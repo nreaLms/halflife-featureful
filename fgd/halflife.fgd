@@ -1029,6 +1029,18 @@
 	]
 ]
 
+@PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
+[
+	radius(integer) : "Radius" : 192
+	warp_target(target_destination) : "Warp target" : ""
+	damage_delay(string) : "Damage delay" : "0"
+	spawnflags(flags) = 
+	[
+		1: "Remove on fire" : 1
+		2: "Kill center" : 0
+	]
+]
+
 @SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object" 
 [
 	spawnflags(flags) =
