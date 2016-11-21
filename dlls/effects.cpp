@@ -2277,7 +2277,11 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 void CEnvWarpBall::Precache( void )
 {
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
-	PRECACHE_MODEL( "sprites/Fexplo1.spr" );
+	if (pev->model) {
+		PRECACHE_MODEL( (char*)STRING(pev->model) );
+	} else {
+		PRECACHE_MODEL( "sprites/Fexplo1.spr" );
+	}
 	PRECACHE_SOUND( "debris/beamstart2.wav" );
 	PRECACHE_SOUND( "debris/beamstart7.wav" );
 }
@@ -2305,9 +2309,19 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 	EMIT_SOUND( pos, CHAN_BODY, "debris/beamstart2.wav", 1, ATTN_NORM );
 	UTIL_ScreenShake( vecOrigin, 6, 160, 1.0, pev->button );
-	CSprite *pSpr = CSprite::SpriteCreate( "sprites/Fexplo1.spr", vecOrigin, TRUE );
+	CSprite *pSpr = CSprite::SpriteCreate( pev->model ? STRING(pev->model) : "sprites/Fexplo1.spr", vecOrigin, TRUE );
 	pSpr->AnimateAndDie( 18 );
-	pSpr->SetTransparency( kRenderGlow,  77, 210, 130,  255, kRenderFxNoDissipation );
+	
+	int red = pev->rendercolor.x;
+	int green = pev->rendercolor.y;
+	int blue = pev->rendercolor.z;
+	if (!red && !green && !blue) {
+		red = 77;
+		green = 210;
+	blue = 130;
+	}
+	
+	pSpr->SetTransparency( pev->rendermode ? pev->rendermode : kRenderGlow,  red, green, blue, pev->renderamt ? pev->renderamt : 255, pev->renderfx ? pev->renderfx : kRenderFxNoDissipation );
 	EMIT_SOUND( pos, CHAN_ITEM, "debris/beamstart7.wav", 1, ATTN_NORM );
 	int iBeams = RANDOM_LONG( 20, 40 );
 	while( iDrawn < iBeams && iTimes < ( iBeams * 3 ) )

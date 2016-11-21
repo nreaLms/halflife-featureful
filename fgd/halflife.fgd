@@ -1029,8 +1029,9 @@
 	]
 ]
 
-@PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
+@PointClass base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
 [
+	model(sprite) : "Sprite Name" : "sprites/Fexplo1.spr"
 	radius(integer) : "Radius" : 192
 	warp_target(target_destination) : "Warp target" : ""
 	damage_delay(string) : "Damage delay" : "0"
