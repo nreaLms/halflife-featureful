@@ -1032,13 +1032,17 @@
 @PointClass base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
 [
 	model(sprite) : "Sprite Name" : "sprites/Fexplo1.spr"
+	amplitude(string) : "Shake Amplitude 0-16" : ""
+	duration(string) : "Shake Duration (seconds)" : ""
+	frequency(string) : "Shake Frequency (0.1 = jerk, 255.0 = rumble)" : ""
 	radius(integer) : "Radius" : 192
 	warp_target(target_destination) : "Warp target" : ""
 	damage_delay(string) : "Damage delay" : "0"
 	spawnflags(flags) = 
 	[
-		1: "Remove on fire" : 1
+		1: "Remove on fire" : 0
 		2: "Kill center" : 0
+		4: "No screen shake" : 1
 	]
 ]
 

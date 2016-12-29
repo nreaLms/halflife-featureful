@@ -2238,6 +2238,7 @@ void CItemSoda::CanTouch( CBaseEntity *pOther )
 //=========================================================
 #define SF_REMOVE_ON_FIRE	0x0001
 #define SF_KILL_CENTER		0x0002
+#define SF_WARPBALL_NOSHAKE	0x0004
 
 class CEnvWarpBall : public CBaseEntity
 {
@@ -2248,6 +2249,33 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	
+	inline float Radius() { 
+		return pev->button ? pev->button : 192;
+	}
+	inline float Amplitude() {
+		return pev->scale ? pev->scale : 6;
+	}
+	inline float Frequency() {
+		return pev->dmg_save ? pev->dmg_save : 160;
+	}
+	inline float Duration() {
+		return pev->dmg_take ? pev->dmg_take : 1;
+	}
+	
+	inline void SetRadius( int radius ) {
+		pev->button = radius;
+	}
+	inline void SetAmplitude( float amplitude ) {
+		pev->scale = amplitude;
+	}
+	inline void SetFrequency( float frequency ) {
+		pev->dmg_save = frequency;
+	}
+	inline void SetDuration( float duration ) {
+		pev->dmg_take = duration;
+	}
+	
 	Vector vecOrigin;
 };
 
@@ -2255,9 +2283,24 @@ LINK_ENTITY_TO_CLASS( env_warpball, CEnvWarpBall )
 
 void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 {
-	if( FStrEq( pkvd->szKeyName, "radius" ) )
+	if( FStrEq( pkvd->szKeyName, "amplitude" ) )
 	{
-		pev->button = atoi( pkvd->szValue );
+		SetAmplitude( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "frequency" ) )
+	{
+		SetFrequency( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "duration" ) )
+	{
+		SetDuration( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "radius" ) )
+	{
+		SetRadius(atoi( pkvd->szValue ));
 		pkvd->fHandled = TRUE;
 	}
 	if( FStrEq( pkvd->szKeyName, "warp_target" ) )
@@ -2308,7 +2351,11 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		pos = edict();
 	}
 	EMIT_SOUND( pos, CHAN_BODY, "debris/beamstart2.wav", 1, ATTN_NORM );
-	UTIL_ScreenShake( vecOrigin, 6, 160, 1.0, pev->button );
+	
+	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
+		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
+	}
+	
 	CSprite *pSpr = CSprite::SpriteCreate( pev->model ? STRING(pev->model) : "sprites/Fexplo1.spr", vecOrigin, TRUE );
 	pSpr->AnimateAndDie( 18 );
 	
@@ -2358,7 +2405,7 @@ void CEnvWarpBall::Think( void )
 		while( ( pMonster = UTIL_FindEntityInSphere( pMonster, vecOrigin, 72 ) ) != NULL )
 		{
 			if( FBitSet( pMonster->pev->flags, FL_MONSTER ) || FClassnameIs( pMonster->pev, "player" ) )
-			pMonster->TakeDamage ( pev, pev, 100, DMG_GENERIC );
+				pMonster->TakeDamage ( pev, pev, 100, DMG_GENERIC );
 		}
 	}
 	if( pev->spawnflags & SF_REMOVE_ON_FIRE )
