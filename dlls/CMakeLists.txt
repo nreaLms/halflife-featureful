@@ -84,6 +84,7 @@ set (SVDLL_SOURCES
 	leech.cpp
 	lights.cpp
 	maprules.cpp
+	medkit.cpp
 	monstermaker.cpp
 	monsters.cpp
 	monsterstate.cpp

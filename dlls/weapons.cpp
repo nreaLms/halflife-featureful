@@ -350,6 +350,8 @@ void W_Precache( void )
 
 	// hornetgun
 	UTIL_PrecacheOtherWeapon( "weapon_hornetgun" );
+	
+	UTIL_PrecacheOtherWeapon( "weapon_medkit" );
 
 	if( g_pGameRules->IsDeathmatch() )
 	{

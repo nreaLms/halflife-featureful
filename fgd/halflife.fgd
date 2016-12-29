@@ -2677,6 +2677,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_grenade.mdl") = weapon_handgrenade : "Handgrenade Ammo" []
 @PointClass base(Weapon, Targetx) studio("models/w_squeak.mdl") = weapon_snark : "Squeak Grenade" []
 @PointClass base(Weapon, Targetx) studio("models/w_hgun.mdl") = weapon_hornetgun : "Hornet Gun" []
+@PointClass base(Weapon, Targetx) studio("models/w_medkit.mdl") = weapon_medkit : "Medkit" []
 @PointClass size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_chainammo.mdl") =  weaponbox : "Weapon/Ammo Container" []
 
 @PointClass base(Weapon, Targetx) = world_items : "World Items" 
