@@ -159,7 +159,7 @@ void CMedkit::Holster(int skiplocal /*= 0*/)
 {
 	m_flSoundDelay = 0;
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
-	MyAnim(MEDKIT_HOLSTER);
+	//MyAnim(MEDKIT_HOLSTER);
 }
 
 void CMedkit::MyAnim(int iAnim)
