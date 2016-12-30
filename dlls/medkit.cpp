@@ -159,6 +159,12 @@ void CMedkit::Holster(int skiplocal /*= 0*/)
 {
 	m_flSoundDelay = 0;
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
+	
+	//HACKHACK - can't select medkit if it's empty! no way to get ammo for it, either
+	if( !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) {
+		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = 1;
+	}
+	
 	//MyAnim(MEDKIT_HOLSTER);
 }
 
@@ -186,8 +192,7 @@ void CMedkit::PrimaryAttack(void)
 	}
 
 	if (m_flNextPrimaryAttack < gpGlobals->time) {
-		m_flNextPrimaryAttack = gpGlobals->time + 2;
-		m_flNextSecondaryAttack = m_flNextPrimaryAttack;
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack = gpGlobals->time + 2;
 	}
 	m_flTimeWeaponIdle = gpGlobals->time + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 5, 10);
 
@@ -209,8 +214,7 @@ void CMedkit::SecondaryAttack()
 	}
 	
 	if (m_flNextSecondaryAttack < gpGlobals->time) {
-		m_flNextSecondaryAttack = gpGlobals->time + 3;
-		m_flNextPrimaryAttack = m_flNextSecondaryAttack;
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 3;
 	}
 	m_flTimeWeaponIdle = gpGlobals->time + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 5, 10);
 	
@@ -227,7 +231,7 @@ void CMedkit::Reload( void )
 	if( m_flRechargeTime < gpGlobals->time )
 	{
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]++;
-		m_flRechargeTime = gpGlobals->time + 1.5;
+		m_flRechargeTime = gpGlobals->time + 3;
 	}
 }
 
