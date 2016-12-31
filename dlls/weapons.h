@@ -77,6 +77,7 @@ public:
 #define WEAPON_TRIPMINE			13
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
+#define WEAPON_MEDKIT			16
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
@@ -101,6 +102,7 @@ public:
 #define SNARK_WEIGHT		5
 #define SATCHEL_WEIGHT		-10
 #define TRIPMINE_WEIGHT		-10
+#define MEDKIT_WEIGHT		-1
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -115,6 +117,7 @@ public:
 #define SNARK_MAX_CARRY			15
 #define HORNET_MAX_CARRY		8
 #define M203_GRENADE_MAX_CARRY	10
+#define MEDKIT_MAX_CARRY		100
 
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
@@ -151,6 +154,7 @@ public:
 #define TRIPMINE_DEFAULT_GIVE		1
 #define SNARK_DEFAULT_GIVE			5
 #define HIVEHAND_DEFAULT_GIVE		8
+#define MEDKIT_DEFAULT_GIVE			50
 
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	20
@@ -982,4 +986,34 @@ public:
 private:
 	unsigned short m_usSnarkFire;
 };
+
+class CMedkit : public CBasePlayerWeapon
+{
+public:
+	void Spawn(void);
+	void Precache(void);
+	int iItemSlot(void) { return 1; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer(CBasePlayer *pPlayer);
+
+	void PrimaryAttack(void);
+	void SecondaryAttack(void);
+	BOOL Deploy(void);
+	void Holster(int skiplocal = 0);
+	void MyAnim(int iAnim);
+	void Reload( void );
+	void WeaponIdle(void);
+	BOOL PlayEmptySound(void);
+	BOOL ShouldWeaponIdle(void) { return TRUE; }
+	CBaseEntity* FindHealTarget();
+
+	virtual BOOL UseDecrement(void) {
+		return FALSE;
+	}
+
+	float	m_flSoundDelay;
+	float	m_flRechargeTime;
+	BOOL	m_secondaryAttack;
+};
+
 #endif // WEAPONS_H

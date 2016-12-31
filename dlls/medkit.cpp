@@ -21,12 +21,6 @@
 #include "nodes.h"
 #include "player.h"
 
-#define WEAPON_MEDKIT		16
-#define MEDKIT_WEIGHT		-1
-#define MEDKIT_MAX_CARRY	100
-#define MEDKIT_DEFAULT_GIVE	50
-#define MEDKIT_SHOTHEAL 10
-
 enum medkit_e {
 	MEDKIT_IDLE = 0,
 	MEDKIT_LONGIDLE,
@@ -34,36 +28,6 @@ enum medkit_e {
 	MEDKIT_SHORTUSE,
 	MEDKIT_HOLSTER,
 	MEDKIT_DRAW,
-};
-
-class CMedkit : public CBasePlayerWeapon
-{
-public:
-	void Spawn(void);
-	void Precache(void);
-	int iItemSlot(void) { return 1; }
-	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer(CBasePlayer *pPlayer);
-
-	void PrimaryAttack(void);
-	void SecondaryAttack(void);
-	BOOL Deploy(void);
-	void Holster(int skiplocal = 0);
-	void MyAnim(int iAnim);
-	void Reload( void );
-	void WeaponIdle(void);
-	BOOL PlayEmptySound(void);
-	BOOL ShouldWeaponIdle(void) { return TRUE; }
-	CBaseEntity* FindHealTarget();
-
-	virtual BOOL UseDecrement(void)
-	{
-		return FALSE;
-	}
-
-	float	m_flSoundDelay;
-	float	m_flRechargeTime;
-	BOOL	m_secondaryAttack;
 };
 
 LINK_ENTITY_TO_CLASS(weapon_medkit, CMedkit)
@@ -185,7 +149,7 @@ void CMedkit::PrimaryAttack(void)
 		return;
 	}
 	
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < MEDKIT_SHOTHEAL || !FindHealTarget()) {
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < gSkillData.plrDmgMedkit || !FindHealTarget()) {
 		PlayEmptySound();
 		m_flNextPrimaryAttack = gpGlobals->time + 0.8;
 		return;
@@ -207,7 +171,7 @@ void CMedkit::SecondaryAttack()
 	if (m_flNextSecondaryAttack > gpGlobals->time) {
 		return;
 	}
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < MEDKIT_SHOTHEAL || m_pPlayer->pev->health >= m_pPlayer->pev->max_health) {
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < gSkillData.plrDmgMedkit || m_pPlayer->pev->health >= m_pPlayer->pev->max_health) {
 		PlayEmptySound();
 		m_flNextSecondaryAttack = gpGlobals->time + 0.8;
 		return;
@@ -228,10 +192,10 @@ void CMedkit::Reload( void )
 	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= MEDKIT_MAX_CARRY )
 		return;
 
-	if( m_flRechargeTime < gpGlobals->time )
+	if( gSkillData.plrMedkitTime != 0 && m_flRechargeTime < gpGlobals->time )
 	{
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]++;
-		m_flRechargeTime = gpGlobals->time + 3;
+		m_flRechargeTime = gpGlobals->time + gSkillData.plrMedkitTime;
 	}
 }
 
@@ -242,11 +206,11 @@ void CMedkit::WeaponIdle(void)
 
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= MEDKIT_SHOTHEAL && m_flSoundDelay != 0 && m_flSoundDelay <= gpGlobals->time)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= gSkillData.plrDmgMedkit && m_flSoundDelay != 0 && m_flSoundDelay <= gpGlobals->time)
 	{
 		if (m_secondaryAttack) {
 			const float diff = m_pPlayer->pev->max_health - m_pPlayer->pev->health;
-			const int toHeal = (int)(diff < MEDKIT_SHOTHEAL ? diff : MEDKIT_SHOTHEAL);
+			const int toHeal = (int)(min(diff, gSkillData.plrDmgMedkit));
 			if ( m_pPlayer->TakeHealth(toHeal, DMG_GENERIC) ) {
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= toHeal;
 			}
@@ -258,7 +222,7 @@ void CMedkit::WeaponIdle(void)
 	
 			if (healTarget) {
 				const float diff = healTarget->pev->max_health - healTarget->pev->health;
-				const int toHeal = (int)(diff < MEDKIT_SHOTHEAL ? diff : MEDKIT_SHOTHEAL);
+				const int toHeal = (int)(min(diff, gSkillData.plrDmgMedkit));
 				if ( healTarget->TakeHealth(toHeal, DMG_GENERIC) ) {
 					m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= toHeal;
 					

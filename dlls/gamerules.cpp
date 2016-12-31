@@ -264,6 +264,10 @@ void CGameRules::RefreshSkillData ( void )
 
 	// Tripmine
 	gSkillData.plrDmgTripmine = GetSkillCvar( "sk_plr_tripmine" );
+	
+	// Medkit 
+	gSkillData.plrDmgMedkit = GetSkillCvar( "sk_plr_medkitshot" );
+	gSkillData.plrMedkitTime = GetSkillCvar( "sk_plr_medkittime" );
 
 	// MONSTER WEAPONS
 	gSkillData.monDmg12MM = GetSkillCvar( "sk_12mm_bullet" );
