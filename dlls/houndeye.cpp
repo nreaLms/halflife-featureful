@@ -59,7 +59,8 @@ enum
 {
 	SCHED_HOUND_AGITATED = LAST_COMMON_SCHEDULE + 1,
 	SCHED_HOUND_HOP_RETREAT,
-	SCHED_HOUND_FAIL
+	SCHED_HOUND_FAIL,
+	SCHED_HOUND_EAT
 };
 
 //=========================================================
@@ -98,6 +99,8 @@ public:
 	BOOL FCanActiveIdle( void );
 	Schedule_t *GetScheduleOfType( int Type );
 	Schedule_t *GetSchedule( void );
+	int IgnoreConditions();
+	int ISoundMask();
 
 	int Save( CSave &save );
 	int Restore( CRestore &restore );
@@ -1118,11 +1121,46 @@ Schedule_t	slHoundCombatFailNoPVS[] =
 	},
 };
 
+// hound walks to something tasty and eats it.
+Task_t tlHoundEat[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_EAT, (float)10 },// this is in case the hound can't get to the food
+	{ TASK_STORE_LASTPOSITION, (float)0 },
+	{ TASK_GET_PATH_TO_BESTSCENT, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.5f },
+	{ TASK_EAT, (float)50 },
+	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_CLEAR_LASTPOSITION, (float)0 },
+};
+
+Schedule_t slHoundEat[] =
+{
+	{
+		tlHoundEat,
+		ARRAYSIZE( tlHoundEat ),
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_NEW_ENEMY,
+		// even though HEAR_SOUND/SMELL FOOD doesn't break this schedule, we need this mask
+		// here or the monster won't detect these sounds at ALL while running this schedule.
+		bits_SOUND_MEAT |
+		bits_SOUND_CARCASS,
+		"HoundEat"
+	}
+};
+
 DEFINE_CUSTOM_SCHEDULES( CHoundeye )
 {
 	slHoundGuardPack,
 	slHoundRangeAttack,
 	&slHoundRangeAttack[ 1 ],
+	slHoundEat,
 	slHoundSleep,
 	slHoundWakeLazy,
 	slHoundWakeUrgent,
@@ -1235,6 +1273,10 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 				return CSquadMonster::GetScheduleOfType( Type );
 			}
 		}
+	case SCHED_HOUND_EAT:
+		{
+			return &slHoundEat[0];
+		}
 	default:
 		{
 			return CSquadMonster::GetScheduleOfType( Type );
@@ -1257,7 +1299,6 @@ Schedule_t *CHoundeye::GetSchedule( void )
 				// call base class, all code to handle dead enemies is centralized there.
 				return CBaseMonster::GetSchedule();
 			}
-
 			if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 			{
 				if( RANDOM_FLOAT( 0, 1 ) <= 0.4 )
@@ -1287,9 +1328,47 @@ Schedule_t *CHoundeye::GetSchedule( void )
 			}
 			break;
 		}
+	case MONSTERSTATE_ALERT:
+		{
+			if( HasConditions( bits_COND_SMELL_FOOD ) )
+			{
+				CSound *pSound = PBestScent();
+				if( pSound && FVisible( pSound->m_vecOrigin ) ) {
+					// scent is not occluded
+					return GetScheduleOfType( SCHED_HOUND_EAT );
+				}
+			}
+			break;
+		}
 	default:
 			break;
 	}
 
 	return CSquadMonster::GetSchedule();
+}
+
+int CHoundeye::IgnoreConditions()
+{
+	int iIgnore = CBaseMonster::IgnoreConditions();
+	// Houndeyes eat only if injured
+	if (pev->health >= pev->max_health) {
+		iIgnore |= bits_COND_SMELL_FOOD;
+	} else {
+		if (InSquad()) {
+			// Let leader to eat first if he is injured
+			if (MySquadLeader()->pev->health < MySquadLeader()->pev->max_health) {
+				iIgnore |= bits_COND_SMELL_FOOD;
+			}
+		}
+	}
+	return iIgnore;
+}
+
+int CHoundeye::ISoundMask( void )
+{
+	return	bits_SOUND_WORLD |
+		bits_SOUND_COMBAT |
+		bits_SOUND_CARCASS |
+		bits_SOUND_MEAT |
+		bits_SOUND_PLAYER;
 }
