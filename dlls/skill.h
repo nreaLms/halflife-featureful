@@ -119,6 +119,7 @@ struct skilldata_t
 	float healthchargerCapacity;
 	float healthkitCapacity;
 	float scientistHeal;
+	float sodaHeal;
 
 	// monster damage adj
 	float monHead;
