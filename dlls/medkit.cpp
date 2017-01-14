@@ -96,7 +96,12 @@ int CMedkit::GetItemInfo(ItemInfo *p)
 	p->iPosition = 1;
 	p->iId = m_iId = WEAPON_MEDKIT;
 	p->iWeight = MEDKIT_WEIGHT;
-	p->iFlags = ITEM_FLAG_NOAUTOSWITCHEMPTY | ITEM_FLAG_NOAUTORELOAD;
+	
+	if (gSkillData.plrMedkitTime != 0) {
+		p->iFlags = ITEM_FLAG_NOAUTOSWITCHEMPTY | ITEM_FLAG_NOAUTORELOAD;
+	} else {
+		p->iFlags = ITEM_FLAG_NOAUTORELOAD;
+	}
 
 	return 1;
 }
@@ -125,7 +130,7 @@ void CMedkit::Holster(int skiplocal /*= 0*/)
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
 	
 	//HACKHACK - can't select medkit if it's empty! no way to get ammo for it, either
-	if( !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) {
+	if( gSkillData.plrMedkitTime != 0 && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) {
 		m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = 1;
 	}
 	
