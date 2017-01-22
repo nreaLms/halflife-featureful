@@ -915,16 +915,16 @@ void CFuncTankLaser::Fire( const Vector &barrelEnd, const Vector &forward, entva
 				m_laserTime = gpGlobals->time;
 				m_pLaser->TurnOn();
 				m_pLaser->pev->dmgtime = gpGlobals->time - 1.0;
-				m_pLaser->FireAtPoint( tr );
+				m_pLaser->FireAtPoint( tr, pevAttacker );
 				m_pLaser->pev->nextthink = 0;
 				RemoveBullet();
 			}
-			CFuncTank::Fire( barrelEnd, forward, pev );
+			CFuncTank::Fire( barrelEnd, forward, pevAttacker );
 		}
 	}
 	else
 	{
-		CFuncTank::Fire( barrelEnd, forward, pev );
+		CFuncTank::Fire( barrelEnd, forward, pevAttacker );
 	}
 }
 
@@ -959,7 +959,8 @@ void CFuncTankRocket::Fire( const Vector &barrelEnd, const Vector &forward, entv
 		{
 			for( i = 0; i < bulletCount && HaveBullets(); i++ )
 			{
-				CBaseEntity *pRocket = CBaseEntity::Create( "rpg_rocket", barrelEnd, pev->angles, edict() );
+				CBaseEntity* owner = CBaseEntity::Instance(pevAttacker);
+				CBaseEntity *pRocket = CBaseEntity::Create( "rpg_rocket", barrelEnd, pev->angles, owner ? owner->edict() : edict() );
 			}
 			RemoveBullet();
 			CFuncTank::Fire( barrelEnd, forward, pev );
@@ -1009,7 +1010,7 @@ void CFuncTankMortar::Fire( const Vector &barrelEnd, const Vector &forward, entv
 
 			TankTrace( barrelEnd, forward, gTankSpread[m_spread], tr );
 
-			ExplosionCreate( tr.vecEndPos, pev->angles, edict(), pev->impulse, TRUE );
+			ExplosionCreate( tr.vecEndPos, pev->angles, edict(), pev->impulse, TRUE, pevAttacker );
 
 			RemoveBullet();
 			CFuncTank::Fire( barrelEnd, forward, pev );
