@@ -3376,3 +3376,32 @@ BOOL CBaseMonster::ShouldFadeOnDeath( void )
 
 	return FALSE;
 }
+
+void CDeadMonster::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "pose"))
+	{
+		m_iPose = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else 
+		CBaseMonster::KeyValue( pkvd );
+}
+
+void CDeadMonster::SpawnHelper( const char* modelName, const char* errorMessage, int bloodColor, int health)
+{
+	PRECACHE_MODEL( (char*)modelName );
+	SET_MODEL(ENT(pev), modelName );
+
+	pev->effects		= 0;
+	pev->yaw_speed		= 8;
+	pev->sequence		= 0;
+	m_bloodColor		= bloodColor;
+
+	pev->sequence = LookupSequence( getPos(m_iPose) );
+	if (pev->sequence == -1)
+	{
+		ALERT ( at_console, "%s\n", errorMessage );
+	}
+	pev->health			= health;
+}

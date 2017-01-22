@@ -774,29 +774,21 @@ void CBarney::DeclineFollowing( void )
 // the m_iFirstPose properly!
 //
 //=========================================================
-class CDeadBarney : public CBaseMonster
+class CDeadBarney : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int Classify( void ) { return CLASS_PLAYER_ALLY; }
+	int	Classify ( void ) { return	CLASS_PLAYER_ALLY; }
 
-	void KeyValue( KeyValueData *pkvd );
-
-	int m_iPose;// which sequence to display	-- temporary, don't need to save
-	static char *m_szPoses[3];
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[3];
 };
 
-char *CDeadBarney::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach" };
+const char *CDeadBarney::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach" };
 
-void CDeadBarney::KeyValue( KeyValueData *pkvd )
+const char* CDeadBarney::getPos(int pos) const
 {
-	if( FStrEq( pkvd->szKeyName, "pose" ) )
-	{
-		m_iPose = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
-	else
-		CBaseMonster::KeyValue( pkvd );
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
 }
 
 LINK_ENTITY_TO_CLASS( monster_barney_dead, CDeadBarney )
@@ -804,23 +796,8 @@ LINK_ENTITY_TO_CLASS( monster_barney_dead, CDeadBarney )
 //=========================================================
 // ********** DeadBarney SPAWN **********
 //=========================================================
-void CDeadBarney::Spawn()
+void CDeadBarney :: Spawn( )
 {
-	PRECACHE_MODEL( "models/barney.mdl" );
-	SET_MODEL( ENT( pev ), "models/barney.mdl" );
-
-	pev->effects = 0;
-	pev->yaw_speed = 8;
-	pev->sequence = 0;
-	m_bloodColor = BLOOD_COLOR_RED;
-
-	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
-	if( pev->sequence == -1 )
-	{
-		ALERT( at_console, "Dead barney with bad pose\n" );
-	}
-	// Corpses have less health
-	pev->health = 8;//gSkillData.barneyHealth;
-
+	SpawnHelper("models/barney.mdl", "Dead barney with bad pose");
 	MonsterInitDead();
 }

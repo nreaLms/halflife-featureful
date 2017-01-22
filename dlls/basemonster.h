@@ -329,4 +329,15 @@ public:
 
 	CBaseEntity* DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 };
+
+class CDeadMonster : public CBaseMonster
+{
+public:
+	void SpawnHelper( const char* modelName, const char* errorMessage, int bloodColor = BLOOD_COLOR_RED, int health = 8);
+	void KeyValue( KeyValueData *pkvd );
+ 
+	virtual const char* getPos(int pose) const = 0;
+	int	m_iPose;// which sequence to display	-- temporary, don't need to save
+};
+
 #endif // BASEMONSTER_H

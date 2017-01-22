@@ -2399,29 +2399,21 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 //=========================================================
 // DEAD HGRUNT PROP
 //=========================================================
-class CDeadHGrunt : public CBaseMonster
+class CDeadHGrunt : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int Classify( void ) { return CLASS_HUMAN_MILITARY; }
+	int	Classify ( void ) { return	CLASS_HUMAN_MILITARY; }
 
-	void KeyValue( KeyValueData *pkvd );
-
-	int m_iPose;// which sequence to display	-- temporary, don't need to save
-	static char *m_szPoses[3];
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[3];
 };
 
-char *CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting" };
+const char *CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting" };
 
-void CDeadHGrunt::KeyValue( KeyValueData *pkvd )
+const char* CDeadHGrunt::getPos(int pos) const
 {
-	if( FStrEq( pkvd->szKeyName, "pose" ) )
-	{
-		m_iPose = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
-	else 
-		CBaseMonster::KeyValue( pkvd );
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
 }
 
 LINK_ENTITY_TO_CLASS( monster_hgrunt_dead, CDeadHGrunt )
@@ -2429,52 +2421,32 @@ LINK_ENTITY_TO_CLASS( monster_hgrunt_dead, CDeadHGrunt )
 //=========================================================
 // ********** DeadHGrunt SPAWN **********
 //=========================================================
-void CDeadHGrunt::Spawn( void )
+void CDeadHGrunt :: Spawn( void )
 {
-	PRECACHE_MODEL( "models/hgrunt.mdl" );
-	SET_MODEL( ENT( pev ), "models/hgrunt.mdl" );
-
-	pev->effects		= 0;
-	pev->yaw_speed		= 8;
-	pev->sequence		= 0;
-	m_bloodColor		= BLOOD_COLOR_RED;
-
-	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
-
-	if( pev->sequence == -1 )
-	{
-		ALERT( at_console, "Dead hgrunt with bad pose\n" );
-	}
-
-	// Corpses have less health
-	pev->health = 8;
+	SpawnHelper("models/hgrunt.mdl", "Dead hgrunt with bad pose\n");
 
 	// map old bodies onto new bodies
 	switch( pev->body )
 	{
-	case 0:
-		// Grunt with Gun
+	case 0: // Grunt with Gun
 		pev->body = 0;
 		pev->skin = 0;
 		SetBodygroup( HEAD_GROUP, HEAD_GRUNT );
 		SetBodygroup( GUN_GROUP, GUN_MP5 );
 		break;
-	case 1:
-		// Commander with Gun
+	case 1: // Commander with Gun
 		pev->body = 0;
 		pev->skin = 0;
 		SetBodygroup( HEAD_GROUP, HEAD_COMMANDER );
 		SetBodygroup( GUN_GROUP, GUN_MP5 );
 		break;
-	case 2:
-		// Grunt no Gun
+	case 2: // Grunt no Gun
 		pev->body = 0;
 		pev->skin = 0;
 		SetBodygroup( HEAD_GROUP, HEAD_GRUNT );
 		SetBodygroup( GUN_GROUP, GUN_NONE );
 		break;
-	case 3:
-		// Commander no Gun
+	case 3: // Commander no Gun
 		pev->body = 0;
 		pev->skin = 0;
 		SetBodygroup( HEAD_GROUP, HEAD_COMMANDER );
