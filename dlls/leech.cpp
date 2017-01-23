@@ -169,7 +169,7 @@ const char *CLeech::pAlertSounds[] =
 void CLeech::Spawn( void )
 {
 	Precache();
-	SET_MODEL( ENT( pev ), "models/leech.mdl" );
+	SetMyModel( "models/leech.mdl" );
 	// Just for fun
 	//	SET_MODEL( ENT( pev ), "models/icky.mdl" );
 	
@@ -179,7 +179,7 @@ void CLeech::Spawn( void )
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	SetBits( pev->flags, FL_SWIM );
-	pev->health = gSkillData.leechHealth;
+	SetMyHealth( gSkillData.leechHealth );
 
 	m_flFieldOfView = -0.5;	// 180 degree FOV
 	m_flDistLook = 750;
@@ -274,7 +274,7 @@ void CLeech::Precache( void )
 	int i;
 
 	//PRECACHE_MODEL( "models/icky.mdl" );
-	PRECACHE_MODEL( "models/leech.mdl" );
+	PrecacheMyModel( "models/leech.mdl" );
 
 	for( i = 0; i < ARRAYSIZE( pAttackSounds ); i++ )
 		PRECACHE_SOUND( (char *)pAttackSounds[i] );

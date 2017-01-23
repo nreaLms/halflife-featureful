@@ -668,14 +668,14 @@ void CBullsquid::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/bullsquid.mdl" );
+	SetMyModel( "models/bullsquid.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_GREEN;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
-	pev->health = gSkillData.bullsquidHealth;
+	SetMyHealth( gSkillData.bullsquidHealth );
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
@@ -690,7 +690,7 @@ void CBullsquid::Spawn()
 //=========================================================
 void CBullsquid::Precache()
 {
-	PRECACHE_MODEL( "models/bullsquid.mdl" );
+	PrecacheMyModel( "models/bullsquid.mdl" );
 
 	PRECACHE_MODEL( "sprites/bigspit.spr" );// spit projectile.
 

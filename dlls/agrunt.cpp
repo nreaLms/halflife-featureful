@@ -583,14 +583,14 @@ void CAGrunt::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/agrunt.mdl" );
+	SetMyModel( "models/agrunt.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_GREEN;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
-	pev->health = gSkillData.agruntHealth;
+	SetMyHealth( gSkillData.agruntHealth );
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_afCapability = 0;
@@ -610,7 +610,7 @@ void CAGrunt::Precache()
 {
 	int i;
 
-	PRECACHE_MODEL( "models/agrunt.mdl" );
+	PrecacheMyModel( "models/agrunt.mdl" );
 
 	for( i = 0; i < ARRAYSIZE( pAttackHitSounds ); i++ )
 		PRECACHE_SOUND( (char *)pAttackHitSounds[i] );

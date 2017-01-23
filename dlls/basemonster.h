@@ -328,6 +328,11 @@ public:
 	BOOL CineCleanup();
 
 	CBaseEntity* DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+	
+	void SetMyHealth( const float health );
+	void SetMyModel( const char* model );
+	void PrecacheMyModel( const char* model );
+	void SetMyBloodColor( int bloodColor );
 };
 
 class CDeadMonster : public CBaseMonster

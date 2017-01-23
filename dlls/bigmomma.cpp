@@ -632,13 +632,13 @@ void CBigMomma::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/big_mom.mdl" );
+	SetMyModel( "models/big_mom.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_GREEN;
-	pev->health = 150 * gSkillData.bigmommaHealthFactor;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
+	SetMyHealth( 150 * gSkillData.bigmommaHealthFactor );
 	pev->view_ofs = Vector( 0, 0, 128 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView = 0.3;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -651,7 +651,7 @@ void CBigMomma::Spawn()
 //=========================================================
 void CBigMomma::Precache()
 {
-	PRECACHE_MODEL( "models/big_mom.mdl" );
+	PrecacheMyModel( "models/big_mom.mdl" );
 
 	PRECACHE_SOUND_ARRAY( pChildDieSounds );
 	PRECACHE_SOUND_ARRAY( pSackSounds );

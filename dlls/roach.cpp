@@ -121,14 +121,14 @@ void CRoach::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/roach.mdl" );
+	SetMyModel( "models/roach.mdl" );
 	UTIL_SetSize( pev, Vector( -1, -1, 0 ), Vector( 1, 1, 2 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_YELLOW;
+	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 	pev->effects = 0;
-	pev->health = 1;
+	SetMyHealth( 1 );
 	m_flFieldOfView = 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
@@ -148,7 +148,7 @@ void CRoach::Spawn()
 //=========================================================
 void CRoach::Precache()
 {
-	PRECACHE_MODEL( "models/roach.mdl" );
+	PrecacheMyModel( "models/roach.mdl" );
 
 	PRECACHE_SOUND( "roach/rch_die.wav" );
 	PRECACHE_SOUND( "roach/rch_walk.wav" );

@@ -184,14 +184,14 @@ void CBloater::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/floater.mdl" );
+	SetMyModel( "models/floater.mdl" );
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	pev->spawnflags |= FL_FLY;
-	m_bloodColor = BLOOD_COLOR_GREEN;
-	pev->health = 40;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
+	SetMyHealth( 40 );
 	pev->view_ofs = VEC_VIEW;// position of the eyes relative to monster's origin.
 	m_flFieldOfView = 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -204,7 +204,7 @@ void CBloater::Spawn()
 //=========================================================
 void CBloater::Precache()
 {
-	PRECACHE_MODEL( "models/floater.mdl" );
+	PrecacheMyModel( "models/floater.mdl" );
 }	
 
 //=========================================================

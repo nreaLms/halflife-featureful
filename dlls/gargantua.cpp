@@ -733,13 +733,13 @@ void CGargantua::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/garg.mdl" );
+	SetMyModel( "models/garg.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
-	m_bloodColor		= BLOOD_COLOR_GREEN;
-	pev->health		= gSkillData.gargantuaHealth;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
+	SetMyHealth( gSkillData.gargantuaHealth );
 	//pev->view_ofs		= Vector ( 0, 0, 96 );// taken from mdl file
 	m_flFieldOfView		= -0.2;// width of forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -761,7 +761,7 @@ void CGargantua::Precache()
 {
 	int i;
 
-	PRECACHE_MODEL( "models/garg.mdl" );
+	PrecacheMyModel( "models/garg.mdl" );
 	PRECACHE_MODEL( GARG_EYE_SPRITE_NAME );
 	PRECACHE_MODEL( GARG_BEAM_SPRITE_NAME );
 	PRECACHE_MODEL( GARG_BEAM_SPRITE2 );

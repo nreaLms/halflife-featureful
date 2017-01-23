@@ -350,14 +350,14 @@ void CController::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/controller.mdl" );
+	SetMyModel( "models/controller.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	pev->flags		|= FL_FLY;
-	m_bloodColor		= BLOOD_COLOR_GREEN;
-	pev->health		= gSkillData.controllerHealth;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
+	SetMyHealth( gSkillData.controllerHealth );
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_FULL;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -370,7 +370,7 @@ void CController::Spawn()
 //=========================================================
 void CController::Precache()
 {
-	PRECACHE_MODEL( "models/controller.mdl" );
+	PrecacheMyModel( "models/controller.mdl" );
 
 	PRECACHE_SOUND_ARRAY( pAttackSounds );
 	PRECACHE_SOUND_ARRAY( pIdleSounds );

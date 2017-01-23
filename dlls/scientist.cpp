@@ -636,13 +636,13 @@ void CScientist::Spawn( void )
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/scientist.mdl" );
+	SetMyModel( "models/scientist.mdl" );
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_RED;
-	pev->health = gSkillData.scientistHealth;
+	SetMyBloodColor( BLOOD_COLOR_RED );
+	SetMyHealth( gSkillData.scientistHealth );
 	pev->view_ofs = Vector( 0, 0, 50 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so scientists will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -673,7 +673,7 @@ void CScientist::Spawn( void )
 //=========================================================
 void CScientist::Precache( void )
 {
-	PRECACHE_MODEL( "models/scientist.mdl" );
+	PrecacheMyModel( "models/scientist.mdl" );
 	PRECACHE_SOUND( "scientist/sci_pain1.wav" );
 	PRECACHE_SOUND( "scientist/sci_pain2.wav" );
 	PRECACHE_SOUND( "scientist/sci_pain3.wav" );
@@ -1171,8 +1171,8 @@ SITTING_ANIM_sitting3
 //
 void CSittingScientist::Spawn()
 {
-	PRECACHE_MODEL( "models/scientist.mdl" );
-	SET_MODEL( ENT( pev ), "models/scientist.mdl" );
+	PrecacheMyModel( "models/scientist.mdl" );
+	SetMyModel( "models/scientist.mdl" );
 	Precache();
 	InitBoneControllers();
 
@@ -1181,9 +1181,9 @@ void CSittingScientist::Spawn()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	pev->effects = 0;
-	pev->health = 50;
+	SetMyHealth( 50 );
 	
-	m_bloodColor = BLOOD_COLOR_RED;
+	SetMyBloodColor( BLOOD_COLOR_RED );
 	m_flFieldOfView = VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
 
 	m_afCapability= bits_CAP_HEAR | bits_CAP_TURN_HEAD;

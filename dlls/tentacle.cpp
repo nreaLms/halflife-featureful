@@ -246,16 +246,16 @@ void CTentacle::Spawn()
 	pev->solid = SOLID_BBOX;
 	pev->movetype = MOVETYPE_FLY;
 	pev->effects = 0;
-	pev->health = 75;
+	SetMyHealth( 75 );
 	pev->sequence = 0;
 
-	SET_MODEL( ENT( pev ), "models/tentacle2.mdl" );
+	SetMyModel( "models/tentacle2.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->takedamage = DAMAGE_AIM;
 	pev->flags |= FL_MONSTER;
 
-	m_bloodColor = BLOOD_COLOR_GREEN;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
 
 	SetThink( &CTentacle::Start );
 	SetTouch( &CTentacle::HitTouch );
@@ -286,7 +286,7 @@ void CTentacle::Spawn()
 
 void CTentacle::Precache()
 {
-	PRECACHE_MODEL( "models/tentacle2.mdl" );
+	PrecacheMyModel( "models/tentacle2.mdl" );
 
 	PRECACHE_SOUND( "ambience/flies.wav" );
 	PRECACHE_SOUND( "ambience/squirm2.wav" );
