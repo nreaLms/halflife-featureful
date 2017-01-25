@@ -62,6 +62,7 @@ public:
 	virtual void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	virtual int Classify( void );
+	virtual int DefaultClassify();
 
 	int BloodColor( void ) { return DONT_BLEED; }
 	void GibMonster( void ) {}	// UNDONE: Throw turret gibs?
@@ -1113,8 +1114,13 @@ int CBaseTurret::MoveTurret( void )
 int CBaseTurret::Classify( void )
 {
 	if( m_iOn || m_iAutoStart )
-		return	CLASS_MACHINE;
+		return	CBaseMonster::Classify();
 	return CLASS_NONE;
+}
+
+int CBaseTurret::DefaultClassify()
+{
+	return CLASS_MACHINE;
 }
 
 //=========================================================
@@ -1214,7 +1220,7 @@ int CSentry::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 
 void CSentry::SentryTouch( CBaseEntity *pOther )
 {
-	if( pOther && ( pOther->IsPlayer() || ( pOther->pev->flags & FL_MONSTER ) ) )
+	if( pOther && ( pOther->IsPlayer() || ( pOther->pev->flags & FL_MONSTER ) ) && IDefaultRelationship(m_iClass, pOther->Classify()) >= R_DL )
 	{
 		TakeDamage( pOther->pev, pOther->pev, 0, 0 );
 	}

@@ -201,7 +201,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -692,7 +692,7 @@ void CGargantua::PrescheduleThink( void )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CGargantua::Classify( void )
+int CGargantua::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MONSTER;
 }

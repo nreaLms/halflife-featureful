@@ -49,7 +49,7 @@ public:
 	int ISoundMask( void );
 	void BarneyFirePistol( void );
 	void AlertSound( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 
 	void RunTask( Task_t *pTask );
@@ -252,7 +252,7 @@ int CBarney::ISoundMask( void)
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CBarney::Classify( void )
+int CBarney::DefaultClassify( void )
 {
 	return CLASS_PLAYER_ALLY;
 }
@@ -412,7 +412,10 @@ void CBarney::Spawn()
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
 	MonsterInit();
-	SetUse( &CTalkMonster::FollowerUse );
+	
+	if (IsFriendWithPlayerBeforeProvoked()) {
+		SetUse( &CTalkMonster::FollowerUse );
+	}
 }
 
 //=========================================================
@@ -498,7 +501,7 @@ int CBarney::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 	if( !IsAlive() || pev->deadflag == DEAD_DYING )
 		return ret;
 
-	if( m_MonsterState != MONSTERSTATE_PRONE && ( pevAttacker->flags & FL_CLIENT ) )
+	if( m_MonsterState != MONSTERSTATE_PRONE && ( pevAttacker->flags & FL_CLIENT ) && IsFriendWithPlayerBeforeProvoked() )
 	{
 		m_flPlayerDamage += flDamage;
 
@@ -778,7 +781,7 @@ class CDeadBarney : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int	Classify ( void ) { return	CLASS_PLAYER_ALLY; }
+	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];

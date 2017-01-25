@@ -202,6 +202,22 @@
 		195 : "Alien (yellow)"
 		-1 : "Don't bleed"
 	]
+	classify(choices) : "Classification" : : "Relationship class of monster" = 
+	[
+		0 : "Default"
+		1 : "Machine"
+		3 : "Human passive"
+		4 : "Human military"
+		5 : "Alien military"
+		6 : "Alien passive"
+		7 : "Alien monster"
+		8 : "Alien prey"
+		9 : "Alien predator"
+		10 : "Insect"
+		11 : "Player ally"
+		12 : "Player bioweapon"
+		13 : "Alien bioweapon"
+	]
 ]
 
 @BaseClass = TalkMonster

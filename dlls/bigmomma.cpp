@@ -187,7 +187,7 @@ public:
 	BOOL ShouldGoToNode( void );
 
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void LayHeadcrab( void );
 
@@ -398,7 +398,7 @@ void CBigMomma::KeyValue( KeyValueData *pkvd )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CBigMomma::Classify( void )
+int CBigMomma::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MONSTER;
 }

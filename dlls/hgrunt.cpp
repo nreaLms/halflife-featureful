@@ -125,7 +125,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int ISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL FCanCheckAttacks( void );
@@ -262,7 +262,7 @@ void CHGrunt::SpeakSentence( void )
 //=========================================================
 int CHGrunt::IRelationship( CBaseEntity *pTarget )
 {
-	if( FClassnameIs( pTarget->pev, "monster_alien_grunt" ) || ( FClassnameIs( pTarget->pev,  "monster_gargantua" ) ) )
+	if( IDefaultRelationship(pTarget) >= R_DL && (FClassnameIs( pTarget->pev, "monster_alien_grunt" ) || ( FClassnameIs( pTarget->pev,  "monster_gargantua" ) )) )
 	{
 		return R_NM;
 	}
@@ -739,7 +739,7 @@ void CHGrunt::CheckAmmo( void )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CHGrunt::Classify( void )
+int CHGrunt::DefaultClassify( void )
 {
 	return CLASS_HUMAN_MILITARY;
 }
@@ -2403,7 +2403,7 @@ class CDeadHGrunt : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int	Classify ( void ) { return	CLASS_HUMAN_MILITARY; }
+	int	DefaultClassify ( void ) { return	CLASS_HUMAN_MILITARY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];

@@ -33,7 +33,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 
 	void PainSound( void );
@@ -53,7 +53,7 @@ LINK_ENTITY_TO_CLASS( monster_bloater, CBloater )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CBloater::Classify( void )
+int CBloater::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MONSTER;
 }

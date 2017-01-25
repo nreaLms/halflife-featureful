@@ -48,7 +48,7 @@ public:
 
 	float m_flLastLightLevel;
 	float m_flNextSmellTime;
-	int Classify( void );
+	int DefaultClassify( void );
 	void Look( int iDistance );
 	int ISoundMask( void );
 
@@ -74,7 +74,7 @@ int CRoach::ISoundMask( void )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CRoach::Classify( void )
+int CRoach::DefaultClassify( void )
 {
 	return CLASS_INSECT;
 }

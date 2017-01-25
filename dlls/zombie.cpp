@@ -39,7 +39,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int IgnoreConditions( void );
 
@@ -109,7 +109,7 @@ const char *CZombie::pPainSounds[] =
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CZombie::Classify( void )
+int CZombie::DefaultClassify( void )
 {
 	return	CLASS_ALIEN_MONSTER;
 }

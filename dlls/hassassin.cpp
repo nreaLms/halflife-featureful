@@ -65,7 +65,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed ( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int ISoundMask( void);
 	void Shoot( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -153,7 +153,7 @@ int CHAssassin::ISoundMask( void )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CHAssassin::Classify( void )
+int CHAssassin::DefaultClassify( void )
 {
 	return CLASS_HUMAN_MILITARY;
 }

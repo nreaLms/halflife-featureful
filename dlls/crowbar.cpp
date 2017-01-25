@@ -240,7 +240,7 @@ int CCrowbar::Swing( int fFirst )
 
 		if( pEntity )
 		{
-			if( pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE )
+			if( pEntity->Classify() != CLASS_NONE && pEntity->DefaultClassify() != CLASS_MACHINE )
 			{
 				// play thwack or smack sound
 				switch( RANDOM_LONG( 0, 2 ) )

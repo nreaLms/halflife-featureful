@@ -149,7 +149,7 @@ int CHornet::IRelationship( CBaseEntity *pTarget )
 //=========================================================
 // ID's Hornet as their owner
 //=========================================================
-int CHornet::Classify( void )
+int CHornet::DefaultClassify( void )
 {
 	if( pev->owner && pev->owner->v.flags & FL_CLIENT )
 	{

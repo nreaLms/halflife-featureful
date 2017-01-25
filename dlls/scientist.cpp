@@ -75,7 +75,7 @@ public:
 	void Precache( void );
 
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
@@ -564,7 +564,7 @@ void CScientist::RunTask( Task_t *pTask )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CScientist::Classify( void )
+int CScientist::DefaultClassify( void )
 {
 	return CLASS_HUMAN_PASSIVE;
 }
@@ -665,7 +665,9 @@ void CScientist::Spawn( void )
 		pev->skin = 1;
 
 	MonsterInit();
-	SetUse( &CTalkMonster::FollowerUse );
+	if (IsFriendWithPlayerBeforeProvoked()) {
+		SetUse( &CTalkMonster::FollowerUse );
+	}
 }
 
 //=========================================================
@@ -743,7 +745,7 @@ void CScientist::TalkInit()
 
 int CScientist::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	if( pevInflictor && pevInflictor->flags & FL_CLIENT )
+	if( pevInflictor && pevInflictor->flags & FL_CLIENT && IsFriendWithPlayerBeforeProvoked() )
 	{
 		Remember( bits_MEMORY_PROVOKED );
 		StopFollowing( TRUE );
@@ -1086,7 +1088,7 @@ class CDeadScientist : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int	Classify ( void ) { return	CLASS_HUMAN_PASSIVE; }
+	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[7];
@@ -1131,7 +1133,7 @@ public:
 	void Precache( void );
 
 	void EXPORT SittingThink( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
@@ -1219,7 +1221,7 @@ void CSittingScientist::Precache( void )
 //=========================================================
 // ID as a passive human
 //=========================================================
-int CSittingScientist::Classify( void )
+int CSittingScientist::DefaultClassify( void )
 {
 	return CLASS_HUMAN_PASSIVE;
 }

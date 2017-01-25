@@ -72,7 +72,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int ISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetObjectCollisionBox( void )
@@ -193,7 +193,7 @@ const char *CAGrunt::pAlertSounds[] =
 //=========================================================
 int CAGrunt::IRelationship( CBaseEntity *pTarget )
 {
-	if( FClassnameIs( pTarget->pev, "monster_human_grunt" ) )
+	if( IDefaultRelationship(pTarget) >= R_DL && FClassnameIs( pTarget->pev, "monster_human_grunt" ) )
 	{
 		return R_NM;
 	}
@@ -379,7 +379,7 @@ void CAGrunt::PainSound( void )
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
-int CAGrunt::Classify( void )
+int CAGrunt::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MILITARY;
 }

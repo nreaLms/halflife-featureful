@@ -158,7 +158,8 @@ public:
 
 	// Classify - returns the type of group (i.e, "houndeye", or "human military" so that monsters with different classnames
 	// still realize that they are teammates. (overridden for monsters that form groups)
-	virtual int Classify( void ) { return CLASS_NONE; };
+	virtual int Classify( void ) { return DefaultClassify(); }
+	virtual int DefaultClassify() { return CLASS_NONE; }
 	virtual void DeathNotice( entvars_t *pevChild ) {}// monster maker children use this to tell the monster maker that they have died.
 
 	static TYPEDESCRIPTION m_SaveData[];

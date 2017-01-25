@@ -4449,7 +4449,7 @@ class CDeadHEV : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int	Classify ( void ) { return	CLASS_HUMAN_MILITARY; }
+	int	DefaultClassify ( void ) { return	CLASS_HUMAN_MILITARY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[4];

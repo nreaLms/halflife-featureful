@@ -72,7 +72,7 @@ public:
 	MONSTERSTATE GetIdealState( void ) { return MONSTERSTATE_IDLE; };
 	int CanPlaySequence( BOOL fDisregardState ) { return TRUE; };
 
-	int Classify( void );
+	int DefaultClassify( void );
 
 	int Level( float dz );
 	int MyLevel( void );
@@ -231,7 +231,7 @@ typedef enum
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CTentacle::Classify( void )
+int CTentacle::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MONSTER;
 }

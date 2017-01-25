@@ -102,7 +102,7 @@ public:
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void Activate( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	int Classify( void ) { return CLASS_INSECT; }
+	int DefaultClassify( void ) { return CLASS_INSECT; }
 	int IRelationship( CBaseEntity *pTarget );
 
 	virtual int Save( CSave &save );
@@ -250,7 +250,7 @@ void CLeech::SwitchLeechState( void )
 
 int CLeech::IRelationship( CBaseEntity *pTarget )
 {
-	if( pTarget->IsPlayer() )
+	if( pTarget->IsPlayer() && Classify() == DefaultClassify() )
 		return R_DL;
 	return CBaseMonster::IRelationship( pTarget );
 }

@@ -105,6 +105,8 @@ public:
 	// Scripted sequence Info
 	SCRIPTSTATE m_scriptState;		// internal cinematic state
 	CCineMonster *m_pCine;
+	
+	int m_iClass;
 
 	virtual int Save( CSave &save ); 
 	virtual int Restore( CRestore &restore );
@@ -138,6 +140,12 @@ public:
 	virtual void MonsterThink( void );
 	void EXPORT CallMonsterThink( void ) { this->MonsterThink(); }
 	virtual int IRelationship( CBaseEntity *pTarget );
+	int IDefaultRelationship(CBaseEntity *pTarget );
+	int IDefaultRelationship( int classify );
+	bool IsFriendWithPlayerBeforeProvoked();
+	
+	static int IDefaultRelationship(int classify1, int classify2);
+	
 	virtual void MonsterInit( void );
 	virtual void MonsterInitDead( void );	// Call after animation/pose is set up
 	virtual void BecomeDead( void );
@@ -333,6 +341,9 @@ public:
 	void SetMyModel( const char* model );
 	void PrecacheMyModel( const char* model );
 	void SetMyBloodColor( int bloodColor );
+	
+	int Classify();
+	virtual int DefaultClassify();
 };
 
 class CDeadMonster : public CBaseMonster
