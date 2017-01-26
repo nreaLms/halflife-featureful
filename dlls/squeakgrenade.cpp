@@ -103,12 +103,12 @@ int CSqueakGrenade::Classify( void )
 			case CLASS_HUMAN_PASSIVE:
 			case CLASS_HUMAN_MILITARY:
 				m_iMyClass = 0;
-				return CLASS_ALIEN_MILITARY; // barney's get mad, grunts get mad at it
+				return m_iClass ? m_iClass : CLASS_ALIEN_MILITARY; // barney's get mad, grunts get mad at it
 		}
 		m_iMyClass = 0;
 	}
 
-	return CLASS_ALIEN_BIOWEAPON;
+	return m_iClass ? m_iClass : CLASS_ALIEN_BIOWEAPON;
 }
 
 void CSqueakGrenade::Spawn( void )

@@ -252,7 +252,7 @@ void CGib::SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
 
 BOOL CBaseMonster::HasHumanGibs( void )
 {
-	int myClass = Classify();
+	int myClass = DefaultClassify();
 
 	if( myClass == CLASS_HUMAN_MILITARY ||
 		myClass == CLASS_PLAYER_ALLY ||
@@ -266,7 +266,7 @@ BOOL CBaseMonster::HasHumanGibs( void )
 
 BOOL CBaseMonster::HasAlienGibs( void )
 {
-	int myClass = Classify();
+	int myClass = DefaultClassify();
 
 	if( myClass == CLASS_ALIEN_MILITARY ||
 		myClass == CLASS_ALIEN_MONSTER ||
