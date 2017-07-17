@@ -2313,6 +2313,7 @@ public:
 	}
 	
 	Vector vecOrigin;
+	int m_beamTexture;
 };
 
 LINK_ENTITY_TO_CLASS( env_warpball, CEnvWarpBall )
@@ -2373,7 +2374,7 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 
 void CEnvWarpBall::Precache( void )
 {
-	PRECACHE_MODEL( WARPBALL_BEAM );
+	m_beamTexture = PRECACHE_MODEL( WARPBALL_BEAM );
 	if (pev->model) {
 		PRECACHE_MODEL( (char*)STRING(pev->model) );
 	} else {
@@ -2439,20 +2440,31 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	{
 		TraceResult tr;
 		Vector vecDest = Radius() * ( Vector( RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ) ).Normalize() );
-		UTIL_TraceLine( vecOrigin, vecOrigin + vecDest, ignore_monsters, NULL, &tr );
+		UTIL_TraceLine( vecOrigin, vecOrigin + vecDest, ignore_monsters, ENT( pev ), &tr );
 		if( tr.flFraction != 1.0 )
 		{
 			// we hit something.
 			iDrawn++;
-			CBeam *pBeam = CBeam::BeamCreate( WARPBALL_BEAM, 200 );
-			pBeam->PointsInit( vecOrigin, tr.vecEndPos );
-			pBeam->SetColor( beamRed, beamGreen, beamBlue );
-			pBeam->SetNoise( 65 );
-			pBeam->SetBrightness( 220 );
-			pBeam->SetWidth( 30 );
-			pBeam->SetScrollRate( 35 );
-			pBeam->SetThink(&CBeam::SUB_Remove );
-			pBeam->pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.5, 1.6 );
+			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+				WRITE_BYTE( TE_BEAMPOINTS );
+				WRITE_COORD( vecOrigin.x );
+				WRITE_COORD( vecOrigin.y );
+				WRITE_COORD( vecOrigin.z );
+				WRITE_COORD( tr.vecEndPos.x );
+				WRITE_COORD( tr.vecEndPos.y );
+				WRITE_COORD( tr.vecEndPos.z );
+				WRITE_SHORT( m_beamTexture );
+				WRITE_BYTE( 0 ); // framestart
+				WRITE_BYTE( 10 ); // framerate
+				WRITE_BYTE( (int)(10*RANDOM_FLOAT( 0.5, 1.6 )) ); // life
+				WRITE_BYTE( 30 );  // width
+				WRITE_BYTE( 65 );   // noise
+				WRITE_BYTE( beamRed );   // r, g, b
+				WRITE_BYTE( beamGreen );   // r, g, b
+				WRITE_BYTE( beamBlue );   // r, g, b
+				WRITE_BYTE( 220 );	// brightness
+				WRITE_BYTE( 35 );		// speed
+			MESSAGE_END();
 		}
 		iTimes++;
 	}
