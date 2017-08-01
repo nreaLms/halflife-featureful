@@ -55,8 +55,10 @@ char *CTalkMonster::m_szFriends[TLK_CFRIENDS] =
 {
 	"monster_barney",
 	"monster_scientist",
+	"monster_otis",
+	"monster_cleansuit_scientist",
 	"monster_sitting_scientist",
-	"monster_otis"
+	"monster_sitting_cleansuit_scientist"
 };
 
 //=========================================================
