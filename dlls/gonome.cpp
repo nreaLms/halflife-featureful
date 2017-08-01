@@ -147,7 +147,7 @@ public:
 	
 protected:
 	int GonomeLookupActivity( void *pmodel, int activity );
-	bool gonnaAttack2;
+	bool gonnaAttack1;
 };
 
 LINK_ENTITY_TO_CLASS(monster_gonome, CGonome)
@@ -173,11 +173,9 @@ int CGonome::GonomeLookupActivity( void *pmodel, int activity )
 		if( pseqdesc[i].activity == activity )
 		{
 			sameActivityNum++;
-			if (sameActivityNum == 1 && RANDOM_LONG(0,1)) {
-				gonnaAttack2 = false;
+			if (sameActivityNum == 1 && gonnaAttack1) {
 				return i;
 			} else if (sameActivityNum == 2) {
-				gonnaAttack2 = true;
 				return i;
 			}
 		}
@@ -641,10 +639,11 @@ void CGonome::StartTask(Task_t *pTask)
 	{
 	case TASK_MELEE_ATTACK1:
 		{
-			if (gonnaAttack2)
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_melee2.wav", 1, ATTN_NORM);
-			else
+			gonnaAttack1 = RANDOM_LONG(0,1) ? true : false;
+			if (gonnaAttack1)
 				EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_melee1.wav", 1, ATTN_NORM);
+			else
+				EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_melee2.wav", 1, ATTN_NORM);
 			CBaseMonster::StartTask(pTask);
 		}
 		break;
