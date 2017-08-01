@@ -65,6 +65,7 @@ set (SVDLL_SOURCES
 	globals.cpp
 	glock.cpp
 	gman.cpp
+	gonome.cpp
 	h_ai.cpp
 	h_battery.cpp
 	h_cine.cpp
