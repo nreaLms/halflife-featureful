@@ -2054,6 +2054,34 @@
 		64 : "Start Inactive" : 0
 	]
 ]
+
+@PointClass base(Monster, Sequence) size(-24 -24 0, 24 24 32) studio("models/pit_drone.mdl") = monster_pitdrone : "PitDrone"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle"
+		1 : "idle"
+		2 : "walk"
+		3 : "gallop"
+		4 : "run"
+		5 : "jump"
+		6 : "flinchs"
+		7 : "flinchb"
+		8 : "turnleft"
+		9 : "turnright"
+		10 : "bite"
+		11 : "whip"
+		12 : "range"
+		13 : "eat"
+		14 : "reload"
+		15 : "die"
+		16 : "die1"
+		17 : "die2"
+		18 : "jump_over_counter"
+	]
+	initammo(string) : "Initial Ammo" : "6"
+]
+
 @PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/bigrat.mdl") = monster_rat : "Rat (no ai)" []
 @PointClass base(Weapon,Targetx,RenderFields, Sequence) studio("models/w_satchel.mdl") = monster_satchelcharge : "Live Satchel Charge" []
 @PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist : "Scared Scientist" 

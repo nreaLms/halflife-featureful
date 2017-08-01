@@ -94,6 +94,7 @@ set (SVDLL_SOURCES
 	nodes.cpp
 	osprey.cpp
 	pathcorner.cpp
+	pitdrone.cpp
 	plane.cpp
 	plats.cpp
 	player.cpp

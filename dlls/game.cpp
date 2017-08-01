@@ -225,6 +225,23 @@ cvar_t	sk_nihilanth_zap1 = {"sk_nihilanth_zap1","0"};
 cvar_t	sk_nihilanth_zap2 = {"sk_nihilanth_zap2","0"};
 cvar_t	sk_nihilanth_zap3 = {"sk_nihilanth_zap3","0"};
 
+// Pitdrone
+cvar_t	sk_pitdrone_health1 = { "sk_pitdrone_health1", "0" };
+cvar_t	sk_pitdrone_health2 = { "sk_pitdrone_health2", "0" };
+cvar_t	sk_pitdrone_health3 = { "sk_pitdrone_health3", "0" };
+
+cvar_t	sk_pitdrone_dmg_bite1 = { "sk_pitdrone_dmg_bite1", "0" };
+cvar_t	sk_pitdrone_dmg_bite2 = { "sk_pitdrone_dmg_bite2", "0" };
+cvar_t	sk_pitdrone_dmg_bite3 = { "sk_pitdrone_dmg_bite3", "0" };
+
+cvar_t	sk_pitdrone_dmg_whip1 = { "sk_pitdrone_dmg_whip1", "0" };
+cvar_t	sk_pitdrone_dmg_whip2 = { "sk_pitdrone_dmg_whip2", "0" };
+cvar_t	sk_pitdrone_dmg_whip3 = { "sk_pitdrone_dmg_whip3", "0" };
+
+cvar_t	sk_pitdrone_dmg_spit1 = { "sk_pitdrone_dmg_spit1", "0" };
+cvar_t	sk_pitdrone_dmg_spit2 = { "sk_pitdrone_dmg_spit2", "0" };
+cvar_t	sk_pitdrone_dmg_spit3 = { "sk_pitdrone_dmg_spit3", "0" };
+
 // Scientist
 cvar_t	sk_scientist_health1 = {"sk_scientist_health1","0"};
 cvar_t	sk_scientist_health2 = {"sk_scientist_health2","0"};
@@ -644,6 +661,23 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_nihilanth_zap1 );
 	CVAR_REGISTER( &sk_nihilanth_zap2 );
 	CVAR_REGISTER( &sk_nihilanth_zap3 );
+
+	// Pitdrone
+	CVAR_REGISTER( &sk_pitdrone_health1 );// { "sk_pitdrone_health1", "0" };
+	CVAR_REGISTER( &sk_pitdrone_health2 );// { "sk_pitdrone_health2", "0" };
+	CVAR_REGISTER( &sk_pitdrone_health3 );// { "sk_pitdrone_health3", "0" };
+
+	CVAR_REGISTER( &sk_pitdrone_dmg_bite1 );// { "sk_pitdrone_dmg_bite1", "0" };
+	CVAR_REGISTER( &sk_pitdrone_dmg_bite2 );// { "sk_pitdrone_dmg_bite2", "0" };
+	CVAR_REGISTER( &sk_pitdrone_dmg_bite3 );// { "sk_pitdrone_dmg_bite3", "0" };
+
+	CVAR_REGISTER( &sk_pitdrone_dmg_whip1 );// { "sk_pitdrone_dmg_whip1", "0" };
+	CVAR_REGISTER( &sk_pitdrone_dmg_whip2 );// { "sk_pitdrone_dmg_whip2", "0" };
+	CVAR_REGISTER( &sk_pitdrone_dmg_whip3 );// { "sk_pitdrone_dmg_whip3", "0" };
+
+	CVAR_REGISTER( &sk_pitdrone_dmg_spit1 );// { "sk_pitdrone_dmg_spit1", "0" };
+	CVAR_REGISTER( &sk_pitdrone_dmg_spit2 );// { "sk_pitdrone_dmg_spit2", "0" };
+	CVAR_REGISTER( &sk_pitdrone_dmg_spit3 );// { "sk_pitdrone_dmg_spit3", "0" };
 
 	// Scientist
 	CVAR_REGISTER( &sk_scientist_health1 );// {"sk_scientist_health1","0"};
