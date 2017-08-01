@@ -554,7 +554,7 @@ void CPitDrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 int	CPitDrone::DefaultClassify(void)
 {
-	return	CLASS_ALIEN_MONSTER;
+	return	CLASS_RACEX_PREDATOR;
 }
 
 void CPitDrone::BodyChange(float horns)
