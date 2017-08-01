@@ -200,6 +200,9 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.nihilanthHealth = GetSkillCvar( "sk_nihilanth_health" );
 	gSkillData.nihilanthZap = GetSkillCvar( "sk_nihilanth_zap" );
 
+	// Otis
+	gSkillData.otisHealth = GetSkillCvar( "sk_otis_health");
+
 	// Scientist
 	gSkillData.scientistHealth = GetSkillCvar( "sk_scientist_health" );
 
