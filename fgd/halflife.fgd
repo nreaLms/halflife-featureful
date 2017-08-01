@@ -2056,6 +2056,139 @@
 ]
 @PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/bigrat.mdl") = monster_rat : "Rat (no ai)" []
 @PointClass base(Weapon,Targetx,RenderFields, Sequence) studio("models/w_satchel.mdl") = monster_satchelcharge : "Live Satchel Charge" []
+
+@PointClass base(Monster, TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist : "Cleansuit Scientist" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 13 =
+	[
+		0 : "walk"
+		1 : "walk_scared"
+		2 : "run"
+		3 : "run1"
+		4 : "run2"
+		5 : "180_Left"
+		6 : "180_Right"
+		7 : "flinch"
+		8 : "flinch1"
+		9 : "laflinch"
+		10 : "raflinch"
+		11 : "llflinch"
+		12 : "rlflinch"
+		13 : "idle1"
+		14 : "idle3"
+		15 : "idle4"
+		16 : "idle5"
+		17 : "idle6"
+		18 : "idle7"
+		19 : "crouchstand"
+		20 : "crouch_idle"
+		21 : "crouch_idle2"
+		22 : "crouch_idle3"
+		23 : "crouch_idle3"
+		24 : "panic"
+		25 : "fear1"
+		26 : "fear2"
+		27 : "eye_wipe"
+		28 : "pull_needle"
+		29 : "return_needle"
+		30 : "give_shot"
+		31 : "diesimple"
+		32 : "dieforward"
+		33 : "dieforward1"
+		34 : "diebackward"
+		35 : "headshot"
+		36 : "gutshot"
+		37 : "germandeath"
+		38 : "lying_on_back"
+		39 : "lying_on_stomach"
+		40 : "dead_sitting"
+		41 : "dead_table1"
+		42 : "dead_table2"
+		43 : "dead_table3"
+		44 : "barnacled1"
+		45 : "barnacled2"
+		46 : "barnacled3"
+		47 : "barnacled4"
+		48 : "console"
+		49 : "dryhands"
+		50 : "tieshoe"
+		51 : "writeboard"
+		52 : "studycart"
+		53 : "lean"
+		54 : "pondering"
+		55 : "pondering2"
+		56 : "pondering3"
+		57 : "pause"
+		58 : "yes"
+		59 : "no"
+		60 : "push_button"
+		61 : "converse1"
+		62 : "converse2"
+		63 : "retina"
+		64 : "coffee"
+		65 : "franticbutton"
+		66 : "startle"
+		67 : "scientist_throwna"
+		68 : "scientist_thrownb"
+		69 : "scientist_beatwindow"
+		70 : "scientist_deadpose1"
+		71 : "scientist_zombiefear"
+		72 : "dead_against_wall"
+		73 : "teleport_fidget"
+	]
+	body(Choices) : "Body" : -1 =
+	[
+		-1 : "Random"
+		0 : "Glasses"
+		1 : "Einstein"
+		2 : "Luther"
+		3 : "Slick"
+	]
+]
+
+@PointClass base(Targetname,Appearflags,RenderFields, Sequence) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist_dead : "Dead Cleansuit Scientist" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 38 =
+	[
+		38 : "lying_on_back"
+		39 : "lying_on_stomach"
+		40 : "dead_sitting"
+		41 : "dead_table1"
+		42 : "dead_table2"
+		43 : "dead_table3"
+	]
+	body(Choices) : "Body" : -1 =
+	[
+		-1 : "Random"
+		0 : "Glasses"
+		1 : "Einstein"
+		2 : "Luther"
+		3 : "Slick"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On back"
+		1 : "On Stomach"
+		2 : "Sitting"
+		3 : "Hanging"
+		4 : "Table1"
+		5 : "Table2"
+		6 : "Table3"
+	]
+]
+
+@PointClass base(Monster) size(-14 -14 22, 14 14 72) = monster_sitting_cleansuit_scientist : "Sitting Cleansuit Scientist" 
+[
+	body(Choices) : "Body" : -1 =
+	[
+		-1 : "Random"
+		0 : "Glasses"
+		1 : "Einstein"
+		2 : "Luther"
+		3 : "Slick"
+	]
+]
+
 @PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist : "Scared Scientist" 
 [
       body(Choices) : "Body" : -1 =

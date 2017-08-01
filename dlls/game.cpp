@@ -101,6 +101,11 @@ cvar_t	sk_bigmomma_radius_blast1 = {"sk_bigmomma_radius_blast1","250"};
 cvar_t	sk_bigmomma_radius_blast2 = {"sk_bigmomma_radius_blast2","250"};
 cvar_t	sk_bigmomma_radius_blast3 = {"sk_bigmomma_radius_blast3","250"};
 
+// Cleansuit Scientist
+cvar_t	sk_cleansuit_scientist_health1 = {"sk_cleansuit_scientist_health1","0"};
+cvar_t	sk_cleansuit_scientist_health2 = {"sk_cleansuit_scientist_health2","0"};
+cvar_t	sk_cleansuit_scientist_health3 = {"sk_cleansuit_scientist_health3","0"};
+
 // Gargantua
 cvar_t	sk_gargantua_health1 = {"sk_gargantua_health1","0"};
 cvar_t	sk_gargantua_health2 = {"sk_gargantua_health2","0"};
@@ -526,6 +531,11 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_bigmomma_radius_blast1 );// {"sk_bigmomma_radius_blast1","250"};
 	CVAR_REGISTER( &sk_bigmomma_radius_blast2 );// {"sk_bigmomma_radius_blast2","250"};
 	CVAR_REGISTER( &sk_bigmomma_radius_blast3 );// {"sk_bigmomma_radius_blast3","250"};
+
+	// Cleansuit Scientist
+	CVAR_REGISTER ( &sk_cleansuit_scientist_health1 );// {"sk_scientist_health1","0"};
+	CVAR_REGISTER ( &sk_cleansuit_scientist_health2 );// {"sk_scientist_health2","0"};
+	CVAR_REGISTER ( &sk_cleansuit_scientist_health3 );// {"sk_scientist_health3","0"};
 
 	// Gargantua
 	CVAR_REGISTER( &sk_gargantua_health1 );// {"sk_gargantua_health1","0"};
