@@ -405,7 +405,7 @@ BOOL CPitDrone::CheckRangeAttack1(float flDot, float flDist)
 		else
 		{
 			// not moving, so spit again pretty soon.
-			m_flNextSpitTime = gpGlobals->time + 0.5;
+			m_flNextSpitTime = gpGlobals->time + 1;
 		}
 
 		return TRUE;
@@ -554,7 +554,7 @@ void CPitDrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 int	CPitDrone::DefaultClassify(void)
 {
-	return	CLASS_ALIEN_MONSTER;
+	return	CLASS_RACEX_PREDATOR;
 }
 
 void CPitDrone::BodyChange(float horns)
@@ -597,7 +597,7 @@ void CPitDrone::Spawn()
 	Precache();
 
 	SetMyModel("models/pit_drone.mdl");
-	UTIL_SetSize(pev, Vector(-24, -24, 0), Vector(24, 24, 64));
+	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 48));
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
