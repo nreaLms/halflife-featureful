@@ -711,8 +711,10 @@ void CScientist::TalkInit()
 	// scientist will try to talk to friends in this order:
 
 	m_szFriends[0] = "monster_scientist";
-	m_szFriends[1] = "monster_sitting_scientist";
-	m_szFriends[2] = "monster_barney";
+	m_szFriends[1] = "monster_cleansuit_scientist";
+	m_szFriends[2] = "monster_sitting_scientist";
+	m_szFriends[3] = "monster_sitting_cleansuit_scientist";
+	m_szFriends[4] = "monster_barney";
 
 	// scientists speach group names (group names are in sentences.txt)
 
