@@ -202,6 +202,12 @@ void CGameRules::RefreshSkillData ( void )
 	// Nihilanth
 	gSkillData.nihilanthHealth = GetSkillCvar( "sk_nihilanth_health" );
 	gSkillData.nihilanthZap = GetSkillCvar( "sk_nihilanth_zap" );
+	
+	// Pitdrone
+	gSkillData.pitdroneHealth = GetSkillCvar( "sk_pitdrone_health" );
+	gSkillData.pitdroneDmgBite = GetSkillCvar( "sk_pitdrone_dmg_bite" );
+	gSkillData.pitdroneDmgWhip = GetSkillCvar( "sk_pitdrone_dmg_whip" );
+	gSkillData.pitdroneDmgSpit = GetSkillCvar( "sk_pitdrone_dmg_spit" );
 
 	// Otis
 	gSkillData.otisHealth = GetSkillCvar( "sk_otis_health");
