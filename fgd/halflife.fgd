@@ -2126,18 +2126,13 @@
 		-1 : "Random"
 		0 : "Gun Holstered"
 		1 : "Gun Drawn"
-		3 : "Donut"
+		2 : "Donut"
 	]
 	head(Choices) : "head" : -1 =
 	[
 		-1 : "Random"
 		0 : "Head with hair"
 		1 : "Bald Head"
-	]
-	suspicious(choices) : "Suspicious" : 0 =
-	[
-		0 : "No"
-		1 : "Yes"
 	]
 ]
 

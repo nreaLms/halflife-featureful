@@ -413,9 +413,6 @@ void CBarney::SpawnImpl(const char* modelName, float health)
 	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
 
-	pev->body = 0; // gun in holster
-	m_fGunDrawn = FALSE;
-
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
 	MonsterInit();
@@ -429,6 +426,8 @@ void CBarney::Spawn()
 {
 	Precache();
 	SpawnImpl("models/barney.mdl", gSkillData.barneyHealth);
+	pev->body = 0; // gun in holster
+	m_fGunDrawn = FALSE;
 	MonsterInit();
 	if (IsFriendWithPlayerBeforeProvoked()) {
 		SetUse( &CTalkMonster::FollowerUse );
@@ -880,10 +879,13 @@ void COtis::Spawn()
 	else
 		SetBodygroup(2, head);
 	if (bodystate == -1) {
-		SetBodygroup(1, RANDOM_LONG(0,1));
-	} else {
-		SetBodygroup(1, bodystate);
+		bodystate = RANDOM_LONG(0,1);
 	}
+	SetBodygroup(1, bodystate);
+	m_fGunDrawn = FALSE;
+ 	if (bodystate == OTIS_BODY_GUNDRAWN) {
+ 		m_fGunDrawn = TRUE;	
+ 	}
 	MonsterInit();
 	SetUse( &COtis :: FollowerUse );
 }
