@@ -2292,16 +2292,62 @@
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie" []
 @PointClass base(Monster, Sequence) studio("models/zombie_soldier.mdl") = monster_zombie_soldier_dead : "Dead Soldier Zombie"
 [
-    pose(Choices) : "Pose" : 0 =
-    [
-        0 : "On back"
-        1 : "On stomach"
-    ]
-    sequence(Choices) : "Animation Sequence (editor)" : 20 =
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On back"
+		1 : "On stomach"
+	]
+	sequence(Choices) : "Animation Sequence (editor)" : 20 =
 	[
 		20 : "dead_on_back"
 		21 : "dead_on_stomach"
-    ]
+	]
+]
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome : "Gonome" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 3 =
+	[
+		0 : "walk"
+		1 : "runlong"
+		2 : "runshort"
+		3 : "idle1"
+		4 : "idle2"
+		5 : "victoryeat1"
+		6 : "eat_loop"
+		7 : "attack1"
+		8 : "attack2"
+		9 : "attack3"
+		10 : "jump1"
+		11 : "diebackward"
+		12 : "dieforward"
+		13 : "dieheadshot"
+		14 : "dieheadshot"
+		15 : "diesimple"
+		16 : "big_flinch"
+		17 : "small_flinch"
+		18 : "flinch"
+		19 : "dead_on_stomach1"
+		20 : "dead_on_back"
+		21 : "dead_on_stomach1"
+		22 : "dead_on_side"
+		23 : "sohappy"
+	]
+]
+@PointClass base(Targetname,Appearflags,RenderFields, Sequence) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome_dead : "Dead Gonome" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 19 =
+	[
+		19 : "dead_on_stomach1"
+		20 : "dead_on_back"
+		21 : "dead_on_stomach1"
+		22 : "dead_on_side"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On Stomach"
+		1 : "On Back"
+		2 : "On Side"
+	]
 ]
 
 @PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = monstermaker : "Monster Maker"
