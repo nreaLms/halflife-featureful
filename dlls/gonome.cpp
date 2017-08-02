@@ -38,6 +38,11 @@
 
 #define		GONOME_MELEE_ATTACK_RADIUS		70
 
+enum 
+{
+	TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE = LAST_COMMON_TASK + 1
+};
+
 //=========================================================
 // Monster's Anim Events Go Here
 //=========================================================
@@ -118,7 +123,7 @@ void CGonomeGuts::Touch( CBaseEntity *pOther )
 //=========================================================
 // CGonome
 //=========================================================
-class CGonome : public CBullsquid
+class CGonome : public CBaseMonster
 {
 public:
 
@@ -126,6 +131,7 @@ public:
 	void Precache(void);
 
 	int  DefaultClassify(void);
+	void SetYawSpeed();
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	void IdleSound(void);
 	void PainSound(void);
@@ -138,19 +144,34 @@ public:
 	BOOL CheckMeleeAttack2(float flDot, float flDist);
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	void RunAI(void);
+	Schedule_t *GetSchedule();
+	Schedule_t *GetScheduleOfType( int Type );
 
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	int IRelationship(CBaseEntity *pTarget);
-	int IgnoreConditions(void);
 	
 	void SetActivity( Activity NewActivity );
 	
+	int	Save(CSave &save);
+	int Restore(CRestore &restore);
+	
+	CUSTOM_SCHEDULES
+	static TYPEDESCRIPTION m_SaveData[];
 protected:
 	int GonomeLookupActivity( void *pmodel, int activity );
+	float m_flLastHurtTime;// we keep track of this, because if something hurts a squid, it will forget about its love of headcrabs for a while.
+	float m_flNextSpitTime;// last time the gonome used the spit attack.
 	bool gonnaAttack1;
 };
 
 LINK_ENTITY_TO_CLASS(monster_gonome, CGonome)
+
+TYPEDESCRIPTION	CGonome::m_SaveData[] =
+{
+	DEFINE_FIELD( CGonome, m_flLastHurtTime, FIELD_TIME ),
+	DEFINE_FIELD( CGonome, m_flNextSpitTime, FIELD_TIME ),
+};
+
+IMPLEMENT_SAVERESTORE( CGonome, CBaseMonster )
 
 /*
  * Hack to ignore activity weights when choosing melee attack animation
@@ -189,7 +210,7 @@ void CGonome::SetActivity( Activity NewActivity )
 	if (NewActivity != ACT_MELEE_ATTACK1) {
 		CBaseMonster::SetActivity(NewActivity);
 	} else {
-		ASSERT( activity != 0 );
+		ASSERT( NewActivity != 0 );
 		void *pmodel = GET_MODEL_PTR( ENT( pev ) );
 		int iSequence = GonomeLookupActivity( pmodel, NewActivity );
 	
@@ -230,23 +251,6 @@ int	CGonome::DefaultClassify(void)
 	return	CLASS_ALIEN_MONSTER;
 }
 
-
-//=========================================================
-// IgnoreConditions 
-//=========================================================
-int CGonome::IgnoreConditions(void)
-{
-	return CBaseMonster::IgnoreConditions();
-}
-
-//=========================================================
-// IRelationship - overridden for gonome
-//=========================================================
-int CGonome::IRelationship(CBaseEntity *pTarget)
-{
-	return CBaseMonster::IRelationship(pTarget);
-}
-
 //=========================================================
 // TakeDamage - overridden for gonome so we can keep track
 // of how much time has passed since it was last injured
@@ -256,9 +260,9 @@ int CGonome::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 	float flDist;
 	Vector vecApex;
 
-	// if the squid is running, has an enemy, was hurt by the enemy, hasn't been hurt in the last 3 seconds, and isn't too close to the enemy,
+	// if the gonome is running, has an enemy, was hurt by the enemy, hasn't been hurt in the last 3 seconds, and isn't too close to the enemy,
 	// it will swerve. (whew).
-	if (m_hEnemy != NULL && IsMoving() && pevAttacker == m_hEnemy->pev && gpGlobals->time - m_flLastHurtTime > 3)
+	if (m_hEnemy != NULL && IsMoving() && pevAttacker == m_hEnemy->pev)
 	{
 		flDist = (pev->origin - m_hEnemy->pev->origin).Length2D();
 
@@ -404,8 +408,37 @@ void CGonome::AlertSound(void)
 	}
 }
 
+//=========================================================
+// SetYawSpeed - allows each sequence to have a different
+// turn rate associated with it.
+//=========================================================
+void CGonome::SetYawSpeed( void )
+{
+	int ys;
 
+	ys = 0;
 
+	switch ( m_Activity )
+	{
+	case ACT_WALK:
+		ys = 90;
+		break;
+	case ACT_RUN:
+		ys = 90;
+		break;
+	case ACT_IDLE:
+		ys = 90;
+		break;
+	case ACT_RANGE_ATTACK1:
+		ys = 90;
+		break;
+	default:
+		ys = 90;
+		break;
+	}
+
+	pev->yaw_speed = ys;
+}
 //=========================================================
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
@@ -530,7 +563,6 @@ void CGonome::Spawn()
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
-	m_fCanThreatDisplay = TRUE;
 	m_flNextSpitTime = gpGlobals->time;
 
 	MonsterInit();
@@ -620,9 +652,157 @@ void CGonome::RunAI(void)
 			pev->framerate = 1.25;
 		}
 	}
-
 }
 
+//=========================================================
+// GetSchedule 
+//=========================================================
+Schedule_t *CGonome::GetSchedule( void )
+{
+	switch( m_MonsterState )
+	{
+	case MONSTERSTATE_COMBAT:
+		{
+			// dead enemy
+			if( HasConditions( bits_COND_ENEMY_DEAD ) )
+			{
+				// call base class, all code to handle dead enemies is centralized there.
+				return CBaseMonster::GetSchedule();
+			}
+
+			if( HasConditions( bits_COND_NEW_ENEMY ) )
+			{
+				return GetScheduleOfType( SCHED_WAKE_ANGRY );
+			}
+
+			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+			{
+				return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+			}
+
+			if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
+			{
+				return GetScheduleOfType( SCHED_MELEE_ATTACK1 );
+			}
+
+			if( HasConditions( bits_COND_CAN_MELEE_ATTACK2 ) )
+			{
+				return GetScheduleOfType( SCHED_MELEE_ATTACK2 );
+			}
+
+			return GetScheduleOfType( SCHED_CHASE_ENEMY );
+			break;
+		}
+	default:
+			break;
+	}
+
+	return CBaseMonster::GetSchedule();
+}
+
+// primary range attack
+Task_t tlGonomeRangeAttack1[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_RANGE_ATTACK1, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+};
+
+Schedule_t slGonomeRangeAttack1[] =
+{
+	{
+		tlGonomeRangeAttack1,
+		ARRAYSIZE( tlGonomeRangeAttack1 ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_ENEMY_OCCLUDED |
+		bits_COND_NO_AMMO_LOADED,
+		0,
+		"Gonome Range Attack1"
+	},
+};
+
+// Chase enemy schedule
+Task_t tlGonomeChaseEnemy1[] =
+{
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RANGE_ATTACK1 },// !!!OEM - this will stop nasty squid oscillation.
+	{ TASK_GET_PATH_TO_ENEMY, (float)0 },
+	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+};
+
+Schedule_t slGonomeChaseEnemy[] =
+{
+	{
+		tlGonomeChaseEnemy1,
+		ARRAYSIZE( tlGonomeChaseEnemy1 ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_SMELL_FOOD |
+		bits_COND_CAN_RANGE_ATTACK1 |
+		bits_COND_CAN_MELEE_ATTACK1 |
+		bits_COND_CAN_MELEE_ATTACK2 |
+		bits_COND_TASK_FAILED,
+		0,
+		"Gonome Chase Enemy"
+	},
+};
+
+// victory dance (eating body)
+Task_t tlGonomeVictoryDance[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_WAIT, (float)0.1 },
+	{ TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE,	(float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
+	{ TASK_WAIT, (float)0 }
+};
+
+Schedule_t slGonomeVictoryDance[] =
+{
+	{
+		tlGonomeVictoryDance,
+		ARRAYSIZE( tlGonomeVictoryDance ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE,
+		0,
+		"GonomeVictoryDance"
+	},
+};
+
+DEFINE_CUSTOM_SCHEDULES( CGonome )
+{
+	slGonomeRangeAttack1,
+	slGonomeChaseEnemy,
+	slGonomeVictoryDance,
+};
+
+IMPLEMENT_CUSTOM_SCHEDULES( CGonome, CBaseMonster )
+
+Schedule_t* CGonome::GetScheduleOfType(int Type)
+{
+	switch ( Type )
+	{
+	case SCHED_RANGE_ATTACK1:
+		return &slGonomeRangeAttack1[0];
+		break;
+	case SCHED_CHASE_ENEMY:
+		return &slGonomeChaseEnemy[0];
+		break;
+	case SCHED_VICTORY_DANCE:
+		return &slGonomeVictoryDance[0];
+		break;
+	default:
+		break;
+	}
+	return CBaseMonster::GetScheduleOfType(Type);
+}
 
 //=========================================================
 // Start task - selects the correct activity and performs
@@ -648,15 +828,22 @@ void CGonome::StartTask(Task_t *pTask)
 		}
 		break;
 
-	case TASK_MELEE_ATTACK2:
+	case TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE:
 		{
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_melee2.wav", 1, ATTN_NORM);
-			CBaseMonster::StartTask(pTask);
+			UTIL_MakeVectors( pev->angles );
+			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 50, bits_MF_TO_LOCATION, NULL ) )
+			{
+				TaskComplete();
+			}
+			else
+			{
+				ALERT( at_aiconsole, "GonomeGetPathToEnemyCorpse failed!!\n" );
+				TaskFail();
+			}
 		}
 		break;
-	
 	default:
-		CBullsquid::StartTask(pTask);
+		CBaseMonster::StartTask(pTask);
 		break;
 
 	}

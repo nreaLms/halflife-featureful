@@ -102,6 +102,7 @@ OBJ = \
 	$(DLL_OBJDIR)/ggrenade.o \
 	$(DLL_OBJDIR)/globals.o \
 	$(DLL_OBJDIR)/gman.o \
+	$(DLL_OBJDIR)/gonome.o \
 	$(DLL_OBJDIR)/h_ai.o \
 	$(DLL_OBJDIR)/h_battery.o \
 	$(DLL_OBJDIR)/h_cine.o \

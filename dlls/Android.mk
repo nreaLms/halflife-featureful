@@ -63,6 +63,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            globals.cpp \
            glock.cpp \
            gman.cpp \
+           gonome.cpp \
            h_ai.cpp \
            h_battery.cpp \
            h_cycler.cpp \
