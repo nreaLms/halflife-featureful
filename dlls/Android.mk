@@ -93,6 +93,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            nodes.cpp \
            osprey.cpp \
            pathcorner.cpp \
+           pitdrone.cpp \
            plane.cpp \
            plats.cpp \
            player.cpp \
