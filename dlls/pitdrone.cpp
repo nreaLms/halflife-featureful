@@ -61,7 +61,7 @@ void CPitDroneSpit::Spawn(void)
 	pev->movetype = MOVETYPE_FLY;
 	pev->classname = MAKE_STRING("pitdronespit");
 
-	pev->solid = SOLID_TRIGGER;
+	pev->solid = SOLID_BBOX;
 	pev->rendermode = kRenderTransAlpha;
 	pev->renderamt = 255;
 
@@ -116,20 +116,12 @@ void CPitDroneSpit::Touch(CBaseEntity *pOther)
 	}
 	else
 	{
-		TraceResult tr = UTIL_GetGlobalTrace();
-		entvars_t	*pevOwner;
-
-		pevOwner = VARS(pev->owner);
-
-		// UNDONE: this needs to call TraceAttack instead
-		ClearMultiDamage();
-
-		pOther->TraceAttack(pevOwner, gSkillData.pitdroneDmgSpit, pev->velocity.Normalize(), &tr, DMG_GENERIC | DMG_NEVERGIB);
+		entvars_t	*pevOwner = VARS(pev->owner);
+		pOther->TakeDamage(pev, pevOwner, gSkillData.pitdroneDmgSpit, DMG_GENERIC | DMG_NEVERGIB);
 		if (RANDOM_LONG(0,1))
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/xbow_hitbod1.wav", 1, ATTN_NORM, 0, iPitch);
 		else
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/xbow_hitbod2.wav", 1, ATTN_NORM, 0, iPitch);
-		ApplyMultiDamage(pev, pevOwner);
 		
 		SetThink( &CBaseEntity::SUB_Remove );
 		pev->nextthink = gpGlobals->time;
@@ -158,10 +150,10 @@ void CPitDroneSpit::Touch(CBaseEntity *pOther)
 //=========================================================
 enum
 {
-	SCHED_PDRONE_SMELLFOOD = LAST_COMMON_SCHEDULE + 1,
+	SCHED_PDRONE_HURTHOP = LAST_COMMON_SCHEDULE + 1,
+	SCHED_PDRONE_SMELLFOOD,
 	SCHED_PDRONE_EAT,
 	SCHED_PDRONE_SNIFF_AND_EAT,
-	SCHED_PDRONE_WALLOW,
 	SCHED_PDRONE_COVER_AND_RELOAD
 };
 
@@ -170,7 +162,7 @@ enum
 //=========================================================
 enum
 {
-	TASK_PDRONE_SMELLFOOD = LAST_COMMON_SCHEDULE + 1,
+	TASK_PDRONE_HOPTURN = LAST_COMMON_SCHEDULE + 1
 };
 
 //=========================================================
@@ -190,6 +182,7 @@ class CPitDrone : public CBaseMonster
 	void Precache(void);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	void SetYawSpeed(void);
+	int ISoundMask();
 	void KeyValue(KeyValueData *pkvd);
 
 	int DefaultClassify(void);
@@ -439,6 +432,21 @@ void CPitDrone::SetYawSpeed(void)
 	pev->yaw_speed = ys;
 }
 
+//=========================================================
+// ISoundMask - returns a bit mask indicating which types
+// of sounds this monster regards. In the base class implementation,
+// monsters care about all sounds, but no scents.
+//=========================================================
+int CPitDrone::ISoundMask( void )
+{
+	return	bits_SOUND_WORLD |
+		bits_SOUND_COMBAT |
+		bits_SOUND_CARCASS |
+		bits_SOUND_MEAT |
+		bits_SOUND_GARBAGE |
+		bits_SOUND_PLAYER;
+}
+
 void CPitDrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 {
 	switch (pEvent->event)
@@ -519,9 +527,9 @@ void CPitDrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 		//vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
 		vecSpitDir = (m_hEnemy->BodyTarget(pev->origin) - vecSpitOffset).Normalize();
 
-		vecSpitDir.x += RANDOM_FLOAT(-0.0, 0.02);
-		vecSpitDir.y += RANDOM_FLOAT(-0.02, 0.02);
-		vecSpitDir.z += RANDOM_FLOAT(-0.02, 0);
+		vecSpitDir.x += RANDOM_FLOAT(-0.01, 0.01);
+		vecSpitDir.y += RANDOM_FLOAT(-0.01, 0.01);
+		vecSpitDir.z += RANDOM_FLOAT(-0.01, 0);
 
 		// do stuff for this event.
 		RangeAttackSound();
@@ -917,6 +925,25 @@ Schedule_t slPDroneChaseEnemy[] =
 	},
 };
 
+Task_t tlPDroneHurtHop[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_SOUND_WAKE, (float)0 },
+	{ TASK_PDRONE_HOPTURN, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },// in case squid didn't turn all the way in the air.
+};
+
+Schedule_t slPDroneHurtHop[] =
+{
+	{
+		tlPDroneHurtHop,
+		ARRAYSIZE( tlPDroneHurtHop ),
+		0,
+		0,
+		"SquidHurtHop"
+	}
+};
+
 
 // PitDrone walks to something tasty and eats it.
 Task_t tlPDroneEat[] =
@@ -960,7 +987,6 @@ Task_t tlPDroneSniffAndEat[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_EAT, (float)10 },// this is in case the PitDrone can't get to the food
-	{ TASK_PLAY_SEQUENCE, (float)ACT_DETECT_SCENT },
 	{ TASK_STORE_LASTPOSITION, (float)0 },
 	{ TASK_GET_PATH_TO_BESTSCENT, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
@@ -970,7 +996,7 @@ Task_t tlPDroneSniffAndEat[] =
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
 	{ TASK_EAT, (float)50 },
 	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
-	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_CLEAR_LASTPOSITION, (float)0 },
 };
@@ -989,40 +1015,6 @@ Schedule_t slPDroneSniffAndEat[] =
 		bits_SOUND_MEAT |
 		bits_SOUND_CARCASS,
 		"PDroneSniffAndEat"
-	}
-};
-
-// PitDrone does this to stinky things. 
-Task_t tlPDroneWallow[] =
-{
-	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_EAT, (float)10 },// this is in case the PitDrone can't get to the stinkiness
-	{ TASK_STORE_LASTPOSITION, (float)0 },
-	{ TASK_GET_PATH_TO_BESTSCENT, (float)0 },
-	{ TASK_RUN_PATH, (float)0 },
-	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
-	{ TASK_PLAY_SEQUENCE, (float)ACT_INSPECT_FLOOR },
-	{ TASK_EAT, (float)50 },// keeps PitDrone from eating or sniffing anything else for a while.
-	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
-	{ TASK_RUN_PATH, (float)0 },
-	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
-	{ TASK_CLEAR_LASTPOSITION, (float)0 },
-};
-
-Schedule_t slPDroneWallow[] =
-{
-	{
-		tlPDroneWallow,
-		ARRAYSIZE(tlPDroneWallow),
-		bits_COND_LIGHT_DAMAGE |
-		bits_COND_HEAVY_DAMAGE |
-		bits_COND_NEW_ENEMY,
-
-		// even though HEAR_SOUND/SMELL FOOD doesn't break this schedule, we need this mask
-		// here or the monster won't detect these sounds at ALL while running this schedule.
-		bits_SOUND_GARBAGE,
-
-		"PDroneWallow"
 	}
 };
 
@@ -1054,9 +1046,9 @@ DEFINE_CUSTOM_SCHEDULES(CPitDrone)
 {
 	slPDroneRangeAttack1,
 	slPDroneChaseEnemy,
+	slPDroneHurtHop,
 	slPDroneEat,
 	slPDroneSniffAndEat,
-	slPDroneWallow,
 	slPDroneHideReload
 };
 
@@ -1071,7 +1063,11 @@ Schedule_t *CPitDrone::GetSchedule(void)
 	{
 	case MONSTERSTATE_ALERT:
 	{
-
+		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+		{
+			return GetScheduleOfType( SCHED_PDRONE_HURTHOP );
+		}
+		
 		if (HasConditions(bits_COND_SMELL_FOOD))
 		{
 			CSound		*pSound;
@@ -1086,16 +1082,6 @@ Schedule_t *CPitDrone::GetSchedule(void)
 
 			// food is right out in the open. Just go get it.
 			return GetScheduleOfType(SCHED_PDRONE_EAT);
-		}
-
-		if (HasConditions(bits_COND_SMELL))
-		{
-			// there's something stinky. 
-			CSound		*pSound;
-
-			pSound = PBestScent();
-			if (pSound)
-				return GetScheduleOfType(SCHED_PDRONE_WALLOW);
 		}
 
 		break;
@@ -1172,14 +1158,14 @@ Schedule_t* CPitDrone::GetScheduleOfType(int Type)
 	case SCHED_RANGE_ATTACK1:
 		return &slPDroneRangeAttack1[0];
 		break;
+	case SCHED_PDRONE_HURTHOP:
+		return &slPDroneHurtHop[0];
+		break;
 	case SCHED_PDRONE_EAT:
 		return &slPDroneEat[0];
 		break;
 	case SCHED_PDRONE_SNIFF_AND_EAT:
 		return &slPDroneSniffAndEat[0];
-		break;
-	case SCHED_PDRONE_WALLOW:
-		return &slPDroneWallow[0];
 		break;
 	case SCHED_CHASE_ENEMY:
 		return &slPDroneChaseEnemy[0];
@@ -1220,6 +1206,12 @@ void CPitDrone::StartTask(Task_t *pTask)
 		CBaseMonster::StartTask(pTask);
 		break;
 	}
+	case TASK_PDRONE_HOPTURN:
+	{
+		SetActivity( ACT_HOP );
+		MakeIdealYaw( m_vecEnemyLKP );
+		break;
+	}
 	case TASK_GET_PATH_TO_ENEMY:
 	{
 		if (BuildRoute(m_hEnemy->pev->origin, bits_MF_TO_ENEMY, m_hEnemy))
@@ -1246,8 +1238,24 @@ void CPitDrone::StartTask(Task_t *pTask)
 //=========================================================
 void CPitDrone::RunTask(Task_t *pTask)
 {
+	switch( pTask->iTask )
 	{
-		CBaseMonster::RunTask(pTask);
+	case TASK_PDRONE_HOPTURN:
+		{
+			MakeIdealYaw( m_vecEnemyLKP );
+			ChangeYaw( pev->yaw_speed );
+
+			if( m_fSequenceFinished )
+			{
+				m_iTaskStatus = TASKSTATUS_COMPLETE;
+			}
+			break;
+		}
+	default:
+		{
+			CBaseMonster::RunTask( pTask );
+			break;
+		}
 	}
 }
 
