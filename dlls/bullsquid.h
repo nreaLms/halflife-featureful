@@ -43,48 +43,4 @@ protected:
 	void SpawnHelper(const char* modelName, const char* className);
 };
 
-//=========================================================
-// CBullsquid
-//=========================================================
-class CBullsquid : public CBaseMonster
-{
-public:
-	virtual void Spawn(void);
-	virtual void Precache(void);
-	void SetYawSpeed(void);
-	int  ISoundMask(void);
-	virtual int  DefaultClassify(void);
-	virtual void HandleAnimEvent(MonsterEvent_t *pEvent);
-	virtual void IdleSound(void);
-	virtual void PainSound(void);
-	virtual void DeathSound(void);
-	virtual void AlertSound(void);
-	virtual void AttackSound(void);
-	virtual void StartTask(Task_t *pTask);
-	void RunTask(Task_t *pTask);
-	virtual BOOL CheckMeleeAttack1(float flDot, float flDist);
-	virtual BOOL CheckMeleeAttack2(float flDot, float flDist);
-	virtual BOOL CheckRangeAttack1(float flDot, float flDist);
-	virtual void RunAI(void);
-	BOOL FValidateHintType(short sHint);
-	Schedule_t *GetSchedule(void);
-	Schedule_t *GetScheduleOfType(int Type);
-	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	virtual int IRelationship(CBaseEntity *pTarget);
-	virtual int IgnoreConditions(void);
-	MONSTERSTATE GetIdealState(void);
-
-	int	Save(CSave &save);
-	int Restore(CRestore &restore);
-
-	CUSTOM_SCHEDULES
-	static TYPEDESCRIPTION m_SaveData[];
-
-	BOOL m_fCanThreatDisplay;// this is so the squid only does the "I see a headcrab!" dance one time. 
-
-	float m_flLastHurtTime;// we keep track of this, because if something hurts a squid, it will forget about its love of headcrabs for a while.
-	float m_flNextSpitTime;// last time the bullsquid used the spit attack.
-};
-
-
 #endif // BULLSQUID_H
