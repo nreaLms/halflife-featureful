@@ -198,8 +198,6 @@ class CPitDrone : public CBaseMonster
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int IRelationship(CBaseEntity *pTarget);
 	int IgnoreConditions(void);
-	void StopTalking(void);
-	BOOL ShouldSpeak(void);
 	Schedule_t* GetSchedule(void);
 	Schedule_t* GetScheduleOfType(int Type);
 	void StartTask(Task_t *pTask);
@@ -208,15 +206,9 @@ class CPitDrone : public CBaseMonster
 	void CheckAmmo();
 	void GibMonster();
 	CUSTOM_SCHEDULES
-	MONSTERSTATE GetIdealState(void);
 
-	BOOL m_fCanThreatDisplay;// this is so the squid only does the "I see a headcrab!" dance one time.
 	float	m_flNextSpitTime;// last time the PitDrone used the spit attack.
-	float	m_flLastHurtTime;
-	float	m_flNextSpeakTime;
-	float	m_flNextWordTime;
 	float	m_flNextFlinch;
-	int		m_iLastWord;
 	int horns;
 
 	static const char *pAttackSounds[];
@@ -236,12 +228,8 @@ LINK_ENTITY_TO_CLASS(monster_pitdrone, CPitDrone)
 
 TYPEDESCRIPTION	CPitDrone::m_SaveData[] =
 {
-	DEFINE_FIELD(CPitDrone, horns, FIELD_FLOAT),
-	DEFINE_FIELD(CPitDrone, m_fCanThreatDisplay, FIELD_BOOLEAN),
+	DEFINE_FIELD(CPitDrone, horns, FIELD_INTEGER),
 	DEFINE_FIELD(CPitDrone, m_flNextSpitTime, FIELD_TIME),
-	DEFINE_FIELD(CPitDrone, m_flNextSpeakTime, FIELD_TIME),
-	DEFINE_FIELD(CPitDrone, m_flNextWordTime, FIELD_TIME),
-	DEFINE_FIELD(CPitDrone, m_iLastWord, FIELD_INTEGER),
 };
 
 IMPLEMENT_SAVERESTORE(CPitDrone, CBaseMonster)
@@ -265,13 +253,8 @@ int CPitDrone::IgnoreConditions(void)
 {
 	int iIgnore = CBaseMonster::IgnoreConditions();
 
-	if ((m_Activity == ACT_MELEE_ATTACK1) || (m_Activity == ACT_MELEE_ATTACK1))
+	if ((m_Activity == ACT_MELEE_ATTACK1) || (m_Activity == ACT_MELEE_ATTACK2))
 	{
-#if 0
-		if (pev->health < 20)
-			iIgnore |= (bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE);
-		else
-#endif			
 			if (m_flNextFlinch >= gpGlobals->time)
 				iIgnore |= (bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE);
 	}
@@ -352,9 +335,9 @@ int CPitDrone::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float
 	float flDist;
 	Vector vecApex;
 
-	// if the gonome is running, has an enemy, was hurt by the enemy, hasn't been hurt in the last 3 seconds, and isn't too close to the enemy,
+	// if the pitdrone is running, has an enemy, was hurt by the enemy, and isn't too close to the enemy,
 	// it will swerve. (whew).
-	if (m_hEnemy != NULL && IsMoving() && pevAttacker == m_hEnemy->pev && gpGlobals->time - m_flLastHurtTime > 3)
+	if (m_hEnemy != NULL && IsMoving() && pevAttacker == m_hEnemy->pev)
 	{
 		flDist = (pev->origin - m_hEnemy->pev->origin).Length2D();
 
@@ -591,7 +574,7 @@ void CPitDrone::BodyChange(float horns)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS2);
 	//		pev->body = PITDRONE_HORNS2;
 
-	if (horns == 6)
+	if (horns >= 6)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS1);
 	//		pev->body = PITDRONE_HORNS1;
 
@@ -615,7 +598,6 @@ void CPitDrone::Spawn()
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
-	m_fCanThreatDisplay = TRUE;
 	m_flNextSpitTime = gpGlobals->time;
 
 	BodyChange(horns);
@@ -797,41 +779,6 @@ void CPitDrone::RangeAttackSound(void)
 	}
 }
 
-//=========================================================
-// StopTalking - won't speak again for 10-20 seconds.
-//=========================================================
-void CPitDrone::StopTalking(void)
-{
-	m_flNextWordTime = m_flNextSpeakTime = gpGlobals->time + 10 + RANDOM_LONG(0, 10);
-}
-
-//=========================================================
-// ShouldSpeak - Should this PDrone be talking?
-//=========================================================
-BOOL CPitDrone::ShouldSpeak(void)
-{
-	if (m_flNextSpeakTime > gpGlobals->time)
-	{
-		// my time to talk is still in the future.
-		return FALSE;
-	}
-
-	if (pev->spawnflags & SF_MONSTER_GAG)
-	{
-		if (m_MonsterState != MONSTERSTATE_COMBAT)
-		{
-			// if gagged, don't talk outside of combat.
-			// if not going to talk because of this, put the talk time 
-			// into the future a bit, so we don't talk immediately after 
-			// going into combat
-			m_flNextSpeakTime = gpGlobals->time + 3;
-			return FALSE;
-		}
-	}
-
-	return TRUE;
-}
-
 void CPitDrone::RunAI(void)
 {
 	// first, do base class stuff
@@ -940,7 +887,7 @@ Schedule_t slPDroneHurtHop[] =
 		ARRAYSIZE( tlPDroneHurtHop ),
 		0,
 		0,
-		"SquidHurtHop"
+		"PDroneHurtHop"
 	}
 };
 
@@ -1097,10 +1044,7 @@ Schedule_t *CPitDrone::GetSchedule(void)
 
 		if (HasConditions(bits_COND_NEW_ENEMY))
 		{
-			if (m_fCanThreatDisplay && IRelationship(m_hEnemy) == R_HT)
-			{
-				return GetScheduleOfType(SCHED_WAKE_ANGRY);
-			}
+			return GetScheduleOfType(SCHED_WAKE_ANGRY);
 		}
 
 		if (HasConditions(bits_COND_SMELL_FOOD))
@@ -1257,21 +1201,4 @@ void CPitDrone::RunTask(Task_t *pTask)
 			break;
 		}
 	}
-}
-
-
-//=========================================================
-// GetIdealState - Overridden for PDrone to deal with
-// the feature that makes it lose interest in headcrabs for 
-// a while if something injures it. 
-//=========================================================
-MONSTERSTATE CPitDrone::GetIdealState(void)
-{
-	int	iConditions;
-
-	iConditions = IScheduleFlags();
-
-	m_IdealMonsterState = CBaseMonster::GetIdealState();
-
-	return m_IdealMonsterState;
 }
