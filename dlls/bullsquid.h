@@ -19,6 +19,7 @@
 #ifndef BULLSQUID_H
 #define BULLSQUID_H
 
+#include "monsters.h"
 
 //=========================================================
 // Bullsquid's spit projectile
@@ -76,7 +77,7 @@ public:
 	int	Save(CSave &save);
 	int Restore(CRestore &restore);
 
-	CUSTOM_SCHEDULES;
+	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
 
 	BOOL m_fCanThreatDisplay;// this is so the squid only does the "I see a headcrab!" dance one time. 

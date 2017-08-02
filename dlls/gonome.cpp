@@ -38,6 +38,11 @@
 
 #define		GONOME_MELEE_ATTACK_RADIUS		70
 
+enum 
+{
+	TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE = LAST_COMMON_TASK + 1
+};
+
 //=========================================================
 // Monster's Anim Events Go Here
 //=========================================================
@@ -138,6 +143,8 @@ public:
 	BOOL CheckMeleeAttack2(float flDot, float flDist);
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	void RunAI(void);
+	Schedule_t *GetSchedule();
+	Schedule_t *GetScheduleOfType( int Type );
 
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int IRelationship(CBaseEntity *pTarget);
@@ -189,7 +196,7 @@ void CGonome::SetActivity( Activity NewActivity )
 	if (NewActivity != ACT_MELEE_ATTACK1) {
 		CBaseMonster::SetActivity(NewActivity);
 	} else {
-		ASSERT( activity != 0 );
+		ASSERT( NewActivity != 0 );
 		void *pmodel = GET_MODEL_PTR( ENT( pev ) );
 		int iSequence = GonomeLookupActivity( pmodel, NewActivity );
 	
@@ -620,9 +627,94 @@ void CGonome::RunAI(void)
 			pev->framerate = 1.25;
 		}
 	}
-
 }
 
+//=========================================================
+// GetSchedule 
+//=========================================================
+Schedule_t *CGonome::GetSchedule( void )
+{
+	switch( m_MonsterState )
+	{
+	case MONSTERSTATE_ALERT:
+		{
+			break;
+		}
+	case MONSTERSTATE_COMBAT:
+		{
+			// dead enemy
+			if( HasConditions( bits_COND_ENEMY_DEAD ) )
+			{
+				// call base class, all code to handle dead enemies is centralized there.
+				return CBaseMonster::GetSchedule();
+			}
+
+			if( HasConditions( bits_COND_NEW_ENEMY ) )
+			{
+				return GetScheduleOfType( SCHED_WAKE_ANGRY );
+			}
+
+			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+			{
+				return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+			}
+
+			if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
+			{
+				return GetScheduleOfType( SCHED_MELEE_ATTACK1 );
+			}
+
+			if( HasConditions( bits_COND_CAN_MELEE_ATTACK2 ) )
+			{
+				return GetScheduleOfType( SCHED_MELEE_ATTACK2 );
+			}
+
+			return GetScheduleOfType( SCHED_CHASE_ENEMY );
+			break;
+		}
+	default:
+			break;
+	}
+
+	return CBaseMonster::GetSchedule();
+}
+
+Task_t tlGonomeVictoryDance[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_WAIT, (float)0.1 },
+	{ TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE,	(float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
+	{ TASK_WAIT, (float)0 }
+};
+
+Schedule_t slGonomeVictoryDance[] =
+{
+	{
+		tlGonomeVictoryDance,
+		ARRAYSIZE( tlGonomeVictoryDance ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE,
+		0,
+		"GonomeVictoryDance"
+	},
+};
+
+Schedule_t* CGonome::GetScheduleOfType(int Type)
+{
+	switch ( Type ) {
+	case SCHED_VICTORY_DANCE:
+		return &slGonomeVictoryDance[0];
+		break;
+	default:
+		break;
+	}
+	return CBullsquid::GetScheduleOfType(Type);
+}
 
 //=========================================================
 // Start task - selects the correct activity and performs
@@ -654,7 +746,21 @@ void CGonome::StartTask(Task_t *pTask)
 			CBaseMonster::StartTask(pTask);
 		}
 		break;
-	
+
+	case TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE:
+		{
+			UTIL_MakeVectors( pev->angles );
+			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 50, bits_MF_TO_LOCATION, NULL ) )
+			{
+				TaskComplete();
+			}
+			else
+			{
+				ALERT( at_aiconsole, "GonomeGetPathToEnemyCorpse failed!!\n" );
+				TaskFail();
+			}
+		}
+		break;
 	default:
 		CBullsquid::StartTask(pTask);
 		break;
