@@ -149,9 +149,11 @@ public:
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int IRelationship(CBaseEntity *pTarget);
 	int IgnoreConditions(void);
+	MONSTERSTATE GetIdealState( void );
 	
 	void SetActivity( Activity NewActivity );
 	
+	CUSTOM_SCHEDULES
 protected:
 	int GonomeLookupActivity( void *pmodel, int activity );
 	bool gonnaAttack1;
@@ -244,6 +246,11 @@ int	CGonome::DefaultClassify(void)
 int CGonome::IgnoreConditions(void)
 {
 	return CBaseMonster::IgnoreConditions();
+}
+
+MONSTERSTATE CGonome::GetIdealState()
+{
+	return CBaseMonster::GetIdealState();
 }
 
 //=========================================================
@@ -703,6 +710,13 @@ Schedule_t slGonomeVictoryDance[] =
 		"GonomeVictoryDance"
 	},
 };
+
+DEFINE_CUSTOM_SCHEDULES( CGonome )
+{
+	slGonomeVictoryDance,
+};
+
+IMPLEMENT_CUSTOM_SCHEDULES( CGonome, CBullsquid )
 
 Schedule_t* CGonome::GetScheduleOfType(int Type)
 {
