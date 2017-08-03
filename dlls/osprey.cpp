@@ -147,7 +147,7 @@ void COsprey::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/osprey.mdl" );
+	SetMyModel( "models/osprey.mdl" );
 	UTIL_SetSize( pev, Vector( -400, -400, -100 ), Vector( 400, 400, 32 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -155,7 +155,7 @@ void COsprey::Spawn( void )
 	pev->takedamage = DAMAGE_YES;
 	m_flRightHealth = 200;
 	m_flLeftHealth = 200;
-	pev->health = 400;
+	SetMyHealth( 400 );
 
 	m_flFieldOfView = 0; // 180 degrees
 
@@ -182,7 +182,7 @@ void COsprey::Precache( void )
 {
 	UTIL_PrecacheOther( "monster_human_grunt" );
 
-	PRECACHE_MODEL( "models/osprey.mdl" );
+	PrecacheMyModel( "models/osprey.mdl" );
 	PRECACHE_MODEL( "models/HVR.mdl" );
 
 	PRECACHE_SOUND( "apache/ap_rotor4.wav" );

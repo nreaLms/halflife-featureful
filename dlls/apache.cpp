@@ -122,13 +122,13 @@ void CApache::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/apache.mdl" );
+	SetMyModel( "models/apache.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, -64 ), Vector( 32, 32, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
 	pev->flags |= FL_MONSTER;
 	pev->takedamage = DAMAGE_AIM;
-	pev->health = gSkillData.apacheHealth;
+	SetMyHealth( gSkillData.apacheHealth );
 
 	m_flFieldOfView = -0.707; // 270 degrees
 
@@ -154,7 +154,7 @@ void CApache::Spawn( void )
 
 void CApache::Precache( void )
 {
-	PRECACHE_MODEL( "models/apache.mdl" );
+	PrecacheMyModel( "models/apache.mdl" );
 
 	PRECACHE_SOUND( "apache/ap_rotor1.wav" );
 	PRECACHE_SOUND( "apache/ap_rotor2.wav" );
