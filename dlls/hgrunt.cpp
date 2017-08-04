@@ -184,6 +184,12 @@ public:
 	int m_iSentence;
 
 	static const char *pGruntSentences[];
+	
+protected:
+	void SpawnHelper(const char* modelName, int health);
+	void PrecacheHelper(const char* modelName);
+	void PlayFirstBurstSounds();
+	BOOL CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist );
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt, CHGrunt )
@@ -278,7 +284,7 @@ void CHGrunt::GibMonster( void )
 	Vector vecGunPos;
 	Vector vecGunAngles;
 
-	if( GetBodygroup( 2 ) != 2 )
+	if( GetBodygroup( GUN_GROUP ) != GUN_NONE )
 	{
 		// throw a gun if the grunt has one
 		GetAttachment( 0, vecGunPos, vecGunAngles );
@@ -474,6 +480,11 @@ BOOL CHGrunt::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 BOOL CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 {
+	return CheckRangeAttack2Impl(gSkillData.hgruntGrenadeSpeed, flDot, flDist);
+}
+
+BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist )
+{
 	if( !FBitSet( pev->weapons, ( HGRUNT_HANDGRENADE | HGRUNT_GRENADELAUNCHER ) ) )
 	{
 		return FALSE;
@@ -527,7 +538,7 @@ BOOL CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 		vecTarget = m_vecEnemyLKP + ( m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin );
 		// estimate position
 		if( HasConditions( bits_COND_SEE_ENEMY ) )
-			vecTarget = vecTarget + ( ( vecTarget - pev->origin).Length() / gSkillData.hgruntGrenadeSpeed ) * m_hEnemy->pev->velocity;
+			vecTarget = vecTarget + ( ( vecTarget - pev->origin).Length() / grenadeSpeed ) * m_hEnemy->pev->velocity;
 	}
 
 	// are any of my squad members near the intended grenade impact area?
@@ -572,7 +583,7 @@ BOOL CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 	}
 	else
 	{
-		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
+		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, grenadeSpeed, 0.5 );
 
 		if( vecToss != g_vecZero )
 		{
@@ -840,6 +851,19 @@ void CHGrunt::Shotgun( void )
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
+void CHGrunt::PlayFirstBurstSounds()
+{
+	// the first round of the three round burst plays the sound and puts a sound in the world sound list.
+	if( RANDOM_LONG( 0, 1 ) )
+	{
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun1.wav", 1, ATTN_NORM );
+	}
+	else
+	{
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun2.wav", 1, ATTN_NORM );
+	}
+}
+
 void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	Vector vecShootDir;
@@ -911,16 +935,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			if( FBitSet( pev->weapons, HGRUNT_9MMAR ) )
 			{
 				Shoot();
-
-				// the first round of the three round burst plays the sound and puts a sound in the world sound list.
-				if( RANDOM_LONG( 0, 1 ) )
-				{
-					EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun1.wav", 1, ATTN_NORM );
-				}
-				else
-				{
-					EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun2.wav", 1, ATTN_NORM );
-				}
+				PlayFirstBurstSounds();
 			}
 			else
 			{
@@ -968,18 +983,18 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CHGrunt::Spawn()
+void CHGrunt::SpawnHelper(const char* modelName, int health)
 {
 	Precache();
 
-	SetMyModel( "models/hgrunt.mdl" );
+	SetMyModel( modelName );
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects		= 0;
-	SetMyHealth( gSkillData.hgruntHealth );
+	SetMyHealth( health );
 	m_flFieldOfView		= 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck	= gpGlobals->time + 1;
@@ -992,7 +1007,11 @@ void CHGrunt::Spawn()
 	m_fFirstEncounter	= TRUE;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector( 0, 0, 55 );
+}
 
+void CHGrunt::Spawn()
+{
+	SpawnHelper("models/hgrunt.mdl", gSkillData.hgruntHealth);
 	if( pev->weapons == 0 )
 	{
 		// initialize to original values
@@ -1035,13 +1054,23 @@ void CHGrunt::Spawn()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
-void CHGrunt::Precache()
+void CHGrunt::PrecacheHelper(const char *modelName)
 {
-	PrecacheMyModel( "models/hgrunt.mdl" );
-
+	PrecacheMyModel( modelName );
 	PRECACHE_SOUND( "hgrunt/gr_mgun1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_mgun2.wav" );
-	
+
+	PRECACHE_SOUND( "hgrunt/gr_reload1.wav" );
+
+	PRECACHE_SOUND( "weapons/glauncher.wav" );
+
+	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
+}
+
+void CHGrunt::Precache()
+{
+	PrecacheHelper("models/hgrunt.mdl");
+
 	PRECACHE_SOUND( "hgrunt/gr_die1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_die2.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_die3.wav" );
@@ -1052,13 +1081,7 @@ void CHGrunt::Precache()
 	PRECACHE_SOUND( "hgrunt/gr_pain4.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_pain5.wav" );
 
-	PRECACHE_SOUND( "hgrunt/gr_reload1.wav" );
-
-	PRECACHE_SOUND( "weapons/glauncher.wav" );
-
 	PRECACHE_SOUND( "weapons/sbarrel1.wav" );
-
-	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
 
 	// get voice pitch
 	if( RANDOM_LONG( 0, 1 ) )
@@ -2351,6 +2374,8 @@ public:
 	void Precache( void );
 	void EXPORT RepelUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int m_iSpriteTexture;	// Don't save, precache
+protected:
+	void RepelUseHelper( const char* monsterName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 };
 
 LINK_ENTITY_TO_CLASS( monster_grunt_repel, CHGruntRepel )
@@ -2371,6 +2396,11 @@ void CHGruntRepel::Precache( void )
 
 void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	RepelUseHelper( "monster_human_grunt", pActivator, pCaller, useType, value );
+}
+
+void CHGruntRepel::RepelUseHelper( const char* monsterName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
 	TraceResult tr;
 	UTIL_TraceLine( pev->origin, pev->origin + Vector( 0, 0, -4096.0 ), dont_ignore_monsters, ENT( pev ), &tr );
 	/*
@@ -2378,7 +2408,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		return NULL;
 	*/
 
-	CBaseEntity *pEntity = Create( "monster_human_grunt", pev->origin, pev->angles );
+	CBaseEntity *pEntity = Create( (char*)monsterName, pev->origin, pev->angles );
 	CBaseMonster *pGrunt = pEntity->MyMonsterPointer();
 	pGrunt->pev->movetype = MOVETYPE_FLY;
 	pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
@@ -2455,4 +2485,350 @@ void CDeadHGrunt :: Spawn( void )
 	}
 
 	MonsterInitDead();
+}
+
+//=========================================================
+// monster-specific DEFINE's
+//=========================================================
+#define	MASSN_CLIP_SIZE				36 // how many bullets in a clip? - NOTE: 3 round burst sound, so keep as 3 * x!
+
+// Weapon flags
+#define MASSN_9MMAR					(1 << 0)
+#define MASSN_HANDGRENADE			(1 << 1)
+#define MASSN_GRENADELAUNCHER		(1 << 2)
+#define MASSN_SNIPERRIFLE			(1 << 3)
+
+// Body groups.
+#define MASSN_HEAD_GROUP					1
+#define MASSN_GUN_GROUP					2
+
+// Head values
+#define HEAD_WHITE					0
+#define HEAD_BLACK					1
+#define HEAD_GOGGLES				2
+
+// Gun values
+#define MASSN_GUN_MP5				0
+#define MASSN_GUN_SNIPERRIFLE				1
+#define MASSN_GUN_NONE					2
+
+//=========================================================
+// Monster's Anim Events Go Here
+//=========================================================
+#define		MASSN_AE_KICK			( 3 )
+#define		MASSN_AE_BURST1			( 4 )
+#define		MASSN_AE_CAUGHT_ENEMY	( 10 ) // grunt established sight with an enemy (player only) that had previously eluded the squad.
+#define		MASSN_AE_DROP_GUN		( 11 ) // grunt (probably dead) is dropping his mp5.
+
+//=========================================================
+// Purpose:
+//=========================================================
+class CMassn : public CHGrunt
+{
+public:
+	void KeyValue(KeyValueData* pkvd);
+	void HandleAnimEvent(MonsterEvent_t *pEvent);
+	BOOL CheckRangeAttack2(float flDot, float flDist);
+	void Sniperrifle(void);
+	void GibMonster();
+
+	BOOL FOkToSpeak(void);
+
+	void Spawn( void );
+	void Precache( void );
+
+	void DeathSound(void);
+	void PainSound(void);
+	void IdleSound(void);
+
+	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+
+protected:
+	int head;
+};
+
+LINK_ENTITY_TO_CLASS(monster_male_assassin, CMassn)
+
+//=========================================================
+// Purpose:
+//=========================================================
+BOOL CMassn::FOkToSpeak(void)
+{
+	return FALSE;
+}
+
+//=========================================================
+// Purpose:
+//=========================================================
+void CMassn::IdleSound(void)
+{
+}
+
+//=========================================================
+// Shoot
+//=========================================================
+void CMassn::Sniperrifle(void)
+{
+	if (m_hEnemy == NULL)
+	{
+		return;
+	}
+
+	Vector vecShootOrigin = GetGunPosition();
+	Vector vecShootDir = ShootAtEnemy(vecShootOrigin);
+
+	UTIL_MakeVectors(pev->angles);
+
+	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
+	EjectBrass(vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 2048, BULLET_PLAYER_357, 0);
+
+	pev->effects |= EF_MUZZLEFLASH;
+
+	m_cAmmoLoaded--;// take away a bullet!
+
+	Vector angDir = UTIL_VecToAngles(vecShootDir);
+	SetBlending(0, angDir.x);
+}
+
+//=========================================================
+// GibMonster - make gun fly through the air.
+//=========================================================
+void CMassn::GibMonster( void )
+{
+	Vector vecGunPos;
+	Vector vecGunAngles;
+
+	if( GetBodygroup( MASSN_GUN_GROUP ) != MASSN_GUN_NONE )
+	{
+		// throw a gun if the grunt has one
+		GetAttachment( 0, vecGunPos, vecGunAngles );
+
+		CBaseEntity *pGun;
+
+		if( FBitSet( pev->weapons, MASSN_SNIPERRIFLE ) )
+		{
+			pGun = DropItem( "ammo_357", vecGunPos, vecGunAngles );
+		}
+		else
+		{
+			pGun = DropItem( "weapon_9mmAR", vecGunPos, vecGunAngles );
+		}
+
+		if( pGun )
+		{
+			pGun->pev->velocity = Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) );
+			pGun->pev->avelocity = Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 );
+		}
+
+		if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) )
+		{
+			pGun = DropItem( "ammo_ARgrenades", vecGunPos, vecGunAngles );
+			if ( pGun )
+			{
+				pGun->pev->velocity = Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) );
+				pGun->pev->avelocity = Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 );
+			}
+		}
+	}
+
+	CBaseMonster::GibMonster();
+}
+
+void CMassn::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "head" ) )
+	{
+		head = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CSquadMonster::KeyValue( pkvd );
+}
+
+//=========================================================
+// HandleAnimEvent - catches the monster-specific messages
+// that occur when tagged animation frames are played.
+//=========================================================
+void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
+{
+	switch (pEvent->event)
+	{
+	case MASSN_AE_DROP_GUN:
+	{
+		Vector	vecGunPos;
+		Vector	vecGunAngles;
+
+		GetAttachment(0, vecGunPos, vecGunAngles);
+
+		// switch to body group with no gun.
+		SetBodygroup(MASSN_GUN_GROUP, MASSN_GUN_NONE);
+
+		// now spawn a gun.
+		if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
+		{
+			DropItem("ammo_357", vecGunPos, vecGunAngles); // set to sniper rifle when weapon is implemented
+		}
+		else
+		{
+			DropItem("weapon_9mmAR", vecGunPos, vecGunAngles);
+		}
+
+		if (FBitSet(pev->weapons, MASSN_GRENADELAUNCHER))
+		{
+			DropItem("ammo_ARgrenades", BodyTarget(pev->origin), vecGunAngles);
+		}
+
+	}
+	break;
+
+
+	case MASSN_AE_BURST1:
+	{
+		if (FBitSet(pev->weapons, MASSN_9MMAR))
+		{
+			Shoot();
+			PlayFirstBurstSounds();
+		}
+		else if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
+		{
+			Sniperrifle();
+			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sniper_fire.wav", 1, ATTN_NORM);
+		}
+
+		CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
+	}
+	break;
+
+	case MASSN_AE_KICK:
+	{
+		CBaseEntity *pHurt = Kick();
+
+		if (pHurt)
+		{
+			// SOUND HERE!
+			UTIL_MakeVectors(pev->angles);
+			pHurt->pev->punchangle.x = 15;
+			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50;
+			pHurt->TakeDamage(pev, pev, gSkillData.massnDmgKick, DMG_CLUB);
+		}
+	}
+	break;
+
+	case MASSN_AE_CAUGHT_ENEMY:
+		break;
+
+	default:
+		CHGrunt::HandleAnimEvent(pEvent);
+		break;
+	}
+}
+
+//=========================================================
+// CheckRangeAttack2 - this checks the Grunt's grenade
+// attack. 
+//=========================================================
+BOOL CMassn::CheckRangeAttack2( float flDot, float flDist )
+{
+	return CheckRangeAttack2Impl(gSkillData.massnGrenadeSpeed, flDot, flDist);
+}
+
+//=========================================================
+// Spawn
+//=========================================================
+void CMassn::Spawn()
+{
+	SpawnHelper("models/massn.mdl", gSkillData.massnHealth);
+
+	if (pev->weapons == 0)
+	{
+		// initialize to original values
+		pev->weapons = MASSN_9MMAR | MASSN_HANDGRENADE;
+	}
+
+	if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
+	{
+		SetBodygroup(MASSN_GUN_GROUP, MASSN_GUN_SNIPERRIFLE);
+		m_cClipSize = 1;
+	}
+	else
+	{
+		m_cClipSize = MASSN_CLIP_SIZE;
+	}
+	m_cAmmoLoaded = m_cClipSize;
+	
+	if (head == -1) {
+		head = RANDOM_LONG(0,1); // never random night googles
+	}
+	SetBodygroup(MASSN_HEAD_GROUP, head);
+
+	MonsterInit();
+}
+
+//=========================================================
+// Precache - precaches all resources this monster needs
+//=========================================================
+void CMassn::Precache()
+{
+	PrecacheHelper("models/massn.mdl");
+
+	PRECACHE_SOUND("weapons/sniper_fire.wav");
+
+	m_iBrassShell = PRECACHE_MODEL("models/shell.mdl");// brass shell
+}
+
+//=========================================================
+// PainSound
+//=========================================================
+void CMassn::PainSound(void)
+{
+}
+
+//=========================================================
+// DeathSound 
+//=========================================================
+void CMassn::DeathSound(void)
+{
+}
+
+//=========================================================
+// TraceAttack - reimplemented in male assassin because they never have helmets
+//=========================================================
+void CMassn::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+{
+	CSquadMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+}
+
+//=========================================================
+// CAssassinRepel - when triggered, spawns a monster_male_assassin
+// repelling down a line.
+//=========================================================
+
+class CAssassinRepel : public CHGruntRepel
+{
+public:
+	void Spawn();
+	void Precache(void);
+	void EXPORT RepelUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+};
+
+LINK_ENTITY_TO_CLASS(monster_assassin_repel, CAssassinRepel)
+
+void CAssassinRepel::Spawn()
+{
+	Precache();
+	pev->solid = SOLID_NOT;
+
+	SetUse( &CAssassinRepel::RepelUse );
+}
+
+void CAssassinRepel::Precache(void)
+{
+	UTIL_PrecacheOther("monster_male_assassin");
+	m_iSpriteTexture = PRECACHE_MODEL("sprites/rope.spr");
+}
+
+void CAssassinRepel::RepelUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	RepelUseHelper( "monster_male_assassin", pActivator, pCaller, useType, value );
 }

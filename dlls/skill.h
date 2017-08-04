@@ -72,6 +72,10 @@ struct skilldata_t
 	float controllerSpeedBall;
 	float controllerDmgBall;
 
+	float massnHealth;
+	float massnDmgKick;
+	float massnGrenadeSpeed;
+
 	float nihilanthHealth;
 	float nihilanthZap;
 

@@ -87,6 +87,10 @@ class CApache : public CBaseMonster
 
 	int m_iDoSmokePuff;
 	CBeam *m_pBeam;
+	
+protected:
+	void SpawnImpl(const char* modelName);
+	void PrecacheImpl(const char* modelName, const char* gibModel);
 };
 
 LINK_ENTITY_TO_CLASS( monster_apache, CApache )
@@ -117,12 +121,17 @@ IMPLEMENT_SAVERESTORE( CApache, CBaseMonster )
 
 void CApache::Spawn( void )
 {
+	SpawnImpl("models/apache.mdl");
+}
+
+void CApache::SpawnImpl(const char *modelName)
+{
 	Precache();
 	// motor
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SetMyModel( "models/apache.mdl" );
+	SetMyModel( modelName );
 	UTIL_SetSize( pev, Vector( -32, -32, -64 ), Vector( 32, 32, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -154,7 +163,12 @@ void CApache::Spawn( void )
 
 void CApache::Precache( void )
 {
-	PrecacheMyModel( "models/apache.mdl" );
+	PrecacheImpl("models/apache.mdl", "models/metalplategibs_green.mdl");
+}
+
+void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
+{
+	PrecacheMyModel( modelName );
 
 	PRECACHE_SOUND( "apache/ap_rotor1.wav" );
 	PRECACHE_SOUND( "apache/ap_rotor2.wav" );
@@ -170,7 +184,7 @@ void CApache::Precache( void )
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 
 	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
-	m_iBodyGibs = PRECACHE_MODEL( "models/metalplategibs_green.mdl" );
+	m_iBodyGibs = PRECACHE_MODEL( (char*)gibModel );
 
 	UTIL_PrecacheOther( "hvr_rocket" );
 }
@@ -1025,4 +1039,24 @@ void CApacheHVR::AccelerateThink( void )
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
+
+class CBlkopApache : public CApache
+{
+public:
+	void Spawn();
+	void Precache();
+};
+
+LINK_ENTITY_TO_CLASS( monster_blkop_apache, CBlkopApache )
+
+void CBlkopApache::Spawn( void )
+{
+	SpawnImpl("models/blkop_apache.mdl");
+}
+
+void CBlkopApache::Precache( void )
+{
+	PrecacheImpl("models/blkop_apache.mdl", "models/metalplategibs_dark.mdl");
+}
+
 #endif

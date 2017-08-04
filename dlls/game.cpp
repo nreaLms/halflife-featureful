@@ -216,6 +216,19 @@ cvar_t	sk_controller_dmgball1 = {"sk_controller_dmgball1","0"};
 cvar_t	sk_controller_dmgball2 = {"sk_controller_dmgball2","0"};
 cvar_t	sk_controller_dmgball3 = {"sk_controller_dmgball3","0"};
 
+// Massassin
+cvar_t	sk_massassin_health1 = {"sk_massassin_health1","0"};
+cvar_t	sk_massassin_health2 = {"sk_massassin_health2","0"};
+cvar_t	sk_massassin_health3 = {"sk_massassin_health3","0"};
+
+cvar_t	sk_massassin_kick1 = {"sk_massassin_kick1","0"};
+cvar_t	sk_massassin_kick2 = {"sk_massassin_kick2","0"};
+cvar_t	sk_massassin_kick3 = {"sk_massassin_kick3","0"};
+
+cvar_t	sk_massassin_gspeed1 = {"sk_massassin_gspeed1","0"};
+cvar_t	sk_massassin_gspeed2 = {"sk_massassin_gspeed2","0"};
+cvar_t	sk_massassin_gspeed3 = {"sk_massassin_gspeed3","0"};
+
 // Nihilanth
 cvar_t	sk_nihilanth_health1 = {"sk_nihilanth_health1","0"};
 cvar_t	sk_nihilanth_health2 = {"sk_nihilanth_health2","0"};
@@ -635,6 +648,19 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_controller_dmgball1 );
 	CVAR_REGISTER( &sk_controller_dmgball2 );
 	CVAR_REGISTER( &sk_controller_dmgball3 );
+
+	// Massassin
+	CVAR_REGISTER( &sk_massassin_health1 );// {"sk_massassin_health1","0"};
+	CVAR_REGISTER( &sk_massassin_health2 );// {"sk_massassin_health2","0"};
+	CVAR_REGISTER( &sk_massassin_health3 );// {"sk_massassin_health3","0"};
+
+	CVAR_REGISTER( &sk_massassin_kick1 );// {"sk_massassin_kick1","0"};
+	CVAR_REGISTER( &sk_massassin_kick2 );// {"sk_massassin_kick2","0"};
+	CVAR_REGISTER( &sk_massassin_kick3 );// {"sk_massassin_kick3","0"};
+
+	CVAR_REGISTER( &sk_massassin_gspeed1 );
+	CVAR_REGISTER( &sk_massassin_gspeed2 );
+	CVAR_REGISTER( &sk_massassin_gspeed3 );
 
 	// Nihilanth
 	CVAR_REGISTER( &sk_nihilanth_health1 );// {"sk_nihilanth_health1","0"};

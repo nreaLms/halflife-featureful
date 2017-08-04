@@ -196,6 +196,11 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.controllerSpeedBall = GetSkillCvar( "sk_controller_speedball" );
 	gSkillData.controllerDmgBall = GetSkillCvar( "sk_controller_dmgball" );
 
+	// Massn
+	gSkillData.massnHealth = GetSkillCvar( "sk_massassin_health" );
+	gSkillData.massnDmgKick = GetSkillCvar( "sk_massassin_kick" );
+	gSkillData.massnGrenadeSpeed = GetSkillCvar( "sk_massassin_gspeed" );
+
 	// Nihilanth
 	gSkillData.nihilanthHealth = GetSkillCvar( "sk_nihilanth_health" );
 	gSkillData.nihilanthZap = GetSkillCvar( "sk_nihilanth_zap" );
