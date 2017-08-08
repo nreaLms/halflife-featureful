@@ -260,6 +260,28 @@ cvar_t	sk_snark_dmg_pop1 = {"sk_snark_dmg_pop1","0"};
 cvar_t	sk_snark_dmg_pop2 = {"sk_snark_dmg_pop2","0"};
 cvar_t	sk_snark_dmg_pop3 = {"sk_snark_dmg_pop3","0"};
 
+// Voltigore
+cvar_t	sk_voltigore_health1 = { "sk_voltigore_health1", "0" };
+cvar_t	sk_voltigore_health2 = { "sk_voltigore_health2", "0" };
+cvar_t	sk_voltigore_health3 = { "sk_voltigore_health3", "0" };
+
+cvar_t	sk_voltigore_dmg_punch1 = { "sk_voltigore_dmg_punch1", "0" };
+cvar_t	sk_voltigore_dmg_punch2 = { "sk_voltigore_dmg_punch2", "0" };
+cvar_t	sk_voltigore_dmg_punch3 = { "sk_voltigore_dmg_punch3", "0" };
+
+cvar_t	sk_voltigore_dmg_beam1 = { "sk_voltigore_dmg_beam1", "0" };
+cvar_t	sk_voltigore_dmg_beam2 = { "sk_voltigore_dmg_beam2", "0" };
+cvar_t	sk_voltigore_dmg_beam3 = { "sk_voltigore_dmg_beam3", "0" };
+
+// Baby Voltigore
+cvar_t	sk_babyvoltigore_health1 = { "sk_babyvoltigore_health1", "0" };
+cvar_t	sk_babyvoltigore_health2 = { "sk_babyvoltigore_health2", "0" };
+cvar_t	sk_babyvoltigore_health3 = { "sk_babyvoltigore_health3", "0" };
+
+cvar_t	sk_babyvoltigore_dmg_punch1 = { "sk_babyvoltigore_dmg_punch1", "0" };
+cvar_t	sk_babyvoltigore_dmg_punch2 = { "sk_babyvoltigore_dmg_punch2", "0" };
+cvar_t	sk_babyvoltigore_dmg_punch3 = { "sk_babyvoltigore_dmg_punch3", "0" };
+
 // Zombie
 cvar_t	sk_zombie_health1 = {"sk_zombie_health1","0"};
 cvar_t	sk_zombie_health2 = {"sk_zombie_health2","0"};
@@ -696,6 +718,28 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_snark_dmg_pop1 );// {"sk_snark_dmg_pop1","0"};
 	CVAR_REGISTER( &sk_snark_dmg_pop2 );// {"sk_snark_dmg_pop2","0"};
 	CVAR_REGISTER( &sk_snark_dmg_pop3 );// {"sk_snark_dmg_pop3","0"};
+
+	// Voltigore
+	CVAR_REGISTER( &sk_voltigore_health1 );// { "sk_voltigore_health1", "0" };
+	CVAR_REGISTER( &sk_voltigore_health2 );// { "sk_voltigore_health2", "0" };
+	CVAR_REGISTER( &sk_voltigore_health3 );// { "sk_voltigore_health3", "0" };
+
+	CVAR_REGISTER( &sk_voltigore_dmg_punch1 );// { "sk_voltigore_dmg_punch1", "0" };
+	CVAR_REGISTER( &sk_voltigore_dmg_punch2 );// { "sk_voltigore_dmg_punch2", "0" };
+	CVAR_REGISTER( &sk_voltigore_dmg_punch3 );// { "sk_voltigore_dmg_punch3", "0" };
+
+	CVAR_REGISTER( &sk_voltigore_dmg_beam1 );// { "sk_voltigore_dmg_beam1", "0" };
+	CVAR_REGISTER( &sk_voltigore_dmg_beam2 );// { "sk_voltigore_dmg_beam2", "0" };
+	CVAR_REGISTER( &sk_voltigore_dmg_beam3 );// { "sk_voltigore_dmg_beam3", "0" };
+
+	// Baby Voltigore
+	CVAR_REGISTER( &sk_babyvoltigore_health1 );// { "sk_babyvoltigore_health1", "0" };
+	CVAR_REGISTER( &sk_babyvoltigore_health2 );// { "sk_babyvoltigore_health2", "0" };
+	CVAR_REGISTER( &sk_babyvoltigore_health3 );// { "sk_babyvoltigore_health3", "0" };
+
+	CVAR_REGISTER( &sk_babyvoltigore_dmg_punch1 );// { "sk_babyvoltigore_dmg_punch1", "0" };
+	CVAR_REGISTER( &sk_babyvoltigore_dmg_punch2 );// { "sk_babyvoltigore_dmg_punch2", "0" };
+	CVAR_REGISTER( &sk_babyvoltigore_dmg_punch3 );// { "sk_babyvoltigore_dmg_punch3", "0" };
 
 	// Zombie
 	CVAR_REGISTER( &sk_zombie_health1 );// {"sk_zombie_health1","0"};

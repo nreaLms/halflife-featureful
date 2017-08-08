@@ -86,6 +86,13 @@ struct skilldata_t
 	float snarkDmgBite;
 	float snarkDmgPop;
 
+	float voltigoreHealth;
+	float voltigoreDmgPunch;
+	float voltigoreDmgBeam;
+
+	float babyVoltigoreHealth;
+	float babyVoltigoreDmgPunch;
+
 	float zombieHealth;
 	float zombieDmgOneSlash;
 	float zombieDmgBothSlash;

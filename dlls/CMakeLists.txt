@@ -123,6 +123,7 @@ set (SVDLL_SOURCES
 	tripmine.cpp
 	turret.cpp
 	util.cpp
+	voltigore.cpp
 	weapons.cpp
 	world.cpp
 	xen.cpp
