@@ -31,7 +31,7 @@
 #define		GONOME_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve
 
 #define		GONOME_TOLERANCE_MELEE1_RANGE	85
-#define		GONOME_TOLERANCE_MELEE2_RANGE	85
+#define		GONOME_TOLERANCE_MELEE2_RANGE	65
 
 #define		GONOME_TOLERANCE_MELEE1_DOT		0.7
 #define		GONOME_TOLERANCE_MELEE2_DOT		0.7
@@ -137,7 +137,6 @@ public:
 	void PainSound(void);
 	void DeathSound(void);
 	void AlertSound(void);
-	void AttackSound(void);
 	void StartTask(Task_t *pTask);
 
 	BOOL CheckMeleeAttack1(float flDot, float flDist);
@@ -156,6 +155,10 @@ public:
 	
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
+
+	static const char* pPainSounds[];
+	static const char* pIdleSounds[];
+	static const char* pDeathSounds[];
 protected:
 	int GonomeLookupActivity( void *pmodel, int activity );
 	float m_flLastHurtTime;// we keep track of this, because if something hurts a squid, it will forget about its love of headcrabs for a while.
@@ -164,6 +167,25 @@ protected:
 };
 
 LINK_ENTITY_TO_CLASS(monster_gonome, CGonome)
+
+const char* CGonome::pPainSounds[] = {
+	"gonome/gonome_pain1.wav",
+	"gonome/gonome_pain2.wav",
+	"gonome/gonome_pain3.wav",
+	"gonome/gonome_pain4.wav"
+};
+
+const char* CGonome::pIdleSounds[] = {
+	"gonome/gonome_idle1.wav",
+	"gonome/gonome_idle2.wav",
+	"gonome/gonome_idle3.wav"
+};
+
+const char* CGonome::pDeathSounds[] = {
+	"gonome/gonome_death2.wav",
+	"gonome/gonome_death3.wav",
+	"gonome/gonome_death4.wav"
+};
 
 TYPEDESCRIPTION	CGonome::m_SaveData[] =
 {
@@ -326,9 +348,13 @@ BOOL CGonome::CheckRangeAttack1(float flDot, float flDist)
 //=========================================================
 BOOL CGonome::CheckMeleeAttack1(float flDot, float flDist)
 {
-	if (flDist <= GONOME_TOLERANCE_MELEE1_RANGE && 
-		flDot  >= GONOME_TOLERANCE_MELEE1_DOT)
+	if (flDist <= GONOME_TOLERANCE_MELEE2_RANGE && flDot >= GONOME_TOLERANCE_MELEE2_DOT && RANDOM_LONG(0,1) == 0) {
+		gonnaAttack1 = false;
+		return TRUE;
+	}
+	else if (flDist <= GONOME_TOLERANCE_MELEE1_RANGE && flDot  >= GONOME_TOLERANCE_MELEE1_DOT)
 	{
+		gonnaAttack1 = true;
 		return TRUE;
 	}
 	return FALSE;
@@ -349,18 +375,7 @@ BOOL CGonome::CheckMeleeAttack2(float flDot, float flDist)
 #define GONOME_ATTN_IDLE	(float)1.5
 void CGonome::IdleSound(void)
 {
-	switch (RANDOM_LONG(0, 2))
-	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_idle1.wav", 1, GONOME_ATTN_IDLE);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_idle2.wav", 1, GONOME_ATTN_IDLE);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_idle3.wav", 1, GONOME_ATTN_IDLE);
-		break;
-	}
+	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, GONOME_ATTN_IDLE);
 }
 
 //=========================================================
@@ -368,23 +383,8 @@ void CGonome::IdleSound(void)
 //=========================================================
 void CGonome::PainSound(void)
 {
-	int iPitch = RANDOM_LONG(85, 120);
-
-	switch (RANDOM_LONG(0, 3))
-	{
-	case 0:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "gonome/gonome_pain1.wav", 1, ATTN_NORM, 0, iPitch);
-		break;
-	case 1:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "gonome/gonome_pain2.wav", 1, ATTN_NORM, 0, iPitch);
-		break;
-	case 2:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "gonome/gonome_pain3.wav", 1, ATTN_NORM, 0, iPitch);
-		break;
-	case 3:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "gonome/gonome_pain4.wav", 1, ATTN_NORM, 0, iPitch);
-		break;
-	}
+	const int iPitch = RANDOM_LONG(85, 120);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
 }
 
 //=========================================================
@@ -393,19 +393,7 @@ void CGonome::PainSound(void)
 void CGonome::AlertSound(void)
 {
 	int iPitch = RANDOM_LONG(140, 160);
-
-	switch (RANDOM_LONG(0, 2))
-	{
-	case 0:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "gonome/gonome_idle1.wav", 1, ATTN_NORM, 0, iPitch);
-		break;
-	case 1:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "gonome/gonome_idle2.wav", 1, ATTN_NORM, 0, iPitch);
-		break;
-	case 2:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "gonome/gonome_idle3.wav", 1, ATTN_NORM, 0, iPitch);
-		break;
-	}
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
 }
 
 //=========================================================
@@ -447,34 +435,25 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 {
 	switch (pEvent->event)
 	{
-
+	case 1011:
+		// This may play sound twice
+		//EMIT_SOUND(ENT(pev), CHAN_VOICE, pEvent->options, 1, ATTN_NORM);
+		break;
 	case GONOME_AE_THROW:
 	{
 		Vector	vecSpitOffset;
 		Vector	vecSpitDir;
 
 		UTIL_MakeVectors(pev->angles);
-
-		// !!!HACKHACK - the spot at which the spit originates (in front of the mouth) was measured in 3ds and hardcoded here.
-		// we should be able to read the position of bones at runtime for this info.
-
-
 		Vector vecArmPos, vecArmAng;
 		GetAttachment(0, vecArmPos, vecArmAng);
 
-		//vecSpitOffset = (gpGlobals->v_right * 8 + gpGlobals->v_forward * 37 + gpGlobals->v_up * 23);
-		//vecSpitOffset = (pev->origin + vecSpitOffset);
 		vecSpitOffset = vecArmPos;
 		vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
 
 		vecSpitDir.x += RANDOM_FLOAT(-0.05, 0.05);
 		vecSpitDir.y += RANDOM_FLOAT(-0.05, 0.05);
 		vecSpitDir.z += RANDOM_FLOAT(-0.05, 0);
-
-#if 0
-		// do stuff for this event.
-		AttackSound();
-#endif
 
 		CGonomeGuts::Shoot(pev, vecSpitOffset, vecSpitDir * 1200); // Default: 900
 	}
@@ -512,8 +491,6 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case GONOME_AE_BITE4:
 		{
 			int iPitch;
-
-			// SOUND HERE!
 			CBaseEntity *pHurt = CheckTraceHullAttack(GONOME_TOLERANCE_MELEE2_RANGE, gSkillData.gonomeDmgOneBite, DMG_SLASH);
 
 			if (pHurt)
@@ -579,24 +556,14 @@ void CGonome::Precache()
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
-	PRECACHE_SOUND("gonome/gonome_death2.wav");
-	PRECACHE_SOUND("gonome/gonome_death3.wav");
-	PRECACHE_SOUND("gonome/gonome_death4.wav");
-
 	PRECACHE_SOUND("gonome/gonome_eat.wav");
-	PRECACHE_SOUND("gonome/gonome_idle1.wav");
-	PRECACHE_SOUND("gonome/gonome_idle2.wav");
-	PRECACHE_SOUND("gonome/gonome_idle3.wav");
-
 	PRECACHE_SOUND("gonome/gonome_jumpattack.wav");
-
 	PRECACHE_SOUND("gonome/gonome_melee1.wav");
 	PRECACHE_SOUND("gonome/gonome_melee2.wav");
 
-	PRECACHE_SOUND("gonome/gonome_pain1.wav");
-	PRECACHE_SOUND("gonome/gonome_pain2.wav");
-	PRECACHE_SOUND("gonome/gonome_pain3.wav");
-	PRECACHE_SOUND("gonome/gonome_pain4.wav");
+	PRECACHE_SOUND_ARRAY(pIdleSounds);
+	PRECACHE_SOUND_ARRAY(pPainSounds);
+	PRECACHE_SOUND_ARRAY(pDeathSounds);
 
 	PRECACHE_SOUND("gonome/gonome_run.wav");
 
@@ -614,25 +581,7 @@ void CGonome::Precache()
 //=========================================================
 void CGonome::DeathSound(void)
 {
-	switch (RANDOM_LONG(0, 2))
-	{
-	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_death2.wav", 1, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_death3.wav", 1, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_death4.wav", 1, ATTN_NORM);
-		break;
-	}
-}
-
-//=========================================================
-// AttackSound
-//=========================================================
-void CGonome::AttackSound(void)
-{
+	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM);
 }
 
 //========================================================
@@ -760,7 +709,8 @@ Task_t tlGonomeVictoryDance[] =
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_WAIT, (float)0 }
+	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE }
 };
 
 Schedule_t slGonomeVictoryDance[] =
@@ -807,9 +757,7 @@ Schedule_t* CGonome::GetScheduleOfType(int Type)
 //=========================================================
 // Start task - selects the correct activity and performs
 // any necessary calculations to start the next task on the
-// schedule.  OVERRIDDEN for bullsquid because it needs to
-// know explicitly when the last attempt to chase the enemy
-// failed, since that impacts its attack choices.
+// schedule.
 //=========================================================
 void CGonome::StartTask(Task_t *pTask)
 {
@@ -819,7 +767,6 @@ void CGonome::StartTask(Task_t *pTask)
 	{
 	case TASK_MELEE_ATTACK1:
 		{
-			gonnaAttack1 = RANDOM_LONG(0,1) ? true : false;
 			if (gonnaAttack1)
 				EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_melee1.wav", 1, ATTN_NORM);
 			else
@@ -831,7 +778,7 @@ void CGonome::StartTask(Task_t *pTask)
 	case TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE:
 		{
 			UTIL_MakeVectors( pev->angles );
-			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 50, bits_MF_TO_LOCATION, NULL ) )
+			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 40, bits_MF_TO_LOCATION, NULL ) )
 			{
 				TaskComplete();
 			}
