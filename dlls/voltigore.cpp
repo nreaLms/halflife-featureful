@@ -97,7 +97,7 @@ TYPEDESCRIPTION	CVoltigoreEnergyBall::m_SaveData[] =
 {
 	DEFINE_ARRAY(CVoltigoreEnergyBall, m_pBeam, FIELD_CLASSPTR, VOLTIGORE_MAX_BEAMS),
 	DEFINE_FIELD(CVoltigoreEnergyBall, m_iBeams, FIELD_INTEGER),
-	DEFINE_FIELD(CVoltigoreEnergyBall, m_timeToDie, FIELD_FLOAT),
+	DEFINE_FIELD(CVoltigoreEnergyBall, m_timeToDie, FIELD_TIME),
 };
 
 IMPLEMENT_SAVERESTORE(CVoltigoreEnergyBall, CBaseEntity)
