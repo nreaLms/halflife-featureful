@@ -832,3 +832,26 @@ void CISlave::ClearBeams()
 
 	STOP_SOUND( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav" );
 }
+
+
+class CDeadISlave : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
+
+	const char* getPos(int pos) const;
+};
+
+const char* CDeadISlave::getPos(int pos) const
+{
+	return "dead_on_stomach";
+}
+
+LINK_ENTITY_TO_CLASS( monster_alien_slave_dead, CDeadISlave )
+
+void CDeadISlave :: Spawn( )
+{
+	SpawnHelper("models/islave.mdl", "Dead alien slave with bad pose", BLOOD_COLOR_YELLOW);
+	MonsterInitDead();
+}
