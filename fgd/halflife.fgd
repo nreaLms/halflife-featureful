@@ -1929,6 +1929,17 @@
 		32 : "SquadLeader" : 0
 	]
 ]
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/houndeye_dead.mdl") = monster_houndeye_dead : "Dead Houndeye" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "dead"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "Just plain dead"
+	]
+]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hassassin.mdl") = monster_human_assassin : "Human Assassin" []
 @PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_human_grunt : "Human Grunt (camo)" 
 [

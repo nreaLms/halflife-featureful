@@ -1293,3 +1293,25 @@ Schedule_t *CHoundeye::GetSchedule( void )
 
 	return CSquadMonster::GetSchedule();
 }
+
+class CDeadHoundeye : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MONSTER; }
+
+	const char* getPos(int pos) const;
+};
+
+const char* CDeadHoundeye::getPos(int pos) const
+{
+	return "dead";
+}
+
+LINK_ENTITY_TO_CLASS( monster_houndeye_dead, CDeadHoundeye )
+
+void CDeadHoundeye :: Spawn( )
+{
+	SpawnHelper("models/houndeye_dead.mdl", "Dead houndeye with bad pose", BLOOD_COLOR_YELLOW);
+	MonsterInitDead();
+}
