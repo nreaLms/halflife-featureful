@@ -74,6 +74,10 @@ struct skilldata_t
 	float controllerSpeedBall;
 	float controllerDmgBall;
 
+	float massnHealth;
+	float massnDmgKick;
+	float massnGrenadeSpeed;
+
 	float nihilanthHealth;
 	float nihilanthZap;
 	
@@ -141,6 +145,7 @@ struct skilldata_t
 	float monDmgMP5;
 	float monDmg12MM;
 	float monDmgHornet;
+	float monDmg762;
 
 	// health/suit charge
 	float suitchargerCapacity;

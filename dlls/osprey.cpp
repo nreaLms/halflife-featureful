@@ -101,6 +101,11 @@ public:
 
 	int m_iDoLeftSmokePuff;
 	int m_iDoRightSmokePuff;
+	
+protected:
+	void SpawnImpl(const char* modelName);
+	void PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs);
+	virtual const char* TrooperName();
 };
 
 LINK_ENTITY_TO_CLASS( monster_osprey, COsprey )
@@ -140,14 +145,19 @@ TYPEDESCRIPTION	COsprey::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( COsprey, CBaseMonster )
 
-void COsprey::Spawn( void )
+void COsprey::Spawn()
+{
+	SpawnImpl("models/osprey.mdl");
+}
+
+void COsprey::SpawnImpl(const char* modelName)
 {
 	Precache();
 	// motor
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/osprey.mdl" );
+	SetMyModel( modelName );
 	UTIL_SetSize( pev, Vector( -400, -400, -100 ), Vector( 400, 400, 32 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -155,7 +165,7 @@ void COsprey::Spawn( void )
 	pev->takedamage = DAMAGE_YES;
 	m_flRightHealth = 200;
 	m_flLeftHealth = 200;
-	pev->health = 400;
+	SetMyHealth( 400 );
 
 	m_flFieldOfView = 0; // 180 degrees
 
@@ -180,9 +190,14 @@ void COsprey::Spawn( void )
 
 void COsprey::Precache( void )
 {
-	UTIL_PrecacheOther( "monster_human_grunt" );
+	PrecacheImpl("models/osprey.mdl", "models/osprey_tailgibs.mdl", "models/osprey_bodygibs.mdl", "models/osprey_enginegibs.mdl");
+}
 
-	PRECACHE_MODEL( "models/osprey.mdl" );
+void COsprey::PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs)
+{
+	UTIL_PrecacheOther( TrooperName() );
+
+	PrecacheMyModel( modelName );
 	PRECACHE_MODEL( "models/HVR.mdl" );
 
 	PRECACHE_SOUND( "apache/ap_rotor4.wav" );
@@ -191,9 +206,9 @@ void COsprey::Precache( void )
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
 
 	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
-	m_iTailGibs = PRECACHE_MODEL( "models/osprey_tailgibs.mdl" );
-	m_iBodyGibs = PRECACHE_MODEL( "models/osprey_bodygibs.mdl" );
-	m_iEngineGibs = PRECACHE_MODEL( "models/osprey_enginegibs.mdl" );
+	m_iTailGibs = PRECACHE_MODEL( (char*)tailGibs );
+	m_iBodyGibs = PRECACHE_MODEL( (char*)bodyGibs );
+	m_iEngineGibs = PRECACHE_MODEL( (char*)engineGibs );
 }
 
 void COsprey::CommandUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -206,7 +221,7 @@ void COsprey::FindAllThink( void )
 	CBaseEntity *pEntity = NULL;
 
 	m_iUnits = 0;
-	while( m_iUnits < MAX_CARRY && ( pEntity = UTIL_FindEntityByClassname( pEntity, "monster_human_grunt" ) ) != NULL )
+	while( m_iUnits < MAX_CARRY && ( pEntity = UTIL_FindEntityByClassname( pEntity, TrooperName() ) ) != NULL )
 	{
 		if( pEntity->IsAlive() )
 		{
@@ -273,6 +288,11 @@ BOOL COsprey::HasDead()
 	return FALSE;
 }
 
+const char* COsprey::TrooperName()
+{
+	return "monster_human_grunt";
+}
+
 CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 {
 	CBaseEntity *pEntity;
@@ -291,7 +311,7 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 			{
 				m_hGrunt[i]->SUB_StartFadeOut();
 			}
-			pEntity = Create( "monster_human_grunt", vecSrc, pev->angles );
+			pEntity = Create( (char*)TrooperName(), vecSrc, pev->angles );
 			pGrunt = pEntity->MyMonsterPointer();
 			pGrunt->pev->movetype = MOVETYPE_FLY;
 			pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
@@ -773,4 +793,30 @@ void COsprey::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	{
 		UTIL_Sparks( ptr->vecEndPos );
 	}
+}
+
+class CBlkopOsprey : public COsprey
+{
+public:
+	void Spawn();
+	void Precache();
+protected:
+	const char* TrooperName();
+};
+
+LINK_ENTITY_TO_CLASS( monster_blkop_osprey, CBlkopOsprey )
+
+void CBlkopOsprey::Spawn()
+{
+	SpawnImpl("models/blkop_osprey.mdl");
+}
+
+void CBlkopOsprey::Precache()
+{
+	PrecacheImpl("models/blkop_osprey.mdl", "models/blkop_tailgibs.mdl", "models/blkop_bodygibs.mdl", "models/blkop_enginegibs.mdl");
+}
+
+const char* CBlkopOsprey::TrooperName()
+{
+	return "monster_male_assassin";
 }

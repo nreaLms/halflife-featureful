@@ -199,6 +199,11 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.controllerSpeedBall = GetSkillCvar( "sk_controller_speedball" );
 	gSkillData.controllerDmgBall = GetSkillCvar( "sk_controller_dmgball" );
 
+	// Massn
+	gSkillData.massnHealth = GetSkillCvar( "sk_massassin_health" );
+	gSkillData.massnDmgKick = GetSkillCvar( "sk_massassin_kick" );
+	gSkillData.massnGrenadeSpeed = GetSkillCvar( "sk_massassin_gspeed" );
+
 	// Nihilanth
 	gSkillData.nihilanthHealth = GetSkillCvar( "sk_nihilanth_health" );
 	gSkillData.nihilanthZap = GetSkillCvar( "sk_nihilanth_zap" );
@@ -306,6 +311,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.monDmg12MM = GetSkillCvar( "sk_12mm_bullet" );
 	gSkillData.monDmgMP5 = GetSkillCvar ("sk_9mmAR_bullet" );
 	gSkillData.monDmg9MM = GetSkillCvar( "sk_9mm_bullet" );
+	gSkillData.monDmg762 = GetSkillCvar( "sk_762_bullet" );
 
 	// MONSTER HORNET
 	gSkillData.monDmgHornet = GetSkillCvar( "sk_hornet_dmg" );
