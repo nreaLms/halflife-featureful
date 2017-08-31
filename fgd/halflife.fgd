@@ -1815,6 +1815,64 @@
 // monsters
 //
 
+@PointClass base(Monster, Sequence) size(-40 -40 0, 40 40 64) studio("models/baby_voltigore.mdl") = monster_alien_babyvoltigore : "Baby Voltigore" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle1"
+		1 : "idle2"
+		2 : "walk"
+		3 : "run"
+		4 : "turnl"
+		5 : "turnr"
+		6 : "mattack2"
+		7 : "mattack3"
+		8 : "victoryeat"
+		9 : "victorysniff"
+		10 : "distanceattack"
+		11 : "flinch"
+		12 : "flinch"
+		13 : "dieforward"
+		14 : "diesimple"
+		15 : "diesideways"
+	]
+	netname(string) : "Squad Name"
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+	]
+]
+
+
+
+@PointClass base(Monster, Sequence) size(-80 -80 0, 80 80 90) studio("models/voltigore.mdl") = monster_alien_voltigore : "Voltigore" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle1"
+		1 : "idle2"
+		2 : "walk"
+		3 : "run"
+		4 : "turnl"
+		5 : "turnr"
+		6 : "mattack2"
+		7 : "mattack3"
+		8 : "victoryeat"
+		9 : "victorysniff"
+		10 : "distanceattack"
+		11 : "flinch"
+		12 : "flinch"
+		13 : "dieforward"
+		14 : "diesimple"
+		15 : "diesideways"
+	]
+	netname(string) : "Squad Name"
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/controller.mdl") = monster_alien_controller : "Controller"  []
 @PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/agrunt.mdl") = monster_alien_grunt : "Alien Grunt" 
 [
