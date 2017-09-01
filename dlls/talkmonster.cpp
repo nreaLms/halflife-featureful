@@ -48,7 +48,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_hTalkTarget, FIELD_EHANDLE ),
 };
 
-IMPLEMENT_SAVERESTORE( CTalkMonster, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
 
 // array of friend names
 char *CTalkMonster::m_szFriends[TLK_CFRIENDS] =
@@ -345,7 +345,7 @@ DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 	slTlkIdleEyecontact,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CTalkMonster, CBaseMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CTalkMonster, CSquadMonster )
 
 void CTalkMonster::SetActivity( Activity newActivity )
 {
@@ -355,7 +355,7 @@ void CTalkMonster::SetActivity( Activity newActivity )
 	if( newActivity == ACT_SIGNAL3 && ( LookupActivity( ACT_SIGNAL3 ) == ACTIVITY_NOT_AVAILABLE ) )
 		newActivity = ACT_IDLE;
 
-	CBaseMonster::SetActivity( newActivity );
+	CSquadMonster::SetActivity( newActivity );
 }
 
 void CTalkMonster::StartTask( Task_t *pTask )
@@ -457,10 +457,10 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		break;
 	case TASK_PLAY_SCRIPT:
 		m_hTalkTarget = NULL;
-		CBaseMonster::StartTask( pTask );
+		CSquadMonster::StartTask( pTask );
 		break;
 	default:
-		CBaseMonster::StartTask( pTask );
+		CSquadMonster::StartTask( pTask );
 	}
 }
 
@@ -577,7 +577,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 			}
 		}
 
-		CBaseMonster::RunTask( pTask );
+		CSquadMonster::RunTask( pTask );
 		if( TaskIsComplete() )
 			IdleHeadTurn( pev->origin );
 		break;
@@ -590,7 +590,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 		{
 			SetBoneController( 0, 0 );
 		}
-		CBaseMonster::RunTask( pTask );
+		CSquadMonster::RunTask( pTask );
 	}
 }
 
@@ -608,7 +608,7 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 	// Don't finish that sentence
 	StopTalking();
 	SetUse( NULL );
-	CBaseMonster::Killed( pevAttacker, iGib );
+	CSquadMonster::Killed( pevAttacker, iGib );
 }
 
 CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, BOOL bTrace )
@@ -740,7 +740,7 @@ void CTalkMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 		//ALERT( at_console, "script event speak\n" );
 		break;
 	default:
-		CBaseMonster::HandleAnimEvent( pEvent );
+		CSquadMonster::HandleAnimEvent( pEvent );
 		break;
 	}
 }
@@ -913,7 +913,7 @@ int CTalkMonster::FOkToSpeak( void )
 int CTalkMonster::CanPlaySentence( BOOL fDisregardState ) 
 { 
 	if( fDisregardState )
-		return CBaseMonster::CanPlaySentence( fDisregardState );
+		return CSquadMonster::CanPlaySentence( fDisregardState );
 	return FOkToSpeak(); 
 }
 
@@ -1172,7 +1172,7 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			}
 		}
 	}
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
@@ -1261,7 +1261,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 		break;
 	}
 
-	return CBaseMonster::GetScheduleOfType( Type );
+	return CSquadMonster::GetScheduleOfType( Type );
 }
 
 //=========================================================
@@ -1315,7 +1315,7 @@ int CTalkMonster::IRelationship( CBaseEntity *pTarget )
 	if( pTarget->IsPlayer() )
 		if( m_afMemory & bits_MEMORY_PROVOKED )
 			return R_HT;
-	return CBaseMonster::IRelationship( pTarget );
+	return CSquadMonster::IRelationship( pTarget );
 }
 
 void CTalkMonster::StopFollowing( BOOL clearSchedule )
@@ -1414,7 +1414,7 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 		pkvd->fHandled = TRUE;
 	}
 	else 
-		CBaseMonster::KeyValue( pkvd );
+		CSquadMonster::KeyValue( pkvd );
 }
 
 void CTalkMonster::Precache( void )

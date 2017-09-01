@@ -16,7 +16,8 @@
 // CSquadMonster - all the extra data for monsters that
 // form squads.
 //=========================================================
-
+#ifndef SQUADMONSTER_H
+#define SQUADMONSTER_H
 #define	SF_SQUADMONSTER_LEADER	32
 
 #define bits_NO_SLOT		0
@@ -52,7 +53,7 @@
 //=========================================================
 // CSquadMonster - for any monster that forms squads.
 //=========================================================
-class CSquadMonster : public CBaseMonster 
+class CSquadMonster : public CBaseMonster
 {
 public:
 	// squad leader info
@@ -116,3 +117,4 @@ public:
 	MONSTERSTATE GetIdealState( void );
 	Schedule_t *GetScheduleOfType( int iType );
 };
+#endif

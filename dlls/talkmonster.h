@@ -18,6 +18,7 @@
 #ifndef MONSTERS_H
 #include "monsters.h"
 #endif
+#include "squadmonster.h"
 
 //=========================================================
 // Talking monster base class
@@ -94,7 +95,7 @@ enum
 	LAST_TALKMONSTER_TASK			// MUST be last
 };
 
-class CTalkMonster : public CBaseMonster
+class CTalkMonster : public CSquadMonster
 {
 public:
 	void			TalkInit( void );				
