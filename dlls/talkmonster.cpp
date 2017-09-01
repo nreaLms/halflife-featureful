@@ -624,6 +624,9 @@ CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, 
 		if( pFriend == this || !pFriend->IsAlive() )
 			// don't talk to self or dead people
 			continue;
+		// has friend classname, but not friend really
+		if ( IRelationship(pFriend) >= R_DL || IRelationship(pFriend) == R_FR )
+			continue;
 		if( bTrace )
 		{
 			vecCheck = pFriend->pev->origin;
