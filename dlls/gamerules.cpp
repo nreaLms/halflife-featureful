@@ -220,6 +220,18 @@ void CGameRules::RefreshSkillData ( void )
 	// Scientist
 	gSkillData.scientistHealth = GetSkillCvar( "sk_scientist_health" );
 
+	// Shock Roach
+	gSkillData.sroachHealth = GetSkillCvar( "sk_shockroach_health" );
+	gSkillData.sroachDmgBite = GetSkillCvar( "sk_shockroach_dmg_bite" );
+	gSkillData.sroachLifespan = GetSkillCvar( "sk_shockroach_lifespan" );
+
+	// ShockTrooper
+	gSkillData.strooperHealth = GetSkillCvar( "sk_shocktrooper_health" );
+	gSkillData.strooperDmgKick = GetSkillCvar( "sk_shocktrooper_kick" );
+	gSkillData.strooperGrenadeSpeed = GetSkillCvar( "sk_shocktrooper_gspeed" );
+	gSkillData.strooperMaxCharge = GetSkillCvar( "sk_shocktrooper_maxcharge" );
+	gSkillData.strooperRchgSpeed = GetSkillCvar( "sk_shocktrooper_rchgspeed" );
+
 	// Snark
 	gSkillData.snarkHealth = GetSkillCvar( "sk_snark_health" );
 	gSkillData.snarkDmgBite = GetSkillCvar( "sk_snark_dmg_bite" );
@@ -306,6 +318,10 @@ void CGameRules::RefreshSkillData ( void )
 
 	// Tripmine
 	gSkillData.plrDmgTripmine = GetSkillCvar( "sk_plr_tripmine" );
+
+	gSkillData.plrDmgShockroach = GetSkillCvar( "sk_plr_shockroachs" );
+	gSkillData.plrDmgShockroachM = GetSkillCvar( "sk_plr_shockroachm" );
+	gSkillData.plrDmgSpore = GetSkillCvar( "sk_plr_spore" );
 
 	// MONSTER WEAPONS
 	gSkillData.monDmg12MM = GetSkillCvar( "sk_12mm_bullet" );

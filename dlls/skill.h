@@ -90,6 +90,16 @@ struct skilldata_t
 
 	float scientistHealth;
 
+	float sroachHealth;
+	float sroachDmgBite;
+	float sroachLifespan;
+
+	float strooperHealth;
+	float strooperDmgKick;
+	float strooperGrenadeSpeed;
+	float strooperMaxCharge;
+	float strooperRchgSpeed;
+
 	float snarkHealth;
 	float snarkDmgBite;
 	float snarkDmgPop;
@@ -139,6 +149,9 @@ struct skilldata_t
 	float plrDmgHandGrenade;
 	float plrDmgSatchel;
 	float plrDmgTripmine;
+	float plrDmgShockroach;
+	float plrDmgShockroachM;
+	float plrDmgSpore;
 	
 	// weapons shared by monsters
 	float monDmg9MM;
