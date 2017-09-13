@@ -2031,6 +2031,304 @@
 		81 : "plunger"
 	]
 ]
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_human_grunt_ally : "Human Grunt Ally (camo)" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 7 =
+	[
+		0 : "walk1"
+		1 : "run"
+		2 : "victorydance"
+		3 : "cower"
+		4 : "smflinch"
+		5 : "launchgrenade"
+		6 : "throwgrenade"
+		7 : "idle1"
+		8 : "idle2"
+		9 : "combatidle"
+		10 : "frontkick"
+		11 : "crouching_idle"
+		12 : "crouching_wait"                                                                                                                                                                                                         
+		13 : "crouching_mp5"                                                                                                                                                                                                          
+		14 : "standing_mp5"                                                                                                                                                                                                           
+		15 : "reload_mp5"                                                                                                                                                                                                             
+		16 : "crouching_shotgun"                                                                                                                                                                                                      
+		17 : "standing_shotgun"                                                                                                                                                                                                       
+		18 : "reload_shotgun"                                                                                                                                                                                                         
+		19 : "crouching_saw"                                                                                                                                                                                                          
+		20 : "standing_saw"                                                                                                                                                                                                           
+		21 : "reload_saw"                                                                                                                                                                                                             
+		22 : "advance_signal"                                                                                                                                                                                                         
+		23 : "flank_signal"                                                                                                                                                                                                           
+		24 : "retreat_signal"                                                                                                                                                                                                         
+		25 : "drop_grenade"                                                                                                                                                                                                           
+		26 : "limpingwalk"                                                                                                                                                                                                            
+		27 : "limpingrun"                                                                                                                                                                                                             
+		28 : "180L"                                                                                                                                                                                                                   
+		29 : "180R"                                                                                                                                                                                                                   
+		30 : "dieback1"                                                                                                                                                                                                               
+		31 : "dieforward"                                                                                                                                                                                                             
+		32 : "diesimple"                                                                                                                                                                                                              
+		33 : "diebackwards"
+		34 : "dieheadshot"
+		35 : "diegutshot"
+		36 : "barnacled1"
+		37 : "barnacled2"
+		38 : "barnacled3"
+		39 : "barnacled4"
+		40 : "dead_on_stomach"
+		41 : "deadstomach"
+		42 : "deadside"
+		43 : "deadsitting"
+		44 : "dead_on_back"
+		45 : "dead_headcrabed"
+		46 : "hgrunt_dead_stomach"
+		47 : "dead_canyon"
+		48 : "repel_jump"
+		49 : "repel_repel"
+		50 : "repel_shoot"
+		51 : "repel_land"
+		52 : "repel_die"
+		53 : "sitting"
+		54 : "sitting2"
+		55 : "sitting3"
+		56 : "react"
+		57 : "holding_on"
+		58 : "open_floor_grate"
+		59 : "hgrunt_on_stretcher"
+		60 : "crawling"
+		61 : "of2a2_speech_idle"
+		62 : "of2a2_death_speech"
+		63 : "of1a6_get_on"
+		64 : "cpr"
+		65 : "mic_idle1"
+		66 : "mic_idle2"
+		67 : "mic_idle3"
+		68 : "mic_idle4"
+		69 : "mic_stand"
+		70 : "interogation"
+		71 : "interogation_idle"
+		72 : "shoot_shotgun"
+	]
+	netname(string) : "Squad Name"
+	
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+	]
+
+	weapons(Choices) : "Weapons" : 3 =
+	[
+		0 : "None"
+		1 : "9mmAR"
+		3 : "9mmAR + HG"
+		5 : "9mmAR + GL"
+		8 : "Shotgun"
+		10 : "Shotgun + HG"
+		16 : "Saw"
+	]
+
+	head(Choices) : "Heads" : -1 =
+	[
+		-1 : "Default"
+		0 : "Gas Mask"
+		1 : "Beret"
+		2 : "Ops Mask"
+		3 : "Bandana White"
+		4 : "Bandana Black"
+		5 : "MP"
+		6 : "Major"
+		7 : "Beret (Black)"
+	]
+]
+
+
+@PointClass base(Targetname,Appearflags,RenderFields, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_human_grunt_ally_dead : "Dead Human Grunt Ally" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 40 =
+	[
+		40 : "dead_on_stomach"
+		41 : "deadstomach"
+		42 : "deadside"
+		43 : "deadsitting"
+		44 : "dead_on_back"
+		45 : "dead_headcrabed"
+		46 : "hgrunt_dead_stomach"
+		47 : "dead_canyon"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On stomach"
+		1 : "On side"
+		2 : "Seated"
+		3 : "Dead On Back"
+		4 : "Dead On Stomach"
+		5 : "Head Crabbed"
+	]
+
+	weapons(Choices) : "Weapons" : 1 =
+	[
+		0 : "None"
+		1 : "9mmAR"
+		8 : "Shotgun"
+		16 : "Saw"
+	]
+
+	head(Choices) : "Heads" : 0 =
+	[
+		0 : "Gas Mask"
+		1 : "Beret"
+		2 : "Ops Mask"
+		3 : "Bandana White"
+		4 : "Bandana Black"
+		5 : "MP"
+	]
+]
+
+
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_human_medic_ally : "Medic" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 6 =
+	[
+		0 : "walk1"
+		1 : "run"
+		2 : "victorydance"
+		3 : "cower"
+		4 : "smflinch"
+		5 : "throwgrenade"
+		6 : "idle1"
+		7 : "idle2"
+		8 : "combatidle"
+		9 : "frontkick"
+		10 : "crouching_idle"
+		11 : "crouching_wait"
+		12 : "crouching_mp5"
+		13 : "standing_mp5"
+		14 : "reload_mp5"
+		15 : "advance_signal"
+		16 : "flank_signal"
+		17 : "retreat_signal"
+		18 : "drop_grenade"
+		19 : "limpingwalk"
+		20 : "limpingrun"
+		21 : "180L"
+		22 : "180R"
+		23 : "pull_needle"
+		24 : "store_needle"
+		25 : "give_shot"
+		26 : "dieback1"
+		27 : "dieforward"
+		28 : "diesimple"
+		29 : "diebackwards"
+		30 : "dieheadshot"
+		31 : "diegutshot"
+		32 : "barnacled1"
+		33 : "barnacled2"
+		34 : "barnacled3"
+		35 : "barnacled4"
+		36 : "dead_on_stomach"
+		37 : "deadstomach"
+		38 : "deadside"
+		39 : "deadsitting"
+		40 : "repel_jump"
+		41 : "repel_repel"
+		42 : "repel_shoot"
+		43 : "repel_land"
+		44 : "repel_die"
+		45 : "open_floor_grate"
+		46 : "heal_crouch"
+	]
+	netname(string) : "Squad Name"
+	
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+	]
+
+	head(Choices) : "Heads" : -1 =
+	[
+	-1 : "Random"
+		0 : "White"
+		1 : "Black"
+	]
+
+	weapons(Choices) : "Weapons" : 2 =
+	[
+		0 : "None"
+		1 : "Desert Eagle"
+		2 : "9mm Handgun"
+		4 : "Hypodermic Needle"
+	]
+]
+
+
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_human_torch_ally : "Torch" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 6 =
+	[
+		0 : "walk1"
+		1 : "run"
+		2 : "victorydance"
+		3 : "cower"
+		4 : "smflinch"
+		5 : "throwgrenade"
+		6 : "idle1"
+		7 : "idle2"
+		8 : "idle3"
+		9 : "combatidle"
+		10 : "frontkick"
+		11 : "crouching_idle"
+		12 : "crouching_wait"
+		13 : "crouching_mp5"
+		14 : "standing_mp5"
+		15 : "reload_mp5"
+		16 : "advance_signal"
+		17 : "flank_signal"
+		18 : "retreat_signal"
+		19 : "drop_grenade"
+		20 : "limpingwalk"
+		21 : "limpingrun"
+		22 : "180L"
+		23 : "180R"
+		24 : "dieback1"
+		25 : "dieforward"
+		26 : "diesimple"
+		27 : "diebackwards"
+		28 : "dieheadshot"
+		29 : "diegutshot"
+		30 : "barnacled1"
+		31 : "barnacled2"
+		32 : "barnacled3"
+		33 : "barnacled4"
+		34 : "dead_on_stomach"
+		35 : "deadstomach"
+		36 : "deadside"
+		37 : "deadsitting"
+		38 : "repel_jump"
+		39 : "repel_repel"
+		40 : "repel_shoot"
+		41 : "repel_land"
+		42 : "repel_die"
+		43 : "open_floor_grate"
+		44 : "cut_floor_grate"
+		45 : "wounded"
+		46 : "get_up"
+		47 : "pull_torch_wgun"
+		48 : "store_torch"
+		49 : "pull_torch_nogun"
+		50 : "cut_door_wgun"
+		51 : "cut_door_nogun"
+	]
+	netname(string) : "Squad Name"
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+	]
+	weapons(Choices) : "Weapons" : 1 =
+	[
+		1 : "Desert Eagle"
+		2 : "Blow Torch"
+	]
+]
 @PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/icky.mdl") = monster_ichthyosaur : "Ichthyosaur" []
 @PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/leech.mdl") = monster_leech : "Leech" []
 @PointClass base(Monster, Sequence) size(-16 -16 -32, 16 16 32) studio("models/miniturret.mdl") = monster_miniturret : "Mini Auto Turret"

@@ -165,6 +165,23 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.headcrabHealth = GetSkillCvar( "sk_headcrab_health" );
 	gSkillData.headcrabDmgBite = GetSkillCvar( "sk_headcrab_dmg_bite" );
 
+	// Hgrunt
+	gSkillData.fgruntHealth = GetSkillCvar( "sk_hgrunt_ally_health" );
+	gSkillData.fgruntDmgKick = GetSkillCvar( "sk_hgrunt_ally_kick" );
+	gSkillData.fgruntShotgunPellets = GetSkillCvar( "sk_hgrunt_ally_pellets" );
+	gSkillData.fgruntGrenadeSpeed = GetSkillCvar( "sk_hgrunt_ally_gspeed" );
+
+	// Medic
+	gSkillData.medicHealth = GetSkillCvar( "sk_medic_ally_health" );
+	gSkillData.medicDmgKick = GetSkillCvar( "sk_medic_ally_kick" );
+	gSkillData.medicGrenadeSpeed = GetSkillCvar( "sk_medic_ally_gspeed" );
+	gSkillData.medicHeal = GetSkillCvar( "sk_medic_ally_gspeed" );
+
+	// Torch
+	gSkillData.torchHealth = GetSkillCvar( "sk_torch_ally_health" );
+	gSkillData.torchDmgKick = GetSkillCvar( "sk_torch_ally_kick" );
+	gSkillData.torchGrenadeSpeed = GetSkillCvar( "sk_torch_ally_gspeed" );
+
 	// Hgrunt 
 	gSkillData.hgruntHealth = GetSkillCvar( "sk_hgrunt_health" );
 	gSkillData.hgruntDmgKick = GetSkillCvar( "sk_hgrunt_kick" );

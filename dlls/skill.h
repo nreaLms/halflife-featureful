@@ -38,6 +38,20 @@ struct skilldata_t
 	float bullsquidDmgWhip;
 	float bullsquidDmgSpit;
 
+	float fgruntHealth;
+	float fgruntDmgKick;
+	float fgruntShotgunPellets;
+	float fgruntGrenadeSpeed;
+
+	float medicHealth;
+	float medicDmgKick;
+	float medicGrenadeSpeed;
+	float medicHeal;
+
+	float torchHealth;
+	float torchDmgKick;
+	float torchGrenadeSpeed;
+
 	float gargantuaHealth;
 	float gargantuaDmgSlash;
 	float gargantuaDmgFire;
