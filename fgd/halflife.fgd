@@ -2345,6 +2345,52 @@
 	initammo(string) : "Initial Ammo" : "6"
 ]
 
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper : "Shock Trooper"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 10 =
+	[
+		0 : "walk1"
+		1 : "run"
+		2 : "victorydance"
+		3 : "cower"
+		4 : "smflinch"
+		5 : "leftlegsmflinchh"
+		6 : "rightlegsmflinch"
+		7 : "rightarmflinch"
+		8 : "leftarmflinch"
+		9 : "throwgrenade"
+		10 : "idle1"
+		11 : "idle2"
+		12 : "combatidle"
+		13 : "frontkick"
+		14 : "crouching_idle"
+		15 : "crouching_wait"
+		16 : "crouching_mp5"
+		17 : "standing_mp5"
+		18 : "reload_mp5"
+		19 : "advance_signal"
+		20 : "flank_signal"
+		21 : "retreat_signal"
+		22 : "drop_grenade"
+		23 : "limpingwalk"
+		24 : "limpingrun"
+		25 : "180L"
+		26 : "180R"
+		27 : "dieback1"
+		28 : "dieforward"
+		29 : "diesimple"
+		30 : "diebackwards"
+		31 : "dieheadshot"
+		32 : "diegutshot"
+		33 : "grab_scientist"
+	]
+	netname(string) : "Squad Name"
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/bigrat.mdl") = monster_rat : "Rat (no ai)" []
 @PointClass base(Weapon,Targetx,RenderFields, Sequence) studio("models/w_satchel.mdl") = monster_satchelcharge : "Live Satchel Charge" []
 
