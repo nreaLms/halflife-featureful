@@ -2885,6 +2885,7 @@ public:
 
 	static void Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity);
 	void Touch(CBaseEntity *pOther);
+	void EXPORT FlyThink();
 
 	virtual int		Save(CSave &save);
 	virtual int		Restore(CRestore &restore);
@@ -2898,7 +2899,7 @@ public:
 	CSprite *m_pSprite;
 };
 
-LINK_ENTITY_TO_CLASS(shock_effect, CShock)
+LINK_ENTITY_TO_CLASS(shock_beam, CShock)
 
 TYPEDESCRIPTION	CShock::m_SaveData[] =
 {
@@ -2907,18 +2908,16 @@ TYPEDESCRIPTION	CShock::m_SaveData[] =
 	DEFINE_FIELD(CShock, m_pSprite, FIELD_CLASSPTR),
 };
 
-IMPLEMENT_SAVERESTORE(CShock, CBaseEntity)
+IMPLEMENT_SAVERESTORE(CShock, CBaseAnimating)
 
 void CShock::Spawn(void)
 {
 	Precache();
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
-	pev->classname = MAKE_STRING("shock_effect");
+	pev->classname = MAKE_STRING("shock_beam");
 	SET_MODEL(ENT(pev), "models/shock_effect.mdl");
 	UTIL_SetOrigin(pev, pev->origin);
-	pev->frame = 0;
-	pev->scale = 0.4;
 
 	if ( g_pGameRules->IsMultiplayer() )
 		pev->dmg = gSkillData.plrDmgShockroachM;
@@ -2927,7 +2926,8 @@ void CShock::Spawn(void)
 	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4));
 
 	CreateEffects();
-	pev->nextthink = gpGlobals->time + 0.1f;
+	SetThink( &CShock::FlyThink );
+	pev->nextthink = gpGlobals->time;
 }
 
 void CShock::Precache()
@@ -2936,6 +2936,25 @@ void CShock::Precache()
 	PRECACHE_MODEL("sprites/lgtning.spr");
 	PRECACHE_MODEL("models/shock_effect.mdl");
 	PRECACHE_SOUND("weapons/shock_impact.wav");
+}
+
+void CShock::FlyThink()
+{
+	if (pev->waterlevel == 3)
+	{
+		entvars_t *pevOwner = VARS(pev->owner);
+		const int iVolume = RANDOM_FLOAT(0.8f, 1);
+		const int iPitch = RANDOM_FLOAT(80, 110);
+		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "weapons/shock_impact.wav", iVolume, ATTN_NORM, 0, iPitch);
+		RadiusDamage(pev->origin, pev, pevOwner ? pevOwner : pev, pev->dmg * 3, 144, CLASS_NONE, DMG_SHOCK | DMG_ALWAYSGIB );
+		ClearEffects();
+		SetThink( &CBaseEntity::SUB_Remove );
+		pev->nextthink = gpGlobals->time;
+	}
+	else
+	{
+		pev->nextthink = gpGlobals->time + 0.05;
+	}
 }
 
 void CShock::Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity)
@@ -3024,7 +3043,8 @@ void CShock::Touch(CBaseEntity *pOther)
 			MESSAGE_END();
 		}
 	}
-	UTIL_Remove(this);
+	SetThink( &CBaseEntity::SUB_Remove );
+	pev->nextthink = gpGlobals->time;
 }
 
 void CShock::CreateEffects()
@@ -3815,7 +3835,7 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 		}
 
 		vecGunAngles.z += RANDOM_FLOAT( -0.05, 0 );
-		CShock::Shoot(pev, pev->angles, vecGunPos, vecGunAngles * 900);
+		CShock::Shoot(pev, pev->angles, vecGunPos, vecGunAngles * 2000);
 		m_cAmmoLoaded--;
 
 		// Play fire sound.
@@ -3914,7 +3934,7 @@ void CStrooper::Precache()
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");
 
-	UTIL_PrecacheOther("shock_effect");
+	UTIL_PrecacheOther("shock_beam");
 	UTIL_PrecacheOther("monster_spore");
 	UTIL_PrecacheOther("monster_shockroach");
 
