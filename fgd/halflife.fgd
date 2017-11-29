@@ -1684,6 +1684,14 @@
 	]
 ]
 
+@PointClass base(Targetname, Angles) size(-48 -48 0, 48 48 32 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
+[
+    unlocked_target(string) : "Unlocked target"
+    locked_target(string) : "Locked target"
+    unlockersname(string) : "Unlockers name"
+    reset_delay(integer) : "Reset delay"
+]
+
 //
 // lights
 //
