@@ -2624,6 +2624,8 @@
 
 @SolidClass base(Trigger) = trigger_once : "Trigger: Activate once" []
 
+@PointClass base(Targetx, Targetname) = trigger_playerfreeze : "Trigger Player Freeze" []
+
 @SolidClass base(Trigger, Angles) = trigger_push : "Trigger player push"
 [
 	spawnflags(flags) =
