@@ -51,6 +51,7 @@ set (CLDLL_SOURCES
 	../dlls/glock.cpp
 	../dlls/eagle.cpp
 	../dlls/pipewrench.cpp
+	../dlls/sniperrifle.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

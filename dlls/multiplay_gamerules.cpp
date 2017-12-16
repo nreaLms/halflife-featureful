@@ -187,6 +187,9 @@ void CHalfLifeMultiplay::RefreshSkillData( void )
 
 	// Pipe wrench
 	gSkillData.plrDmgPWrench = 20;
+
+	// 762 Round
+	gSkillData.plrDmg762 = 100;
 }
 
 // longest the intermission can last, in seconds

@@ -598,6 +598,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_rpgammo.mdl") = ammo_rpgclip : "Spawns rockets for the RPG." : "http://twhl.info/wiki.php?id=9" []
 @PointClass base(Weapon, Targetx) studio("models/w_gaussammo.mdl") = ammo_gaussclip : "Spawns ammo for the gauss and egon weapons." : "http://twhl.info/wiki.php?id=5" []
 @PointClass base(Weapon, Targetx) studio("models/w_crossbow_clip.mdl") = ammo_crossbow : "Spawns crossbow ammo." : "http://twhl.info/wiki.php?id=8" []
+@PointClass base(Weapon, Targetx) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
 
 @SolidClass base(Target, ZHLT) = button_target : "Target Button"
 [
@@ -2685,8 +2686,12 @@
 ]
 @PointClass base(Weapon, Targetx) studio("models/w_hgun.mdl") = weapon_hornetgun : "Hornet Gun" []
 @PointClass size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_weaponbox.mdl") =  weaponbox : "Weapon/Ammo Container" []
+<<<<<<< HEAD
 @PointClass base(Weapon, Targetx) studio("models/w_desert_eagle.mdl") = weapon_eagle : "Desert Eagle" []
 @PointClass base(Weapon, Targetx, RenderFields) studio("models/w_pipe_wrench.mdl") = weapon_pipewrench : "Pipe Wrench" []
+=======
+@PointClass base(Weapon, Targetx) studio("models/w_m40a1.mdl") = weapon_sniperrifle : "Sniper Rifle" []
+>>>>>>> weapon_sniperrifle
 
 @PointClass base(Weapon, Targetx) = world_items : "World Items"
 [

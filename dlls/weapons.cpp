@@ -169,6 +169,7 @@ void DecalGunshot( TraceResult *pTrace, int iBulletType )
 		case BULLET_MONSTER_MP5:
 		case BULLET_PLAYER_BUCKSHOT:
 		case BULLET_PLAYER_357:
+		case BULLET_PLAYER_762:
 		default:
 			// smoke and decal
 			UTIL_GunshotDecalTrace( pTrace, DamageDecal( pEntity, DMG_BULLET ) );
@@ -362,6 +363,8 @@ void W_Precache( void )
 #endif
 	UTIL_PrecacheOtherWeapon( "weapon_eagle" );
 	UTIL_PrecacheOtherWeapon( "weapon_pipewrench" );
+	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
+	UTIL_PrecacheOther( "ammo_762" );
 	g_sModelIndexFireball = PRECACHE_MODEL( "sprites/zerogxplode.spr" );// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL( "sprites/WXplo1.spr" );// underwater fireball
 	g_sModelIndexSmoke = PRECACHE_MODEL( "sprites/steam1.spr" );// smoke
@@ -1636,7 +1639,6 @@ TYPEDESCRIPTION CEagle::m_SaveData[] =
 	DEFINE_FIELD( CEagle, m_fEagleLaserActive, FIELD_INTEGER ),
 };
 
-
 IMPLEMENT_SAVERESTORE( CEagle, CBasePlayerWeapon )
 
 TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
@@ -1646,3 +1648,11 @@ TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CPipeWrench, CBasePlayerWeapon )
+
+TYPEDESCRIPTION	CSniperrifle::m_SaveData[] =
+{
+	DEFINE_FIELD( CSniperrifle, m_fNeedAjustBolt, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CSniperrifle, m_iBoltState, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE( CSniperrifle, CBasePlayerWeapon )

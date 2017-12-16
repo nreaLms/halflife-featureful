@@ -80,6 +80,7 @@ public:
 #define	WEAPON_SNARK			15
 #define WEAPON_EAGLE			17
 #define WEAPON_PIPEWRENCH		22
+#define WEAPON_SNIPERRIFLE		24
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
@@ -106,6 +107,7 @@ public:
 #define TRIPMINE_WEIGHT		-10
 #define EAGLE_WEIGHT		15
 #define PIPEWRENCH_WEIGHT		0
+#define SNIPERRIFLE_WEIGHT		10
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -120,6 +122,7 @@ public:
 #define SNARK_MAX_CARRY			15
 #define HORNET_MAX_CARRY		8
 #define M203_GRENADE_MAX_CARRY	10
+#define _762_MAX_CARRY			15
 
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
@@ -140,6 +143,7 @@ public:
 #define TRIPMINE_MAX_CLIP		WEAPON_NOCLIP
 #define SNARK_MAX_CLIP			WEAPON_NOCLIP
 #define EAGLE_MAX_CLIP			7
+#define SNIPERRIFLE_MAX_CLIP	5
 
 // the default amount of ammo that comes with each gun when it spawns
 #define GLOCK_DEFAULT_GIVE			17
@@ -158,6 +162,7 @@ public:
 #define SNARK_DEFAULT_GIVE			5
 #define HIVEHAND_DEFAULT_GIVE		8
 #define EAGLE_DEFAULT_GIVE			7
+#define SNIPERRIFLE_DEFAULT_GIVE		5
 
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	20
@@ -171,6 +176,7 @@ public:
 #define AMMO_RPGCLIP_GIVE		RPG_MAX_CLIP
 #define AMMO_URANIUMBOX_GIVE	20
 #define AMMO_SNARKBOX_GIVE		5
+#define AMMO_762BOX_GIVE		5
 
 // bullet types
 typedef	enum
@@ -181,6 +187,7 @@ typedef	enum
 	BULLET_PLAYER_357, // python
 	BULLET_PLAYER_BUCKSHOT, // shotgun
 	BULLET_PLAYER_CROWBAR, // crowbar swipe
+	BULLET_PLAYER_762, // sniperrifle
 
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,
@@ -1056,8 +1063,6 @@ public:
 	int		Restore(CRestore &restore);
 	static	TYPEDESCRIPTION m_SaveData[];
 #endif
-
-
 	void Spawn(void);
 	void Precache(void);
 	int iItemSlot(void) { return 1; }
@@ -1096,6 +1101,51 @@ private:
 	enum PWRENCH_FIRESTATE { FIRESTATE_NONE = 0, FIRESTATE_WINDUP, FIRESTATE_WINDLOOP, FIRESTATE_BIGHIT };
 	int m_iFirestate;
 	float m_flHoldStartTime;
+};
+
+class CSniperrifle : public CBasePlayerWeapon
+{
+public:
+
+#ifndef CLIENT_DLL
+	int		Save(CSave &save);
+	int		Restore(CRestore &restore);
+	static	TYPEDESCRIPTION m_SaveData[];
+#endif
+
+	void Spawn(void);
+	void Precache(void);
+	int iItemSlot(void) { return 3; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer(CBasePlayer *pPlayer);
+	void PrimaryAttack(void);
+	void SecondaryAttack(void);
+	BOOL Deploy(void);
+	void Holster(int skiplocal = 0);
+	void Reload(void);
+	void WeaponIdle(void);
+	//void ItemPostFrame(void);
+
+	BOOL ShouldWeaponIdle(void) { return TRUE; }
+
+	BOOL m_fInZoom;// don't save this.
+
+	virtual BOOL UseDecrement(void)
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+	BOOL m_fNeedAjustBolt;
+	int	 m_iBoltState;
+
+	enum SNIPER_BOLTSTATE { BOLTSTATE_FINE = 0, BOLTSTATE_ADJUST, BOLTSTATE_ADJUSTING, };
+
+private:
+	unsigned short m_usSniper;
 };
 
 #endif // WEAPONS_H

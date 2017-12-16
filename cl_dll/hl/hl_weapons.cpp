@@ -69,6 +69,7 @@ CTripmine g_Tripmine;
 CSqueak g_Snark;
 CEagle g_Eagle;
 CPipeWrench g_PipeWrench;
+CSniperrifle g_Sniper;
 
 /*
 ======================
@@ -620,6 +621,7 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &g_Snark, &player );
 	HUD_PrepEntity( &g_Eagle, &player );
 	HUD_PrepEntity( &g_PipeWrench, &player );
+	HUD_PrepEntity( &g_Sniper, &player );
 }
 
 /*
@@ -729,8 +731,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 			pWeapon = &g_Eagle;
 			break;
 		case WEAPON_PIPEWRENCH:
-				pWeapon = &g_PipeWrench;
-				break;
+			pWeapon = &g_PipeWrench;
+			break;
+		case WEAPON_SNIPERRIFLE:
+			pWeapon = &g_Sniper;
+			break;
 	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
@@ -840,6 +845,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CRpg *)player.m_pActiveItem )->m_fSpotActive = (int)from->client.vuser2[1];
 		( (CRpg *)player.m_pActiveItem )->m_cActiveRockets = (int)from->client.vuser2[2];
 	}
+	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
+	{
+		player.ammo_762 = (int)from->client.vuser2[1];
+	}
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -907,6 +916,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	{
 		from->client.vuser2[1] = ( (CRpg *)player.m_pActiveItem)->m_fSpotActive;
 		from->client.vuser2[2] = ( (CRpg *)player.m_pActiveItem)->m_cActiveRockets;
+	}
+	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
+	{
+		from->client.vuser2[1] = player.ammo_762;
 	}
 
 	// Make sure that weapon animation matches what the game .dll is telling us

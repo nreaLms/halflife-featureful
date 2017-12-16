@@ -73,6 +73,8 @@ void EV_TrainPitchAdjust( struct event_args_s *args );
 
 void EV_FireEagle( struct event_args_s *args );
 void EV_PipeWrench( struct event_args_s *args );
+
+void EV_FireSniper( struct event_args_s *args );
 }
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
@@ -320,6 +322,7 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType )
 		case BULLET_MONSTER_MP5:
 		case BULLET_PLAYER_BUCKSHOT:
 		case BULLET_PLAYER_357:
+		case BULLET_PLAYER_762:
 		default:
 			// smoke and decal
 			EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ) );
@@ -362,6 +365,7 @@ int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, flo
 		case BULLET_MONSTER_MP5:
 		case BULLET_MONSTER_9MM:
 		case BULLET_MONSTER_12MM:
+		case BULLET_PLAYER_762:
 		default:
 			EV_CreateTracer( vecTracerSrc, end );
 			break;
@@ -438,6 +442,7 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 				EV_HLDM_DecalGunshot( &tr, iBulletType );
 				break;
 			case BULLET_PLAYER_MP5:
+			case BULLET_PLAYER_762:
 				if( !tracer )
 				{
 					EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
@@ -1889,6 +1894,69 @@ void EV_PipeWrench( event_args_t *args )
 //	   PIPEWRENCH END
 //======================
 
+//======================
+//	   SNIPERRIFLE START
+//======================
+enum sniper_e
+{
+	SNIPER_DRAW = 0,
+	SNIPER_SLOWIDLE,
+	SNIPER_FIRE,
+	SNIPER_FIRELASTROUND,
+	SNIPER_RELOAD1,
+	SNIPER_RELOAD2,
+	SNIPER_RELOAD3,
+	SNIPER_SLOWIDLE2,
+	SNIPER_HOLSTER
+};
+
+void EV_FireSniper( event_args_t *args )
+{
+	int idx;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
+
+	vec3_t vecSrc, vecAiming;
+	vec3_t up, right, forward;
+	float flSpread = 0.01;
+
+	idx = args->entindex;
+	VectorCopy( args->origin, origin );
+	VectorCopy( args->angles, angles );
+	VectorCopy( args->velocity, velocity );
+
+	AngleVectors( angles, forward, right, up );
+
+	if( EV_IsLocal( idx ) )
+	{
+		// Add muzzle flash to current weapon model
+		EV_MuzzleFlash();
+
+		if( args->iparam1 == 1 ) // Last round in clip
+		{
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( SNIPER_FIRELASTROUND, 0 );
+		}
+		else // Regular shot.
+		{
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( SNIPER_FIRE, 0 );
+		}
+
+		V_PunchAxis( 0, -5.0 );
+	}
+
+	// Play fire sound.
+	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/sniper_fire.wav", 1.0f, ATTN_NORM, 0, PITCH_NORM );
+
+	EV_GetGunPosition( args, vecSrc, origin );
+
+	VectorCopy( forward, vecAiming );
+
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_762, 0, 0, args->fparam1, args->fparam2 );
+}
+//======================
+//	   SNIPERRIFLE END
+//======================
 
 int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )
 {

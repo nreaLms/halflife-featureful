@@ -75,6 +75,7 @@ set SOURCES=agrunt.cpp^
 	observer.cpp^
 	osprey.cpp^
 	pathcorner.cpp^
+	pipewrench.cpp^
 	plane.cpp^
 	plats.cpp^
 	player.cpp^
@@ -90,6 +91,7 @@ set SOURCES=agrunt.cpp^
 	shotgun.cpp^
 	singleplay_gamerules.cpp^
 	skill.cpp^
+	sniperrifle.cpp^
 	sound.cpp^
 	soundent.cpp^
 	spectator.cpp^
