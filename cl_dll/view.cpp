@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright Â© 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -1328,6 +1328,7 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 		{ "models/p_tripmine.mdl",	"models/v_tripmine.mdl" },
 		{ "models/p_satchel_radio.mdl",	"models/v_satchel_radio.mdl" },
 		{ "models/p_satchel.mdl",	"models/v_satchel.mdl" },
+		{ "models/p_m40a1.mdl",		"models/v_m40a1.mdl" },
 		{ NULL, NULL }
 	};
 
