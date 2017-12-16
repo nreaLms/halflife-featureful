@@ -1022,11 +1022,12 @@ public:
 	void EXPORT SwingAgain(void);
 	void EXPORT Smack(void);
 	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer( CBasePlayer *pPlayer );
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
 	void ItemPostFrame(void);
-	virtual BOOL ShouldWeaponIdle(void) { return FALSE; };
+	virtual BOOL ShouldWeaponIdle(void) { return FALSE; }
 	int Swing(int fFirst, BOOL fIsPrimary);
 	BOOL Deploy(void);
 	void Holster(int skiplocal = 0);
