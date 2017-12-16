@@ -1329,6 +1329,7 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 		{ "models/p_satchel_radio.mdl",	"models/v_satchel_radio.mdl" },
 		{ "models/p_satchel.mdl",	"models/v_satchel.mdl" },
 		{ "models/p_desert_eagle.mdl",	"models/v_desert_eagle.mdl" },
+		{ "models/p_pipe_wrench.mdl",	"models/v_pipe_wrench.mdl" },
 		{ NULL, NULL }
 	};
 

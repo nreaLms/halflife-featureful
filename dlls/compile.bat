@@ -29,6 +29,7 @@ set SOURCES=agrunt.cpp^
 	crowbar.cpp^
 	defaultai.cpp^
 	doors.cpp^
+	eagle.cpp^
 	effects.cpp^
 	egon.cpp^
 	explode.cpp^

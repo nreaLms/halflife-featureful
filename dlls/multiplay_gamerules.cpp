@@ -184,6 +184,9 @@ void CHalfLifeMultiplay::RefreshSkillData( void )
 
 	// Desert Eagle
 	gSkillData.plrDmgEagle = 34;
+
+	// Pipe wrench
+	gSkillData.plrDmgPWrench = 20;
 }
 
 // longest the intermission can last, in seconds

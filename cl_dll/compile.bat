@@ -22,6 +22,7 @@ set SOURCES=../dlls/crossbow.cpp^
 	../dlls/squeakgrenade.cpp^
 	../dlls/tripmine.cpp^
 	../dlls/glock.cpp^
+	../dlls/eagle.cpp^
 	ev_hldm.cpp^
 	hl/hl_baseentity.cpp^
 	hl/hl_events.cpp^

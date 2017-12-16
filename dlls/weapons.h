@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -79,6 +79,7 @@ public:
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
 #define WEAPON_EAGLE			17
+#define WEAPON_PIPEWRENCH		22
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
@@ -104,6 +105,7 @@ public:
 #define SATCHEL_WEIGHT		-10
 #define TRIPMINE_WEIGHT		-10
 #define EAGLE_WEIGHT		15
+#define PIPEWRENCH_WEIGHT		0
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -281,7 +283,7 @@ public:
 	// int		m_iIdSecondary;										// Unique Id for secondary ammo
 };
 
-// inventory items that 
+// inventory items that
 class CBasePlayerWeapon : public CBasePlayerItem
 {
 public:
@@ -331,8 +333,8 @@ public:
 	virtual void Holster( int skiplocal = 0 );
 	virtual BOOL UseDecrement( void ) { return FALSE; };
 
-	int	PrimaryAmmoIndex(); 
-	int	SecondaryAmmoIndex(); 
+	int	PrimaryAmmoIndex();
+	int	SecondaryAmmoIndex();
 
 	void PrintState( void );
 
@@ -389,7 +391,7 @@ extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
 extern int DamageDecal( CBaseEntity *pEntity, int bitsDamageType );
 extern void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType );
 
-typedef struct 
+typedef struct
 {
 	CBaseEntity		*pEntity;
 	float			amount;
@@ -427,7 +429,7 @@ extern MULTIDAMAGE gMultiDamage;
 
 //=========================================================
 // CWeaponBox - a single entity that can store weapons
-// and ammo. 
+// and ammo.
 //=========================================================
 class CWeaponBox : public CBaseEntity
 {
@@ -449,7 +451,7 @@ public:
 	BOOL PackWeapon( CBasePlayerItem *pWeapon );
 	BOOL PackAmmo( int iszName, int iCount );
 
-	CBasePlayerItem	*m_rgpPlayerItems[MAX_ITEM_TYPES];// one slot for each 
+	CBasePlayerItem	*m_rgpPlayerItems[MAX_ITEM_TYPES];// one slot for each
 
 	string_t m_rgiszAmmo[MAX_AMMO_SLOTS];// ammo names
 	int	m_rgAmmo[MAX_AMMO_SLOTS];// ammo quantities
@@ -479,7 +481,7 @@ public:
 	void WeaponIdle( void );
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -516,7 +518,7 @@ public:
 	TraceResult m_trHit;
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -543,7 +545,7 @@ public:
 	void WeaponIdle( void );
 	float m_flSoundDelay;
 
-	BOOL m_fInZoom;// don't save this. 
+	BOOL m_fInZoom;// don't save this.
 
 	virtual BOOL UseDecrement( void )
 	{
@@ -578,7 +580,7 @@ public:
 	int m_iShell;
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -612,7 +614,7 @@ public:
 	int m_fInZoom; // don't save this
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -708,7 +710,7 @@ public:
 	int m_cActiveRockets;// how many missiles in flight from this launcher right now?
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -735,7 +737,7 @@ public:
 
 	int m_iTrail;
 	float m_flIgniteTime;
-	EHANDLE m_hLauncher; // handle back to the launcher that fired me. 
+	EHANDLE m_hLauncher; // handle back to the launcher that fired me.
 };
 
 class CGauss : public CBasePlayerWeapon
@@ -768,11 +770,11 @@ public:
 	int m_iSoundState; // don't save this
 
 	// was this weapon just fired primary or secondary?
-	// we need to know so we can pick the right set of effects. 
+	// we need to know so we can pick the right set of effects.
 	BOOL m_fPrimaryFire;
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -879,7 +881,7 @@ public:
 	int m_iFirePhase;// don't save me.
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -905,7 +907,7 @@ public:
 	void WeaponIdle( void );
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -939,7 +941,7 @@ public:
 	void Throw( void );
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -959,7 +961,7 @@ public:
 	{
 		//!!!BUGBUG - fix the model!
 		pev->absmin = pev->origin + Vector(-16, -16, -5);
-		pev->absmax = pev->origin + Vector(16, 16, 28); 
+		pev->absmax = pev->origin + Vector(16, 16, 28);
 	}
 
 	void PrimaryAttack( void );
@@ -968,7 +970,7 @@ public:
 	void WeaponIdle( void );
 
 	virtual BOOL UseDecrement( void )
-	{ 
+	{
 #if defined( CLIENT_WEAPONS )
 		return TRUE;
 #else
@@ -1040,11 +1042,60 @@ public:
 		return FALSE;
 #endif
 	}
-
 private:
 	int m_iShell;
 
 	unsigned short m_usEagle;
+};
+
+class CPipeWrench : public CBasePlayerWeapon
+{
+public:
+#ifndef CLIENT_DLL
+	int		Save(CSave &save);
+	int		Restore(CRestore &restore);
+	static	TYPEDESCRIPTION m_SaveData[];
+#endif
+
+
+	void Spawn(void);
+	void Precache(void);
+	int iItemSlot(void) { return 1; }
+	void EXPORT SwingAgain(void);
+	void EXPORT Smack(void);
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer( CBasePlayer *pPlayer );
+
+	void PrimaryAttack(void);
+	void SecondaryAttack(void);
+	void ItemPostFrame(void);
+	virtual BOOL ShouldWeaponIdle(void) { return FALSE; }
+	int Swing(int fFirst, BOOL fIsPrimary);
+	BOOL Deploy(void);
+	void Holster(int skiplocal = 0);
+	int m_iSwing;
+	TraceResult m_trHit;
+
+	virtual BOOL UseDecrement(void)
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+private:
+
+	unsigned short m_usPWrench;
+
+	void EXPORT WindUp(void);
+	void EXPORT WindLoop(void);
+	void EXPORT SwingAgain2(void);
+	BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);
+
+	enum PWRENCH_FIRESTATE { FIRESTATE_NONE = 0, FIRESTATE_WINDUP, FIRESTATE_WINDLOOP, FIRESTATE_BIGHIT };
+	int m_iFirestate;
+	float m_flHoldStartTime;
 };
 
 #endif // WEAPONS_H
