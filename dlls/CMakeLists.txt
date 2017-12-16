@@ -50,6 +50,7 @@ set (SVDLL_SOURCES
 	crowbar.cpp
 	defaultai.cpp
 	doors.cpp
+	eagle.cpp
 	effects.cpp
 	egon.cpp
 	explode.cpp

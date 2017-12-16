@@ -360,6 +360,10 @@ cvar_t	sk_plr_tripmine1 = {"sk_plr_tripmine1","0"};
 cvar_t	sk_plr_tripmine2 = {"sk_plr_tripmine2","0"};
 cvar_t	sk_plr_tripmine3 = {"sk_plr_tripmine3","0"};
 
+// Desert Eagle
+cvar_t	sk_plr_eagle1 = { "sk_plr_eagle1", "0" };
+cvar_t	sk_plr_eagle2 = { "sk_plr_eagle2", "0" };
+cvar_t	sk_plr_eagle3 = { "sk_plr_eagle3", "0" };
 
 // WORLD WEAPONS
 cvar_t	sk_12mm_bullet1 = {"sk_12mm_bullet1","0"};
@@ -775,6 +779,11 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_tripmine1 );// {"sk_plr_tripmine1","0"};
 	CVAR_REGISTER( &sk_plr_tripmine2 );// {"sk_plr_tripmine2","0"};
 	CVAR_REGISTER( &sk_plr_tripmine3 );// {"sk_plr_tripmine3","0"};
+
+	// Desert Eagle
+	CVAR_REGISTER( &sk_plr_eagle1 );// { "sk_plr_eagle1", "0" };
+	CVAR_REGISTER( &sk_plr_eagle2 );// { "sk_plr_eagle2", "0" };
+	CVAR_REGISTER( &sk_plr_eagle3 );// { "sk_plr_eagle3", "0" };
 
 	// WORLD WEAPONS
 	CVAR_REGISTER( &sk_12mm_bullet1 );// {"sk_12mm_bullet1","0"};
