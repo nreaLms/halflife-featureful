@@ -1,10 +1,11 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright Â© 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
 // $NoKeywords: $
 //=============================================================================
 
+#pragma once
 #if !defined ( EV_HLDMH )
 #define EV_HLDMH
 
@@ -20,7 +21,8 @@ typedef	enum
 
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,
-	BULLET_MONSTER_12MM
+	BULLET_MONSTER_12MM,
+	BULLET_MONSTER_762
 }Bullet;
 
 enum glock_e

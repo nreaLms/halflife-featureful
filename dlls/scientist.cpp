@@ -1091,8 +1091,8 @@ void CScientist::Heal( void )
 
 int CScientist::FriendNumber( int arrayNumber )
 {
-	static int array[3] = { 1, 2, 0 };
-	if( arrayNumber < 3 )
+	static int array[6] = { 1, 3, 4, 5, 0, 2 };
+	if( arrayNumber < 6 )
 		return array[arrayNumber];
 	return arrayNumber;
 }
@@ -1256,8 +1256,8 @@ int CSittingScientist::DefaultClassify( void )
 
 int CSittingScientist::FriendNumber( int arrayNumber )
 {
-	static int array[3] = { 2, 1, 0 };
-	if( arrayNumber < 3 )
+	static int array[6] = { 4, 5, 1, 3, 0, 2 };
+	if( arrayNumber < 6 )
 		return array[arrayNumber];
 	return arrayNumber;
 }
