@@ -95,6 +95,7 @@ set (SVDLL_SOURCES
 	observer.cpp
 	osprey.cpp
 	pathcorner.cpp
+	pipewrench.cpp
 	plane.cpp
 	plats.cpp
 	player.cpp

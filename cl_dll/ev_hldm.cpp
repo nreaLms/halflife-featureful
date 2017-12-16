@@ -70,6 +70,8 @@ void EV_TripmineFire( struct event_args_s *args );
 void EV_SnarkFire( struct event_args_s *args );
 
 void EV_TrainPitchAdjust( struct event_args_s *args );
+
+void EV_PipeWrench( struct event_args_s *args );
 }
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
@@ -1748,6 +1750,85 @@ void EV_TrainPitchAdjust( event_args_t *args )
 		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_STATIC, pszSound, m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, pitch );
 	}
 }
+
+//======================
+//	   PIPEWRENCH START
+//======================
+enum pwrench_e
+{
+	PIPEWRENCH_IDLE1 = 0,
+	PIPEWRENCH_IDLE2,
+	PIPEWRENCH_IDLE3,
+	PIPEWRENCH_DRAW,
+	PIPEWRENCH_HOLSTER,
+	PIPEWRENCH_ATTACK1HIT,
+	PIPEWRENCH_ATTACK1MISS,
+	PIPEWRENCH_ATTACK2HIT,
+	PIPEWRENCH_ATTACK2MISS,
+	PIPEWRENCH_ATTACK3HIT,
+	PIPEWRENCH_ATTACK3MISS,
+	PIPEWRENCH_ATTACKBIGWIND,
+	PIPEWRENCH_ATTACKBIGHIT,
+	PIPEWRENCH_ATTACKBIGMISS,
+	PIPEWRENCH_ATTACKBIGLOOP
+};
+
+//Only predict the miss sounds, hit sounds are still played
+//server side, so players don't get the wrong idea.
+void EV_PipeWrench( event_args_t *args )
+{
+	int idx;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
+
+	idx = args->entindex;
+	VectorCopy( args->origin, origin );
+
+	if( EV_IsLocal( idx ) )
+	{
+		if( args->iparam1 ) // Is primary attack?
+		{
+			//Play Swing sound
+			switch( gEngfuncs.pfnRandomLong( 0, 1 ) )
+			{
+			case 0:
+				gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/pwrench_miss1.wav", 1, ATTN_NORM, 0, PITCH_NORM );
+				break;
+			case 1:
+				gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/pwrench_miss2.wav", 1, ATTN_NORM, 0, PITCH_NORM );
+				break;
+			}
+
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( PIPEWRENCH_ATTACK1MISS, 1 );
+
+			// Send weapon anim.
+			switch( ( g_iSwing++ ) % 3 )
+			{
+			case 0:
+				gEngfuncs.pEventAPI->EV_WeaponAnimation( PIPEWRENCH_ATTACK1MISS, 1 );
+				break;
+			case 1:
+				gEngfuncs.pEventAPI->EV_WeaponAnimation( PIPEWRENCH_ATTACK2MISS, 1 );
+				break;
+			case 2:
+				gEngfuncs.pEventAPI->EV_WeaponAnimation( PIPEWRENCH_ATTACK3MISS, 1 );
+				break;
+			}
+		}
+		else
+		{
+			// Play Swing sound
+			gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/pwrench_big_miss.wav", 1, ATTN_NORM, 0, PITCH_NORM );
+
+			// Send weapon anim.
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( PIPEWRENCH_ATTACKBIGMISS, 1 );
+		}
+	}
+}
+//======================
+//	   PIPEWRENCH END
+//======================
 
 int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )
 {

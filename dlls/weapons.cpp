@@ -360,6 +360,7 @@ void W_Precache( void )
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
 	}
 #endif
+	UTIL_PrecacheOtherWeapon( "weapon_pipewrench" );
 	g_sModelIndexFireball = PRECACHE_MODEL( "sprites/zerogxplode.spr" );// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL( "sprites/WXplo1.spr" );// underwater fireball
 	g_sModelIndexSmoke = PRECACHE_MODEL( "sprites/steam1.spr" );// smoke
@@ -1628,3 +1629,10 @@ TYPEDESCRIPTION	CSatchel::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CSatchel, CBasePlayerWeapon )
+
+TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
+{
+	DEFINE_FIELD( CPipeWrench, m_iFirestate, FIELD_INTEGER ),
+	DEFINE_FIELD( CPipeWrench, m_flHoldStartTime, FIELD_TIME ),
+};
+IMPLEMENT_SAVERESTORE( CPipeWrench, CBasePlayerWeapon )
