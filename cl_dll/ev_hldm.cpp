@@ -70,6 +70,8 @@ void EV_TripmineFire( struct event_args_s *args );
 void EV_SnarkFire( struct event_args_s *args );
 
 void EV_TrainPitchAdjust( struct event_args_s *args );
+
+void EV_MedkitFire( struct event_args_s *args );
 }
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
@@ -1748,6 +1750,37 @@ void EV_TrainPitchAdjust( event_args_t *args )
 		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_STATIC, pszSound, m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, pitch );
 	}
 }
+
+//======================
+//	   MEDKIT START
+//======================
+
+enum medkit_e {
+	MEDKIT_IDLE = 0,
+	MEDKIT_LONGIDLE,
+	MEDKIT_LONGUSE,
+	MEDKIT_SHORTUSE,
+	MEDKIT_HOLSTER,
+	MEDKIT_DRAW,
+};
+
+void EV_MedkitFire( event_args_s *args )
+{
+	int idx = args->entindex;
+	gEngfuncs.Con_Printf( "In medkit event\n" );
+	if( EV_IsLocal( idx ) )
+	{
+		gEngfuncs.Con_Printf( "EV_IsLocal in medkit\n" );
+		if (args->iparam1)
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( MEDKIT_LONGUSE, 1 );
+		else
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( MEDKIT_SHORTUSE, 1 );
+	}
+}
+
+//======================
+//	   MEDKIT END
+//======================
 
 int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )
 {

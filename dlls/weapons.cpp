@@ -1630,3 +1630,12 @@ TYPEDESCRIPTION	CSatchel::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CSatchel, CBasePlayerWeapon )
+
+TYPEDESCRIPTION	CMedkit::m_SaveData[] =
+{
+	DEFINE_FIELD( CMedkit, m_flSoundDelay, FIELD_TIME ),
+	DEFINE_FIELD( CMedkit, m_flRechargeTime, FIELD_TIME ),
+	DEFINE_FIELD( CMedkit, m_secondaryAttack, FIELD_BOOLEAN ),
+};
+
+IMPLEMENT_SAVERESTORE( CMedkit, CBasePlayerWeapon )

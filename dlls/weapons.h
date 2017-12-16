@@ -1011,6 +1011,11 @@ private:
 class CMedkit : public CBasePlayerWeapon
 {
 public:
+#ifndef CLIENT_DLL
+	int		Save( CSave &save );
+	int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+#endif
 	void Spawn(void);
 	void Precache(void);
 	int iItemSlot(void) { return 1; }
@@ -1021,20 +1026,27 @@ public:
 	void SecondaryAttack(void);
 	BOOL Deploy(void);
 	void Holster(int skiplocal = 0);
-	void MyAnim(int iAnim);
 	void Reload( void );
 	void WeaponIdle(void);
 	BOOL PlayEmptySound(void);
 	BOOL ShouldWeaponIdle(void) { return TRUE; }
 	CBaseEntity* FindHealTarget();
 
-	virtual BOOL UseDecrement(void) {
+	virtual BOOL UseDecrement( void )
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
 		return FALSE;
+#endif
 	}
 
 	float	m_flSoundDelay;
 	float	m_flRechargeTime;
 	BOOL	m_secondaryAttack;
+
+private:
+	unsigned short m_usMedkitFire;
 };
 
 #endif // WEAPONS_H

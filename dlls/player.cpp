@@ -374,7 +374,7 @@ int CBasePlayer::TakeHealth( float flHealth, int bitsDamageType )
 						int medAmmoIndex = GetAmmoIndex(pPlayerItem->pszAmmo1());
 						int medAmmo = AmmoInventory(medAmmoIndex);
 						if (medAmmo >= 0 && medAmmo < pPlayerItem->iMaxAmmo1()) {
-							m_rgAmmo[medAmmoIndex] += min(diff, pPlayerItem->iMaxAmmo1() - medAmmo);
+							m_rgAmmo[medAmmoIndex] += Q_min(diff, pPlayerItem->iMaxAmmo1() - medAmmo);
 							CBaseMonster::TakeHealth( flHealth, bitsDamageType );
 							return 1;
 						}
