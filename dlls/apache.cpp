@@ -184,7 +184,7 @@ void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 
 	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
-	m_iBodyGibs = PRECACHE_MODEL( (char*)gibModel );
+	m_iBodyGibs = PRECACHE_MODEL( gibModel );
 
 	UTIL_PrecacheOther( "hvr_rocket" );
 }
@@ -472,7 +472,7 @@ void CApache::HuntThink( void )
 	if( m_flGoalSpeed < 800 )
 		m_flGoalSpeed += 5;
 
-	if( m_hEnemy != NULL )
+	if( m_hEnemy != 0 )
 	{
 		// ALERT( at_console, "%s\n", STRING( m_hEnemy->pev->classname ) );
 		if( FVisible( m_hEnemy ) )
@@ -566,7 +566,7 @@ void CApache::HuntThink( void )
 	{
 		if( m_flLastSeen + 60 > gpGlobals->time )
 		{
-			if( m_hEnemy != NULL )
+			if( m_hEnemy != 0 )
 			{
 				// make sure it's a good shot
 				if( DotProduct( m_vecTarget, vecEst ) > .965 )
@@ -746,7 +746,6 @@ void CApache::Flight( void )
 void CApache::FireRocket( void )
 {
 	static float side = 1.0;
-	static int count;
 
 	if( m_iRockets <= 0 )
 		return;
@@ -819,13 +818,13 @@ BOOL CApache::FireGun()
 		angles.x = angles.x + 360;
 
 	if( angles.x > m_angGun.x )
-		m_angGun.x = min( angles.x, m_angGun.x + 12 );
+		m_angGun.x = Q_min( angles.x, m_angGun.x + 12 );
 	if( angles.x < m_angGun.x )
-		m_angGun.x = max( angles.x, m_angGun.x - 12 );
+		m_angGun.x = Q_max( angles.x, m_angGun.x - 12 );
 	if( angles.y > m_angGun.y )
-		m_angGun.y = min( angles.y, m_angGun.y + 12 );
+		m_angGun.y = Q_min( angles.y, m_angGun.y + 12 );
 	if( angles.y < m_angGun.y )
-		m_angGun.y = max( angles.y, m_angGun.y - 12 );
+		m_angGun.y = Q_max( angles.y, m_angGun.y - 12 );
 
 	m_angGun.y = SetBoneController( 0, m_angGun.y );
 	m_angGun.x = SetBoneController( 1, m_angGun.x );

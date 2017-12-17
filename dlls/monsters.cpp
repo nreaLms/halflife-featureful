@@ -134,7 +134,7 @@ int CBaseMonster::Restore( CRestore &restore )
 	m_Activity = ACT_RESET;
 
 	// If we don't have an enemy, clear conditions like see enemy, etc.
-	if( m_hEnemy == NULL )
+	if( m_hEnemy == 0 )
 		m_afConditions = 0;
 
 	return status;
@@ -335,12 +335,10 @@ void CBaseMonster::Look( int iDistance )
 					{
 						if( pev->spawnflags & SF_MONSTER_WAIT_TILL_SEEN )
 						{
-							CBaseMonster *pClient;
-
-							pClient = pSightEnt->MyMonsterPointer();
+							CBaseMonster *pClient = pSightEnt->MyMonsterPointer();
 
 							// don't link this client in the list if the monster is wait till seen and the player isn't facing the monster
-							if( pSightEnt && !pClient->FInViewCone( this ) )
+							if( pClient && !pClient->FInViewCone( this ) )
 							{
 								// we're not in the player's view cone. 
 								continue;
@@ -673,7 +671,7 @@ BOOL CBaseMonster::FRefreshRoute( void )
 			returnCode = BuildRoute( m_vecMoveGoal, bits_MF_TO_LOCATION, NULL );
 			break;
 		case MOVEGOAL_TARGETENT:
-			if( m_hTargetEnt != NULL )
+			if( m_hTargetEnt != 0 )
 			{
 				returnCode = BuildRoute( m_hTargetEnt->pev->origin, bits_MF_TO_TARGETENT, m_hTargetEnt );
 			}
@@ -955,7 +953,7 @@ BOOL CBaseMonster::CheckRangeAttack2( float flDot, float flDist )
 BOOL CBaseMonster::CheckMeleeAttack1( float flDot, float flDist )
 {
 	// Decent fix to keep folks from kicking/punching hornets and snarks is to check the onground flag(sjb)
-	if( flDist <= 64 && flDot >= 0.7 && m_hEnemy != NULL && FBitSet( m_hEnemy->pev->flags, FL_ONGROUND ) )
+	if( flDist <= 64 && flDot >= 0.7 && m_hEnemy != 0 && FBitSet( m_hEnemy->pev->flags, FL_ONGROUND ) )
 	{
 		return TRUE;
 	}
@@ -1166,7 +1164,7 @@ void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, Vector &vecLastKnownPos )
 	{
 		if( m_hOldEnemy[i] == pEnemy )
 			return;
-		if( m_hOldEnemy[i] == NULL ) // someone died, reuse their slot
+		if( m_hOldEnemy[i] == 0 ) // someone died, reuse their slot
 			break;
 	}
 	if( i >= MAX_OLD_ENEMIES )
@@ -1184,7 +1182,7 @@ BOOL CBaseMonster::PopEnemy()
 	// UNDONE: blah, this is bad, we should use a stack but I'm too lazy to code one.
 	for( int i = MAX_OLD_ENEMIES - 1; i >= 0; i-- )
 	{
-		if( m_hOldEnemy[i] != NULL )
+		if( m_hOldEnemy[i] != 0 )
 		{
 			if( m_hOldEnemy[i]->IsAlive()) // cheat and know when they die
 			{
@@ -1241,7 +1239,7 @@ void CBaseMonster::SetActivity( Activity NewActivity )
 //=========================================================
 // SetSequenceByName
 //=========================================================
-void CBaseMonster::SetSequenceByName( char *szSequence )
+void CBaseMonster::SetSequenceByName( const char *szSequence )
 {
 	int iSequence;
 
@@ -1962,7 +1960,7 @@ void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, f
 	while( flTotal > 0.001 )
 	{
 		// don't walk more than 16 units or stairs stop working
-		flStep = min( 16.0, flTotal );
+		flStep = Q_min( 16.0, flTotal );
 		UTIL_MoveToOrigin( ENT( pev ), m_Route[m_iRouteIndex].vecLocation, flStep, MOVE_NORMAL );
 		flTotal -= flStep;
 	}
@@ -2885,7 +2883,7 @@ void CBaseMonster::ReportAIState( void )
 	else
 		ALERT( level, "No Schedule, " );
 
-	if( m_hEnemy != NULL )
+	if( m_hEnemy != 0 )
 		ALERT( level, "\nEnemy is %s", STRING( m_hEnemy->pev->classname ) );
 	else
 		ALERT( level, "No enemy" );
@@ -2982,7 +2980,7 @@ BOOL CBaseMonster::FCheckAITrigger( void )
 	switch( m_iTriggerCondition )
 	{
 	case AITRIGGER_SEEPLAYER_ANGRY_AT_PLAYER:
-		if( m_hEnemy != NULL && m_hEnemy->IsPlayer() && HasConditions( bits_COND_SEE_ENEMY ) )
+		if( m_hEnemy != 0 && m_hEnemy->IsPlayer() && HasConditions( bits_COND_SEE_ENEMY ) )
 		{
 			fFireTarget = TRUE;
 		}
@@ -3353,7 +3351,7 @@ BOOL CBaseMonster::GetEnemy( void )
 	}
 
 	// remember old enemies
-	if( m_hEnemy == NULL && PopEnemy() )
+	if( m_hEnemy == 0 && PopEnemy() )
 	{
 		if( m_pSchedule )
 		{
@@ -3364,7 +3362,7 @@ BOOL CBaseMonster::GetEnemy( void )
 		}
 	}
 
-	if( m_hEnemy != NULL )
+	if( m_hEnemy != 0 )
 	{
 		// monster has an enemy.
 		return TRUE;
@@ -3376,7 +3374,7 @@ BOOL CBaseMonster::GetEnemy( void )
 //=========================================================
 // DropItem - dead monster drops named item 
 //=========================================================
-CBaseEntity *CBaseMonster::DropItem( char *pszItemName, const Vector &vecPos, const Vector &vecAng )
+CBaseEntity *CBaseMonster::DropItem( const char *pszItemName, const Vector &vecPos, const Vector &vecAng )
 {
 	if( !pszItemName )
 	{
@@ -3391,6 +3389,9 @@ CBaseEntity *CBaseMonster::DropItem( char *pszItemName, const Vector &vecPos, co
 		// do we want this behavior to be default?! (sjb)
 		pItem->pev->velocity = pev->velocity;
 		pItem->pev->avelocity = Vector( 0, RANDOM_FLOAT( 0, 100 ), 0 );
+
+		// Dropped items should never respawn (unless this rule changes in the future). - Solokiller
+		pItem->pev->spawnflags |= SF_NORESPAWN;
 		return pItem;
 	}
 	else

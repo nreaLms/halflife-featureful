@@ -228,7 +228,7 @@ void CBarney::RunTask( Task_t *pTask )
 	switch( pTask->iTask )
 	{
 	case TASK_RANGE_ATTACK1:
-		if( m_hEnemy != NULL && ( m_hEnemy->IsPlayer() ) )
+		if( m_hEnemy != 0 && ( m_hEnemy->IsPlayer() ) )
 		{
 			pev->framerate = 1.5;
 		}
@@ -269,7 +269,7 @@ int CBarney::DefaultClassify( void )
 //=========================================================
 void CBarney::AlertSound( void )
 {
-	if( m_hEnemy != NULL )
+	if( m_hEnemy != 0 )
 	{
 		if( FOkToSpeak() )
 		{
@@ -528,7 +528,7 @@ int CBarney::TakeDamageImpl(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 
 		// This is a heurstic to determine if the player intended to harm me
 		// If I have an enemy, we can't establish intent (may just be crossfire)
-		if( m_hEnemy == NULL )
+		if( m_hEnemy == 0 )
 		{
 			// If the player was facing directly at me, or I'm already suspicious, get mad
 			if( ( m_afMemory & bits_MEMORY_SUSPICIOUS ) || IsFacing( pevAttacker, pev->origin ) )
@@ -650,7 +650,7 @@ void CBarney::Killed( entvars_t *pevAttacker, int iGib )
 
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-		CBaseEntity *pGun = DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
 	}
 
 	SetUse( NULL );	
@@ -667,7 +667,7 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 	switch( Type )
 	{
 	case SCHED_ARM_WEAPON:
-		if( m_hEnemy != NULL )
+		if( m_hEnemy != 0 )
 		{
 			// face enemy, then draw.
 			return slBarneyEnemyDraw;
@@ -755,7 +755,7 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 
-		if( m_hEnemy == NULL && IsFollowing() )
+		if( m_hEnemy == 0 && IsFollowing() )
 		{
 			if( !m_hTargetEnt->IsAlive() )
 			{

@@ -206,9 +206,9 @@ void COsprey::PrecacheImpl(const char* modelName, const char* tailGibs, const ch
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
 
 	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
-	m_iTailGibs = PRECACHE_MODEL( (char*)tailGibs );
-	m_iBodyGibs = PRECACHE_MODEL( (char*)bodyGibs );
-	m_iEngineGibs = PRECACHE_MODEL( (char*)engineGibs );
+	m_iTailGibs = PRECACHE_MODEL( tailGibs );
+	m_iBodyGibs = PRECACHE_MODEL( bodyGibs );
+	m_iEngineGibs = PRECACHE_MODEL( engineGibs );
 }
 
 void COsprey::CommandUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -276,7 +276,7 @@ BOOL COsprey::HasDead()
 {
 	for( int i = 0; i < m_iUnits; i++ )
 	{
-		if( m_hGrunt[i] == NULL || !m_hGrunt[i]->IsAlive() )
+		if( m_hGrunt[i] == 0 || !m_hGrunt[i]->IsAlive() )
 		{
 			return TRUE;
 		}
@@ -305,13 +305,13 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 
 	for( int i = 0; i < m_iUnits; i++ )
 	{
-		if( m_hGrunt[i] == NULL || !m_hGrunt[i]->IsAlive() )
+		if( m_hGrunt[i] == 0 || !m_hGrunt[i]->IsAlive() )
 		{
-			if( m_hGrunt[i] != NULL && m_hGrunt[i]->pev->rendermode == kRenderNormal )
+			if( m_hGrunt[i] != 0 && m_hGrunt[i]->pev->rendermode == kRenderNormal )
 			{
 				m_hGrunt[i]->SUB_StartFadeOut();
 			}
-			pEntity = Create( (char*)TrooperName(), vecSrc, pev->angles );
+			pEntity = Create( TrooperName(), vecSrc, pev->angles );
 			pGrunt = pEntity->MyMonsterPointer();
 			pGrunt->pev->movetype = MOVETYPE_FLY;
 			pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
@@ -339,7 +339,7 @@ void COsprey::HoverThink( void )
 	int i;
 	for( i = 0; i < 4; i++ )
 	{
-		if( m_hRepel[i] != NULL && m_hRepel[i]->pev->health > 0 && !( m_hRepel[i]->pev->flags & FL_ONGROUND ) )
+		if( m_hRepel[i] != 0 && m_hRepel[i]->pev->health > 0 && !( m_hRepel[i]->pev->flags & FL_ONGROUND ) )
 		{
 			break;
 		}

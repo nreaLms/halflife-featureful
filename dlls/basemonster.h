@@ -12,7 +12,7 @@
 *   use or distribution of this code by or to any unlicensed person is illegal.
 *
 ****/
-
+#pragma once
 #ifndef BASEMONSTER_H
 #define BASEMONSTER_H
 
@@ -203,7 +203,7 @@ public:
 	Task_t *GetTask( void );
 	virtual MONSTERSTATE GetIdealState( void );
 	virtual void SetActivity( Activity NewActivity );
-	void SetSequenceByName( char *szSequence );
+	void SetSequenceByName( const char *szSequence );
 	void SetState( MONSTERSTATE State );
 	virtual void ReportAIState( void );
 
@@ -335,7 +335,7 @@ public:
 	BOOL ExitScriptedSequence();
 	BOOL CineCleanup();
 
-	CBaseEntity* DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+	CBaseEntity* DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 	
 	void SetMyHealth( const float health );
 	void SetMyModel( const char* model );
