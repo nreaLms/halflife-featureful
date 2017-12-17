@@ -2121,7 +2121,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 							if( ( m_hEnemy != 0 ) && m_hEnemy->IsPlayer() )
 								// player
 								SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-							else if( ( m_hEnemy != NULL ) &&
+							else if( ( m_hEnemy != 0 ) &&
 									( m_hEnemy->Classify() != CLASS_PLAYER_ALLY ) &&
 									( m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE ) &&
 									( m_hEnemy->Classify() != CLASS_MACHINE ) )
@@ -2606,7 +2606,7 @@ void CMassn::IdleSound(void)
 //=========================================================
 void CMassn::Sniperrifle(void)
 {
-	if (m_hEnemy == NULL)
+	if (m_hEnemy == 0)
 	{
 		return;
 	}
@@ -3469,9 +3469,9 @@ void CSporeGrenade::SpawnExplosionParticles(const Vector& origin, const Vector& 
 #define STROOPER_SHOCKRIFLE			(1 << 0)
 #define STROOPER_HANDGRENADE		(1 << 1)
 
-#define GUN_GROUP					1
+#define STROOPER_GUN_GROUP					1
 #define GUN_SHOCKRIFLE				0
-#define GUN_NONE					1
+#define STROOPER_GUN_NONE					1
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -3541,8 +3541,11 @@ public:
 
 	void DeathSound(void);
 	void PainSound(void);
+	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void GibMonster(void);
 	void CheckAmmo();
+
+	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
 	int	Save(CSave &save);
 	int Restore(CRestore &restore);
@@ -3640,7 +3643,7 @@ Schedule_t* CStrooper::ScheduleOnRangeAttack1()
 		}
 	}
 
-	const bool preferAttack2 = HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && RANDOM_LONG(0,2) == 0;
+	const bool preferAttack2 = HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && RANDOM_LONG(0,3) == 0;
 	if (preferAttack2)
 	{
 		if( HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) )
@@ -3689,7 +3692,7 @@ void CStrooper::GibMonster(void)
 	Vector	vecGunPos;
 	Vector	vecGunAngles;
 
-	if (GetBodygroup(1) != 1)
+	if (GetBodygroup(STROOPER_GUN_GROUP) != STROOPER_GUN_NONE)
 	{// throw a shockroach if the shock trooper has one
 		GetAttachment(0, vecGunPos, vecGunAngles);
 
@@ -3727,6 +3730,9 @@ void CStrooper::CheckAmmo()
 			m_rechargeTime = gpGlobals->time + gSkillData.strooperRchgSpeed;
 		}
 	}
+	if (m_cAmmoLoaded <= 0) {
+		SetConditions( bits_COND_NO_AMMO_LOADED );
+	}
 }
 
 //=========================================================
@@ -3759,13 +3765,13 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case STROOPER_AE_DROP_GUN:
 	{
 		// switch to body group with no gun.
-		if (GetBodygroup(GUN_GROUP) != GUN_NONE)
+		if (GetBodygroup(STROOPER_GUN_GROUP) != STROOPER_GUN_NONE)
 		{
 			Vector	vecGunPos;
 			Vector	vecGunAngles;
 
 			GetAttachment(0, vecGunPos, vecGunAngles);
-			SetBodygroup(GUN_GROUP, GUN_NONE);
+			SetBodygroup(STROOPER_GUN_GROUP, STROOPER_GUN_NONE);
 
 			Vector vecDropAngles = vecGunAngles;
 
@@ -3778,13 +3784,15 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			vecDropAngles.x = 0;
 
 			// now spawn a shockroach.
+			const int originalSolid = pev->solid;
+			pev->solid = SOLID_NOT;
 			CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecGunPos, vecDropAngles, edict() );
 			if (pRoach)
 			{
-				pRoach->pev->owner = edict();
 				// Remove any pitch.
 				pRoach->pev->angles.x = 0;
 			}
+			pev->solid = originalSolid;
 		}
 	}
 	break;
@@ -3826,17 +3834,29 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			WRITE_BYTE( 196 );			// brightness
 		MESSAGE_END();
 
+		Vector vecShootDir;
 		if (m_hEnemy)
 		{
-			vecGunAngles = (m_hEnemy->EyePosition() - vecGunPos).Normalize();
+			if (m_hEnemy->IsPlayer())
+			{
+				vecShootDir = (m_hEnemy->EyePosition() - vecGunPos).Normalize();
+				vecShootDir.z += RANDOM_FLOAT( -0.05, 0 );
+			}
+			else
+			{
+				vecShootDir = (m_hEnemy->Center() - vecGunPos).Normalize();
+				vecShootDir.z += RANDOM_FLOAT( 0, 0.05 );
+			}
 		}
 		else
 		{
-			vecGunAngles = (m_vecEnemyLKP - vecGunPos).Normalize();
+			ALERT(at_aiconsole, "Shooting with no enemy! Ammo: %d\n", m_cAmmoLoaded);
+			vecShootDir = (m_vecEnemyLKP - vecGunPos).Normalize();
+			vecShootDir.z += RANDOM_FLOAT( 0, 0.05 );
 		}
 
-		vecGunAngles.z += RANDOM_FLOAT( -0.05, 0 );
-		CShock::Shoot(pev, pev->angles, vecGunPos, vecGunAngles * 2000);
+		vecGunAngles = UTIL_VecToAngles(vecShootDir);
+		CShock::Shoot(pev, vecGunAngles, vecGunPos, vecShootDir * 2000);
 		m_cAmmoLoaded--;
 
 		// Play fire sound.
@@ -3891,6 +3911,7 @@ void CStrooper::Spawn()
 	Precache();
 
 	SpawnHelper("models/strooper.mdl", gSkillData.strooperHealth, BLOOD_COLOR_GREEN);
+	UTIL_SetSize( pev, Vector(-24, -24, 0), Vector(24, 24, 72) );
 
 	if (pev->weapons == 0)
 	{
@@ -3977,6 +3998,16 @@ void CStrooper::PainSound(void)
 
 		m_flNextPainTime = gpGlobals->time + 1;
 	}
+}
+
+int CStrooper::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
+{
+	if( bitsDamageType == DMG_BULLET ) {
+		flDamage = flDamage * 0.6;
+	} else if(FClassnameIs(pevInflictor, "monster_spore") || FClassnameIs(pevInflictor, "shock_beam")) {
+		flDamage = flDamage * 0.8;
+	}
+	return CHGrunt::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
@@ -4086,4 +4117,12 @@ void CStrooper::SetActivity(Activity NewActivity)
 		ALERT(at_console, "%s has no sequence for act:%d\n", STRING(pev->classname), NewActivity);
 		pev->sequence = 0;	// Set to the reset anim (if it's there)
 	}
+}
+
+//=========================================================
+// TraceAttack - reimplemented in shock trooper because they never have helmets
+//=========================================================
+void CStrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+{
+	CSquadMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
