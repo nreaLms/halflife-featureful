@@ -1767,10 +1767,8 @@ enum medkit_e {
 void EV_MedkitFire( event_args_s *args )
 {
 	int idx = args->entindex;
-	gEngfuncs.Con_Printf( "In medkit event\n" );
 	if( EV_IsLocal( idx ) )
 	{
-		gEngfuncs.Con_Printf( "EV_IsLocal in medkit\n" );
 		if (args->iparam1)
 			gEngfuncs.pEventAPI->EV_WeaponAnimation( MEDKIT_LONGUSE, 1 );
 		else

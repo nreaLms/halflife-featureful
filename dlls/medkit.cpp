@@ -157,9 +157,11 @@ void CMedkit::PrimaryAttack(void)
 	}
 
 	m_secondaryAttack = FALSE;
-	//SendWeaponAnim(MEDKIT_SHORTUSE);
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usMedkitFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0, 0.0, 0, 0.0);
-	m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(2);
+	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0, 0.0, 0, 0.0);
+	float delay = GetNextAttackDelay(2);
+	if (delay < UTIL_WeaponTimeBase())
+		delay = UTIL_WeaponTimeBase() + 2;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = delay;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 5, 10);
 	m_flSoundDelay = gpGlobals->time + 0.8;
 }
@@ -176,15 +178,11 @@ void CMedkit::SecondaryAttack()
 
 	m_secondaryAttack = TRUE;
 
-	int flags;
-#if defined( CLIENT_WEAPONS )
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
-#endif
-	ALERT(at_console, "Sending medkit event\n");
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usMedkitFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 1, 0.0, 0, 0.0);
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(3);
+	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 1, 0.0, 0, 0.0);
+	float delay = GetNextAttackDelay(3);
+	if (delay < UTIL_WeaponTimeBase())
+		delay = UTIL_WeaponTimeBase() + 3;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = delay;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 5, 10);
 	m_flSoundDelay = gpGlobals->time + 1;
 }
