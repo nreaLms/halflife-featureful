@@ -275,6 +275,40 @@ cvar_t	sk_scientist_health1 = {"sk_scientist_health1","0"};
 cvar_t	sk_scientist_health2 = {"sk_scientist_health2","0"};
 cvar_t	sk_scientist_health3 = {"sk_scientist_health3","0"};
 
+// Shock Roach
+cvar_t	sk_shockroach_health1 = { "sk_shockroach_health1", "0" };
+cvar_t	sk_shockroach_health2 = { "sk_shockroach_health2", "0" };
+cvar_t	sk_shockroach_health3 = { "sk_shockroach_health3", "0" };
+
+cvar_t	sk_shockroach_dmg_bite1 = { "sk_shockroach_dmg_bite1", "0" };
+cvar_t	sk_shockroach_dmg_bite2 = { "sk_shockroach_dmg_bite2", "0" };
+cvar_t	sk_shockroach_dmg_bite3 = { "sk_shockroach_dmg_bite3", "0" };
+
+cvar_t	sk_shockroach_lifespan1 = { "sk_shockroach_lifespan1", "0" };
+cvar_t	sk_shockroach_lifespan2 = { "sk_shockroach_lifespan2", "0" };
+cvar_t	sk_shockroach_lifespan3 = { "sk_shockroach_lifespan3", "0" };
+
+// ShockTrooper
+cvar_t	sk_shocktrooper_health1 = { "sk_shocktrooper_health1", "0" };
+cvar_t	sk_shocktrooper_health2 = { "sk_shocktrooper_health2", "0" };
+cvar_t	sk_shocktrooper_health3 = { "sk_shocktrooper_health3", "0" };
+
+cvar_t	sk_shocktrooper_kick1 = { "sk_shocktrooper_kick1", "0" };
+cvar_t	sk_shocktrooper_kick2 = { "sk_shocktrooper_kick2", "0" };
+cvar_t	sk_shocktrooper_kick3 = { "sk_shocktrooper_kick3", "0" };
+
+cvar_t	sk_shocktrooper_gspeed1 = { "sk_shocktrooper_gspeed1", "0" };
+cvar_t	sk_shocktrooper_gspeed2 = { "sk_shocktrooper_gspeed2", "0" };
+cvar_t	sk_shocktrooper_gspeed3 = { "sk_shocktrooper_gspeed3", "0" };
+
+cvar_t	sk_shocktrooper_maxcharge1 = { "sk_shocktrooper_maxcharge1", "0" };
+cvar_t	sk_shocktrooper_maxcharge2 = { "sk_shocktrooper_maxcharge2", "0" };
+cvar_t	sk_shocktrooper_maxcharge3 = { "sk_shocktrooper_maxcharge3", "0" };
+
+cvar_t	sk_shocktrooper_rchgspeed1 = { "sk_shocktrooper_rchgspeed1", "0" };
+cvar_t	sk_shocktrooper_rchgspeed2 = { "sk_shocktrooper_rchgspeed2", "0" };
+cvar_t	sk_shocktrooper_rchgspeed3 = { "sk_shocktrooper_rchgspeed3", "0" };
+
 // Snark
 cvar_t	sk_snark_health1 = {"sk_snark_health1","0"};
 cvar_t	sk_snark_health2 = {"sk_snark_health2","0"};
@@ -500,6 +534,18 @@ cvar_t	sk_357_bullet3 = {"sk_357_bullet3","35"};
 cvar_t	sk_762_bullet1 = {"sk_762_bullet1","35"};
 cvar_t	sk_762_bullet2 = {"sk_762_bullet2","40"};
 cvar_t	sk_762_bullet3 = {"sk_762_bullet3","40"};
+
+cvar_t	sk_plr_shockroachs1 = { "sk_plr_shockroachs1", "0" };
+cvar_t	sk_plr_shockroachs2 = { "sk_plr_shockroachs2", "0" };
+cvar_t	sk_plr_shockroachs3 = { "sk_plr_shockroachs3", "0" };
+
+cvar_t	sk_plr_shockroachm1 = { "sk_plr_shockroachm1", "0" };
+cvar_t	sk_plr_shockroachm2 = { "sk_plr_shockroachm2", "0" };
+cvar_t	sk_plr_shockroachm3 = { "sk_plr_shockroachm3", "0" };
+
+cvar_t	sk_plr_spore1 = { "sk_plr_spore1", "0" };
+cvar_t	sk_plr_spore2 = { "sk_plr_spore2", "0" };
+cvar_t	sk_plr_spore3 = { "sk_plr_spore3", "0" };
 
 // HORNET
 cvar_t	sk_hornet_dmg1 = {"sk_hornet_dmg1","0"};
@@ -820,6 +866,40 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_pitdrone_dmg_spit2 );// { "sk_pitdrone_dmg_spit2", "0" };
 	CVAR_REGISTER( &sk_pitdrone_dmg_spit3 );// { "sk_pitdrone_dmg_spit3", "0" };
 
+	// ShockTrooper
+	CVAR_REGISTER( &sk_shocktrooper_health1 );// { "sk_shocktrooper_health1", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_health2 );// { "sk_shocktrooper_health2", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_health3 );// { "sk_shocktrooper_health3", "0" };
+
+	CVAR_REGISTER( &sk_shocktrooper_kick1 );// { "sk_shocktrooper_kick1", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_kick2 );// { "sk_shocktrooper_kick2", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_kick3 );// { "sk_shocktrooper_kick3", "0" };
+
+	CVAR_REGISTER( &sk_shocktrooper_gspeed1 );// { "sk_shocktrooper_gspeed1", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_gspeed2 );// { "sk_shocktrooper_gspeed2", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_gspeed3 );// { "sk_shocktrooper_gspeed3", "0" };
+
+	CVAR_REGISTER( &sk_shocktrooper_maxcharge1 );// { "sk_shocktrooper_maxcharge1", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_maxcharge2 );// { "sk_shocktrooper_maxcharge2", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_maxcharge3 );// { "sk_shocktrooper_maxcharge3", "0" };
+
+	CVAR_REGISTER( &sk_shocktrooper_rchgspeed1 );// { "sk_shocktrooper_rchgspeed1", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_rchgspeed2 );// { "sk_shocktrooper_rchgspeed2", "0" };
+	CVAR_REGISTER( &sk_shocktrooper_rchgspeed3 );// { "sk_shocktrooper_rchgspeed3", "0" };
+
+	// Shock Roach
+	CVAR_REGISTER( &sk_shockroach_health1 );// { "sk_shockroach_health1", "0" };
+	CVAR_REGISTER( &sk_shockroach_health2 );// { "sk_shockroach_health2", "0" };
+	CVAR_REGISTER( &sk_shockroach_health3 );// { "sk_shockroach_health3", "0" };
+
+	CVAR_REGISTER( &sk_shockroach_dmg_bite1 );// { "sk_shockroach_dmg_bite1", "0" };
+	CVAR_REGISTER( &sk_shockroach_dmg_bite2 );// { "sk_shockroach_dmg_bite2", "0" };
+	CVAR_REGISTER( &sk_shockroach_dmg_bite3 );// { "sk_shockroach_dmg_bite3", "0" };
+
+	CVAR_REGISTER( &sk_shockroach_lifespan1 );// { "sk_shockroach_lifespan1", "0" };
+	CVAR_REGISTER( &sk_shockroach_lifespan2 );// { "sk_shockroach_lifespan2", "0" };
+	CVAR_REGISTER( &sk_shockroach_lifespan3 );// { "sk_shockroach_lifespan3", "0" };
+
 	// Scientist
 	CVAR_REGISTER( &sk_scientist_health1 );// {"sk_scientist_health1","0"};
 	CVAR_REGISTER( &sk_scientist_health2 );// {"sk_scientist_health2","0"};
@@ -1021,6 +1101,19 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_762_bullet1 );// { "sk_plr_762_bullet1", "0" };
 	CVAR_REGISTER( &sk_plr_762_bullet2 );// { "sk_plr_762_bullet2", "0" };
 	CVAR_REGISTER( &sk_plr_762_bullet3 );// { "sk_plr_762_bullet3", "0" };
+
+	// Shock rifle
+	CVAR_REGISTER( &sk_plr_shockroachs1 );// { "sk_plr_shockroachs1", "0" };
+	CVAR_REGISTER( &sk_plr_shockroachs2 );// { "sk_plr_shockroachs2", "0" };
+	CVAR_REGISTER( &sk_plr_shockroachs3 );// { "sk_plr_shockroachs3", "0" };
+
+	CVAR_REGISTER( &sk_plr_shockroachm1 );// { "sk_plr_shockroachm1", "0" };
+	CVAR_REGISTER( &sk_plr_shockroachm2 );// { "sk_plr_shockroachm2", "0" };
+	CVAR_REGISTER( &sk_plr_shockroachm3 );// { "sk_plr_shockroachm3", "0" };
+
+	CVAR_REGISTER( &sk_plr_spore1 );// { "sk_plr_spore1", "0" };
+	CVAR_REGISTER( &sk_plr_spore2 );// { "sk_plr_spore2", "0" };
+	CVAR_REGISTER( &sk_plr_spore3 );// { "sk_plr_spore3", "0" };
 
 	// WORLD WEAPONS
 	CVAR_REGISTER( &sk_12mm_bullet1 );// {"sk_12mm_bullet1","0"};

@@ -105,6 +105,9 @@ public:
 	static const char *pAttackSounds[];
 	static const char *pDeathSounds[];
 	static const char *pBiteSounds[];
+
+protected:
+	virtual void AttackSound();
 };
 
 LINK_ENTITY_TO_CLASS( monster_headcrab, CHeadCrab )
@@ -260,9 +263,7 @@ void CHeadCrab::HandleAnimEvent( MonsterEvent_t *pEvent )
 				vecJumpDir = Vector( gpGlobals->v_forward.x, gpGlobals->v_forward.y, gpGlobals->v_up.z ) * 350;
 			}
 
-			int iSound = RANDOM_LONG(0,2);
-			if( iSound != 0 )
-				EMIT_SOUND_DYN( edict(), CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+			AttackSound();
 
 			pev->velocity = vecJumpDir;
 			m_flNextAttack = gpGlobals->time + 2;
@@ -272,6 +273,13 @@ void CHeadCrab::HandleAnimEvent( MonsterEvent_t *pEvent )
 			CBaseMonster::HandleAnimEvent( pEvent );
 			break;
 	}
+}
+
+void CHeadCrab::AttackSound()
+{
+	int iSound = RANDOM_LONG(0,2);
+	if( iSound != 0 )
+		EMIT_SOUND_DYN( edict(), CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 //=========================================================
@@ -549,4 +557,227 @@ Schedule_t *CBabyCrab::GetScheduleOfType( int Type )
 	}
 
 	return CHeadCrab::GetScheduleOfType( Type );
+}
+
+class CShockRoach : public CHeadCrab
+{
+public:
+	void Spawn(void);
+	void Precache(void);
+	void EXPORT LeapTouch(CBaseEntity *pOther);
+	void PainSound(void);
+	void DeathSound(void);
+	void IdleSound(void);
+	void AlertSound(void);
+	void PrescheduleThink(void);
+	void StartTask(Task_t* pTask);
+
+	virtual int		Save(CSave &save);
+	virtual int		Restore(CRestore &restore);
+
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	static const char *pIdleSounds[];
+	static const char *pAlertSounds[];
+	static const char *pPainSounds[];
+	static const char *pAttackSounds[];
+	static const char *pDeathSounds[];
+	static const char *pBiteSounds[];
+
+	float m_flDie;
+
+protected:
+	void AttackSound();
+};
+
+LINK_ENTITY_TO_CLASS(monster_shockroach, CShockRoach)
+
+TYPEDESCRIPTION	CShockRoach::m_SaveData[] =
+{
+	DEFINE_FIELD(CShockRoach, m_flDie, FIELD_TIME),
+};
+
+IMPLEMENT_SAVERESTORE(CShockRoach, CHeadCrab)
+
+const char *CShockRoach::pIdleSounds[] =
+{
+	"shockroach/shock_idle1.wav",
+	"shockroach/shock_idle2.wav",
+	"shockroach/shock_idle3.wav",
+};
+const char *CShockRoach::pAlertSounds[] =
+{
+	"shockroach/shock_angry.wav",
+};
+const char *CShockRoach::pPainSounds[] =
+{
+	"shockroach/shock_flinch.wav",
+};
+const char *CShockRoach::pAttackSounds[] =
+{
+	"shockroach/shock_jump1.wav",
+	"shockroach/shock_jump2.wav",
+};
+
+const char *CShockRoach::pDeathSounds[] =
+{
+	"shockroach/shock_die.wav",
+};
+
+const char *CShockRoach::pBiteSounds[] =
+{
+	"shockroach/shock_bite.wav",
+};
+
+
+//=========================================================
+// Spawn
+//=========================================================
+void CShockRoach::Spawn()
+{
+	Precache();
+
+	SetMyModel("models/w_shock_rifle.mdl");
+	UTIL_SetSize(pev, Vector(-12, -12, 0), Vector(12, 12, 24));
+
+	pev->solid = SOLID_SLIDEBOX;
+	pev->movetype = MOVETYPE_STEP;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
+	pev->effects = 0;
+	SetMyHealth( gSkillData.sroachHealth );
+	pev->view_ofs = Vector(0, 0, 20);// position of the eyes relative to monster's origin.
+	pev->yaw_speed = 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
+	m_flFieldOfView = 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	m_MonsterState = MONSTERSTATE_NONE;
+
+	m_flDie = gpGlobals->time + gSkillData.sroachLifespan;
+
+	MonsterInit();
+}
+
+//=========================================================
+// Precache - precaches all resources this monster needs
+//=========================================================
+void CShockRoach::Precache()
+{
+	PRECACHE_SOUND_ARRAY(pIdleSounds);
+	PRECACHE_SOUND_ARRAY(pAlertSounds);
+	PRECACHE_SOUND_ARRAY(pPainSounds);
+	PRECACHE_SOUND_ARRAY(pAttackSounds);
+	PRECACHE_SOUND_ARRAY(pDeathSounds);
+	PRECACHE_SOUND_ARRAY(pBiteSounds);
+
+	PRECACHE_SOUND("shockroach/shock_walk.wav");
+
+	PrecacheMyModel("models/w_shock_rifle.mdl");
+}
+
+//=========================================================
+// LeapTouch - this is the headcrab's touch function when it
+// is in the air
+//=========================================================
+void CShockRoach::LeapTouch(CBaseEntity *pOther)
+{
+	if (!pOther->pev->takedamage)
+	{
+		return;
+	}
+
+	if (pOther->Classify() == Classify())
+	{
+		return;
+	}
+
+	// Don't hit if back on ground
+	if (!FBitSet(pev->flags, FL_ONGROUND))
+	{
+		EMIT_SOUND_DYN(edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+
+
+		// Give the shockrifle weapon to the player, if not already in possession.
+//		CBasePlayer* pPlayer = dynamic_cast<CBasePlayer*>(pOther);
+//		if (pPlayer && !(pPlayer->pev->weapons & (1 << WEAPON_SHOCKRIFLE)))
+//		{
+//			pPlayer->GiveNamedItem("weapon_shockrifle");
+//			pPlayer->pev->weapons |= (1 << WEAPON_SHOCKRIFLE);
+//			UTIL_Remove(this);
+//			return;
+//		}
+
+		pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
+	}
+
+	SetTouch(NULL);
+}
+//=========================================================
+// PrescheduleThink
+//=========================================================
+void CShockRoach::PrescheduleThink(void)
+{
+	// explode when ready
+	if (gpGlobals->time >= m_flDie)
+	{
+		pev->health = -1;
+		Killed(pev, 0);
+		return;
+	}
+
+	CHeadCrab::PrescheduleThink();
+}
+
+//=========================================================
+// IdleSound
+//=========================================================
+void CShockRoach::IdleSound(void)
+{
+	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+}
+
+//=========================================================
+// AlertSound
+//=========================================================
+void CShockRoach::AlertSound(void)
+{
+	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+}
+
+//=========================================================
+// AlertSound
+//=========================================================
+void CShockRoach::PainSound(void)
+{
+	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+}
+
+//=========================================================
+// DeathSound
+//=========================================================
+void CShockRoach::DeathSound(void)
+{
+	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+}
+
+
+void CShockRoach::StartTask(Task_t *pTask)
+{
+	m_iTaskStatus = TASKSTATUS_RUNNING;
+
+	switch (pTask->iTask)
+	{
+	case TASK_RANGE_ATTACK1:
+	{
+		m_IdealActivity = ACT_RANGE_ATTACK1;
+		SetTouch(&CShockRoach::LeapTouch);
+		break;
+	}
+	default:
+		CHeadCrab::StartTask(pTask);
+	}
+}
+
+void CShockRoach::AttackSound()
+{
+	int iSound = RANDOM_LONG(0,2);
+	if( iSound != 0 )
+		EMIT_SOUND_DYN( edict(), CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }

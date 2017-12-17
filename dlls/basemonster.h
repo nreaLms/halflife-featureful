@@ -344,6 +344,22 @@ public:
 	
 	int Classify();
 	virtual int DefaultClassify();
+
+	//
+	// Glowshell effects
+	//
+	void GlowShellOn( Vector color, float flDuration );
+
+	void GlowShellOff( void );
+	void GlowShellUpdate( void );
+
+	float m_glowShellTime;
+	Vector m_glowShellColor;
+	BOOL m_glowShellUpdate;
+
+	Vector m_prevRenderColor;
+	int m_prevRenderFx;
+	int m_prevRenderAmt;
 };
 
 class CDeadMonster : public CBaseMonster
