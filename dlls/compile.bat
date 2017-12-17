@@ -44,6 +44,7 @@ set SOURCES=agrunt.cpp^
 	globals.cpp^
 	glock.cpp^
 	gman.cpp^
+	gonome.cpp^
 	h_ai.cpp^
 	h_battery.cpp^
 	h_cine.cpp^
@@ -74,6 +75,7 @@ set SOURCES=agrunt.cpp^
 	observer.cpp^
 	osprey.cpp^
 	pathcorner.cpp^
+	pitdrone.cpp^
 	plane.cpp^
 	plats.cpp^
 	player.cpp^
