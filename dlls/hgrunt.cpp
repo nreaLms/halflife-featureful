@@ -222,7 +222,7 @@ const char *CHGrunt::pGruntSentences[] =
 {
 	"HG_GREN", // grenade scared grunt
 	"HG_ALERT", // sees player
-	"HG_MONSTER", // sees monster
+	"HG_MONST", // sees monster
 	"HG_COVER", // running to cover
 	"HG_THROW", // about to throw grenade
 	"HG_CHARGE",  // running out to get the enemy
