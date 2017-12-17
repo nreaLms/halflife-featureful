@@ -47,7 +47,7 @@ public:
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
 	int ISoundMask( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int IRelationship( CBaseEntity *pTarget );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL CheckRangeAttack1( float flDot, float flDist );
@@ -143,7 +143,7 @@ const char *CISlave::pDeathSounds[] =
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CISlave::Classify( void )
+int CISlave::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MILITARY;
 }
@@ -508,14 +508,14 @@ void CISlave::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/islave.mdl" );
+	SetMyModel( "models/islave.mdl" );
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
-	m_bloodColor		= BLOOD_COLOR_GREEN;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects		= 0;
-	pev->health		= gSkillData.slaveHealth;
+	SetMyHealth( gSkillData.slaveHealth );
 	pev->view_ofs		= Vector( 0, 0, 64 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -533,7 +533,7 @@ void CISlave::Precache()
 {
 	size_t i;
 
-	PRECACHE_MODEL( "models/islave.mdl" );
+	PrecacheMyModel( "models/islave.mdl" );
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 	PRECACHE_SOUND( "debris/zap1.wav" );
 	PRECACHE_SOUND( "debris/zap4.wav" );

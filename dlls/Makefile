@@ -102,6 +102,7 @@ OBJ = \
 	$(DLL_OBJDIR)/ggrenade.o \
 	$(DLL_OBJDIR)/globals.o \
 	$(DLL_OBJDIR)/gman.o \
+	$(DLL_OBJDIR)/gonome.o \
 	$(DLL_OBJDIR)/h_ai.o \
 	$(DLL_OBJDIR)/h_battery.o \
 	$(DLL_OBJDIR)/h_cine.o \
@@ -132,6 +133,7 @@ OBJ = \
 	$(DLL_OBJDIR)/observer.o \
 	$(DLL_OBJDIR)/osprey.o \
 	$(DLL_OBJDIR)/pathcorner.o \
+	$(DLL_OBJDIR)/pitdrone.o \
 	$(DLL_OBJDIR)/plane.o \
 	$(DLL_OBJDIR)/plats.o \
 	$(DLL_OBJDIR)/player.o \
@@ -161,6 +163,7 @@ OBJ = \
 	$(DLL_OBJDIR)/tripmine.o \
 	$(DLL_OBJDIR)/turret.o \
 	$(DLL_OBJDIR)/util.o \
+	$(DLL_OBJDIR)/voltigore.o \
 	$(DLL_OBJDIR)/weapons.o \
 	$(DLL_OBJDIR)/world.o \
 	$(DLL_OBJDIR)/xen.o \

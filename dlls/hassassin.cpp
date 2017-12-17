@@ -65,7 +65,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed ( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int ISoundMask( void);
 	void Shoot( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -153,7 +153,7 @@ int CHAssassin::ISoundMask( void )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CHAssassin::Classify( void )
+int CHAssassin::DefaultClassify( void )
 {
 	return CLASS_HUMAN_MILITARY;
 }
@@ -275,14 +275,14 @@ void CHAssassin::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/hassassin.mdl" );
+	SetMyModel( "models/hassassin.mdl" );
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
-	m_bloodColor		= BLOOD_COLOR_RED;
+	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects		= 0;
-	pev->health		= gSkillData.hassassinHealth;
+	SetMyHealth( gSkillData.hassassinHealth );
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability		= bits_CAP_MELEE_ATTACK1 | bits_CAP_DOORS_GROUP;
@@ -302,7 +302,7 @@ void CHAssassin::Spawn()
 //=========================================================
 void CHAssassin::Precache()
 {
-	PRECACHE_MODEL( "models/hassassin.mdl" );
+	PrecacheMyModel( "models/hassassin.mdl" );
 
 	PRECACHE_SOUND( "weapons/pl_gun1.wav" );
 	PRECACHE_SOUND( "weapons/pl_gun2.wav" );

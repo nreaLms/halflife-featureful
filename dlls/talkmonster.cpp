@@ -55,7 +55,10 @@ const char *CTalkMonster::m_szFriends[TLK_CFRIENDS] =
 {
 	"monster_barney",
 	"monster_scientist",
+	"monster_otis",
+	"monster_cleansuit_scientist",
 	"monster_sitting_scientist",
+	"monster_sitting_cleansuit_scientist"
 };
 
 //=========================================================
@@ -597,7 +600,8 @@ void CTalkMonster::RunTask( Task_t *pTask )
 void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 {
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
-	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE )
+	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE 
+			&& IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
 	{
 		AlertFriends();
 		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
@@ -769,10 +773,15 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 
 	vecStart.z = pev->absmax.z;
 
-	if( fPlayer )
-		cfriends = 1;
-	else
+	if( fPlayer ) {
+		if (IsFriendWithPlayerBeforeProvoked()) {
+			cfriends = 1;
+		} else {
+			return NULL;
+		}
+	} else {
 		cfriends = TLK_CFRIENDS;
+	}
 
 	// for each type of friend...
 	for( i = cfriends-1; i > -1; i-- )
@@ -797,6 +806,11 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 			// If not a monster for some reason, or in a script, or prone
 			if( !pMonster || pMonster->m_MonsterState == MONSTERSTATE_SCRIPT || pMonster->m_MonsterState == MONSTERSTATE_PRONE )
 				continue;
+			
+			// has friend classname, but not friend really
+			if ( IRelationship(pMonster) >= R_DL || IRelationship(pMonster) == R_FR ) {
+				continue;
+			}
 
 			vecCheck = pFriend->pev->origin;
 			vecCheck.z = pFriend->pev->absmax.z;
@@ -1145,7 +1159,8 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( IsAlive() )
 	{
 		// if player damaged this entity, have other friends talk about it
-		if( pevAttacker && m_MonsterState != MONSTERSTATE_PRONE && FBitSet( pevAttacker->flags, FL_CLIENT ) )
+		if( pevAttacker && m_MonsterState != MONSTERSTATE_PRONE && FBitSet( pevAttacker->flags, FL_CLIENT ) 
+				&& IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
 		{
 			CBaseEntity *pFriend = FindNearestFriend( FALSE );
 
@@ -1360,7 +1375,7 @@ void CTalkMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	if( m_useTime > gpGlobals->time )
 		return;
 
-	if( pCaller != NULL && pCaller->IsPlayer() )
+	if( pCaller != NULL && pCaller->IsPlayer() && IRelationship(pCaller) < R_DL && IRelationship(pCaller) != R_FR )
 	{
 		// Pre-disaster followers can't be used
 		if( pev->spawnflags & SF_MONSTER_PREDISASTER )

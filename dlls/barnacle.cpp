@@ -37,7 +37,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	CBaseEntity *TongueTouchEnt( float *pflLength );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void EXPORT BarnacleThink( void );
 	void EXPORT WaitTillDead( void );
@@ -85,7 +85,7 @@ IMPLEMENT_SAVERESTORE( CBarnacle, CBaseMonster )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CBarnacle::Classify( void )
+int CBarnacle::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MONSTER;
 }
@@ -116,15 +116,15 @@ void CBarnacle::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/barnacle.mdl" );
+	SetMyModel( "models/barnacle.mdl" );
 	UTIL_SetSize( pev, Vector( -16, -16, -32 ), Vector( 16, 16, 0 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_NONE;
 	pev->takedamage = DAMAGE_AIM;
-	m_bloodColor = BLOOD_COLOR_RED;
+	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects = EF_INVLIGHT; // take light from the ceiling 
-	pev->health = 25;
+	SetMyHealth( 25 );
 	m_flFieldOfView = 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_flKillVictimTime = 0;
@@ -405,7 +405,7 @@ void CBarnacle::WaitTillDead( void )
 //=========================================================
 void CBarnacle::Precache()
 {
-	PRECACHE_MODEL( "models/barnacle.mdl" );
+	PrecacheMyModel( "models/barnacle.mdl" );
 
 	PRECACHE_SOUND( "barnacle/bcl_alert2.wav" );//happy, lifting food up
 	PRECACHE_SOUND( "barnacle/bcl_bite3.wav" );//just got food to mouth

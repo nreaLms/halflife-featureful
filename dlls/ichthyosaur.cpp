@@ -53,7 +53,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	CUSTOM_SCHEDULES
 
@@ -318,7 +318,7 @@ IMPLEMENT_CUSTOM_SCHEDULES( CIchthyosaur, CFlyingMonster )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CIchthyosaur::Classify( void )
+int CIchthyosaur::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MONSTER;
 }
@@ -466,13 +466,13 @@ void CIchthyosaur::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/icky.mdl" );
+	SetMyModel( "models/icky.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, -32 ), Vector( 32, 32, 32 ) );
 
 	pev->solid		= SOLID_BBOX;
 	pev->movetype		= MOVETYPE_FLY;
-	m_bloodColor		= BLOOD_COLOR_GREEN;
-	pev->health		= gSkillData.ichthyosaurHealth;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
+	SetMyHealth( gSkillData.ichthyosaurHealth );
 	pev->view_ofs		= Vector( 0, 0, 16 );
 	m_flFieldOfView		= VIEW_FIELD_WIDE;
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -503,7 +503,7 @@ void CIchthyosaur::Spawn()
 //=========================================================
 void CIchthyosaur::Precache()
 {
-	PRECACHE_MODEL( "models/icky.mdl" );
+	PrecacheMyModel( "models/icky.mdl" );
 
 	PRECACHE_SOUND_ARRAY( pIdleSounds );
 	PRECACHE_SOUND_ARRAY( pAlertSounds );

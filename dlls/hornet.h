@@ -37,7 +37,7 @@ class CHornet : public CBaseMonster
 public:
 	void Spawn( void );
 	void Precache( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int IRelationship( CBaseEntity *pTarget );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );

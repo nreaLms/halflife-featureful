@@ -170,6 +170,7 @@ void DecalGunshot( TraceResult *pTrace, int iBulletType )
 		case BULLET_PLAYER_BUCKSHOT:
 		case BULLET_PLAYER_357:
 		case BULLET_PLAYER_762:
+		case BULLET_MONSTER_357:
 		default:
 			// smoke and decal
 			UTIL_GunshotDecalTrace( pTrace, DamageDecal( pEntity, DMG_BULLET ) );

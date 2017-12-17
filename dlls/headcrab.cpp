@@ -86,7 +86,7 @@ public:
 	void IdleSound( void );
 	void AlertSound( void );
 	void PrescheduleThink( void );
-	int  Classify ( void );
+	int  DefaultClassify ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
@@ -158,7 +158,7 @@ const char *CHeadCrab::pBiteSounds[] =
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CHeadCrab::Classify( void )
+int CHeadCrab::DefaultClassify( void )
 {
 	return CLASS_ALIEN_PREY;
 }
@@ -281,14 +281,14 @@ void CHeadCrab::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/headcrab.mdl" );
+	SetMyModel( "models/headcrab.mdl" );
 	UTIL_SetSize( pev, Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
-	m_bloodColor		= BLOOD_COLOR_GREEN;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects		= 0;
-	pev->health		= gSkillData.headcrabHealth;
+	SetMyHealth( gSkillData.headcrabHealth );
 	pev->view_ofs		= Vector( 0, 0, 20 );// position of the eyes relative to monster's origin.
 	pev->yaw_speed		= 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
 	m_flFieldOfView		= 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
@@ -309,7 +309,7 @@ void CHeadCrab::Precache()
 	PRECACHE_SOUND_ARRAY( pDeathSounds );
 	PRECACHE_SOUND_ARRAY( pBiteSounds );
 
-	PRECACHE_MODEL( "models/headcrab.mdl" );
+	PrecacheMyModel( "models/headcrab.mdl" );
 }
 
 //=========================================================
@@ -499,17 +499,17 @@ LINK_ENTITY_TO_CLASS( monster_babycrab, CBabyCrab )
 void CBabyCrab::Spawn( void )
 {
 	CHeadCrab::Spawn();
-	SET_MODEL( ENT( pev ), "models/baby_headcrab.mdl" );
+	SetMyModel( "models/baby_headcrab.mdl" );
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 192;
 	UTIL_SetSize( pev, Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
 	
-	pev->health = gSkillData.headcrabHealth * 0.25;	// less health than full grown
+	SetMyHealth( gSkillData.headcrabHealth * 0.25 );	// less health than full grown
 }
 
 void CBabyCrab::Precache( void )
 {
-	PRECACHE_MODEL( "models/baby_headcrab.mdl" );
+	PrecacheMyModel( "models/baby_headcrab.mdl" );
 	CHeadCrab::Precache();
 }
 

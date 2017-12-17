@@ -41,6 +41,8 @@ struct skilldata_t
 	float bullsquidDmgWhip;
 	float bullsquidDmgSpit;
 
+	float cleansuitScientistHealth;
+
 	float gargantuaHealth;
 	float gargantuaDmgSlash;
 	float gargantuaDmgFire;
@@ -75,8 +77,19 @@ struct skilldata_t
 	float controllerSpeedBall;
 	float controllerDmgBall;
 
+	float massnHealth;
+	float massnDmgKick;
+	float massnGrenadeSpeed;
+
 	float nihilanthHealth;
 	float nihilanthZap;
+	
+	float pitdroneHealth;
+	float pitdroneDmgBite;
+	float pitdroneDmgWhip;
+	float pitdroneDmgSpit;
+
+	float otisHealth;
 
 	float scientistHealth;
 
@@ -84,9 +97,29 @@ struct skilldata_t
 	float snarkDmgBite;
 	float snarkDmgPop;
 
+	float voltigoreHealth;
+	float voltigoreDmgPunch;
+	float voltigoreDmgBeam;
+
+	float babyVoltigoreHealth;
+	float babyVoltigoreDmgPunch;
+
 	float zombieHealth;
 	float zombieDmgOneSlash;
 	float zombieDmgBothSlash;
+
+	float zombieBarneyHealth;
+	float zombieBarneyDmgOneSlash;
+	float zombieBarneyDmgBothSlash;
+
+	float zombieSoldierHealth;
+	float zombieSoldierDmgOneSlash;
+	float zombieSoldierDmgBothSlash;
+
+	float gonomeHealth;
+	float gonomeDmgOneSlash;
+	float gonomeDmgGuts;
+	float gonomeDmgOneBite;
 
 	float turretHealth;
 	float miniturretHealth;
@@ -118,6 +151,8 @@ struct skilldata_t
 	float monDmgMP5;
 	float monDmg12MM;
 	float monDmgHornet;
+	float monDmg357;
+	float monDmg762;
 
 	// health/suit charge
 	float suitchargerCapacity;

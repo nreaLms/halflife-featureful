@@ -180,6 +180,15 @@ void CGib::SpawnHeadGib( entvars_t *pevVictim )
 
 void CGib::SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
 {
+	if (human) {
+		SpawnRandomGibs( pevVictim, cGibs, "models/hgibs.mdl", HUMAN_GIB_COUNT, 1 ); // start at one to avoid throwing random amounts of skulls (0th gib)
+	} else {
+		SpawnRandomGibs( pevVictim, cGibs, "models/agibs.mdl", ALIEN_GIB_COUNT );
+	}
+}
+
+void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum , int startGibNum)
+{
 	int cSplat;
 
 	for( cSplat = 0; cSplat < cGibs; cSplat++ )
@@ -189,22 +198,12 @@ void CGib::SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
 		if( g_Language == LANGUAGE_GERMAN )
 		{
 			pGib->Spawn( "models/germangibs.mdl" );
-			pGib->pev->body = RANDOM_LONG( 0, GERMAN_GIB_COUNT - 1 );
+			pGib->pev->body = RANDOM_LONG( startGibNum, GERMAN_GIB_COUNT - 1 );
 		}
 		else
 		{
-			if( human )
-			{
-				// human pieces
-				pGib->Spawn( "models/hgibs.mdl" );
-				pGib->pev->body = RANDOM_LONG( 1, HUMAN_GIB_COUNT - 1 );// start at one to avoid throwing random amounts of skulls (0th gib)
-			}
-			else
-			{
-				// aliens
-				pGib->Spawn( "models/agibs.mdl" );
-				pGib->pev->body = RANDOM_LONG( 0, ALIEN_GIB_COUNT - 1 );
-			}
+			pGib->Spawn( gibModel );
+			pGib->pev->body = RANDOM_LONG( startGibNum, gibBodiesNum - 1 );
 		}
 
 		if( pevVictim )
@@ -252,7 +251,7 @@ void CGib::SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
 
 BOOL CBaseMonster::HasHumanGibs( void )
 {
-	int myClass = Classify();
+	int myClass = DefaultClassify();
 
 	if( myClass == CLASS_HUMAN_MILITARY ||
 		myClass == CLASS_PLAYER_ALLY ||
@@ -266,7 +265,7 @@ BOOL CBaseMonster::HasHumanGibs( void )
 
 BOOL CBaseMonster::HasAlienGibs( void )
 {
-	int myClass = Classify();
+	int myClass = DefaultClassify();
 
 	if( myClass == CLASS_ALIEN_MILITARY ||
 		myClass == CLASS_ALIEN_MONSTER ||
@@ -1402,6 +1401,8 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 			case BULLET_MONSTER_MP5:
 			case BULLET_MONSTER_9MM:
 			case BULLET_MONSTER_12MM:
+			case BULLET_MONSTER_357:
+			case BULLET_MONSTER_762:
 			default:
 				MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecTracerSrc );
 					WRITE_BYTE( TE_TRACER );
@@ -1449,6 +1450,16 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 					TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
 					DecalGunshot( &tr, iBulletType );
 				}
+				break;
+			case BULLET_MONSTER_357:
+				pEntity->TraceAttack(pevAttacker, gSkillData.monDmg357, vecDir, &tr, DMG_BULLET); // TODO: use different skill for monsters?
+				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
+				DecalGunshot( &tr, iBulletType );
+				break;
+			case BULLET_MONSTER_762:
+				pEntity->TraceAttack( pevAttacker, gSkillData.monDmg762, vecDir, &tr, DMG_BULLET );
+				TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
+				DecalGunshot( &tr, iBulletType );
 				break;
 			case BULLET_NONE: // FIX
 				pEntity->TraceAttack( pevAttacker, 50, vecDir, &tr, DMG_CLUB );

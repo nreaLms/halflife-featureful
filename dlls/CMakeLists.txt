@@ -66,6 +66,7 @@ set (SVDLL_SOURCES
 	globals.cpp
 	glock.cpp
 	gman.cpp
+	gonome.cpp
 	h_ai.cpp
 	h_battery.cpp
 	h_cine.cpp
@@ -97,6 +98,7 @@ set (SVDLL_SOURCES
 	osprey.cpp
 	pathcorner.cpp
 	pipewrench.cpp
+	pitdrone.cpp
 	plane.cpp
 	plats.cpp
 	player.cpp
@@ -127,6 +129,7 @@ set (SVDLL_SOURCES
 	tripmine.cpp
 	turret.cpp
 	util.cpp
+	voltigore.cpp
 	weapons.cpp
 	world.cpp
 	xen.cpp

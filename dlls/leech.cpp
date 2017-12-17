@@ -102,7 +102,7 @@ public:
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void Activate( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	int Classify( void ) { return CLASS_INSECT; }
+	int DefaultClassify( void ) { return CLASS_INSECT; }
 	int IRelationship( CBaseEntity *pTarget );
 
 	virtual int Save( CSave &save );
@@ -169,7 +169,7 @@ const char *CLeech::pAlertSounds[] =
 void CLeech::Spawn( void )
 {
 	Precache();
-	SET_MODEL( ENT( pev ), "models/leech.mdl" );
+	SetMyModel( "models/leech.mdl" );
 	// Just for fun
 	//	SET_MODEL( ENT( pev ), "models/icky.mdl" );
 	
@@ -179,7 +179,7 @@ void CLeech::Spawn( void )
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	SetBits( pev->flags, FL_SWIM );
-	pev->health = gSkillData.leechHealth;
+	SetMyHealth( gSkillData.leechHealth );
 
 	m_flFieldOfView = -0.5;	// 180 degree FOV
 	m_flDistLook = 750;
@@ -250,7 +250,7 @@ void CLeech::SwitchLeechState( void )
 
 int CLeech::IRelationship( CBaseEntity *pTarget )
 {
-	if( pTarget->IsPlayer() )
+	if( pTarget->IsPlayer() && Classify() == DefaultClassify() )
 		return R_DL;
 	return CBaseMonster::IRelationship( pTarget );
 }
@@ -274,7 +274,7 @@ void CLeech::Precache( void )
 	size_t i;
 
 	//PRECACHE_MODEL( "models/icky.mdl" );
-	PRECACHE_MODEL( "models/leech.mdl" );
+	PrecacheMyModel( "models/leech.mdl" );
 
 	for( i = 0; i < ARRAYSIZE( pAttackSounds ); i++ )
 		PRECACHE_SOUND( pAttackSounds[i] );

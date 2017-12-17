@@ -63,6 +63,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            globals.cpp \
            glock.cpp \
            gman.cpp \
+           gonome.cpp \
            h_ai.cpp \
            h_battery.cpp \
            h_cycler.cpp \
@@ -93,6 +94,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
 	   observer.cpp \
            osprey.cpp \
            pathcorner.cpp \
+           pitdrone.cpp \
            plane.cpp \
            plats.cpp \
            player.cpp \
@@ -122,6 +124,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            tripmine.cpp \
            turret.cpp \
            util.cpp \
+           voltigore.cpp \
            weapons.cpp \
            world.cpp \
            xen.cpp \

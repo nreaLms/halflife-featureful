@@ -105,6 +105,8 @@ public:
 	// Scripted sequence Info
 	SCRIPTSTATE m_scriptState;		// internal cinematic state
 	CCineMonster *m_pCine;
+	
+	int m_iClass;
 
 	virtual int Save( CSave &save ); 
 	virtual int Restore( CRestore &restore );
@@ -138,6 +140,12 @@ public:
 	virtual void MonsterThink( void );
 	void EXPORT CallMonsterThink( void ) { this->MonsterThink(); }
 	virtual int IRelationship( CBaseEntity *pTarget );
+	int IDefaultRelationship(CBaseEntity *pTarget );
+	int IDefaultRelationship( int classify );
+	bool IsFriendWithPlayerBeforeProvoked();
+	
+	static int IDefaultRelationship(int classify1, int classify2);
+	
 	virtual void MonsterInit( void );
 	virtual void MonsterInitDead( void );	// Call after animation/pose is set up
 	virtual void BecomeDead( void );
@@ -327,6 +335,25 @@ public:
 	BOOL ExitScriptedSequence();
 	BOOL CineCleanup();
 
-	CBaseEntity* DropItem( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+	CBaseEntity* DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+	
+	void SetMyHealth( const float health );
+	void SetMyModel( const char* model );
+	void PrecacheMyModel( const char* model );
+	void SetMyBloodColor( int bloodColor );
+	
+	int Classify();
+	virtual int DefaultClassify();
 };
+
+class CDeadMonster : public CBaseMonster
+{
+public:
+	void SpawnHelper( const char* modelName, const char* errorMessage, int bloodColor = BLOOD_COLOR_RED, int health = 8);
+	void KeyValue( KeyValueData *pkvd );
+ 
+	virtual const char* getPos(int pose) const = 0;
+	int	m_iPose;// which sequence to display	-- temporary, don't need to save
+};
+
 #endif // BASEMONSTER_H

@@ -72,7 +72,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int ISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetObjectCollisionBox( void )
@@ -193,7 +193,7 @@ const char *CAGrunt::pAlertSounds[] =
 //=========================================================
 int CAGrunt::IRelationship( CBaseEntity *pTarget )
 {
-	if( FClassnameIs( pTarget->pev, "monster_human_grunt" ) )
+	if( IDefaultRelationship(pTarget) >= R_DL && FClassnameIs( pTarget->pev, "monster_human_grunt" ) )
 	{
 		return R_NM;
 	}
@@ -379,7 +379,7 @@ void CAGrunt::PainSound( void )
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
-int CAGrunt::Classify( void )
+int CAGrunt::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MILITARY;
 }
@@ -583,14 +583,14 @@ void CAGrunt::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/agrunt.mdl" );
+	SetMyModel( "models/agrunt.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_GREEN;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
-	pev->health = gSkillData.agruntHealth;
+	SetMyHealth( gSkillData.agruntHealth );
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_afCapability = 0;
@@ -610,7 +610,7 @@ void CAGrunt::Precache()
 {
 	size_t i;
 
-	PRECACHE_MODEL( "models/agrunt.mdl" );
+	PrecacheMyModel( "models/agrunt.mdl" );
 
 	for( i = 0; i < ARRAYSIZE( pAttackHitSounds ); i++ )
 		PRECACHE_SOUND( pAttackHitSounds[i] );

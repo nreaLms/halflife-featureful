@@ -202,7 +202,7 @@ public:
 	void Precache( void );
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -692,7 +692,7 @@ void CGargantua::PrescheduleThink( void )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CGargantua::Classify( void )
+int CGargantua::DefaultClassify( void )
 {
 	return CLASS_ALIEN_MONSTER;
 }
@@ -733,13 +733,13 @@ void CGargantua::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/garg.mdl" );
+	SetMyModel( "models/garg.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
-	m_bloodColor		= BLOOD_COLOR_GREEN;
-	pev->health		= gSkillData.gargantuaHealth;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
+	SetMyHealth( gSkillData.gargantuaHealth );
 	//pev->view_ofs		= Vector ( 0, 0, 96 );// taken from mdl file
 	m_flFieldOfView		= -0.2;// width of forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -761,7 +761,7 @@ void CGargantua::Precache()
 {
 	size_t i;
 
-	PRECACHE_MODEL( "models/garg.mdl" );
+	PrecacheMyModel( "models/garg.mdl" );
 	PRECACHE_MODEL( GARG_EYE_SPRITE_NAME );
 	PRECACHE_MODEL( GARG_BEAM_SPRITE_NAME );
 	PRECACHE_MODEL( GARG_BEAM_SPRITE2 );

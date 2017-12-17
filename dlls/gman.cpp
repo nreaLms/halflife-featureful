@@ -32,7 +32,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int Classify ( void );
+	int DefaultClassify ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int ISoundMask ( void );
 
@@ -66,7 +66,7 @@ IMPLEMENT_SAVERESTORE( CGMan, CBaseMonster )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CGMan::Classify( void )
+int CGMan::DefaultClassify( void )
 {
 	return CLASS_NONE;
 }
@@ -119,13 +119,13 @@ void CGMan::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/gman.mdl" );
+	SetMyModel( "models/gman.mdl" );
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
-	m_bloodColor		= DONT_BLEED;
-	pev->health		= 100;
+	SetMyBloodColor( DONT_BLEED );
+	SetMyHealth( 100 );
 	m_flFieldOfView		= 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 
@@ -137,7 +137,7 @@ void CGMan::Spawn()
 //=========================================================
 void CGMan::Precache()
 {
-	PRECACHE_MODEL( "models/gman.mdl" );
+	PrecacheMyModel( "models/gman.mdl" );
 }
 
 //=========================================================

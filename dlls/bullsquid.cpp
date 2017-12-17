@@ -26,6 +26,7 @@
 #include	"decals.h"
 #include	"soundent.h"
 #include	"game.h"
+#include	"bullsquid.h"
 
 #define		SQUID_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve
 
@@ -55,21 +56,6 @@ enum
 //=========================================================
 // Bullsquid's spit projectile
 //=========================================================
-class CSquidSpit : public CBaseEntity
-{
-public:
-	void Spawn( void );
-
-	static void Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
-	void Touch( CBaseEntity *pOther );
-	void EXPORT Animate( void );
-
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
-	static TYPEDESCRIPTION m_SaveData[];
-
-	int m_maxFrame;
-};
 
 LINK_ENTITY_TO_CLASS( squidspit, CSquidSpit )
 
@@ -82,14 +68,19 @@ IMPLEMENT_SAVERESTORE( CSquidSpit, CBaseEntity )
 
 void CSquidSpit::Spawn( void )
 {
+	SpawnHelper("sprites/bigspit.spr", "squidspit");
+}
+
+void CSquidSpit::SpawnHelper(const char *modelName, const char *className)
+{
 	pev->movetype = MOVETYPE_FLY;
-	pev->classname = MAKE_STRING( "squidspit" );
+	pev->classname = MAKE_STRING( className );
 
 	pev->solid = SOLID_BBOX;
 	pev->rendermode = kRenderTransAlpha;
 	pev->renderamt = 255;
 
-	SET_MODEL( ENT( pev ), "sprites/bigspit.spr" );
+	SET_MODEL( ENT( pev ), modelName );
 	pev->frame = 0;
 	pev->scale = 0.5;
 
@@ -184,36 +175,39 @@ void CSquidSpit::Touch( CBaseEntity *pOther )
 #define		BSQUID_AE_HOP		( 5 )
 #define		BSQUID_AE_THROW		( 6 )
 
+//=========================================================
+// CBullsquid
+//=========================================================
 class CBullsquid : public CBaseMonster
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void SetYawSpeed( void );
-	int ISoundMask( void );
-	int Classify( void );
-	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	void IdleSound( void );
-	void PainSound( void );
-	void DeathSound( void );
-	void AlertSound( void );
-	void AttackSound( void );
-	void StartTask( Task_t *pTask );
-	void RunTask( Task_t *pTask );
-	BOOL CheckMeleeAttack1( float flDot, float flDist );
-	BOOL CheckMeleeAttack2( float flDot, float flDist );
-	BOOL CheckRangeAttack1( float flDot, float flDist );
-	void RunAI( void );
-	BOOL FValidateHintType( short sHint );
-	Schedule_t *GetSchedule( void );
-	Schedule_t *GetScheduleOfType( int Type );
-	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	int IRelationship( CBaseEntity *pTarget );
-	int IgnoreConditions( void );
-	MONSTERSTATE GetIdealState( void );
+	virtual void Spawn(void);
+	virtual void Precache(void);
+	void SetYawSpeed(void);
+	int  ISoundMask(void);
+	virtual int  DefaultClassify(void);
+	virtual void HandleAnimEvent(MonsterEvent_t *pEvent);
+	virtual void IdleSound(void);
+	virtual void PainSound(void);
+	virtual void DeathSound(void);
+	virtual void AlertSound(void);
+	virtual void AttackSound(void);
+	virtual void StartTask(Task_t *pTask);
+	void RunTask(Task_t *pTask);
+	virtual BOOL CheckMeleeAttack1(float flDot, float flDist);
+	virtual BOOL CheckMeleeAttack2(float flDot, float flDist);
+	virtual BOOL CheckRangeAttack1(float flDot, float flDist);
+	virtual void RunAI(void);
+	BOOL FValidateHintType(short sHint);
+	Schedule_t *GetSchedule(void);
+	Schedule_t *GetScheduleOfType(int Type);
+	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
+	virtual int IRelationship(CBaseEntity *pTarget);
+	virtual int IgnoreConditions(void);
+	MONSTERSTATE GetIdealState(void);
 
-	int Save( CSave &save ); 
-	int Restore( CRestore &restore );
+	int	Save(CSave &save);
+	int Restore(CRestore &restore);
 
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
@@ -421,7 +415,7 @@ int CBullsquid::ISoundMask( void )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CBullsquid::Classify( void )
+int CBullsquid::DefaultClassify( void )
 {
 	return CLASS_ALIEN_PREDATOR;
 }
@@ -668,14 +662,14 @@ void CBullsquid::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/bullsquid.mdl" );
+	SetMyModel( "models/bullsquid.mdl" );
 	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_GREEN;
+	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
-	pev->health = gSkillData.bullsquidHealth;
+	SetMyHealth( gSkillData.bullsquidHealth );
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
@@ -690,7 +684,7 @@ void CBullsquid::Spawn()
 //=========================================================
 void CBullsquid::Precache()
 {
-	PRECACHE_MODEL( "models/bullsquid.mdl" );
+	PrecacheMyModel( "models/bullsquid.mdl" );
 
 	PRECACHE_MODEL( "sprites/bigspit.spr" );// spit projectile.
 

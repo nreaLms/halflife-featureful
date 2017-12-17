@@ -75,7 +75,7 @@ public:
 	void Precache( void );
 
 	void SetYawSpeed( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
@@ -90,7 +90,7 @@ public:
 	float CoverRadius( void ) { return 1200; }		// Need more room for cover because scientists want to get far away!
 	BOOL DisregardEnemy( CBaseEntity *pEnemy ) { return !pEnemy->IsAlive() || ( gpGlobals->time - m_fearTime ) > 15; }
 
-	BOOL CanHeal( void );
+	virtual BOOL	CanHeal( void );
 	void Heal( void );
 	void Scream( void );
 
@@ -112,6 +112,10 @@ public:
 
 	CUSTOM_SCHEDULES
 
+protected:
+	void SciSpawnHelper(const char* modelName, float health);
+	void PrecacheSounds();
+	
 private:	
 	float m_painTime;
 	float m_healTime;
@@ -567,7 +571,7 @@ void CScientist::RunTask( Task_t *pTask )
 // Classify - indicates this monster's place in the 
 // relationship table.
 //=========================================================
-int CScientist::Classify( void )
+int CScientist::DefaultClassify( void )
 {
 	return CLASS_HUMAN_PASSIVE;
 }
@@ -635,17 +639,17 @@ void CScientist::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CScientist::Spawn( void )
+void CScientist::SciSpawnHelper(const char* modelName, float health)
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), "models/scientist.mdl" );
+	SetMyModel( modelName );
 	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
-	m_bloodColor = BLOOD_COLOR_RED;
-	pev->health = gSkillData.scientistHealth;
+	SetMyBloodColor( BLOOD_COLOR_RED );
+	SetMyHealth( health );
 	pev->view_ofs = Vector( 0, 0, 50 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so scientists will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -666,9 +670,16 @@ void CScientist::Spawn( void )
 	// Luther is black, make his hands black
 	if( pev->body == HEAD_LUTHER )
 		pev->skin = 1;
+}
 
+void CScientist::Spawn()
+{
+	Precache( );
+	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
 	MonsterInit();
-	SetUse( &CTalkMonster::FollowerUse );
+	if (IsFriendWithPlayerBeforeProvoked()) {
+		SetUse( &CTalkMonster::FollowerUse );
+	}
 }
 
 //=========================================================
@@ -676,19 +687,24 @@ void CScientist::Spawn( void )
 //=========================================================
 void CScientist::Precache( void )
 {
-	PRECACHE_MODEL( "models/scientist.mdl" );
-	PRECACHE_SOUND( "scientist/sci_pain1.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain2.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain3.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain4.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain5.wav" );
+	PrecacheMyModel( "models/scientist.mdl" );
+	PrecacheSounds();
 
 	// every new scientist must call this, otherwise
 	// when a level is loaded, nobody will talk (time is reset to 0)
 	TalkInit();
 
 	CTalkMonster::Precache();
-}	
+}
+
+void CScientist::PrecacheSounds()
+{
+	PRECACHE_SOUND( "scientist/sci_pain1.wav" );
+	PRECACHE_SOUND( "scientist/sci_pain2.wav" );
+	PRECACHE_SOUND( "scientist/sci_pain3.wav" );
+	PRECACHE_SOUND( "scientist/sci_pain4.wav" );
+	PRECACHE_SOUND( "scientist/sci_pain5.wav" );
+}
 
 // Init talk data
 void CScientist::TalkInit()
@@ -698,8 +714,11 @@ void CScientist::TalkInit()
 	// scientist will try to talk to friends in this order:
 
 	m_szFriends[0] = "monster_scientist";
-	m_szFriends[1] = "monster_sitting_scientist";
-	m_szFriends[2] = "monster_barney";
+	m_szFriends[1] = "monster_cleansuit_scientist";
+	m_szFriends[2] = "monster_sitting_scientist";
+	m_szFriends[3] = "monster_sitting_cleansuit_scientist";
+	m_szFriends[4] = "monster_barney";
+	m_szFriends[5] = "monster_otis";
 
 	// scientists speach group names (group names are in sentences.txt)
 
@@ -746,7 +765,7 @@ void CScientist::TalkInit()
 
 int CScientist::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	if( pevInflictor && pevInflictor->flags & FL_CLIENT )
+	if( pevInflictor && pevInflictor->flags & FL_CLIENT && IsFriendWithPlayerBeforeProvoked() )
 	{
 		Remember( bits_MEMORY_PROVOKED );
 		StopFollowing( TRUE );
@@ -1075,8 +1094,8 @@ void CScientist::Heal( void )
 
 int CScientist::FriendNumber( int arrayNumber )
 {
-	static int array[3] = { 1, 2, 0 };
-	if( arrayNumber < 3 )
+	static int array[6] = { 1, 3, 4, 5, 0, 2 };
+	if( arrayNumber < 6 )
 		return array[arrayNumber];
 	return arrayNumber;
 }
@@ -1085,76 +1104,40 @@ int CScientist::FriendNumber( int arrayNumber )
 //=========================================================
 // Dead Scientist PROP
 //=========================================================
-class CDeadScientist : public CBaseMonster
+class CDeadScientist : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int Classify( void )
-	{
-		return CLASS_HUMAN_PASSIVE;
-	}
+	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
 
-	void KeyValue( KeyValueData *pkvd );
-	int m_iPose;// which sequence to display
+	const char* getPos(int pos) const;
 	static const char *m_szPoses[7];
 };
+const char *CDeadScientist::m_szPoses[] = { "lying_on_back", "lying_on_stomach", "dead_sitting", "dead_hang", "dead_table1", "dead_table2", "dead_table3" };
 
-const char *CDeadScientist::m_szPoses[] =
+const char* CDeadScientist::getPos(int pos) const
 {
-	"lying_on_back",
-	"lying_on_stomach",
-	"dead_sitting",
-	"dead_hang",
-	"dead_table1",
-	"dead_table2",
-	"dead_table3"
-};
-
-void CDeadScientist::KeyValue( KeyValueData *pkvd )
-{
-	if( FStrEq( pkvd->szKeyName, "pose" ) )
-	{
-		m_iPose = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
-	else
-		CBaseMonster::KeyValue( pkvd );
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
 }
+
 LINK_ENTITY_TO_CLASS( monster_scientist_dead, CDeadScientist )
 
 //
 // ********** DeadScientist SPAWN **********
 //
-void CDeadScientist::Spawn()
+void CDeadScientist :: Spawn( )
 {
-	PRECACHE_MODEL( "models/scientist.mdl" );
-	SET_MODEL( ENT( pev ), "models/scientist.mdl" );
+	SpawnHelper("models/scientist.mdl", "Dead scientist with bad pose\n");
 
-	pev->effects = 0;
-	pev->sequence = 0;
-
-	// Corpses have less health
-	pev->health = 8;//gSkillData.scientistHealth;
-	
-	m_bloodColor = BLOOD_COLOR_RED;
-
-	if( pev->body == -1 )
-	{
-		// -1 chooses a random head
-		pev->body = RANDOM_LONG( 0, NUM_SCIENTIST_HEADS - 1 );// pick a head, any head
+	if ( pev->body == -1 )
+	{// -1 chooses a random head
+		pev->body = RANDOM_LONG(0, NUM_SCIENTIST_HEADS-1);// pick a head, any head
 	}
-
 	// Luther is black, make his hands black
-	if( pev->body == HEAD_LUTHER )
+	if ( pev->body == HEAD_LUTHER )
 		pev->skin = 1;
 	else
 		pev->skin = 0;
-
-	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
-	if( pev->sequence == -1 )
-	{
-		ALERT ( at_console, "Dead scientist with bad pose\n" );
-	}
 
 	//	pev->skin += 2; // use bloody skin -- UNDONE: Turn this back on when we have a bloody skin again!
 	MonsterInitDead();
@@ -1170,7 +1153,7 @@ public:
 	void Precache( void );
 
 	void EXPORT SittingThink( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
@@ -1182,6 +1165,9 @@ public:
 	int m_baseSequence;	
 	int m_headTurn;
 	float m_flResponseDelay;
+
+protected:
+	void SciSpawnHelper(const char* modelName);
 };
 
 LINK_ENTITY_TO_CLASS( monster_sitting_scientist, CSittingScientist )
@@ -1208,10 +1194,10 @@ SITTING_ANIM_sitting3
 //
 // ********** Scientist SPAWN **********
 //
-void CSittingScientist::Spawn()
+void CSittingScientist::SciSpawnHelper(const char* modelName)
 {
-	PRECACHE_MODEL( "models/scientist.mdl" );
-	SET_MODEL( ENT( pev ), "models/scientist.mdl" );
+	PrecacheMyModel( modelName );
+	SetMyModel( modelName );
 	Precache();
 	InitBoneControllers();
 
@@ -1220,9 +1206,9 @@ void CSittingScientist::Spawn()
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
 	pev->effects = 0;
-	pev->health = 50;
+	SetMyHealth( 50 );
 	
-	m_bloodColor = BLOOD_COLOR_RED;
+	SetMyBloodColor( BLOOD_COLOR_RED );
 	m_flFieldOfView = VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
 
 	m_afCapability= bits_CAP_HEAR | bits_CAP_TURN_HEAD;
@@ -1249,6 +1235,14 @@ void CSittingScientist::Spawn()
 	DROP_TO_FLOOR( ENT( pev ) );
 }
 
+void CSittingScientist::Spawn( )
+{
+	SciSpawnHelper("models/scientist.mdl");
+	// Luther is black, make his hands black
+	if ( pev->body == HEAD_LUTHER )
+		pev->skin = 1;
+}
+
 void CSittingScientist::Precache( void )
 {
 	m_baseSequence = LookupSequence( "sitlookleft" );
@@ -1258,15 +1252,15 @@ void CSittingScientist::Precache( void )
 //=========================================================
 // ID as a passive human
 //=========================================================
-int CSittingScientist::Classify( void )
+int CSittingScientist::DefaultClassify( void )
 {
 	return CLASS_HUMAN_PASSIVE;
 }
 
 int CSittingScientist::FriendNumber( int arrayNumber )
 {
-	static int array[3] = { 2, 1, 0 };
-	if( arrayNumber < 3 )
+	static int array[6] = { 4, 5, 1, 3, 0, 2 };
+	if( arrayNumber < 6 )
 		return array[arrayNumber];
 	return arrayNumber;
 }
@@ -1429,3 +1423,74 @@ int CSittingScientist::FIdleSpeak( void )
 	CTalkMonster::g_talkWaitTime = 0;
 	return FALSE;
 }
+
+class CCleansuitScientist : public CScientist
+{
+public:
+	void Spawn();
+	void Precache();
+	BOOL CanHeal();
+};
+
+LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist, CCleansuitScientist )
+
+void CCleansuitScientist::Spawn()
+{
+	Precache( );
+	SciSpawnHelper("models/cleansuit_scientist.mdl", gSkillData.cleansuitScientistHealth);
+	MonsterInit();
+	SetUse( &CScientist::FollowerUse );
+}
+
+void CCleansuitScientist::Precache()
+{
+	PrecacheMyModel("models/cleansuit_scientist.mdl");
+	PrecacheSounds();
+	TalkInit();
+	CTalkMonster::Precache();
+}
+
+BOOL CCleansuitScientist::CanHeal()
+{
+	return FALSE;
+}
+
+class CDeadCleansuitScientist : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
+
+	const char* getPos(int pos) const;
+	static char *m_szPoses[7];
+};
+char *CDeadCleansuitScientist::m_szPoses[] = { "lying_on_back", "lying_on_stomach", "dead_sitting", "dead_hang", "dead_table1", "dead_table2", "dead_table3" };
+
+const char* CDeadCleansuitScientist::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist_dead, CDeadCleansuitScientist )
+
+void CDeadCleansuitScientist :: Spawn( )
+{
+	SpawnHelper("models/cleansuit_scientist.mdl", "Dead cleansuit scientist with bad pose\n");
+	if ( pev->body == -1 ) {
+		pev->body = RANDOM_LONG(0, NUM_SCIENTIST_HEADS-1);
+	}
+	MonsterInitDead();
+}
+
+class CSittingCleansuitScientist : public CSittingScientist
+{
+public:
+	void Spawn();
+};
+
+void CSittingCleansuitScientist::Spawn()
+{
+	SciSpawnHelper("models/cleansuit_scientist.mdl");
+}
+
+LINK_ENTITY_TO_CLASS( monster_sitting_cleansuit_scientist, CSittingCleansuitScientist )

@@ -34,8 +34,9 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
+
+	int DefaultClassify( void ) { return CLASS_ALIEN_MILITARY; }
 	void UpdateOnRemove();
-	int Classify( void ) { return CLASS_ALIEN_MILITARY; };
 	int BloodColor( void ) { return BLOOD_COLOR_YELLOW; }
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
