@@ -1452,7 +1452,7 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 				}
 				break;
 			case BULLET_MONSTER_357:
-				pEntity->TraceAttack(pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET); // TODO: use different skill for monsters?				
+				pEntity->TraceAttack(pevAttacker, gSkillData.monDmg357, vecDir, &tr, DMG_BULLET); // TODO: use different skill for monsters?
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 				DecalGunshot( &tr, iBulletType );
 				break;

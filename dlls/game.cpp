@@ -479,6 +479,10 @@ cvar_t	sk_9mm_bullet1 = {"sk_9mm_bullet1","0"};
 cvar_t	sk_9mm_bullet2 = {"sk_9mm_bullet2","0"};
 cvar_t	sk_9mm_bullet3 = {"sk_9mm_bullet3","0"};
 
+cvar_t	sk_357_bullet1 = {"sk_357_bullet1","35"};
+cvar_t	sk_357_bullet2 = {"sk_357_bullet2","35"};
+cvar_t	sk_357_bullet3 = {"sk_357_bullet3","35"};
+
 cvar_t	sk_762_bullet1 = {"sk_762_bullet1","35"};
 cvar_t	sk_762_bullet2 = {"sk_762_bullet2","40"};
 cvar_t	sk_762_bullet3 = {"sk_762_bullet3","40"};
@@ -1001,6 +1005,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_9mm_bullet1 );// {"sk_9mm_bullet1","0"};
 	CVAR_REGISTER( &sk_9mm_bullet2 );// {"sk_9mm_bullet2","0"};
 	CVAR_REGISTER( &sk_9mm_bullet3 );// {"sk_9mm_bullet3","0"};
+
+	CVAR_REGISTER( &sk_357_bullet1 );// {"sk_357_bullet1","0"};
+	CVAR_REGISTER( &sk_357_bullet2 );// {"sk_357_bullet2","0"};
+	CVAR_REGISTER( &sk_357_bullet3 );// {"sk_357_bullet3","0"};
 
 	CVAR_REGISTER( &sk_762_bullet1 );// {"sk_762_bullet1","0"};
 	CVAR_REGISTER( &sk_762_bullet2 );// {"sk_762_bullet2","0"};
