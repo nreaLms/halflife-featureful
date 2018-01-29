@@ -26,6 +26,7 @@
 #include	"scripted.h"
 #include	"animation.h"
 #include	"soundent.h"
+#include	"mod_features.h"
 
 #define NUM_SCIENTIST_HEADS		4 // four heads available for scientist model
 
@@ -1424,6 +1425,7 @@ int CSittingScientist::FIdleSpeak( void )
 	return FALSE;
 }
 
+#ifdef FEATURE_CLEANSUIT_SCIENTIST
 class CCleansuitScientist : public CScientist
 {
 public:
@@ -1494,3 +1496,4 @@ void CSittingCleansuitScientist::Spawn()
 }
 
 LINK_ENTITY_TO_CLASS( monster_sitting_cleansuit_scientist, CSittingCleansuitScientist )
+#endif

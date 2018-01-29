@@ -23,6 +23,7 @@
 #include	"cbase.h"
 #include	"monsters.h"
 #include	"schedule.h"
+#include	"mod_features.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -318,6 +319,7 @@ int CZombie::IgnoreConditions( void )
 	return iIgnore;
 }
 
+#ifdef FEATURE_ZOMBIE_BARNEY
 class CZombieBarney : public CZombie
 {
 	void Spawn( void );
@@ -360,7 +362,9 @@ void CZombieBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 			break;
 	}
 }
+#endif
 
+#ifdef FEATURE_ZOMBIE_SOLDIER
 class CZombieSoldier : public CZombie
 {
 	void Spawn( void );
@@ -428,3 +432,4 @@ void CDeadZombieSoldier::Spawn( )
 	SpawnHelper("models/zombie_soldier.mdl", "Dead zombie soldier with bad pose\n", BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
+#endif

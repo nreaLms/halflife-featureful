@@ -19,6 +19,8 @@
 #ifndef SKILL_H
 #define SKILL_H
 
+#include "mod_features.h"
+
 struct skilldata_t
 {
 	int iSkillLevel; // game skill level
@@ -41,7 +43,9 @@ struct skilldata_t
 	float bullsquidDmgWhip;
 	float bullsquidDmgSpit;
 
+#ifdef FEATURE_CLEANSUIT_SCIENTIST
 	float cleansuitScientistHealth;
+#endif
 
 	float gargantuaHealth;
 	float gargantuaDmgSlash;
@@ -77,22 +81,29 @@ struct skilldata_t
 	float controllerSpeedBall;
 	float controllerDmgBall;
 
+#ifdef FEATURE_MASSN
 	float massnHealth;
 	float massnDmgKick;
 	float massnGrenadeSpeed;
+#endif
 
 	float nihilanthHealth;
 	float nihilanthZap;
-	
+
+#ifdef FEATURE_PITDRONE
 	float pitdroneHealth;
 	float pitdroneDmgBite;
 	float pitdroneDmgWhip;
 	float pitdroneDmgSpit;
+#endif
 
+#ifdef FEATURE_OTIS
 	float otisHealth;
+#endif
 
 	float scientistHealth;
 
+#ifdef FEATURE_SHOCKTROOPER
 	float sroachHealth;
 	float sroachDmgBite;
 	float sroachLifespan;
@@ -102,35 +113,41 @@ struct skilldata_t
 	float strooperGrenadeSpeed;
 	float strooperMaxCharge;
 	float strooperRchgSpeed;
+#endif
 
 	float snarkHealth;
 	float snarkDmgBite;
 	float snarkDmgPop;
 
+#ifdef FEATURE_VOLTIFORE
 	float voltigoreHealth;
 	float voltigoreDmgPunch;
 	float voltigoreDmgBeam;
 
 	float babyVoltigoreHealth;
 	float babyVoltigoreDmgPunch;
+#endif
 
 	float zombieHealth;
 	float zombieDmgOneSlash;
 	float zombieDmgBothSlash;
 
+#ifdef FEATURE_ZOMBIE_BARNEY
 	float zombieBarneyHealth;
 	float zombieBarneyDmgOneSlash;
 	float zombieBarneyDmgBothSlash;
-
+#endif
+#ifdef FEATURE_ZOMBIE_SOLDIER
 	float zombieSoldierHealth;
 	float zombieSoldierDmgOneSlash;
 	float zombieSoldierDmgBothSlash;
-
+#endif
+#ifdef FEATURE_GONOME
 	float gonomeHealth;
 	float gonomeDmgOneSlash;
 	float gonomeDmgGuts;
 	float gonomeDmgOneBite;
-
+#endif
 	float turretHealth;
 	float miniturretHealth;
 	float sentryHealth;

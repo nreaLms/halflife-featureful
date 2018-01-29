@@ -27,6 +27,7 @@
 #include	"scripted.h"
 #include	"weapons.h"
 #include	"soundent.h"
+#include	"mod_features.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -841,6 +842,7 @@ void CDeadBarney :: Spawn( )
 	MonsterInitDead();
 }
 
+#ifdef FEATURE_OTIS
 #define	OTIS_BODY_GUNHOLSTERED	0
 #define	OTIS_BODY_GUNDRAWN		1
 #define OTIS_BODY_DONUT			2
@@ -1059,3 +1061,4 @@ void CDeadOtis::KeyValue( KeyValueData *pkvd )
 	else 
 		CDeadBarney::KeyValue( pkvd );
 }
+#endif

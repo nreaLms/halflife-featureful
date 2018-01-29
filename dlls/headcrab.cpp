@@ -22,6 +22,7 @@
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"game.h"
+#include	"mod_features.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -559,6 +560,7 @@ Schedule_t *CBabyCrab::GetScheduleOfType( int Type )
 	return CHeadCrab::GetScheduleOfType( Type );
 }
 
+#ifdef FEATURE_SHOCKTROOPER
 class CShockRoach : public CHeadCrab
 {
 public:
@@ -781,3 +783,4 @@ void CShockRoach::AttackSound()
 	if( iSound != 0 )
 		EMIT_SOUND_DYN( edict(), CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
+#endif

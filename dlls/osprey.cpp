@@ -22,6 +22,7 @@
 #include "soundent.h"
 #include "effects.h"
 #include "customentity.h"
+#include "mod_features.h"
 
 typedef struct 
 {
@@ -795,6 +796,7 @@ void COsprey::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	}
 }
 
+#ifdef FEATURE_BLACK_OSPREY
 class CBlkopOsprey : public COsprey
 {
 public:
@@ -820,3 +822,4 @@ const char* CBlkopOsprey::TrooperName()
 {
 	return "monster_male_assassin";
 }
+#endif

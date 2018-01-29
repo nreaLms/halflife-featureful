@@ -21,6 +21,7 @@
 #include "weapons.h"
 #include "nodes.h"
 #include "effects.h"
+#include "mod_features.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -1039,6 +1040,7 @@ void CApacheHVR::AccelerateThink( void )
 	pev->nextthink = gpGlobals->time + 0.1;
 }
 
+#ifdef FEATURE_BLACK_APACHE
 class CBlkopApache : public CApache
 {
 public:
@@ -1057,5 +1059,6 @@ void CBlkopApache::Precache( void )
 {
 	PrecacheImpl("models/blkop_apache.mdl", "models/metalplategibs_dark.mdl");
 }
+#endif
 
 #endif

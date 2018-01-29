@@ -21,7 +21,9 @@
 #include	"soundent.h"
 #include	"game.h"
 #include	"weapons.h"
+#include	"mod_features.h"
 
+#ifdef FEATURE_PITDRONE
 int		iPitDroneSpitSprite;
 //=========================================================
 // CPitDrone's spit projectile
@@ -1101,3 +1103,4 @@ void CPitDrone::RunTask(Task_t *pTask)
 		}
 	}
 }
+#endif

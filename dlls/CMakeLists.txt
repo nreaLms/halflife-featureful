@@ -86,6 +86,7 @@ set (SVDLL_SOURCES
 	leech.cpp
 	lights.cpp
 	maprules.cpp
+	massn.cpp
 	monstermaker.cpp
 	monsters.cpp
 	monsterstate.cpp
@@ -111,6 +112,7 @@ set (SVDLL_SOURCES
 	schedule.cpp
 	scientist.cpp
 	scripted.cpp
+	shocktrooper.cpp
 	shotgun.cpp
 	singleplay_gamerules.cpp
 	skill.cpp
