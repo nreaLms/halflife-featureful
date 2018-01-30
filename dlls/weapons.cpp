@@ -362,10 +362,16 @@ void W_Precache( void )
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
 	}
 #endif
+#if FEATURE_DESERT_EAGLE
 	UTIL_PrecacheOtherWeapon( "weapon_eagle" );
+#endif
+#if FEATURE_PIPEWRENCH
 	UTIL_PrecacheOtherWeapon( "weapon_pipewrench" );
+#endif
+#if FEATURE_SNIPERRIFLE
 	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
 	UTIL_PrecacheOther( "ammo_762" );
+#endif
 	g_sModelIndexFireball = PRECACHE_MODEL( "sprites/zerogxplode.spr" );// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL( "sprites/WXplo1.spr" );// underwater fireball
 	g_sModelIndexSmoke = PRECACHE_MODEL( "sprites/steam1.spr" );// smoke

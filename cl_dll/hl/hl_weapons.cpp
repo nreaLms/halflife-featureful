@@ -31,6 +31,7 @@
 #include "../hud_iface.h"
 #include "../com_weapons.h"
 #include "../demo.h"
+#include "mod_features.h"
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
@@ -67,9 +68,15 @@ CHandGrenade g_HandGren;
 CSatchel g_Satchel;
 CTripmine g_Tripmine;
 CSqueak g_Snark;
+#if FEATURE_DESERT_EAGLE
 CEagle g_Eagle;
+#endif
+#if FEATURE_PIPEWRENCH
 CPipeWrench g_PipeWrench;
+#endif
+#if FEATURE_SNIPERRIFLE
 CSniperrifle g_Sniper;
+#endif
 
 /*
 ======================
@@ -619,9 +626,15 @@ void HUD_InitClientWeapons( void )
 	HUD_PrepEntity( &g_Satchel, &player );
 	HUD_PrepEntity( &g_Tripmine, &player );
 	HUD_PrepEntity( &g_Snark, &player );
+#if FEATURE_DESERT_EAGLE
 	HUD_PrepEntity( &g_Eagle, &player );
+#endif
+#if FEATURE_PIPEWRENCH
 	HUD_PrepEntity( &g_PipeWrench, &player );
+#endif
+#if FEATURE_SNIPERRIFLE
 	HUD_PrepEntity( &g_Sniper, &player );
+#endif
 }
 
 /*
@@ -727,15 +740,21 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		case WEAPON_SNARK:
 			pWeapon = &g_Snark;
 			break;
+#if FEATURE_DESERT_EAGLE
 		case WEAPON_EAGLE:
 			pWeapon = &g_Eagle;
 			break;
+#endif
+#if FEATURE_PIPEWRENCH
 		case WEAPON_PIPEWRENCH:
 			pWeapon = &g_PipeWrench;
 			break;
+#endif
+#if FEATURE_SNIPERRIFLE
 		case WEAPON_SNIPERRIFLE:
 			pWeapon = &g_Sniper;
 			break;
+#endif
 	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
@@ -845,10 +864,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CRpg *)player.m_pActiveItem )->m_fSpotActive = (int)from->client.vuser2[1];
 		( (CRpg *)player.m_pActiveItem )->m_cActiveRockets = (int)from->client.vuser2[2];
 	}
+#ifdef FEATURE_SNIPERRIFLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
 	{
 		player.ammo_762 = (int)from->client.vuser2[1];
 	}
+#endif
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -917,10 +938,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		from->client.vuser2[1] = ( (CRpg *)player.m_pActiveItem)->m_fSpotActive;
 		from->client.vuser2[2] = ( (CRpg *)player.m_pActiveItem)->m_cActiveRockets;
 	}
+#ifdef FEATURE_SNIPERRIFLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
 	{
 		from->client.vuser2[1] = player.ammo_762;
 	}
+#endif
 
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )

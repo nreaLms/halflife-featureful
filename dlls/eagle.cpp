@@ -14,6 +14,8 @@
 #include "nodes.h"
 #include "player.h"
 
+#if FEATURE_DESERT_EAGLE
+
 enum deagle_e {
 	DEAGLE_IDLE1 = 0,
 	DEAGLE_IDLE2,
@@ -307,3 +309,4 @@ void CEagle::WeaponIdle( void )
 		}
 	}
 }
+#endif

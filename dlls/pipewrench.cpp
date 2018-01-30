@@ -22,6 +22,8 @@
 #include "player.h"
 #include "gamerules.h"
 
+#if FEATURE_PIPEWRENCH
+
 void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity);
 
 #define	PIPEWRENCH_BODYHIT_VOLUME 128
@@ -530,3 +532,5 @@ BOOL CPipeWrench::CanAttack(float attack_time, float curtime, BOOL isPredicted)
 		return (attack_time <= 0.0) ? TRUE : FALSE;
 	}
 }
+
+#endif

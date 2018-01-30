@@ -43,7 +43,7 @@ struct skilldata_t
 	float bullsquidDmgWhip;
 	float bullsquidDmgSpit;
 
-#ifdef FEATURE_CLEANSUIT_SCIENTIST
+#if FEATURE_CLEANSUIT_SCIENTIST
 	float cleansuitScientistHealth;
 #endif
 
@@ -81,7 +81,7 @@ struct skilldata_t
 	float controllerSpeedBall;
 	float controllerDmgBall;
 
-#ifdef FEATURE_MASSN
+#if FEATURE_MASSN
 	float massnHealth;
 	float massnDmgKick;
 	float massnGrenadeSpeed;
@@ -90,20 +90,20 @@ struct skilldata_t
 	float nihilanthHealth;
 	float nihilanthZap;
 
-#ifdef FEATURE_PITDRONE
+#if FEATURE_PITDRONE
 	float pitdroneHealth;
 	float pitdroneDmgBite;
 	float pitdroneDmgWhip;
 	float pitdroneDmgSpit;
 #endif
 
-#ifdef FEATURE_OTIS
+#if FEATURE_OTIS
 	float otisHealth;
 #endif
 
 	float scientistHealth;
 
-#ifdef FEATURE_SHOCKTROOPER
+#if FEATURE_SHOCKTROOPER
 	float sroachHealth;
 	float sroachDmgBite;
 	float sroachLifespan;
@@ -119,7 +119,7 @@ struct skilldata_t
 	float snarkDmgBite;
 	float snarkDmgPop;
 
-#ifdef FEATURE_VOLTIFORE
+#if FEATURE_VOLTIFORE
 	float voltigoreHealth;
 	float voltigoreDmgPunch;
 	float voltigoreDmgBeam;
@@ -132,17 +132,17 @@ struct skilldata_t
 	float zombieDmgOneSlash;
 	float zombieDmgBothSlash;
 
-#ifdef FEATURE_ZOMBIE_BARNEY
+#if FEATURE_ZOMBIE_BARNEY
 	float zombieBarneyHealth;
 	float zombieBarneyDmgOneSlash;
 	float zombieBarneyDmgBothSlash;
 #endif
-#ifdef FEATURE_ZOMBIE_SOLDIER
+#if FEATURE_ZOMBIE_SOLDIER
 	float zombieSoldierHealth;
 	float zombieSoldierDmgOneSlash;
 	float zombieSoldierDmgBothSlash;
 #endif
-#ifdef FEATURE_GONOME
+#if FEATURE_GONOME
 	float gonomeHealth;
 	float gonomeDmgOneSlash;
 	float gonomeDmgGuts;

@@ -120,6 +120,7 @@ set (SVDLL_SOURCES
 	schedule.cpp
 	scientist.cpp
 	scripted.cpp
+	shockbeam.cpp
 	shocktrooper.cpp
 	shotgun.cpp
 	singleplay_gamerules.cpp
@@ -128,6 +129,7 @@ set (SVDLL_SOURCES
 	sound.cpp
 	soundent.cpp
 	spectator.cpp
+	spore.cpp
 	squadmonster.cpp
 	squeakgrenade.cpp
 	subs.cpp

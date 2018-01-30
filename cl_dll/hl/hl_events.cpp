@@ -16,6 +16,7 @@
 #include "../hud.h"
 #include "../cl_util.h"
 #include "event_api.h"
+#include "mod_features.h"
 
 extern "C"
 {
@@ -80,7 +81,13 @@ void Game_HookEvents( void )
 	gEngfuncs.pfnHookEvent( "events/firehornet.sc", EV_HornetGunFire );
 	gEngfuncs.pfnHookEvent( "events/tripfire.sc", EV_TripmineFire );
 	gEngfuncs.pfnHookEvent( "events/snarkfire.sc", EV_SnarkFire );
+#if FEATURE_DESERT_EAGLE
 	gEngfuncs.pfnHookEvent( "events/eagle.sc", EV_FireEagle );
+#endif
+#if FEATURE_PIPEWRENCH
 	gEngfuncs.pfnHookEvent( "events/pipewrench.sc", EV_PipeWrench );
+#endif
+#if FEATURE_SNIPERRIFLE
 	gEngfuncs.pfnHookEvent( "events/sniper.sc", EV_FireSniper );
+#endif
 }

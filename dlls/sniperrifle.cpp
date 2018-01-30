@@ -21,6 +21,8 @@
 #include "nodes.h"
 #include "player.h"
 
+#if FEATURE_SNIPERRIFLE
+
 enum sniper_e {
 	SNIPER_DRAW = 0,
 	SNIPER_SLOWIDLE1,
@@ -271,3 +273,5 @@ class CSniperrifleAmmo : public CBasePlayerAmmo
 	}
 };
 LINK_ENTITY_TO_CLASS( ammo_762, CSniperrifleAmmo )
+
+#endif

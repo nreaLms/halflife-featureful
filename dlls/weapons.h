@@ -17,6 +17,7 @@
 #define WEAPONS_H
 
 #include "effects.h"
+#include "mod_features.h"
 
 class CBasePlayer;
 extern int gmsgWeapPickup;
@@ -78,9 +79,15 @@ public:
 #define WEAPON_TRIPMINE			13
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
+#if FEATURE_DESERT_EAGLE
 #define WEAPON_EAGLE			17
+#endif
+#if FEATURE_PIPEWRENCH
 #define WEAPON_PIPEWRENCH		22
+#endif
+#if FEATURE_SNIPERRIFLE
 #define WEAPON_SNIPERRIFLE		24
+#endif
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
@@ -1019,6 +1026,7 @@ private:
 	unsigned short m_usSnarkFire;
 };
 
+#if FEATURE_DESERT_EAGLE
 class CEagle : public CBasePlayerWeapon
 {
 public:
@@ -1056,7 +1064,9 @@ private:
 
 	unsigned short m_usEagle;
 };
+#endif
 
+#if FEATURE_PIPEWRENCH
 class CPipeWrench : public CBasePlayerWeapon
 {
 public:
@@ -1104,7 +1114,9 @@ private:
 	int m_iFirestate;
 	float m_flHoldStartTime;
 };
+#endif
 
+#if FEATURE_SNIPERRIFLE
 class CSniperrifle : public CBasePlayerWeapon
 {
 public:
@@ -1149,5 +1161,6 @@ public:
 private:
 	unsigned short m_usSniper;
 };
+#endif
 
 #endif // WEAPONS_H

@@ -152,7 +152,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.bullsquidDmgWhip = GetSkillCvar( "sk_bullsquid_dmg_whip" );
 	gSkillData.bullsquidDmgSpit = GetSkillCvar( "sk_bullsquid_dmg_spit" );
 
-#ifdef FEATURE_CLEANSUIT_SCIENTIST
+#if FEATURE_CLEANSUIT_SCIENTIST
 	// Cleansuit Scientist
 	gSkillData.cleansuitScientistHealth = GetSkillCvar( "sk_cleansuit_scientist_health");
 #endif
@@ -199,7 +199,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.controllerDmgZap = GetSkillCvar( "sk_controller_dmgzap" );
 	gSkillData.controllerSpeedBall = GetSkillCvar( "sk_controller_speedball" );
 	gSkillData.controllerDmgBall = GetSkillCvar( "sk_controller_dmgball" );
-#ifdef FEATURE_MASSN
+#if FEATURE_MASSN
 	// Massn
 	gSkillData.massnHealth = GetSkillCvar( "sk_massassin_health" );
 	gSkillData.massnDmgKick = GetSkillCvar( "sk_massassin_kick" );
@@ -208,20 +208,20 @@ void CGameRules::RefreshSkillData ( void )
 	// Nihilanth
 	gSkillData.nihilanthHealth = GetSkillCvar( "sk_nihilanth_health" );
 	gSkillData.nihilanthZap = GetSkillCvar( "sk_nihilanth_zap" );
-#ifdef FEATURE_PITDRONE
+#if FEATURE_PITDRONE
 	// Pitdrone
 	gSkillData.pitdroneHealth = GetSkillCvar( "sk_pitdrone_health" );
 	gSkillData.pitdroneDmgBite = GetSkillCvar( "sk_pitdrone_dmg_bite" );
 	gSkillData.pitdroneDmgWhip = GetSkillCvar( "sk_pitdrone_dmg_whip" );
 	gSkillData.pitdroneDmgSpit = GetSkillCvar( "sk_pitdrone_dmg_spit" );
 #endif
-#ifdef FEATURE_OTIS
+#if FEATURE_OTIS
 	// Otis
 	gSkillData.otisHealth = GetSkillCvar( "sk_otis_health");
 #endif
 	// Scientist
 	gSkillData.scientistHealth = GetSkillCvar( "sk_scientist_health" );
-#ifdef FEATURE_SHOCKTROOPER
+#if FEATURE_SHOCKTROOPER
 	// Shock Roach
 	gSkillData.sroachHealth = GetSkillCvar( "sk_shockroach_health" );
 	gSkillData.sroachDmgBite = GetSkillCvar( "sk_shockroach_dmg_bite" );
@@ -238,7 +238,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.snarkHealth = GetSkillCvar( "sk_snark_health" );
 	gSkillData.snarkDmgBite = GetSkillCvar( "sk_snark_dmg_bite" );
 	gSkillData.snarkDmgPop = GetSkillCvar( "sk_snark_dmg_pop" );
-#ifdef FEATURE_VOLTIFORE
+#if FEATURE_VOLTIFORE
 	// Voltigore
 	gSkillData.voltigoreHealth = GetSkillCvar( "sk_voltigore_health" );
 	gSkillData.voltigoreDmgPunch = GetSkillCvar( "sk_voltigore_dmg_punch" );
@@ -252,19 +252,19 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.zombieHealth = GetSkillCvar( "sk_zombie_health" );
 	gSkillData.zombieDmgOneSlash = GetSkillCvar( "sk_zombie_dmg_one_slash" );
 	gSkillData.zombieDmgBothSlash = GetSkillCvar( "sk_zombie_dmg_both_slash" );
-#ifdef FEATURE_ZOMBIE_BARNEY
+#if FEATURE_ZOMBIE_BARNEY
 	// Zombie Barney
 	gSkillData.zombieBarneyHealth = GetSkillCvar( "sk_zombie_barney_health");
 	gSkillData.zombieBarneyDmgOneSlash = GetSkillCvar( "sk_zombie_barney_dmg_one_slash");
 	gSkillData.zombieBarneyDmgBothSlash = GetSkillCvar( "sk_zombie_barney_dmg_both_slash");
 #endif
-#ifdef FEATURE_ZOMBIE_SOLDIER
+#if FEATURE_ZOMBIE_SOLDIER
 	// Zombie Soldier
 	gSkillData.zombieSoldierHealth = GetSkillCvar( "sk_zombie_soldier_health");
 	gSkillData.zombieSoldierDmgOneSlash = GetSkillCvar( "sk_zombie_soldier_dmg_one_slash");
 	gSkillData.zombieSoldierDmgBothSlash = GetSkillCvar( "sk_zombie_soldier_dmg_both_slash");
 #endif
-#ifdef FEATURE_GONOME
+#if FEATURE_GONOME
 	// Gonome
 	gSkillData.gonomeHealth = GetSkillCvar( "sk_gonome_health" );
 	gSkillData.gonomeDmgOneSlash = GetSkillCvar( "sk_gonome_dmg_one_slash" );
