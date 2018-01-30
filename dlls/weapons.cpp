@@ -1641,13 +1641,16 @@ TYPEDESCRIPTION	CSatchel::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CSatchel, CBasePlayerWeapon )
 
+#if FEATURE_DESERT_EAGLE
 TYPEDESCRIPTION CEagle::m_SaveData[] =
 {
 	DEFINE_FIELD( CEagle, m_fEagleLaserActive, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CEagle, CBasePlayerWeapon )
+#endif
 
+#if FEATURE_PIPEWRENCH
 TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
 {
 	DEFINE_FIELD( CPipeWrench, m_iFirestate, FIELD_INTEGER ),
@@ -1655,7 +1658,9 @@ TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CPipeWrench, CBasePlayerWeapon )
+#endif
 
+#if FEATURE_SNIPERRIFLE
 TYPEDESCRIPTION	CSniperrifle::m_SaveData[] =
 {
 	DEFINE_FIELD( CSniperrifle, m_fNeedAjustBolt, FIELD_BOOLEAN ),
@@ -1663,3 +1668,4 @@ TYPEDESCRIPTION	CSniperrifle::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CSniperrifle, CBasePlayerWeapon )
+#endif

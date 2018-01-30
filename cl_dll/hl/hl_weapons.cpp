@@ -864,7 +864,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CRpg *)player.m_pActiveItem )->m_fSpotActive = (int)from->client.vuser2[1];
 		( (CRpg *)player.m_pActiveItem )->m_cActiveRockets = (int)from->client.vuser2[2];
 	}
-#ifdef FEATURE_SNIPERRIFLE
+#if FEATURE_SNIPERRIFLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
 	{
 		player.ammo_762 = (int)from->client.vuser2[1];
@@ -938,7 +938,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		from->client.vuser2[1] = ( (CRpg *)player.m_pActiveItem)->m_fSpotActive;
 		from->client.vuser2[2] = ( (CRpg *)player.m_pActiveItem)->m_cActiveRockets;
 	}
-#ifdef FEATURE_SNIPERRIFLE
+#if FEATURE_SNIPERRIFLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
 	{
 		from->client.vuser2[1] = player.ammo_762;
