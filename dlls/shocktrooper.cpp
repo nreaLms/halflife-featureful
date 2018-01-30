@@ -157,7 +157,7 @@ const char *CStrooper::pGruntSentences[] =
 	"ST_ANSWER",
 };
 
-enum
+typedef enum
 {
 	STROOPER_SENT_NONE = -1,
 	STROOPER_SENT_GREN = 0,

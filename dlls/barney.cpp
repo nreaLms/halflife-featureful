@@ -933,7 +933,7 @@ void COtis::TalkInit()
 
 void COtis :: AlertSound( void )
 {
-	if ( m_hEnemy != NULL )
+	if ( m_hEnemy != 0 )
 	{
 		if ( FOkToSpeak() )
 		{
@@ -1027,12 +1027,12 @@ public:
 	void Spawn( void );
 	void KeyValue( KeyValueData *pkvd );
 	const char* getPos(int pos) const;
-	static char *m_szPoses[5];
+	static const char *m_szPoses[5];
 
 	int head;
 };
 
-char *CDeadOtis::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach", "stuffed_in_vent", "dead_sitting" };
+const char *CDeadOtis::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach", "stuffed_in_vent", "dead_sitting" };
 
 const char* CDeadOtis::getPos(int pos) const
 {
