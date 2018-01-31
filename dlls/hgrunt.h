@@ -46,6 +46,8 @@ public:
 
 	BOOL FOkToSpeak( void );
 	void JustSpoke( void );
+	void DropMyItems(BOOL isGibbed);
+	void DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, BOOL isGibbed);
 
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];

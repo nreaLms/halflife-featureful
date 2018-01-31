@@ -72,6 +72,8 @@ public:
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
+	void DropMyItems(BOOL isGibbed);
+
 protected:
 	int head;
 };
@@ -125,43 +127,33 @@ void CMassn::Sniperrifle(void)
 //=========================================================
 void CMassn::GibMonster( void )
 {
-	Vector vecGunPos;
-	Vector vecGunAngles;
-
 	if( GetBodygroup( MASSN_GUN_GROUP ) != MASSN_GUN_NONE )
 	{
-		// throw a gun if the grunt has one
-		GetAttachment( 0, vecGunPos, vecGunAngles );
-
-		CBaseEntity *pGun;
-
-		if( FBitSet( pev->weapons, MASSN_SNIPERRIFLE ) )
-		{
-			pGun = DropItem( "weapon_sniperrifle", vecGunPos, vecGunAngles );
-		}
-		else
-		{
-			pGun = DropItem( "weapon_9mmAR", vecGunPos, vecGunAngles );
-		}
-
-		if( pGun )
-		{
-			pGun->pev->velocity = Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) );
-			pGun->pev->avelocity = Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 );
-		}
-
-		if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) )
-		{
-			pGun = DropItem( "ammo_ARgrenades", vecGunPos, vecGunAngles );
-			if ( pGun )
-			{
-				pGun->pev->velocity = Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) );
-				pGun->pev->avelocity = Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 );
-			}
-		}
+		DropMyItems(TRUE);
 	}
 
 	CBaseMonster::GibMonster();
+}
+
+void CMassn::DropMyItems(BOOL isGibbed)
+{
+	Vector vecGunPos;
+	Vector vecGunAngles;
+	GetAttachment( 0, vecGunPos, vecGunAngles );
+
+	if (!isGibbed) {
+		SetBodygroup( MASSN_GUN_GROUP, MASSN_GUN_NONE );
+	}
+
+	if( FBitSet( pev->weapons, MASSN_SNIPERRIFLE ) ) {
+		DropMyItem( "weapon_sniperrifle", vecGunPos, vecGunAngles, isGibbed );
+	} else if ( FBitSet( pev->weapons, MASSN_9MMAR ) ) {
+		DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
+	}
+	if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) ) {
+		DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+	}
+	pev->weapons = 0;
 }
 
 void CMassn::KeyValue(KeyValueData *pkvd)
@@ -185,29 +177,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 	case MASSN_AE_DROP_GUN:
 	{
-		Vector	vecGunPos;
-		Vector	vecGunAngles;
-
-		GetAttachment(0, vecGunPos, vecGunAngles);
-
-		// switch to body group with no gun.
-		SetBodygroup(MASSN_GUN_GROUP, MASSN_GUN_NONE);
-
-		// now spawn a gun.
-		if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
-		{
-			DropItem("ammo_357", vecGunPos, vecGunAngles); // set to sniper rifle when weapon is implemented
-		}
-		else
-		{
-			DropItem("weapon_9mmAR", vecGunPos, vecGunAngles);
-		}
-
-		if (FBitSet(pev->weapons, MASSN_GRENADELAUNCHER))
-		{
-			DropItem("ammo_ARgrenades", BodyTarget(pev->origin), vecGunAngles);
-		}
-
+		DropMyItems(FALSE);
 	}
 	break;
 
