@@ -91,6 +91,7 @@ class CStrooper : public CHGrunt
 {
 public:
 	void Spawn(void);
+	void MonsterThink();
 	void Precache(void);
 	int  DefaultClassify(void);
 	BOOL CheckRangeAttack1(float flDot, float flDist);
@@ -106,9 +107,7 @@ public:
 
 	void DeathSound(void);
 	void PainSound(void);
-	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void GibMonster(void);
-	void CheckAmmo();
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
@@ -121,6 +120,8 @@ public:
 
 	BOOL m_bRightClaw;
 	float m_rechargeTime;
+	float m_blinkTime;
+	float m_eyeChangeTime;
 
 	static const char *pGruntSentences[];
 
@@ -137,6 +138,8 @@ TYPEDESCRIPTION	CStrooper::m_SaveData[] =
 {
 	DEFINE_FIELD(CStrooper, m_bRightClaw, FIELD_BOOLEAN),
 	DEFINE_FIELD(CStrooper, m_rechargeTime, FIELD_TIME),
+	DEFINE_FIELD(CStrooper, m_blinkTime, FIELD_TIME),
+	DEFINE_FIELD(CStrooper, m_eyeChangeTime, FIELD_TIME),
 };
 
 IMPLEMENT_SAVERESTORE(CStrooper, CHGrunt)
@@ -285,21 +288,6 @@ void CStrooper::GibMonster(void)
 	pev->nextthink = gpGlobals->time;
 }
 
-void CStrooper::CheckAmmo()
-{
-	if (m_cAmmoLoaded < m_cClipSize)
-	{
-		if (m_rechargeTime < gpGlobals->time)
-		{
-			m_cAmmoLoaded++;
-			m_rechargeTime = gpGlobals->time + gSkillData.strooperRchgSpeed;
-		}
-	}
-	if (m_cAmmoLoaded <= 0) {
-		SetConditions( bits_COND_NO_AMMO_LOADED );
-	}
-}
-
 //=========================================================
 // Classify - indicates this monster's place in the
 // relationship table.
@@ -384,50 +372,39 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 	case STROOPER_AE_BURST1:
 	{
-		Vector	vecGunPos;
-		Vector	vecGunAngles;
-
-		GetAttachment(0, vecGunPos, vecGunAngles);
-
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecGunPos );
-			WRITE_BYTE( TE_SPRITE );
-			WRITE_COORD( vecGunPos.x );	// pos
-			WRITE_COORD( vecGunPos.y );
-			WRITE_COORD( vecGunPos.z );
-			WRITE_SHORT( iStrooperMuzzleFlash );		// model
-			WRITE_BYTE( 4 );				// size * 10
-			WRITE_BYTE( 196 );			// brightness
-		MESSAGE_END();
-
-		Vector vecShootDir;
 		if (m_hEnemy)
 		{
-			if (m_hEnemy->IsPlayer())
-			{
-				vecShootDir = (m_hEnemy->EyePosition() - vecGunPos).Normalize();
-				vecShootDir.z += RANDOM_FLOAT( -0.05, 0 );
-			}
-			else
-			{
-				vecShootDir = (m_hEnemy->Center() - vecGunPos).Normalize();
-				vecShootDir.z += RANDOM_FLOAT( 0, 0.05 );
-			}
+			Vector	vecGunPos;
+			Vector	vecGunAngles;
+
+			GetAttachment(0, vecGunPos, vecGunAngles);
+
+			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecGunPos );
+				WRITE_BYTE( TE_SPRITE );
+				WRITE_COORD( vecGunPos.x );	// pos
+				WRITE_COORD( vecGunPos.y );
+				WRITE_COORD( vecGunPos.z );
+				WRITE_SHORT( iStrooperMuzzleFlash );		// model
+				WRITE_BYTE( 4 );				// size * 10
+				WRITE_BYTE( 128 );			// brightness
+			MESSAGE_END();
+
+			Vector vecShootOrigin = GetGunPosition();
+			Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
+			vecGunAngles = UTIL_VecToAngles(vecShootDir);
+
+			CShock::Shoot(pev, vecGunAngles, vecShootOrigin, vecShootDir * 2000);
+			m_cAmmoLoaded--;
+			SetBlending( 0, vecGunAngles.x );
+
+			// Play fire sound.
+			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_fire.wav", 1, ATTN_NORM);
+			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
 		}
 		else
 		{
-			ALERT(at_aiconsole, "Shooting with no enemy! Ammo: %d\n", m_cAmmoLoaded);
-			vecShootDir = (m_vecEnemyLKP - vecGunPos).Normalize();
-			vecShootDir.z += RANDOM_FLOAT( 0, 0.05 );
+			ALERT(at_aiconsole, "Shooting with no enemy! Schedule: %s\n", m_pSchedule->pName);
 		}
-
-		vecGunAngles = UTIL_VecToAngles(vecShootDir);
-		CShock::Shoot(pev, vecGunAngles, vecGunPos, vecShootDir * 2000);
-		m_cAmmoLoaded--;
-
-		// Play fire sound.
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_fire.wav", 1, ATTN_NORM);
-
-		CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
 	}
 	break;
 
@@ -475,7 +452,7 @@ void CStrooper::Spawn()
 {
 	Precache();
 
-	SpawnHelper("models/strooper.mdl", gSkillData.strooperHealth, BLOOD_COLOR_GREEN);
+	SpawnHelper("models/strooper.mdl", gSkillData.strooperHealth * 2.5, BLOOD_COLOR_GREEN);
 	UTIL_SetSize( pev, Vector(-24, -24, 0), Vector(24, 24, 72) );
 
 	if (pev->weapons == 0)
@@ -492,8 +469,36 @@ void CStrooper::Spawn()
 
 	CTalkMonster::g_talkWaitTime = 0;
 	m_rechargeTime = gpGlobals->time + gSkillData.strooperRchgSpeed;
+	m_blinkTime = gpGlobals->time + RANDOM_FLOAT(3.0f, 7.0f);
 
 	MonsterInit();
+}
+
+void CStrooper::MonsterThink()
+{
+	if (m_cAmmoLoaded < m_cClipSize)
+	{
+		if (m_rechargeTime < gpGlobals->time)
+		{
+			m_cAmmoLoaded++;
+			m_rechargeTime = gpGlobals->time + gSkillData.strooperRchgSpeed;
+		}
+	}
+	if (m_blinkTime <= gpGlobals->time && pev->skin == 0) {
+		pev->skin = 1;
+		m_blinkTime = gpGlobals->time + RANDOM_FLOAT(3.0f, 7.0f);
+		m_eyeChangeTime = gpGlobals->time + 0.1;
+	}
+	if (pev->skin != 0) {
+		if (m_eyeChangeTime <= gpGlobals->time) {
+			m_eyeChangeTime = gpGlobals->time + 0.1;
+			pev->skin++;
+			if (pev->skin > 3) {
+				pev->skin = 0;
+			}
+		}
+	}
+	CHGrunt::MonsterThink();
 }
 
 //=========================================================
@@ -563,16 +568,6 @@ void CStrooper::PainSound(void)
 
 		m_flNextPainTime = gpGlobals->time + 1;
 	}
-}
-
-int CStrooper::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
-{
-	if( bitsDamageType == DMG_BULLET ) {
-		flDamage = flDamage * 0.6;
-	} else if(FClassnameIs(pevInflictor, "monster_spore") || FClassnameIs(pevInflictor, "shock_beam")) {
-		flDamage = flDamage * 0.8;
-	}
-	return CHGrunt::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 //=========================================================

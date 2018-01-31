@@ -9,7 +9,7 @@
 class CHGrunt : public CSquadMonster
 {
 public:
-        void Spawn( void );
+	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
