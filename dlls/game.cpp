@@ -67,6 +67,23 @@ cvar_t	sk_apache_health1 = {"sk_apache_health1","0"};
 cvar_t	sk_apache_health2 = {"sk_apache_health2","0"};
 cvar_t	sk_apache_health3 = {"sk_apache_health3","0"};
 
+// Baby Gargantua
+cvar_t	sk_babygargantua_health1 = {"sk_babygargantua_health1","0"};
+cvar_t	sk_babygargantua_health2 = {"sk_babygargantua_health2","0"};
+cvar_t	sk_babygargantua_health3 = {"sk_babygargantua_health3","0"};
+
+cvar_t	sk_babygargantua_dmg_slash1	= {"sk_babygargantua_dmg_slash1","0"};
+cvar_t	sk_babygargantua_dmg_slash2	= {"sk_babygargantua_dmg_slash2","0"};
+cvar_t	sk_babygargantua_dmg_slash3	= {"sk_babygargantua_dmg_slash3","0"};
+
+cvar_t	sk_babygargantua_dmg_fire1 = {"sk_babygargantua_dmg_fire1","0"};
+cvar_t	sk_babygargantua_dmg_fire2 = {"sk_babygargantua_dmg_fire2","0"};
+cvar_t	sk_babygargantua_dmg_fire3 = {"sk_babygargantua_dmg_fire3","0"};
+
+cvar_t	sk_babygargantua_dmg_stomp1	= {"sk_babygargantua_dmg_stomp1","0"};
+cvar_t	sk_babygargantua_dmg_stomp2	= {"sk_babygargantua_dmg_stomp2","0"};
+cvar_t	sk_babygargantua_dmg_stomp3	= {"sk_babygargantua_dmg_stomp3","0"};
+
 // Barney
 cvar_t	sk_barney_health1 = {"sk_barney_health1","0"};
 cvar_t	sk_barney_health2 = {"sk_barney_health2","0"};
@@ -688,6 +705,23 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_apache_health1 );// {"sk_apache_health1","0"};
 	CVAR_REGISTER( &sk_apache_health2 );// {"sk_apache_health2","0"};
 	CVAR_REGISTER( &sk_apache_health3 );// {"sk_apache_health3","0"};
+
+	// Baby Gargantua
+	CVAR_REGISTER( &sk_babygargantua_health1 );// {"sk_babygargantua_health1","0"};
+	CVAR_REGISTER( &sk_babygargantua_health2 );// {"sk_babygargantua_health2","0"};
+	CVAR_REGISTER( &sk_babygargantua_health3 );// {"sk_babygargantua_health3","0"};
+
+	CVAR_REGISTER( &sk_babygargantua_dmg_slash1 );// {"sk_babygargantua_dmg_slash1","0"};
+	CVAR_REGISTER( &sk_babygargantua_dmg_slash2 );// {"sk_babygargantua_dmg_slash2","0"};
+	CVAR_REGISTER( &sk_babygargantua_dmg_slash3 );// {"sk_babygargantua_dmg_slash3","0"};
+
+	CVAR_REGISTER( &sk_babygargantua_dmg_fire1 );// {"sk_babygargantua_dmg_fire1","0"};
+	CVAR_REGISTER( &sk_babygargantua_dmg_fire2 );// {"sk_babygargantua_dmg_fire2","0"};
+	CVAR_REGISTER( &sk_babygargantua_dmg_fire3 );// {"sk_babygargantua_dmg_fire3","0"};
+
+	CVAR_REGISTER( &sk_babygargantua_dmg_stomp1 );// {"sk_babygargantua_dmg_stomp1","0"};
+	CVAR_REGISTER( &sk_babygargantua_dmg_stomp2 );// {"sk_babygargantua_dmg_stomp2","0"};
+	CVAR_REGISTER( &sk_babygargantua_dmg_stomp3	);// {"sk_babygargantua_dmg_stomp3","0"};
 
 	// Barney
 	CVAR_REGISTER( &sk_barney_health1 );// {"sk_barney_health1","0"};
