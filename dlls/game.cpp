@@ -164,6 +164,54 @@ cvar_t	sk_headcrab_dmg_bite1 = {"sk_headcrab_dmg_bite1","0"};
 cvar_t	sk_headcrab_dmg_bite2 = {"sk_headcrab_dmg_bite2","0"};
 cvar_t	sk_headcrab_dmg_bite3 = {"sk_headcrab_dmg_bite3","0"};
 
+#if FEATURE_OPFOR_GRUNT
+// Opposing Force Hgrunt
+cvar_t	sk_hgrunt_ally_health1 = {"sk_hgrunt_ally_health1","0"};
+cvar_t	sk_hgrunt_ally_health2 = {"sk_hgrunt_ally_health2","0"};
+cvar_t	sk_hgrunt_ally_health3 = {"sk_hgrunt_ally_health3","0"};
+
+cvar_t	sk_hgrunt_ally_kick1 = {"sk_hgrunt_ally_kick1","0"};
+cvar_t	sk_hgrunt_ally_kick2 = {"sk_hgrunt_ally_kick2","0"};
+cvar_t	sk_hgrunt_ally_kick3 = {"sk_hgrunt_ally_kick3","0"};
+
+cvar_t	sk_hgrunt_ally_pellets1 = {"sk_hgrunt_ally_pellets1","0"};
+cvar_t	sk_hgrunt_ally_pellets2 = {"sk_hgrunt_ally_pellets2","0"};
+cvar_t	sk_hgrunt_ally_pellets3 = {"sk_hgrunt_ally_pellets3","0"};
+
+cvar_t	sk_hgrunt_ally_gspeed1 = {"sk_hgrunt_ally_gspeed1","0"};
+cvar_t	sk_hgrunt_ally_gspeed2 = {"sk_hgrunt_ally_gspeed2","0"};
+cvar_t	sk_hgrunt_ally_gspeed3 = {"sk_hgrunt_ally_gspeed3","0"};
+
+// Medic
+cvar_t	sk_medic_ally_health1 = {"sk_medic_ally_health1","0"};
+cvar_t	sk_medic_ally_health2 = {"sk_medic_ally_health2","0"};
+cvar_t	sk_medic_ally_health3 = {"sk_medic_ally_health3","0"};
+
+cvar_t	sk_medic_ally_kick1 = {"sk_medic_ally_kick1","0"};
+cvar_t	sk_medic_ally_kick2 = {"sk_medic_ally_kick2","0"};
+cvar_t	sk_medic_ally_kick3 = {"sk_medic_ally_kick3","0"};
+
+cvar_t	sk_medic_ally_gspeed1 = {"sk_medic_ally_gspeed1","0"};
+cvar_t	sk_medic_ally_gspeed2 = {"sk_medic_ally_gspeed2","0"};
+cvar_t	sk_medic_ally_gspeed3 = {"sk_medic_ally_gspeed3","0"};
+
+cvar_t	sk_medic_ally_heal1 = {"sk_medic_ally_heal1","0"};
+cvar_t	sk_medic_ally_heal2 = {"sk_medic_ally_heal2","0"};
+cvar_t	sk_medic_ally_heal3 = {"sk_medic_ally_heal3","0"};
+
+// Torch
+cvar_t	sk_torch_ally_health1 = {"sk_torch_ally_health1","0"};
+cvar_t	sk_torch_ally_health2 = {"sk_torch_ally_health2","0"};
+cvar_t	sk_torch_ally_health3 = {"sk_torch_ally_health3","0"};
+
+cvar_t	sk_torch_ally_kick1 = {"sk_torch_ally_kick1","0"};
+cvar_t	sk_torch_ally_kick2 = {"sk_torch_ally_kick2","0"};
+cvar_t	sk_torch_ally_kick3 = {"sk_torch_ally_kick3","0"};
+
+cvar_t	sk_torch_ally_gspeed1 = {"sk_torch_ally_gspeed1","0"};
+cvar_t	sk_torch_ally_gspeed2 = {"sk_torch_ally_gspeed2","0"};
+cvar_t	sk_torch_ally_gspeed3 = {"sk_torch_ally_gspeed3","0"};
+#endif
 
 // Hgrunt 
 cvar_t	sk_hgrunt_health1 = {"sk_hgrunt_health1","0"};
@@ -798,6 +846,55 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_headcrab_dmg_bite1 );// {"sk_headcrab_dmg_bite1","0"};
 	CVAR_REGISTER( &sk_headcrab_dmg_bite2 );// {"sk_headcrab_dmg_bite2","0"};
 	CVAR_REGISTER( &sk_headcrab_dmg_bite3 );// {"sk_headcrab_dmg_bite3","0"};
+
+#if FEATURE_OPFOR_GRUNT
+	// Opposing Hgrunt
+	CVAR_REGISTER( &sk_hgrunt_ally_health1 );
+	CVAR_REGISTER( &sk_hgrunt_ally_health2 );
+	CVAR_REGISTER( &sk_hgrunt_ally_health3 );
+
+	CVAR_REGISTER( &sk_hgrunt_ally_kick1 );
+	CVAR_REGISTER( &sk_hgrunt_ally_kick2 );
+	CVAR_REGISTER( &sk_hgrunt_ally_kick3 );
+
+	CVAR_REGISTER( &sk_hgrunt_ally_pellets1 );
+	CVAR_REGISTER( &sk_hgrunt_ally_pellets2 );
+	CVAR_REGISTER( &sk_hgrunt_ally_pellets3 );
+
+	CVAR_REGISTER( &sk_hgrunt_ally_gspeed1 );
+	CVAR_REGISTER( &sk_hgrunt_ally_gspeed2 );
+	CVAR_REGISTER( &sk_hgrunt_ally_gspeed3 );
+
+	// Medic
+	CVAR_REGISTER( &sk_medic_ally_health1 );
+	CVAR_REGISTER( &sk_medic_ally_health2 );
+	CVAR_REGISTER( &sk_medic_ally_health3 );
+
+	CVAR_REGISTER( &sk_medic_ally_kick1 );
+	CVAR_REGISTER( &sk_medic_ally_kick2 );
+	CVAR_REGISTER( &sk_medic_ally_kick3 );
+
+	CVAR_REGISTER( &sk_medic_ally_gspeed1 );
+	CVAR_REGISTER( &sk_medic_ally_gspeed2 );
+	CVAR_REGISTER( &sk_medic_ally_gspeed3 );
+
+	CVAR_REGISTER( &sk_medic_ally_heal1 );
+	CVAR_REGISTER( &sk_medic_ally_heal2 );
+	CVAR_REGISTER( &sk_medic_ally_heal3 );
+
+	// Torch
+	CVAR_REGISTER( &sk_torch_ally_health1 );
+	CVAR_REGISTER( &sk_torch_ally_health2 );
+	CVAR_REGISTER( &sk_torch_ally_health3 );
+
+	CVAR_REGISTER( &sk_torch_ally_kick1 );
+	CVAR_REGISTER( &sk_torch_ally_kick2 );
+	CVAR_REGISTER( &sk_torch_ally_kick3 );
+
+	CVAR_REGISTER( &sk_torch_ally_gspeed1 );
+	CVAR_REGISTER( &sk_torch_ally_gspeed2 );
+	CVAR_REGISTER( &sk_torch_ally_gspeed3 );
+#endif
 
 	// Hgrunt
 	CVAR_REGISTER( &sk_hgrunt_health1 );// {"sk_hgrunt_health1","0"};

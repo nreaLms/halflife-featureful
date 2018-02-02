@@ -62,6 +62,7 @@ set (SVDLL_SOURCES
 	effects.cpp
 	egon.cpp
 	explode.cpp
+	fgrunt.cpp
 	flyingmonster.cpp
 	func_break.cpp
 	func_tank.cpp

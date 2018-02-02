@@ -256,7 +256,8 @@ BOOL CBaseMonster::HasHumanGibs( void )
 	if( myClass == CLASS_HUMAN_MILITARY ||
 		myClass == CLASS_PLAYER_ALLY ||
 		myClass == CLASS_HUMAN_PASSIVE ||
-		myClass == CLASS_PLAYER )
+		myClass == CLASS_PLAYER ||
+		myClass == CLASS_PLAYER_ALLY_MILITARY)
 
 		 return TRUE;
 

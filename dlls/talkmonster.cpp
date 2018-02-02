@@ -48,7 +48,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_hTalkTarget, FIELD_EHANDLE ),
 };
 
-IMPLEMENT_SAVERESTORE( CTalkMonster, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
 
 // array of friend names
 const char *CTalkMonster::m_szFriends[TLK_CFRIENDS] =
@@ -59,6 +59,9 @@ const char *CTalkMonster::m_szFriends[TLK_CFRIENDS] =
 	"monster_cleansuit_scientist",
 	"monster_sitting_scientist",
 	"monster_sitting_cleansuit_scientist"
+	"monster_human_grunt_ally",
+	"monster_human_torch_ally",
+	"monster_human_medic_ally"
 };
 
 //=========================================================
@@ -72,7 +75,7 @@ Task_t tlIdleResponse[] =
 	{ TASK_TLK_RESPOND, (float)0 },	// Wait and then say my response
 	{ TASK_TLK_IDEALYAW, (float)0 },	// look at who I'm talking to
 	{ TASK_FACE_IDEAL, (float)0 }, 
-	{ TASK_SET_ACTIVITY, (float)ACT_SIGNAL3 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
 	{ TASK_TLK_EYECONTACT, (float)0	 },	// Wait until speaker is done
 };
 
@@ -94,7 +97,7 @@ Task_t tlIdleSpeak[] =
 	{ TASK_TLK_SPEAK, (float)0 },// question or remark
 	{ TASK_TLK_IDEALYAW, (float)0 },// look at who I'm talking to
 	{ TASK_FACE_IDEAL, (float)0 },
-	{ TASK_SET_ACTIVITY, (float)ACT_SIGNAL3	},
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE	},
 	{ TASK_TLK_EYECONTACT, (float)0 },
 	{ TASK_WAIT_RANDOM, (float)0.5 },
 };
@@ -115,7 +118,7 @@ Schedule_t slIdleSpeak[] =
 
 Task_t	tlIdleSpeakWait[] =
 {
-	{ TASK_SET_ACTIVITY, (float)ACT_SIGNAL3 },// Stop and talk
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },// Stop and talk
 	{ TASK_TLK_SPEAK, (float)0 },// question or remark
 	{ TASK_TLK_EYECONTACT, (float)0 },// 
 	{ TASK_WAIT, (float)2 },// wait - used when sci is in 'use' mode to keep head turned
@@ -137,7 +140,7 @@ Schedule_t slIdleSpeakWait[] =
 
 Task_t tlIdleHello[] =
 {
-	{ TASK_SET_ACTIVITY, (float)ACT_SIGNAL3 },// Stop and talk
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },// Stop and talk
 	{ TASK_TLK_HELLO, (float)0 },// Try to say hello to player
 	{ TASK_TLK_EYECONTACT, (float)0 },
 	{ TASK_WAIT, (float)0.5 },// wait a bit
@@ -262,7 +265,7 @@ Task_t tlTlkIdleWatchClientStare[] =
 	{ TASK_TLK_STARE, (float)0 },
 	{ TASK_TLK_IDEALYAW, (float)0 },// look at who I'm talking to
 	{ TASK_FACE_IDEAL, (float)0 }, 
-	{ TASK_SET_ACTIVITY, (float)ACT_SIGNAL3 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
 	{ TASK_TLK_EYECONTACT, (float)0 },
 };
 
@@ -315,7 +318,7 @@ Task_t	tlTlkIdleEyecontact[] =
 {
 	{ TASK_TLK_IDEALYAW, (float)0 },// look at who I'm talking to
 	{ TASK_FACE_IDEAL, (float)0 }, 
-	{ TASK_SET_ACTIVITY, (float)ACT_SIGNAL3 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
 	{ TASK_TLK_EYECONTACT, (float)0 },// Wait until speaker is done
 };
 
@@ -348,17 +351,17 @@ DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 	slTlkIdleEyecontact,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CTalkMonster, CBaseMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CTalkMonster, CSquadMonster )
 
 void CTalkMonster::SetActivity( Activity newActivity )
 {
-	if( newActivity == ACT_IDLE && IsTalking() )
-		newActivity = ACT_SIGNAL3;
+//	if( newActivity == ACT_IDLE && IsTalking() )
+//		newActivity = ACT_SIGNAL3;
 
-	if( newActivity == ACT_SIGNAL3 && ( LookupActivity( ACT_SIGNAL3 ) == ACTIVITY_NOT_AVAILABLE ) )
-		newActivity = ACT_IDLE;
+//	if( newActivity == ACT_SIGNAL3 && ( LookupActivity( ACT_SIGNAL3 ) == ACTIVITY_NOT_AVAILABLE ) )
+//		newActivity = ACT_IDLE;
 
-	CBaseMonster::SetActivity( newActivity );
+	CSquadMonster::SetActivity( newActivity );
 }
 
 void CTalkMonster::StartTask( Task_t *pTask )
@@ -460,10 +463,10 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		break;
 	case TASK_PLAY_SCRIPT:
 		m_hTalkTarget = NULL;
-		CBaseMonster::StartTask( pTask );
+		CSquadMonster::StartTask( pTask );
 		break;
 	default:
-		CBaseMonster::StartTask( pTask );
+		CSquadMonster::StartTask( pTask );
 	}
 }
 
@@ -580,7 +583,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 			}
 		}
 
-		CBaseMonster::RunTask( pTask );
+		CSquadMonster::RunTask( pTask );
 		if( TaskIsComplete() )
 			IdleHeadTurn( pev->origin );
 		break;
@@ -593,7 +596,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 		{
 			SetBoneController( 0, 0 );
 		}
-		CBaseMonster::RunTask( pTask );
+		CSquadMonster::RunTask( pTask );
 	}
 }
 
@@ -611,7 +614,7 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 	// Don't finish that sentence
 	StopTalking();
 	SetUse( NULL );
-	CBaseMonster::Killed( pevAttacker, iGib );
+	CSquadMonster::Killed( pevAttacker, iGib );
 }
 
 CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, BOOL bTrace )
@@ -626,6 +629,9 @@ CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, 
 	{
 		if( pFriend == this || !pFriend->IsAlive() )
 			// don't talk to self or dead people
+			continue;
+		// has friend classname, but not friend really
+		if ( IRelationship(pFriend) >= R_DL || IRelationship(pFriend) == R_FR )
 			continue;
 		if( bTrace )
 		{
@@ -740,7 +746,7 @@ void CTalkMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 		//ALERT( at_console, "script event speak\n" );
 		break;
 	default:
-		CBaseMonster::HandleAnimEvent( pEvent );
+		CSquadMonster::HandleAnimEvent( pEvent );
 		break;
 	}
 }
@@ -913,7 +919,7 @@ int CTalkMonster::FOkToSpeak( void )
 int CTalkMonster::CanPlaySentence( BOOL fDisregardState ) 
 { 
 	if( fDisregardState )
-		return CBaseMonster::CanPlaySentence( fDisregardState );
+		return CSquadMonster::CanPlaySentence( fDisregardState );
 	return FOkToSpeak(); 
 }
 
@@ -1172,7 +1178,7 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			}
 		}
 	}
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
@@ -1261,7 +1267,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 		break;
 	}
 
-	return CBaseMonster::GetScheduleOfType( Type );
+	return CSquadMonster::GetScheduleOfType( Type );
 }
 
 //=========================================================
@@ -1315,7 +1321,7 @@ int CTalkMonster::IRelationship( CBaseEntity *pTarget )
 	if( pTarget->IsPlayer() )
 		if( m_afMemory & bits_MEMORY_PROVOKED )
 			return R_HT;
-	return CBaseMonster::IRelationship( pTarget );
+	return CSquadMonster::IRelationship( pTarget );
 }
 
 void CTalkMonster::StopFollowing( BOOL clearSchedule )
@@ -1414,7 +1420,7 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 		pkvd->fHandled = TRUE;
 	}
 	else 
-		CBaseMonster::KeyValue( pkvd );
+		CSquadMonster::KeyValue( pkvd );
 }
 
 void CTalkMonster::Precache( void )

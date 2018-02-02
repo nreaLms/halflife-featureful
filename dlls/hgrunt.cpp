@@ -2027,7 +2027,8 @@ Schedule_t *CHGrunt::GetSchedule( void )
 							else if( ( m_hEnemy != 0 ) &&
 									( m_hEnemy->Classify() != CLASS_PLAYER_ALLY ) &&
 									( m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE ) &&
-									( m_hEnemy->Classify() != CLASS_MACHINE ) )
+									( m_hEnemy->Classify() != CLASS_MACHINE ) &&
+									( m_hEnemy->Classify() != CLASS_PLAYER_ALLY_MILITARY ))
 								// monster
 								SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_MONSTER), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
 

@@ -19,6 +19,7 @@
 #ifndef MONSTERS_H
 #include "monsters.h"
 #endif
+#include "squadmonster.h"
 
 //=========================================================
 // Talking monster base class
@@ -38,7 +39,7 @@
 #define bit_saidHeard			(1<<6)
 #define bit_saidSmelled			(1<<7)
 
-#define TLK_CFRIENDS		6
+#define TLK_CFRIENDS		9
 
 typedef enum
 {
@@ -95,7 +96,7 @@ enum
 	LAST_TALKMONSTER_TASK			// MUST be last
 };
 
-class CTalkMonster : public CBaseMonster
+class CTalkMonster : public CSquadMonster
 {
 public:
 	void			TalkInit( void );				

@@ -20,6 +20,10 @@
 #define FEATURE_OTIS 1
 #define FEATURE_CLEANSUIT_SCIENTIST 1
 #define FEATURE_BABYGARG 1
+#define FEATURE_OPFOR_GRUNT 1
+
+// whether fgrunts and black mesa personnel are enemies like in Opposing Force
+#define FEATURE_OPFOR_ALLY_RELATIONSHIP 1
 
 // New weapons
 #define FEATURE_PIPEWRENCH 1
