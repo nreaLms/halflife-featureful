@@ -155,6 +155,9 @@ public:
 	BOOL FOkToSpeak( void );
 	void JustSpoke( void );
 
+	void DropMyItems(BOOL isGibbed);
+	void DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, BOOL isGibbed);
+
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	int IRelationship ( CBaseEntity *pTarget );
@@ -254,7 +257,7 @@ void CHFGrunt :: KeyValue( KeyValueData *pkvd )
 	}
 	else
 	{
-		CBaseMonster::KeyValue( pkvd );
+		CTalkMonster::KeyValue( pkvd );
 	}
 }
 //=========================================================
@@ -1193,40 +1196,53 @@ void CHFGrunt :: GibMonster ( void )
 
 	if ( GetBodygroup( FG_GUN_GROUP ) != FG_GUN_NONE )
 	{// throw a gun if the grunt has one
-		GetAttachment( 0, vecGunPos, vecGunAngles );
-
-		CBaseEntity *pGun;
-		if (FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
-		{
-			pGun = DropItem( "weapon_shotgun", vecGunPos, vecGunAngles );
-		}
-		else if (FBitSet( pev->weapons, FGRUNT_9MMAR ))
-		{
-			pGun = DropItem( "weapon_9mmAR", vecGunPos, vecGunAngles );
-		}
-		else
-		{
-			pGun = DropItem( "ammo_9mmAR", vecGunPos, vecGunAngles ); // TODO: change to saw when implemented
-		}
-		if ( pGun )
-		{
-			pGun->pev->velocity = Vector (RANDOM_FLOAT(-100,100), RANDOM_FLOAT(-100,100), RANDOM_FLOAT(200,300));
-			pGun->pev->avelocity = Vector ( 0, RANDOM_FLOAT( 200, 400 ), 0 );
-		}
-
-		if (FBitSet( pev->weapons, FGRUNT_GRENADELAUNCHER ))
-		{
-			pGun = DropItem( "ammo_ARgrenades", vecGunPos, vecGunAngles );
-			if ( pGun )
-			{
-				pGun->pev->velocity = Vector (RANDOM_FLOAT(-100,100), RANDOM_FLOAT(-100,100), RANDOM_FLOAT(200,300));
-				pGun->pev->avelocity = Vector ( 0, RANDOM_FLOAT( 200, 400 ), 0 );
-			}
-		}
+		DropMyItems(TRUE);
 	}
 
-	CBaseMonster :: GibMonster();
+	CTalkMonster::GibMonster();
 }
+
+void CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, BOOL isGibbed)
+{
+	CBaseEntity* pGun = DropItem(entityName, vecGunPos, vecGunAngles);
+	if (pGun && isGibbed) {
+		pGun->pev->velocity = Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) );
+		pGun->pev->avelocity = Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 );
+	}
+}
+
+void CHFGrunt::DropMyItems(BOOL isGibbed)
+{
+	Vector vecGunPos;
+	Vector vecGunAngles;
+	GetAttachment( 0, vecGunPos, vecGunAngles );
+
+	if (!isGibbed) {
+		SetBodygroup( FG_GUN_GROUP, FG_GUN_NONE );
+	}
+
+	GetAttachment( 0, vecGunPos, vecGunAngles );
+
+	if (FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
+	{
+		DropMyItem( "weapon_shotgun", vecGunPos, vecGunAngles, isGibbed );
+	}
+	else if (FBitSet( pev->weapons, FGRUNT_9MMAR ))
+	{
+		DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
+	}
+	else if (FBitSet( pev->weapons, FGRUNT_M249 ))
+	{
+		DropMyItem( "ammo_9mmAR", vecGunPos, vecGunAngles, isGibbed ); // TODO: change to saw when implemented
+	}
+
+	if (FBitSet( pev->weapons, FGRUNT_GRENADELAUNCHER ))
+	{
+		DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+	}
+	pev->weapons = 0;
+}
+
 //=========================================================
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards.
@@ -1334,7 +1350,7 @@ void CHFGrunt :: PrescheduleThink ( void )
 			}
 		}
 	}
-	CBaseMonster :: PrescheduleThink();
+	CTalkMonster::PrescheduleThink();
 }
 
 //=========================================================
@@ -1715,35 +1731,10 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 	switch( pEvent->event )
 	{
 		case HGRUNT_ALLY_AE_DROP_GUN:
-			{
-			Vector	vecGunPos;
-			Vector	vecGunAngles;
-
-			GetAttachment( 0, vecGunPos, vecGunAngles );
-
-			// switch to body group with no gun.
-			SetBodygroup( FG_GUN_GROUP, FG_GUN_NONE );
-
-			// now spawn a gun.
-			if (FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
-			{
-				 DropItem( "weapon_shotgun", vecGunPos, vecGunAngles );
-			}
-			else if (FBitSet( pev->weapons, FGRUNT_9MMAR ))
-			{
-				 DropItem( "weapon_9mmAR", vecGunPos, vecGunAngles );
-			}
-			else
-			{
-				 DropItem( "ammo_9mmAR", vecGunPos, vecGunAngles );
-			}
-			if (FBitSet( pev->weapons, FGRUNT_GRENADELAUNCHER ))
-			{
-				DropItem( "ammo_ARgrenades", BodyTarget( pev->origin ), vecGunAngles );
-			}
-
-			}
-			break;
+		{
+			DropMyItems(FALSE);
+		}
+		break;
 
 		case HGRUNT_ALLY_AE_RELOAD:
 			if (FBitSet( pev->weapons, FGRUNT_9MMAR | FGRUNT_SHOTGUN ))
@@ -2511,7 +2502,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 			if ( HasConditions( bits_COND_ENEMY_DEAD ) )
 			{
 				// call base class, all code to handle dead enemies is centralized there.
-				return CBaseMonster :: GetSchedule();
+				return CTalkMonster::GetSchedule();
 			}
 // new enemy
 			if ( HasConditions(bits_COND_NEW_ENEMY) )
@@ -2889,6 +2880,8 @@ public:
 	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void PrescheduleThink();
 
+	void DropMyItems(BOOL isGibbed);
+
 	void MakeGas( void );
 	void UpdateGas( void );
 	void KillGas( void );
@@ -2968,17 +2961,9 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 		KillGas ();
 		break;
 	case HGRUNT_ALLY_AE_DROP_GUN:
-		if ( GetBodygroup( TORCH_GUN_GROUP ) != TORCH_GUN_NONE )
-		{
-			SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_NONE );
-		}
 		if ( FBitSet( pev->weapons, TORCH_EAGLE ) )
 		{
-			Vector	vecGunPos;
-			Vector	vecGunAngles;
-
-			GetAttachment( 0, vecGunPos, vecGunAngles );
-			DropItem( "weapon_eagle", vecGunPos, vecGunAngles );
+			DropMyItems(FALSE);
 		}
 		break;
 	case HGRUNT_ALLY_AE_RELOAD:
@@ -3029,21 +3014,22 @@ BOOL CTorch::CheckRangeAttack1(float flDot, float flDist)
 
 void CTorch::GibMonster()
 {
-	Vector	vecGunPos;
-	Vector	vecGunAngles;
-
 	if ( FBitSet( pev->weapons, TORCH_EAGLE ) && GetBodygroup(TORCH_GUN_GROUP) != TORCH_GUN_NONE )
 	{// throw a gun if the grunt has one
-		GetAttachment( 0, vecGunPos, vecGunAngles );
-
-		CBaseEntity *pGun = DropItem( "weapon_eagle", vecGunPos, vecGunAngles );
-		if ( pGun )
-		{
-			pGun->pev->velocity = Vector (RANDOM_FLOAT(-100,100), RANDOM_FLOAT(-100,100), RANDOM_FLOAT(200,300));
-			pGun->pev->avelocity = Vector ( 0, RANDOM_FLOAT( 200, 400 ), 0 );
-		}
+		DropMyItems(TRUE);
 	}
-	CBaseMonster::GibMonster();
+	CTalkMonster::GibMonster();
+}
+
+void CTorch::DropMyItems(BOOL isGibbed)
+{
+	if (!isGibbed) {
+		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_NONE );
+	}
+	Vector	vecGunPos;
+	Vector	vecGunAngles;
+	GetAttachment( 0, vecGunPos, vecGunAngles );
+	DropMyItem("weapon_eagle", vecGunPos, vecGunAngles, isGibbed);
 }
 
 void CTorch::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
