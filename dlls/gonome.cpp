@@ -373,7 +373,7 @@ BOOL CGonome::CheckMeleeAttack2(float flDot, float flDist)
 //=========================================================
 void CGonome::IdleSound(void)
 {
-	const int iPitch = 100 + RANDOM_LONG( -5, 5 );
+	const int iPitch = 95 + RANDOM_LONG( 0, 10 );
 	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
 }
 

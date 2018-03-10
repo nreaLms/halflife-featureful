@@ -65,6 +65,7 @@ enum
 	TASK_HGRUNT_ALLY_FACE_TOSS_DIR = LAST_TALKMONSTER_TASK + 1,
 	TASK_HGRUNT_ALLY_CHECK_FIRE,
 	TASK_HGRUNT_ALLY_FIND_MEDIC,
+	LAST_HGRUNT_ALLY_TASK
 };
 //=========================================================
 // monster heads
@@ -1910,7 +1911,7 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 //=========================================================
 void CHFGrunt :: Precache()
 {
-	PRECACHE_MODEL("models/hgrunt_opfor.mdl");
+	PrecacheMyModel("models/hgrunt_opfor.mdl");
 
 	PRECACHE_SOUND( "hgrunt/gr_mgun1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_mgun2.wav" );
@@ -1936,6 +1937,17 @@ void CHFGrunt :: Precache()
 	m_iM249Link = PRECACHE_MODEL ("models/saw_link.mdl");// saw link
 
 	TalkInit();
+	switch ( m_iHead ) {
+	case FG_HEAD_SHOTGUN:
+	case FG_HEAD_SAW_BLACK:
+	case FG_HEAD_BERET_BLACK:
+		m_voicePitch = 90;
+		break;
+	default:
+		m_voicePitch = 100;
+		break;
+	}
+
 	CTalkMonster::Precache();
 }
 
@@ -1968,7 +1980,7 @@ void CHFGrunt :: TalkInit()
 	m_szGrp[TLK_ANSWER]  =	"FG_ANSWER";
 	m_szGrp[TLK_QUESTION] =	"FG_QUESTION";
 	m_szGrp[TLK_IDLE] =		"FG_IDLE";
-	m_szGrp[TLK_STARE] =		"FG_STARE";
+	m_szGrp[TLK_STARE] =	"FG_STARE";
 	m_szGrp[TLK_USE] =		"FG_OK";
 	m_szGrp[TLK_UNUSE] =	"FG_WAIT";
 	m_szGrp[TLK_STOP] =		"FG_STOP";
@@ -1984,24 +1996,6 @@ void CHFGrunt :: TalkInit()
 
 	m_szGrp[TLK_WOUND] =	"FG_WOUND";
 	m_szGrp[TLK_MORTAL] =	"FG_MORTAL";
-
-
-	if ( m_iHead == FG_HEAD_MASK )
-		m_voicePitch = 100;
-	if ( m_iHead == FG_HEAD_BERET )
-		m_voicePitch = 100;
-	if ( m_iHead == FG_HEAD_SHOTGUN )
-		m_voicePitch = 90;
-	if ( m_iHead == FG_HEAD_SAW )
-		m_voicePitch = 100;
-	if ( m_iHead == FG_HEAD_SAW_BLACK )
-		m_voicePitch = 90;
-	if ( m_iHead == FG_HEAD_MP )
-		m_voicePitch = 100;
-	if ( m_iHead == FG_HEAD_MAJOR )
-		m_voicePitch = 100;
-	if ( m_iHead == FG_HEAD_BERET_BLACK )
-		m_voicePitch = 90;
 }
 
 
@@ -2876,6 +2870,7 @@ public:
 	void Precache( void );
 	void HandleAnimEvent( MonsterEvent_t* pEvent );
 	BOOL CheckRangeAttack1(float flDot, float flDist);
+	BOOL CheckRangeAttack2(float flDot, float flDist);
 	void GibMonster();
 	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void PrescheduleThink();
@@ -2930,6 +2925,7 @@ void CTorch::Precache()
 	PRECACHE_SOUND("weapons/desert_eagle_reload.wav");
 	PrecacheHelper();
 	TalkInit();
+	m_voicePitch = 95;
 	CTalkMonster::Precache();
 }
 
@@ -2991,6 +2987,7 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 			pitchShift -= 5;
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "weapons/desert_eagle_fire.wav", 1, ATTN_NORM, 0, 100 + pitchShift );
 		CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
+		m_cAmmoLoaded--;// take away a bullet!
 	}
 		break;
 	case HGRUNT_ALLY_AE_BURST2:
@@ -3010,6 +3007,11 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 BOOL CTorch::CheckRangeAttack1(float flDot, float flDist)
 {
 	return FBitSet( pev->weapons, TORCH_EAGLE ) && CHFGrunt::CheckRangeAttack1(flDot, flDist);
+}
+
+BOOL CTorch::CheckRangeAttack2(float flDot, float flDist)
+{
+	return FALSE;
 }
 
 void CTorch::GibMonster()
@@ -3172,4 +3174,373 @@ void CTorch :: KillGas( void )
 	}
 	return;
 }
+
+
+#define MEDIC_CLIP_SIZE 17
+#define MEDIC_CLIP_SIZE_EAGLE 7
+
+#define MEDIC_EAGLE 1 << 0
+#define MEDIC_HANDGUN 1 << 1
+#define MEDIC_NEEDLE 1 << 2
+
+// Weapon group
+#define MEDIC_GUN_GROUP					3
+#define MEDIC_GUN_EAGLE					0
+#define MEDIC_GUN_PISTOL				1
+#define MEDIC_GUN_NEEDLE				2
+#define MEDIC_GUN_NONE					3
+
+// Head group
+#define MEDIC_HEAD_GROUP					2
+enum {
+	MEDIC_HEAD_WHITE,
+	MEDIC_HEAD_BLACK,
+	MEDIC_HEAD_COUNT
+};
+
+//=========================================================
+// Medic specific animation events
+//=========================================================
+#define		MEDIC_AE_HIDEGUN		( 15)
+#define		MEDIC_AE_SHOWNEEDLE		( 16)
+#define		MEDIC_AE_HIDENEEDLE		( 17)
+#define		MEDIC_AE_SHOWGUN		( 18)
+
+enum
+{
+	TASK_MEDIC_SAY_HEAL = LAST_HGRUNT_ALLY_TASK + 1,
+	TASK_MEDIC_HEAL,
+};
+
+Task_t	tlMedicHeal[] =
+{
+	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move within 60 of target ent (client)
+	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_TARGET_CHASE },	// If you fail, catch up with that guy! (change this to put syringe away and then chase)
+	{ TASK_FACE_IDEAL,						(float)0		},
+	{ TASK_MEDIC_SAY_HEAL,					(float)0		},
+	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_ARM	},			// Whip out the needle
+	{ TASK_MEDIC_HEAL,						(float)0	},	// Put it in the player
+	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_DISARM	},			// Put away the needle
+};
+
+Schedule_t	slMedicHeal[] =
+{
+	{
+		tlMedicHeal,
+		ARRAYSIZE ( tlMedicHeal ),
+		0,	// Don't interrupt or he'll end up running around with a needle all the time
+		0,
+		"Heal"
+	},
+};
+
+class CMedic : public CHFGrunt
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	BOOL CheckRangeAttack1 ( float flDot, float flDist );
+	BOOL CheckRangeAttack2 ( float flDot, float flDist );
+	void GibMonster();
+
+	void RunTask( Task_t *pTask );
+	void StartTask( Task_t *pTask );
+	Schedule_t *GetSchedule ( void );
+
+	void DropMyItems(BOOL isGibbed);
+
+	void FirePistol ( const char* shotSound, Bullet bullet );
+	bool CanHeal();
+	void Heal();
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	CUSTOM_SCHEDULES
+	float m_flHealCharge;
+	BOOL m_fDepleteLine;
+};
+
+LINK_ENTITY_TO_CLASS( monster_human_medic_ally, CMedic )
+
+TYPEDESCRIPTION	CMedic::m_SaveData[] =
+{
+	DEFINE_FIELD( CMedic, m_flHealCharge, FIELD_FLOAT ),
+	DEFINE_FIELD( CMedic, m_fDepleteLine, FIELD_BOOLEAN ),
+};
+
+IMPLEMENT_SAVERESTORE( CMedic, CHFGrunt )
+
+DEFINE_CUSTOM_SCHEDULES( CMedic )
+{
+	slMedicHeal
+};
+
+IMPLEMENT_CUSTOM_SCHEDULES( CMedic, CHFGrunt )
+
+bool CMedic::CanHeal( void )
+{
+	//ALERT(at_console, "Heal amount is %f\n", m_flHealCharge );
+	if ( m_flHealCharge < 1 )
+	{
+		if ( !m_fDepleteLine )
+		{
+			PlaySentence( "MG_NOTHEAL", 2, VOL_NORM, ATTN_IDLE );
+			m_fDepleteLine = TRUE;
+		}
+		return FALSE;
+	}
+
+	if ( (m_hTargetEnt == 0) || (m_hTargetEnt->pev->health > (m_hTargetEnt->pev->max_health * 0.75)) )
+	{
+		return FALSE;
+	}
+	return TRUE;
+}
+
+void CMedic::Heal( void )
+{
+	if ( !CanHeal() )
+		return;
+
+	float healAmount = (m_hTargetEnt->pev->max_health - m_hTargetEnt->pev->health);
+	if (healAmount > gSkillData.scientistHeal) {
+		healAmount = gSkillData.scientistHeal;
+	}
+
+	Vector target = m_hTargetEnt->pev->origin - pev->origin;
+	if ( target.Length() > 100 )
+		return;
+
+	if (m_hTargetEnt->TakeHealth( healAmount, DMG_GENERIC ))
+		m_flHealCharge -= healAmount;
+}
+
+void CMedic::StartTask(Task_t *pTask)
+{
+	switch( pTask->iTask )
+	{
+	case TASK_MEDIC_HEAL:
+		m_IdealActivity = ACT_MELEE_ATTACK2;
+		Heal();
+		break;
+	case TASK_MEDIC_SAY_HEAL:
+		m_hTalkTarget = m_hTargetEnt;
+		PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
+		TaskComplete();
+		break;
+	default:
+		CHFGrunt::StartTask(pTask);
+		break;
+	}
+}
+
+void CMedic::RunTask(Task_t *pTask)
+{
+	switch ( pTask->iTask )
+	{
+	case TASK_MEDIC_HEAL:
+		if ( m_fSequenceFinished )
+		{
+			TaskComplete();
+		}
+		else
+		{
+			if ( TargetDistance() > 90 )
+				TaskComplete();
+			pev->ideal_yaw = UTIL_VecToYaw( m_hTargetEnt->pev->origin - pev->origin );
+			ChangeYaw( pev->yaw_speed );
+		}
+		break;
+	default:
+		CHFGrunt::RunTask(pTask);
+		break;
+	}
+}
+
+Schedule_t *CMedic::GetSchedule()
+{
+	switch( m_MonsterState )
+	{
+	case MONSTERSTATE_IDLE:
+		if ( IsFollowing() )
+		{
+			if ( TargetDistance() <= 128 )
+			{
+				if ( CanHeal() )	// Heal opportunistically
+					return slMedicHeal;
+			}
+		}
+	}
+	return CHFGrunt::GetSchedule();
+}
+
+void CMedic::Spawn()
+{
+	Precache( );
+
+	SpawnHelper("models/hgrunt_medic.mdl", gSkillData.medicHealth);
+
+	m_cClipSize = MEDIC_CLIP_SIZE_EAGLE;
+	if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
+	{
+		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_EAGLE );
+	}
+	else if ( FBitSet( pev->weapons, MEDIC_HANDGUN ) )
+	{
+		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_PISTOL );
+		m_cClipSize = MEDIC_CLIP_SIZE;
+	}
+	else if ( FBitSet( pev->weapons, MEDIC_NEEDLE ) )
+	{
+		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NEEDLE );
+	}
+	m_cAmmoLoaded		= m_cClipSize;
+
+	if (m_iHead < 0 || m_iHead >= MEDIC_HEAD_COUNT) {
+		m_iHead = RANDOM_LONG(MEDIC_HEAD_WHITE, MEDIC_HEAD_BLACK);
+	}
+
+	SetBodygroup(MEDIC_HEAD_GROUP, m_iHead);
+
+	m_flHealCharge = gSkillData.medicHeal;
+	MonsterInit();
+	SetUse( &CMedic::FollowerUse );
+}
+
+void CMedic::Precache()
+{
+	PrecacheMyModel("models/hgrunt_medic.mdl");
+	PRECACHE_SOUND("weapons/desert_eagle_fire.wav");
+	PRECACHE_SOUND("weapons/desert_eagle_reload.wav");
+	PRECACHE_SOUND("weapons/pl_gun3.wav");
+	PRECACHE_SOUND("fgrunt/medic_give_shot.wav");
+	PRECACHE_SOUND("fgrunt/medical.wav");
+	PrecacheHelper();
+	TalkInit();
+	if (m_iHead == MEDIC_HEAD_BLACK)
+		m_voicePitch = 95;
+	else
+		m_voicePitch = 105;
+	CTalkMonster::Precache();
+}
+
+void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
+{
+	switch ( pEvent->event )
+	{
+	case MEDIC_AE_SHOWNEEDLE:
+		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NEEDLE );
+		break;
+
+	case MEDIC_AE_SHOWGUN:
+		if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
+			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_EAGLE );
+		else if ( FBitSet( pev->weapons, MEDIC_HANDGUN ) )
+			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_PISTOL );
+		else
+			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NEEDLE );
+		break;
+
+	case MEDIC_AE_HIDENEEDLE:
+		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
+		break;
+	case MEDIC_AE_HIDEGUN:
+		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
+		break;
+
+	case HGRUNT_ALLY_AE_DROP_GUN:
+		if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) )
+		{
+			DropMyItems(FALSE);
+		}
+		break;
+	case HGRUNT_ALLY_AE_RELOAD:
+		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/desert_eagle_reload.wav", 1, ATTN_NORM );
+		m_cAmmoLoaded = m_cClipSize;
+		ClearConditions(bits_COND_NO_AMMO_LOADED);
+		break;
+	case HGRUNT_ALLY_AE_BURST1:
+	{
+		if (FBitSet(pev->weapons, MEDIC_EAGLE)) {
+			FirePistol("weapons/desert_eagle_fire.wav", BULLET_MONSTER_357);
+		} else if (FBitSet(pev->weapons, MEDIC_HANDGUN)) {
+			FirePistol("weapons/pl_gun3.wav", BULLET_MONSTER_9MM);
+		}
+	}
+		break;
+	case HGRUNT_ALLY_AE_BURST2:
+	case HGRUNT_ALLY_AE_BURST3:
+		break;
+	case HGRUNT_ALLY_AE_KICK:
+	{
+		KickImpl(gSkillData.medicDmgKick);
+	}
+	break;
+	default:
+		CHFGrunt::HandleAnimEvent(pEvent);
+		break;
+	}
+}
+
+BOOL CMedic::CheckRangeAttack1(float flDot, float flDist)
+{
+	return FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && CHFGrunt::CheckRangeAttack1(flDot, flDist);
+}
+
+BOOL CMedic::CheckRangeAttack2(float flDot, float flDist)
+{
+	return FALSE;
+}
+
+void CMedic::GibMonster()
+{
+	if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && GetBodygroup(MEDIC_GUN_GROUP) != MEDIC_GUN_NONE )
+	{// throw a gun if the grunt has one
+		DropMyItems(TRUE);
+	}
+	CTalkMonster::GibMonster();
+}
+
+void CMedic::DropMyItems(BOOL isGibbed)
+{
+	if (!isGibbed) {
+		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
+	}
+	Vector	vecGunPos;
+	Vector	vecGunAngles;
+	GetAttachment( 0, vecGunPos, vecGunAngles );
+	if (FBitSet(pev->weapons, MEDIC_EAGLE))
+		DropMyItem("weapon_eagle", vecGunPos, vecGunAngles, isGibbed);
+	else if (FBitSet(pev->weapons, MEDIC_HANDGUN)) {
+		DropMyItem("weapon_9mmhandgun", vecGunPos, vecGunAngles, isGibbed);
+	}
+}
+
+void CMedic::FirePistol(const char *shotSound , Bullet bullet)
+{
+	UTIL_MakeVectors( pev->angles );
+	Vector vecShootOrigin = GetGunPosition();
+	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
+
+	Vector angDir = UTIL_VecToAngles( vecShootDir );
+	SetBlending( 0, angDir.x );
+	pev->effects = EF_MUZZLEFLASH;
+
+	FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, bullet );
+
+	int pitchShift = RANDOM_LONG( 0, 20 );
+	// Only shift about half the time
+	if( pitchShift > 10 )
+		pitchShift = 0;
+	else
+		pitchShift -= 5;
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, shotSound, 1, ATTN_NORM, 0, 100 + pitchShift );
+	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
+
+	m_cAmmoLoaded--;// take away a bullet!
+}
+
 #endif
