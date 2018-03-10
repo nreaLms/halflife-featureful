@@ -191,6 +191,7 @@ struct skilldata_t
 	float plrDmgTripmine;
 	float plrDmgEagle;
 	float plrDmgPWrench;
+	float plrDmgKnife;
 	float plrDmg762;
 	float plrDmgShockroach;
 	float plrDmgShockroachM;

@@ -3488,6 +3488,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #if FEATURE_SHOCKRIFLE
 		GiveNamedItem( "weapon_shockrifle" );
 #endif
+#if FEATURE_KNIFE
+		GiveNamedItem( "weapon_knife" );
+#endif
 		gEvilImpulse101 = FALSE;
 		break;
 	case 102:

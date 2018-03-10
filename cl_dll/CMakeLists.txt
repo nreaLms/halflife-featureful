@@ -49,6 +49,7 @@ set (CLDLL_SOURCES
 	../dlls/gauss.cpp
 	../dlls/handgrenade.cpp
 	../dlls/hornetgun.cpp
+	../dlls/knife.cpp
 	../dlls/mp5.cpp
 	../dlls/python.cpp
 	../dlls/rpg.cpp

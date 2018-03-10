@@ -352,6 +352,9 @@ void CGameRules::RefreshSkillData ( void )
 	// Pipe wrench
 	gSkillData.plrDmgPWrench = GetSkillCvar( "sk_plr_pipewrench" );
 
+	// Knife
+	gSkillData.plrDmgKnife = GetSkillCvar( "sk_plr_knife" );
+
 	// 762 Round
 	gSkillData.plrDmg762 = GetSkillCvar( "sk_plr_762_bullet" );
 

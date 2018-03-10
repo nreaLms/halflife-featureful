@@ -73,6 +73,7 @@ void EV_TrainPitchAdjust( struct event_args_s *args );
 
 void EV_FireEagle( struct event_args_s *args );
 void EV_PipeWrench( struct event_args_s *args );
+void EV_Knife( struct event_args_s *args );
 
 void EV_FireSniper( struct event_args_s *args );
 void EV_ShockFire( struct event_args_s *args );
@@ -1897,6 +1898,74 @@ void EV_PipeWrench( event_args_t *args )
 }
 //======================
 //	   PIPEWRENCH END
+//======================
+
+//======================
+//	   KNIFE START
+//======================
+enum knife_e
+{
+	KNIFE_IDLE1 = 0,
+	KNIFE_DRAW,
+	KNIFE_HOLSTER,
+	KNIFE_ATTACK1,
+	KNIFE_ATTACK1MISS,
+	KNIFE_ATTACK2,
+	KNIFE_ATTACK2HIT,
+	KNIFE_ATTACK3,
+	KNIFE_ATTACK3HIT,
+	KNIFE_IDLE2,
+	KNIFE_IDLE3,
+	KNIFE_CHARGE,
+	KNIFE_STAB
+};
+
+//Only predict the miss sounds, hit sounds are still played
+//server side, so players don't get the wrong idea.
+void EV_Knife( event_args_t *args )
+{
+	int idx;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
+
+	idx = args->entindex;
+	VectorCopy( args->origin, origin );
+
+	//Play Swing sound
+	switch( gEngfuncs.pfnRandomLong( 0, 2 ) )
+	{
+	case 0:
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/knife1.wav", 1, ATTN_NORM, 0, PITCH_NORM );
+		break;
+	case 1:
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/knife2.wav", 1, ATTN_NORM, 0, PITCH_NORM );
+		break;
+	case 2:
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/knife3.wav", 1, ATTN_NORM, 0, PITCH_NORM );
+		break;
+	}
+
+	if( EV_IsLocal( idx ) )
+	{
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK1MISS, 1 );
+
+		switch( ( g_iSwing++ ) % 3 )
+		{
+		case 0:
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK1MISS, 1 );
+			break;
+		case 1:
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK2, 1 );
+			break;
+		case 2:
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK3, 1 );
+			break;
+		}
+	}
+}
+//======================
+//	   KNIFE END
 //======================
 
 //======================

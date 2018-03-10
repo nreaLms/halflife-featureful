@@ -74,6 +74,9 @@ CEagle g_Eagle;
 #if FEATURE_PIPEWRENCH
 CPipeWrench g_PipeWrench;
 #endif
+#if FEATURE_KNIFE
+CKnife g_Knife;
+#endif
 #if FEATURE_SNIPERRIFLE
 CSniperrifle g_Sniper;
 #endif
@@ -635,6 +638,9 @@ void HUD_InitClientWeapons( void )
 #if FEATURE_PIPEWRENCH
 	HUD_PrepEntity( &g_PipeWrench, &player );
 #endif
+#if FEATURE_KNIFE
+	HUD_PrepEntity( &g_Knife, &player );
+#endif
 #if FEATURE_SNIPERRIFLE
 	HUD_PrepEntity( &g_Sniper, &player );
 #endif
@@ -754,6 +760,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 #if FEATURE_PIPEWRENCH
 		case WEAPON_PIPEWRENCH:
 			pWeapon = &g_PipeWrench;
+			break;
+#endif
+#if FEATURE_KNIFE
+		case WEAPON_KNIFE:
+			pWeapon = &g_Knife;
 			break;
 #endif
 #if FEATURE_SNIPERRIFLE

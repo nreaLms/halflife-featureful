@@ -368,6 +368,9 @@ void W_Precache( void )
 #if FEATURE_PIPEWRENCH
 	UTIL_PrecacheOtherWeapon( "weapon_pipewrench" );
 #endif
+#if FEATURE_KNIFE
+	UTIL_PrecacheOtherWeapon( "weapon_knife" );
+#endif
 #if FEATURE_SNIPERRIFLE
 	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
 	UTIL_PrecacheOther( "ammo_762" );

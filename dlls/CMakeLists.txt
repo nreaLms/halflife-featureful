@@ -92,6 +92,7 @@ set (SVDLL_SOURCES
 	ichthyosaur.cpp
 	islave.cpp
 	items.cpp
+	knife.cpp
 	leech.cpp
 	lights.cpp
 	maprules.cpp

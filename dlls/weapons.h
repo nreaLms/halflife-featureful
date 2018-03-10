@@ -91,6 +91,9 @@ public:
 #if FEATURE_SNIPERRIFLE
 #define WEAPON_SNIPERRIFLE		24
 #endif
+#if FEATURE_KNIFE
+#define WEAPON_KNIFE			25
+#endif
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
@@ -119,6 +122,7 @@ public:
 #define PIPEWRENCH_WEIGHT		0
 #define SNIPERRIFLE_WEIGHT		10
 #define SHOCKRIFLE_WEIGHT		15
+#define KNIFE_WEIGHT			0
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -1200,6 +1204,37 @@ public:
 private:
 	unsigned short m_usShockFire;
 	CBeam* m_pBeam[4];
+};
+#endif
+
+#if FEATURE_KNIFE
+class CKnife : public CBasePlayerWeapon
+{
+public:
+	void Spawn(void);
+	void Precache(void);
+	int iItemSlot(void) { return 1; }
+	void EXPORT SwingAgain(void);
+	void EXPORT Smack(void);
+	int GetItemInfo(ItemInfo *p);
+
+	void PrimaryAttack(void);
+	int Swing(int fFirst);
+	BOOL Deploy(void);
+	void Holster(int skiplocal = 0);
+	int m_iSwing;
+	TraceResult m_trHit;
+
+	virtual BOOL UseDecrement(void)
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+private:
+	unsigned short m_usKnife;
 };
 #endif
 

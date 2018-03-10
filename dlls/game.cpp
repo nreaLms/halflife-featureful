@@ -593,6 +593,11 @@ cvar_t	sk_plr_pipewrench1 = { "sk_plr_pipewrench1", "0" };
 cvar_t	sk_plr_pipewrench2 = { "sk_plr_pipewrench2", "0" };
 cvar_t	sk_plr_pipewrench3 = { "sk_plr_pipewrench3", "0" };
 
+// Knife
+cvar_t	sk_plr_knife1 = { "sk_plr_knife1", "0" };
+cvar_t	sk_plr_knife2 = { "sk_plr_knife2", "0" };
+cvar_t	sk_plr_knife3 = { "sk_plr_knife3", "0" };
+
 // Sniper rifle
 cvar_t	sk_plr_762_bullet1 = { "sk_plr_762_bullet1", "0" };
 cvar_t	sk_plr_762_bullet2 = { "sk_plr_762_bullet2", "0" };
@@ -1263,6 +1268,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_pipewrench1 );// { "sk_plr_pipewrench1", "0" };
 	CVAR_REGISTER( &sk_plr_pipewrench2 );// { "sk_plr_pipewrench2", "0" };
 	CVAR_REGISTER( &sk_plr_pipewrench3 );// { "sk_plr_pipewrench3", "0" };
+
+	CVAR_REGISTER( &sk_plr_knife1 );// { "sk_plr_knife1", "0" };
+	CVAR_REGISTER( &sk_plr_knife2 );// { "sk_plr_knife2", "0" };
+	CVAR_REGISTER( &sk_plr_knife3 );// { "sk_plr_knife3", "0" };
 
 	// Sniper rifle
 	CVAR_REGISTER( &sk_plr_762_bullet1 );// { "sk_plr_762_bullet1", "0" };
