@@ -75,6 +75,7 @@ void EV_FireEagle( struct event_args_s *args );
 void EV_PipeWrench( struct event_args_s *args );
 
 void EV_FireSniper( struct event_args_s *args );
+void EV_ShockFire( struct event_args_s *args );
 }
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
@@ -1960,6 +1961,42 @@ void EV_FireSniper( event_args_t *args )
 }
 //======================
 //	   SNIPERRIFLE END
+//======================
+
+//======================
+//	   SHOCKRIFLE START
+//======================
+enum shockrifle_e
+{
+	SHOCK_IDLE1 = 0,
+	SHOCK_FIRE,
+	SHOCK_DRAW,
+	SHOCK_HOLSTER,
+	SHOCK_IDLE3
+};
+
+void EV_ShockFire( event_args_t *args )
+{
+	int idx;
+	vec3_t origin;
+
+	idx = args->entindex;
+
+	VectorCopy( args->origin, origin );
+
+
+	//Only play the weapon anims if I shot it.
+	if( EV_IsLocal( idx ) )
+	{
+		V_PunchAxis( 0, gEngfuncs.pfnRandomLong( 0, 2 ) );
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( SHOCK_FIRE, 1 );
+	}
+
+	// Play fire sound.
+	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/shock_fire.wav", 1, ATTN_NORM, 0, 100 );
+}
+//======================
+//	   SHOCKRIFLE END
 //======================
 
 int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )

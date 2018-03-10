@@ -1793,6 +1793,12 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 						cd->vuser2.y = pl->ammo_762;
 					}
 #endif
+#if FEATURE_SHOCKRIFLE
+					else if( pl->m_pActiveItem->m_iId == WEAPON_SHOCKRIFLE )
+					{
+						cd->vuser2.y = pl->ammo_shocks;
+					}
+#endif
 				}
 			}
 		}

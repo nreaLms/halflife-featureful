@@ -83,7 +83,10 @@ public:
 #define WEAPON_EAGLE			17
 #endif
 #if FEATURE_PIPEWRENCH
-#define WEAPON_PIPEWRENCH		22
+#define WEAPON_PIPEWRENCH		18
+#endif
+#if FEATURE_SHOCKRIFLE
+#define WEAPON_SHOCKRIFLE		22
 #endif
 #if FEATURE_SNIPERRIFLE
 #define WEAPON_SNIPERRIFLE		24
@@ -115,6 +118,7 @@ public:
 #define EAGLE_WEIGHT		15
 #define PIPEWRENCH_WEIGHT		0
 #define SNIPERRIFLE_WEIGHT		10
+#define SHOCKRIFLE_WEIGHT		15
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -130,6 +134,7 @@ public:
 #define HORNET_MAX_CARRY		8
 #define M203_GRENADE_MAX_CARRY	10
 #define _762_MAX_CARRY			15
+#define SHOCK_MAX_CARRY			10
 
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
@@ -151,6 +156,7 @@ public:
 #define SNARK_MAX_CLIP			WEAPON_NOCLIP
 #define EAGLE_MAX_CLIP			7
 #define SNIPERRIFLE_MAX_CLIP	5
+#define SHOCKRIFLE_MAX_CLIP		10
 
 // the default amount of ammo that comes with each gun when it spawns
 #define GLOCK_DEFAULT_GIVE			17
@@ -170,6 +176,7 @@ public:
 #define HIVEHAND_DEFAULT_GIVE		8
 #define EAGLE_DEFAULT_GIVE			7
 #define SNIPERRIFLE_DEFAULT_GIVE		5
+#define SHOCKRIFLE_DEFAULT_GIVE		10
 
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	20
@@ -1160,6 +1167,39 @@ public:
 
 private:
 	unsigned short m_usSniper;
+};
+#endif
+
+#if FEATURE_SHOCKRIFLE
+class CShockrifle : public CHgun
+{
+public:
+	void Spawn(void);
+	void Precache(void);
+	int iItemSlot(void) { return 4; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer(CBasePlayer *pPlayer);
+
+	void PrimaryAttack(void);
+	void SecondaryAttack(void);
+	BOOL Deploy(void);
+	void Holster(int skiplocal = 0);
+	void ItemPostFrame(void);
+	void Reload(void);
+	void WeaponIdle(void);
+	void CreateChargeEffect(void);
+	void ClearBeams(void);
+	virtual BOOL UseDecrement(void)
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+private:
+	unsigned short m_usShockFire;
+	CBeam* m_pBeam[4];
 };
 #endif
 

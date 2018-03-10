@@ -122,6 +122,7 @@ set (SVDLL_SOURCES
 	scientist.cpp
 	scripted.cpp
 	shockbeam.cpp
+	shockrifle.cpp
 	shocktrooper.cpp
 	shotgun.cpp
 	singleplay_gamerules.cpp

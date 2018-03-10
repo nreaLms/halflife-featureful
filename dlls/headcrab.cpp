@@ -23,6 +23,10 @@
 #include	"schedule.h"
 #include	"game.h"
 #include	"mod_features.h"
+#if FEATURE_SHOCKRIFLE
+#include "player.h"
+#include "weapons.h"
+#endif
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -566,6 +570,7 @@ class CShockRoach : public CHeadCrab
 public:
 	void Spawn(void);
 	void Precache(void);
+	virtual float GetDamageAmount( void ) { return gSkillData.sroachDmgBite; }
 	void EXPORT LeapTouch(CBaseEntity *pOther);
 	void PainSound(void);
 	void DeathSound(void);
@@ -695,17 +700,16 @@ void CShockRoach::LeapTouch(CBaseEntity *pOther)
 	{
 		EMIT_SOUND_DYN(edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 
-
+#if FEATURE_SHOCKRIFLE
 		// Give the shockrifle weapon to the player, if not already in possession.
-//		CBasePlayer* pPlayer = dynamic_cast<CBasePlayer*>(pOther);
-//		if (pPlayer && !(pPlayer->pev->weapons & (1 << WEAPON_SHOCKRIFLE)))
-//		{
-//			pPlayer->GiveNamedItem("weapon_shockrifle");
-//			pPlayer->pev->weapons |= (1 << WEAPON_SHOCKRIFLE);
-//			UTIL_Remove(this);
-//			return;
-//		}
-
+		if (pOther->IsPlayer() && pOther->IsAlive() && !(pOther->pev->weapons & (1 << WEAPON_SHOCKRIFLE))) {
+			CBasePlayer* pPlayer = (CBasePlayer*)(pOther);
+			pPlayer->GiveNamedItem("weapon_shockrifle");
+			pPlayer->pev->weapons |= (1 << WEAPON_SHOCKRIFLE);
+			UTIL_Remove(this);
+			return;
+		}
+#endif
 		pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
 	}
 

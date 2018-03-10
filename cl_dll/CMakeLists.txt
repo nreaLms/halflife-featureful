@@ -53,6 +53,7 @@ set (CLDLL_SOURCES
 	../dlls/python.cpp
 	../dlls/rpg.cpp
 	../dlls/satchel.cpp
+	../dlls/shockrifle.cpp
 	../dlls/shotgun.cpp
 	../dlls/squeakgrenade.cpp
 	../dlls/tripmine.cpp
