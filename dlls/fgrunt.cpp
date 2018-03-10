@@ -3031,7 +3031,7 @@ void CTorch::DropMyItems(BOOL isGibbed)
 	Vector	vecGunPos;
 	Vector	vecGunAngles;
 	GetAttachment( 0, vecGunPos, vecGunAngles );
-	DropMyItem("weapon_eagle", vecGunPos, vecGunAngles, isGibbed);
+	DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
 }
 
 void CTorch::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
@@ -3513,7 +3513,7 @@ void CMedic::DropMyItems(BOOL isGibbed)
 	Vector	vecGunAngles;
 	GetAttachment( 0, vecGunPos, vecGunAngles );
 	if (FBitSet(pev->weapons, MEDIC_EAGLE))
-		DropMyItem("weapon_eagle", vecGunPos, vecGunAngles, isGibbed);
+		DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
 	else if (FBitSet(pev->weapons, MEDIC_HANDGUN)) {
 		DropMyItem("weapon_9mmhandgun", vecGunPos, vecGunAngles, isGibbed);
 	}
