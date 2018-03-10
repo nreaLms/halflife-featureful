@@ -225,6 +225,11 @@
 [
 	UseSentence(String) : "Use Sentence"
 	UnUseSentence(String) : "Un-Use Sentence"
+	suspicious(choices) : "Suspicious" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 ]
 
 @BaseClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = gibshooterbase

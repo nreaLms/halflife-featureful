@@ -171,6 +171,7 @@ public:
 	float		m_flStopTalkTime;// when in the future that I'll be done saying this sentence.
 
 	EHANDLE		m_hTalkTarget;	// who to look at while talking
+	BOOL m_fStartSuspicious;
 	CUSTOM_SCHEDULES
 };
 

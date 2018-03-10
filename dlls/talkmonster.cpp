@@ -46,6 +46,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_flLastSaidSmelled, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_flStopTalkTime, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_hTalkTarget, FIELD_EHANDLE ),
+	DEFINE_FIELD( CTalkMonster, m_fStartSuspicious, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
@@ -604,7 +605,7 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 {
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
 	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE 
-			&& IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
+			&& !m_fStartSuspicious && IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
 	{
 		AlertFriends();
 		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
@@ -1292,6 +1293,12 @@ void CTalkMonster::PrescheduleThink( void )
 	{
 		SetConditions( bits_COND_CLIENT_UNSEEN );
 	}
+	if (m_fStartSuspicious) {
+		if (!HasMemory(bits_MEMORY_PROVOKED)) {
+			ALERT(at_console, "Talk Monster Pre-Provoked\n");
+			Remember(bits_MEMORY_PROVOKED);
+		}
+	}
 }
 
 // try to smell something
@@ -1417,6 +1424,11 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "UnUseSentence" ) )
 	{
 		m_iszUnUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "suspicious" ) )
+	{
+		m_fStartSuspicious = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else 
