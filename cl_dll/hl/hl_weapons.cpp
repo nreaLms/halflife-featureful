@@ -77,6 +77,9 @@ CPipeWrench g_PipeWrench;
 #if FEATURE_KNIFE
 CKnife g_Knife;
 #endif
+#if FEATURE_PENGUIN
+CPenguin g_Penguin;
+#endif
 #if FEATURE_SNIPERRIFLE
 CSniperrifle g_Sniper;
 #endif
@@ -641,6 +644,9 @@ void HUD_InitClientWeapons( void )
 #if FEATURE_KNIFE
 	HUD_PrepEntity( &g_Knife, &player );
 #endif
+#if FEATURE_PENGUIN
+	HUD_PrepEntity( &g_Penguin, &player );
+#endif
 #if FEATURE_SNIPERRIFLE
 	HUD_PrepEntity( &g_Sniper, &player );
 #endif
@@ -765,6 +771,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 #if FEATURE_KNIFE
 		case WEAPON_KNIFE:
 			pWeapon = &g_Knife;
+			break;
+#endif
+#if FEATURE_PENGUIN
+		case WEAPON_PENGUIN:
+			pWeapon = &g_Penguin;
 			break;
 #endif
 #if FEATURE_SNIPERRIFLE

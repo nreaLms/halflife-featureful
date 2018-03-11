@@ -92,6 +92,9 @@ void Game_HookEvents( void )
 #if FEATURE_KNIFE
 	gEngfuncs.pfnHookEvent( "events/knife.sc", EV_Knife );
 #endif
+#if FEATURE_PENGUIN
+	gEngfuncs.pfnHookEvent( "events/penguinfire.sc", EV_SnarkFire );
+#endif
 #if FEATURE_SNIPERRIFLE
 	gEngfuncs.pfnHookEvent( "events/sniper.sc", EV_FireSniper );
 #endif

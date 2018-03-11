@@ -3561,6 +3561,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_hgun.mdl") = weapon_hornetgun : "Hornet Gun" []
 @PointClass size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_weaponbox.mdl") =  weaponbox : "Weapon/Ammo Container" []
 @PointClass base(Weapon, Targetx) studio("models/w_desert_eagle.mdl") = weapon_eagle : "Desert Eagle" []
+@PointClass base(Weapon, Targetx) studio("models/w_penguinnest.mdl") = weapon_penguin : "Killer Penguin" []
 @PointClass base(Weapon, Targetx) studio("models/w_pipe_wrench.mdl") = weapon_pipewrench : "Pipe Wrench" []
 @PointClass base(Weapon, Targetx) studio("models/w_knife.mdl") = weapon_knife : "Knife" []
 @PointClass base(Weapon, Targetx) studio("models/w_shock.mdl") = weapon_shockrifle : "Shock Roach" []

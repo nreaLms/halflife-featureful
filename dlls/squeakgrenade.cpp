@@ -45,6 +45,7 @@ enum squeak_e
 #ifndef CLIENT_DLL
 class CSqueakGrenade : public CGrenade
 {
+public:
 	void Spawn( void );
 	void Precache( void );
 	int Classify( void );
@@ -69,6 +70,10 @@ class CSqueakGrenade : public CGrenade
 	Vector m_posPrev;
 	EHANDLE m_hOwner;
 	int m_iMyClass;
+
+protected:
+	void SpawnImpl(const char* modelName, float damage);
+	void PrecacheImpl(const char* modelName);
 };
 
 float CSqueakGrenade::m_flNextBounceSoundTime = 0;
@@ -111,15 +116,19 @@ int CSqueakGrenade::Classify( void )
 	return m_iClass ? m_iClass : CLASS_ALIEN_BIOWEAPON;
 }
 
-void CSqueakGrenade::Spawn( void )
+void CSqueakGrenade::Spawn()
 {
 	Precache();
+	SpawnImpl("models/w_squeak.mdl", gSkillData.snarkDmgPop);
+}
 
+void CSqueakGrenade::SpawnImpl(const char* modelName , float damage)
+{
 	// motor
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/w_squeak.mdl" );
+	SET_MODEL( ENT( pev ), modelName );
 	UTIL_SetSize( pev, Vector( -4, -4, 0 ), Vector( 4, 4, 8 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -134,7 +143,7 @@ void CSqueakGrenade::Spawn( void )
 	pev->gravity = 0.5;
 	pev->friction = 0.5;
 
-	pev->dmg = gSkillData.snarkDmgPop;
+	pev->dmg = damage;
 
 	m_flDie = gpGlobals->time + SQUEEK_DETONATE_DELAY;
 
@@ -149,9 +158,14 @@ void CSqueakGrenade::Spawn( void )
 	ResetSequenceInfo();
 }
 
-void CSqueakGrenade::Precache( void )
+void CSqueakGrenade::Precache()
 {
-	PRECACHE_MODEL( "models/w_squeak.mdl" );
+	PrecacheImpl("models/w_squeak.mdl");
+}
+
+void CSqueakGrenade::PrecacheImpl( const char* modelName )
+{
+	PRECACHE_MODEL( modelName );
 	PRECACHE_SOUND( "squeek/sqk_blast1.wav" );
 	PRECACHE_SOUND( "common/bodysplat.wav" );
 	PRECACHE_SOUND( "squeek/sqk_die1.wav" );
@@ -405,6 +419,39 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 
 	m_flNextBounceSoundTime = gpGlobals->time + 0.5;// half second.
 }
+
+#if FEATURE_PENGUIN
+class CPenguinGrenade : public CSqueakGrenade
+{
+	void Spawn( void );
+	void Precache( void );
+	void Killed(entvars_t *pevAttacker, int iGib);
+};
+
+void CPenguinGrenade::Spawn()
+{
+	Precache();
+	SpawnImpl("models/w_penguin.mdl", gSkillData.plrDmgHandGrenade);
+}
+
+void CPenguinGrenade::Precache()
+{
+	PrecacheImpl("models/w_penguin.mdl");
+}
+
+void CPenguinGrenade::Killed(entvars_t *pevAttacker, int iGib)
+{
+	if( m_hOwner != 0 )
+		pev->owner = m_hOwner->edict();
+	CGrenade::Detonate();
+	UTIL_BloodDrips( pev->origin, g_vecZero, BloodColor(), 80 );
+	if( m_hOwner != 0 )
+		pev->owner = m_hOwner->edict();
+}
+
+LINK_ENTITY_TO_CLASS( monster_penguin, CPenguinGrenade )
+#endif
+
 #endif
 
 LINK_ENTITY_TO_CLASS( weapon_snark, CSqueak )
@@ -412,12 +459,12 @@ LINK_ENTITY_TO_CLASS( weapon_snark, CSqueak )
 void CSqueak::Spawn()
 {
 	Precache();
-	m_iId = WEAPON_SNARK;
-	SET_MODEL( ENT( pev ), "models/w_sqknest.mdl" );
+	m_iId = WeaponId();
+	SET_MODEL( ENT( pev ), NestModel() );
 
 	FallInit();//get ready to fall down.
 
-	m_iDefaultAmmo = SNARK_DEFAULT_GIVE;
+	m_iDefaultAmmo = DefaultGive();
 
 	pev->sequence = 1;
 	pev->animtime = gpGlobals->time;
@@ -426,27 +473,27 @@ void CSqueak::Spawn()
 
 void CSqueak::Precache( void )
 {
-	PRECACHE_MODEL( "models/w_sqknest.mdl" );
-	PRECACHE_MODEL( "models/v_squeak.mdl" );
-	PRECACHE_MODEL( "models/p_squeak.mdl" );
+	PRECACHE_MODEL( NestModel() );
+	PRECACHE_MODEL( VModel() );
+	PRECACHE_MODEL( PModel() );
 	PRECACHE_SOUND( "squeek/sqk_hunt2.wav" );
 	PRECACHE_SOUND( "squeek/sqk_hunt3.wav" );
-	UTIL_PrecacheOther( "monster_snark" );
+	UTIL_PrecacheOther( GrenadeName() );
 
-	m_usSnarkFire = PRECACHE_EVENT( 1, "events/snarkfire.sc" );
+	m_usSnarkFire = PRECACHE_EVENT( 1, EventsFile() );
 }
 
 int CSqueak::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "Snarks";
-	p->iMaxAmmo1 = SNARK_MAX_CARRY;
+	p->pszAmmo1 = AmmoName();
+	p->iMaxAmmo1 = MaxCarry();
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 4;
-	p->iPosition = 3;
-	p->iId = m_iId = WEAPON_SNARK;
+	p->iPosition = PositionInSlot();
+	p->iId = m_iId = WeaponId();
 	p->iWeight = SNARK_WEIGHT;
 	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
 
@@ -465,7 +512,7 @@ BOOL CSqueak::Deploy()
 
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 
-	return DefaultDeploy( "models/v_squeak.mdl", "models/p_squeak.mdl", SQUEAK_UP, "squeak" );
+	return DefaultDeploy( VModel(), PModel(), SQUEAK_UP, "squeak" );
 }
 
 void CSqueak::Holster( int skiplocal /* = 0 */ )
@@ -474,7 +521,7 @@ void CSqueak::Holster( int skiplocal /* = 0 */ )
 
 	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 	{
-		m_pPlayer->pev->weapons &= ~( 1 << WEAPON_SNARK );
+		m_pPlayer->pev->weapons &= ~( 1 << WeaponId() );
 		DestroyItem();
 		return;
 	}
@@ -515,7 +562,7 @@ void CSqueak::PrimaryAttack()
 			// player "shoot" animation
 			m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 #ifndef CLIENT_DLL
-			CBaseEntity *pSqueak = CBaseEntity::Create( "monster_snark", tr.vecEndPos, m_pPlayer->pev->v_angle, m_pPlayer->edict() );
+			CBaseEntity *pSqueak = CBaseEntity::Create( GrenadeName(), tr.vecEndPos, m_pPlayer->pev->v_angle, m_pPlayer->edict() );
 			pSqueak->pev->velocity = gpGlobals->v_forward * 200 + m_pPlayer->pev->velocity;
 #endif
 			// play hunt sound
@@ -582,4 +629,109 @@ void CSqueak::WeaponIdle( void )
 	}
 	SendWeaponAnim( iAnim );
 }
+
+const char* CSqueak::GrenadeName() const
+{
+	return "monster_snark";
+}
+
+int CSqueak::WeaponId() const
+{
+	return WEAPON_SNARK;
+}
+
+const char* CSqueak::NestModel() const
+{
+	return "models/w_sqknest.mdl";
+}
+
+const char* CSqueak::PModel() const
+{
+	return "models/p_squeak.mdl";
+}
+
+const char* CSqueak::VModel() const
+{
+	return "models/v_squeak.mdl";
+}
+
+int CSqueak::PositionInSlot() const
+{
+	return 3;
+}
+
+int CSqueak::DefaultGive() const
+{
+	return SNARK_DEFAULT_GIVE;
+}
+
+int CSqueak::MaxCarry() const
+{
+	return SNARK_MAX_CARRY;
+}
+
+const char* CSqueak::AmmoName() const
+{
+	return "Snarks";
+}
+
+const char* CSqueak::EventsFile() const
+{
+	return "events/snarkfire.sc";
+}
+
+#if FEATURE_PENGUIN
+LINK_ENTITY_TO_CLASS( weapon_penguin, CPenguin )
+
+const char* CPenguin::GrenadeName() const
+{
+	return "monster_penguin";
+}
+
+int CPenguin::WeaponId() const
+{
+	return WEAPON_PENGUIN;
+}
+
+const char* CPenguin::NestModel() const
+{
+	return "models/w_penguinnest.mdl";
+}
+
+const char* CPenguin::PModel() const
+{
+	return "models/p_penguin.mdl";
+}
+
+const char* CPenguin::VModel() const
+{
+	return "models/v_penguin.mdl";
+}
+
+int CPenguin::PositionInSlot() const
+{
+	return 4;
+}
+
+int CPenguin::DefaultGive() const
+{
+	return PENGUIN_DEFAULT_GIVE;
+}
+
+int CPenguin::MaxCarry() const
+{
+	return PENGUIN_MAX_CARRY;
+}
+
+const char* CPenguin::AmmoName() const
+{
+	return "Penguins";
+}
+
+const char* CPenguin::EventsFile() const
+{
+	return "events/penguinfire.sc";
+}
+#endif
+
 #endif

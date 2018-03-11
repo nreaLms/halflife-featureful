@@ -94,6 +94,9 @@ public:
 #if FEATURE_KNIFE
 #define WEAPON_KNIFE			25
 #endif
+#if FEATURE_PENGUIN
+#define	WEAPON_PENGUIN			26
+#endif
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
@@ -137,6 +140,7 @@ public:
 #define SNARK_MAX_CARRY			15
 #define HORNET_MAX_CARRY		8
 #define M203_GRENADE_MAX_CARRY	10
+#define PENGUIN_MAX_CARRY		9
 #define _762_MAX_CARRY			15
 #define SHOCK_MAX_CARRY			10
 
@@ -179,6 +183,7 @@ public:
 #define SNARK_DEFAULT_GIVE			5
 #define HIVEHAND_DEFAULT_GIVE		8
 #define EAGLE_DEFAULT_GIVE			7
+#define PENGUIN_DEFAULT_GIVE		3
 #define SNIPERRIFLE_DEFAULT_GIVE		5
 #define SHOCKRIFLE_DEFAULT_GIVE		10
 
@@ -194,6 +199,7 @@ public:
 #define AMMO_RPGCLIP_GIVE		RPG_MAX_CLIP
 #define AMMO_URANIUMBOX_GIVE	20
 #define AMMO_SNARKBOX_GIVE		5
+#define AMMO_PENGUINBOX_GIVE		3
 #define AMMO_762BOX_GIVE		5
 
 // bullet types
@@ -1033,6 +1039,17 @@ public:
 #endif
 	}
 
+	virtual const char* GrenadeName() const;
+	virtual int WeaponId() const;
+	virtual const char* NestModel() const;
+	virtual const char* PModel() const;
+	virtual const char* VModel() const;
+	virtual int PositionInSlot() const;
+	virtual int DefaultGive() const;
+	virtual int MaxCarry() const;
+	virtual const char* AmmoName() const;
+	virtual const char* EventsFile() const;
+
 private:
 	unsigned short m_usSnarkFire;
 };
@@ -1235,6 +1252,23 @@ public:
 	}
 private:
 	unsigned short m_usKnife;
+};
+#endif
+
+#if FEATURE_PENGUIN
+class CPenguin : public CSqueak
+{
+public:
+	virtual const char* GrenadeName() const;
+	virtual int WeaponId() const;
+	virtual const char* NestModel() const;
+	virtual const char* PModel() const;
+	virtual const char* VModel() const;
+	virtual int PositionInSlot() const;
+	virtual int DefaultGive() const;
+	virtual int MaxCarry() const;
+	virtual const char* AmmoName() const;
+	virtual const char* EventsFile() const;
 };
 #endif
 

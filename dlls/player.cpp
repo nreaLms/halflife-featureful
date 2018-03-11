@@ -3491,6 +3491,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #if FEATURE_KNIFE
 		GiveNamedItem( "weapon_knife" );
 #endif
+#if FEATURE_PENGUIN
+		GiveNamedItem( "weapon_penguin" );
+#endif
 		gEvilImpulse101 = FALSE;
 		break;
 	case 102:
