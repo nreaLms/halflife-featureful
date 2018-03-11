@@ -1234,6 +1234,7 @@ public:
 	void EXPORT SwingAgain(void);
 	void EXPORT Smack(void);
 	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer( CBasePlayer *pPlayer );
 
 	void PrimaryAttack(void);
 	int Swing(int fFirst);
