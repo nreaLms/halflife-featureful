@@ -21,12 +21,15 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
+#include "mod_features.h"
 
 #include <string.h>
 #include <stdio.h>
 
 DECLARE_MESSAGE( m_Flash, FlashBat )
+#if !FEATURE_NIGHTVISION
 DECLARE_MESSAGE( m_Flash, Flashlight )
+#endif
 
 #define BAT_NAME "sprites/%d_Flashlight.spr"
 
@@ -35,7 +38,9 @@ int CHudFlashlight::Init( void )
 	m_fFade = 0;
 	m_fOn = 0;
 
+#if !FEATURE_NIGHTVISION
 	HOOK_MESSAGE( Flashlight );
+#endif
 	HOOK_MESSAGE( FlashBat );
 
 	m_iFlags |= HUD_ACTIVE;

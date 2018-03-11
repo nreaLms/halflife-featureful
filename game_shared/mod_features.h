@@ -45,4 +45,7 @@
 #define DESERT_EAGLE_DROP_NAME "ammo_357"
 #endif
 
+// Misc features
+#define FEATURE_NIGHTVISION 0
+
 #endif

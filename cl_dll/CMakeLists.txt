@@ -94,6 +94,7 @@ set (CLDLL_SOURCES
 	input_xash3d.cpp
 	menu.cpp
 	message.cpp
+	nightvision.cpp
 	overview.cpp
 	parsemsg.cpp
 	../pm_shared/pm_debug.c

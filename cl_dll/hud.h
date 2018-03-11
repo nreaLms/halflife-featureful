@@ -451,6 +451,23 @@ private:
 	int m_iWidth;		// width of the battery innards
 };
 
+class CHudNightvision : public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	void Reset( void );
+	int MsgFunc_Nightvision( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_Flashlight( const char *pszName, int iSize, void *pbuf );
+
+private:
+	HSPRITE m_hSprite;
+
+	wrect_t *m_prc;
+	int m_fOn;
+	int m_iFrame, m_nFrameCount;
+};
 //
 //-----------------------------------------------------
 //
@@ -635,6 +652,7 @@ public:
 	CHudStatusIcons m_StatusIcons;
 	CHudScoreboard	m_Scoreboard;
 	CHudMOTD	m_MOTD;
+	CHudNightvision m_Nightvision;
 
 	void Init( void );
 	void VidInit( void );
