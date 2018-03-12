@@ -23,6 +23,7 @@
 #define FEATURE_OPFOR_GRUNT 1
 
 #define FEATURE_ISLAVE_DEAD 1
+#define FEATURE_HOUNDEYE_DEAD 1
 
 // whether fgrunts and black mesa personnel are enemies like in Opposing Force
 #define FEATURE_OPFOR_ALLY_RELATIONSHIP 1
