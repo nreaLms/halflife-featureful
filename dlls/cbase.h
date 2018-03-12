@@ -28,7 +28,7 @@ CBaseEntity
 				CBasePlayer
 				CBaseGroup
 */
-
+#include "mod_features.h"
 #define		MAX_PATH_SIZE	10 // max number of nodes available for a path.
 
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
@@ -346,8 +346,12 @@ public:
 	int ammo_uranium;
 	int ammo_hornets;
 	int ammo_argrens;
+#if FEATURE_SNIPERRIFLE
 	int ammo_762;
+#endif
+#if FEATURE_SHOCKRIFLE
 	int ammo_shocks;
+#endif
 	//Special stuff for grenades and satchels.
 	float m_flStartThrow;
 	float m_flReleaseThrow;

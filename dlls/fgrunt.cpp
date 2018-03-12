@@ -1919,7 +1919,6 @@ void CHFGrunt :: Spawn()
 
 	MonsterInit();
 	SetUse( &CHFGrunt::FollowerUse );
-	pev->health = pev->max_health / 3;
 }
 
 void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)

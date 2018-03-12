@@ -1114,7 +1114,12 @@ void CBasePlayer::TabulateAmmo()
 	ammo_rockets = AmmoInventory( GetAmmoIndex( "rockets" ) );
 	ammo_uranium = AmmoInventory( GetAmmoIndex( "uranium" ) );
 	ammo_hornets = AmmoInventory( GetAmmoIndex( "Hornets" ) );
+#if FEATURE_SNIPERRIFLE
 	ammo_762 = AmmoInventory( GetAmmoIndex( "762" ) );
+#endif
+#if FEATURE_SHOCKRIFLE
+	ammo_shocks = AmmoInventory( GetAmmoIndex( "Shocks" ) );
+#endif
 }
 
 /*
@@ -3286,7 +3291,11 @@ CBaseEntity *FindEntityForward( CBaseEntity *pMe )
 
 BOOL CBasePlayer::FlashlightIsOn( void )
 {
+#if FEATURE_NIGHTVISION
+	return FBitSet( pev->effects, EF_BRIGHTLIGHT );
+#else
 	return FBitSet( pev->effects, EF_DIMLIGHT );
+#endif
 }
 
 void CBasePlayer::FlashlightTurnOn( void )
