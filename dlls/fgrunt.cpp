@@ -167,6 +167,8 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
+	bool CallForMedic(CBaseMonster *pMember);
+
 	// UNDONE: What is this for?  It isn't used?
 	float	m_flPlayerDamage;// how much pain has the player inflicted on me?
 
@@ -206,6 +208,42 @@ protected:
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
+
+class CMedic : public CHFGrunt
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	BOOL CheckRangeAttack1 ( float flDot, float flDist );
+	BOOL CheckRangeAttack2 ( float flDot, float flDist );
+	void GibMonster();
+
+	void RunTask( Task_t *pTask );
+	void StartTask( Task_t *pTask );
+	Schedule_t *GetSchedule ( void );
+	void SetAnswerQuestion(CTalkMonster *pSpeaker);
+
+	void DropMyItems(BOOL isGibbed);
+
+	void FirePistol ( const char* shotSound, Bullet bullet );
+	bool Heal();
+	void StartFollowingHealTarget(CBaseEntity* pTarget);
+	void StopHealing();
+	CBaseEntity* HealTarget();
+	inline bool HasHealTarget() { return HealTarget() != 0; }
+	inline bool HasHealCharge() { return m_flHealCharge >= 1; }
+	bool CheckHealCharge();
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	CUSTOM_SCHEDULES
+	float m_flHealCharge;
+	BOOL m_fDepleteLine;
+	BOOL m_fHealing;
+};
 
 TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
 {
@@ -1065,6 +1103,23 @@ DEFINE_CUSTOM_SCHEDULES( CHFGrunt )
 
 IMPLEMENT_CUSTOM_SCHEDULES( CHFGrunt, CTalkMonster )
 
+bool CHFGrunt::CallForMedic(CBaseMonster *pMember)
+{
+	if ( pMember && pMember != this && pMember->pev->deadflag == DEAD_NO && FClassnameIs( pMember->pev, "monster_human_medic_ally" ) )
+	{
+		CMedic* medic = (CMedic*)pMember;
+		ALERT( at_aiconsole, "Injured Grunt found Medic\n" );
+		if ( medic->CanFollow() && medic->HasHealCharge() && !medic->HasHealTarget() )
+		{
+			EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
+			ALERT( at_aiconsole, "Injured Grunt called for Medic\n" );
+			medic->StartFollowingHealTarget(this);
+			return true;
+		}
+	}
+	return false;
+}
+
 void CHFGrunt :: StartTask( Task_t *pTask )
 {
 	m_iTaskStatus = TASKSTATUS_RUNNING;
@@ -1087,19 +1142,8 @@ void CHFGrunt :: StartTask( Task_t *pTask )
 				if ( pSquadLeader ) for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
 				{
 					CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
-					if ( pMember && pMember != this )
-					{
-						CBaseMonster *pMedic = pMember->MyMonsterPointer();
-						if ( pMedic && pMedic->pev->deadflag == DEAD_NO && FClassnameIs( pMedic->pev, "monster_human_medic_ally" ) )
-						{
-//							if ( !pMedic->IsFollowing() )
-//							{
-								ALERT( at_console, "I've found my medic!\n" );
-								EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
-								//pMedic->GruntHealerCall( this );
-								TaskComplete();
-							//}
-						}
+					if (CallForMedic(pMember)) {
+						TaskComplete();
 					}
 				}
 			}
@@ -1114,15 +1158,9 @@ void CHFGrunt :: StartTask( Task_t *pTask )
 				{
 					while (pFriend = EnumFriends( pFriend, i, TRUE ))
 					{
-						CBaseMonster *pMedic = pFriend->MyMonsterPointer();
-						if ( pMedic && pMedic->pev->deadflag == DEAD_NO && FClassnameIs( pMedic->pev, "monster_human_medic_ally" ))
-						{
-							//if ( !pMedic->IsFollowing() )
-							//{
-								EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
-								//pMedic->GruntHealerCall( this );
-								TaskComplete();
-							//}
+						CBaseMonster *pMonster = pFriend->MyMonsterPointer();
+						if (CallForMedic(pMonster)) {
+							TaskComplete();
 						}
 					}
 				}
@@ -1881,6 +1919,7 @@ void CHFGrunt :: Spawn()
 
 	MonsterInit();
 	SetUse( &CHFGrunt::FollowerUse );
+	pev->health = pev->max_health / 3;
 }
 
 void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
@@ -2673,10 +2712,10 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 		{
 			return GetScheduleOfType ( SCHED_RELOAD );
 		}
-		if ( pev->health < pev->max_health && ( m_flMedicWaitTime < gpGlobals->time ))
+		if ( pev->health < pev->max_health/2 && ( m_flMedicWaitTime < gpGlobals->time ))
 		{
 			// Find a medic
-			//return GetScheduleOfType( SCHED_HGRUNT_ALLY_FIND_MEDIC ); // Unresolved
+			return GetScheduleOfType( SCHED_HGRUNT_ALLY_FIND_MEDIC ); // Unresolved
 		}
 		if ( m_hEnemy == 0 && IsFollowing() )
 		{
@@ -3214,7 +3253,7 @@ enum
 
 Task_t	tlMedicHeal[] =
 {
-	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move within 60 of target ent (client)
+	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move within 50 of target ent (client)
 	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_TARGET_CHASE },	// If you fail, catch up with that guy! (change this to put syringe away and then chase)
 	{ TASK_FACE_IDEAL,						(float)0		},
 	{ TASK_MEDIC_SAY_HEAL,					(float)0		},
@@ -3234,33 +3273,20 @@ Schedule_t	slMedicHeal[] =
 	},
 };
 
-class CMedic : public CHFGrunt
+Task_t	tlMedicDrawGun[] =
 {
-public:
-	void Spawn( void );
-	void Precache( void );
-	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	BOOL CheckRangeAttack1 ( float flDot, float flDist );
-	BOOL CheckRangeAttack2 ( float flDot, float flDist );
-	void GibMonster();
+	{ TASK_PLAY_SEQUENCE,		(float)ACT_DISARM	},			// Put away the needle
+};
 
-	void RunTask( Task_t *pTask );
-	void StartTask( Task_t *pTask );
-	Schedule_t *GetSchedule ( void );
-
-	void DropMyItems(BOOL isGibbed);
-
-	void FirePistol ( const char* shotSound, Bullet bullet );
-	bool CanHeal();
-	void Heal();
-
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
-	static	TYPEDESCRIPTION m_SaveData[];
-
-	CUSTOM_SCHEDULES
-	float m_flHealCharge;
-	BOOL m_fDepleteLine;
+Schedule_t	slMedicDrawGun[] =
+{
+	{
+		tlMedicDrawGun,
+		ARRAYSIZE ( tlMedicDrawGun ),
+		0,	// Don't interrupt or he'll end up running around with a needle all the time
+		0,
+		"DrawGun"
+	},
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_medic_ally, CMedic )
@@ -3269,53 +3295,38 @@ TYPEDESCRIPTION	CMedic::m_SaveData[] =
 {
 	DEFINE_FIELD( CMedic, m_flHealCharge, FIELD_FLOAT ),
 	DEFINE_FIELD( CMedic, m_fDepleteLine, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CMedic, m_fHealing, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CMedic, CHFGrunt )
 
 DEFINE_CUSTOM_SCHEDULES( CMedic )
 {
-	slMedicHeal
+	slMedicHeal,
+	slMedicDrawGun,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CMedic, CHFGrunt )
 
-bool CMedic::CanHeal( void )
+bool CMedic::Heal( void )
 {
-	//ALERT(at_console, "Heal amount is %f\n", m_flHealCharge );
-	if ( m_flHealCharge < 1 )
-	{
-		if ( !m_fDepleteLine )
-		{
-			PlaySentence( "MG_NOTHEAL", 2, VOL_NORM, ATTN_IDLE );
-			m_fDepleteLine = TRUE;
-		}
-		return FALSE;
-	}
+	if ( !HasHealCharge() || !HasHealTarget() )
+		return false;
 
-	if ( (m_hTargetEnt == 0) || (m_hTargetEnt->pev->health > (m_hTargetEnt->pev->max_health * 0.75)) )
-	{
-		return FALSE;
-	}
-	return TRUE;
-}
-
-void CMedic::Heal( void )
-{
-	if ( !CanHeal() )
-		return;
-
-	float healAmount = (m_hTargetEnt->pev->max_health - m_hTargetEnt->pev->health);
-	if (healAmount > gSkillData.scientistHeal) {
-		healAmount = gSkillData.scientistHeal;
+	float healAmount = Q_min(m_hTargetEnt->pev->max_health - m_hTargetEnt->pev->health, m_flHealCharge);
+	if (healAmount > 10) {
+		healAmount = 10;
 	}
 
 	Vector target = m_hTargetEnt->pev->origin - pev->origin;
 	if ( target.Length() > 100 )
-		return;
+		return false;
 
 	if (m_hTargetEnt->TakeHealth( healAmount, DMG_GENERIC ))
 		m_flHealCharge -= healAmount;
+	ALERT(at_aiconsole, "Heal charge left: %f\n", m_flHealCharge);
+	m_fHealing = TRUE;
+	return true;
 }
 
 void CMedic::StartTask(Task_t *pTask)
@@ -3324,7 +3335,8 @@ void CMedic::StartTask(Task_t *pTask)
 	{
 	case TASK_MEDIC_HEAL:
 		m_IdealActivity = ACT_MELEE_ATTACK2;
-		Heal();
+		if (Heal())
+			EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "fgrunt/medic_give_shot.wav", 1, ATTN_NORM );
 		break;
 	case TASK_MEDIC_SAY_HEAL:
 		m_hTalkTarget = m_hTargetEnt;
@@ -3344,12 +3356,21 @@ void CMedic::RunTask(Task_t *pTask)
 	case TASK_MEDIC_HEAL:
 		if ( m_fSequenceFinished )
 		{
-			TaskComplete();
+			if (HasHealTarget() && CheckHealCharge()) {
+				m_IdealActivity = ACT_MELEE_ATTACK2;
+				ALERT(at_aiconsole, "Medic continuing healing\n");
+				Heal();
+			} else {
+				TaskComplete();
+				StopHealing();
+			}
 		}
 		else
 		{
-			if ( TargetDistance() > 90 )
+			if ( TargetDistance() > 90 ) {
 				TaskComplete();
+				StopHealing();
+			}
 			pev->ideal_yaw = UTIL_VecToYaw( m_hTargetEnt->pev->origin - pev->origin );
 			ChangeYaw( pev->yaw_speed );
 		}
@@ -3362,19 +3383,42 @@ void CMedic::RunTask(Task_t *pTask)
 
 Schedule_t *CMedic::GetSchedule()
 {
+	if (m_fHealing) {
+		StopHealing();
+	}
+	if ( FBitSet( pev->weapons, MEDIC_EAGLE|MEDIC_HANDGUN ) &&
+		 GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE || GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NONE) {
+		return slMedicDrawGun;
+	}
 	switch( m_MonsterState )
 	{
 	case MONSTERSTATE_IDLE:
-		if ( IsFollowing() )
+	case MONSTERSTATE_ALERT:
+		if ( m_hEnemy == 0 )
 		{
-			if ( TargetDistance() <= 128 )
-			{
-				if ( CanHeal() )	// Heal opportunistically
-					return slMedicHeal;
+			if (IsFollowing()) {
+				if ( TargetDistance() <= 128 )
+				{
+					if ( CheckHealCharge() && m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health * 0.75 ) {
+						ALERT(at_aiconsole, "Medic is going to heal a player\n");
+						return slMedicHeal;
+					}
+				}
+			}
+			// was called by other grunt
+			else if (HasHealCharge() && HasHealTarget()) {
+				return slMedicHeal;
 			}
 		}
 	}
 	return CHFGrunt::GetSchedule();
+}
+
+void CMedic::SetAnswerQuestion(CTalkMonster *pSpeaker)
+{
+	if (!m_fHealing) {
+		CTalkMonster::SetAnswerQuestion(pSpeaker);
+	}
 }
 
 void CMedic::Spawn()
@@ -3541,6 +3585,56 @@ void CMedic::FirePistol(const char *shotSound , Bullet bullet)
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
 
 	m_cAmmoLoaded--;// take away a bullet!
+}
+
+void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
+{
+	if( m_pCine )
+		m_pCine->CancelScript();
+
+	if( m_hEnemy != 0 )
+		m_IdealMonsterState = MONSTERSTATE_ALERT;
+
+	m_hTargetEnt = pTarget;
+	ClearConditions( bits_COND_CLIENT_PUSH );
+	ClearSchedule();
+	ALERT(at_aiconsole, "Medic started to follow injured grunt\n");
+}
+
+void CMedic::StopHealing()
+{
+	m_fHealing = FALSE;
+	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM );
+	if (m_hTargetEnt != 0 && !m_hTargetEnt->IsPlayer()) {
+		if( m_movementGoal == MOVEGOAL_TARGETENT )
+			RouteClear(); // Stop him from walking toward the player
+		m_hTargetEnt = 0;
+		if( m_hEnemy != 0 )
+			m_IdealMonsterState = MONSTERSTATE_COMBAT;
+	}
+}
+
+CBaseEntity* CMedic::HealTarget()
+{
+	if (m_hTargetEnt != 0 && m_hTargetEnt->IsAlive() && (m_hTargetEnt->pev->health < m_hTargetEnt->pev->max_health) &&
+			((m_hTargetEnt->MyMonsterPointer() && IRelationship(m_hTargetEnt) < R_DL) || m_hTargetEnt->IsPlayer())) {
+		return m_hTargetEnt;
+	}
+	return 0;
+}
+
+bool CMedic::CheckHealCharge()
+{
+	if ( !HasHealCharge() )
+	{
+		if ( !m_fDepleteLine )
+		{
+			PlaySentence( "MG_NOTHEAL", 2, VOL_NORM, ATTN_IDLE );
+			m_fDepleteLine = TRUE;
+		}
+		return false;
+	}
+	return true;
 }
 
 #endif

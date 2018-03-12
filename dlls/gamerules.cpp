@@ -185,7 +185,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.medicHealth = GetSkillCvar( "sk_medic_ally_health" );
 	gSkillData.medicDmgKick = GetSkillCvar( "sk_medic_ally_kick" );
 	gSkillData.medicGrenadeSpeed = GetSkillCvar( "sk_medic_ally_gspeed" );
-	gSkillData.medicHeal = GetSkillCvar( "sk_medic_ally_gspeed" );
+	gSkillData.medicHeal = GetSkillCvar( "sk_medic_ally_heal" );
 
 	// Torch
 	gSkillData.torchHealth = GetSkillCvar( "sk_torch_ally_health" );
