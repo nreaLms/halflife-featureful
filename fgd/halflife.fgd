@@ -1897,7 +1897,18 @@
 		64 : "IgnorePlayer" : 0
 	]
 ]
-@PointClass base(Monster, Sequence) size(-360 -360 -172, 360 360 8) studio("models/apache.mdl") = monster_apache : "Apache"
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave_dead : "Dead Vortigaunt" 
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 32 =
+	[
+		32 : "dead_on_stomach"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On Stomach"
+	]
+]
+@PointClass base(Monster, Sequence) size(-360 -360 -172, 360 360 8) studio("models/apache.mdl") = monster_apache : "Apache" 
 [
 	spawnflags(Flags) =
 	[
