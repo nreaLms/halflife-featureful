@@ -60,6 +60,8 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
+	virtual float AdditionalExplosionDamage();
+
 	static float m_flNextBounceSoundTime;
 
 	// CBaseEntity *m_pTarget;
@@ -209,6 +211,11 @@ void CSqueakGrenade::Killed( entvars_t *pevAttacker, int iGib )
 void CSqueakGrenade::GibMonster( void )
 {
 	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "common/bodysplat.wav", 0.75, ATTN_NORM, 0, 200 );
+}
+
+float CSqueakGrenade::AdditionalExplosionDamage()
+{
+	return gSkillData.snarkDmgPop;
 }
 
 void CSqueakGrenade::HuntThink( void )
@@ -371,7 +378,7 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 				else
 					ApplyMultiDamage( pev, pev );
 
-				pev->dmg += gSkillData.snarkDmgPop; // add more explosion damage
+				pev->dmg += AdditionalExplosionDamage(); // add more explosion damage
 				// m_flDie += 2.0; // add more life
 
 				// make bite sound
@@ -426,6 +433,7 @@ class CPenguinGrenade : public CSqueakGrenade
 	void Spawn( void );
 	void Precache( void );
 	void Killed(entvars_t *pevAttacker, int iGib);
+	float AdditionalExplosionDamage();
 };
 
 void CPenguinGrenade::Spawn()
@@ -447,6 +455,11 @@ void CPenguinGrenade::Killed(entvars_t *pevAttacker, int iGib)
 	UTIL_BloodDrips( pev->origin, g_vecZero, BloodColor(), 80 );
 	if( m_hOwner != 0 )
 		pev->owner = m_hOwner->edict();
+}
+
+float CPenguinGrenade::AdditionalExplosionDamage()
+{
+	return gSkillData.plrDmgHandGrenade;
 }
 
 LINK_ENTITY_TO_CLASS( monster_penguin, CPenguinGrenade )
