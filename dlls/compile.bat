@@ -33,6 +33,7 @@ set SOURCES=agrunt.cpp^
 	effects.cpp^
 	egon.cpp^
 	explode.cpp^
+	fgrunt.cpp^
 	flyingmonster.cpp^
 	func_break.cpp^
 	func_tank.cpp^
@@ -62,6 +63,7 @@ set SOURCES=agrunt.cpp^
 	ichthyosaur.cpp^
 	islave.cpp^
 	items.cpp^
+	knife.cpp^
 	leech.cpp^
 	lights.cpp^
 	maprules.cpp^
@@ -90,6 +92,9 @@ set SOURCES=agrunt.cpp^
 	schedule.cpp^
 	scientist.cpp^
 	scripted.cpp^
+	shockbeam.cpp^
+	shockrifle.cpp^
+	shocktrooper.cpp^
 	shotgun.cpp^
 	singleplay_gamerules.cpp^
 	skill.cpp^
@@ -97,6 +102,7 @@ set SOURCES=agrunt.cpp^
 	sound.cpp^
 	soundent.cpp^
 	spectator.cpp^
+	spore.cpp^
 	squadmonster.cpp^
 	squeakgrenade.cpp^
 	subs.cpp^
@@ -108,6 +114,7 @@ set SOURCES=agrunt.cpp^
 	tripmine.cpp^
 	turret.cpp^
 	util.cpp^
+	voltigore.cpp^
 	weapons.cpp^
 	world.cpp^
 	xen.cpp^
