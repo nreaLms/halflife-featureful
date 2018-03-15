@@ -2972,18 +2972,18 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 	switch ( pEvent->event )
 	{
 	case TORCH_AE_SHOWTORCH:
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_TORCH );
+		pev->body = 1;
 		break;
 
 	case TORCH_AE_SHOWGUN:
 		if ( FBitSet( pev->weapons, TORCH_EAGLE ) )
-			SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_EAGLE );
+			pev->body = 0;
 		else
-			SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_TORCH );
+			pev->body = 1;
 		break;
 
 	case TORCH_AE_HIDETORCH:
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_NONE );
+		pev->body = 2;
 		break;
 
 	case TORCH_AE_ONGAS:
