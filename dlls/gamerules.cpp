@@ -355,6 +355,9 @@ void CGameRules::RefreshSkillData ( void )
 	// Knife
 	gSkillData.plrDmgKnife = GetSkillCvar( "sk_plr_knife" );
 
+	// M249
+	gSkillData.plrDmg556 = GetSkillCvar( "sk_plr_556_bullet" );
+
 	// 762 Round
 	gSkillData.plrDmg762 = GetSkillCvar( "sk_plr_762_bullet" );
 
@@ -367,7 +370,14 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.monDmgMP5 = GetSkillCvar ("sk_9mmAR_bullet" );
 	gSkillData.monDmg9MM = GetSkillCvar( "sk_9mm_bullet" );
 	gSkillData.monDmg357 = GetSkillCvar( "sk_357_bullet" );
+	if (!gSkillData.monDmg357)
+		gSkillData.monDmg357 = gSkillData.plrDmgEagle;
+	gSkillData.monDmg556 = GetSkillCvar( "sk_556_bullet" );
+	if (!gSkillData.monDmg556)
+		gSkillData.monDmg556 = gSkillData.plrDmg556;
 	gSkillData.monDmg762 = GetSkillCvar( "sk_762_bullet" );
+	if (!gSkillData.monDmg762)
+		gSkillData.monDmg762 = gSkillData.plrDmg762;
 
 	// MONSTER HORNET
 	gSkillData.monDmgHornet = GetSkillCvar( "sk_hornet_dmg" );

@@ -192,6 +192,7 @@ struct skilldata_t
 	float plrDmgEagle;
 	float plrDmgPWrench;
 	float plrDmgKnife;
+	float plrDmg556;
 	float plrDmg762;
 	float plrDmgShockroach;
 	float plrDmgShockroachM;
@@ -203,6 +204,7 @@ struct skilldata_t
 	float monDmg12MM;
 	float monDmgHornet;
 	float monDmg357;
+	float monDmg556;
 	float monDmg762;
 
 	// health/suit charge

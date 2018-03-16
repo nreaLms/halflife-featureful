@@ -80,6 +80,9 @@ CKnife g_Knife;
 #if FEATURE_PENGUIN
 CPenguin g_Penguin;
 #endif
+#if FEATURE_M249
+CM249 g_M249;
+#endif
 #if FEATURE_SNIPERRIFLE
 CSniperrifle g_Sniper;
 #endif
@@ -647,6 +650,9 @@ void HUD_InitClientWeapons( void )
 #if FEATURE_PENGUIN
 	HUD_PrepEntity( &g_Penguin, &player );
 #endif
+#if FEATURE_M249
+	HUD_PrepEntity( &g_M249, &player );
+#endif
 #if FEATURE_SNIPERRIFLE
 	HUD_PrepEntity( &g_Sniper, &player );
 #endif
@@ -778,6 +784,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 			pWeapon = &g_Penguin;
 			break;
 #endif
+#if FEATURE_M249
+		case WEAPON_M249:
+			pWeapon = &g_M249;
+			break;
+#endif
 #if FEATURE_SNIPERRIFLE
 		case WEAPON_SNIPERRIFLE:
 			pWeapon = &g_Sniper;
@@ -897,6 +908,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CRpg *)player.m_pActiveItem )->m_fSpotActive = (int)from->client.vuser2[1];
 		( (CRpg *)player.m_pActiveItem )->m_cActiveRockets = (int)from->client.vuser2[2];
 	}
+#if FEATURE_M249
+	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
+	{
+		player.ammo_556 = (int)from->client.vuser2[1];
+	}
+#endif
 #if FEATURE_SNIPERRIFLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
 	{
@@ -977,6 +994,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		from->client.vuser2[1] = ( (CRpg *)player.m_pActiveItem)->m_fSpotActive;
 		from->client.vuser2[2] = ( (CRpg *)player.m_pActiveItem)->m_cActiveRockets;
 	}
+#if FEATURE_M249
+	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
+	{
+		from->client.vuser2[1] = player.ammo_556;
+	}
+#endif
 #if FEATURE_SNIPERRIFLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
 	{

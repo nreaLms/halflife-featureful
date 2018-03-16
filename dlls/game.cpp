@@ -598,6 +598,11 @@ cvar_t	sk_plr_knife1 = { "sk_plr_knife1", "0" };
 cvar_t	sk_plr_knife2 = { "sk_plr_knife2", "0" };
 cvar_t	sk_plr_knife3 = { "sk_plr_knife3", "0" };
 
+// M249
+cvar_t	sk_plr_556_bullet1 = { "sk_plr_556_bullet1", "0" };
+cvar_t	sk_plr_556_bullet2 = { "sk_plr_556_bullet2", "0" };
+cvar_t	sk_plr_556_bullet3 = { "sk_plr_556_bullet3", "0" };
+
 // Sniper rifle
 cvar_t	sk_plr_762_bullet1 = { "sk_plr_762_bullet1", "0" };
 cvar_t	sk_plr_762_bullet2 = { "sk_plr_762_bullet2", "0" };
@@ -619,6 +624,10 @@ cvar_t	sk_9mm_bullet3 = {"sk_9mm_bullet3","0"};
 cvar_t	sk_357_bullet1 = {"sk_357_bullet1","35"};
 cvar_t	sk_357_bullet2 = {"sk_357_bullet2","35"};
 cvar_t	sk_357_bullet3 = {"sk_357_bullet3","35"};
+
+cvar_t	sk_556_bullet1 = { "sk_556_bullet1", "0" };
+cvar_t	sk_556_bullet2 = { "sk_556_bullet2", "0" };
+cvar_t	sk_556_bullet3 = { "sk_556_bullet3", "0" };
 
 cvar_t	sk_762_bullet1 = {"sk_762_bullet1","35"};
 cvar_t	sk_762_bullet2 = {"sk_762_bullet2","40"};
@@ -1269,9 +1278,15 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_pipewrench2 );// { "sk_plr_pipewrench2", "0" };
 	CVAR_REGISTER( &sk_plr_pipewrench3 );// { "sk_plr_pipewrench3", "0" };
 
+	// Knife
 	CVAR_REGISTER( &sk_plr_knife1 );// { "sk_plr_knife1", "0" };
 	CVAR_REGISTER( &sk_plr_knife2 );// { "sk_plr_knife2", "0" };
 	CVAR_REGISTER( &sk_plr_knife3 );// { "sk_plr_knife3", "0" };
+
+	// M249
+	CVAR_REGISTER( &sk_plr_556_bullet1 );// { "sk_plr_556_bullet1", "0" };
+	CVAR_REGISTER( &sk_plr_556_bullet2 );// { "sk_plr_556_bullet2", "0" };
+	CVAR_REGISTER( &sk_plr_556_bullet3 );// { "sk_plr_556_bullet3", "0" };
 
 	// Sniper rifle
 	CVAR_REGISTER( &sk_plr_762_bullet1 );// { "sk_plr_762_bullet1", "0" };
@@ -1307,6 +1322,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_357_bullet1 );// {"sk_357_bullet1","0"};
 	CVAR_REGISTER( &sk_357_bullet2 );// {"sk_357_bullet2","0"};
 	CVAR_REGISTER( &sk_357_bullet3 );// {"sk_357_bullet3","0"};
+
+	CVAR_REGISTER( &sk_556_bullet1 );// { "sk_556_bullet1", "0" };
+	CVAR_REGISTER( &sk_556_bullet2 );// { "sk_556_bullet2", "0" };
+	CVAR_REGISTER( &sk_556_bullet3 );// { "sk_556_bullet3", "0" };
 
 	CVAR_REGISTER( &sk_762_bullet1 );// {"sk_762_bullet1","0"};
 	CVAR_REGISTER( &sk_762_bullet2 );// {"sk_762_bullet2","0"};

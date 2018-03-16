@@ -1403,6 +1403,7 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 			case BULLET_MONSTER_9MM:
 			case BULLET_MONSTER_12MM:
 			case BULLET_MONSTER_357:
+			case BULLET_MONSTER_556:
 			case BULLET_MONSTER_762:
 			default:
 				MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecTracerSrc );
@@ -1453,8 +1454,13 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 				}
 				break;
 			case BULLET_MONSTER_357:
-				pEntity->TraceAttack(pevAttacker, gSkillData.monDmg357, vecDir, &tr, DMG_BULLET); // TODO: use different skill for monsters?
+				pEntity->TraceAttack(pevAttacker, gSkillData.monDmg357, vecDir, &tr, DMG_BULLET);
 				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
+				DecalGunshot( &tr, iBulletType );
+				break;
+			case BULLET_MONSTER_556:
+				pEntity->TraceAttack( pevAttacker, gSkillData.monDmg556, vecDir, &tr, DMG_BULLET );
+				TEXTURETYPE_PlaySound( &tr, vecSrc, vecEnd, iBulletType );
 				DecalGunshot( &tr, iBulletType );
 				break;
 			case BULLET_MONSTER_762:
@@ -1547,6 +1553,9 @@ Vector CBaseEntity::FireBulletsPlayer( ULONG cShots, Vector vecSrc, Vector vecDi
 				break;
 			case BULLET_PLAYER_357:
 				pEntity->TraceAttack( pevAttacker, gSkillData.plrDmg357, vecDir, &tr, DMG_BULLET );
+				break;
+			case BULLET_PLAYER_556:
+				pEntity->TraceAttack( pevAttacker, gSkillData.plrDmg556, vecDir, &tr, DMG_BULLET );
 				break;
 			case BULLET_PLAYER_762:
 				pEntity->TraceAttack( pevAttacker, gSkillData.plrDmg762, vecDir, &tr, DMG_BULLET );

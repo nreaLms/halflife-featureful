@@ -1333,6 +1333,7 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 		{ "models/p_knife.mdl",		"models/v_knife.mdl" },
 		{ "models/p_m40a1.mdl",		"models/v_m40a1.mdl" },
 		{ "models/p_shock.mdl",		"models/v_shock.mdl" },
+		{ "models/p_saw.mdl",		"models/v_saw.mdl" },
 		{ NULL, NULL }
 	};
 

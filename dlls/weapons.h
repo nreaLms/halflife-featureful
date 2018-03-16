@@ -85,6 +85,9 @@ public:
 #if FEATURE_PIPEWRENCH
 #define WEAPON_PIPEWRENCH		18
 #endif
+#if FEATURE_M249
+#define	WEAPON_M249				19
+#endif
 #if FEATURE_SHOCKRIFLE
 #define WEAPON_SHOCKRIFLE		22
 #endif
@@ -123,6 +126,7 @@ public:
 #define TRIPMINE_WEIGHT		-10
 #define EAGLE_WEIGHT		15
 #define PIPEWRENCH_WEIGHT		0
+#define M249_WEIGHT			15
 #define SNIPERRIFLE_WEIGHT		10
 #define SHOCKRIFLE_WEIGHT		15
 #define KNIFE_WEIGHT			0
@@ -141,6 +145,7 @@ public:
 #define HORNET_MAX_CARRY		8
 #define M203_GRENADE_MAX_CARRY	10
 #define PENGUIN_MAX_CARRY		9
+#define	_556_MAX_CARRY			200
 #define _762_MAX_CARRY			15
 #define SHOCK_MAX_CARRY			10
 
@@ -163,6 +168,7 @@ public:
 #define TRIPMINE_MAX_CLIP		WEAPON_NOCLIP
 #define SNARK_MAX_CLIP			WEAPON_NOCLIP
 #define EAGLE_MAX_CLIP			7
+#define M249_MAX_CLIP			50
 #define SNIPERRIFLE_MAX_CLIP	5
 #define SHOCKRIFLE_MAX_CLIP		10
 
@@ -184,6 +190,7 @@ public:
 #define HIVEHAND_DEFAULT_GIVE		8
 #define EAGLE_DEFAULT_GIVE			7
 #define PENGUIN_DEFAULT_GIVE		3
+#define M249_DEFAULT_GIVE			50
 #define SNIPERRIFLE_DEFAULT_GIVE		5
 #define SHOCKRIFLE_DEFAULT_GIVE		10
 
@@ -200,6 +207,7 @@ public:
 #define AMMO_URANIUMBOX_GIVE	20
 #define AMMO_SNARKBOX_GIVE		5
 #define AMMO_PENGUINBOX_GIVE		3
+#define AMMO_556CLIP_GIVE			50
 #define AMMO_762BOX_GIVE		5
 
 // bullet types
@@ -211,12 +219,14 @@ typedef	enum
 	BULLET_PLAYER_357, // python
 	BULLET_PLAYER_BUCKSHOT, // shotgun
 	BULLET_PLAYER_CROWBAR, // crowbar swipe
+	BULLET_PLAYER_556, // m249
 	BULLET_PLAYER_762, // sniperrifle
 
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,
 	BULLET_MONSTER_12MM,
 	BULLET_MONSTER_357,
+	BULLET_MONSTER_556,
 	BULLET_MONSTER_762
 } Bullet;
 
@@ -1141,6 +1151,52 @@ private:
 	enum PWRENCH_FIRESTATE { FIRESTATE_NONE = 0, FIRESTATE_WINDUP, FIRESTATE_WINDLOOP, FIRESTATE_BIGHIT };
 	int m_iFirestate;
 	float m_flHoldStartTime;
+};
+#endif
+
+#if FEATURE_M249
+class CM249 : public CBasePlayerWeapon
+{
+public:
+
+#ifndef CLIENT_DLL
+	int		Save(CSave &save);
+	int		Restore(CRestore &restore);
+	static	TYPEDESCRIPTION m_SaveData[];
+#endif
+
+	void Spawn(void);
+	void Precache(void);
+	int iItemSlot(void) { return 3; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer(CBasePlayer *pPlayer);
+
+	void PrimaryAttack(void);
+	BOOL Deploy(void);
+	void Reload(void);
+	void WeaponIdle(void);
+	virtual BOOL ShouldWeaponIdle(void) { return TRUE; }
+	float m_flNextAnimTime;
+	int m_iShell;
+
+	virtual BOOL UseDecrement(void)
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+	void ReloadStart( void );
+	void ReloadInsert( void );
+
+	enum M249_RELOAD_STATE { RELOAD_STATE_NONE = 0, RELOAD_STATE_OPEN, RELOAD_STATE_FILL };
+
+	int m_iReloadState;
+
+private:
+	unsigned short m_usM249;
 };
 #endif
 

@@ -346,6 +346,9 @@ public:
 	int ammo_uranium;
 	int ammo_hornets;
 	int ammo_argrens;
+#if FEATURE_M249
+	int ammo_556;
+#endif
 #if FEATURE_SNIPERRIFLE
 	int ammo_762;
 #endif

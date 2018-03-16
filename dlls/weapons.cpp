@@ -169,8 +169,11 @@ void DecalGunshot( TraceResult *pTrace, int iBulletType )
 		case BULLET_MONSTER_MP5:
 		case BULLET_PLAYER_BUCKSHOT:
 		case BULLET_PLAYER_357:
-		case BULLET_PLAYER_762:
 		case BULLET_MONSTER_357:
+		case BULLET_PLAYER_556:
+		case BULLET_MONSTER_556:
+		case BULLET_PLAYER_762:
+		case BULLET_MONSTER_762:
 		default:
 			// smoke and decal
 			UTIL_GunshotDecalTrace( pTrace, DamageDecal( pEntity, DMG_BULLET ) );
@@ -373,6 +376,10 @@ void W_Precache( void )
 #endif
 #if FEATURE_PENGUIN
 	UTIL_PrecacheOtherWeapon( "weapon_penguin" );
+#endif
+#if FEATURE_SNIPERRIFLE
+	UTIL_PrecacheOtherWeapon( "weapon_m249" );
+	UTIL_PrecacheOther( "ammo_556" );
 #endif
 #if FEATURE_SNIPERRIFLE
 	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
@@ -1667,6 +1674,14 @@ TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CPipeWrench, CBasePlayerWeapon )
+#endif
+
+#if FEATURE_M249
+TYPEDESCRIPTION	CM249::m_SaveData[] =
+{
+	DEFINE_FIELD( CM249, m_iReloadState, FIELD_INTEGER ),
+};
+IMPLEMENT_SAVERESTORE( CM249, CBasePlayerWeapon )
 #endif
 
 #if FEATURE_SNIPERRIFLE

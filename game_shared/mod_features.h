@@ -34,6 +34,7 @@
 #define FEATURE_DESERT_EAGLE 1
 #define FEATURE_PENGUIN 1
 #define FEATURE_SNIPERRIFLE 1
+#define FEATURE_M249 1
 #define FEATURE_SHOCKRIFLE 1
 #define FEATURE_SPORELAUNCHER 0
 
@@ -46,6 +47,12 @@
 #define DESERT_EAGLE_DROP_NAME "weapon_eagle"
 #else
 #define DESERT_EAGLE_DROP_NAME "ammo_357"
+#endif
+
+#if FEATURE_M249
+#define M249_DROP_NAME "weapon_m249"
+#else
+#define M249_DROP_NAME "ammo_9mmAR"
 #endif
 
 // Misc features

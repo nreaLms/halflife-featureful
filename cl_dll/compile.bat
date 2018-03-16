@@ -25,6 +25,7 @@ set SOURCES=../dlls/crossbow.cpp^
 	../dlls/eagle.cpp^
 	../dlls/pipewrench.cpp^
 	../dlls/knife.cpp^
+	../dlls/m249.cpp^
 	../dlls/sniperrifle.cpp^
 	../dlls/shockrifle.cpp^
 	ev_hldm.cpp^

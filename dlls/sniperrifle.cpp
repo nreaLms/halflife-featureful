@@ -35,7 +35,7 @@ enum sniper_e {
 	SNIPER_HOLSTER,
 };
 
-LINK_ENTITY_TO_CLASS( weapon_sniperrifle, CSniperrifle );
+LINK_ENTITY_TO_CLASS( weapon_sniperrifle, CSniperrifle )
 
 void CSniperrifle::Spawn( )
 {
@@ -77,7 +77,7 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = 5;
 	p->iSlot = 2;
-	p->iPosition = 3;
+	p->iPosition = 4;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_SNIPERRIFLE;
 	p->iWeight = 10;

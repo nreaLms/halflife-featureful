@@ -66,6 +66,7 @@ set SOURCES=agrunt.cpp^
 	knife.cpp^
 	leech.cpp^
 	lights.cpp^
+	m249.cpp^
 	maprules.cpp^
 	monstermaker.cpp^
 	monsters.cpp^

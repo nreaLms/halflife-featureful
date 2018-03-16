@@ -95,6 +95,7 @@ set (SVDLL_SOURCES
 	knife.cpp
 	leech.cpp
 	lights.cpp
+	m249.cpp
 	maprules.cpp
 	massn.cpp
 	monstermaker.cpp

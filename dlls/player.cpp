@@ -1114,6 +1114,9 @@ void CBasePlayer::TabulateAmmo()
 	ammo_rockets = AmmoInventory( GetAmmoIndex( "rockets" ) );
 	ammo_uranium = AmmoInventory( GetAmmoIndex( "uranium" ) );
 	ammo_hornets = AmmoInventory( GetAmmoIndex( "Hornets" ) );
+#if FEATURE_M249
+	ammo_556 = AmmoInventory( GetAmmoIndex( "556" ) );
+#endif
 #if FEATURE_SNIPERRIFLE
 	ammo_762 = AmmoInventory( GetAmmoIndex( "762" ) );
 #endif
@@ -3518,6 +3521,10 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #endif
 #if FEATURE_PIPEWRENCH
 		GiveNamedItem( "weapon_pipewrench" );
+#endif
+#if FEATURE_M249
+		GiveNamedItem( "weapon_m249" );
+		GiveNamedItem( "ammo_556" );
 #endif
 #if FEATURE_SNIPERRIFLE
 		GiveNamedItem( "weapon_sniperrifle" );

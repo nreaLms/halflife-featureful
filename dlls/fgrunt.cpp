@@ -1272,7 +1272,7 @@ void CHFGrunt::DropMyItems(BOOL isGibbed)
 	}
 	else if (FBitSet( pev->weapons, FGRUNT_M249 ))
 	{
-		DropMyItem( "ammo_9mmAR", vecGunPos, vecGunAngles, isGibbed ); // TODO: change to saw when implemented
+		DropMyItem( M249_DROP_NAME, vecGunPos, vecGunAngles, isGibbed );
 	}
 
 	if (FBitSet( pev->weapons, FGRUNT_GRENADELAUNCHER ))
@@ -1747,7 +1747,7 @@ void CHFGrunt :: M249 ( void )
 	else
 		EjectBrass ( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iM249Link, TE_BOUNCE_SHELL);
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_6DEGREES, 2048, BULLET_MONSTER_MP5 ); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_6DEGREES, 2048, BULLET_MONSTER_556 ); // shoot +-5 degrees
 
 	pev->effects |= EF_MUZZLEFLASH;
 
