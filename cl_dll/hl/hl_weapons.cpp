@@ -86,6 +86,9 @@ CM249 g_M249;
 #if FEATURE_SNIPERRIFLE
 CSniperrifle g_Sniper;
 #endif
+#if FEATURE_DISPLACER
+CDisplacer g_Displacer;
+#endif
 #if FEATURE_SHOCKRIFLE
 CShockrifle g_Shock;
 #endif
@@ -656,6 +659,9 @@ void HUD_InitClientWeapons( void )
 #if FEATURE_SNIPERRIFLE
 	HUD_PrepEntity( &g_Sniper, &player );
 #endif
+#if FEATURE_DISPLACER
+	HUD_PrepEntity( &g_Displacer, &player );
+#endif
 #if FEATURE_SHOCKRIFLE
 	HUD_PrepEntity( &g_Shock, &player );
 #endif
@@ -792,6 +798,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 #if FEATURE_SNIPERRIFLE
 		case WEAPON_SNIPERRIFLE:
 			pWeapon = &g_Sniper;
+			break;
+#endif
+#if FEATURE_DISPLACER
+		case WEAPON_DISPLACER:
+			pWeapon = &g_Displacer;
 			break;
 #endif
 #if FEATURE_SHOCKRIFLE

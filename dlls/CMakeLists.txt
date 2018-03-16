@@ -57,6 +57,7 @@ set (SVDLL_SOURCES
 	crossbow.cpp
 	crowbar.cpp
 	defaultai.cpp
+	displacer.cpp
 	doors.cpp
 	eagle.cpp
 	effects.cpp

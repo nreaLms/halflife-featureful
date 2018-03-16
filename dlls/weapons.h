@@ -88,6 +88,9 @@ public:
 #if FEATURE_M249
 #define	WEAPON_M249				19
 #endif
+#if FEATURE_DISPLACER
+#define WEAPON_DISPLACER		20
+#endif
 #if FEATURE_SHOCKRIFLE
 #define WEAPON_SHOCKRIFLE		22
 #endif
@@ -128,6 +131,7 @@ public:
 #define PIPEWRENCH_WEIGHT		0
 #define M249_WEIGHT			15
 #define SNIPERRIFLE_WEIGHT		10
+#define DISPLACER_WEIGHT		20
 #define SHOCKRIFLE_WEIGHT		15
 #define KNIFE_WEIGHT			0
 
@@ -192,6 +196,7 @@ public:
 #define PENGUIN_DEFAULT_GIVE		3
 #define M249_DEFAULT_GIVE			50
 #define SNIPERRIFLE_DEFAULT_GIVE		5
+#define DISPLACER_DEFAULT_GIVE		40
 #define SHOCKRIFLE_DEFAULT_GIVE		10
 
 // The amount of ammo given to a player by an ammo item.
@@ -1244,6 +1249,55 @@ public:
 
 private:
 	unsigned short m_usSniper;
+};
+#endif
+
+#if FEATURE_DISPLACER
+class CDisplacer : public CBasePlayerWeapon
+{
+public:
+#ifndef CLIENT_DLL
+	int Save( CSave &save );
+	int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+#endif
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return 2; }
+	int GetItemInfo( ItemInfo *p );
+	int AddToPlayer( CBasePlayer *pPlayer );
+	void PrimaryAttack( void );
+	void SecondaryAttack( void );
+	BOOL Deploy( void );
+	void Holster( int skiplocal = 0 );
+	void WeaponIdle( void );
+
+	BOOL PlayEmptySound( void );
+
+	virtual BOOL UseDecrement( void )
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+	void UseAmmo(int count);
+	BOOL CanFireDisplacer( int count ) const;
+
+	enum DISPLACER_FIREMODE { FIREMODE_FORWARD = 1, FIREMODE_BACKWARD };
+
+	void ClearSpin( void );
+	void EXPORT SpinUp( void );
+	void EXPORT Teleport( void );
+	void EXPORT Displace( void );
+	void LightningEffect( void );
+	void ClearBeams( void );
+private:
+	CBeam *m_pBeam[3];
+	int m_iFireMode;
+	unsigned short m_usDisplacer;
 };
 #endif
 

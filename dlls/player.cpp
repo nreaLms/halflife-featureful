@@ -119,6 +119,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD( CBasePlayer, m_iHideHUD, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_iFOV, FIELD_INTEGER ),
 
+	DEFINE_FIELD(CBasePlayer, m_fInXen, FIELD_BOOLEAN),
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -2889,6 +2891,8 @@ void CBasePlayer::Spawn( void )
 
 	m_flNextChatTime = gpGlobals->time;
 
+	m_fInXen = FALSE;
+
 	g_pGameRules->PlayerSpawn( this );
 }
 
@@ -3529,6 +3533,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #if FEATURE_SNIPERRIFLE
 		GiveNamedItem( "weapon_sniperrifle" );
 		GiveNamedItem( "ammo_762" );
+#endif
+#if FEATURE_DISPLACER
+		GiveNamedItem( "weapon_displacer" );
 #endif
 #if FEATURE_SHOCKRIFLE
 		GiveNamedItem( "weapon_shockrifle" );

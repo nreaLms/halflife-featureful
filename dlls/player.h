@@ -325,6 +325,10 @@ public:
 
 	float m_flNextChatTime;
 
+	BOOL	m_fInXen;
+	friend class CDisplacer;
+	friend class CTriggerXenReturn;
+
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
 };
 

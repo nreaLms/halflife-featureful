@@ -54,7 +54,6 @@ set (CLDLL_SOURCES
 	../dlls/python.cpp
 	../dlls/rpg.cpp
 	../dlls/satchel.cpp
-	../dlls/shockrifle.cpp
 	../dlls/shotgun.cpp
 	../dlls/squeakgrenade.cpp
 	../dlls/tripmine.cpp
@@ -63,6 +62,8 @@ set (CLDLL_SOURCES
 	../dlls/pipewrench.cpp
 	../dlls/sniperrifle.cpp
 	../dlls/m249.cpp
+	../dlls/displacer.cpp
+	../dlls/shockrifle.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

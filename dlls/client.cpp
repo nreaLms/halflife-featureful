@@ -929,6 +929,9 @@ void ClientPrecache( void )
 
 	if( giPrecacheGrunt )
 		UTIL_PrecacheOther( "monster_human_grunt" );
+
+	// Teleport sounds. Used by trigger_xen_return
+	PRECACHE_SOUND( "debris/beamstart7.wav" );
 }
 
 /*

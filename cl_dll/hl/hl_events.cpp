@@ -42,12 +42,27 @@ void EV_SnarkFire( struct event_args_s *args );
 
 void EV_TrainPitchAdjust( struct event_args_s *args );
 
+#if FEATURE_DESERT_EAGLE
 void EV_FireEagle( struct event_args_s *args );
+#endif
+#if FEATURE_PIPEWRENCH
 void EV_PipeWrench( struct event_args_s *args );
+#endif
+#if FEATURE_KNIFE
 void EV_Knife( struct event_args_s *args );
+#endif
+#if FEATURE_M249
 void EV_FireM249( struct event_args_s *args );
+#endif
+#if FEATURE_SNIPERRIFLE
 void EV_FireSniper( struct event_args_s *args );
+#endif
+#if FEATURE_DISPLACER
+void EV_Displacer( struct event_args_s *args );
+#endif
+#if FEATURE_SHOCKRIFLE
 void EV_ShockFire( struct event_args_s *args );
+#endif
 }
 
 /*
@@ -101,6 +116,9 @@ void Game_HookEvents( void )
 #endif
 #if FEATURE_SNIPERRIFLE
 	gEngfuncs.pfnHookEvent( "events/sniper.sc", EV_FireSniper );
+#endif
+#if FEATURE_DISPLACER
+	gEngfuncs.pfnHookEvent( "events/displacer.sc", EV_Displacer );
 #endif
 #if FEATURE_SHOCKRIFLE
 	gEngfuncs.pfnHookEvent( "events/shock.sc", EV_ShockFire );

@@ -35,6 +35,7 @@
 
 #include "r_studioint.h"
 #include "com_model.h"
+#include "mod_features.h"
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -71,12 +72,27 @@ void EV_SnarkFire( struct event_args_s *args );
 
 void EV_TrainPitchAdjust( struct event_args_s *args );
 
+#if FEATURE_DESERT_EAGLE
 void EV_FireEagle( struct event_args_s *args );
+#endif
+#if FEATURE_PIPEWRENCH
 void EV_PipeWrench( struct event_args_s *args );
+#endif
+#if FEATURE_KNIFE
 void EV_Knife( struct event_args_s *args );
+#endif
+#if FEATURE_M249
 void EV_FireM249( struct event_args_s *args );
+#endif
+#if FEATURE_SNIPERRIFLE
 void EV_FireSniper( struct event_args_s *args );
+#endif
+#if FEATURE_DISPLACER
+void EV_Displacer( struct event_args_s *args );
+#endif
+#if FEATURE_SHOCKRIFLE
 void EV_ShockFire( struct event_args_s *args );
+#endif
 }
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
@@ -2117,6 +2133,40 @@ void EV_FireSniper( event_args_t *args )
 }
 //======================
 //	   SNIPERRIFLE END
+//======================
+
+//======================
+//	   DISPLACER START
+//======================
+enum displacer_e
+{
+	DISPLACER_IDLE1 = 0,
+	DISPLACER_IDLE2,
+	DISPLACER_SPINUP,
+	DISPLACER_SPIN,
+	DISPLACER_FIRE,
+	DISPLACER_DRAW,
+	DISPLACER_HOLSTER
+};
+
+void EV_Displacer( event_args_t *args )
+{
+	int idx;
+	vec3_t origin;
+
+	idx = args->entindex;
+	VectorCopy( args->origin, origin );
+
+	if( EV_IsLocal( idx ) )
+	{
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( DISPLACER_FIRE, 0 );
+		V_PunchAxis( 0, -2.0 );
+	}
+
+	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/displacer_fire.wav", 1, ATTN_NORM, 0, PITCH_NORM );
+}
+//======================
+//	    DISPLACER END
 //======================
 
 //======================

@@ -377,13 +377,16 @@ void W_Precache( void )
 #if FEATURE_PENGUIN
 	UTIL_PrecacheOtherWeapon( "weapon_penguin" );
 #endif
-#if FEATURE_SNIPERRIFLE
+#if FEATURE_M249
 	UTIL_PrecacheOtherWeapon( "weapon_m249" );
 	UTIL_PrecacheOther( "ammo_556" );
 #endif
 #if FEATURE_SNIPERRIFLE
 	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
 	UTIL_PrecacheOther( "ammo_762" );
+#endif
+#if FEATURE_DISPLACER
+	UTIL_PrecacheOtherWeapon( "weapon_displacer" );
 #endif
 #if FEATURE_SHOCKRIFLE
 	UTIL_PrecacheOtherWeapon( "weapon_shockrifle" );
@@ -1692,4 +1695,12 @@ TYPEDESCRIPTION	CSniperrifle::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CSniperrifle, CBasePlayerWeapon )
+
+TYPEDESCRIPTION	CDisplacer::m_SaveData[] =
+{
+	DEFINE_FIELD( CDisplacer, m_iFireMode, FIELD_INTEGER ),
+	DEFINE_ARRAY( CDisplacer, m_pBeam, FIELD_CLASSPTR, 3 ),
+};
+
+IMPLEMENT_SAVERESTORE( CDisplacer, CBasePlayerWeapon )
 #endif

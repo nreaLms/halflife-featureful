@@ -1691,6 +1691,10 @@
 	presequence(string) : "Sequence before approach" : ""
 ]
 
+// Displacer target placement represents the point where the player's feet shall be
+@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_xen_target : "Displacer XEN Target" []
+@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_earth_target : "Displacer EARTH Target" []
+
 @PointClass base(Target, Angles) size(-4 -4 -4, 4 4 4) color(0 255 0) = info_intermission : "Intermission Spot" []
 
 @PointClass base(Targetname) = info_landmark : "Transition Landmark" []
@@ -3550,6 +3554,8 @@
 
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []
 
+@SolidClass base(Trigger) = trigger_xen_return : "Return To Earth (self-tele)" []
+
 //
 // weapons
 //
@@ -3590,6 +3596,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_shock.mdl") = weapon_shockrifle : "Shock Roach" []
 @PointClass base(Weapon, Targetx) studio("models/w_saw.mdl") = weapon_m249 : "M249 SAW" []
 @PointClass base(Weapon, Targetx) studio("models/w_m40a1.mdl") = weapon_sniperrifle : "Sniper Rifle" []
+@PointClass base(Weapon, Targetx) studio("models/w_displacer.mdl") = weapon_displacer : "Displacer" []
 
 @PointClass base(Weapon, Targetx) = world_items : "World Items"
 [
