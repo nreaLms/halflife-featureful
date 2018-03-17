@@ -118,6 +118,8 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
+	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+
 	BOOL m_bRightClaw;
 	float m_rechargeTime;
 	float m_blinkTime;

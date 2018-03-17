@@ -977,7 +977,13 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		break;
 	case PLAYER_IDLE:
 	case PLAYER_WALK:
-		if( !FBitSet( pev->flags, FL_ONGROUND ) && ( m_Activity == ACT_HOP || m_Activity == ACT_LEAP ) )	// Still jumping
+		if( ( m_afPhysicsFlags & PFLAG_LATCHING ) && ( pev->velocity.Length() > 100 ) )
+		{
+			ASSERT( ( m_pActiveItem && FClassnameIs( m_pActiveItem->pev, "weapon_grapple" ) ) == TRUE );
+
+			m_IdealActivity = ACT_SWIM;
+		}
+		else if( !FBitSet( pev->flags, FL_ONGROUND ) && ( m_Activity == ACT_HOP || m_Activity == ACT_LEAP ) )	// Still jumping
 		{
 			m_IdealActivity = m_Activity;
 		}
@@ -3525,6 +3531,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #endif
 #if FEATURE_PIPEWRENCH
 		GiveNamedItem( "weapon_pipewrench" );
+#endif
+#if FEATURE_GRAPPLE
+		GiveNamedItem( "weapon_grapple" );
 #endif
 #if FEATURE_M249
 		GiveNamedItem( "weapon_m249" );

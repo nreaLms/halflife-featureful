@@ -598,6 +598,11 @@ cvar_t	sk_plr_knife1 = { "sk_plr_knife1", "0" };
 cvar_t	sk_plr_knife2 = { "sk_plr_knife2", "0" };
 cvar_t	sk_plr_knife3 = { "sk_plr_knife3", "0" };
 
+// Grapple
+cvar_t	sk_plr_grapple1 = { "sk_plr_grapple1", "0" };
+cvar_t	sk_plr_grapple2 = { "sk_plr_grapple2", "0" };
+cvar_t	sk_plr_grapple3 = { "sk_plr_grapple3", "0" };
+
 // M249
 cvar_t	sk_plr_556_bullet1 = { "sk_plr_556_bullet1", "0" };
 cvar_t	sk_plr_556_bullet2 = { "sk_plr_556_bullet2", "0" };
@@ -1282,6 +1287,11 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_knife1 );// { "sk_plr_knife1", "0" };
 	CVAR_REGISTER( &sk_plr_knife2 );// { "sk_plr_knife2", "0" };
 	CVAR_REGISTER( &sk_plr_knife3 );// { "sk_plr_knife3", "0" };
+
+	// Grapple
+	CVAR_REGISTER( &sk_plr_grapple1 );// { "sk_plr_grapple1", "0" };
+	CVAR_REGISTER( &sk_plr_grapple2 );// { "sk_plr_grapple2", "0" };
+	CVAR_REGISTER( &sk_plr_grapple3 );// { "sk_plr_grapple3", "0" };
 
 	// M249
 	CVAR_REGISTER( &sk_plr_556_bullet1 );// { "sk_plr_556_bullet1", "0" };

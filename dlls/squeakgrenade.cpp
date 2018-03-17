@@ -62,6 +62,8 @@ public:
 
 	virtual float AdditionalExplosionDamage();
 
+	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+
 	static float m_flNextBounceSoundTime;
 
 	// CBaseEntity *m_pTarget;

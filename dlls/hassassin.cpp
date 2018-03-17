@@ -86,6 +86,8 @@ public:
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
+	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+
 	float m_flLastShot;
 	float m_flDiviation;
 

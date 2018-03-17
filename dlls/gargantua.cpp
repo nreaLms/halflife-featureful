@@ -250,6 +250,8 @@ public:
 
 	CUSTOM_SCHEDULES
 
+	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+
 protected:
 	virtual float DefaultHealth();
 	virtual float FireAttackDamage();

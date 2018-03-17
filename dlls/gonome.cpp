@@ -164,6 +164,8 @@ public:
 	static const char* pPainSounds[];
 	static const char* pIdleSounds[];
 	static const char* pDeathSounds[];
+
+	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
 protected:
 	int GonomeLookupActivity( void *pmodel, int activity );
 	float m_flNextFlinch;

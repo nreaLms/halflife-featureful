@@ -52,6 +52,8 @@ public:
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
 
+	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+
 	// checking the feasibility of a grenade toss is kind of costly, so we do it every couple of seconds,
 	// not every server frame.
 	float m_flNextGrenadeCheck;
@@ -92,6 +94,7 @@ public:
 	void Precache( void );
 	void EXPORT RepelUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int m_iSpriteTexture;	// Don't save, precache
+	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
 protected:
 	void RepelUseHelper( const char* monsterName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 };

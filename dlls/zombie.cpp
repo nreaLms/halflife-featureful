@@ -62,6 +62,8 @@ public:
 	BOOL CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
 	BOOL CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+
+	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
 protected:
 	void HandleAnimEventHelper( MonsterEvent_t *pEvent, float dmg, vec3_t velocityAdd, float punchz );
 	void ZombieSpawnHelper(const char* modelName, float health);

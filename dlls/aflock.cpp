@@ -46,6 +46,8 @@ public:
 	// Sounds are shared by the flock
 	static void PrecacheFlockSounds( void );
 
+	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+
 	int m_cFlockSize;
 	float m_flFlockRadius;
 };

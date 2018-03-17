@@ -79,6 +79,9 @@ public:
 #define WEAPON_TRIPMINE			13
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
+#if FEATURE_GRAPPLE
+#define WEAPON_GRAPPLE			16
+#endif
 #if FEATURE_DESERT_EAGLE
 #define WEAPON_EAGLE			17
 #endif
@@ -134,6 +137,7 @@ public:
 #define DISPLACER_WEIGHT		20
 #define SHOCKRIFLE_WEIGHT		15
 #define KNIFE_WEIGHT			0
+#define GRAPPLE_WEIGHT			21
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -1156,6 +1160,61 @@ private:
 	enum PWRENCH_FIRESTATE { FIRESTATE_NONE = 0, FIRESTATE_WINDUP, FIRESTATE_WINDLOOP, FIRESTATE_BIGHIT };
 	int m_iFirestate;
 	float m_flHoldStartTime;
+};
+#endif
+
+#if FEATURE_GRAPPLE
+class CBarnacleGrappleTip;
+
+class CBarnacleGrapple : public CBasePlayerWeapon
+{
+public:
+#ifndef CLIENT_DLL
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+#endif
+	enum FireState
+	{
+		OFF		= 0,
+		CHARGE	= 1
+	};
+
+	void Precache( void );
+	void Spawn( void );
+	void EndAttack( void );
+
+	int iItemSlot( void ) { return 1; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer( CBasePlayer* pPlayer );
+	BOOL Deploy();
+	void Holster( int skiplocal /* = 0 */ );
+	void WeaponIdle( void );
+	void PrimaryAttack( void );
+
+	void Fire( Vector vecOrigin, Vector vecDir );
+
+	void CreateEffect( void );
+	void UpdateEffect( void );
+	void DestroyEffect( void );
+	virtual BOOL UseDecrement(void)
+	{
+		return FALSE;
+	}
+
+private:
+	CBarnacleGrappleTip* m_pTip;
+
+	CBeam* m_pBeam;
+
+	float m_flShootTime;
+	float m_flDamageTime;
+
+	FireState m_FireState;
+
+	bool m_bGrappling;
+	bool m_bMissed;
+	bool m_bMomentaryStuck;
 };
 #endif
 

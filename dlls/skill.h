@@ -192,6 +192,7 @@ struct skilldata_t
 	float plrDmgEagle;
 	float plrDmgPWrench;
 	float plrDmgKnife;
+	float plrDmgGrapple;
 	float plrDmg556;
 	float plrDmg762;
 	float plrDmgShockroach;

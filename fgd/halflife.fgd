@@ -3593,6 +3593,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_penguinnest.mdl") = weapon_penguin : "Killer Penguin" []
 @PointClass base(Weapon, Targetx) studio("models/w_pipe_wrench.mdl") = weapon_pipewrench : "Pipe Wrench" []
 @PointClass base(Weapon, Targetx) studio("models/w_knife.mdl") = weapon_knife : "Knife" []
+@PointClass base(Weapon, Targetx) studio("models/w_bgrap.mdl") = weapon_grapple : "Barnacle Grapple" []
 @PointClass base(Weapon, Targetx) studio("models/w_shock.mdl") = weapon_shockrifle : "Shock Roach" []
 @PointClass base(Weapon, Targetx) studio("models/w_saw.mdl") = weapon_m249 : "M249 SAW" []
 @PointClass base(Weapon, Targetx) studio("models/w_m40a1.mdl") = weapon_sniperrifle : "Sniper Rifle" []

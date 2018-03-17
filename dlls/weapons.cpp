@@ -374,6 +374,10 @@ void W_Precache( void )
 #if FEATURE_KNIFE
 	UTIL_PrecacheOtherWeapon( "weapon_knife" );
 #endif
+#if FEATURE_GRAPPLE
+	UTIL_PrecacheOtherWeapon( "weapon_grapple" );
+	UTIL_PrecacheOther( "grapple_tip" );
+#endif
 #if FEATURE_PENGUIN
 	UTIL_PrecacheOtherWeapon( "weapon_penguin" );
 #endif
@@ -1703,4 +1707,13 @@ TYPEDESCRIPTION	CDisplacer::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CDisplacer, CBasePlayerWeapon )
+
+TYPEDESCRIPTION	CBarnacleGrapple::m_SaveData[] =
+{
+	DEFINE_FIELD( CBarnacleGrapple, m_pBeam, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CBarnacleGrapple, m_flShootTime, FIELD_TIME ),
+	DEFINE_FIELD( CBarnacleGrapple, m_FireState, FIELD_INTEGER ),
+};
+IMPLEMENT_SAVERESTORE( CBarnacleGrapple, CBasePlayerWeapon )
+
 #endif

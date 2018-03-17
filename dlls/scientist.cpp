@@ -1153,6 +1153,8 @@ public:
 	virtual void SetAnswerQuestion( CTalkMonster *pSpeaker );
 	int FriendNumber( int arrayNumber );
 
+	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
+
 	int FIdleSpeak( void );
 	int m_baseSequence;	
 	int m_headTurn;

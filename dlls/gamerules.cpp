@@ -355,6 +355,9 @@ void CGameRules::RefreshSkillData ( void )
 	// Knife
 	gSkillData.plrDmgKnife = GetSkillCvar( "sk_plr_knife" );
 
+	// Grapple
+	gSkillData.plrDmgGrapple = GetSkillCvar( "sk_plr_grapple" );
+
 	// M249
 	gSkillData.plrDmg556 = GetSkillCvar( "sk_plr_556_bullet" );
 

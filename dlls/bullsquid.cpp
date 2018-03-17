@@ -212,6 +212,8 @@ public:
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
 
+	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+
 	BOOL m_fCanThreatDisplay;// this is so the squid only does the "I see a headcrab!" dance one time. 
 
 	float m_flLastHurtTime;// we keep track of this, because if something hurts a squid, it will forget about its love of headcrabs for a while.

@@ -104,6 +104,8 @@ public:
 
 	CUSTOM_SCHEDULES
 
+	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+
 	static const char *pIdleSounds[];
 	static const char *pAlertSounds[];
 	static const char *pPainSounds[];

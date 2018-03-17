@@ -60,6 +60,7 @@ set (CLDLL_SOURCES
 	../dlls/glock.cpp
 	../dlls/eagle.cpp
 	../dlls/pipewrench.cpp
+	../dlls/grapple.cpp
 	../dlls/sniperrifle.cpp
 	../dlls/m249.cpp
 	../dlls/displacer.cpp

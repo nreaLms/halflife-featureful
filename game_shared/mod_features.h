@@ -31,6 +31,7 @@
 // New weapons
 #define FEATURE_PIPEWRENCH 1
 #define FEATURE_KNIFE 1
+#define FEATURE_GRAPPLE 1
 #define FEATURE_DESERT_EAGLE 1
 #define FEATURE_PENGUIN 1
 #define FEATURE_M249 1
