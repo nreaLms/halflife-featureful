@@ -11,7 +11,7 @@
 #include	"spore.h"
 
 #if FEATURE_SPOREGRENADE
-LINK_ENTITY_TO_CLASS(monster_spore, CSporeGrenade)
+LINK_ENTITY_TO_CLASS(spore, CSporeGrenade)
 
 TYPEDESCRIPTION	CSporeGrenade::m_SaveData[] =
 {
@@ -33,7 +33,7 @@ void CSporeGrenade::Precache(void)
 	PRECACHE_SOUND("weapons/splauncher_impact.wav");
 }
 
-void CSporeGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
+void CSporeGrenade::Explode(TraceResult *pTrace)
 {
 	pev->solid = SOLID_NOT;// intangible
 	pev->takedamage = DAMAGE_NO;
@@ -100,34 +100,33 @@ void CSporeGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	RadiusDamage(pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
+	RadiusDamage(pev, pevOwner, pev->dmg, CLASS_NONE, DMG_BLAST);
 
 	// Place a decal on the surface that was hit.
 	UTIL_DecalTrace(pTrace, DECAL_YBLOOD5 + RANDOM_LONG(0, 1));
 
 	UTIL_Remove(this);
-	if (m_pSporeGlow)
-	{
-		UTIL_Remove(m_pSporeGlow);
-		m_pSporeGlow = NULL;
-	}
 }
 
 void CSporeGrenade::Detonate(void)
 {
 	TraceResult tr;
-	Vector		vecSpot;// trace starts here!
-
-	vecSpot = pev->origin + Vector(0, 0, 8);
+	Vector vecSpot = pev->origin + Vector(0, 0, 8);
 	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
 
-	Explode(&tr, DMG_BLAST);
+	Explode(&tr);
 }
 
 
 void CSporeGrenade::BounceSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/splauncher_bounce.wav", 0.4, ATTN_NORM);
+	DangerSound();
+	EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/splauncher_bounce.wav", 0.25, ATTN_NORM);
+}
+
+void CSporeGrenade::DangerSound()
+{
+	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5, pev->velocity.Length(), 0.2);
 }
 
 void CSporeGrenade::TumbleThink(void)
@@ -148,10 +147,6 @@ void CSporeGrenade::TumbleThink(void)
 	if (pev->dmgtime <= gpGlobals->time)
 	{
 		SetThink(&CSporeGrenade::Detonate);
-	}
-	if (pev->waterlevel != 0)
-	{
-		pev->velocity = pev->velocity * 0.5;
 	}
 
 	// Spawn particles.
@@ -177,7 +172,7 @@ void CSporeGrenade::ExplodeTouch(CBaseEntity *pOther)
 	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
 	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr);
 
-	Explode(&tr, DMG_BLAST);
+	Explode(&tr);
 }
 
 void CSporeGrenade::DangerSoundThink(void)
@@ -188,13 +183,8 @@ void CSporeGrenade::DangerSoundThink(void)
 		return;
 	}
 
-	CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5, pev->velocity.Length(), 0.2);
+	DangerSound();
 	pev->nextthink = gpGlobals->time + 0.2;
-
-	if (pev->waterlevel != 0)
-	{
-		pev->velocity = pev->velocity * 0.5;
-	}
 
 	// Spawn particles.
 	SpawnTrailParticles(
@@ -208,15 +198,25 @@ void CSporeGrenade::DangerSoundThink(void)
 
 void CSporeGrenade::BounceTouch(CBaseEntity *pOther)
 {
-	if (pev->flags & FL_ONGROUND)
+	if ( !pOther->pev->takedamage )
 	{
-		// add a bit of static friction
-		pev->velocity = pev->velocity * 0.03;
+		if (!(pev->flags & FL_ONGROUND)) {
+			if (pev->dmg_save < gpGlobals->time) {
+				BounceSound();
+				pev->dmg_save = gpGlobals->time + 0.1;
+			}
+		} else {
+			pev->velocity = pev->velocity * 0.9;
+		}
+		if (pev->flags & FL_SWIM)
+		{
+			pev->velocity = pev->velocity * 0.5;
+		}
 	}
 	else
 	{
-		// play bounce sound
-		BounceSound();
+		TraceResult tr = UTIL_GetGlobalTrace();
+		Explode(&tr);
 	}
 }
 
@@ -230,8 +230,7 @@ void CSporeGrenade::Spawn(void)
 	SET_MODEL(ENT(pev), "models/spore.mdl");
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 
-	pev->gravity = 0.5; // 0.5
-	//pev->friction = 0.8; // 0.8
+	//pev->gravity = 0.5;
 
 	pev->dmg = gSkillData.plrDmgSpore;
 
@@ -245,7 +244,7 @@ void CSporeGrenade::Spawn(void)
 	}
 }
 
-CBaseEntity* CSporeGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time)
+CBaseEntity* CSporeGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, bool ai)
 {
 	CSporeGrenade *pGrenade = GetClassPtr((CSporeGrenade *)NULL);
 	pGrenade->Spawn();
@@ -256,23 +255,20 @@ CBaseEntity* CSporeGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vec
 
 	pGrenade->SetTouch(&CSporeGrenade::BounceTouch);	// Bounce if touched
 
-	pGrenade->pev->dmgtime = gpGlobals->time + time;
+	float lifetime = 2.0;
+	if (ai) {
+		lifetime = 4.0;
+		pGrenade->pev->gravity = 0.5;
+		pGrenade->pev->friction = 0.9;
+	}
+	pGrenade->pev->dmgtime = gpGlobals->time + lifetime;
 	pGrenade->SetThink(&CSporeGrenade::TumbleThink);
 	pGrenade->pev->nextthink = gpGlobals->time + 0.1;
-	if (time < 0.1)
+	if (lifetime < 0.1)
 	{
 		pGrenade->pev->nextthink = gpGlobals->time;
 		pGrenade->pev->velocity = Vector(0, 0, 0);
 	}
-
-	// Tumble through the air
-	// pGrenade->pev->avelocity.x = -400;
-
-	pGrenade->pev->gravity = 0.5;
-	pGrenade->pev->friction = 0.8;
-
-	SET_MODEL(ENT(pGrenade->pev), "models/spore.mdl");
-	pGrenade->pev->dmg = gSkillData.plrDmgSpore;
 
 	return pGrenade;
 }
@@ -287,14 +283,15 @@ CBaseEntity *CSporeGrenade::ShootContact(entvars_t *pevOwner, Vector vecStart, V
 	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = ENT(pevOwner);
 
-	// make monsters afaid of it while in the air
+	// make monsters afraid of it while in the air
 	pGrenade->SetThink(&CSporeGrenade::DangerSoundThink);
 	pGrenade->pev->nextthink = gpGlobals->time;
 
 	// Explode on contact
 	pGrenade->SetTouch(&CSporeGrenade::ExplodeTouch);
 
-	pGrenade->pev->dmg = gSkillData.plrDmgSpore;
+	pGrenade->pev->gravity = 0.5;
+	pGrenade->pev->friction = 0.7;
 
 	return pGrenade;
 }
@@ -333,4 +330,213 @@ void CSporeGrenade::SpawnExplosionParticles(const Vector& origin, const Vector& 
 		WRITE_BYTE(noise);					// noise ( client will divide by 100 )
 	MESSAGE_END();
 }
+
+void CSporeGrenade::UpdateOnRemove()
+{
+	if (m_pSporeGlow)
+	{
+		UTIL_Remove(m_pSporeGlow);
+		m_pSporeGlow = NULL;
+	}
+}
+
+//=========================================================
+// Opposing Forces Spore Ammo
+//=========================================================
+#define		SACK_GROUP			1
+#define		SACK_EMPTY			0
+#define		SACK_FULL			1
+
+class CSporeAmmo : public CBaseEntity
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	void EXPORT BornThink ( void );
+	void EXPORT IdleThink ( void );
+	void EXPORT AmmoTouch ( CBaseEntity *pOther );
+	int  TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType );
+
+	int	Save( CSave &save );
+	int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
+
+	int m_iExplode;
+	BOOL borntime;
+	float m_flTimeSporeIdle;
+};
+
+
+typedef enum
+{
+	SPOREAMMO_IDLE = 0,
+	SPOREAMMO_SPAWNUP,
+	SPOREAMMO_SNATCHUP,
+	SPOREAMMO_SPAWNDOWN,
+	SPOREAMMO_SNATCHDOWN,
+	SPOREAMMO_IDLE1,
+	SPOREAMMO_IDLE2,
+} SPOREAMMO;
+
+LINK_ENTITY_TO_CLASS( ammo_spore, CSporeAmmo )
+
+TYPEDESCRIPTION	CSporeAmmo::m_SaveData[] =
+{
+	DEFINE_FIELD( CSporeAmmo, m_flTimeSporeIdle, FIELD_TIME ),
+	DEFINE_FIELD( CSporeAmmo, borntime, FIELD_BOOLEAN ),
+};
+IMPLEMENT_SAVERESTORE( CSporeAmmo, CBaseEntity )
+
+void CSporeAmmo :: Precache( void )
+{
+	PRECACHE_MODEL("models/spore_ammo.mdl");
+	m_iExplode = PRECACHE_MODEL ("sprites/spore_exp_c_01.spr");
+	PRECACHE_SOUND("weapons/spore_ammo.wav");
+	UTIL_PrecacheOther ( "spore" );
+}
+//=========================================================
+// Spawn
+//=========================================================
+void CSporeAmmo :: Spawn( void )
+{
+	Precache( );
+	SET_MODEL(ENT(pev), "models/spore_ammo.mdl");
+	UTIL_SetSize(pev, Vector( -16, -16, -16 ), Vector( 16, 16, 16 ));
+	pev->takedamage = DAMAGE_YES;
+	pev->solid			= SOLID_BBOX;
+	pev->movetype		= MOVETYPE_NONE;
+	pev->framerate		= 1.0;
+	pev->animtime		= gpGlobals->time + 0.1;
+
+	pev->sequence = SPOREAMMO_IDLE1;
+	pev->body = 1;
+
+	Vector vecOrigin = pev->origin;
+	vecOrigin.z += 16;
+	UTIL_SetOrigin( pev, vecOrigin );
+
+	pev->angles.x -= 90;// :3
+
+	SetThink (&CSporeAmmo::IdleThink);
+#if FEATURE_SPORELAUNCHER
+	SetTouch (&CSporeAmmo::AmmoTouch);
+#endif
+
+	m_flTimeSporeIdle = gpGlobals->time + 20;
+	pev->nextthink = gpGlobals->time + 0.1;
+}
+
+//=========================================================
+// Override all damage
+//=========================================================
+int CSporeAmmo::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
+{
+	if (!borntime) // rigth '!borntime'  // blast in anytime 'borntime || !borntime'
+	{
+		CBaseEntity *attacker = GetClassPtr( (CBaseEntity*)pevAttacker );
+		Vector vecSrc = pev->origin + gpGlobals->v_forward * -32;
+
+		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
+			WRITE_BYTE( TE_EXPLOSION );		// This makes a dynamic light and the explosion sprites/sound
+			WRITE_COORD( vecSrc.x );	// Send to PAS because of the sound
+			WRITE_COORD( vecSrc.y );
+			WRITE_COORD( vecSrc.z );
+			WRITE_SHORT( m_iExplode );
+			WRITE_BYTE( 25  ); // scale * 10
+			WRITE_BYTE( 12  ); // framerate
+			WRITE_BYTE( TE_EXPLFLAG_NOSOUND );
+		MESSAGE_END();
+
+
+		//ALERT( at_console, "angles %f %f %f\n", pev->angles.x, pev->angles.y, pev->angles.z );
+
+		Vector angles = pev->angles;
+		angles.x -= 90;
+		angles.y += 180;
+
+		Vector vecLaunchDir = angles;
+
+		vecLaunchDir.x += RANDOM_FLOAT( -20, 20 );
+		vecLaunchDir.y += RANDOM_FLOAT( -20, 20 );
+		vecLaunchDir.z += RANDOM_FLOAT( -20, 20 );
+
+		UTIL_MakeVectors( vecLaunchDir );
+		CSporeGrenade::ShootTimed(attacker->pev, vecSrc, gpGlobals->v_forward * 800, false);
+
+		pev->framerate		= 1.0;
+		pev->animtime		= gpGlobals->time + 0.1;
+		pev->sequence		= SPOREAMMO_SNATCHDOWN;
+		pev->body			= 0;
+		borntime			= 1;
+		m_flTimeSporeIdle = gpGlobals->time + 1;
+		SetThink (&CSporeAmmo::IdleThink);
+	}
+}
+
+//=========================================================
+// Thinking begin
+//=========================================================
+void CSporeAmmo :: BornThink ( void )
+{
+	pev->nextthink = gpGlobals->time + 0.1;
+
+	if ( m_flTimeSporeIdle > gpGlobals->time )
+		return;
+
+	pev->sequence = 3;
+	pev->framerate		= 1.0;
+	pev->animtime		= gpGlobals->time + 0.1;
+	pev->body = 1;
+	borntime = 0;
+	SetThink (&CSporeAmmo::IdleThink);
+
+	m_flTimeSporeIdle = gpGlobals->time + 16;
+}
+
+void CSporeAmmo :: IdleThink ( void )
+{
+
+	pev->nextthink = gpGlobals->time + 0.1;
+	if ( m_flTimeSporeIdle > gpGlobals->time )
+		return;
+
+	if (borntime)
+	{
+		pev->sequence = SPOREAMMO_IDLE;
+
+		m_flTimeSporeIdle = gpGlobals->time + 10;
+		SetThink(&CSporeAmmo::BornThink);
+		return;
+	}
+	else
+	{
+		pev->sequence = SPOREAMMO_IDLE1;
+	}
+}
+
+void CSporeAmmo :: AmmoTouch ( CBaseEntity *pOther )
+{
+	if ( !pOther->IsPlayer() )
+		return;
+
+	if (borntime)
+		return;
+
+	int bResult = (pOther->GiveAmmo( AMMO_SPORE_GIVE, "Spores", SPORE_MAX_CARRY) != -1);
+	if (bResult)
+	{
+		EMIT_SOUND(ENT(pev), CHAN_ITEM, "weapons/spore_ammo.wav", 1, ATTN_NORM);
+
+		pev->framerate		= 1.0;
+		pev->animtime		= gpGlobals->time + 0.1;
+		pev->sequence = SPOREAMMO_SNATCHDOWN;
+		pev->body = 0;
+		borntime = 1;
+		m_flTimeSporeIdle = gpGlobals->time + 1;
+		SetThink (&CSporeAmmo::IdleThink);
+	}
+}
+
 #endif

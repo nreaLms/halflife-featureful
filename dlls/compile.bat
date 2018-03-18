@@ -106,6 +106,7 @@ set SOURCES=agrunt.cpp^
 	soundent.cpp^
 	spectator.cpp^
 	spore.cpp^
+	sporelauncher.cpp^
 	squadmonster.cpp^
 	squeakgrenade.cpp^
 	subs.cpp^

@@ -185,16 +185,16 @@ int CBarnacleGrappleTip::CheckTarget( CBaseEntity* pTarget )
 	else
 		pTexture = TRACE_TEXTURE(ENT(0), rgfl1, rgfl2);
 
-	bool bIsFixed = FALSE;
+	bool bIsFixed = false;
 
 	if( pTexture && strnicmp( pTexture, "xeno_grapple", 12 ) == 0 )
 	{
-		bIsFixed = TRUE;
+		bIsFixed = true;
 	}
 	else if (pTarget->SizeForGrapple() != GRAPPLE_NOT_A_TARGET)
 	{
 		if (pTarget->SizeForGrapple() == GRAPPLE_FIXED) {
-			bIsFixed = TRUE;
+			bIsFixed = true;
 		} else {
 			m_hGrappleTarget = pTarget;
 			m_vecOriginOffset = pev->origin - pTarget->pev->origin;

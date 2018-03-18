@@ -644,6 +644,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_crossbow_clip.mdl") = ammo_crossbow : "Spawns crossbow ammo." : "http://twhl.info/wiki.php?id=8" []
 @PointClass base(Weapon, Targetx) studio("models/w_saw_clip.mdl") = ammo_556 : "M249 Ammo" []
 @PointClass base(Weapon, Targetx) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
+@PointClass base(Weapon, Targetx) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
 
 @SolidClass base(Target, ZHLT) = button_target : "Target Button"
 [
@@ -3598,6 +3599,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_saw.mdl") = weapon_m249 : "M249 SAW" []
 @PointClass base(Weapon, Targetx) studio("models/w_m40a1.mdl") = weapon_sniperrifle : "Sniper Rifle" []
 @PointClass base(Weapon, Targetx) studio("models/w_displacer.mdl") = weapon_displacer : "Displacer" []
+@PointClass base(Weapon, Targetx) studio("models/w_spore_launcher.mdl") = weapon_sporelauncher : "Spore Launcher" []
 
 @PointClass base(Weapon, Targetx) = world_items : "World Items"
 [

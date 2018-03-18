@@ -1335,6 +1335,7 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 		{ "models/p_shock.mdl",		"models/v_shock.mdl" },
 		{ "models/p_saw.mdl",		"models/v_saw.mdl" },
 		{ "models/p_displacer.mdl",	"models/v_displacer.mdl" },
+		{ "models/p_spore_launcher.mdl","models/v_spore_launcher.mdl" },
 		{ NULL, NULL }
 	};
 

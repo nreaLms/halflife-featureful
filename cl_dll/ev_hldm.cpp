@@ -93,6 +93,9 @@ void EV_Displacer( struct event_args_s *args );
 #if FEATURE_SHOCKRIFLE
 void EV_ShockFire( struct event_args_s *args );
 #endif
+#if FEATURE_SPORELAUNCHER
+void EV_SporeFire( struct event_args_s *args );
+#endif
 }
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
@@ -2203,6 +2206,73 @@ void EV_ShockFire( event_args_t *args )
 }
 //======================
 //	   SHOCKRIFLE END
+//======================
+
+//======================
+//	   SPORELAUNCHER START
+//======================
+enum sporelauncher_e
+{
+	SPLAUNCHER_IDLE = 0,
+	SPLAUNCHER_FIDGET,
+	SPLAUNCHER_RELOAD_REACH,
+	SPLAUNCHER_RELOAD_LOAD,
+	SPLAUNCHER_RELOAD_AIM,
+	SPLAUNCHER_FIRE,
+	SPLAUNCHER_HOLSTER1,
+	SPLAUNCHER_DRAW1,
+	SPLAUNCHER_IDLE2
+};
+
+void EV_SporeFire( event_args_t *args )
+{
+	int idx;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
+	vec3_t up, right, forward;
+
+	idx = args->entindex;
+	VectorCopy( args->origin, origin );
+	VectorCopy( args->angles, angles );
+	VectorCopy( args->velocity, velocity );
+
+	AngleVectors( angles, forward, right, up );
+
+	if( EV_IsLocal( idx ) )
+	{
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( SPLAUNCHER_FIRE, 0 );
+		V_PunchAxis( 0, -5.0 );
+	}
+
+	int fPrimaryFire = args->bparam2;
+
+	if( fPrimaryFire )
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/splauncher_fire.wav", 1, ATTN_NORM, 0, 100 );
+	else
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/splauncher_altfire.wav", 1, ATTN_NORM, 0, 100 );
+
+	Vector	vecSpitOffset;
+	Vector	vecSpitDir;
+	int	iSpitModelIndex;
+
+	vecSpitDir.x = forward.x;
+	vecSpitDir.y = forward.y;
+	vecSpitDir.z = forward.z;
+
+	vecSpitOffset = origin;
+
+	vecSpitOffset = vecSpitOffset + forward * 16;
+	vecSpitOffset = vecSpitOffset + right * 8;
+	vecSpitOffset = vecSpitOffset + up * 4;
+
+	iSpitModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/tinyspit.spr" );
+
+	// spew the spittle temporary ents.
+	gEngfuncs.pEfxAPI->R_Sprite_Spray( (float*)&vecSpitOffset, (float*)&vecSpitDir, iSpitModelIndex, 8, 210, 25 );
+}
+//======================
+//	   SPORELAUNCHER END
 //======================
 
 int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )

@@ -63,6 +63,9 @@ void EV_Displacer( struct event_args_s *args );
 #if FEATURE_SHOCKRIFLE
 void EV_ShockFire( struct event_args_s *args );
 #endif
+#if FEATURE_SPORELAUNCHER
+void EV_SporeFire( struct event_args_s *args );
+#endif
 }
 
 /*
@@ -122,5 +125,8 @@ void Game_HookEvents( void )
 #endif
 #if FEATURE_SHOCKRIFLE
 	gEngfuncs.pfnHookEvent( "events/shock.sc", EV_ShockFire );
+#endif
+#if FEATURE_SPORELAUNCHER
+	gEngfuncs.pfnHookEvent( "events/spore.sc", EV_SporeFire );
 #endif
 }

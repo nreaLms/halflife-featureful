@@ -92,6 +92,9 @@ CDisplacer g_Displacer;
 #if FEATURE_SHOCKRIFLE
 CShockrifle g_Shock;
 #endif
+#if FEATURE_SPORELAUNCHER
+CSporelauncher g_Spore;
+#endif
 
 /*
 ======================
@@ -665,6 +668,9 @@ void HUD_InitClientWeapons( void )
 #if FEATURE_SHOCKRIFLE
 	HUD_PrepEntity( &g_Shock, &player );
 #endif
+#if FEATURE_SPORELAUNCHER
+	HUD_PrepEntity( &g_Spore, &player );
+#endif
 }
 
 /*
@@ -810,6 +816,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 			pWeapon = &g_Shock;
 			break;
 #endif
+#if FEATURE_SPORELAUNCHER
+	case WEAPON_SPORELAUNCHER:
+			pWeapon = &g_Spore;
+			break;
+#endif
 	}
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
@@ -937,6 +948,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		player.ammo_shocks = (int)from->client.vuser2[1];
 	}
 #endif
+#if FEATURE_SPORELAUNCHER
+	else if( player.m_pActiveItem->m_iId == WEAPON_SPORELAUNCHER )
+	{
+		player.ammo_spores = (int)from->client.vuser2[1];
+	}
+#endif
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -1021,6 +1038,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	else if( player.m_pActiveItem->m_iId == WEAPON_SHOCKRIFLE )
 	{
 		from->client.vuser2[1] = player.ammo_shocks;
+	}
+#endif
+#if FEATURE_SPORELAUNCHER
+	else if( player.m_pActiveItem->m_iId == WEAPON_SPORELAUNCHER )
+	{
+		from->client.vuser2[1] = player.ammo_spores;
 	}
 #endif
 

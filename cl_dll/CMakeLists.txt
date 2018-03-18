@@ -65,6 +65,7 @@ set (CLDLL_SOURCES
 	../dlls/m249.cpp
 	../dlls/displacer.cpp
 	../dlls/shockrifle.cpp
+	../dlls/sporelauncher.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

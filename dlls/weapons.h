@@ -97,6 +97,9 @@ public:
 #if FEATURE_SHOCKRIFLE
 #define WEAPON_SHOCKRIFLE		22
 #endif
+#if FEATURE_SPORELAUNCHER
+#define WEAPON_SPORELAUNCHER	23
+#endif
 #if FEATURE_SNIPERRIFLE
 #define WEAPON_SNIPERRIFLE		24
 #endif
@@ -136,6 +139,7 @@ public:
 #define SNIPERRIFLE_WEIGHT		10
 #define DISPLACER_WEIGHT		20
 #define SHOCKRIFLE_WEIGHT		15
+#define SPORELAUNCHER_WEIGHT		20
 #define KNIFE_WEIGHT			0
 #define GRAPPLE_WEIGHT			21
 
@@ -156,6 +160,7 @@ public:
 #define	_556_MAX_CARRY			200
 #define _762_MAX_CARRY			15
 #define SHOCK_MAX_CARRY			10
+#define SPORE_MAX_CARRY			20
 
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
@@ -179,6 +184,7 @@ public:
 #define M249_MAX_CLIP			50
 #define SNIPERRIFLE_MAX_CLIP	5
 #define SHOCKRIFLE_MAX_CLIP		10
+#define SPORELAUNCHER_MAX_CLIP		5
 
 // the default amount of ammo that comes with each gun when it spawns
 #define GLOCK_DEFAULT_GIVE			17
@@ -202,6 +208,7 @@ public:
 #define SNIPERRIFLE_DEFAULT_GIVE		5
 #define DISPLACER_DEFAULT_GIVE		40
 #define SHOCKRIFLE_DEFAULT_GIVE		10
+#define SPORELAUNCHER_DEFAULT_GIVE	5
 
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	20
@@ -218,6 +225,7 @@ public:
 #define AMMO_PENGUINBOX_GIVE		3
 #define AMMO_556CLIP_GIVE			50
 #define AMMO_762BOX_GIVE		5
+#define AMMO_SPORE_GIVE			1
 
 // bullet types
 typedef	enum
@@ -1439,6 +1447,42 @@ public:
 	virtual int MaxCarry() const;
 	virtual const char* AmmoName() const;
 	virtual const char* EventsFile() const;
+};
+#endif
+
+#if FEATURE_SPORELAUNCHER
+class CSporelauncher : public CShotgun
+{
+public:
+//#ifndef CLIENT_DLL
+//	int		Save(CSave &save);
+//	int		Restore(CRestore &restore);
+//	static	TYPEDESCRIPTION m_SaveData[];
+//#endif
+
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot() { return 2; }
+	int GetItemInfo( ItemInfo *p );
+	int AddToPlayer( CBasePlayer *pPlayer );
+
+	void PrimaryAttack( void );
+	void SecondaryAttack( void );
+	BOOL Deploy();
+	void Reload( void );
+	void WeaponIdle( void );
+
+	virtual BOOL UseDecrement( void )
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+	int m_iSquidSpitSprite;
+private:
+	unsigned short m_usSporeFire;
 };
 #endif
 

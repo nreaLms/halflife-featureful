@@ -242,7 +242,6 @@ void CShockrifle::WeaponIdle(void)
 	SendWeaponAnim(SHOCK_IDLE3);
 }
 
-#endif
 void CShockrifle::CreateChargeEffect( void )
 {
 #ifndef CLIENT_DLL
@@ -284,4 +283,5 @@ void CShockrifle::ClearBeams( void )
 	SetThink( NULL );
 #endif
 }
+#endif
 #endif

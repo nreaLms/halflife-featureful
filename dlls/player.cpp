@@ -1131,6 +1131,9 @@ void CBasePlayer::TabulateAmmo()
 #if FEATURE_SHOCKRIFLE
 	ammo_shocks = AmmoInventory( GetAmmoIndex( "Shocks" ) );
 #endif
+#if FEATURE_SPORELAUNCHER
+	ammo_spores = AmmoInventory( GetAmmoIndex( "Spores" ) );
+#endif
 }
 
 /*
@@ -3548,6 +3551,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #endif
 #if FEATURE_SHOCKRIFLE
 		GiveNamedItem( "weapon_shockrifle" );
+#endif
+#if FEATURE_SPORELAUNCHER
+		GiveNamedItem( "weapon_sporelauncher" );
 #endif
 #if FEATURE_KNIFE
 		GiveNamedItem( "weapon_knife" );

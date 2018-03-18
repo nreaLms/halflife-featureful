@@ -366,6 +366,9 @@ public:
 #if FEATURE_SHOCKRIFLE
 	int ammo_shocks;
 #endif
+#if FEATURE_SPORELAUNCHER
+	int ammo_spores;
+#endif
 	//Special stuff for grenades and satchels.
 	float m_flStartThrow;
 	float m_flReleaseThrow;

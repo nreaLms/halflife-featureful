@@ -1808,6 +1808,12 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 						cd->vuser2.y = pl->ammo_shocks;
 					}
 #endif
+#if FEATURE_SPORELAUNCHER
+					else if( pl->m_pActiveItem->m_iId == WEAPON_SPORELAUNCHER )
+					{
+						cd->vuser2.y = pl->ammo_spores;
+					}
+#endif
 				}
 			}
 		}

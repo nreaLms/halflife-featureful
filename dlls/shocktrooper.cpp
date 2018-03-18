@@ -360,7 +360,7 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case STROOPER_AE_GREN_TOSS:
 	{
 		UTIL_MakeVectors(pev->angles);
-		CSporeGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5);
+		CSporeGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, true);
 
 		m_fThrowGrenade = FALSE;
 		m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
