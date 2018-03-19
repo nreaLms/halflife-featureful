@@ -137,11 +137,13 @@ void CGameRules::RefreshSkillData ( void )
 	// Apache 
 	gSkillData.apacheHealth = GetSkillCvar( "sk_apache_health" );
 
+#if FEATURE_BABYGARG
 	// Baby Gargantua
 	gSkillData.babygargantuaHealth = GetSkillCvar( "sk_babygargantua_health" );
 	gSkillData.babygargantuaDmgSlash = GetSkillCvar( "sk_babygargantua_dmg_slash" );
 	gSkillData.babygargantuaDmgFire = GetSkillCvar( "sk_babygargantua_dmg_fire" );
 	gSkillData.babygargantuaDmgStomp = GetSkillCvar( "sk_babygargantua_dmg_stomp" );
+#endif
 
 	// Barney
 	gSkillData.barneyHealth = GetSkillCvar( "sk_barney_health" );

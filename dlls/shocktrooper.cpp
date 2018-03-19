@@ -14,7 +14,7 @@
 #include	"hgrunt.h"
 #include	"mod_features.h"
 
-#ifdef FEATURE_SHOCKTROOPER
+#if FEATURE_SHOCKTROOPER
 
 #include "shockbeam.h"
 #include "spore.h"

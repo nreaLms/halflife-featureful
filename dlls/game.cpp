@@ -67,6 +67,7 @@ cvar_t	sk_apache_health1 = {"sk_apache_health1","0"};
 cvar_t	sk_apache_health2 = {"sk_apache_health2","0"};
 cvar_t	sk_apache_health3 = {"sk_apache_health3","0"};
 
+#if FEATURE_BABYGARG
 // Baby Gargantua
 cvar_t	sk_babygargantua_health1 = {"sk_babygargantua_health1","0"};
 cvar_t	sk_babygargantua_health2 = {"sk_babygargantua_health2","0"};
@@ -83,6 +84,7 @@ cvar_t	sk_babygargantua_dmg_fire3 = {"sk_babygargantua_dmg_fire3","0"};
 cvar_t	sk_babygargantua_dmg_stomp1	= {"sk_babygargantua_dmg_stomp1","0"};
 cvar_t	sk_babygargantua_dmg_stomp2	= {"sk_babygargantua_dmg_stomp2","0"};
 cvar_t	sk_babygargantua_dmg_stomp3	= {"sk_babygargantua_dmg_stomp3","0"};
+#endif
 
 // Barney
 cvar_t	sk_barney_health1 = {"sk_barney_health1","0"};
@@ -773,6 +775,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_apache_health2 );// {"sk_apache_health2","0"};
 	CVAR_REGISTER( &sk_apache_health3 );// {"sk_apache_health3","0"};
 
+#if FEATURE_BABYGARG
 	// Baby Gargantua
 	CVAR_REGISTER( &sk_babygargantua_health1 );// {"sk_babygargantua_health1","0"};
 	CVAR_REGISTER( &sk_babygargantua_health2 );// {"sk_babygargantua_health2","0"};
@@ -789,6 +792,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_babygargantua_dmg_stomp1 );// {"sk_babygargantua_dmg_stomp1","0"};
 	CVAR_REGISTER( &sk_babygargantua_dmg_stomp2 );// {"sk_babygargantua_dmg_stomp2","0"};
 	CVAR_REGISTER( &sk_babygargantua_dmg_stomp3	);// {"sk_babygargantua_dmg_stomp3","0"};
+#endif
 
 	// Barney
 	CVAR_REGISTER( &sk_barney_health1 );// {"sk_barney_health1","0"};

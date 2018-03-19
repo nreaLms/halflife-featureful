@@ -29,7 +29,7 @@
 #include	"studio.h"
 #include	"mod_features.h"
 
-#ifdef FEATURE_GONOME
+#if FEATURE_GONOME
 #define		GONOME_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve
 
 #define		GONOME_TOLERANCE_MELEE1_RANGE	85

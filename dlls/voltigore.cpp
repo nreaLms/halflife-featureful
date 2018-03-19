@@ -28,7 +28,7 @@
 #include	"game.h"
 #include	"mod_features.h"
 
-#ifdef FEATURE_VOLTIFORE
+#if FEATURE_VOLTIFORE
 #define		VOLTIGORE_SPRINT_DIST	256 // how close the voltigore has to get before starting to sprint and refusing to swerve
 
 #define		VOLTIGORE_MAX_BEAMS		12

@@ -31,10 +31,12 @@ struct skilldata_t
 
 	float apacheHealth;
 
+#if FEATURE_BABYGARG
 	float babygargantuaHealth;
 	float babygargantuaDmgSlash;
 	float babygargantuaDmgFire;
 	float babygargantuaDmgStomp;
+#endif
 
 	float barneyHealth;
 

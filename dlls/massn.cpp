@@ -14,7 +14,7 @@
 #include	"hgrunt.h"
 #include	"mod_features.h"
 
-#ifdef FEATURE_MASSN
+#if FEATURE_MASSN
 
 //=========================================================
 // monster-specific DEFINE's

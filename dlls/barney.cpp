@@ -842,7 +842,7 @@ void CDeadBarney :: Spawn( )
 	MonsterInitDead();
 }
 
-#ifdef FEATURE_OTIS
+#if FEATURE_OTIS
 #define	OTIS_BODY_GUNHOLSTERED	0
 #define	OTIS_BODY_GUNDRAWN		1
 #define OTIS_BODY_DONUT			2

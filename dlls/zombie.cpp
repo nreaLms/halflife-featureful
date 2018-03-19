@@ -321,7 +321,7 @@ int CZombie::IgnoreConditions( void )
 	return iIgnore;
 }
 
-#ifdef FEATURE_ZOMBIE_BARNEY
+#if FEATURE_ZOMBIE_BARNEY
 class CZombieBarney : public CZombie
 {
 	void Spawn( void );
@@ -366,7 +366,7 @@ void CZombieBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 }
 #endif
 
-#ifdef FEATURE_ZOMBIE_SOLDIER
+#if FEATURE_ZOMBIE_SOLDIER
 class CZombieSoldier : public CZombie
 {
 	void Spawn( void );
