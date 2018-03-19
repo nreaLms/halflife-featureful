@@ -1029,6 +1029,14 @@
 	]
 ]
 
+@PointClass sprite() base(Targetname) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_spritetrain : "Sprite Train"
+[
+  target(target_source) : "First stop target"
+  model(sprite) : "Sprite Name" : "sprites/glow01.spr"
+  speed(integer) : "Speed (units per second)" : 64
+  scale(string) : "Sprite Scale"
+]
+
 @SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object"
 [
 	spawnflags(flags) =
