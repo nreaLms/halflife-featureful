@@ -245,8 +245,8 @@ int CCrowbar::Swing( int fFirst )
 		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
 
 		// play thwack, smack, or dong sound
-                float flVol = 1.0;
-                int fHitWorld = TRUE;
+		float flVol = 1.0;
+		int fHitWorld = TRUE;
 
 		if( pEntity )
 		{

@@ -118,8 +118,10 @@ void CKnife::PrimaryAttack()
 {
 	if (!Swing(1))
 	{
+#ifndef CLIENT_DLL
 		SetThink(&CKnife::SwingAgain);
 		pev->nextthink = gpGlobals->time + 0.1;
+#endif
 	}
 }
 
@@ -164,9 +166,12 @@ int CKnife::Swing(int fFirst)
 	}
 #endif
 
-	PLAYBACK_EVENT_FULL(FEV_RELIABLE, m_pPlayer->edict(), m_usKnife,
-		0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
-		0.0, 0, 0.0);
+	if ( fFirst )
+	{
+		PLAYBACK_EVENT_FULL(FEV_RELIABLE, m_pPlayer->edict(), m_usKnife,
+			0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
+			0.0, 0, 0.0);
+	}
 
 
 	if (tr.flFraction >= 1.0)
@@ -186,10 +191,13 @@ int CKnife::Swing(int fFirst)
 		{
 		case 0:
 			SendWeaponAnim(KNIFE_ATTACK1); break;
+			break;
 		case 1:
 			SendWeaponAnim(KNIFE_ATTACK2HIT); break;
+			break;
 		case 2:
 			SendWeaponAnim(KNIFE_ATTACK3HIT); break;
+			break;
 		}
 
 		// player "shoot" animation
@@ -201,31 +209,46 @@ int CKnife::Swing(int fFirst)
 		fDidHit = TRUE;
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
-		ClearMultiDamage();
-
-		// do damage
-		pEntity->TraceAttack(m_pPlayer->pev, gSkillData.plrDmgKnife, gpGlobals->v_forward, &tr, DMG_CLUB);
-
-		ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-
 		// play thwack, smack, or dong sound
 		float flVol = 1.0;
 		int fHitWorld = TRUE;
 
-		if (pEntity)
+		if( pEntity )
 		{
-			if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
+			ClearMultiDamage();
+			// If building with the clientside weapon prediction system,
+			// UTIL_WeaponTimeBase() is always 0 and m_flNextPrimaryAttack is >= -1.0f, thus making
+			// m_flNextPrimaryAttack + 1 < UTIL_WeaponTimeBase() always evaluate to false.
+#ifdef CLIENT_WEAPONS
+			if( ( m_flNextPrimaryAttack + 1 == UTIL_WeaponTimeBase() ) || g_pGameRules->IsMultiplayer() )
+#else
+			if( ( m_flNextPrimaryAttack + 1 < UTIL_WeaponTimeBase() ) || g_pGameRules->IsMultiplayer() )
+#endif
+			{
+				// first swing does full damage
+				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgKnife, gpGlobals->v_forward, &tr, DMG_CLUB );
+			}
+			else
+			{
+				// subsequent swings do half
+				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgKnife / 2, gpGlobals->v_forward, &tr, DMG_CLUB );
+			}
+			ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
+
+			if( pEntity->DefaultClassify() != CLASS_NONE && pEntity->DefaultClassify() != CLASS_MACHINE )
 			{
 				// play thwack or smack sound
-				switch (RANDOM_LONG(0, 1))
+				switch( RANDOM_LONG( 0, 1 ) )
 				{
 				case 0:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh1.wav", 1, ATTN_NORM); break;
+					EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/knife_hit_flesh1.wav", 1, ATTN_NORM );
+					break;
 				case 1:
-					EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh2.wav", 1, ATTN_NORM); break;
+					EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/knife_hit_flesh2.wav", 1, ATTN_NORM );
+					break;
 				}
 				m_pPlayer->m_iWeaponVolume = KNIFE_BODYHIT_VOLUME;
-				if (!pEntity->IsAlive())
+				if( !pEntity->IsAlive() )
 					return TRUE;
 				else
 					flVol = 0.1;
@@ -249,7 +272,7 @@ int CKnife::Swing(int fFirst)
 				fvolbar = 1;
 			}
 
-			// also play crowbar strike
+			// also play knife strike
 			switch (RANDOM_LONG(0, 1))
 			{
 			case 0:
@@ -265,13 +288,11 @@ int CKnife::Swing(int fFirst)
 		}
 
 		m_pPlayer->m_iWeaponVolume = flVol * KNIFE_WALLHIT_VOLUME;
-#endif
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
 
 		SetThink(&CKnife::Smack);
 		pev->nextthink = UTIL_WeaponTimeBase() + 0.2;
-
-
+#endif
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
 	}
 	return fDidHit;
 }
