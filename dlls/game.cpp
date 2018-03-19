@@ -630,9 +630,9 @@ cvar_t	sk_357_bullet1 = {"sk_357_bullet1","35"};
 cvar_t	sk_357_bullet2 = {"sk_357_bullet2","35"};
 cvar_t	sk_357_bullet3 = {"sk_357_bullet3","35"};
 
-cvar_t	sk_556_bullet1 = { "sk_556_bullet1", "0" };
-cvar_t	sk_556_bullet2 = { "sk_556_bullet2", "0" };
-cvar_t	sk_556_bullet3 = { "sk_556_bullet3", "0" };
+cvar_t	sk_556_bullet1 = { "sk_556_bullet1", "15" };
+cvar_t	sk_556_bullet2 = { "sk_556_bullet2", "15" };
+cvar_t	sk_556_bullet3 = { "sk_556_bullet3", "15" };
 
 cvar_t	sk_762_bullet1 = {"sk_762_bullet1","35"};
 cvar_t	sk_762_bullet2 = {"sk_762_bullet2","40"};
