@@ -339,15 +339,12 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			vecDropAngles.x = 0;
 
 			// now spawn a shockroach.
-			const int originalSolid = pev->solid;
-			pev->solid = SOLID_NOT;
 			CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecGunPos, vecDropAngles, edict() );
 			if (pRoach)
 			{
 				// Remove any pitch.
 				pRoach->pev->angles.x = 0;
 			}
-			pev->solid = originalSolid;
 		}
 	}
 	break;
