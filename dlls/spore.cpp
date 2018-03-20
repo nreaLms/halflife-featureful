@@ -472,7 +472,9 @@ int CSporeAmmo::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 		borntime			= 1;
 		m_flTimeSporeIdle = gpGlobals->time + 1;
 		SetThink (&CSporeAmmo::IdleThink);
+		return 1;
 	}
+	return 0;
 }
 
 //=========================================================
