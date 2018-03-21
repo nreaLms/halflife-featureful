@@ -47,7 +47,9 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            crossbow.cpp \
            crowbar.cpp \
            defaultai.cpp \
+           displacer.cpp \
            doors.cpp \
+           eagle.cpp \
            effects.cpp \
            egon.cpp \
            explode.cpp \
@@ -64,6 +66,7 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            glock.cpp \
            gman.cpp \
            gonome.cpp \
+           grapple.cpp \
            h_ai.cpp \
            h_battery.cpp \
            h_cycler.cpp \
@@ -80,9 +83,12 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            ichthyosaur.cpp \
            islave.cpp \
            items.cpp \
+           knife.cpp \
            leech.cpp \
            lights.cpp \
+           m249.cpp \
            maprules.cpp \
+           massn.cpp \
            monstermaker.cpp \
            monsters.cpp \
            monsterstate.cpp \
@@ -91,14 +97,15 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            multiplay_gamerules.cpp \
            nihilanth.cpp \
            nodes.cpp \
-	   observer.cpp \
+           observer.cpp \
            osprey.cpp \
            pathcorner.cpp \
+           pipewrench.cpp \
            pitdrone.cpp \
            plane.cpp \
            plats.cpp \
            player.cpp \
-	   playermonster.cpp \
+           playermonster.cpp \
            python.cpp \
            rat.cpp \
            roach.cpp \
@@ -107,12 +114,18 @@ LOCAL_SRC_FILES := agrunt.cpp airtank.cpp \
            schedule.cpp \
            scientist.cpp \
            scripted.cpp \
+           shockbeam.cpp \
+           shockrifle.cpp \
+           shocktrooper.cpp \
            shotgun.cpp \
            singleplay_gamerules.cpp \
            skill.cpp \
+           sniperrifle.cpp \
            sound.cpp \
            soundent.cpp \
            spectator.cpp \
+           spore.cpp \
+           sporelauncher.cpp \
            squadmonster.cpp \
            squeakgrenade.cpp \
            subs.cpp \

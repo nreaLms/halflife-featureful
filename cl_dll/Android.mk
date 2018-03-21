@@ -43,6 +43,15 @@ SRCS+=../dlls/shotgun.cpp
 SRCS+=../dlls/squeakgrenade.cpp
 SRCS+=../dlls/tripmine.cpp
 SRCS+=../dlls/glock.cpp
+SRCS+=../dlls/eagle.cpp
+SRCS+=../dlls/pipewrench.cpp
+SRCS+=../dlls/knife.cpp
+SRCS+=../dlls/grapple.cpp
+SRCS+=../dlls/m249.cpp
+SRCS+=../dlls/displacer.cpp
+SRCS+=../dlls/sniperrifle.cpp
+SRCS+=../dlls/shockrifle.cpp
+SRCS+=../dlls/sporelauncher.cpp
 #SRCS+=../game_shared/voice_banmgr.cpp
 #SRCS+=../game_shared/voice_status.cpp
 SRCS+=./ammo.cpp
@@ -73,6 +82,7 @@ SRCS+=./input_mouse.cpp
 #SRCS+=./inputw32.cpp
 SRCS+=./menu.cpp
 SRCS+=./message.cpp
+SRCS+=./nightvision.cpp
 SRCS+=./overview.cpp
 SRCS+=./parsemsg.cpp
 SRCS_C+=../pm_shared/pm_debug.c
@@ -92,7 +102,7 @@ SRCS+=./input_xash3d.cpp
 SRCS+=./scoreboard.cpp
 SRCS+=./MOTD.cpp
 INCLUDES =  -I../common -I. -I../game_shared -I../pm_shared -I../engine -I../dlls -I../utils/false_vgui/include
-DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp -DCLIENT_WEAPONS -DCLIENT_DLL -w
+DEFINES = -Wno-write-strings -DLINUX -D_LINUX -Dstricmp=strcasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DCLIENT_WEAPONS -DCLIENT_DLL -w
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/. \
 		 $(LOCAL_PATH)/../common \
