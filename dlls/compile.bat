@@ -70,6 +70,7 @@ set SOURCES=agrunt.cpp^
 	lights.cpp^
 	m249.cpp^
 	maprules.cpp^
+	massn.cpp^
 	monstermaker.cpp^
 	monsters.cpp^
 	monsterstate.cpp^
