@@ -17,6 +17,7 @@
 #define PLAYER_H
 
 #include "pm_materials.h"
+#include "mod_features.h"
 
 #define PLAYER_FATAL_FALL_SPEED		1024// approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED	580// approx 20 feet
@@ -59,7 +60,11 @@
 #define CSUITNOREPEAT		32
 
 #define	SOUND_FLASHLIGHT_ON		"items/flashlight1.wav"
+#if FEATURE_NIGHTVISION
+#define	SOUND_FLASHLIGHT_OFF	"items/flashlight2.wav"
+#else
 #define	SOUND_FLASHLIGHT_OFF	"items/flashlight1.wav"
+#endif
 
 #define TEAM_NAME_LENGTH	16
 
