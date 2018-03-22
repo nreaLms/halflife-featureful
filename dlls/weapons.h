@@ -571,7 +571,7 @@ public:
 	int Swing( int fFirst );
 	BOOL Deploy( void );
 	void Holster( int skiplocal = 0 );
-#ifdef CROWBAR_IDLE_ANIM
+#if FEATURE_CROWBAR_IDLE_ANIM
 	void WeaponIdle();
 #endif
 	int m_iSwing;
