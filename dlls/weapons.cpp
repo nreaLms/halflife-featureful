@@ -1679,10 +1679,11 @@ IMPLEMENT_SAVERESTORE( CEagle, CBasePlayerWeapon )
 #if FEATURE_PIPEWRENCH
 TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
 {
-	DEFINE_FIELD( CPipeWrench, m_iFirestate, FIELD_INTEGER ),
-	DEFINE_FIELD( CPipeWrench, m_flHoldStartTime, FIELD_TIME ),
+	DEFINE_FIELD( CPipeWrench, m_flBigSwingStart, FIELD_TIME ),
+	DEFINE_FIELD( CPipeWrench, m_iSwing, FIELD_INTEGER ),
+	DEFINE_FIELD( CPipeWrench, m_iSwingMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CPipeWrench, m_iBigSwingHit, FIELD_INTEGER ),
 };
-
 IMPLEMENT_SAVERESTORE( CPipeWrench, CBasePlayerWeapon )
 #endif
 

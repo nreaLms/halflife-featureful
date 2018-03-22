@@ -1130,23 +1130,29 @@ public:
 	int		Restore(CRestore &restore);
 	static	TYPEDESCRIPTION m_SaveData[];
 #endif
+
 	void Spawn(void);
 	void Precache(void);
 	int iItemSlot(void) { return 1; }
 	void EXPORT SwingAgain(void);
 	void EXPORT Smack(void);
 	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
+	int AddToPlayer(CBasePlayer *pPlayer);
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
-	void ItemPostFrame(void);
-	virtual BOOL ShouldWeaponIdle(void) { return FALSE; }
-	int Swing(int fFirst, BOOL fIsPrimary);
+
+	int Swing(int fFirst);
 	BOOL Deploy(void);
+	void WeaponIdle(void);
 	void Holster(int skiplocal = 0);
+	void BigSwing(void);
+
 	int m_iSwing;
 	TraceResult m_trHit;
+	int m_iSwingMode;
+	float m_flBigSwingStart;
+	int m_iBigSwingHit;
 
 	virtual BOOL UseDecrement(void)
 	{
@@ -1159,15 +1165,6 @@ public:
 private:
 
 	unsigned short m_usPWrench;
-
-	void EXPORT WindUp(void);
-	void EXPORT WindLoop(void);
-	void EXPORT SwingAgain2(void);
-	BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);
-
-	enum PWRENCH_FIRESTATE { FIRESTATE_NONE = 0, FIRESTATE_WINDUP, FIRESTATE_WINDLOOP, FIRESTATE_BIGHIT };
-	int m_iFirestate;
-	float m_flHoldStartTime;
 };
 #endif
 
