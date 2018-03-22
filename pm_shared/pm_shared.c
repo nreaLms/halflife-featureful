@@ -283,7 +283,6 @@ void PM_PlayStepSound( int step, float fvol )
 	// FIXME mp_footsteps needs to be a movevar
 	if( pmove->multiplayer && !pmove->movevars->footsteps )
 		return;
-
 	VectorCopy( pmove->velocity, hvel );
 	hvel[2] = 0.0;
 
@@ -466,6 +465,9 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_LADDER:
+		if (pmove->flags & FL_IMMUNE_SLIME) {
+			break;
+		}
 		switch( irand )
 		{
 		// right foot

@@ -380,6 +380,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 			if( m_pTip->GetGrappleType() > GRAPPLE_SMALL )
 			{
 				m_pPlayer->pev->movetype = MOVETYPE_FLY;
+				m_pPlayer->pev->flags |= FL_IMMUNE_SLIME;
 				//Tells the physics code that the player is not on a ladder - Solokiller
 			}
 
@@ -668,6 +669,7 @@ void CBarnacleGrapple::EndAttack( void )
 	}
 
 	m_pPlayer->pev->movetype = MOVETYPE_WALK;
+	m_pPlayer->pev->flags &= ~(FL_IMMUNE_SLIME);
 	m_pPlayer->m_afPhysicsFlags &= ~PFLAG_LATCHING;
 }
 
