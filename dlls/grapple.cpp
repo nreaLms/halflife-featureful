@@ -301,8 +301,9 @@ int CBarnacleGrapple::AddToPlayer( CBasePlayer* pPlayer )
 
 BOOL CBarnacleGrapple::Deploy()
 {
-	m_flTimeWeaponIdle = gpGlobals->time + 0.9;
-	return DefaultDeploy("models/v_bgrap.mdl", "models/p_bgrap.mdl", BGRAPPLE_UP, "gauss" );
+	int r = DefaultDeploy("models/v_bgrap.mdl", "models/p_bgrap.mdl", BGRAPPLE_UP, "gauss" );
+	m_flTimeWeaponIdle = gpGlobals->time + 1.1;
+	return r;
 }
 
 void CBarnacleGrapple::Holster( int skiplocal /* = 0 */ )
