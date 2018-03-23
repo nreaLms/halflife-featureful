@@ -1690,6 +1690,7 @@ IMPLEMENT_SAVERESTORE( CPipeWrench, CBasePlayerWeapon )
 TYPEDESCRIPTION	CM249::m_SaveData[] =
 {
 	DEFINE_FIELD( CM249, m_iReloadState, FIELD_INTEGER ),
+	DEFINE_FIELD( CM249, m_flReloadStart, FIELD_TIME ),
 };
 IMPLEMENT_SAVERESTORE( CM249, CBasePlayerWeapon )
 #endif

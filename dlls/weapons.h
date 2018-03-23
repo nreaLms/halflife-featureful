@@ -378,7 +378,7 @@ public:
 	virtual BOOL CanDeploy( void );
 	virtual BOOL IsUseable( void );
 	BOOL DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal = 0, int body = 0 );
-	int DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
+	BOOL DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
 
 	virtual void ItemPostFrame( void );	// called each frame by the player PostThink
 	// called by CBasePlayerWeapons ItemPostFrame()
@@ -1245,10 +1245,11 @@ public:
 
 	void PrimaryAttack(void);
 	BOOL Deploy(void);
+	void Holster();
 	void Reload(void);
 	void WeaponIdle(void);
 	virtual BOOL ShouldWeaponIdle(void) { return TRUE; }
-	float m_flNextAnimTime;
+
 	int m_iShell;
 
 	virtual BOOL UseDecrement(void)
@@ -1260,12 +1261,12 @@ public:
 #endif
 	}
 
-	void ReloadStart( void );
-	void ReloadInsert( void );
+	void UpdateTape();
 
 	enum M249_RELOAD_STATE { RELOAD_STATE_NONE = 0, RELOAD_STATE_OPEN, RELOAD_STATE_FILL };
 
 	int m_iReloadState;
+	float m_flReloadStart;
 
 private:
 	unsigned short m_usM249;
