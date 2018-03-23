@@ -24,6 +24,7 @@
 
 #define FEATURE_ISLAVE_DEAD 1
 #define FEATURE_HOUNDEYE_DEAD 1
+#define FEATURE_OPFOR_DEADHAZ 0
 
 // whether fgrunts and black mesa personnel are enemies like in Opposing Force
 #define FEATURE_OPFOR_ALLY_RELATIONSHIP 1
@@ -59,6 +60,12 @@
 #define M249_DROP_NAME "weapon_m249"
 #else
 #define M249_DROP_NAME "ammo_9mmAR"
+#endif
+
+#if FEATURE_OPFOR_DEADHAZ
+#define DEADHAZMODEL "models/deadhaz.mdl"
+#else
+#define DEADHAZMODEL "models/player.mdl"
 #endif
 
 // Misc features
