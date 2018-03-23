@@ -208,9 +208,7 @@ void CShockrifle::PrimaryAttack()
 
 void CShockrifle::SecondaryAttack( void )
 {
-	SendWeaponAnim( SHOCK_IDLE1 );
-	m_flNextSecondaryAttack = GetNextAttackDelay(3.3f);
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.3f;
+	CBasePlayerWeapon::SecondaryAttack();
 }
 
 void CShockrifle::Reload(void)
@@ -238,8 +236,13 @@ void CShockrifle::WeaponIdle(void)
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
 
+	float flRand = UTIL_SharedRandomFloat(m_pPlayer->random_seed, 0, 1);
+	if (flRand <= 0.8) {
+		SendWeaponAnim(SHOCK_IDLE3);
+	} else {
+		SendWeaponAnim(SHOCK_IDLE1);
+	}
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.3f;
-	SendWeaponAnim(SHOCK_IDLE3);
 }
 
 void CShockrifle::CreateChargeEffect( void )

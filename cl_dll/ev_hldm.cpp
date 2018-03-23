@@ -2197,7 +2197,7 @@ void EV_ShockFire( event_args_t *args )
 	//Only play the weapon anims if I shot it.
 	if( EV_IsLocal( idx ) )
 	{
-		V_PunchAxis( 0, gEngfuncs.pfnRandomLong( 0, 2 ) );
+		//V_PunchAxis( 0, gEngfuncs.pfnRandomLong( 0, 2 ) );
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( SHOCK_FIRE, 1 );
 	}
 
