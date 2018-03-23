@@ -104,8 +104,16 @@ void CTripmineGrenade::Spawn( void )
 	pev->sequence = TRIPMINE_WORLD;
 	ResetSequenceInfo();
 	pev->framerate = 0;
-	
+#if FEATURE_TRIPMINE_OPFOR_SIZE
+	if (pev->angles.y >= 270.0 || pev->angles.y <= 90.0) {
+		UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 1, 1, 1 ) );
+	} else {
+		UTIL_SetSize( pev, Vector( -1, -1, 0 ), Vector( 0, 0, 1 ) );
+	}
+#else
 	UTIL_SetSize( pev, Vector( -8, -8, -8 ), Vector( 8, 8, 8 ) );
+#endif
+
 	UTIL_SetOrigin( pev, pev->origin );
 
 	if( pev->spawnflags & 1 )
