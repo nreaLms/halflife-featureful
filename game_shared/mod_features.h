@@ -62,6 +62,7 @@
 #endif
 
 // Misc features
+#define FEATURE_OPFOR_DECALS 0
 #define FEATURE_NIGHTVISION 0
 
 #endif
