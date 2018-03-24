@@ -1701,18 +1701,22 @@ TYPEDESCRIPTION	CSniperrifle::m_SaveData[] =
 {
 	DEFINE_FIELD( CSniperrifle, m_fNeedAjustBolt, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CSniperrifle, m_iBoltState, FIELD_INTEGER ),
+	DEFINE_FIELD( CSniperrifle, m_fInSpecialReload, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CSniperrifle, CBasePlayerWeapon )
+#endif
 
+#if FEATURE_DISPLACER
 TYPEDESCRIPTION	CDisplacer::m_SaveData[] =
 {
 	DEFINE_FIELD( CDisplacer, m_iFireMode, FIELD_INTEGER ),
 	DEFINE_ARRAY( CDisplacer, m_pBeam, FIELD_CLASSPTR, 3 ),
 };
-
 IMPLEMENT_SAVERESTORE( CDisplacer, CBasePlayerWeapon )
+#endif
 
+#if FEATURE_GRAPPLE
 TYPEDESCRIPTION	CBarnacleGrapple::m_SaveData[] =
 {
 	DEFINE_FIELD( CBarnacleGrapple, m_pBeam, FIELD_CLASSPTR ),
@@ -1720,5 +1724,4 @@ TYPEDESCRIPTION	CBarnacleGrapple::m_SaveData[] =
 	DEFINE_FIELD( CBarnacleGrapple, m_FireState, FIELD_INTEGER ),
 };
 IMPLEMENT_SAVERESTORE( CBarnacleGrapple, CBasePlayerWeapon )
-
 #endif

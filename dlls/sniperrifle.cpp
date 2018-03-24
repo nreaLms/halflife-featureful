@@ -183,7 +183,7 @@ void CSniperrifle::PrimaryAttack()
 
 	vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_762, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 	m_flNextPrimaryAttack = 1.75;
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSniper, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, ( m_iClip == 0 ) ? 1 : 0, 0 );
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSniper, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, ( m_iClip == 0 ) ? 1 : 0, 0, 0, 0 );
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	// HEV suit - indicate out of ammo condition
@@ -195,7 +195,7 @@ void CSniperrifle::PrimaryAttack()
 
 void CSniperrifle::Reload( void )
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == 5)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == SNIPERRIFLE_MAX_CLIP)
 		return;
 
 	int iResult;
@@ -205,7 +205,7 @@ void CSniperrifle::Reload( void )
 		SecondaryAttack();
 	}
 
-	if (m_iClip == 0 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0 )
+	if (m_iClip == 0)
 	{
 		iResult = DefaultReload( 5, SNIPER_RELOAD1, 80 / 34 );
 		m_fInSpecialReload = 1;

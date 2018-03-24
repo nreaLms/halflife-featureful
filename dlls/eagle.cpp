@@ -188,7 +188,7 @@ void CEagle::PrimaryAttack()
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase()+ 0.22;
 	}
 
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usEagle, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, flSpread, flSpread, ( m_iClip == 0 ) ? 1 : 0, 0 );
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usEagle, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	// HEV suit - indicate out of ammo condition
