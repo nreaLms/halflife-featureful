@@ -61,6 +61,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual float AdditionalExplosionDamage();
+	virtual float MaximumExplosionDamage();
 
 	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
 
@@ -218,6 +219,11 @@ void CSqueakGrenade::GibMonster( void )
 float CSqueakGrenade::AdditionalExplosionDamage()
 {
 	return gSkillData.snarkDmgPop;
+}
+
+float CSqueakGrenade::MaximumExplosionDamage()
+{
+	return 0;
 }
 
 void CSqueakGrenade::HuntThink( void )
@@ -381,6 +387,9 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 					ApplyMultiDamage( pev, pev );
 
 				pev->dmg += AdditionalExplosionDamage(); // add more explosion damage
+				if (MaximumExplosionDamage()) {
+					pev->dmg = Q_max(pev->dmg, MaximumExplosionDamage());
+				}
 				// m_flDie += 2.0; // add more life
 
 				// make bite sound
@@ -436,6 +445,7 @@ class CPenguinGrenade : public CSqueakGrenade
 	void Precache( void );
 	void Killed(entvars_t *pevAttacker, int iGib);
 	float AdditionalExplosionDamage();
+	float MaximumExplosionDamage();
 };
 
 void CPenguinGrenade::Spawn()
@@ -462,6 +472,11 @@ void CPenguinGrenade::Killed(entvars_t *pevAttacker, int iGib)
 float CPenguinGrenade::AdditionalExplosionDamage()
 {
 	return gSkillData.plrDmgHandGrenade;
+}
+
+float CPenguinGrenade::MaximumExplosionDamage()
+{
+	return gSkillData.plrDmgHandGrenade*5;
 }
 
 LINK_ENTITY_TO_CLASS( monster_penguin, CPenguinGrenade )
