@@ -526,7 +526,7 @@ void CStrooper::Precache()
 	PRECACHE_SOUND("zombie/claw_miss2.wav");
 
 	UTIL_PrecacheOther("shock_beam");
-	UTIL_PrecacheOther("monster_spore");
+	UTIL_PrecacheOther("spore");
 	UTIL_PrecacheOther("monster_shockroach");
 
 	// get voice pitch
