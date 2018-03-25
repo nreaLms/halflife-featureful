@@ -642,7 +642,7 @@ void CDisplacer::Teleport( void )
 		{
 			m_pPlayer->m_fInXen = !m_pPlayer->m_fInXen;
 			if (m_pPlayer->m_fInXen)
-				m_pPlayer->pev->gravity = 0.5;
+				m_pPlayer->pev->gravity = 0.6;
 			else
 				m_pPlayer->pev->gravity = 1.0;
 		}
