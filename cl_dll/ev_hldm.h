@@ -6,7 +6,7 @@
 //=============================================================================
 
 #pragma once
-#if !defined ( EV_HLDMH )
+#ifndef EV_HLDMH
 #define EV_HLDMH
 
 #include "bullet_types.h"
