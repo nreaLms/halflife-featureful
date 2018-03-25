@@ -31,18 +31,6 @@
 #define VECTOR_CONE_DM_SHOTGUN	Vector( 0.08716, 0.04362, 0.00  )// 10 degrees by 5 degrees
 #define VECTOR_CONE_DM_DOUBLESHOTGUN Vector( 0.17365, 0.04362, 0.00 ) // 20 degrees by 5 degrees
 
-enum sporelauncher_e {
-	SPLAUNCHER_IDLE = 0,
-	SPLAUNCHER_FIDGET,
-	SPLAUNCHER_RELOAD_REACH ,
-	SPLAUNCHER_RELOAD_LOAD,
-	SPLAUNCHER_RELOAD_AIM,
-	SPLAUNCHER_FIRE,
-	SPLAUNCHER_HOLSTER1,
-	SPLAUNCHER_DRAW1,
-	SPLAUNCHER_IDLE2
-};
-
 LINK_ENTITY_TO_CLASS(weapon_sporelauncher, CSporelauncher)
 
 void CSporelauncher::Spawn()

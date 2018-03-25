@@ -32,16 +32,6 @@ enum w_squeak_e
 	WSQUEAK_RUN
 };
 
-enum squeak_e
-{
-	SQUEAK_IDLE1 = 0,
-	SQUEAK_FIDGETFIT,
-	SQUEAK_FIDGETNIP,
-	SQUEAK_DOWN,
-	SQUEAK_UP,
-	SQUEAK_THROW
-};
-
 #ifndef CLIENT_DLL
 class CSqueakGrenade : public CGrenade
 {

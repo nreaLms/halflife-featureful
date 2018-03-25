@@ -16,19 +16,6 @@
 
 #if FEATURE_DESERT_EAGLE
 
-enum deagle_e {
-	DEAGLE_IDLE1 = 0,
-	DEAGLE_IDLE2,
-	DEAGLE_IDLE3,
-	DEAGLE_IDLE4,
-	DEAGLE_IDLE5,
-	DEAGLE_SHOOT,
-	DEAGLE_SHOOT_EMPTY,
-	DEAGLE_RELOAD,
-	DEAGLE_RELOAD_NOT_EMPTY,
-	DEAGLE_DRAW,
-	DEAGLE_HOLSTER
-};
 LINK_ENTITY_TO_CLASS( weapon_eagle, CEagle )
 
 #ifndef CLIENT_DLL
@@ -96,14 +83,14 @@ int CEagle::GetItemInfo(ItemInfo *p)
 
 BOOL CEagle::Deploy( )
 {
-	return DefaultDeploy( "models/v_desert_eagle.mdl", "models/p_desert_eagle.mdl", DEAGLE_DRAW, "onehanded", 0 );
+	return DefaultDeploy( "models/v_desert_eagle.mdl", "models/p_desert_eagle.mdl", EAGLE_DRAW, "onehanded", 0 );
 }
 
 void CEagle::Holster( int skiplocal /* = 0 */ )
 {
 	m_fInReload = FALSE;// cancel any reload in progress.
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
-	SendWeaponAnim( DEAGLE_HOLSTER );
+	SendWeaponAnim( EAGLE_HOLSTER );
 
 	if (m_pEagleLaser)
 	{
@@ -217,9 +204,9 @@ void CEagle::Reload( void )
 	int iResult;
 
 	if (m_iClip == 0)
-		iResult = DefaultReload( EAGLE_MAX_CLIP, DEAGLE_RELOAD, 1.5 );
+		iResult = DefaultReload( EAGLE_MAX_CLIP, EAGLE_RELOAD, 1.5 );
 	else
-		iResult = DefaultReload( EAGLE_MAX_CLIP, DEAGLE_RELOAD_NOT_EMPTY, 1.5 );
+		iResult = DefaultReload( EAGLE_MAX_CLIP, EAGLE_RELOAD_NOT_EMPTY, 1.5 );
 
 	if (iResult)
 	{
@@ -272,12 +259,12 @@ void CEagle::WeaponIdle( void )
 			{
 				if (flRand > 0.5 )
 				{
-					iAnim = DEAGLE_IDLE5;//Done
+					iAnim = EAGLE_IDLE5;//Done
 					m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
 				}
 				else
 				{
-					iAnim = DEAGLE_IDLE4;//Done
+					iAnim = EAGLE_IDLE4;//Done
 					m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;
 				}
 			}
@@ -285,17 +272,17 @@ void CEagle::WeaponIdle( void )
 			{
 				if (flRand <= 0.3 )
 				{
-					iAnim = DEAGLE_IDLE1;//Done
+					iAnim = EAGLE_IDLE1;//Done
 					m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;
 				}
 				else if (flRand <= 0.6 )
 				{
-					iAnim = DEAGLE_IDLE2;
+					iAnim = EAGLE_IDLE2;
 					m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;
 				}
 				else
 				{
-					iAnim = DEAGLE_IDLE3;//Done
+					iAnim = EAGLE_IDLE3;//Done
 					m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.63f;
 				}
 			}

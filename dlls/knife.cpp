@@ -32,23 +32,6 @@ void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, fl
 
 LINK_ENTITY_TO_CLASS(weapon_knife, CKnife)
 
-enum knife_e {
-	KNIFE_IDLE1 = 0,
-	KNIFE_DRAW,
-	KNIFE_HOLSTER,
-	KNIFE_ATTACK1,
-	KNIFE_ATTACK1MISS,
-	KNIFE_ATTACK2,
-	KNIFE_ATTACK2HIT,
-	KNIFE_ATTACK3,
-	KNIFE_ATTACK3HIT,
-	KNIFE_IDLE2,
-	KNIFE_IDLE3,
-	KNIFE_CHARGE,
-	KNIFE_STAB,
-};
-
-
 void CKnife::Spawn()
 {
 	Precache();

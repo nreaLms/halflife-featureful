@@ -1119,24 +1119,6 @@ void EV_FireGauss( event_args_t *args )
 //======================
 //	   CROWBAR START
 //======================
-enum crowbar_e
-{
-	CROWBAR_IDLE = 0,
-	CROWBAR_DRAW,
-	CROWBAR_HOLSTER,
-	CROWBAR_ATTACK1HIT,
-	CROWBAR_ATTACK1MISS,
-	CROWBAR_ATTACK2MISS,
-	CROWBAR_ATTACK2HIT,
-	CROWBAR_ATTACK3MISS,
-#if FEATURE_CROWBAR_IDLE_ANIM
-	CROWBAR_ATTACK3HIT,
-	CROWBAR_IDLE2,
-	CROWBAR_IDLE3,
-#else
-	CROWBAR_ATTACK3HIT
-#endif
-};
 
 int g_iSwing;
 
@@ -1178,21 +1160,6 @@ void EV_Crowbar( event_args_t *args )
 //======================
 //	  CROSSBOW START
 //======================
-enum crossbow_e
-{
-	CROSSBOW_IDLE1 = 0,	// full
-	CROSSBOW_IDLE2,		// empty
-	CROSSBOW_FIDGET1,	// full
-	CROSSBOW_FIDGET2,	// empty
-	CROSSBOW_FIRE1,		// full
-	CROSSBOW_FIRE2,		// reload
-	CROSSBOW_FIRE3,		// empty
-	CROSSBOW_RELOAD,	// from empty
-	CROSSBOW_DRAW1,		// full
-	CROSSBOW_DRAW2,		// empty
-	CROSSBOW_HOLSTER1,	// full
-	CROSSBOW_HOLSTER2	// empty
-};
 
 //=====================
 // EV_BoltCallback
@@ -1324,19 +1291,6 @@ void EV_FireCrossbow( event_args_t *args )
 //======================
 //	    RPG START
 //======================
-enum rpg_e
-{
-	RPG_IDLE = 0,
-	RPG_FIDGET,
-	RPG_RELOAD,		// to reload
-	RPG_FIRE2,		// to empty
-	RPG_HOLSTER1,	// loaded
-	RPG_DRAW1,		// loaded
-	RPG_HOLSTER2,	// unloaded
-	RPG_DRAW_UL,	// unloaded
-	RPG_IDLE_UL,	// unloaded idle
-	RPG_FIDGET_UL	// unloaded fidget
-};
 
 void EV_FireRpg( event_args_t *args )
 {
@@ -1364,20 +1318,6 @@ void EV_FireRpg( event_args_t *args )
 //======================
 //	    EGON END
 //======================
-enum egon_e
-{
-	EGON_IDLE1 = 0,
-	EGON_FIDGET1,
-	EGON_ALTFIREON,
-	EGON_ALTFIRECYCLE,
-	EGON_ALTFIREOFF,
-	EGON_FIRE1,
-	EGON_FIRE2,
-	EGON_FIRE3,
-	EGON_FIRE4,
-	EGON_DRAW,
-	EGON_HOLSTER
-};
 
 int g_fireAnims1[] = { EGON_FIRE1, EGON_FIRE2, EGON_FIRE3, EGON_FIRE4 };
 int g_fireAnims2[] = { EGON_ALTFIRECYCLE };
@@ -1529,15 +1469,6 @@ void EV_EgonStop( event_args_t *args )
 //======================
 //	   HORNET START
 //======================
-enum hgun_e
-{
-	HGUN_IDLE1 = 0,
-	HGUN_FIDGETSWAY,
-	HGUN_FIDGETSHAKE,
-	HGUN_DOWN,
-	HGUN_UP,
-	HGUN_SHOOT
-};
 
 void EV_HornetGunFire( event_args_t *args )
 {
@@ -1576,18 +1507,6 @@ void EV_HornetGunFire( event_args_t *args )
 //======================
 //	   TRIPMINE START
 //======================
-enum tripmine_e
-{
-	TRIPMINE_IDLE1 = 0,
-	TRIPMINE_IDLE2,
-	TRIPMINE_ARM1,
-	TRIPMINE_ARM2,
-	TRIPMINE_FIDGET,
-	TRIPMINE_HOLSTER,
-	TRIPMINE_DRAW,
-	TRIPMINE_WORLD,
-	TRIPMINE_GROUND
-};
 
 //We only check if it's possible to put a trip mine
 //and if it is, then we play the animation. Server still places it.
@@ -1632,15 +1551,6 @@ void EV_TripmineFire( event_args_t *args )
 //======================
 //	   SQUEAK START
 //======================
-enum squeak_e
-{
-	SQUEAK_IDLE1 = 0,
-	SQUEAK_FIDGETFIT,
-	SQUEAK_FIDGETNIP,
-	SQUEAK_DOWN,
-	SQUEAK_UP,
-	SQUEAK_THROW
-};
 
 #define VEC_HULL_MIN		Vector( -16, -16, -36 )
 #define VEC_DUCK_HULL_MIN	Vector( -16, -16, -18 )
@@ -1743,20 +1653,6 @@ void EV_TrainPitchAdjust( event_args_t *args )
 //======================
 //	   DESERT EAGLE START
 //======================
-enum eagle_e
-{
-	EAGLE_IDLE1 = 0,
-	EAGLE_IDLE2,
-	EAGLE_IDLE3,
-	EAGLE_IDLE4,
-	EAGLE_IDLE5,
-	EAGLE_SHOOT,
-	EAGLE_SHOOT_EMPTY,
-	EAGLE_RELOAD,
-	EAGLE_RELOAD_NOT_EMPTY,
-	EAGLE_DRAW,
-	EAGLE_HOLSTER
-};
 
 void EV_FireEagle( event_args_t *args )
 {
@@ -1801,24 +1697,6 @@ void EV_FireEagle( event_args_t *args )
 //======================
 //	   PIPEWRENCH START
 //======================
-enum pwrench_e
-{
-	PIPEWRENCH_IDLE1 = 0,
-	PIPEWRENCH_IDLE2,
-	PIPEWRENCH_IDLE3,
-	PIPEWRENCH_DRAW,
-	PIPEWRENCH_HOLSTER,
-	PIPEWRENCH_ATTACK1HIT,
-	PIPEWRENCH_ATTACK1MISS,
-	PIPEWRENCH_ATTACK2HIT,
-	PIPEWRENCH_ATTACK2MISS,
-	PIPEWRENCH_ATTACK3HIT,
-	PIPEWRENCH_ATTACK3MISS,
-	PIPEWRENCH_ATTACKBIGWIND,
-	PIPEWRENCH_ATTACKBIGHIT,
-	PIPEWRENCH_ATTACKBIGMISS,
-	PIPEWRENCH_ATTACKBIGLOOP
-};
 
 //Only predict the miss sounds, hit sounds are still played
 //server side, so players don't get the wrong idea.
@@ -1880,22 +1758,6 @@ void EV_PipeWrench( event_args_t *args )
 //======================
 //	   KNIFE START
 //======================
-enum knife_e
-{
-	KNIFE_IDLE1 = 0,
-	KNIFE_DRAW,
-	KNIFE_HOLSTER,
-	KNIFE_ATTACK1,
-	KNIFE_ATTACK1MISS,
-	KNIFE_ATTACK2,
-	KNIFE_ATTACK2HIT,
-	KNIFE_ATTACK3,
-	KNIFE_ATTACK3HIT,
-	KNIFE_IDLE2,
-	KNIFE_IDLE3,
-	KNIFE_CHARGE,
-	KNIFE_STAB
-};
 
 //Only predict the miss sounds, hit sounds are still played
 //server side, so players don't get the wrong idea.
@@ -1948,18 +1810,6 @@ void EV_Knife( event_args_t *args )
 //======================
 //	    M249 START
 //======================
-enum m249_e
-{
-	M249_SLOWIDLE = 0,
-	M249_IDLE2,
-	M249_LAUNCH,
-	M249_RELOAD1,
-	M249_HOLSTER,
-	M249_DEPLOY,
-	M249_SHOOT1,
-	M249_SHOOT2,
-	M249_SHOOT3
-};
 
 void EV_FireM249( event_args_t *args )
 {
@@ -2030,18 +1880,6 @@ void EV_FireM249( event_args_t *args )
 //======================
 //	   SNIPERRIFLE START
 //======================
-enum sniper_e
-{
-	SNIPER_DRAW = 0,
-	SNIPER_SLOWIDLE,
-	SNIPER_FIRE,
-	SNIPER_FIRELASTROUND,
-	SNIPER_RELOAD1,
-	SNIPER_RELOAD2,
-	SNIPER_RELOAD3,
-	SNIPER_SLOWIDLE2,
-	SNIPER_HOLSTER
-};
 
 void EV_FireSniper( event_args_t *args )
 {
@@ -2093,16 +1931,6 @@ void EV_FireSniper( event_args_t *args )
 //======================
 //	   DISPLACER START
 //======================
-enum displacer_e
-{
-	DISPLACER_IDLE1 = 0,
-	DISPLACER_IDLE2,
-	DISPLACER_SPINUP,
-	DISPLACER_SPIN,
-	DISPLACER_FIRE,
-	DISPLACER_DRAW,
-	DISPLACER_HOLSTER
-};
 
 void EV_Displacer( event_args_t *args )
 {
@@ -2127,14 +1955,6 @@ void EV_Displacer( event_args_t *args )
 //======================
 //	   SHOCKRIFLE START
 //======================
-enum shockrifle_e
-{
-	SHOCK_IDLE1 = 0,
-	SHOCK_FIRE,
-	SHOCK_DRAW,
-	SHOCK_HOLSTER,
-	SHOCK_IDLE3
-};
 
 void EV_ShockFire( event_args_t *args )
 {
@@ -2163,18 +1983,6 @@ void EV_ShockFire( event_args_t *args )
 //======================
 //	   SPORELAUNCHER START
 //======================
-enum sporelauncher_e
-{
-	SPLAUNCHER_IDLE = 0,
-	SPLAUNCHER_FIDGET,
-	SPLAUNCHER_RELOAD_REACH,
-	SPLAUNCHER_RELOAD_LOAD,
-	SPLAUNCHER_RELOAD_AIM,
-	SPLAUNCHER_FIRE,
-	SPLAUNCHER_HOLSTER1,
-	SPLAUNCHER_DRAW1,
-	SPLAUNCHER_IDLE2
-};
 
 void EV_SporeFire( event_args_t *args )
 {
@@ -2230,15 +2038,6 @@ void EV_SporeFire( event_args_t *args )
 //======================
 //	   MEDKIT START
 //======================
-
-enum medkit_e {
-	MEDKIT_IDLE = 0,
-	MEDKIT_LONGIDLE,
-	MEDKIT_LONGUSE,
-	MEDKIT_SHORTUSE,
-	MEDKIT_HOLSTER,
-	MEDKIT_DRAW,
-};
 
 void EV_MedkitFire( event_args_s *args )
 {

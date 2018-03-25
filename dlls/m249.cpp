@@ -25,20 +25,6 @@
 
 #if FEATURE_M249
 
-enum m249_e
-{
-	M249_SLOWIDLE = 0,
-	M249_IDLE2,
-	M249_LAUNCH,
-	M249_RELOAD1,
-	M249_HOLSTER,
-	M249_DEPLOY,
-	M249_SHOOT1,
-	M249_SHOOT2,
-	M249_SHOOT3,
-};
-
-
 LINK_ENTITY_TO_CLASS(weapon_m249, CM249)
 
 //=========================================================

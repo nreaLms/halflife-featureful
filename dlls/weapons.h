@@ -19,6 +19,7 @@
 #include "effects.h"
 #include "mod_features.h"
 #include "bullet_types.h"
+#include "weapon_animations.h"
 
 class CBasePlayer;
 extern int gmsgWeapPickup;

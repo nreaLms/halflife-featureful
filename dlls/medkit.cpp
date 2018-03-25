@@ -23,15 +23,6 @@
 
 #if FEATURE_MEDKIT
 
-enum medkit_e {
-	MEDKIT_IDLE = 0,
-	MEDKIT_LONGIDLE,
-	MEDKIT_LONGUSE,
-	MEDKIT_SHORTUSE,
-	MEDKIT_HOLSTER,
-	MEDKIT_DRAW,
-};
-
 LINK_ENTITY_TO_CLASS(weapon_medkit, CMedkit)
 
 CBaseEntity* CMedkit::FindHealTarget()

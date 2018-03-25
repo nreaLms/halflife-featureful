@@ -29,14 +29,6 @@
 
 #if FEATURE_SHOCKRIFLE
 
-enum shockrifle_e {
-	SHOCK_IDLE1 = 0,
-	SHOCK_FIRE,
-	SHOCK_DRAW,
-	SHOCK_HOLSTER,
-	SHOCK_IDLE3,
-};
-
 LINK_ENTITY_TO_CLASS(weapon_shockrifle, CShockrifle)
 
 void CShockrifle::Spawn()
