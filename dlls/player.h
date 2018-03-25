@@ -333,6 +333,9 @@ public:
 	float m_flNextChatTime;
 
 	BOOL	m_fInXen;
+#if FEATURE_NIGHTVISION
+	BOOL	m_fNVGisON;
+#endif
 	friend class CDisplacer;
 	friend class CTriggerXenReturn;
 

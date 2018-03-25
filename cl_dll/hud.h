@@ -29,6 +29,8 @@
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
+#include "dlight.h"
+#include "mod_features.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
@@ -460,13 +462,27 @@ public:
 	void Reset( void );
 	int MsgFunc_Nightvision( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_Flashlight( const char *pszName, int iSize, void *pbuf );
+	int MsgImpl(const char *pszName, int iSize, void *pbuf);
+	void DrawCSNVG(float flTime);
+	void DrawOpforNVG(float flTime);
+	void RemoveCSdlight();
+	void UserCmd_ToggleNVGStyle();
+	void UserCmd_NVGAdjustDown();
+	void UserCmd_NVGAdjustUp();
 
 private:
-	HSPRITE m_hSprite;
-
-	wrect_t *m_prc;
 	int m_fOn;
+#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
+	bool m_nvgStyle;
+#endif
+#if FEATURE_CS_NIGHTVISION
+	dlight_t* m_pLight;
+#endif
+#if FEATURE_OPFOR_NIGHTVISION
+	HSPRITE m_hSprite;
+	wrect_t *m_prc;
 	int m_iFrame, m_nFrameCount;
+#endif
 };
 //
 //-----------------------------------------------------
