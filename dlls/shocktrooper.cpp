@@ -388,7 +388,8 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 				WRITE_BYTE( 128 );			// brightness
 			MESSAGE_END();
 
-			Vector vecShootOrigin = GetGunPosition();
+			UTIL_MakeVectors(pev->angles);
+			Vector vecShootOrigin = vecGunPos + gpGlobals->v_forward * 32;
 			Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 			vecGunAngles = UTIL_VecToAngles(vecShootDir);
 
