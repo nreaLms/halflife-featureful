@@ -620,7 +620,7 @@ void CDisplacer::Teleport( void )
 
 		UTIL_CleanSpawnPoint( tmp, 50 );
 
-		EMIT_SOUND( edict(), CHAN_BODY, "weapons/displacer_self.wav", 1, ATTN_NORM );
+		EMIT_SOUND( m_pPlayer->edict(), CHAN_WEAPON, "weapons/displacer_self.wav", 1, ATTN_NORM );
 	 	CDisplacerBall::SelfCreate(m_pPlayer->pev, m_pPlayer->pev->origin);
 
 		// make origin adjustments (origin in center, not at feet)
