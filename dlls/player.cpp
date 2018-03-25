@@ -3565,6 +3565,8 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_satchel" );
 		GiveNamedItem( "weapon_snark" );
 		GiveNamedItem( "weapon_hornetgun" );
+#endif
+#if FEATURE_MEDKIT
 		GiveNamedItem( "weapon_medkit" );
 #endif
 #if FEATURE_DESERT_EAGLE
