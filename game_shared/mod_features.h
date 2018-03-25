@@ -26,6 +26,9 @@
 #define FEATURE_HOUNDEYE_DEAD 1
 #define FEATURE_OPFOR_DEADHAZ 0
 
+#define FEATURE_PITDRONE_SPAWN_WITH_SPIKES 1
+#define FEATURE_PITDRONE_ALWAYS_CAN_RELOAD 1
+
 // whether fgrunts and black mesa personnel are enemies like in Opposing Force
 #define FEATURE_OPFOR_ALLY_RELATIONSHIP 1
 

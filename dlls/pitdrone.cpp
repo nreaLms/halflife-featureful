@@ -603,10 +603,19 @@ void CPitDrone::Spawn()
 
 	m_flNextSpitTime = gpGlobals->time;
 
+#if FEATURE_PITDRONE_SPAWN_WITH_SPIKES
+	if (!spikes) {
+		spikes = 6;
+	}
+#endif
 	BodyChange(spikes);
+#if FEATURE_PITDRONE_ALWAYS_CAN_RELOAD
+	canReloadSpikes = TRUE;
+#else
 	if (spikes) {
 		canReloadSpikes = TRUE;
 	}
+#endif
 	MonsterInit();
 }
 
