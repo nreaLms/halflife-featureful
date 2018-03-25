@@ -1790,6 +1790,12 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 						cd->vuser2.y = ( (CRpg *)pl->m_pActiveItem )->m_fSpotActive;
 						cd->vuser2.z = ( (CRpg *)pl->m_pActiveItem )->m_cActiveRockets;
 					}
+#if FEATURE_DESERT_EAGLE
+					else if( pl->m_pActiveItem->m_iId == WEAPON_EAGLE )
+					{
+						cd->vuser2.y = ( (CEagle *)pl->m_pActiveItem )->m_fEagleLaserActive;
+					}
+#endif
 #if FEATURE_M249
 					else if( pl->m_pActiveItem->m_iId == WEAPON_M249 )
 					{

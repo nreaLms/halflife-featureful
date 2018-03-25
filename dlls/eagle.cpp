@@ -42,6 +42,8 @@ void CEagle::Spawn( void )
 	SET_MODEL(ENT(pev), "models/w_desert_eagle.mdl");
 
 	m_iDefaultAmmo = EAGLE_DEFAULT_GIVE;
+	m_fEagleLaserActive = 0;
+	m_pEagleLaser = 0;
 
 	FallInit();// get ready to fall down.
 }
@@ -117,12 +119,14 @@ void CEagle::SecondaryAttack()
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 	if (wasActive)
 	{
+#ifndef CLIENT_DLL
 		if (m_pEagleLaser)
 		{
 			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/desert_eagle_sight2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 			m_pEagleLaser->Killed( NULL, GIB_NORMAL );
 			m_pEagleLaser = NULL;
 		}
+#endif
 	}
 }
 
@@ -169,13 +173,12 @@ void CEagle::PrimaryAttack()
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
 	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
-	Vector vecAiming;
-	vecAiming = gpGlobals->v_forward;
+	Vector vecAiming = gpGlobals->v_forward;
 
 	Vector vecDir;
 	if (m_fEagleLaserActive)
 	{
-		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_357, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_EAGLE, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase()+ 0.5;
 #ifndef CLIENT_DLL
 		m_pEagleLaser->Suspend( 0.6 );
@@ -184,7 +187,7 @@ void CEagle::PrimaryAttack()
 	else
 	{
 		flSpread = 0.1;
-		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector(flSpread, flSpread, flSpread), 8192, BULLET_PLAYER_357, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector(flSpread, flSpread, flSpread), 8192, BULLET_PLAYER_EAGLE, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase()+ 0.22;
 	}
 
