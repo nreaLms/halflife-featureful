@@ -79,6 +79,7 @@ public:
 #define WEAPON_TRIPMINE			13
 #define	WEAPON_SATCHEL			14
 #define	WEAPON_SNARK			15
+
 #if FEATURE_GRAPPLE
 #define WEAPON_GRAPPLE			16
 #endif
@@ -93,6 +94,9 @@ public:
 #endif
 #if FEATURE_DISPLACER
 #define WEAPON_DISPLACER		20
+#endif
+#if FEATURE_MEDKIT
+#define WEAPON_MEDKIT			21
 #endif
 #if FEATURE_SHOCKRIFLE
 #define WEAPON_SHOCKRIFLE		22
@@ -142,6 +146,7 @@ public:
 #define SPORELAUNCHER_WEIGHT		20
 #define KNIFE_WEIGHT			0
 #define GRAPPLE_WEIGHT			21
+#define MEDKIT_WEIGHT		-1
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -161,6 +166,7 @@ public:
 #define _762_MAX_CARRY			15
 #define SHOCK_MAX_CARRY			10
 #define SPORE_MAX_CARRY			20
+#define MEDKIT_MAX_CARRY		100
 
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
@@ -209,6 +215,7 @@ public:
 #define DISPLACER_DEFAULT_GIVE		40
 #define SHOCKRIFLE_DEFAULT_GIVE		10
 #define SPORELAUNCHER_DEFAULT_GIVE	5
+#define MEDKIT_DEFAULT_GIVE			50
 
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	20
@@ -1134,13 +1141,13 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int iItemSlot(void) { return 1; }
-	void EXPORT SwingAgain(void);
-	void EXPORT Smack(void);
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
 	void PrimaryAttack(void);
 	void SecondaryAttack(void);
+	void EXPORT SwingAgain(void);
+	void EXPORT Smack(void);
 
 	int Swing(int fFirst);
 	BOOL Deploy(void);
@@ -1165,6 +1172,49 @@ public:
 private:
 
 	unsigned short m_usPWrench;
+};
+#endif
+
+#if FEATURE_MEDKIT
+class CMedkit : public CBasePlayerWeapon
+{
+public:
+#ifndef CLIENT_DLL
+	int		Save( CSave &save );
+	int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+#endif
+	void Spawn(void);
+	void Precache(void);
+	int iItemSlot(void) { return 1; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer(CBasePlayer *pPlayer);
+
+	void PrimaryAttack(void);
+	void SecondaryAttack(void);
+	BOOL Deploy(void);
+	void Holster(int skiplocal = 0);
+	void Reload( void );
+	void WeaponIdle(void);
+	BOOL PlayEmptySound(void);
+	BOOL ShouldWeaponIdle(void) { return TRUE; }
+	CBaseEntity* FindHealTarget();
+
+	virtual BOOL UseDecrement( void )
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+	float	m_flSoundDelay;
+	float	m_flRechargeTime;
+	BOOL	m_secondaryAttack;
+
+private:
+	unsigned short m_usMedkitFire;
 };
 #endif
 

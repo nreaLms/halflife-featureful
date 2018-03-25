@@ -100,6 +100,7 @@ set (SVDLL_SOURCES
 	m249.cpp
 	maprules.cpp
 	massn.cpp
+	medkit.cpp
 	monstermaker.cpp
 	monsters.cpp
 	monsterstate.cpp

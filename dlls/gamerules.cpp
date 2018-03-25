@@ -347,6 +347,10 @@ void CGameRules::RefreshSkillData ( void )
 
 	// Tripmine
 	gSkillData.plrDmgTripmine = GetSkillCvar( "sk_plr_tripmine" );
+	
+	// Medkit 
+	gSkillData.plrDmgMedkit = GetSkillCvar( "sk_plr_medkitshot" );
+	gSkillData.plrMedkitTime = GetSkillCvar( "sk_plr_medkittime" );
 
 	// Desert Eagle
 	gSkillData.plrDmgEagle = GetSkillCvar( "sk_plr_eagle" );

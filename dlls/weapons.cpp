@@ -359,7 +359,9 @@ void W_Precache( void )
 
 	// hornetgun
 	UTIL_PrecacheOtherWeapon( "weapon_hornetgun" );
-
+#if FEATURE_MEDKIT
+	UTIL_PrecacheOtherWeapon( "weapon_medkit" );
+#endif
 	if( g_pGameRules->IsDeathmatch() )
 	{
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
@@ -1724,4 +1726,15 @@ TYPEDESCRIPTION	CBarnacleGrapple::m_SaveData[] =
 	DEFINE_FIELD( CBarnacleGrapple, m_FireState, FIELD_INTEGER ),
 };
 IMPLEMENT_SAVERESTORE( CBarnacleGrapple, CBasePlayerWeapon )
+#endif
+
+#if FEATURE_MEDKIT
+TYPEDESCRIPTION	CMedkit::m_SaveData[] =
+{
+	DEFINE_FIELD( CMedkit, m_flSoundDelay, FIELD_TIME ),
+	DEFINE_FIELD( CMedkit, m_flRechargeTime, FIELD_TIME ),
+	DEFINE_FIELD( CMedkit, m_secondaryAttack, FIELD_BOOLEAN ),
+};
+
+IMPLEMENT_SAVERESTORE( CMedkit, CBasePlayerWeapon )
 #endif

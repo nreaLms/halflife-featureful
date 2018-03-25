@@ -360,6 +360,10 @@ SOURCE=.\items.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\medkit.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\leech.cpp
 # End Source File
 # Begin Source File
@@ -637,6 +641,10 @@ SOURCE=.\hornet.h
 # Begin Source File
 
 SOURCE=.\items.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\medkit.h
 # End Source File
 # Begin Source File
 

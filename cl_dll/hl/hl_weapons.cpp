@@ -95,6 +95,9 @@ CShockrifle g_Shock;
 #if FEATURE_SPORELAUNCHER
 CSporelauncher g_Spore;
 #endif
+#if FEATURE_MEDKIT
+CMedkit g_Medkit;
+#endif
 
 /*
 ======================
@@ -671,6 +674,9 @@ void HUD_InitClientWeapons( void )
 #if FEATURE_SPORELAUNCHER
 	HUD_PrepEntity( &g_Spore, &player );
 #endif
+#if FEATURE_MEDKIT
+	HUD_PrepEntity( &g_Medkit, &player );
+#endif
 }
 
 /*
@@ -819,6 +825,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 #if FEATURE_SPORELAUNCHER
 	case WEAPON_SPORELAUNCHER:
 			pWeapon = &g_Spore;
+			break;
+#endif
+#if FEATURE_MEDKIT
+		case WEAPON_MEDKIT:
+			pWeapon = &g_Medkit;
 			break;
 #endif
 	}

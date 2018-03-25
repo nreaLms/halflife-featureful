@@ -31,6 +31,7 @@ set SOURCES=../dlls/crossbow.cpp^
 	../dlls/sniperrifle.cpp^
 	../dlls/shockrifle.cpp^
 	../dlls/sporelauncher.cpp^
+	../dlls/medkit.cpp^
 	ev_hldm.cpp^
 	hl/hl_baseentity.cpp^
 	hl/hl_events.cpp^

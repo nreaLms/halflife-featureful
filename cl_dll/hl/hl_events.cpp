@@ -66,6 +66,9 @@ void EV_ShockFire( struct event_args_s *args );
 #if FEATURE_SPORELAUNCHER
 void EV_SporeFire( struct event_args_s *args );
 #endif
+#if FEATURE_MEDKIT
+void EV_MedkitFire( struct event_args_s *args );
+#endif
 }
 
 /*
@@ -128,5 +131,8 @@ void Game_HookEvents( void )
 #endif
 #if FEATURE_SPORELAUNCHER
 	gEngfuncs.pfnHookEvent( "events/spore.sc", EV_SporeFire );
+#endif
+#if FEATURE_MEDKIT
+	gEngfuncs.pfnHookEvent( "events/medkit.sc", EV_MedkitFire );
 #endif
 }

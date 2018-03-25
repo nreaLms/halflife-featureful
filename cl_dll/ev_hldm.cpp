@@ -96,6 +96,9 @@ void EV_ShockFire( struct event_args_s *args );
 #if FEATURE_SPORELAUNCHER
 void EV_SporeFire( struct event_args_s *args );
 #endif
+#if FEATURE_MEDKIT
+void EV_MedkitFire( struct event_args_s *args );
+#endif
 }
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
@@ -2272,6 +2275,35 @@ void EV_SporeFire( event_args_t *args )
 }
 //======================
 //	   SPORELAUNCHER END
+//======================
+
+//======================
+//	   MEDKIT START
+//======================
+
+enum medkit_e {
+	MEDKIT_IDLE = 0,
+	MEDKIT_LONGIDLE,
+	MEDKIT_LONGUSE,
+	MEDKIT_SHORTUSE,
+	MEDKIT_HOLSTER,
+	MEDKIT_DRAW,
+};
+
+void EV_MedkitFire( event_args_s *args )
+{
+	int idx = args->entindex;
+	if( EV_IsLocal( idx ) )
+	{
+		if (args->iparam1)
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( MEDKIT_LONGUSE, 1 );
+		else
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( MEDKIT_SHORTUSE, 1 );
+	}
+}
+
+//======================
+//	   MEDKIT END
 //======================
 
 int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 )
