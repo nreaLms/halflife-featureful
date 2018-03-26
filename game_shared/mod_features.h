@@ -1,6 +1,6 @@
 #pragma once
-#ifndef FEATURES_H
-#define FEATURES_H
+#ifndef MOD_FEATURES_H
+#define MOD_FEATURES_H
 
 /*
  * 0 to disable feature
