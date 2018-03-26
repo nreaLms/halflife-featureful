@@ -347,15 +347,6 @@ public:
 	virtual	BOOL FVisible( const Vector &vecOrigin );
 
 	virtual int SizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
-
-	//Special stuff for grenades and satchels.
-	float m_flStartThrow;
-	float m_flReleaseThrow;
-	int m_chargeReady;
-	int m_fInAttack;
-
-	enum EGON_FIRESTATE { FIRE_OFF, FIRE_CHARGE };
-	int m_fireState;
 };
 
 // Ugly technique to override base member functions
