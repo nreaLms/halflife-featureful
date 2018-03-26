@@ -163,7 +163,7 @@ int CPipeWrench::Swing(int fFirst)
 	if (fFirst)
 	{
 		PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usPWrench,
-			0.0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, !m_iSwingMode,
+			0.0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, 1,
 			0, 0, 0 );
 	}
 
@@ -323,12 +323,7 @@ void CPipeWrench::BigSwing(void)
 		0.0,
 		(float*)&g_vecZero,
 		(float*)&g_vecZero,
-		0,
-		0,
-		0,
-		0.0,
-		1,
-		1.0 );
+		0, 0, 0, 0, 0, 0 );
 
 	//EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pwrench_big_miss.wav", 0.8, ATTN_NORM);
 
@@ -426,14 +421,17 @@ void CPipeWrench::WeaponIdle(void)
 {
 	if ( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
 		return;
-
 	if ( m_iSwingMode == 1 )
 	{
 		if ( gpGlobals->time > m_flBigSwingStart + 1.0 )
 		{
 			m_iSwingMode = 2;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.2;
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.2;
+			m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.2;
 			BigSwing();
+			m_iSwingMode = 0;
+			return;
 		}
 	}
 	else
