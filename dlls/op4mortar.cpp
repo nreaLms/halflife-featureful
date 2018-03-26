@@ -204,6 +204,10 @@ CMortarShell *CMortarShell::CreateMortarShell(Vector p_VecOrigin, Vector p_VecAn
     return rocket;
 }
 
+#define SF_MORTAR_ACTIVE (1 << 0)
+#define SF_MORTAR_LINE_OF_SIGHT (1 << 4)
+#define SF_MORTAR_CAN_CONTROL (1 << 5)
+
 class COp4Mortar : public CBaseMonster
 {
 public:
@@ -212,7 +216,7 @@ public:
     virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
     void Precache();
     void KeyValue(KeyValueData *pvkd);
-    void UpdatePosition(float direction, int controller, COp4Mortar *Mortar);
+    void UpdatePosition(float direction, int controller);
     void AIUpdatePosition();
     virtual int Save(CSave &save);
     virtual int Restore(CRestore &restore);
@@ -303,43 +307,46 @@ void COp4Mortar::Spawn()
     m_zeroYaw = UTIL_AngleMod(angle);
     m_hEnemy = NULL;
 
-    SetThink(&COp4Mortar::MortarThink);
+    if (pev->spawnflags & SF_MORTAR_ACTIVE)
+        SetThink(&COp4Mortar::MortarThink);
+    else
+        SetThink(NULL);
 
     m_flExplodeTime = gpGlobals->time + 5;
 
     pev->nextthink = gpGlobals->time + 0.01;
 }
 
-void COp4Mortar::UpdatePosition(float direction, int controller, COp4Mortar *Mortar)
+void COp4Mortar::UpdatePosition(float direction, int controller)
 {
-  if(Mortar->m_vGunAngle.y > 90)
-      Mortar->m_vGunAngle.y = 90;
+    if(m_vGunAngle.y > 90)
+        m_vGunAngle.y = 90;
 
-  if(Mortar->m_vGunAngle.y < -90)
-      Mortar->m_vGunAngle.y = -90;
+    if(m_vGunAngle.y < -90)
+        m_vGunAngle.y = -90;
 
-  if(Mortar->m_vGunAngle.x > 90)
-      Mortar->m_vGunAngle.x = 90;
+    if(m_vGunAngle.x > 90)
+        m_vGunAngle.x = 90;
 
-  if(Mortar->m_vGunAngle.x < 0)
-      Mortar->m_vGunAngle.x = 0;
+    if(m_vGunAngle.x < 0)
+        m_vGunAngle.x = 0;
 
-  if(controller == 1)
-    Mortar->m_vGunAngle.y += direction/2;
-  else
-      Mortar->m_vGunAngle.x += direction/2;
+    if(controller == 1)
+        m_vGunAngle.y += direction/2;
+    else
+        m_vGunAngle.x += direction/2;
 
-  if(m_iUpdateTime >= 15)
-  {
-    EMIT_SOUND_DYN(ENT(Mortar->pev), 2, "player/pl_grate1.wav", 1, 0.8, 0, 100);
-    m_iUpdateTime = 0;
-  }
+    if(m_iUpdateTime >= 15)
+    {
+        EMIT_SOUND_DYN(ENT(pev), 2, "player/pl_grate1.wav", 1, 0.8, 0, 100);
+        m_iUpdateTime = 0;
+    }
 
-  Mortar->SetBoneController(1, Mortar->m_vGunAngle.y);
-  Mortar->SetBoneController(0, Mortar->m_vGunAngle.x);
+    SetBoneController(1, m_vGunAngle.y);
+    SetBoneController(0, m_vGunAngle.x);
 
-  m_lastupdate = gpGlobals->time + 0.1;
-  m_iUpdateTime++;
+    m_lastupdate = gpGlobals->time + 0.1;
+    m_iUpdateTime++;
 }
 
 void COp4Mortar::MortarThink()
@@ -363,7 +370,7 @@ void COp4Mortar::MortarThink()
 
     pev->nextthink = gpGlobals->time + 0.1;
 
-    if(pev->spawnflags & FL_FLY)
+    if(pev->spawnflags & SF_MORTAR_ACTIVE)
     {
         if(!m_hEnemy || !m_hEnemy->IsAlive())
         {
@@ -387,18 +394,15 @@ void COp4Mortar::MortarThink()
 
             m_trackDelay = gpGlobals->time;
         }
+        AIUpdatePosition();
     }
 
-    AIUpdatePosition();
-
-    if(m_hEnemy && gpGlobals->time - m_lastFire > 5 && (m_hEnemy->pev->origin - pev->origin).Length() > 710)
+    if(m_hEnemy != 0 && gpGlobals->time - m_lastFire > 5 && (m_hEnemy->pev->origin - pev->origin).Length() > 710)
     {
         EMIT_SOUND_DYN(ENT(pev), 2, "weapons/mortarhit.wav", 1, 0.8, 0, 100);
         UTIL_ScreenShake(pev->origin, 12, 100, 2, 1000);
 
-        float speed = sqrt(m_vIdealGunVector.x * m_vIdealGunVector.x +
-                           m_vIdealGunVector.y * m_vIdealGunVector.y +
-                           m_vIdealGunVector.z * m_vIdealGunVector.z);
+        float speed = m_vIdealGunVector.Length();
 
         angle = m_vIdealGunAngle;
 
@@ -440,7 +444,7 @@ CBaseEntity *COp4Mortar::FindTarget()
            targetPosition = pPlayer->pev->origin + pev->view_ofs;
            UTIL_TraceLine(BarretEnd, targetPosition, ignore_monsters, dont_ignore_glass, ENT(pev), &tr);
 
-           if((!(pev->spawnflags & FL_INWATER) || tr.pHit == ENT(pPlayer->pev)) && !m_iEnemyType)
+           if((!(pev->spawnflags & SF_MORTAR_LINE_OF_SIGHT) || tr.pHit == ENT(pPlayer->pev)) && !m_iEnemyType)
            {
                pIdealTarget = pPlayer;
            }
@@ -504,21 +508,17 @@ void COp4Mortar::KeyValue(KeyValueData *pvkd)
 
 void COp4Mortar::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-    Vector pos;
-    float anglemod;
-    Vector angle;
-    CBaseEntity *pPlayer = UTIL_FindEntityByClassname(0, "player");
-
     SetThink(NULL);
 
-    if(!(pev->spawnflags & FL_SWIM) && !(pev->spawnflags & FL_INWATER)  && (pPlayer->pev->origin - pev->origin).Length() < 170)
+    if((pev->spawnflags & SF_MORTAR_CAN_CONTROL)  && (pActivator->pev->origin - pev->origin).Length() < 170)
     {
         EMIT_SOUND_DYN(ENT(pev), 2, "weapons/mortarhit.wav", 1, 0, 0, 100);
         UTIL_ScreenShake(pev->origin, 12, 100, 2, 1000);
 
+        Vector pos, angle;
         GetAttachment(0, pos, angle);
         angle = m_vGunAngle;
-        anglemod = pev->angles.y + m_vGunAngle.y;
+        float anglemod = pev->angles.y + m_vGunAngle.y;
 
         angle.y = UTIL_AngleMod(anglemod);
 
@@ -528,7 +528,6 @@ void COp4Mortar::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
             pev->sequence = LookupSequence("fire");
             ResetSequenceInfo();
         }
-      return;
     }
 
 }
@@ -575,7 +574,7 @@ public:
     int Save(CSave &save);
     void KeyValue(KeyValueData *pvkd);
     void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
-    int ObjectCaps() { return 16; }
+    int ObjectCaps() { return FCAP_CONTINUOUS_USE; }
 
     static TYPEDESCRIPTION m_SaveData[];
     float m_direction;
@@ -600,7 +599,7 @@ void COp4MortarController::Spawn()
     UTIL_SetOrigin(pev, pev->origin);
 
     SET_MODEL(ENT(pev), STRING(pev->model));
-    m_direction = 1;
+    m_direction = -1;
     m_lastpush = gpGlobals->time;
 }
 
@@ -609,8 +608,15 @@ void COp4MortarController::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
     if(gpGlobals->time - m_lastpush > 0.5)
          m_direction = -m_direction;
 
-    COp4Mortar *Mortar = (COp4Mortar*)UTIL_FindEntityByClassname(NULL, "op4mortar");
-    Mortar->UpdatePosition(m_direction, m_controller, Mortar);
+    CBaseEntity* ent = UTIL_FindEntityByTargetname(NULL, STRING(pev->target));
+    if (ent) {
+        if (FClassnameIs(ent->pev, "op4mortar")) {
+            COp4Mortar *Mortar = (COp4Mortar*)ent;
+            Mortar->UpdatePosition(m_direction, m_controller);
+        } else {
+            ALERT(at_console, "Found %s, but it's not op4mortar!\n", STRING(pev->target));
+        }
+    }
 
     m_lastpush = gpGlobals->time;
 }

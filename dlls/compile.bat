@@ -72,6 +72,7 @@ set SOURCES=agrunt.cpp^
 	nihilanth.cpp^
 	nodes.cpp^
 	observer.cpp^
+	op4mortar.cpp^
 	osprey.cpp^
 	pathcorner.cpp^
 	plane.cpp^
