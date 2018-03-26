@@ -2821,7 +2821,6 @@ public:
 	const char* getPos(int pos) const;
 
 	int	m_iHead;
-	int	m_iPose;// which sequence to display
 	static const char *m_szPoses[7];
 };
 
@@ -2834,12 +2833,7 @@ const char* CDeadFGrunt::getPos(int pos) const
 
 void CDeadFGrunt::KeyValue( KeyValueData *pkvd )
 {
-	if (FStrEq(pkvd->szKeyName, "pose"))
-	{
-		m_iPose = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else if (FStrEq(pkvd->szKeyName, "head"))
+	if (FStrEq(pkvd->szKeyName, "head"))
 	{
 		m_iHead = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
