@@ -348,27 +348,6 @@ public:
 
 	virtual int SizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
 
-	//We use this variables to store each ammo count.
-	int ammo_9mm;
-	int ammo_357;
-	int ammo_bolts;
-	int ammo_buckshot;
-	int ammo_rockets;
-	int ammo_uranium;
-	int ammo_hornets;
-	int ammo_argrens;
-#if FEATURE_M249
-	int ammo_556;
-#endif
-#if FEATURE_SNIPERRIFLE
-	int ammo_762;
-#endif
-#if FEATURE_SHOCKRIFLE
-	int ammo_shocks;
-#endif
-#if FEATURE_SPORELAUNCHER
-	int ammo_spores;
-#endif
 	//Special stuff for grenades and satchels.
 	float m_flStartThrow;
 	float m_flReleaseThrow;
