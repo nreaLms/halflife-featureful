@@ -204,6 +204,27 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	if( m_flNextCharge >= gpGlobals->time )
 		return;
 
+	// govern the rate of charge
+	m_flNextCharge = gpGlobals->time + 0.1;
+
+	// charge the player
+	if( pActivator->TakeHealth( 1, DMG_GENERIC ) )
+	{
+		m_iJuice--;
+	}
+	else
+	{
+		if( m_flSoundTime <= gpGlobals->time )
+		{
+			m_flSoundTime = gpGlobals->time + 0.62;
+			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshotno1.wav", 1.0, ATTN_NORM );
+		}
+		if( m_iOn > 1 )
+			STOP_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav" );
+		m_iOn = 0;
+		return;
+	}
+
 	// Play the on sound or the looping charging sound
 	if( !m_iOn )
 	{
@@ -216,15 +237,6 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		m_iOn++;
 		EMIT_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav", 1.0, ATTN_NORM );
 	}
-
-	// charge the player
-	if( pActivator->TakeHealth( 1, DMG_GENERIC ) )
-	{
-		m_iJuice--;
-	}
-
-	// govern the rate of charge
-	m_flNextCharge = gpGlobals->time + 0.1;
 }
 
 void CWallHealth::Recharge( void )

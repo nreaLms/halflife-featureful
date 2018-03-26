@@ -103,7 +103,11 @@ void CRecharge::Precache()
 }
 
 void CRecharge::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-{ 
+{
+	// Make sure that we have a caller
+	if( !pActivator )
+		return;
+
 	// if it's not a player, ignore
 	if( !FClassnameIs( pActivator->pev, "player" ) )
 		return;
@@ -133,16 +137,37 @@ void CRecharge::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	if( m_flNextCharge >= gpGlobals->time )
 		return;
 
-	// Make sure that we have a caller
-	if( !pActivator )
-		return;
-
 	m_hActivator = pActivator;
 
 	//only recharge the player
 	if( !m_hActivator->IsPlayer() )
 		return;
 	
+	// govern the rate of charge
+	m_flNextCharge = gpGlobals->time + 0.1;
+
+	// charge the player
+	if( m_hActivator->pev->armorvalue < 100 )
+	{
+		m_iJuice--;
+		m_hActivator->pev->armorvalue += 1;
+
+		if( m_hActivator->pev->armorvalue > 100 )
+			m_hActivator->pev->armorvalue = 100;
+	}
+	else
+	{
+		if( m_flSoundTime <= gpGlobals->time )
+		{
+			m_flSoundTime = gpGlobals->time + 0.62;
+			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeno1.wav", 0.85, ATTN_NORM );
+		}
+		if( m_iOn > 1 )
+			STOP_SOUND( ENT( pev ), CHAN_STATIC,  "items/suitcharge1.wav" );
+		m_iOn = 0;
+		return;
+	}
+
 	// Play the on sound or the looping charging sound
 	if( !m_iOn )
 	{
@@ -156,18 +181,7 @@ void CRecharge::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 		EMIT_SOUND( ENT( pev ), CHAN_STATIC, "items/suitcharge1.wav", 0.85, ATTN_NORM );
 	}
 
-	// charge the player
-	if( m_hActivator->pev->armorvalue < 100 )
-	{
-		m_iJuice--;
-		m_hActivator->pev->armorvalue += 1;
 
-		if( m_hActivator->pev->armorvalue > 100 )
-			m_hActivator->pev->armorvalue = 100;
-	}
-
-	// govern the rate of charge
-	m_flNextCharge = gpGlobals->time + 0.1;
 }
 
 void CRecharge::Recharge( void )
