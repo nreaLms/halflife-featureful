@@ -1760,14 +1760,6 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 			cd->m_flNextAttack = pl->m_flNextAttack;
 			cd->fuser2 = pl->m_flNextAmmoBurn;
 			cd->fuser3 = pl->m_flAmmoStartCharge;
-			cd->vuser1.x = pl->ammo_9mm;
-			cd->vuser1.y = pl->ammo_357;
-			cd->vuser1.z = pl->ammo_argrens;
-			cd->ammo_nails = pl->ammo_bolts;
-			cd->ammo_shells = pl->ammo_buckshot;
-			cd->ammo_rockets = pl->ammo_rockets;
-			cd->ammo_cells = pl->ammo_uranium;
-			cd->vuser2.x = pl->ammo_hornets;
 
 			if( pl->m_pActiveItem )
 			{
@@ -1794,30 +1786,6 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 					else if( pl->m_pActiveItem->m_iId == WEAPON_EAGLE )
 					{
 						cd->vuser2.y = ( (CEagle *)pl->m_pActiveItem )->m_fEagleLaserActive;
-					}
-#endif
-#if FEATURE_M249
-					else if( pl->m_pActiveItem->m_iId == WEAPON_M249 )
-					{
-						cd->vuser2.y = pl->ammo_556;
-					}
-#endif
-#if FEATURE_SNIPERRIFLE
-					else if( pl->m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
-					{
-						cd->vuser2.y = pl->ammo_762;
-					}
-#endif
-#if FEATURE_SHOCKRIFLE
-					else if( pl->m_pActiveItem->m_iId == WEAPON_SHOCKRIFLE )
-					{
-						cd->vuser2.y = pl->ammo_shocks;
-					}
-#endif
-#if FEATURE_SPORELAUNCHER
-					else if( pl->m_pActiveItem->m_iId == WEAPON_SPORELAUNCHER )
-					{
-						cd->vuser2.y = pl->ammo_spores;
 					}
 #endif
 				}

@@ -920,16 +920,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.m_flNextAmmoBurn = from->client.fuser2;
 	player.m_flAmmoStartCharge = from->client.fuser3;
 
-	//Stores all our ammo info, so the client side weapons can use them.
-	player.ammo_9mm = (int)from->client.vuser1[0];
-	player.ammo_357 = (int)from->client.vuser1[1];
-	player.ammo_argrens = (int)from->client.vuser1[2];
-	player.ammo_bolts = (int)from->client.ammo_nails; //is an int anyways...
-	player.ammo_buckshot = (int)from->client.ammo_shells; 
-	player.ammo_uranium = (int)from->client.ammo_cells;
-	player.ammo_hornets = (int)from->client.vuser2[0];
-	player.ammo_rockets = (int)from->client.ammo_rockets;
-
 	// Point to current weapon object
 	if( from->client.m_iId )
 	{
@@ -945,30 +935,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	if( player.m_pActiveItem->m_iId == WEAPON_EAGLE )
 	{
 		( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive = (int)from->client.vuser2[1];
-	}
-#endif
-#if FEATURE_M249
-	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
-	{
-		player.ammo_556 = (int)from->client.vuser2[1];
-	}
-#endif
-#if FEATURE_SNIPERRIFLE
-	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
-	{
-		player.ammo_762 = (int)from->client.vuser2[1];
-	}
-#endif
-#if FEATURE_SHOCKRIFLE
-	else if( player.m_pActiveItem->m_iId == WEAPON_SHOCKRIFLE )
-	{
-		player.ammo_shocks = (int)from->client.vuser2[1];
-	}
-#endif
-#if FEATURE_SPORELAUNCHER
-	else if( player.m_pActiveItem->m_iId == WEAPON_SPORELAUNCHER )
-	{
-		player.ammo_spores = (int)from->client.vuser2[1];
 	}
 #endif
 
@@ -1023,17 +989,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.fuser3 = player.m_flAmmoStartCharge;
 	to->client.maxspeed = player.pev->maxspeed;
 
-	//HL Weapons
-	to->client.vuser1[0] = player.ammo_9mm;
-	to->client.vuser1[1] = player.ammo_357;
-	to->client.vuser1[2] = player.ammo_argrens;
-
-	to->client.ammo_nails = player.ammo_bolts;
-	to->client.ammo_shells = player.ammo_buckshot;
-	to->client.ammo_cells = player.ammo_uranium;
-	to->client.vuser2[0] = player.ammo_hornets;
-	to->client.ammo_rockets = player.ammo_rockets;
-
 	if( player.m_pActiveItem->m_iId == WEAPON_RPG )
 	{
 		from->client.vuser2[1] = ( (CRpg *)player.m_pActiveItem)->m_fSpotActive;
@@ -1043,30 +998,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	else if( player.m_pActiveItem->m_iId == WEAPON_EAGLE )
 	{
 		from->client.vuser2[1] = ( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive;;
-	}
-#endif
-#if FEATURE_M249
-	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
-	{
-		from->client.vuser2[1] = player.ammo_556;
-	}
-#endif
-#if FEATURE_SNIPERRIFLE
-	else if( player.m_pActiveItem->m_iId == WEAPON_SNIPERRIFLE )
-	{
-		from->client.vuser2[1] = player.ammo_762;
-	}
-#endif
-#if FEATURE_SHOCKRIFLE
-	else if( player.m_pActiveItem->m_iId == WEAPON_SHOCKRIFLE )
-	{
-		from->client.vuser2[1] = player.ammo_shocks;
-	}
-#endif
-#if FEATURE_SPORELAUNCHER
-	else if( player.m_pActiveItem->m_iId == WEAPON_SPORELAUNCHER )
-	{
-		from->client.vuser2[1] = player.ammo_spores;
 	}
 #endif
 

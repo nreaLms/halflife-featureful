@@ -312,8 +312,6 @@ public:
 	void SetCustomDecalFrames( int nFrames );
 	int GetCustomDecalFrames( void );
 
-	void TabulateAmmo( void );
-
 	Vector m_vecLastViewAngles;
 
 	float m_flStartCharge;
@@ -340,28 +338,6 @@ public:
 	friend class CTriggerXenReturn;
 
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
-
-	//We use this variables to store each ammo count.
-	int ammo_9mm;
-	int ammo_357;
-	int ammo_bolts;
-	int ammo_buckshot;
-	int ammo_rockets;
-	int ammo_uranium;
-	int ammo_hornets;
-	int ammo_argrens;
-#if FEATURE_M249
-	int ammo_556;
-#endif
-#if FEATURE_SNIPERRIFLE
-	int ammo_762;
-#endif
-#if FEATURE_SHOCKRIFLE
-	int ammo_shocks;
-#endif
-#if FEATURE_SPORELAUNCHER
-	int ammo_spores;
-#endif
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025
