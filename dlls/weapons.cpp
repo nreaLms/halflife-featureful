@@ -804,6 +804,18 @@ int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 	return FALSE;
 }
 
+int CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer )
+{
+	if( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
+			WRITE_BYTE( m_iId );
+		MESSAGE_END();
+		return TRUE;
+	}
+	return FALSE;
+}
+
 int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer )
 {
 	BOOL bSend = FALSE;

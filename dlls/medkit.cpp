@@ -105,14 +105,7 @@ int CMedkit::GetItemInfo(ItemInfo *p)
 
 int CMedkit::AddToPlayer(CBasePlayer *pPlayer)
 {
-	if (CBasePlayerWeapon::AddToPlayer(pPlayer))
-	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev);
-		WRITE_BYTE(m_iId);
-		MESSAGE_END();
-		return TRUE;
-	}
-	return FALSE;
+	return AddToPlayerDefault(pPlayer);
 }
 
 BOOL CMedkit::Deploy()
