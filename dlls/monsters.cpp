@@ -3440,9 +3440,9 @@ void CBaseMonster::SetMyModel(const char *model)
 void CBaseMonster::PrecacheMyModel(const char *model)
 {
 	if (FStringNull(pev->model)) {
-		PRECACHE_MODEL( (char *)model );
+		PRECACHE_MODEL( model );
 	} else {
-		PRECACHE_MODEL( (char *)STRING( pev->model ) );
+		PRECACHE_MODEL( STRING( pev->model ) );
 	}
 }
 

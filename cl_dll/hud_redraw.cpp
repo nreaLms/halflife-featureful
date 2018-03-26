@@ -204,7 +204,7 @@ int CHud::DrawHudString( int xpos, int ypos, int iMaxX, const char *szIt, int r,
 	if( hud_textmode->value == 2 )
 	{
 		gEngfuncs.pfnDrawSetTextColor( r / 255.0, g / 255.0, b / 255.0 );
-		return gEngfuncs.pfnDrawConsoleString( xpos, ypos, (char*) szIt );
+		return gEngfuncs.pfnDrawConsoleString( xpos, ypos, szIt );
 	}
 
 	// xash3d: reset unicode state
