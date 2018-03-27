@@ -157,7 +157,7 @@ void CHudNightvision::DrawCSNVG(float flTime)
 	if( m_pLight )
 	{
 		m_pLight->origin = gHUD.m_vecOrigin;
-		m_pLight->radius = gEngfuncs.pfnRandomLong( 750, 800 );
+		m_pLight->radius = 775;
 	}
 #endif
 }
