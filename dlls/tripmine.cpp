@@ -277,6 +277,12 @@ void CTripmineGrenade::BeamBreakThink( void )
 			m_hOwner = CBaseEntity::Instance( tr.pHit );	// reset owner too
 	}
 
+#if FEATURE_TRIPMINE_OPFOR_SIZE
+	if (tr.fStartSolid)
+	{
+		bBlowup = 1;
+	}
+#endif
 	if( fabs( m_flBeamLength - tr.flFraction ) > 0.001 )
 	{
 		bBlowup = 1;
