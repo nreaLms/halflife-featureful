@@ -1789,17 +1789,24 @@ void EV_Knife( event_args_t *args )
 	{
 		//gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK1MISS, 1 );
 
-		switch( ( g_iSwing++ ) % 3 )
+		if( args->iparam1 ) // Is primary attack?
 		{
-		case 0:
-			gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK1MISS, 1 );
-			break;
-		case 1:
-			gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK2, 1 );
-			break;
-		case 2:
-			gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK3, 1 );
-			break;
+			switch( ( g_iSwing++ ) % 3 )
+			{
+			case 0:
+				gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK1MISS, 1 );
+				break;
+			case 1:
+				gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK2, 1 );
+				break;
+			case 2:
+				gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_ATTACK3, 1 );
+				break;
+			}
+		}
+		else
+		{
+			gEngfuncs.pEventAPI->EV_WeaponAnimation( KNIFE_STAB, 1 );
 		}
 	}
 }

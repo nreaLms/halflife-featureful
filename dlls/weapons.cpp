@@ -1692,9 +1692,18 @@ TYPEDESCRIPTION	CPipeWrench::m_SaveData[] =
 	DEFINE_FIELD( CPipeWrench, m_flBigSwingStart, FIELD_TIME ),
 	DEFINE_FIELD( CPipeWrench, m_iSwing, FIELD_INTEGER ),
 	DEFINE_FIELD( CPipeWrench, m_iSwingMode, FIELD_INTEGER ),
-	DEFINE_FIELD( CPipeWrench, m_iBigSwingHit, FIELD_INTEGER ),
 };
 IMPLEMENT_SAVERESTORE( CPipeWrench, CBasePlayerWeapon )
+#endif
+
+#if FEATURE_KNIFE
+TYPEDESCRIPTION	CKnife::m_SaveData[] =
+{
+	DEFINE_FIELD( CKnife, m_flStabStart, FIELD_TIME ),
+	DEFINE_FIELD( CKnife, m_iSwing, FIELD_INTEGER ),
+	DEFINE_FIELD( CKnife, m_iSwingMode, FIELD_INTEGER ),
+};
+IMPLEMENT_SAVERESTORE( CKnife, CBasePlayerWeapon )
 #endif
 
 #if FEATURE_M249

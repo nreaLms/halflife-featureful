@@ -1150,7 +1150,6 @@ public:
 	TraceResult m_trHit;
 	int m_iSwingMode;
 	float m_flBigSwingStart;
-	int m_iBigSwingHit;
 
 	virtual BOOL UseDecrement(void)
 	{
@@ -1444,21 +1443,33 @@ private:
 class CKnife : public CBasePlayerWeapon
 {
 public:
+#ifndef CLIENT_DLL
+	int		Save(CSave &save);
+	int		Restore(CRestore &restore);
+	static	TYPEDESCRIPTION m_SaveData[];
+#endif
+
 	void Spawn(void);
 	void Precache(void);
 	int iItemSlot(void) { return 1; }
-	void EXPORT SwingAgain(void);
-	void EXPORT Smack(void);
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
 	void PrimaryAttack(void);
+	void SecondaryAttack(void);
+	void EXPORT SwingAgain(void);
+	void EXPORT Smack(void);
+
 	int Swing(int fFirst);
 	BOOL Deploy(void);
-	void Holster(int skiplocal = 0);
 	void WeaponIdle();
+	void Holster(int skiplocal = 0);
+	void Stab();
+
 	int m_iSwing;
 	TraceResult m_trHit;
+	int m_iSwingMode;
+	float m_flStabStart;
 
 	virtual BOOL UseDecrement(void)
 	{

@@ -426,9 +426,7 @@ void CPipeWrench::WeaponIdle(void)
 		if ( gpGlobals->time > m_flBigSwingStart + 1.0 )
 		{
 			m_iSwingMode = 2;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.2;
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.2;
-			m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.2;
+			m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.2;
 			BigSwing();
 			m_iSwingMode = 0;
 			return;

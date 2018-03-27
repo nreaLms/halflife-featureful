@@ -27,8 +27,8 @@
 
 void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity);
 
-#define	KNIFE_BODYHIT_VOLUME 128
 #define	KNIFE_WALLHIT_VOLUME 512
+#define	KNIFE_BODYHIT_VOLUME 128
 
 LINK_ENTITY_TO_CLASS(weapon_knife, CKnife)
 
@@ -37,8 +37,9 @@ void CKnife::Spawn()
 	Precache();
 	m_iId = WEAPON_KNIFE;
 	SET_MODEL(ENT(pev), "models/w_knife.mdl");
-	m_iClip = -1;
 
+	m_iSwingMode = 0;
+	m_iClip = -1;
 	FallInit();// get ready to fall down.
 }
 
@@ -92,7 +93,7 @@ void CKnife::Holster(int skiplocal /* = 0 */)
 
 void CKnife::PrimaryAttack()
 {
-	if (!Swing(1))
+	if (!m_iSwingMode && !Swing(1))
 	{
 #ifndef CLIENT_DLL
 		SetThink(&CKnife::SwingAgain);
@@ -101,6 +102,17 @@ void CKnife::PrimaryAttack()
 	}
 }
 
+void CKnife::SecondaryAttack()
+{
+	if (m_iSwingMode != 1)
+	{
+		SendWeaponAnim(KNIFE_CHARGE);
+		m_flStabStart = gpGlobals->time;
+	}
+	m_iSwingMode = 1;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.3;
+	m_flNextSecondaryAttack = GetNextAttackDelay(0.1);
+}
 
 void CKnife::Smack()
 {
@@ -144,9 +156,9 @@ int CKnife::Swing(int fFirst)
 
 	if ( fFirst )
 	{
-		PLAYBACK_EVENT_FULL(FEV_RELIABLE, m_pPlayer->edict(), m_usKnife,
-			0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
-			0.0, 0, 0.0);
+		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usKnife,
+			0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 1,
+			0, 0, 0);
 	}
 
 
@@ -156,9 +168,8 @@ int CKnife::Swing(int fFirst)
 		{
 			// miss
 			m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 6, 10 );
-
+			m_flNextSecondaryAttack = GetNextAttackDelay(0.5);
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5.0;
 			// player "shoot" animation
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 		}
@@ -271,16 +282,151 @@ int CKnife::Swing(int fFirst)
 		pev->nextthink = UTIL_WeaponTimeBase() + 0.2;
 #endif
 		m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
+		m_flNextSecondaryAttack = GetNextAttackDelay(0.25);
 	}
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
-
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5.0;
 	return fDidHit;
+}
+
+void CKnife::Stab()
+{
+	TraceResult tr;
+
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
+	Vector vecSrc	= m_pPlayer->GetGunPosition( );
+	Vector vecEnd	= vecSrc + gpGlobals->v_forward * 32;
+
+	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
+
+#ifndef CLIENT_DLL
+	if ( tr.flFraction >= 1.0 )
+	{
+		UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT( m_pPlayer->pev ), &tr );
+		if ( tr.flFraction < 1.0 )
+		{
+			// Calculate the point of intersection of the line (or hull) and the object we hit
+			// This is and approximation of the "best" intersection
+			CBaseEntity *pHit = CBaseEntity::Instance( tr.pHit );
+			if ( !pHit || pHit->IsBSPModel() )
+				FindHullIntersection( vecSrc, tr, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX, m_pPlayer->edict() );
+			vecEnd = tr.vecEndPos;	// This is the point on the actual surface (the hull could have hit space)
+		}
+	}
+#endif
+
+	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usKnife,
+		0.0,
+		(float*)&g_vecZero,
+		(float*)&g_vecZero,
+		0, 0, 0, 0, 0, 0 );
+
+	if ( tr.flFraction >= 1.0 )
+	{
+		// player "shoot" animation
+		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
+	}
+	else
+	{
+		//SendWeaponAnim( KNIFE_STAB );
+
+		// player "shoot" animation
+		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
+
+#ifndef CLIENT_DLL
+
+		// hit
+		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
+
+		if( pEntity )
+		{
+			ClearMultiDamage();
+			float flDamage = (gpGlobals->time - m_flStabStart) * gSkillData.plrDmgKnife + gSkillData.plrDmgKnife*2;
+			if (flDamage > 100) {
+				flDamage = 100;
+			}
+			pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_CLUB|DMG_NEVERGIB);
+
+			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+		}
+
+		// play thwack, smack, or dong sound
+		float flVol = 1.0;
+		int fHitWorld = TRUE;
+
+		if (pEntity)
+		{
+			if (pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
+			{
+				// play thwack or smack sound
+				switch( RANDOM_LONG(0,1) )
+				{
+				case 0:
+					EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh1.wav", 1, ATTN_NORM);
+					break;
+				case 1:
+					EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh2.wav", 1, ATTN_NORM);
+					break;
+				}
+				m_pPlayer->m_iWeaponVolume = KNIFE_BODYHIT_VOLUME;
+				if ( !pEntity->IsAlive() )
+					  return;
+				else
+					  flVol = 0.1;
+
+				fHitWorld = false;
+			}
+		}
+
+		// play texture hit sound
+		if( fHitWorld )
+		{
+			float fvolbar = TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd-vecSrc)*2, BULLET_PLAYER_CROWBAR );
+
+			if ( g_pGameRules->IsMultiplayer() )
+			{
+				// override the volume here, cause we don't play texture sounds in multiplayer,
+				// and fvolbar is going to be 0 from the above call.
+
+				fvolbar = 1;
+			}
+
+			switch( RANDOM_LONG(0,1) )
+			{
+			case 0:
+				EMIT_SOUND_DYN( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_wall1.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3));
+				break;
+			case 1:
+				EMIT_SOUND_DYN( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_wall2.wav", fvolbar, ATTN_NORM, 0, 98 + RANDOM_LONG(0,3));
+				break;
+			}
+
+			// delay the decal a bit
+			m_trHit = tr;
+		}
+
+		m_pPlayer->m_iWeaponVolume = (int)( flVol * KNIFE_WALLHIT_VOLUME );
+#endif
+	}
 }
 
 void CKnife::WeaponIdle( void )
 {
-	if( m_flTimeWeaponIdle < UTIL_WeaponTimeBase() )
+	if ( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
+		return;
+	if ( m_iSwingMode == 1 )
+	{
+		if ( gpGlobals->time > m_flStabStart + 0.8 )
+		{
+			m_iSwingMode = 2;
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.0;
+			m_flNextSecondaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1;
+			Stab();
+			m_iSwingMode = 0;
+			return;
+		}
+	}
+	else
 	{
 		int iAnim;
 		float flRand = UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, 1 );
