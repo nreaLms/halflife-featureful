@@ -36,13 +36,13 @@
 #define		VOLTIGORE_CLASSNAME				"monster_alien_voltigore"
 #define		VOLTIGORE_BABY_CLASSNAME		"monster_alien_babyvoltigore"
 
-#define VOLTIGORE_ZAP_RED 160
-#define VOLTIGORE_ZAP_GREEN 0
+#define VOLTIGORE_ZAP_RED 180
+#define VOLTIGORE_ZAP_GREEN 16
 #define VOLTIGORE_ZAP_BLUE 255
 #define VOLTIGORE_ZAP_BEAM "sprites/lgtning.spr"
 #define VOLTIGORE_ZAP_NOISE 80
 #define VOLTIGORE_ZAP_WIDTH 40
-#define VOLTIGORE_ZAP_BRIGHTNESS 210
+#define VOLTIGORE_ZAP_BRIGHTNESS 255
 #define VOLTIGORE_ZAP_DISTANCE 512
 #define VOLTIGORE_GLOW_SCALE 1.0f
 #define VOLTIGORE_GIB_COUNT 9
@@ -123,9 +123,6 @@ void CVoltigoreEnergyBall::Spawn(void)
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 
 	m_iBeams = 0;
-
-	// Create beams.
-	CreateBeams();
 }
 
 //=========================================================
@@ -179,10 +176,20 @@ void CVoltigoreEnergyBall::BeamThink(void)
 	{
 		CBaseEntity* pEntity = NULL;
 		while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, 32)) != NULL) {
-			if ( pEntity->pev->takedamage && pEntity->MyMonsterPointer() &&
-				 !FClassnameIs(pEntity->pev, "monster_alien_voltigore") && 
-				 !FClassnameIs(pEntity->pev, "monster_alien_babyvoltigore")) {
-				pEntity->TakeDamage(pev, pev, gSkillData.voltigoreDmgBeam/5, DMG_SHOCK);
+			if ( pEntity->pev->takedamage && pEntity->MyMonsterPointer()) {
+				bool shouldDamage = true;
+				bool someVoltigore = FClassnameIs(pEntity->pev, "monster_alien_voltigore") || FClassnameIs(pEntity->pev, "monster_alien_babyvoltigore");
+				if (pev->owner && someVoltigore) {
+					CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
+					if (owner && owner->MyMonsterPointer()) {
+						const int relationship = owner->MyMonsterPointer()->IRelationship(pEntity);
+						if (relationship < R_DL) {
+							shouldDamage = false;
+						}
+					}
+				}
+				if (shouldDamage)
+					pEntity->TakeDamage(pev, pev, gSkillData.voltigoreDmgBeam/5, DMG_SHOCK);
 			}
 		}
 		
@@ -194,7 +201,11 @@ void CVoltigoreEnergyBall::BeamThink(void)
 	}
 	else
 	{
-		UpdateBeams();
+		if (m_iBeams) {
+			UpdateBeams();
+		} else {
+			CreateBeams();
+		}
 	}
 }
 
@@ -246,7 +257,7 @@ void CVoltigoreEnergyBall::CreateBeams()
 {
 	for (int i = 0; i < VOLTIGORE_MAX_BEAMS; ++i)
 	{
-		CreateBeam(i, pev->origin, VOLTIGORE_ZAP_WIDTH, VOLTIGORE_ZAP_BRIGHTNESS + RANDOM_LONG(1, 5) );
+		CreateBeam(i, pev->origin, VOLTIGORE_ZAP_WIDTH, VOLTIGORE_ZAP_BRIGHTNESS );
 	}
 	m_iBeams = VOLTIGORE_MAX_BEAMS;
 }
@@ -272,7 +283,7 @@ void CVoltigoreEnergyBall::UpdateBeams()
 	const Vector vecSrc = pev->origin;
 	const Vector directionVector = pev->velocity.Normalize();
 	const int baseDistance = VOLTIGORE_ZAP_DISTANCE;
-	for (i = 0; i < VOLTIGORE_MAX_BEAMS; ++i)
+	for (i = 0; i < m_iBeams; ++i)
 	{
 		for (j = 0; j < 3; ++j)
 		{
@@ -649,7 +660,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		// do stuff for this event.
 		//AttackSound();
 
-		CVoltigoreEnergyBall::Shoot(pev, vecSpitOffset, vecSpitDir * 900);
+		CVoltigoreEnergyBall::Shoot(pev, vecSpitOffset, vecSpitDir * 1000);
 
 		// turn the beam glow off.
 		DestroyBeams();
