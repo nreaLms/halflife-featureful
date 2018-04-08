@@ -157,6 +157,7 @@ set (SVDLL_SOURCES
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
+	../game_shared/tex_materials.cpp
 )
 	
 include_directories (. wpn_shared ../common ../engine ../pm_shared ../game_shared ../public)

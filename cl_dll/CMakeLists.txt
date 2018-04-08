@@ -67,6 +67,7 @@ set (CLDLL_SOURCES
 	../dlls/shockrifle.cpp
 	../dlls/sporelauncher.cpp
 	../dlls/medkit.cpp
+	../game_shared/tex_materials.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
