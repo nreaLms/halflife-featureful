@@ -67,7 +67,6 @@ set (CLDLL_SOURCES
 	../dlls/shockrifle.cpp
 	../dlls/sporelauncher.cpp
 	../dlls/medkit.cpp
-	../game_shared/tex_materials.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp
@@ -106,6 +105,7 @@ set (CLDLL_SOURCES
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c
+	../game_shared/tex_materials.c
 	saytext.cpp
 	status_icons.cpp
 	statusbar.cpp

@@ -102,14 +102,14 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 			strcpy( texname, pTextureName );
 			pTextureName = texname;
 
-			StrippedTextureName(szbuffer, pTextureName);
+			GetStrippedTextureName(szbuffer, pTextureName);
 
 			// get texture type
 			chTextureType = PM_FindTextureType( szbuffer );
 		}
 	}
 
-	if (!GetTextureMaterialProperties(chTextureType, fvol, fvolbar, rgsz, cnt, fattn, iBulletType))
+	if (!GetTextureMaterialProperties(chTextureType, &fvol, &fvolbar, rgsz, &cnt, &fattn, iBulletType))
 		return 0.0;
 
 	// play material hit sound

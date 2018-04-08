@@ -1644,7 +1644,7 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 
 		if( pTextureName )
 		{
-			StrippedTextureName(szbuffer, pTextureName);
+			GetStrippedTextureName(szbuffer, pTextureName);
 	
 			// ALERT( at_console, "texture hit: %s\n", szbuffer );
 
@@ -1653,7 +1653,7 @@ float TEXTURETYPE_PlaySound( TraceResult *ptr,  Vector vecSrc, Vector vecEnd, in
 		}
 	}
 
-	if (!GetTextureMaterialProperties(chTextureType, fvol, fvolbar, rgsz, cnt, fattn, iBulletType))
+	if (!GetTextureMaterialProperties(chTextureType, &fvol, &fvolbar, rgsz, &cnt, &fattn, iBulletType))
 		return 0.0;
 
 	// did we hit a breakable?

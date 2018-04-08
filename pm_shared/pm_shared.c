@@ -22,6 +22,7 @@
 #include "pm_movevars.h"
 #include "pm_debug.h"
 #include "pm_materials.h"
+#include "tex_materials.h"
 //#include <stdio.h>  // NULL
 #include <math.h>   // sqrt
 #include <string.h> // strcpy
@@ -525,16 +526,7 @@ void PM_CatagorizeTextureType( void )
 	if( !pTextureName )
 		return;
 
-	// strip leading '-0' or '+0~' or '{' or '!'
-	if( *pTextureName == '-' || *pTextureName == '+' )
-		pTextureName += 2;
-
-	if( *pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ' )
-		pTextureName++;
-	// '}}'
-	
-	strcpy( pmove->sztexturename, pTextureName);
-	pmove->sztexturename[CBTEXTURENAMEMAX - 1] = 0;
+	GetStrippedTextureName(pmove->sztexturename, pTextureName);
 
 	// get texture type
 	pmove->chtexturetype = PM_FindTextureType( pmove->sztexturename );	
