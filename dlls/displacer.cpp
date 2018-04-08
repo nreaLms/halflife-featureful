@@ -607,8 +607,8 @@ void CDisplacer::Teleport( void )
 	 	CDisplacerBall::SelfCreate(m_pPlayer->pev, m_pPlayer->pev->origin);
 
 		// make origin adjustments (origin in center, not at feet)
-		tmp.z -= m_pPlayer->pev->mins.z + 36;
-		tmp.z++;
+		//tmp.z -= m_pPlayer->pev->mins.z + 36;
+		tmp.z+=37;
 
 		m_pPlayer->pev->flags &= ~FL_ONGROUND;
 
