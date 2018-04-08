@@ -3533,3 +3533,36 @@ void CDeadMonster::SpawnHelper( const char* modelName, const char* errorMessage,
 	}
 	SetMyHealth( health );
 }
+
+#if FEATURE_SKELETON
+class CSkeleton : public CDeadMonster
+{
+public:
+	void Spawn(void);
+	int	Classify(void) { return	CLASS_HUMAN_MILITARY; }
+	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
+
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[4];
+};
+
+const char *CSkeleton::m_szPoses[] = { "s_onback", "s_sitting", "dead_against_wall", "dead_stomach" };
+
+const char* CSkeleton::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS(monster_skeleton_dead, CSkeleton)
+
+void CSkeleton::Spawn(void)
+{
+	SpawnHelper("models/skeleton.mdl", "Skeleton with bad pose", DONT_BLEED);
+	MonsterInitDead();
+}
+
+int CSkeleton::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+{
+	return CDeadMonster::TakeDamage(pevInflictor, pevAttacker, 0.0, bitsDamageType);
+}
+#endif
