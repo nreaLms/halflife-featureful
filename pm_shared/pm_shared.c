@@ -21,6 +21,7 @@
 #include "pm_shared.h"
 #include "pm_movevars.h"
 #include "pm_debug.h"
+#include "pm_materials.h"
 //#include <stdio.h>  // NULL
 #include <math.h>   // sqrt
 #include <string.h> // strcpy
@@ -59,19 +60,6 @@ playermove_t *pmove = NULL;
 #define	STOP_EPSILON		0.1
 
 #define CTEXTURESMAX		512			// max number of textures loaded
-#define CBTEXTURENAMEMAX	13			// only load first n chars of name
-
-#define CHAR_TEX_CONCRETE	'C'			// texture types
-#define CHAR_TEX_METAL		'M'
-#define CHAR_TEX_DIRT		'D'
-#define CHAR_TEX_VENT		'V'
-#define CHAR_TEX_GRATE		'G'
-#define CHAR_TEX_TILE		'T'
-#define CHAR_TEX_SLOSH		'S'
-#define CHAR_TEX_WOOD		'W'
-#define CHAR_TEX_COMPUTER	'P'
-#define CHAR_TEX_GLASS		'Y'
-#define CHAR_TEX_FLESH		'F'
 
 #define STEP_CONCRETE		0		// default step sound
 #define STEP_METAL		1		// metal floor
