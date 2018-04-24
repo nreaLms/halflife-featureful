@@ -70,6 +70,7 @@ set SOURCES=../dlls/crossbow.cpp^
 	../pm_shared/pm_debug.c^
 	../pm_shared/pm_math.c^
 	../pm_shared/pm_shared.c^
+	../game_shared/tex_materials.c^
 	saytext.cpp^
 	status_icons.cpp^
 	statusbar.cpp^
