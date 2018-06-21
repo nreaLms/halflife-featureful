@@ -525,6 +525,8 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	if ((pev->spawnflags & SF_BREAK_EXPLOSIVES_ONLY) && !(bitsDamageType & DMG_BLAST))
 		return 0;
+	if ((pev->spawnflags & SF_BREAK_OP4MORTAR_ONLY) && !FClassnameIs(pevInflictor, "mortar_shell"))
+		return 0;
 
 	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
 	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin). 
