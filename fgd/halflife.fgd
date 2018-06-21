@@ -1084,6 +1084,7 @@
 		2 : "Touch"	   : 0
 		4 : "Pressure"     : 0
 		256: "Instant Crowbar" : 1
+		512: "Explosives only": 0
 	]
 	_minlight(string) : "Minimum light level"
 ]
