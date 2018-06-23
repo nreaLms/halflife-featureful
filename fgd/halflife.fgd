@@ -3375,6 +3375,7 @@
 		32: "No Interruptions"	: 0
 		64: "Override AI"	: 0
 		128: "No Script Movement" : 0
+		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
 	]
 ]
 
