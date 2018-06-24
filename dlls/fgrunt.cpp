@@ -3365,8 +3365,11 @@ void CMedic::RunTask(Task_t *pTask)
 				TaskComplete();
 				StopHealing();
 			}
-			pev->ideal_yaw = UTIL_VecToYaw( m_hTargetEnt->pev->origin - pev->origin );
-			ChangeYaw( pev->yaw_speed );
+			if (m_hTargetEnt != 0)
+			{
+				pev->ideal_yaw = UTIL_VecToYaw( m_hTargetEnt->pev->origin - pev->origin );
+				ChangeYaw( pev->yaw_speed );
+			}
 		}
 		break;
 	default:
