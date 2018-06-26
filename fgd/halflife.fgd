@@ -1743,7 +1743,13 @@
 		1 : "Short Logon" : 0
 	]
 ]
-
+@PointClass base(Weapon, Targetx) studio() = item_generic : "Generic scenery item"
+[
+	model(studio) : "Model" : "models/w_security.mdl"
+	sequencename(string) : "Sequence Name" : "idle"
+	skin(integer) : "Skin" : 0
+	body(integer) : "Body" : 0
+]
 //
 // lights
 //
