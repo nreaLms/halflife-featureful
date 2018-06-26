@@ -110,6 +110,7 @@ set (SVDLL_SOURCES
 	nihilanth.cpp
 	nodes.cpp
 	observer.cpp
+	op4mortar.cpp
 	osprey.cpp
 	pathcorner.cpp
 	pipewrench.cpp
