@@ -201,16 +201,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 	case MASSN_AE_KICK:
 	{
-		CBaseEntity *pHurt = Kick();
-
-		if (pHurt)
-		{
-			// SOUND HERE!
-			UTIL_MakeVectors(pev->angles);
-			pHurt->pev->punchangle.x = 15;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50;
-			pHurt->TakeDamage(pev, pev, gSkillData.massnDmgKick, DMG_CLUB);
-		}
+		KickImpl(gSkillData.massnDmgKick);
 	}
 	break;
 

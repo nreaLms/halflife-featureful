@@ -1623,7 +1623,8 @@ CBaseEntity *CHFGrunt :: Kick( void )
 	if ( tr.pHit )
 	{
 		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
-		return pEntity;
+		if (pEntity && IRelationship(pEntity) != R_AL)
+			return pEntity;
 	}
 
 	return NULL;

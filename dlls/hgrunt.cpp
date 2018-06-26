@@ -711,10 +711,26 @@ CBaseEntity *CHGrunt::Kick( void )
 	if( tr.pHit )
 	{
 		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
-		return pEntity;
+		if (pEntity && IRelationship(pEntity) != R_AL)
+			return pEntity;
 	}
 
 	return NULL;
+}
+
+void CHGrunt::KickImpl(float damage, float zpunch)
+{
+	CBaseEntity* pHurt = Kick();
+	if (pHurt)
+	{
+		UTIL_MakeVectors(pev->angles);
+		pHurt->pev->punchangle.x = 15;
+		if (zpunch)
+			pHurt->pev->punchangle.z = zpunch;
+
+		pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50;
+		pHurt->TakeDamage(pev, pev, damage, DMG_CLUB);
+	}
 }
 
 //=========================================================
@@ -872,16 +888,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			break;
 		case HGRUNT_AE_KICK:
 		{
-			CBaseEntity *pHurt = Kick();
-
-			if( pHurt )
-			{
-				// SOUND HERE!
-				UTIL_MakeVectors( pev->angles );
-				pHurt->pev->punchangle.x = 15;
-				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50;
-				pHurt->TakeDamage( pev, pev, gSkillData.hgruntDmgKick, DMG_CLUB );
-			}
+			KickImpl(gSkillData.hgruntDmgKick);
 		}
 			break;
 		case HGRUNT_AE_CAUGHT_ENEMY:

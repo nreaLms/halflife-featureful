@@ -411,18 +411,7 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case STROOPER_AE_KICK:
 	{
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "zombie/claw_miss2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM + RANDOM_LONG( -5, 5 ) );
-		CBaseEntity *pHurt = Kick();
-
-		if (pHurt)
-		{
-			// SOUND HERE!
-			UTIL_MakeVectors(pev->angles);
-			pHurt->pev->punchangle.x = 15;
-			pHurt->pev->punchangle.z = (m_bRightClaw) ? -10 : 10;
-
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50;
-			pHurt->TakeDamage(pev, pev, gSkillData.strooperDmgKick, DMG_CLUB);
-		}
+		KickImpl(gSkillData.strooperDmgKick, (m_bRightClaw) ? -10 : 10);
 
 		m_bRightClaw = !m_bRightClaw;
 	}
