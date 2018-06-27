@@ -445,6 +445,37 @@ void CSquadMonster::StartMonster( void )
 //=========================================================
 BOOL CSquadMonster::NoFriendlyFire( void )
 {
+	//!!!BUGBUG - to fix this, the planes must be aligned to where the monster will be firing its gun, not the direction it is facing!!!
+	if( m_hEnemy != 0 )
+	{
+		UTIL_MakeVectors( UTIL_VecToAngles( m_hEnemy->Center() - pev->origin ) );
+	}
+	else
+	{
+		// if there's no enemy, pretend there's a friendly in the way, so the grunt won't shoot.
+		return FALSE;
+	}
+
+	const Vector enemyCenter = m_hEnemy->Center();
+	const Vector gunPos = GetGunPosition();
+	const Vector posVecs[3] = {gunPos, gunPos + gpGlobals->v_right * pev->size.x * 1, gpGlobals->v_right * pev->size.x * (-1)};
+	const Vector enemyVec[3] = {enemyCenter, enemyCenter + gpGlobals->v_right * m_hEnemy->pev->size.x * 0.5, enemyCenter + gpGlobals->v_right * m_hEnemy->pev->size.x * -0.5};
+	for (int j=0; j<3; ++j)
+	{
+		TraceResult tr;
+		UTIL_TraceLine(posVecs[j], enemyVec[j], dont_ignore_monsters, ENT(pev), &tr);
+		if (tr.flFraction != 1.0 && tr.pHit != 0)
+		{
+			CBaseEntity* ent = CBaseEntity::Instance(tr.pHit);
+			CBaseMonster* monster = ent->MyMonsterPointer();
+			if (monster !=0 && IRelationship(monster) == R_AL)
+			{
+				ALERT(at_aiconsole, "Ally %s at fire line. Don't shoot!\n", STRING(ent->pev->classname));
+				return FALSE;
+			}
+		}
+	}
+
 	if( !InSquad() )
 	{
 		return TRUE;
@@ -457,19 +488,6 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 	Vector vecLeftSide;
 	Vector vecRightSide;
 	Vector v_left;
-
-	//!!!BUGBUG - to fix this, the planes must be aligned to where the monster will be firing its gun, not the direction it is facing!!!
-	if( m_hEnemy != 0 )
-	{
-		UTIL_MakeVectors( UTIL_VecToAngles( m_hEnemy->Center() - pev->origin ) );
-	}
-	else
-	{
-		// if there's no enemy, pretend there's a friendly in the way, so the grunt won't shoot.
-		return FALSE;
-	}
-
-	//UTIL_MakeVectors( pev->angles );
 
 	vecLeftSide = pev->origin - ( gpGlobals->v_right * ( pev->size.x * 1.5 ) );
 	vecRightSide = pev->origin + ( gpGlobals->v_right * ( pev->size.x * 1.5 ) );

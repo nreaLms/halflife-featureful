@@ -191,7 +191,6 @@ void CMortarShell::FlyThink()
 CMortarShell *CMortarShell::CreateMortarShell(Vector p_VecOrigin, Vector p_VecAngles, CBaseEntity *pOwner, int velocity)
 {
     CMortarShell *rocket = GetClassPtr( (CMortarShell *)NULL );
-    rocket->pev->classname = MAKE_STRING("func_tankrocket_of");
     rocket->Spawn();
 
     rocket->pev->gravity = 1;
