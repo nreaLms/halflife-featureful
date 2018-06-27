@@ -136,6 +136,9 @@ void CGameRules::RefreshSkillData ( void )
 
 	// Apache 
 	gSkillData.apacheHealth = GetSkillCvar( "sk_apache_health" );
+	
+	//Barnacle
+	gSkillData.barnacleHealth = GetSkillCvar( "sk_barnacle_health");
 
 #if FEATURE_BABYGARG
 	// Baby Gargantua
