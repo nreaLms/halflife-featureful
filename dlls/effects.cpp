@@ -2233,3 +2233,264 @@ void CItemSoda::CanTouch( CBaseEntity *pOther )
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time;
 }
+
+//=========================================================
+// env_warpball
+//=========================================================
+#define SF_REMOVE_ON_FIRE	0x0001
+#define SF_KILL_CENTER		0x0002
+#define SF_WARPBALL_NOSHAKE	0x0004
+
+#define WARPBALL_SPRITE "sprites/fexplo1.spr"
+#define WARPBALL_BEAM "sprites/lgtning.spr"
+#define WARPBALL_SOUND1 "debris/beamstart2.wav"
+#define WARPBALL_SOUND2 "debris/beamstart7.wav"
+
+class CEnvWarpBall : public CBaseEntity
+{
+public:
+	void Precache( void );
+	void Spawn( void ) { Precache(); }
+	void Think( void );
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
+	inline float Radius() { 
+		return pev->button ? pev->button : 192;
+	}
+	inline float Amplitude() {
+		return pev->friction ? pev->friction : 6;
+	}
+	inline float Frequency() {
+		return pev->dmg_save ? pev->dmg_save : 160;
+	}
+	inline float Duration() {
+		return pev->dmg_take ? pev->dmg_take : 1;
+	}
+	inline float DamageDelay() {
+		return pev->frags;
+	}
+	inline float Scale() {
+		return pev->scale > 0 ? pev->scale : 1;
+	}
+	inline int MaxBeamCount() {
+		return pev->team > 0 ? pev->team : 20;
+	}
+
+	inline float RenderAmount() {
+		return pev->renderamt ? pev->renderamt : 255;
+	}
+	inline float RenderFx() {
+		return pev->renderfx ? pev->renderfx : kRenderFxNoDissipation;
+	}
+	inline int RenderMode() {
+		return pev->rendermode ? pev->rendermode : kRenderGlow;
+	}
+	const char* SpriteModel() {
+		return pev->model ? STRING(pev->model) : WARPBALL_SPRITE;
+	}
+
+	inline void SetRadius( int radius ) {
+		pev->button = radius;
+	}
+	inline void SetAmplitude( float amplitude ) {
+		pev->friction = amplitude;
+	}
+	inline void SetFrequency( float frequency ) {
+		pev->dmg_save = frequency;
+	}
+	inline void SetDuration( float duration ) {
+		pev->dmg_take = duration;
+	}
+	inline void SetDamageDelay( float delay ) {
+		pev->frags = delay;
+	}
+	inline void SetScale( float scale ) {
+		pev->scale = scale;
+	}
+	inline void SetMaxBeamCount( int beamCount ) {
+		pev->team = beamCount;
+	}
+
+	Vector vecOrigin;
+	int m_beamTexture;
+};
+
+LINK_ENTITY_TO_CLASS( env_warpball, CEnvWarpBall )
+
+void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "amplitude" ) )
+	{
+		SetAmplitude( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "frequency" ) )
+	{
+		SetFrequency( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "duration" ) )
+	{
+		SetDuration( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "radius" ) )
+	{
+		SetRadius(atoi( pkvd->szValue ));
+		pkvd->fHandled = TRUE;
+	} 
+	else if( FStrEq( pkvd->szKeyName, "warp_target" ) )
+	{
+		pev->message = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "damage_delay" ) )
+	{
+		SetDamageDelay( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "scale" ) ) 
+	{
+		SetScale( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "beamcolor" ) ) 
+	{
+		float red, green, blue;
+		if (sscanf( pkvd->szValue, "%f %f %f", &red, &green, &blue) == 3) {
+			pev->punchangle = Vector(red, green, blue);
+		}
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "beamcount" ) )
+	{
+		SetMaxBeamCount( atoi(pkvd->szValue) );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue( pkvd );
+}
+
+void CEnvWarpBall::Precache( void )
+{
+	m_beamTexture = PRECACHE_MODEL( WARPBALL_BEAM );
+	if (pev->model) {
+		PRECACHE_MODEL( STRING(pev->model) );
+	} else {
+		PRECACHE_MODEL( WARPBALL_SPRITE );
+	}
+	PRECACHE_SOUND( WARPBALL_SOUND1 );
+	PRECACHE_SOUND( WARPBALL_SOUND2 );
+}
+
+void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	CBaseEntity *pEntity = NULL;
+	edict_t *pos;
+
+	if (pev->dmg_inflictor && (pEntity = CBaseEntity::Instance(pev->dmg_inflictor)) != NULL)
+	{
+		vecOrigin = pEntity->pev->origin;
+		pos = pEntity->edict();
+	}
+	else if( !FStringNull( pev->message ) && (pEntity = UTIL_FindEntityByTargetname( NULL, STRING( pev->message ) )) != NULL )//target found ?
+	{
+		vecOrigin = pEntity->pev->origin;
+		pos = pEntity->edict();
+	}
+	else
+	{
+		//use as center
+		vecOrigin = pev->origin;
+		pos = edict();
+	}
+	EMIT_SOUND( pos, CHAN_BODY, WARPBALL_SOUND1, 1, ATTN_NORM );
+	
+	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
+		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
+	}
+
+	CSprite *pSpr = CSprite::SpriteCreate( SpriteModel(), vecOrigin, TRUE );
+	pSpr->AnimateAndDie( 18 );
+
+	int red = pev->rendercolor.x;
+	int green = pev->rendercolor.y;
+	int blue = pev->rendercolor.z;
+	if (!red && !green && !blue) {
+		red = 77;
+		green = 210;
+		blue = 130;
+	}
+
+	pSpr->SetTransparency( RenderMode(),  red, green, blue, RenderAmount(), RenderFx() );
+	pSpr->SetScale(Scale());
+
+	EMIT_SOUND( pos, CHAN_ITEM, WARPBALL_SOUND2, 1, ATTN_NORM );
+
+	int beamRed = pev->punchangle.x;
+	int beamGreen = pev->punchangle.y;
+	int beamBlue = pev->punchangle.z;
+
+	if (!beamRed && !beamGreen && !beamBlue) {
+		beamRed = 20;
+		beamGreen = 243;
+		beamBlue = 20;
+	}
+	
+	int iTimes = 0;
+	int iDrawn = 0;
+	const int iBeams = RANDOM_LONG( MaxBeamCount()/2, MaxBeamCount() );
+	while( iDrawn < iBeams && iTimes < ( iBeams * 3 ) )
+	{
+		TraceResult tr;
+		Vector vecDest = Radius() * ( Vector( RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ) ).Normalize() );
+		UTIL_TraceLine( vecOrigin, vecOrigin + vecDest, ignore_monsters, ENT( pev ), &tr );
+		if( tr.flFraction != 1.0 )
+		{
+			// we hit something.
+			iDrawn++;
+			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+				WRITE_BYTE( TE_BEAMPOINTS );
+				WRITE_COORD( vecOrigin.x );
+				WRITE_COORD( vecOrigin.y );
+				WRITE_COORD( vecOrigin.z );
+				WRITE_COORD( tr.vecEndPos.x );
+				WRITE_COORD( tr.vecEndPos.y );
+				WRITE_COORD( tr.vecEndPos.z );
+				WRITE_SHORT( m_beamTexture );
+				WRITE_BYTE( 0 ); // framestart
+				WRITE_BYTE( 10 ); // framerate
+				WRITE_BYTE( (int)(10*RANDOM_FLOAT( 0.5, 1.6 )) ); // life
+				WRITE_BYTE( 30 );  // width
+				WRITE_BYTE( 65 );   // noise
+				WRITE_BYTE( beamRed );   // r, g, b
+				WRITE_BYTE( beamGreen );   // r, g, b
+				WRITE_BYTE( beamBlue );   // r, g, b
+				WRITE_BYTE( 220 );	// brightness
+				WRITE_BYTE( 35 );		// speed
+			MESSAGE_END();
+		}
+		iTimes++;
+	}
+	pev->nextthink = gpGlobals->time + DamageDelay();
+}
+
+void CEnvWarpBall::Think( void )
+{
+	SUB_UseTargets( this, USE_TOGGLE, 0 );
+
+	if( pev->spawnflags & SF_KILL_CENTER )
+	{
+		CBaseEntity *pMonster = NULL;
+
+		while( ( pMonster = UTIL_FindEntityInSphere( pMonster, vecOrigin, 72 ) ) != NULL )
+		{
+			if( FBitSet( pMonster->pev->flags, FL_MONSTER ) || FClassnameIs( pMonster->pev, "player" ) )
+				pMonster->TakeDamage ( pev, pev, 100, DMG_GENERIC );
+		}
+	}
+	if( pev->spawnflags & SF_REMOVE_ON_FIRE )
+		UTIL_Remove( this );
+}

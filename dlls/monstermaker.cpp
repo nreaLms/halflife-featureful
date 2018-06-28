@@ -93,6 +93,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 		m_iszMonsterClassname = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "warpball" ) )
+	{
+		pev->message = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseMonster::KeyValue( pkvd );
 }
@@ -216,6 +221,17 @@ void CMonsterMaker::MakeMonster( void )
 
 	DispatchSpawn( ENT( pevCreate ) );
 	pevCreate->owner = edict();
+
+	if ( !FStringNull( pev->message ) && !FStringNull( pev->targetname ) )
+	{
+		CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
+		if ( foundEntity && FClassnameIs(foundEntity->pev, "env_warpball"))
+		{
+			foundEntity->pev->dmg_inflictor = edict();
+			foundEntity->Use(this, this, USE_TOGGLE, 0.0f);
+			foundEntity->pev->dmg_inflictor = 0;
+		}
+	}
 
 	if( !FStringNull( pev->netname ) )
 	{

@@ -1084,7 +1084,27 @@
   scale(string) : "Sprite Scale"
 ]
 
-@SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object"
+@PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
+[
+	model(sprite) : "Sprite Name" : "sprites/fexplo1.spr"
+	amplitude(string) : "Shake Amplitude 0-16" : ""
+	duration(string) : "Shake Duration (seconds)" : ""
+	frequency(string) : "Shake Frequency (0.1 = jerk, 255.0 = rumble)" : ""
+	radius(integer) : "Shake and Beam Radius" : 192
+	scale(string) : "Sprite Scale" : ""
+	warp_target(target_destination) : "Warp target" : ""
+	damage_delay(string) : "Damage delay" : ""
+	beamcolor(color255) : "Beam color" : ""
+	beamcount(integer) : "Max beam count" : 20
+	spawnflags(flags) =
+	[
+		1: "Remove on fire" : 0
+		2: "Kill center" : 0
+		4: "No screen shake" : 1
+	]
+]
+
+@SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object" 
 [
 	spawnflags(flags) =
 	[
@@ -3209,6 +3229,7 @@
 	// maximum number of live children allowed at one time. (New ones will not be made until one dies)
 	// -1 no limit
 	m_imaxlivechildren(integer) : "Max live children" : 5
+	warpball(string) : "Warpball template" : "" : "env_warpball entity used as effect template for this monstermaker"
 ]
 
 @PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager"
@@ -3624,7 +3645,6 @@
 	]
 ]
 @PointClass base(Weapon, Targetx) studio("models/w_hgun.mdl") = weapon_hornetgun : "Hornet Gun" []
-<<<<<<< HEAD
 @PointClass size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_weaponbox.mdl") =  weaponbox : "Weapon/Ammo Container" []
 @PointClass base(Weapon, Targetx) studio("models/w_desert_eagle.mdl") = weapon_eagle : "Desert Eagle" []
 @PointClass base(Weapon, Targetx) studio("models/w_penguinnest.mdl") = weapon_penguin : "Killer Penguin" []
