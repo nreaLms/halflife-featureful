@@ -3244,11 +3244,18 @@
 	// -1 no limit
 	m_imaxlivechildren(integer) : "Max live children" : 5
 	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
-    new_model(studio) : "Custom model"
-    health(integer) : "Custom health"
-    body(integer) : "Body"
-    skin(integer) : "Skin"
-    classify(choices) : "Classification" : : "Relationship class of spawned monster" =
+	new_model(studio) : "Custom model"
+	health(integer) : "Custom health"
+	body(integer) : "Body"
+	skin(integer) : "Skin"
+	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
+	[
+		0 : "Default"
+		247 : "Human (red)"
+		195 : "Alien (yellow)"
+		-1 : "Don't bleed"
+	]
+	classify(choices) : "Classification" : : "Relationship class of spawned monster" =
 	[
 		0 : "Default"
 		1 : "Machine"

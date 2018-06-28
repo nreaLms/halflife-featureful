@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -48,11 +48,11 @@ public:
 	virtual int Restore( CRestore &restore );
 
 	static TYPEDESCRIPTION m_SaveData[];
-	
+
 	string_t m_iszMonsterClassname;// classname of the monster(s) that will be created.
-	
+
 	int m_cNumMonsters;// max number of monsters this ent can create
-	
+
 	int m_cLiveChildren;// how many monsters made by this monster maker that are currently alive
 	int m_iMaxLiveChildren;// max number of monsters that this maker may have out at one time.
 
@@ -245,12 +245,14 @@ void CMonsterMaker::MakeMonster( void )
 	if( pev->spawnflags & SF_MONSTERMAKER_MONSTERCLIP )
 		SetBits( pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP );
 
-	if (m_classify)
+	CBaseEntity* createdEnt = CBaseEntity::Instance(pent);
+	CBaseMonster* createdMonster = createdEnt->MyMonsterPointer();
+	if (createdMonster)
 	{
-		CBaseEntity* createdEnt = CBaseEntity::Instance(pent);
-		CBaseMonster* createdMonster = createdEnt->MyMonsterPointer();
-		if (createdMonster)
+		if (m_classify)
 			createdMonster->m_iClass = m_classify;
+		if (m_bloodColor)
+			createdMonster->m_bloodColor = m_bloodColor;
 	}
 
 	DispatchSpawn( ENT( pevCreate ) );

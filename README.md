@@ -1,4 +1,4 @@
-# Half-Life SDK for Xash3D [![Build Status](https://travis-ci.org/FreeSlave/hlsdk-xash3d.svg)](https://travis-ci.org/FreeSlave/hlsdk-xash3d) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FreeSlave/hlsdk-xash3d?svg=true)](https://ci.appveyor.com/project/FreeSlave/hlsdk-xash3d)
+# Half-Life SDK for Xash3D and GoldSource [![Build Status](https://travis-ci.org/FreeSlave/hlsdk-xash3d.svg)](https://travis-ci.org/FreeSlave/hlsdk-xash3d) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FreeSlave/hlsdk-xash3d?svg=true)](https://ci.appveyor.com/project/FreeSlave/hlsdk-xash3d)
 
 Half-Life SDK for Xash3D & GoldSource with some fixes and features that can be useful for mod makers.
 
@@ -35,7 +35,7 @@ Most Opposing Force monsters are implemented (exceptions are geneworm and pitwor
 
 ### Monster features
 
-* Health, relationship class and model can be customized in map editor.
+* Health, relationship class, blood color and model can be customized in map editor.
 * monster_barnacle health can be configured via skill.cfg
 
 ### New weapons
@@ -84,7 +84,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * Nightvision can be enabled instead of flashlight. Both Opposing Force and Counter Strike nightvision versions are implemented.
 * Added Explosive Only and Op4Mortar only flags for func_breakable. Breakables with these flags can be destroyed only with explosive weapons and op4mortar shells respectively.
 * monstermaker can have env_warpball template to automatically play teleportation effects on monster spawn.
-* monstermaker can set custom health, body, skin, relationship class and model for spawned monsters.
+* monstermaker can set custom health, body, skin, blood color, relationship class and model for spawned monsters.
 
 ## How to build
 
