@@ -60,6 +60,8 @@ public:
 
 	BOOL m_fActive;
 	BOOL m_fFadeChildren;// should we make the children fadeout?
+	string_t m_customModel;
+	int m_classify;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -73,6 +75,8 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iMaxLiveChildren, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_fActive, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_fFadeChildren, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CMonsterMaker, m_customModel, FIELD_STRING ),
+	DEFINE_FIELD( CMonsterMaker, m_classify, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -97,6 +101,16 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "warpball" ) )
 	{
 		pev->message = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "new_model" ) )
+	{
+		m_customModel = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "classify" ) )
+	{
+		m_classify = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -157,6 +171,8 @@ void CMonsterMaker::Precache( void )
 {
 	CBaseMonster::Precache();
 
+	if (!FStringNull(m_customModel))
+		PRECACHE_MODEL(STRING(m_customModel));
 	UTIL_PrecacheOther( STRING( m_iszMonsterClassname ) );
 }
 
@@ -219,10 +235,23 @@ void CMonsterMaker::MakeMonster( void )
 	pevCreate->origin = pev->origin;
 	pevCreate->angles = pev->angles;
 	SetBits( pevCreate->spawnflags, SF_MONSTER_FALL_TO_GROUND );
+	pevCreate->body = pev->body;
+	pevCreate->skin = pev->skin;
+	pevCreate->health = pev->health;
+	if (!FStringNull(m_customModel))
+		pevCreate->model = m_customModel;
 
 	// Children hit monsterclip brushes
 	if( pev->spawnflags & SF_MONSTERMAKER_MONSTERCLIP )
 		SetBits( pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP );
+
+	if (m_classify)
+	{
+		CBaseEntity* createdEnt = CBaseEntity::Instance(pent);
+		CBaseMonster* createdMonster = createdEnt->MyMonsterPointer();
+		if (createdMonster)
+			createdMonster->m_iClass = m_classify;
+	}
 
 	DispatchSpawn( ENT( pevCreate ) );
 	pevCreate->owner = edict();

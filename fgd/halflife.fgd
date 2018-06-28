@@ -3230,7 +3230,28 @@
 	// maximum number of live children allowed at one time. (New ones will not be made until one dies)
 	// -1 no limit
 	m_imaxlivechildren(integer) : "Max live children" : 5
-	warpball(string) : "Warpball template" : "" : "env_warpball entity used as effect template for this monstermaker"
+	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
+    new_model(studio) : "Custom model"
+    health(integer) : "Custom health"
+    body(integer) : "Body"
+    skin(integer) : "Skin"
+    classify(choices) : "Classification" : : "Relationship class of spawned monster" =
+	[
+		0 : "Default"
+		1 : "Machine"
+		3 : "Human passive"
+		4 : "Human military"
+		5 : "Alien military"
+		6 : "Alien passive"
+		7 : "Alien monster"
+		8 : "Alien prey"
+		9 : "Alien predator"
+		10 : "Insect"
+		11 : "Player ally"
+		12 : "Player bioweapon"
+		13 : "Alien bioweapon"
+		14 : "Race X predator"
+	]
 ]
 
 @PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager"
