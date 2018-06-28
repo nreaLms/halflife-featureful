@@ -1,6 +1,83 @@
-# Half-Life SDK for Xash3D [![Build Status](https://travis-ci.org/FWGS/hlsdk-xash3d.svg)](https://travis-ci.org/FWGS/hlsdk-xash3d) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FWGS/hlsdk-xash3d?svg=true)](https://ci.appveyor.com/project/a1batross/hlsdk-xash3d)
+# Half-Life SDK for Xash3D [![Build Status](https://travis-ci.org/FWGS/hlsdk-xash3d.svg)](https://travis-ci.org/FreeSlave/hlsdk-xash3d) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FreeSlave/hlsdk-xash3d?svg=true)](https://ci.appveyor.com/project/FreeSlave/hlsdk-xash3d)
 
-Half-Life SDK for Xash3D & GoldSource with some fixes.
+Half-Life SDK for Xash3D & GoldSource with some fixes and features that can be useful for mod makers.
+
+## Features
+
+### New monsters
+
+#### Opposing Force monsters
+
+Most Opposing Force monsters are implemented (exceptions are geneworm and pitworm bosses).
+
+* monster_cleansuit_scientist
+* monster_otis
+* monster_blkop_osprey
+* monster_blkop_apache
+* monster_male_assassin
+* monster_alien_voltigore
+* monster_alien_babyvoltigore
+* monster_pitdrone
+* monster_shocktrooper
+* monster_shockroach
+* monster_human_grunt_ally
+* monster_human_medic_ally (healing works a bit different from original)
+* monster_human_torch_ally
+* monster_gonome
+* monster_zombie_barney
+* monster_zombie_soldier
+* monster_alien_slave_dead
+* monster_houndeye_dead
+
+#### Other monsters
+
+* monster_babygarg - smaller version of Gargantua monster
+
+### Monster features
+
+* Health, relationship class and model can be customized in map editor.
+* monster_barnacle health can be configured via skill.cfg
+
+### New weapons
+
+#### Opposing Force weapons
+
+All Opposing Force weapons and corresponding ammo entities are implemented, but they may work a bit different.
+
+* weapon_pipewrench
+* weapon_knife (also has an alternative attack)
+* weapon_grapple (no prediction, not tested in multiplayer)
+* weapon_eagle
+* weapon_penguin
+* weapon_m249
+* weapon_sniperrifle
+* weapon_displacer
+* weapon_sporelauncher
+* weapon_shockrifle (plays idle animations)
+
+#### Other weapons
+
+* weapon_medkit - TFC-like medkit that allows to heal allies
+
+### Other new entities
+
+#### Opposing Force entities
+
+* env_spritetrain
+* monster_skeleton_dead
+* op4mortar
+* trigger_playerfreeze
+
+#### Others
+
+* env_warpball - easy way to create a teleportation effect for monster spawns. Also can be set as a template for monstermaker.
+
+### Other features
+
+* Nightvision can be enabled instead of flashlight. Both Opposing Force and Counter Strike nightvision versions are implemented.
+* Added Explosive Only and Op4Mortar only flags for func_breakable. Breakables with these flags can be destroyed only with explosive weapons and op4mortar shells respectively.
+* monstermaker can have env_warpball template to automatically play teleportation effects on monster spawn.
+* monstermaker can set custom health, body, skin, relationship class and model for spawned monsters.
 
 ## How to build
 
