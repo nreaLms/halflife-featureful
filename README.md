@@ -64,9 +64,16 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 #### Opposing Force entities
 
 * env_spritetrain
+* item_generic
 * monster_skeleton_dead
 * op4mortar
 * trigger_playerfreeze
+
+#### Decay entities
+
+* item_eyescanner
+* item_healthcharger
+* item_recharge
 
 #### Others
 

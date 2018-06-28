@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -31,7 +31,7 @@ class CHealthKit : public CItem
 	void Precache( void );
 	BOOL MyTouch( CBasePlayer *pPlayer );
 /*
-	virtual int Save( CSave &save ); 
+	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 */
@@ -83,7 +83,7 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 		}
 		else
 		{
-			UTIL_Remove( this );	
+			UTIL_Remove( this );
 		}
 
 		return TRUE;
@@ -110,7 +110,7 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	float m_flNextCharge; 
+	float m_flNextCharge;
 	int m_iReactivate ; // DeathMatch Delay until reactvated
 	int m_iJuice;
 	int m_iOn;			// 0 = off, 1 = startup, 2 = going
@@ -171,7 +171,7 @@ void CWallHealth::Precache()
 }
 
 void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-{ 
+{
 	// Make sure that we have a caller
 	if( !pActivator )
 		return;
@@ -182,7 +182,7 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	// if there is no juice left, turn it off
 	if( m_iJuice <= 0 )
 	{
-		pev->frame = 1;			
+		pev->frame = 1;
 		Off();
 	}
 
@@ -243,7 +243,7 @@ void CWallHealth::Recharge( void )
 {
 	EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
 	m_iJuice = (int)gSkillData.healthchargerCapacity;
-	pev->frame = 0;			
+	pev->frame = 0;
 	SetThink( &CBaseEntity::SUB_DoNothing );
 }
 
@@ -315,7 +315,7 @@ public:
 		Inactive
 	};
 
-	float m_flNextCharge; 
+	float m_flNextCharge;
 	int m_iJuice;
 	int m_iState;
 	float m_flSoundTime;
@@ -456,7 +456,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	}
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) )
+	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->health >= 100 )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
