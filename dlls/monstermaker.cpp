@@ -27,6 +27,7 @@
 #define	SF_MONSTERMAKER_START_ON	1 // start active ( if has targetname )
 #define	SF_MONSTERMAKER_CYCLIC		4 // drop one monster every time fired.
 #define SF_MONSTERMAKER_MONSTERCLIP	8 // Children are blocked by monsterclip
+#define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
 //=========================================================
 // MonsterMaker - this ent creates monsters during the game.
@@ -173,19 +174,23 @@ void CMonsterMaker::MakeMonster( void )
 		return;
 	}
 
-	if( !m_flGround )
+	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
 	{
-		// set altitude. Now that I'm activated, any breakables, etc should be out from under me. 
-		TraceResult tr;
+		if( !m_flGround )
+		{
+			// set altitude. Now that I'm activated, any breakables, etc should be out from under me.
+			TraceResult tr;
 
-		UTIL_TraceLine( pev->origin, pev->origin - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );
-		m_flGround = tr.vecEndPos.z;
+			UTIL_TraceLine( pev->origin, pev->origin - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );
+			m_flGround = tr.vecEndPos.z;
+		}
 	}
 
 	Vector mins = pev->origin - Vector( 34, 34, 0 );
 	Vector maxs = pev->origin + Vector( 34, 34, 0 );
 	maxs.z = pev->origin.z;
-	mins.z = m_flGround;
+	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
+		mins.z = m_flGround;
 
 	CBaseEntity *pList[2];
 	int count = UTIL_EntitiesInBox( pList, 2, mins, maxs, FL_CLIENT | FL_MONSTER );

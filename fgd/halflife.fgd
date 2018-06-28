@@ -3217,6 +3217,7 @@
 	// 	2 : "PVS On/Off" : 0  // not implemented
 		4 : "Cyclic" : 0
 		8 : "MonsterClip" : 0
+		2048 : "No ground check" : 0
 	]
 
 	// how many monsters the monstermaker can create (-1 = unlimited)
