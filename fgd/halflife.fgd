@@ -154,7 +154,7 @@
 
 @BaseClass base(Appearflags, Angles) flags(Angle) size(-16 -16 -36, 16 16 36) color(0 255 0) offset(0 0 36) = PlayerClass []
 
-@BaseClass base() = DeadMonster
+@BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence) = DeadMonster
 [
 	health(string) : "Custom Health"
 	model(studio) : "Custom Model"
@@ -1951,7 +1951,7 @@
 		64 : "IgnorePlayer" : 0
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave_dead : "Dead Vortigaunt" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave_dead : "Dead Vortigaunt"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 32 =
 	[
@@ -1974,7 +1974,7 @@
 @PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/babygarg.mdl") = monster_babygarg : "Baby Gargantua" []
 @PointClass base(RenderFields, Sequence) size(-16 -16 -36, 16 16 0) studio("models/barnacle.mdl") = monster_barnacle : "Barnacle Monster" []
 @PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") = monster_barney : "Barney" []
-@PointClass base(RenderFields,Appearflags,DeadMonster, Angles, Sequence) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") sequence(35) = monster_barney_dead : "Dead Barney" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") sequence(35) = monster_barney_dead : "Dead Barney"
 [
 	pose(Choices) : "Pose" : 0 =
 	[
@@ -2038,9 +2038,9 @@
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_grunt_repel : "Human Grunt (Repel)" []
 @PointClass base(Weapon, Targetx, RenderFields, Sequence) studio("models/w_grenade.mdl") = monster_handgrenade : "Live Handgrenade" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/headcrab.mdl") = monster_headcrab : "Head Crab" []
-@PointClass base(Appearflags,RenderFields,DeadMonster, Angles, Sequence) size(-16 -16 0, 16 16 72) = monster_hevsuit_dead : "Dead HEV Suit" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) = monster_hevsuit_dead : "Dead HEV Suit"
 [
-      pose(Choices) : "Pose" : 0 =
+	pose(Choices) : "Pose" : 0 =
 	[
 		0 : "On back"
 		1 : "Seated"
@@ -2048,9 +2048,9 @@
 		3 : "On Table"
 	]
 ]
-@PointClass base(Appearflags,RenderFields,DeadMonster, Angles) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_hgrunt_dead : "Dead Human Grunt" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_hgrunt_dead : "Dead Human Grunt"
 [
-      pose(Choices) : "Pose" : 0 =
+	pose(Choices) : "Pose" : 0 =
 	[
 		0 : "On stomach"
 		1 : "On side"
@@ -2078,7 +2078,7 @@
 		32 : "SquadLeader" : 0
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/houndeye_dead.mdl") = monster_houndeye_dead : "Dead Houndeye" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/houndeye_dead.mdl") = monster_houndeye_dead : "Dead Houndeye"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -2207,27 +2207,27 @@
 		9 : "combatidle"
 		10 : "frontkick"
 		11 : "crouching_idle"
-		12 : "crouching_wait"                                                                                                                                                                                                         
-		13 : "crouching_mp5"                                                                                                                                                                                                          
-		14 : "standing_mp5"                                                                                                                                                                                                           
-		15 : "reload_mp5"                                                                                                                                                                                                             
-		16 : "crouching_shotgun"                                                                                                                                                                                                      
-		17 : "standing_shotgun"                                                                                                                                                                                                       
-		18 : "reload_shotgun"                                                                                                                                                                                                         
-		19 : "crouching_saw"                                                                                                                                                                                                          
-		20 : "standing_saw"                                                                                                                                                                                                           
-		21 : "reload_saw"                                                                                                                                                                                                             
-		22 : "advance_signal"                                                                                                                                                                                                         
-		23 : "flank_signal"                                                                                                                                                                                                           
-		24 : "retreat_signal"                                                                                                                                                                                                         
-		25 : "drop_grenade"                                                                                                                                                                                                           
-		26 : "limpingwalk"                                                                                                                                                                                                            
-		27 : "limpingrun"                                                                                                                                                                                                             
-		28 : "180L"                                                                                                                                                                                                                   
-		29 : "180R"                                                                                                                                                                                                                   
-		30 : "dieback1"                                                                                                                                                                                                               
-		31 : "dieforward"                                                                                                                                                                                                             
-		32 : "diesimple"                                                                                                                                                                                                              
+		12 : "crouching_wait"
+		13 : "crouching_mp5"
+		14 : "standing_mp5"
+		15 : "reload_mp5"
+		16 : "crouching_shotgun"
+		17 : "standing_shotgun"
+		18 : "reload_shotgun"
+		19 : "crouching_saw"
+		20 : "standing_saw"
+		21 : "reload_saw"
+		22 : "advance_signal"
+		23 : "flank_signal"
+		24 : "retreat_signal"
+		25 : "drop_grenade"
+		26 : "limpingwalk"
+		27 : "limpingrun"
+		28 : "180L"
+		29 : "180R"
+		30 : "dieback1"
+		31 : "dieforward"
+		32 : "diesimple"
 		33 : "diebackwards"
 		34 : "dieheadshot"
 		35 : "diegutshot"
@@ -2302,7 +2302,7 @@
 ]
 
 
-@PointClass base(Targetname,Appearflags,RenderFields, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_human_grunt_ally_dead : "Dead Human Grunt Ally" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_human_grunt_ally_dead : "Dead Human Grunt Ally"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 40 =
 	[
@@ -2324,7 +2324,6 @@
 		4 : "Dead On Stomach"
 		5 : "Head Crabbed"
 	]
-
 	weapons(Choices) : "Weapons" : 1 =
 	[
 		0 : "None"
@@ -2332,7 +2331,6 @@
 		8 : "Shotgun"
 		16 : "Saw"
 	]
-
 	head(Choices) : "Heads" : 0 =
 	[
 		0 : "Gas Mask"
@@ -2341,6 +2339,8 @@
 		3 : "Bandana White"
 		4 : "Bandana Black"
 		5 : "MP"
+		6 : "Major"
+		7 : "Beret (Black)"
 	]
 ]
 
@@ -2406,7 +2406,7 @@
 
 	head(Choices) : "Heads" : -1 =
 	[
-	-1 : "Random"
+		-1 : "Random"
 		0 : "White"
 		1 : "Black"
 	]
@@ -2420,6 +2420,34 @@
 	]
 ]
 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_human_medic_ally_dead : "Dead Human Medic Ally"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 37 =
+	[
+		37 : "deadstomach"
+		38 : "deadside"
+		39 : "deadsitting"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On stomach"
+		1 : "On side"
+		2 : "Seated"
+	]
+	weapons(Choices) : "Weapons" : 2 =
+	[
+		0 : "None"
+		1 : "Desert Eagle"
+		2 : "9mm Handgun"
+		4 : "Hypodermic Needle"
+	]
+	head(Choices) : "Heads" : -1 =
+	[
+		-1 : "Random"
+		0 : "White"
+		1 : "Black"
+	]
+]
 
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_human_torch_ally : "Torch" 
 [
@@ -2489,6 +2517,29 @@
 		2 : "Blow Torch"
 	]
 ]
+
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_human_torch_ally_dead : "Dead Human Torch Ally"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 35 =
+	[
+		35 : "deadstomach"
+		36 : "deadside"
+		37 : "deadsitting"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On stomach"
+		1 : "On side"
+		2 : "Seated"
+	]
+	weapons(Choices) : "Weapons" : 1 =
+	[
+		0 : "None"
+		1 : "Desert Eagle"
+		2 : "Blow Torch"
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/icky.mdl") = monster_ichthyosaur : "Ichthyosaur" []
 @PointClass base(Monster, Sequence) size(-6 -6 0, 6 6 6) studio("models/leech.mdl") = monster_leech : "Leech" []
 @PointClass base(Monster, Sequence) size(-16 -16 -32, 16 16 32) studio("models/miniturret.mdl") = monster_miniturret : "Mini Auto Turret"
@@ -2589,6 +2640,35 @@
 	]
 ]
 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_male_assassin_dead : "Dead Male Assassin"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 43 =
+	[
+		43 : "deadstomach"
+		44 : "deadside"
+		45 : "deadsitting"
+	]
+	head(Choices) : "Heads" : -1 =
+	[
+		-1 : "Random"
+		0 : "Ski Mask White"
+		1 : "Ski Mask Black"
+		2 : "Night Goggles"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On stomach"
+		1 : "On side"
+		2 : "Seated"
+	]
+	weapons(Choices) : "Weapons" : 1 =
+	[
+		0 : "None"
+		1 : "9mmAR"
+		8 : "Sniper Rifle"
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-192 -192 0, 192 192 384) studio("models/nihilanth.mdl") = monster_nihilanth : "Nihilanth"  []
 @PointClass base(Monster, Sequence) size(-480 -480 -112, 480 480 24) studio("models/osprey.mdl") = monster_osprey : "Osprey"
 [
@@ -2679,7 +2759,7 @@
 	]
 ]
 
-@PointClass base(Targetname,Appearflags, Sequence) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis_dead : "Dead Otis" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis_dead : "Dead Otis"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 35 =
 	[
@@ -2696,7 +2776,7 @@
 		2 : "On stomach"
 		3 : "Stuffed in Vent"
 		4 : "Dead Sitting"
-    ]
+	]
 ]
 
 @PointClass base(Monster, Sequence) size(-24 -24 0, 24 24 32) studio("models/pit_drone.mdl") = monster_pitdrone : "PitDrone"
@@ -2726,7 +2806,7 @@
 	initammo(string) : "Initial Ammo" : "6"
 ]
 
-@PointClass base(Targetname,Appearflags,RenderFields) size(-16 -16 0, 16 16 72) studio("models/skeleton.mdl") = monster_skeleton_dead : "Dead Skeleton"
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/skeleton.mdl") = monster_skeleton_dead : "Dead Skeleton"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -2882,7 +2962,7 @@
 	]
 ]
 
-@PointClass base(Targetname,Appearflags,RenderFields, Sequence) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist_dead : "Dead Cleansuit Scientist" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist_dead : "Dead Cleansuit Scientist"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 38 =
 	[
@@ -3067,7 +3147,7 @@
 		127 : "kneel"
 	]
 ]
-@PointClass base(Appearflags,RenderFields,DeadMonster,Angles) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist_dead : "Dead Scientist" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist_dead : "Dead Scientist"
 [
 	body(Choices) : "Body" : -1 =
 	[
@@ -3159,7 +3239,7 @@
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Scientist Zombie" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_barney.mdl") = monster_zombie_barney : "Barney Zombie" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie" []
-@PointClass base(Monster, Sequence) studio("models/zombie_soldier.mdl") = monster_zombie_soldier_dead : "Dead Soldier Zombie"
+@PointClass base(DeadMonster) studio("models/zombie_soldier.mdl") = monster_zombie_soldier_dead : "Dead Soldier Zombie"
 [
 	pose(Choices) : "Pose" : 0 =
 	[
@@ -3202,7 +3282,7 @@
 		23 : "sohappy"
 	]
 ]
-@PointClass base(Targetname,Appearflags,RenderFields, Sequence) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome_dead : "Dead Gonome" 
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/gonome.mdl") = monster_gonome_dead : "Dead Gonome"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 19 =
 	[

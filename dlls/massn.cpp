@@ -32,9 +32,13 @@
 #define MASSN_GUN_GROUP					2
 
 // Head values
-#define HEAD_WHITE					0
-#define HEAD_BLACK					1
-#define HEAD_GOGGLES				2
+enum
+{
+	MASSN_HEAD_WHITE,
+	MASSN_HEAD_BLACK,
+	MASSN_HEAD_GOOGLES,
+	MASSN_HEAD_COUNT,
+};
 
 // Gun values
 #define MASSN_GUN_MP5				0
@@ -247,8 +251,8 @@ void CMassn::Spawn()
 	}
 	m_cAmmoLoaded = m_cClipSize;
 
-	if (head == -1) {
-		head = RANDOM_LONG(0,1); // never random night googles
+	if (head == -1 || head >= MASSN_HEAD_COUNT) {
+		head = RANDOM_LONG(MASSN_HEAD_WHITE, MASSN_HEAD_BLACK); // never random night googles
 	}
 	SetBodygroup(MASSN_HEAD_GROUP, head);
 
@@ -321,6 +325,65 @@ void CAssassinRepel::Precache(void)
 void CAssassinRepel::RepelUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	RepelUseHelper( "monster_male_assassin", pActivator, pCaller, useType, value );
+}
+
+class CDeadMassn : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_HUMAN_MILITARY; }
+
+	void KeyValue( KeyValueData *pkvd );
+	const char* getPos(int pos) const;
+
+	int	m_iHead;
+	static const char *m_szPoses[3];
+};
+
+const char *CDeadMassn::m_szPoses[] = { "deadstomach", "deadside", "deadsitting" };
+
+const char* CDeadMassn::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+void CDeadMassn::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "head"))
+	{
+		m_iHead = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CDeadMonster::KeyValue( pkvd );
+}
+
+LINK_ENTITY_TO_CLASS( monster_male_assassin_dead, CDeadMassn )
+
+void CDeadMassn::Spawn( )
+{
+	SpawnHelper("models/massn.mdl", "Dead massn with bad pose");
+
+	if ( pev->weapons <= 0 )
+	{
+		SetBodygroup( MASSN_GUN_GROUP, MASSN_GUN_NONE );
+	}
+	if (FBitSet( pev->weapons, MASSN_9MMAR ))
+	{
+		SetBodygroup(MASSN_GUN_GROUP, MASSN_GUN_MP5);
+	}
+	if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
+	{
+		SetBodygroup(MASSN_GUN_GROUP, MASSN_GUN_SNIPERRIFLE);
+	}
+
+	if ( m_iHead < 0 || m_iHead >= MASSN_HEAD_COUNT ) {
+		m_iHead = RANDOM_LONG(MASSN_HEAD_WHITE, MASSN_HEAD_BLACK);  // never random night googles
+	}
+
+	SetBodygroup( MASSN_HEAD_GROUP, m_iHead );
+
+	MonsterInitDead();
 }
 
 #endif

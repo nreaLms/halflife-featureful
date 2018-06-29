@@ -1043,7 +1043,7 @@ LINK_ENTITY_TO_CLASS( monster_otis_dead, CDeadOtis )
 
 void CDeadOtis :: Spawn( )
 {
-	SpawnHelper("models/otis.mdl", "Dead otis with bad pose\n");
+	SpawnHelper("models/otis.mdl", "Dead otis with bad pose");
 	if ( head == -1 )
 		SetBodygroup(2, RANDOM_LONG(0, 1));
 	else

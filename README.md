@@ -26,10 +26,21 @@ Most Opposing Force monsters are implemented (exceptions are geneworm and pitwor
 * monster_gonome
 * monster_zombie_barney
 * monster_zombie_soldier
+
+#### Dead monsters
+
+* monster_cleansuit_scientist_dead
+* monster_otis_dead
+* monster_male_assassin_dead (was not in Opposing Force)
+* monster_human_grunt_ally_dead
+* monster_human_medic_ally_dead (was not in Opposing Force)
+* monster_human_torch_ally_dead (was not in Opposing Force)
 * monster_alien_slave_dead
 * monster_houndeye_dead
+* monster_gonome_dead
+* monster_zombie_soldier_dead
 
-#### Other monsters
+#### Other new monsters
 
 * monster_babygarg - smaller version of Gargantua monster
 
@@ -55,7 +66,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * weapon_sporelauncher
 * weapon_shockrifle (plays idle animations)
 
-#### Other weapons
+#### Other new weapons
 
 * weapon_medkit - TFC-like medkit that allows to heal allies
 
