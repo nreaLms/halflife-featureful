@@ -2850,7 +2850,7 @@ LINK_ENTITY_TO_CLASS( monster_human_grunt_ally_dead, CDeadFGrunt )
 //=========================================================
 void CDeadFGrunt :: Spawn( )
 {
-	SpawnHelper("models/hgrunt_opfor.mdl", "Dead fgrunt with bad pose");
+	SpawnHelper("models/hgrunt_opfor.mdl");
 
 	if ( pev->weapons <= 0 )
 	{
@@ -3234,7 +3234,7 @@ LINK_ENTITY_TO_CLASS( monster_human_torch_ally_dead, CDeadTorch )
 
 void CDeadTorch::Spawn( )
 {
-	SpawnHelper("models/hgrunt_torch.mdl", "Dead torch with bad pose");
+	SpawnHelper("models/hgrunt_torch.mdl");
 
 	if ( pev->weapons <= 0 )
 	{
@@ -3699,7 +3699,7 @@ LINK_ENTITY_TO_CLASS( monster_human_medic_ally_dead, CDeadMedic )
 
 void CDeadMedic::Spawn( )
 {
-	SpawnHelper("models/hgrunt_medic.mdl", "Dead medic with bad pose");
+	SpawnHelper("models/hgrunt_medic.mdl");
 
 	if ( pev->weapons <= 0 )
 	{

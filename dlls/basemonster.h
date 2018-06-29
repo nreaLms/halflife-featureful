@@ -365,7 +365,7 @@ public:
 class CDeadMonster : public CBaseMonster
 {
 public:
-	void SpawnHelper( const char* modelName, const char* errorMessage, int bloodColor = BLOOD_COLOR_RED, int health = 8);
+	void SpawnHelper(const char* modelName, int bloodColor = BLOOD_COLOR_RED, int health = 8);
 	void KeyValue( KeyValueData *pkvd );
  
 	virtual const char* getPos(int pose) const = 0;

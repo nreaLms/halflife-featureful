@@ -1315,7 +1315,7 @@ LINK_ENTITY_TO_CLASS( monster_houndeye_dead, CDeadHoundeye )
 
 void CDeadHoundeye :: Spawn( )
 {
-	SpawnHelper("models/houndeye_dead.mdl", "Dead houndeye with bad pose", BLOOD_COLOR_YELLOW);
+	SpawnHelper("models/houndeye_dead.mdl", BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
 #endif

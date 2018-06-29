@@ -2390,7 +2390,7 @@ LINK_ENTITY_TO_CLASS( monster_hgrunt_dead, CDeadHGrunt )
 //=========================================================
 void CDeadHGrunt :: Spawn( void )
 {
-	SpawnHelper("models/hgrunt.mdl", "Dead hgrunt with bad pose\n");
+	SpawnHelper("models/hgrunt.mdl");
 
 	// map old bodies onto new bodies
 	switch( pev->body )

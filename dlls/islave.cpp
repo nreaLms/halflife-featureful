@@ -860,7 +860,7 @@ LINK_ENTITY_TO_CLASS( monster_alien_slave_dead, CDeadISlave )
 
 void CDeadISlave :: Spawn( )
 {
-	SpawnHelper("models/islave.mdl", "Dead alien slave with bad pose", BLOOD_COLOR_YELLOW);
+	SpawnHelper("models/islave.mdl", BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
 #endif

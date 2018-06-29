@@ -431,7 +431,7 @@ LINK_ENTITY_TO_CLASS( monster_zombie_soldier_dead, CDeadZombieSoldier )
 
 void CDeadZombieSoldier::Spawn( )
 {
-	SpawnHelper("models/zombie_soldier.mdl", "Dead zombie soldier with bad pose\n", BLOOD_COLOR_YELLOW);
+	SpawnHelper("models/zombie_soldier.mdl", BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
 #endif

@@ -821,7 +821,7 @@ LINK_ENTITY_TO_CLASS(monster_gonome_dead, CDeadGonome)
 //=========================================================
 void CDeadGonome::Spawn(void)
 {
-	SpawnHelper("models/gonome.mdl", "Dead gonome with bad pose\n", BLOOD_COLOR_YELLOW);
+	SpawnHelper("models/gonome.mdl", BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
 #endif

@@ -362,7 +362,7 @@ LINK_ENTITY_TO_CLASS( monster_male_assassin_dead, CDeadMassn )
 
 void CDeadMassn::Spawn( )
 {
-	SpawnHelper("models/massn.mdl", "Dead massn with bad pose");
+	SpawnHelper("models/massn.mdl");
 
 	if ( pev->weapons <= 0 )
 	{

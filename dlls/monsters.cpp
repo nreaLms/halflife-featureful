@@ -3516,7 +3516,7 @@ void CDeadMonster::KeyValue( KeyValueData *pkvd )
 		CBaseMonster::KeyValue( pkvd );
 }
 
-void CDeadMonster::SpawnHelper( const char* modelName, const char* errorMessage, int bloodColor, int health)
+void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int health)
 {
 	PrecacheMyModel( modelName );
 	SetMyModel( modelName );
@@ -3529,7 +3529,7 @@ void CDeadMonster::SpawnHelper( const char* modelName, const char* errorMessage,
 	pev->sequence = LookupSequence( getPos(m_iPose) );
 	if (pev->sequence == -1)
 	{
-		ALERT ( at_console, "%s\n", errorMessage );
+		ALERT ( at_console, "%s with bad pose (%s)\n", STRING(pev->classname), modelName );
 	}
 	SetMyHealth( health );
 }
@@ -3557,7 +3557,7 @@ LINK_ENTITY_TO_CLASS(monster_skeleton_dead, CSkeleton)
 
 void CSkeleton::Spawn(void)
 {
-	SpawnHelper("models/skeleton.mdl", "Skeleton with bad pose", DONT_BLEED);
+	SpawnHelper("models/skeleton.mdl", DONT_BLEED);
 	MonsterInitDead();
 }
 

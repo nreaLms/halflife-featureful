@@ -1119,7 +1119,7 @@ LINK_ENTITY_TO_CLASS( monster_scientist_dead, CDeadScientist )
 //
 void CDeadScientist :: Spawn( )
 {
-	SpawnHelper("models/scientist.mdl", "Dead scientist with bad pose\n");
+	SpawnHelper("models/scientist.mdl");
 
 	if ( pev->body == -1 )
 	{// -1 chooses a random head
@@ -1470,7 +1470,7 @@ LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist_dead, CDeadCleansuitScientist 
 
 void CDeadCleansuitScientist :: Spawn( )
 {
-	SpawnHelper("models/cleansuit_scientist.mdl", "Dead cleansuit scientist with bad pose\n");
+	SpawnHelper("models/cleansuit_scientist.mdl");
 	if ( pev->body == -1 ) {
 		pev->body = RANDOM_LONG(0, NUM_SCIENTIST_HEADS-1);
 	}
