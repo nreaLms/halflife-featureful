@@ -245,8 +245,7 @@ void CMonsterMaker::MakeMonster( void )
 	if( pev->spawnflags & SF_MONSTERMAKER_MONSTERCLIP )
 		SetBits( pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP );
 
-	CBaseEntity* createdEnt = CBaseEntity::Instance(pent);
-	CBaseMonster* createdMonster = createdEnt->MyMonsterPointer();
+	CBaseMonster* createdMonster = GetMonsterPointer(pent);
 	if (createdMonster)
 	{
 		if (m_classify)

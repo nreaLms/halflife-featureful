@@ -98,7 +98,14 @@ void CGenericMonster::Spawn()
 {
 	Precache();
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	if (FStringNull(pev->model))
+	{
+		ALERT(at_console, "Spawning monster_generic without model!\n");
+	}
+	else
+	{
+		SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	}
 /*
 	if( FStrEq( STRING( pev->model ), "models/player.mdl" ) )
 		UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
@@ -131,7 +138,8 @@ void CGenericMonster::Spawn()
 //=========================================================
 void CGenericMonster::Precache()
 {
-	PRECACHE_MODEL( STRING( pev->model ) );
+	if (!FStringNull(pev->model))
+		PRECACHE_MODEL( STRING( pev->model ) );
 }
 
 //=========================================================
