@@ -468,7 +468,7 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 		{
 			CBaseEntity* ent = CBaseEntity::Instance(tr.pHit);
 			CBaseMonster* monster = ent->MyMonsterPointer();
-			if (monster !=0 && IRelationship(monster) == R_AL)
+			if (monster != 0 && FBitSet(monster->pev->flags, FL_MONSTER) && monster->pev->deadflag != DEAD_DEAD && IRelationship(monster) == R_AL)
 			{
 				ALERT(at_aiconsole, "Ally %s at fire line. Don't shoot!\n", STRING(ent->pev->classname));
 				return FALSE;
