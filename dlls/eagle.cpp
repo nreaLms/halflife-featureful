@@ -183,6 +183,7 @@ void CEagle::PrimaryAttack()
 
 void CEagle::Reload( void )
 {
+    UpdateSpot( );
     if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == EAGLE_MAX_CLIP)
                 return;
 
