@@ -3526,10 +3526,11 @@ void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int healt
 	pev->sequence		= 0;
 	SetMyBloodColor( bloodColor );
 
-	pev->sequence = LookupSequence( getPos(m_iPose) );
+	const char* seqName = getPos(m_iPose);
+	pev->sequence = LookupSequence( seqName );
 	if (pev->sequence == -1)
 	{
-		ALERT ( at_console, "%s with bad pose (%s)\n", STRING(pev->classname), modelName );
+		ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), seqName, modelName );
 	}
 	SetMyHealth( health );
 }
