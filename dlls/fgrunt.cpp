@@ -2825,7 +2825,7 @@ public:
 	static const char *m_szPoses[7];
 };
 
-const char *CDeadFGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting", "dead_on_back", "dead_headcrabbed", "hgrunt_dead_stomach", "dead_canyon" };
+const char *CDeadFGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting", "dead_on_back", "hgrunt_dead_stomach", "dead_headcrabed" };
 
 const char* CDeadFGrunt::getPos(int pos) const
 {
