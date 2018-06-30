@@ -2331,6 +2331,7 @@
 	spawnflags(Flags) =
 	[
 		4 : "Not solid"	: 0
+		8 : "Head controller" : 0
 	]
 	model(studio) : "model"
 	body(integer) : "Body" : 0
