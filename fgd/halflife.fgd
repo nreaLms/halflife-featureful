@@ -2001,6 +2001,19 @@
 		32 : "SquadLeader" : 0
 	]
 ]
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/agrunt.mdl") = monster_alien_grunt_dead : "Dead Alien Grunt"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 24 =
+	[
+		24 : "dieforward"
+        26 : "diebackward"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On Stomach"
+        1 : "On Back"
+	]
+]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave : "Vortigaunt"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 2 =
@@ -2047,11 +2060,19 @@
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 32 =
 	[
+		18 : "dieheadshot"
+		19 : "diesimple"
+		20 : "diebackward"
+		21 : "dieforward"
 		32 : "dead_on_stomach"
 	]
 	pose(Choices) : "Pose" : 0 =
 	[
-		0 : "On Stomach"
+		0 : "On Stomach (OpFor)"
+        1 : "On Stomach (hands forward)"
+        2 : "On Side"
+        3 : "On Back"
+        4 : "On Stomach (hands backward)"
 	]
 ]
 @PointClass base(Monster, Sequence) size(-360 -360 -172, 360 360 8) studio("models/apache.mdl") = monster_apache : "Apache" 
@@ -4119,6 +4140,7 @@
 	health(integer) : "Custom health"
 	body(integer) : "Body"
 	skin(integer) : "Skin"
+	pose(integer) : "Pose (Only for dead monsters)"
 	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
 	[
 		0 : "Default"

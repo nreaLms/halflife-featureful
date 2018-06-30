@@ -62,6 +62,7 @@ public:
 	BOOL m_fFadeChildren;// should we make the children fadeout?
 	string_t m_customModel;
 	int m_classify;
+	int m_iPose;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -77,6 +78,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_fFadeChildren, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_customModel, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_classify, FIELD_INTEGER ),
+	DEFINE_FIELD( CMonsterMaker, m_iPose, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -111,6 +113,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "classify" ) )
 	{
 		m_classify = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "pose" ) )
+	{
+		m_iPose = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -252,6 +259,11 @@ void CMonsterMaker::MakeMonster( void )
 			createdMonster->m_iClass = m_classify;
 		if (m_bloodColor)
 			createdMonster->m_bloodColor = m_bloodColor;
+		if (createdMonster->IsInitiallyDead())
+		{
+			CDeadMonster* deadMonster = (CDeadMonster*)createdMonster;
+			deadMonster->m_iPose = m_iPose;
+		}
 	}
 
 	DispatchSpawn( ENT( pevCreate ) );

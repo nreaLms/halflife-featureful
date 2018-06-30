@@ -849,18 +849,23 @@ public:
 	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
 
 	const char* getPos(int pos) const;
+	static const char *m_szPoses[5];
 };
+
+const char *CDeadISlave::m_szPoses[] = { "dead_on_stomach", "dieheadshot", "diesimple", "diebackward", "dieforward" };
 
 const char* CDeadISlave::getPos(int pos) const
 {
-	return "dead_on_stomach";
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
 }
 
 LINK_ENTITY_TO_CLASS( monster_alien_slave_dead, CDeadISlave )
 
-void CDeadISlave :: Spawn( )
+void CDeadISlave::Spawn( )
 {
 	SpawnHelper("models/islave.mdl", BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
+	if (m_iPose)
+		pev->frame = 255;
 }
 #endif

@@ -341,9 +341,11 @@ public:
 	void SetMyModel( const char* model );
 	void PrecacheMyModel( const char* model );
 	void SetMyBloodColor( int bloodColor );
-	
+
 	int Classify();
 	virtual int DefaultClassify();
+
+	virtual BOOL IsInitiallyDead() {return FALSE;}
 
 	//
 	// Glowshell effects
@@ -368,6 +370,7 @@ public:
 	void SpawnHelper(const char* modelName, int bloodColor = BLOOD_COLOR_RED, int health = 8);
 	void KeyValue( KeyValueData *pkvd );
  
+	BOOL IsInitiallyDead() {return TRUE;}
 	virtual const char* getPos(int pose) const = 0;
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
 };

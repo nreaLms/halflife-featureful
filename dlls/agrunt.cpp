@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -38,7 +38,7 @@ enum
 //=========================================================
 // monster-specific tasks
 //=========================================================
-enum 
+enum
 {
 	TASK_AGRUNT_SETUP_HIDE_ATTACK = LAST_COMMON_TASK + 1,
 	TASK_AGRUNT_GET_PATH_TO_ENEMY_CORPSE
@@ -190,7 +190,7 @@ const char *CAGrunt::pAlertSounds[] =
 };
 
 //=========================================================
-// IRelationship - overridden because Human Grunts are 
+// IRelationship - overridden because Human Grunts are
 // Alien Grunt's nemesis.
 //=========================================================
 int CAGrunt::IRelationship( CBaseEntity *pTarget )
@@ -204,7 +204,7 @@ int CAGrunt::IRelationship( CBaseEntity *pTarget )
 }
 
 //=========================================================
-// ISoundMask 
+// ISoundMask
 //=========================================================
 int CAGrunt::ISoundMask( void )
 {
@@ -214,15 +214,15 @@ int CAGrunt::ISoundMask( void )
 //=========================================================
 // TraceAttack
 //=========================================================
-void CAGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+static void AgruntTraceAttack( CBaseMonster* self, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
 	if( ptr->iHitgroup == 10 && ( bitsDamageType & ( DMG_BULLET | DMG_SLASH | DMG_CLUB ) ) )
 	{
 		// hit armor
-		if( pev->dmgtime != gpGlobals->time || ( RANDOM_LONG( 0, 10 ) < 1 ) )
+		if( self->pev->dmgtime != gpGlobals->time || ( RANDOM_LONG( 0, 10 ) < 1 ) )
 		{
 			UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT( 1, 2 ) );
-			pev->dmgtime = gpGlobals->time;
+			self->pev->dmgtime = gpGlobals->time;
 		}
 
 		if( RANDOM_LONG( 0, 1 ) == 0 )
@@ -253,11 +253,16 @@ void CAGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	}
 	else
 	{
-		SpawnBlood( ptr->vecEndPos, BloodColor(), flDamage );// a little surface blood.
-		TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
+		SpawnBlood( ptr->vecEndPos, self->BloodColor(), flDamage );// a little surface blood.
+		self->TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
 	}
 
-	AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
+	AddMultiDamage( pevAttacker, self, flDamage, bitsDamageType );
+}
+
+void CAGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+{
+	AgruntTraceAttack(this, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
 //=========================================================
@@ -284,8 +289,8 @@ BOOL CAGrunt::ShouldSpeak( void )
 		if( m_MonsterState != MONSTERSTATE_COMBAT )
 		{
 			// if gagged, don't talk outside of combat.
-			// if not going to talk because of this, put the talk time 
-			// into the future a bit, so we don't talk immediately after 
+			// if not going to talk because of this, put the talk time
+			// into the future a bit, so we don't talk immediately after
 			// going into combat
 			m_flNextSpeakTime = gpGlobals->time + 3;
 			return FALSE;
@@ -296,7 +301,7 @@ BOOL CAGrunt::ShouldSpeak( void )
 }
 
 //=========================================================
-// PrescheduleThink 
+// PrescheduleThink
 //=========================================================
 void CAGrunt::PrescheduleThink( void )
 {
@@ -457,8 +462,8 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecArmPos );
 				WRITE_BYTE( TE_SPRITE );
 				WRITE_COORD( vecArmPos.x );	// pos
-				WRITE_COORD( vecArmPos.y );	
-				WRITE_COORD( vecArmPos.z );	
+				WRITE_COORD( vecArmPos.y );
+				WRITE_COORD( vecArmPos.z );
 				WRITE_SHORT( iAgruntMuzzleFlash );		// model
 				WRITE_BYTE( 6 );				// size * 10
 				WRITE_BYTE( 128 );			// brightness
@@ -693,8 +698,8 @@ Schedule_t slAGruntCombatFail[] =
 };
 
 //=========================================================
-// Standoff schedule. Used in combat when a monster is 
-// hiding in cover or the enemy has moved out of sight. 
+// Standoff schedule. Used in combat when a monster is
+// hiding in cover or the enemy has moved out of sight.
 // Should we look around in this schedule?
 //=========================================================
 Task_t tlAGruntStandoff[] =
@@ -906,8 +911,8 @@ BOOL CAGrunt::FCanCheckAttacks( void )
 }
 
 //=========================================================
-// CheckMeleeAttack1 - alien grunts zap the crap out of 
-// any enemy that gets too close. 
+// CheckMeleeAttack1 - alien grunts zap the crap out of
+// any enemy that gets too close.
 //=========================================================
 BOOL CAGrunt::CheckMeleeAttack1( float flDot, float flDist )
 {
@@ -919,11 +924,11 @@ BOOL CAGrunt::CheckMeleeAttack1( float flDot, float flDist )
 }
 
 //=========================================================
-// CheckRangeAttack1 
+// CheckRangeAttack1
 //
 // !!!LATER - we may want to load balance this. Several
 // tracelines are done, so we may not want to do this every
-// server frame. Definitely not while firing. 
+// server frame. Definitely not while firing.
 //=========================================================
 BOOL CAGrunt::CheckRangeAttack1( float flDot, float flDist )
 {
@@ -979,7 +984,7 @@ void CAGrunt::StartTask( Task_t *pTask )
 		}
 		break;
 	case TASK_AGRUNT_SETUP_HIDE_ATTACK:
-		// alien grunt shoots hornets back out into the open from a concealed location. 
+		// alien grunt shoots hornets back out into the open from a concealed location.
 		// try to find a spot to throw that gives the smart weapon a good chance of finding the enemy.
 		// ideally, this spot is along a line that is perpendicular to a line drawn from the agrunt to the enemy.
 		CBaseMonster	*pEnemyMonsterPtr;
@@ -1127,7 +1132,7 @@ Schedule_t *CAGrunt::GetSchedule( void )
 
 //=========================================================
 //=========================================================
-Schedule_t *CAGrunt::GetScheduleOfType( int Type ) 
+Schedule_t *CAGrunt::GetScheduleOfType( int Type )
 {
 	switch( Type )
 	{
@@ -1166,7 +1171,7 @@ Schedule_t *CAGrunt::GetScheduleOfType( int Type )
 			{
 				// I have an enemy
 				// !!!LATER - what if this enemy is really far away and i'm chasing him?
-				// this schedule will make me stop, face his last known position for 2 
+				// this schedule will make me stop, face his last known position for 2
 				// seconds, and then try to move again
 				return &slAGruntCombatFail[0];
 			}
@@ -1177,4 +1182,36 @@ Schedule_t *CAGrunt::GetScheduleOfType( int Type )
 	}
 
 	return CSquadMonster::GetScheduleOfType( Type );
+}
+
+class CDeadAgrunt : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
+	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[2];
+};
+
+const char *CDeadAgrunt::m_szPoses[] = { "dieforward", "diebackward" };
+
+const char* CDeadAgrunt::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_alien_grunt_dead, CDeadAgrunt )
+
+void CDeadAgrunt::Spawn( )
+{
+	SpawnHelper("models/agrunt.mdl", BLOOD_COLOR_YELLOW, gSkillData.agruntHealth/2);
+	MonsterInitDead();
+	pev->frame = 255;
+}
+
+void CDeadAgrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+{
+	AgruntTraceAttack(this, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
