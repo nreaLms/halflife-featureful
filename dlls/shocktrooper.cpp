@@ -296,7 +296,7 @@ void CStrooper::GibMonster(void)
 //=========================================================
 int	CStrooper::DefaultClassify(void)
 {
-	return CLASS_ALIEN_MILITARY;
+	return CLASS_RACEX_SHOCK;
 }
 
 BOOL CStrooper::CheckRangeAttack1(float flDot, float flDist)

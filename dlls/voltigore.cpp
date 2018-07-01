@@ -579,7 +579,7 @@ BOOL CVoltigore::CheckMeleeAttack1(float flDot, float flDist)
 //=========================================================
 int	CVoltigore::DefaultClassify(void)
 {
-	return	CLASS_ALIEN_MONSTER;
+	return	CLASS_RACEX_SHOCK;
 }
 
 //=========================================================

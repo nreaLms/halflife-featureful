@@ -33,6 +33,9 @@
 // whether fgrunts and black mesa personnel are enemies like in Opposing Force
 #define FEATURE_OPFOR_ALLY_RELATIONSHIP 1
 
+// whether race x and alien military are enemies
+#define FEATURE_RACEX_AND_AMIL_ENEMIES 1
+
 // New weapons
 #define FEATURE_PIPEWRENCH 1
 #define FEATURE_KNIFE 1

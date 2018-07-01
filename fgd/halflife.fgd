@@ -218,6 +218,7 @@
 		12 : "Player bioweapon"
 		13 : "Alien bioweapon"
 		14 : "Race X predator"
+        15 : "Race X shock"
 	]
 ]
 
@@ -4164,6 +4165,7 @@
 		12 : "Player bioweapon"
 		13 : "Alien bioweapon"
 		14 : "Race X predator"
+        15 : "Race X shock"
 	]
 ]
 

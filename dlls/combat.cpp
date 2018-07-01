@@ -251,33 +251,33 @@ void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel
 
 BOOL CBaseMonster::HasHumanGibs( void )
 {
-	int myClass = DefaultClassify();
-
-	if( myClass == CLASS_HUMAN_MILITARY ||
-		myClass == CLASS_PLAYER_ALLY ||
-		myClass == CLASS_HUMAN_PASSIVE ||
-		myClass == CLASS_PLAYER ||
-		myClass == CLASS_PLAYER_ALLY_MILITARY)
-
-		 return TRUE;
-
-	return FALSE;
+	switch (DefaultClassify()) {
+	case CLASS_HUMAN_MILITARY:
+	case CLASS_PLAYER_ALLY:
+	case CLASS_HUMAN_PASSIVE:
+	case CLASS_PLAYER:
+	case CLASS_PLAYER_ALLY_MILITARY:
+		return TRUE;
+	default:
+		return FALSE;
+	}
 }
 
 BOOL CBaseMonster::HasAlienGibs( void )
 {
-	int myClass = DefaultClassify();
-
-	if( myClass == CLASS_ALIEN_MILITARY ||
-		myClass == CLASS_ALIEN_MONSTER ||
-		myClass == CLASS_ALIEN_PASSIVE ||
-		myClass == CLASS_INSECT ||
-		myClass == CLASS_ALIEN_PREDATOR ||
-		myClass == CLASS_ALIEN_PREY )
-
+	switch (DefaultClassify()) {
+	case CLASS_ALIEN_MILITARY:
+	case CLASS_ALIEN_MONSTER:
+	case CLASS_ALIEN_PASSIVE:
+	case CLASS_INSECT:
+	case CLASS_ALIEN_PREDATOR:
+	case CLASS_ALIEN_PREY:
+	case CLASS_RACEX_PREDATOR:
+	case CLASS_RACEX_SHOCK:
 		return TRUE;
-
-	return FALSE;
+	default:
+		return FALSE;
+	}
 }
 
 void CBaseMonster::FadeMonster( void )
