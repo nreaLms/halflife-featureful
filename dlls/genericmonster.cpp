@@ -146,6 +146,8 @@ void CGenericMonster::Precache()
 {
 	if (!FStringNull(pev->model))
 		PRECACHE_MODEL( STRING( pev->model ) );
+	if (!FStringNull(m_gibModel))
+		PRECACHE_MODEL( STRING(m_gibModel) );
 }
 
 //=========================================================
