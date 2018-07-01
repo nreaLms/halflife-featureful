@@ -115,6 +115,12 @@ public:
 	int Restore(CRestore &restore);
 
 	void SpeakSentence();
+	const char* DefaultGibModel() {
+		return "models/strooper_gibs.mdl";
+	}
+	int DefaultGibCount() {
+		return 6;
+	}
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -280,14 +286,7 @@ void CStrooper::GibMonster(void)
 		}
 	}
 
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM );
-
-	if( CVAR_GET_FLOAT( "violence_agibs" ) != 0 )	// Should never get here, but someone might call it directly
-	{
-		CGib::SpawnRandomGibs( pev, 6, "models/strooper_gibs.mdl", STROOPER_GIB_COUNT );	// Throw alien gibs
-	}
-	SetThink( &CBaseEntity::SUB_Remove );
-	pev->nextthink = gpGlobals->time;
+	CBaseMonster::GibMonster();
 }
 
 //=========================================================

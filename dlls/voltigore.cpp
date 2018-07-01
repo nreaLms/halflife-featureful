@@ -342,6 +342,12 @@ public:
 	Schedule_t *GetScheduleOfType(int Type);
 	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
+	const char* DefaultGibModel() {
+		return "models/vgibs.mdl";
+	}
+	int DefaultGibCount() {
+		return 10;
+	}
 	
 	int	Save(CSave &save);
 	int Restore(CRestore &restore);
@@ -551,13 +557,7 @@ void CVoltigore::RunAI(void)
 void CVoltigore::GibMonster()
 {
 	GibBeamDamage();
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM );
-	if( CVAR_GET_FLOAT( "violence_agibs" ) != 0 )	// Should never get here, but someone might call it directly
-	{
-		CGib::SpawnRandomGibs( pev, 10, "models/vgibs.mdl", VOLTIGORE_GIB_COUNT );	// Throw alien gibs
-	}
-	SetThink( &CBaseEntity::SUB_Remove );
-	pev->nextthink = gpGlobals->time;
+	CBaseMonster::GibMonster();
 }
 
 //=========================================================

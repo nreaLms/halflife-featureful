@@ -107,6 +107,7 @@ public:
 	CCineMonster *m_pCine;
 	
 	int m_iClass;
+	string_t m_gibModel;
 
 	virtual int Save( CSave &save ); 
 	virtual int Restore( CRestore &restore );
@@ -347,6 +348,11 @@ public:
 
 	virtual BOOL IsInitiallyDead() {return FALSE;}
 
+	virtual const char* DefaultGibModel();
+	const char* GibModel();
+	virtual int DefaultGibCount();
+	int GibCount();
+
 	//
 	// Glowshell effects
 	//
@@ -367,6 +373,7 @@ public:
 class CDeadMonster : public CBaseMonster
 {
 public:
+	void Precache();
 	void SpawnHelper(const char* modelName, int bloodColor = BLOOD_COLOR_RED, int health = 8);
 	void KeyValue( KeyValueData *pkvd );
  

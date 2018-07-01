@@ -178,13 +178,9 @@ void CGib::SpawnHeadGib( entvars_t *pevVictim )
 	pGib->LimitVelocity();
 }
 
-void CGib::SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
+void CGib::SpawnHumanGibs(entvars_t *pevVictim, int cGibs)
 {
-	if (human) {
-		SpawnRandomGibs( pevVictim, cGibs, "models/hgibs.mdl", HUMAN_GIB_COUNT, 1 ); // start at one to avoid throwing random amounts of skulls (0th gib)
-	} else {
-		SpawnRandomGibs( pevVictim, cGibs, "models/agibs.mdl", ALIEN_GIB_COUNT );
-	}
+	SpawnRandomGibs( pevVictim, cGibs, "models/hgibs.mdl", HUMAN_GIB_COUNT, 1 ); // start at one to avoid throwing random amounts of skulls (0th gib)
 }
 
 void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum , int startGibNum)
@@ -203,6 +199,12 @@ void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel
 		else
 		{
 			pGib->Spawn( gibModel );
+			if (gibBodiesNum <= 0)
+			{
+				gibBodiesNum = GetBodyNumber(GET_MODEL_PTR(ENT(pGib->pev)));
+				if (gibBodiesNum == 0)
+					gibBodiesNum = 1;
+			}
 			pGib->pev->body = RANDOM_LONG( startGibNum, gibBodiesNum - 1 );
 		}
 
@@ -249,23 +251,20 @@ void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel
 	}
 }
 
-BOOL CBaseMonster::HasHumanGibs( void )
+enum
 {
-	switch (DefaultClassify()) {
+	GIBTYPE_UNKNOWN,
+	GIBTYPE_HUMAN,
+	GIBTYPE_ALIEN,
+};
+int GibType(CBaseMonster* monster)
+{
+	switch (monster->DefaultClassify()) {
 	case CLASS_HUMAN_MILITARY:
 	case CLASS_PLAYER_ALLY:
 	case CLASS_HUMAN_PASSIVE:
 	case CLASS_PLAYER:
 	case CLASS_PLAYER_ALLY_MILITARY:
-		return TRUE;
-	default:
-		return FALSE;
-	}
-}
-
-BOOL CBaseMonster::HasAlienGibs( void )
-{
-	switch (DefaultClassify()) {
 	case CLASS_ALIEN_MILITARY:
 	case CLASS_ALIEN_MONSTER:
 	case CLASS_ALIEN_PASSIVE:
@@ -274,10 +273,55 @@ BOOL CBaseMonster::HasAlienGibs( void )
 	case CLASS_ALIEN_PREY:
 	case CLASS_RACEX_PREDATOR:
 	case CLASS_RACEX_SHOCK:
-		return TRUE;
-	default:
-		return FALSE;
+	{
+		int bloodColor = monster->BloodColor();
+		if (bloodColor == BLOOD_COLOR_RED)
+			return GIBTYPE_HUMAN;
+		else if (bloodColor == BLOOD_COLOR_YELLOW)
+			return GIBTYPE_ALIEN;
 	}
+	default:
+		return GIBTYPE_UNKNOWN;
+	}
+}
+
+BOOL CBaseMonster::HasHumanGibs( void )
+{
+	return GibType(this) == GIBTYPE_HUMAN;
+}
+
+BOOL CBaseMonster::HasAlienGibs( void )
+{
+	return GibType(this) == GIBTYPE_ALIEN;
+}
+
+const char* CBaseMonster::DefaultGibModel()
+{
+	if (HasHumanGibs()) {
+		return "models/hgibs.mdl";
+	} else if (HasAlienGibs()) {
+		return "models/agibs.mdl";
+	}
+	return NULL;
+}
+
+const char* CBaseMonster::GibModel()
+{
+	if (FStringNull(m_gibModel)) {
+		return DefaultGibModel();
+	} else {
+		return STRING(m_gibModel);
+	}
+}
+
+int CBaseMonster::DefaultGibCount()
+{
+	return 4;
+}
+
+int CBaseMonster::GibCount()
+{
+	return FStringNull(m_gibModel) ? DefaultGibCount() : 4;
 }
 
 void CBaseMonster::FadeMonster( void )
@@ -297,28 +341,37 @@ void CBaseMonster::FadeMonster( void )
 //=========================================================
 void CBaseMonster::GibMonster( void )
 {
-	TraceResult	tr;
 	BOOL		gibbed = FALSE;
 
 	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM );
 
-	// only humans throw skulls !!!UNDONE - eventually monsters will have their own sets of gibs
-	if( HasHumanGibs() )
+	const char* gibModel = GibModel();
+	if (gibModel)
 	{
-		if( CVAR_GET_FLOAT( "violence_hgibs" ) != 0 )	// Only the player will ever get here
+		if (HasHumanGibs())
 		{
-			CGib::SpawnHeadGib( pev );
-			CGib::SpawnRandomGibs( pev, 4, 1 );	// throw some human gibs.
+			if( CVAR_GET_FLOAT( "violence_hgibs" ) != 0 )
+			{
+				if (FStrEq(gibModel, "models/hgibs.mdl"))
+				{
+					CGib::SpawnHeadGib(pev);
+					CGib::SpawnHumanGibs(pev);
+				}
+				else
+				{
+					CGib::SpawnRandomGibs( pev, GibCount(), gibModel );
+				}
+			}
+			gibbed = TRUE;
 		}
-		gibbed = TRUE;
-	}
-	else if( HasAlienGibs() )
-	{
-		if( CVAR_GET_FLOAT( "violence_agibs" ) != 0 )	// Should never get here, but someone might call it directly
+		else if (HasAlienGibs())
 		{
-			CGib::SpawnRandomGibs( pev, 4, 0 );	// Throw alien gibs
+			if( CVAR_GET_FLOAT( "violence_agibs" ) != 0 )
+			{
+				CGib::SpawnRandomGibs( pev, GibCount(), gibModel );
+			}
+			gibbed = TRUE;
 		}
-		gibbed = TRUE;
 	}
 
 	if( !IsPlayer() )

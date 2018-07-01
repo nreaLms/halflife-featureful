@@ -180,6 +180,8 @@ void CMonsterMaker::Precache( void )
 
 	if (!FStringNull(m_customModel))
 		PRECACHE_MODEL(STRING(m_customModel));
+	if (!FStringNull(m_gibModel))
+		PRECACHE_MODEL(STRING(m_gibModel));
 	UTIL_PrecacheOther( STRING( m_iszMonsterClassname ) );
 }
 
@@ -259,6 +261,8 @@ void CMonsterMaker::MakeMonster( void )
 			createdMonster->m_iClass = m_classify;
 		if (m_bloodColor)
 			createdMonster->m_bloodColor = m_bloodColor;
+		if (!FStringNull(m_gibModel))
+			createdMonster->m_gibModel = m_gibModel;
 		if (createdMonster->IsInitiallyDead())
 		{
 			CDeadMonster* deadMonster = (CDeadMonster*)createdMonster;

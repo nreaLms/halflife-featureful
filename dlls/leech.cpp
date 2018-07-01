@@ -99,6 +99,7 @@ public:
 	// Base entity functions
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int BloodColor( void ) { return DONT_BLEED; }
+	BOOL HasAlienGibs() {return TRUE;}
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void Activate( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );

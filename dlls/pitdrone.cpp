@@ -181,7 +181,6 @@ enum
 
 class CPitDrone : public CBaseMonster
 {
-
 	void Spawn(void);
 	void Precache(void);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
@@ -206,7 +205,13 @@ class CPitDrone : public CBaseMonster
 	void RunTask(Task_t *pTask);
 	void RunAI(void);
 	void CheckAmmo();
-	void GibMonster();
+	const char* DefaultGibModel() {
+		return "models/pit_drone_gibs.mdl";
+	}
+	int DefaultGibCount() {
+		return 5;
+	}
+
 	CUSTOM_SCHEDULES
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
@@ -719,18 +724,6 @@ void CPitDrone::CheckAmmo( void )
 	{
 		SetConditions( bits_COND_NO_AMMO_LOADED );
 	}
-}
-
-void CPitDrone::GibMonster()
-{
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM );
-
-	if( CVAR_GET_FLOAT( "violence_agibs" ) != 0 )	// Should never get here, but someone might call it directly
-	{
-		CGib::SpawnRandomGibs( pev, 5, "models/pit_drone_gibs.mdl", PITDRONE_GIB_COUNT );	// Throw alien gibs
-	}
-	SetThink( &CBaseEntity::SUB_Remove );
-	pev->nextthink = gpGlobals->time;
 }
 
 //========================================================

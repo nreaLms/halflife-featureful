@@ -107,6 +107,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_scriptState, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_pCine, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CBaseMonster, m_iClass, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseMonster, m_gibModel, FIELD_STRING ),
 
 	DEFINE_FIELD( CBaseMonster, m_glowShellTime, FIELD_TIME ),
 
@@ -2974,6 +2975,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 		m_iClass = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName , "gibmodel" ) )
+	{
+		m_gibModel = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseToggle::KeyValue( pkvd );
@@ -3455,6 +3461,9 @@ void CBaseMonster::PrecacheMyModel(const char *model)
 	} else {
 		PRECACHE_MODEL( STRING( pev->model ) );
 	}
+	if (!FStringNull(m_gibModel)) {
+		PRECACHE_MODEL( STRING(m_gibModel) );
+	}
 }
 
 void CBaseMonster::SetMyBloodColor(int bloodColor)
@@ -3524,6 +3533,12 @@ void CDeadMonster::KeyValue( KeyValueData *pkvd )
 	}
 	else 
 		CBaseMonster::KeyValue( pkvd );
+}
+
+void CDeadMonster::Precache()
+{
+	if (!FStringNull(m_gibModel))
+		PRECACHE_MODEL(STRING(m_gibModel));
 }
 
 void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int health)
