@@ -89,24 +89,28 @@ typedef void(CBaseEntity::*ENTITYFUNCPTR)( CBaseEntity *pOther );
 typedef void(CBaseEntity::*USEPTR)( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 // For CLASSIFY
-#define	CLASS_NONE			0
-#define CLASS_MACHINE			1
-#define CLASS_PLAYER			2
-#define	CLASS_HUMAN_PASSIVE		3
-#define CLASS_HUMAN_MILITARY		4
-#define CLASS_ALIEN_MILITARY		5
-#define CLASS_ALIEN_PASSIVE		6
-#define CLASS_ALIEN_MONSTER		7
-#define CLASS_ALIEN_PREY		8
-#define CLASS_ALIEN_PREDATOR		9
-#define CLASS_INSECT			10
-#define CLASS_PLAYER_ALLY		11
-#define CLASS_PLAYER_BIOWEAPON		12 // hornets and snarks.launched by players
-#define CLASS_ALIEN_BIOWEAPON		13 // hornets and snarks.launched by the alien menace
-#define CLASS_RACEX_PREDATOR	14
-#define CLASS_RACEX_SHOCK		15
-#define CLASS_PLAYER_ALLY_MILITARY 16
-#define	CLASS_BARNACLE			99 // special because no one pays attention to it, and it eats a wide cross-section of creatures.
+enum
+{
+	CLASS_NONE,
+	CLASS_MACHINE,
+	CLASS_PLAYER,
+	CLASS_HUMAN_PASSIVE,
+	CLASS_HUMAN_MILITARY,
+	CLASS_ALIEN_MILITARY,
+	CLASS_ALIEN_PASSIVE,
+	CLASS_ALIEN_MONSTER,
+	CLASS_ALIEN_PREY,
+	CLASS_ALIEN_PREDATOR,
+	CLASS_INSECT,
+	CLASS_PLAYER_ALLY,
+	CLASS_PLAYER_BIOWEAPON, // hornets and snarks.launched by players
+	CLASS_ALIEN_BIOWEAPON, // hornets and snarks.launched by the alien menace
+	CLASS_RACEX_PREDATOR,
+	CLASS_RACEX_SHOCK,
+	CLASS_PLAYER_ALLY_MILITARY,
+	CLASS_NUMBER_OF_CLASSES,
+	CLASS_BARNACLE = 99 // special because no one pays attention to it, and it eats a wide cross-section of creatures.
+};
 
 class CBaseEntity;
 class CBaseMonster;

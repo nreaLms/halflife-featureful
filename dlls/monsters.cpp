@@ -2199,7 +2199,7 @@ int CBaseMonster::IDefaultRelationship(int classify)
 
 int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 {
-	static int iEnemy[17][17] =
+	static int iEnemy[CLASS_NUMBER_OF_CLASSES][CLASS_NUMBER_OF_CLASSES] =
 	{			 //   NONE	 MACH	 PLYR	 HPASS	 HMIL	 AMIL	 APASS	 AMONST	APREY	 APRED	 INSECT	PLRALY	PBWPN	ABWPN	XPED	XSHOCK	ALMIL
 	/*NONE*/		{ R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO},
 	/*MACHINE*/		{ R_NO	,R_NO	,R_DL	,R_DL	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL},
@@ -2219,6 +2219,11 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 	/*XSHOCK*/		{ R_NO	,R_DL	,R_DL	,R_DL	,R_HT	,R_XA	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_HT},
 	/*PLRALLYMIL*/	{ R_NO	,R_DL	,R_AL	,R_DL	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_NO,	R_DL,	R_HT,	R_AL},
 	};
+	if (classify1 >= CLASS_NUMBER_OF_CLASSES || classify1 < 0 || classify2 >= CLASS_NUMBER_OF_CLASSES || classify2 < 0 )
+	{
+		ALERT(at_console, "Unknown classify for monster relationship %d,%d\n", classify1, classify2);
+		return R_NO;
+	}
 	return iEnemy[classify1][classify2];
 }
 
