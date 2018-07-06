@@ -751,10 +751,16 @@ CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, c
 	edict_t	*pent;
 	CBaseEntity *pEntity;
 
+	if( !szName )
+	{
+		ALERT( at_console, "Create() - No item name!\n" );
+		return NULL;
+	}
+
 	pent = CREATE_NAMED_ENTITY( MAKE_STRING( szName ) );
 	if( FNullEnt( pent ) )
 	{
-		ALERT ( at_console, "NULL Ent in Create!\n" );
+		ALERT ( at_console, "NULL Ent in Create! (%s)\n", szName );
 		return NULL;
 	}
 	pEntity = Instance( pent );
