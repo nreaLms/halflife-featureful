@@ -895,8 +895,11 @@ Task_t tlSquidEat[] =
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.5f },
 	{ TASK_EAT, (float)50 },
 	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
 	{ TASK_WALK_PATH, (float)0 },
@@ -932,9 +935,13 @@ Task_t tlSquidSniffAndEat[] =
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.5f },
 	{ TASK_EAT, (float)50 },
+	{ TASK_GET_HEALTH_FROM_FOOD, (float)0 },
 	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
@@ -989,6 +996,43 @@ Schedule_t slSquidWallow[] =
 	}
 };
 
+Task_t tlSquidVictoryDance[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_EAT, (float)10 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_WAIT, (float)0.2 },
+	{ TASK_STORE_LASTPOSITION, (float)0 },
+	{ TASK_GET_PATH_TO_ENEMY_CORPSE, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.5f },
+	{ TASK_EAT, (float)50 },
+	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_CLEAR_LASTPOSITION, (float)0 },
+};
+
+Schedule_t slSquidVictoryDance[] =
+{
+	{
+		tlSquidVictoryDance,
+		ARRAYSIZE( tlSquidVictoryDance ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE,
+		0,
+		"SquidVictoryDance"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES( CBullsquid ) 
 {
 	slSquidRangeAttack1,
@@ -997,7 +1041,8 @@ DEFINE_CUSTOM_SCHEDULES( CBullsquid )
 	slSquidSeeCrab,
 	slSquidEat,
 	slSquidSniffAndEat,
-	slSquidWallow
+	slSquidWallow,
+	slSquidVictoryDance
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CBullsquid, CBaseMonster )
@@ -1011,6 +1056,11 @@ Schedule_t *CBullsquid::GetSchedule( void )
 	{
 	case MONSTERSTATE_ALERT:
 		{
+			if( HasConditions( bits_COND_ENEMY_DEAD ) && pev->health < pev->max_health )
+			{
+				return GetScheduleOfType( SCHED_VICTORY_DANCE );
+			}
+			
 			if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 			{
 				return GetScheduleOfType( SCHED_SQUID_HURTHOP );
@@ -1135,6 +1185,9 @@ Schedule_t *CBullsquid::GetScheduleOfType( int Type )
 	case SCHED_CHASE_ENEMY:
 		return &slSquidChaseEnemy[0];
 		break;
+	case SCHED_VICTORY_DANCE:
+		return slSquidVictoryDance;
+		break;
 	}
 
 	return CBaseMonster::GetScheduleOfType( Type );
@@ -1153,6 +1206,20 @@ void CBullsquid::StartTask( Task_t *pTask )
 
 	switch( pTask->iTask )
 	{
+	case TASK_GET_PATH_TO_ENEMY_CORPSE:
+		{
+			UTIL_MakeVectors( pev->angles );
+			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 50, bits_MF_TO_LOCATION, NULL ) )
+			{
+				TaskComplete();
+			}
+			else
+			{
+				ALERT( at_console, "GetPathToEnemyCorpse failed!!\n" );
+				TaskFail();
+			}
+		}
+		break;
 	case TASK_MELEE_ATTACK2:
 		{
 			switch( RANDOM_LONG( 0, 2 ) )

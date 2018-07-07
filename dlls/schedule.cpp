@@ -1306,6 +1306,12 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		m_failSchedule = SCHED_NONE;
 		TaskComplete();
 		break;
+	case TASK_GET_HEALTH_FROM_FOOD:
+		//ALERT(at_console, "Eating. Current health: %f. Max health: %f\n", pev->health, pev->max_health);
+		TakeHealth( pev->max_health * pTask->flData, DMG_GENERIC);
+		//ALERT(at_console, "Health after eating: %f\n", pev->health);
+		TaskComplete();
+		break;
 	default:
 		{
 			ALERT( at_aiconsole, "No StartTask entry for %d\n", (SHARED_TASKS)pTask->iTask );
