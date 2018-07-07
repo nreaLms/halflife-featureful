@@ -76,6 +76,7 @@ IMPLEMENT_SAVERESTORE(CDisplacerBall, CBaseEntity);
 
 void CDisplacerBall::Spawn(void)
 {
+	pev->classname = MAKE_STRING("displacer_ball");
 	pev->movetype = MOVETYPE_FLY;
 
 	pev->solid = SOLID_BBOX;

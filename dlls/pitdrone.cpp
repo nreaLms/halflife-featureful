@@ -47,7 +47,6 @@ CPitDroneSpit *CPitDroneSpit::SpitCreate(void)
 {
 	// Create a new entity with CShock private data
 	CPitDroneSpit *pSpit = GetClassPtr((CPitDroneSpit *)NULL);
-	pSpit->pev->classname = MAKE_STRING("pitdronespit");
 	pSpit->Spawn();
 
 	return pSpit;

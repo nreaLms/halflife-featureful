@@ -227,6 +227,7 @@ void CSporeGrenade::BounceTouch(CBaseEntity *pOther)
 void CSporeGrenade::Spawn(void)
 {
 	Precache();
+	pev->classname = MAKE_STRING("spore");
 	pev->movetype = MOVETYPE_BOUNCE;
 
 	pev->solid = SOLID_BBOX;

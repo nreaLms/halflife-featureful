@@ -27,7 +27,7 @@ public:
     float m_velocity;
 };
 
-LINK_ENTITY_TO_CLASS(func_tankrocket_of, CMortarShell)
+LINK_ENTITY_TO_CLASS(mortar_shell, CMortarShell)
 
 TYPEDESCRIPTION CMortarShell::m_SaveData[] =
 {
@@ -272,7 +272,7 @@ void COp4Mortar::Precache()
     PRECACHE_MODEL("models/mortar.mdl");
     PRECACHE_SOUND("weapons/mortarhit.wav");
     PRECACHE_SOUND("player/pl_grate1.wav");
-    UTIL_PrecacheOther("func_tankrocket_of");
+    UTIL_PrecacheOther("mortar_shell");
 }
 
 void COp4Mortar::Spawn()
