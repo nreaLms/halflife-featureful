@@ -708,8 +708,11 @@ Task_t tlGonomeVictoryDance[] =
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
+	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.25 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE }
+	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.25 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
+	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.25 },
 };
 
 Schedule_t slGonomeVictoryDance[] =

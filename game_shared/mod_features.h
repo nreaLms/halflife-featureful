@@ -36,6 +36,9 @@
 // whether race x and alien military are enemies
 #define FEATURE_RACEX_AND_AMIL_ENEMIES 1
 
+// whether monsters get health from eating meat or enemy corpses
+#define FEATURE_EAT_FOR_HEALTH 1
+
 // New weapons
 #define FEATURE_PIPEWRENCH 1
 #define FEATURE_KNIFE 1
