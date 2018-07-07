@@ -495,12 +495,17 @@ int CBaseEntity::TakeHealth( float flHealth, int bitsDamageType )
 	if( pev->health >= pev->max_health )
 		return 0;
 
+	if (flHealth <= 0)
+		return 0;
+
 	pev->health += flHealth;
 
-	if( pev->health > pev->max_health )
+	if( pev->health > pev->max_health ) {
+		flHealth -= (pev->health - pev->max_health);
 		pev->health = pev->max_health;
+	}
 
-	return 1;
+	return (int)flHealth;
 }
 
 // inflict damage on this entity.  bitsDamageType indicates type of damage inflicted, ie: DMG_CRUSH

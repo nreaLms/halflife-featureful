@@ -375,32 +375,32 @@ void CBasePlayer::DeathSound( void )
 // bitsDamageType indicates type of damage healed. 
 int CBasePlayer::TakeHealth( float flHealth, int bitsDamageType )
 {
+	const int healed = CBaseMonster::TakeHealth(flHealth, bitsDamageType);
 #if FEATURE_MEDKIT
-	if (pev->weapons & ( 1 << WEAPON_MEDKIT )) {
-		if ((flHealth == 1 && pev->health >= pev->max_health) || (pev->health < pev->max_health && pev->health + flHealth > pev->max_health) ) {
-			const int diff = (int)(pev->health + flHealth - pev->max_health);
-			for( int i = 0; i < MAX_ITEM_TYPES; i++ ) {
-				if( m_rgpPlayerItems[i] ) {
-					CBasePlayerItem *pPlayerItem = m_rgpPlayerItems[i];
-					while( pPlayerItem ) {
-						if (pPlayerItem->m_iId == WEAPON_MEDKIT) {
-							//CBasePlayerWeapon* pPlayerWeapon = (CBasePlayerWeapon*)pPlayerItem;
-							int medAmmoIndex = GetAmmoIndex(pPlayerItem->pszAmmo1());
-							int medAmmo = AmmoInventory(medAmmoIndex);
-							if (medAmmo >= 0 && medAmmo < pPlayerItem->iMaxAmmo1()) {
-								m_rgAmmo[medAmmoIndex] += Q_min(diff, pPlayerItem->iMaxAmmo1() - medAmmo);
-								CBaseMonster::TakeHealth( flHealth, bitsDamageType );
-								return 1;
-							}
+	if ((int)flHealth > healed && (pev->weapons & ( 1 << WEAPON_MEDKIT ))) {
+		const int rest = (int)flHealth - healed;
+		for( int i = 0; i < MAX_ITEM_TYPES; i++ ) {
+			if( m_rgpPlayerItems[i] ) {
+				CBasePlayerItem *pPlayerItem = m_rgpPlayerItems[i];
+				while( pPlayerItem ) {
+					if (pPlayerItem->m_iId == WEAPON_MEDKIT) {
+						//CBasePlayerWeapon* pPlayerWeapon = (CBasePlayerWeapon*)pPlayerItem;
+						const int medAmmoIndex = GetAmmoIndex(pPlayerItem->pszAmmo1());
+						const int medAmmo = AmmoInventory(medAmmoIndex);
+						if (medAmmo >= 0 && medAmmo < pPlayerItem->iMaxAmmo1()) {
+							const int toAdd = Q_min(rest, pPlayerItem->iMaxAmmo1() - medAmmo);
+							m_rgAmmo[medAmmoIndex] += toAdd;
+							return healed + toAdd;
 						}
-						pPlayerItem = pPlayerItem->m_pNext;
+						return healed;
 					}
+					pPlayerItem = pPlayerItem->m_pNext;
 				}
 			}
 		}
 	}
 #endif
-	return CBaseMonster::TakeHealth( flHealth, bitsDamageType );
+	return healed;
 }
 
 Vector CBasePlayer::GetGunPosition()

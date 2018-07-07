@@ -459,7 +459,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	}
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->health >= pActivator->pev->max_health )
+	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
@@ -476,12 +476,13 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	if( m_flNextCharge >= gpGlobals->time )
 		return;
 
+	int soundType = 0;
 	TurnNeedleToPlayer(pActivator->pev->origin);
 	switch (m_iState) {
 	case Idle:
 		m_flSoundTime = 0.56 + gpGlobals->time;
 		SetNeedleState(GiveShot);
-		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
+		soundType = 1;
 		break;
 	case GiveShot:
 		SetNeedleState(Healing);
@@ -489,7 +490,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	case Healing:
 		if (!m_playingChargeSound && m_flSoundTime <= gpGlobals->time)
 		{
-			EMIT_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav", 1.0, ATTN_NORM );
+			soundType = 2;
 			m_playingChargeSound = TRUE;
 		}
 		break;
@@ -504,6 +505,28 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		m_iJuice--;
 		const float jarBoneControllerValue = (m_iJuice / gSkillData.healthchargerCapacity) * 11 - 11;
 		m_jar->SetBoneController(0,  jarBoneControllerValue );
+
+		if (soundType == 1)
+		{
+			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
+		}
+		else if (soundType == 2)
+		{
+			EMIT_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav", 1.0, ATTN_NORM );
+			m_playingChargeSound = TRUE;
+		}
+	}
+	else
+	{
+		if( m_flSoundTime <= gpGlobals->time )
+		{
+			m_flSoundTime = gpGlobals->time + 0.62;
+			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshotno1.wav", 1.0, ATTN_NORM );
+		}
+		if (m_playingChargeSound) {
+			STOP_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav" );
+			m_playingChargeSound = FALSE;
+		}
 	}
 
 	// govern the rate of charge

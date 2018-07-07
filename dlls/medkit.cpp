@@ -193,13 +193,10 @@ void CMedkit::WeaponIdle(void)
 
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 && m_flSoundDelay != 0 && m_flSoundDelay <= gpGlobals->time)
 	{
-		const float maxHeal = Q_min(gSkillData.plrDmgMedkit, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+		const int maxHeal = Q_min((int)gSkillData.plrDmgMedkit, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 		if (m_secondaryAttack) {
-			const float diff = m_pPlayer->pev->max_health - m_pPlayer->pev->health;
-			const int toHeal = (int)(Q_min(diff, maxHeal));
-			if ( m_pPlayer->TakeHealth(toHeal, DMG_GENERIC) ) {
-				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= toHeal;
-			}
+			const int diff = (int)(m_pPlayer->pev->max_health - m_pPlayer->pev->health);
+			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= m_pPlayer->TakeHealth(Q_min(maxHeal, diff), DMG_GENERIC);
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/medshot5.wav", 1.0, ATTN_NORM, 0, 100);
 		} else {
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -207,10 +204,10 @@ void CMedkit::WeaponIdle(void)
 			CBaseEntity* healTarget = FindHealTarget();
 	
 			if (healTarget) {
-				const float diff = healTarget->pev->max_health - healTarget->pev->health;
-				const int toHeal = (int)(Q_min(diff, maxHeal));
-				if ( healTarget->TakeHealth(toHeal, DMG_GENERIC) ) {
-					m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= toHeal;
+				const int diff = (int)(healTarget->pev->max_health - healTarget->pev->health);
+				const int healResult = healTarget->TakeHealth(Q_min(maxHeal, diff), DMG_GENERIC);
+				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= healResult;
+				if ( healResult ) {
 #ifndef CLIENT_DLL
 					CBaseMonster* monster = healTarget->MyMonsterPointer();
 					if (monster) {

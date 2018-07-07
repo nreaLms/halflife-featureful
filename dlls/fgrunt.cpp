@@ -3349,18 +3349,12 @@ bool CMedic::Heal( void )
 	if ( !HasHealCharge() || !HasHealTarget() )
 		return false;
 
-	float healAmount = Q_min(m_hTargetEnt->pev->max_health - m_hTargetEnt->pev->health, m_flHealCharge);
-	if (healAmount > 10) {
-		healAmount = 10;
-	}
-
 	Vector target = m_hTargetEnt->pev->origin - pev->origin;
 	if ( target.Length() > 100 )
 		return false;
 
-	if (m_hTargetEnt->TakeHealth( healAmount, DMG_GENERIC ))
-		m_flHealCharge -= healAmount;
-	ALERT(at_aiconsole, "Heal charge left: %f\n", m_flHealCharge);
+	m_flHealCharge -= m_hTargetEnt->TakeHealth( Q_min(10, m_flHealCharge), DMG_GENERIC );
+	ALERT(at_aiconsole, "Medic grunt heal charge left: %f\n", m_flHealCharge);
 	m_fHealing = TRUE;
 	return true;
 }
