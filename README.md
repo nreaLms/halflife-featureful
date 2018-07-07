@@ -52,6 +52,7 @@ Most Opposing Force monsters are implemented (exceptions are geneworm and pitwor
 
 * Health, relationship class, blood color, gibs and model can be customized in map editor.
 * monster_barnacle health can be configured via skill.cfg
+* Houndeye squad leader can play leaderlook animation.
 
 ### New weapons
 
