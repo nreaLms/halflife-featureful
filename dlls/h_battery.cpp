@@ -27,6 +27,7 @@
 #include "skill.h"
 #include "gamerules.h"
 #include "effects.h"
+#include "customentity.h"
 
 class CRecharge : public CBaseToggle
 {
@@ -229,6 +230,8 @@ void CRechargeGlassDecay::Spawn()
 	pev->rendermode = kRenderTransTexture;
 }
 
+LINK_ENTITY_TO_CLASS(item_recharge_glass, CRechargeGlassDecay)
+
 class CRechargeDecay : public CBaseAnimating
 {
 public:
@@ -239,9 +242,10 @@ public:
 	void EXPORT Recharge( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int ObjectCaps( void ) { return ( CBaseAnimating::ObjectCaps() | FCAP_CONTINUOUS_USE ) & ~FCAP_ACROSS_TRANSITION; }
-	void TurnChargeToPlayer(const Vector player);
+	void TurnChargeToPlayer(const Vector &player);
 	void SetChargeState(int state);
 	void SetChargeController(float yaw);
+	void UpdateOnRemove();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -300,8 +304,8 @@ void CRechargeDecay::Spawn()
 
 	m_glass = GetClassPtr( (CRechargeGlassDecay *)NULL );
 	m_glass->Spawn();
+	m_glass->pev->classname = MAKE_STRING("item_recharge_glass");
 	UTIL_SetOrigin( m_glass->pev, pev->origin );
-	m_glass->pev->owner = ENT( pev );
 	m_glass->pev->angles = pev->angles;
 
 	InitBoneControllers();
@@ -338,7 +342,7 @@ void CRechargeDecay::SearchForPlayer()
 	float delay = 0.05;
 	UTIL_MakeVectors( pev->angles );
 	while((pEntity = UTIL_FindEntityInSphere(pEntity, Center(), 64)) != 0) { // this must be in sync with PLAYER_SEARCH_RADIUS from player.cpp
-		if (pEntity->IsPlayer()) {
+		if (pEntity->IsPlayer() && pEntity->IsAlive()) {
 			if (DotProduct(pEntity->pev->origin - pev->origin, gpGlobals->v_forward) < 0) {
 				continue;
 			}
@@ -524,7 +528,7 @@ void CRechargeDecay::SetMySequence(const char *sequence)
 {
 	pev->sequence = LookupSequence( sequence );
 	if (pev->sequence == -1) {
-		ALERT(at_error, "unknown sequence: %s\n", sequence);
+		ALERT(at_error, "unknown sequence in %s: %s\n", STRING(pev->model), sequence);
 		pev->sequence = 0;
 	}
 	pev->frame = 0;
@@ -565,7 +569,7 @@ void CRechargeDecay::SetChargeState(int state)
 	}
 }
 
-void CRechargeDecay::TurnChargeToPlayer(const Vector player)
+void CRechargeDecay::TurnChargeToPlayer(const Vector& player)
 {
 	float yaw = UTIL_VecToYaw( player - pev->origin ) - pev->angles.y;
 
@@ -587,7 +591,9 @@ void CRechargeDecay::CreateBeam()
 	CBeam* beam = CBeam::BeamCreate( "sprites/lgtning.spr", 5 );
 	if( !beam )
 		return;
-	beam->EntsInit(entindex(), entindex());
+	beam->SetType( BEAM_ENTS );
+	beam->SetStartEntity( entindex() );
+	beam->SetEndEntity( entindex() );
 	beam->SetStartAttachment(3);
 	beam->SetEndAttachment(4);
 	beam->SetColor( 0, 225, 0 );
@@ -596,4 +602,13 @@ void CRechargeDecay::CreateBeam()
 	beam->RelinkBeam();
 
 	m_beam = beam;
+}
+
+void CRechargeDecay::UpdateOnRemove()
+{
+	CBaseAnimating::UpdateOnRemove();
+	UTIL_Remove(m_beam);
+	UTIL_Remove(m_glass);
+	m_beam = NULL;
+	m_glass = NULL;
 }

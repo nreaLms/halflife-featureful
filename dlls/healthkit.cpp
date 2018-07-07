@@ -285,6 +285,8 @@ void CWallHealthJarDecay::Spawn()
 	InitBoneControllers();
 }
 
+LINK_ENTITY_TO_CLASS(item_healthcharger_jar, CWallHealthJarDecay)
+
 class CWallHealthDecay : public CBaseAnimating
 {
 public:
@@ -295,9 +297,10 @@ public:
 	void EXPORT Recharge( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int ObjectCaps( void ) { return ( CBaseAnimating::ObjectCaps() | FCAP_CONTINUOUS_USE ) & ~FCAP_ACROSS_TRANSITION; }
-	void TurnNeedleToPlayer(const Vector player);
+	void TurnNeedleToPlayer(const Vector &player);
 	void SetNeedleState(int state);
 	void SetNeedleController(float yaw);
+	void UpdateOnRemove();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -353,8 +356,8 @@ void CWallHealthDecay::Spawn()
 
 	m_jar = GetClassPtr( (CWallHealthJarDecay *)NULL );
 	m_jar->Spawn();
+	m_jar->pev->classname = MAKE_STRING("item_healthcharger_jar");
 	UTIL_SetOrigin( m_jar->pev, pev->origin );
-	m_jar->pev->owner = ENT( pev );
 	m_jar->pev->angles = pev->angles;
 
 	InitBoneControllers();
@@ -388,7 +391,7 @@ void CWallHealthDecay::SearchForPlayer()
 	float delay = 0.05;
 	UTIL_MakeVectors( pev->angles );
 	while((pEntity = UTIL_FindEntityInSphere(pEntity, Center(), 64)) != 0) { // this must be in sync with PLAYER_SEARCH_RADIUS from player.cpp
-		if (pEntity->IsPlayer()) {
+		if (pEntity->IsPlayer() && pEntity->IsAlive()) {
 			if (DotProduct(pEntity->pev->origin - pev->origin, gpGlobals->v_forward) < 0) {
 				continue;
 			}
@@ -456,7 +459,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	}
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->health >= 100 )
+	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->health >= pActivator->pev->max_health )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
@@ -562,7 +565,7 @@ void CWallHealthDecay::SetMySequence(const char *sequence)
 {
 	pev->sequence = LookupSequence( sequence );
 	if (pev->sequence == -1) {
-		ALERT(at_error, "unknown sequence: %s\n", sequence);
+		ALERT(at_error, "unknown sequence in %s: %s\n", STRING(pev->model), sequence);
 		pev->sequence = 0;
 	}
 	pev->frame = 0;
@@ -603,7 +606,7 @@ void CWallHealthDecay::SetNeedleState(int state)
 	}
 }
 
-void CWallHealthDecay::TurnNeedleToPlayer(const Vector player)
+void CWallHealthDecay::TurnNeedleToPlayer(const Vector& player)
 {
 	float yaw = UTIL_VecToYaw( player - pev->origin ) - pev->angles.y;
 
@@ -618,4 +621,11 @@ void CWallHealthDecay::TurnNeedleToPlayer(const Vector player)
 void CWallHealthDecay::SetNeedleController(float yaw)
 {
 	SetBoneController(0, yaw);
+}
+
+void CWallHealthDecay::UpdateOnRemove()
+{
+	CBaseAnimating::UpdateOnRemove();
+	UTIL_Remove(m_jar);
+	m_jar = NULL;
 }
