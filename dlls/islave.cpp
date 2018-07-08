@@ -160,6 +160,7 @@ public:
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
 	void PrescheduleThink();
+	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
 	void SpawnFamiliar(const char *entityName, const Vector& origin, int hullType);
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType( int Type );
