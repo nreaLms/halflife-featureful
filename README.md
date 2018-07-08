@@ -55,6 +55,10 @@ Most Opposing Force monsters are implemented (exceptions are geneworm and pitwor
 * Houndeye squad leader can play leaderlook animation.
 * Alien grunts, bullsquids, houndeyes, gonomes, pitdrones and voltigores restore health when they eat meat or enemy corpses.
 
+### Alien slave features
+
+Alien slaves (also known as vortigaunts) got many new abilities. Now they gain energy to heal themselves when attack enemies with lightning. They can use free energy to heal or revive ally vortigaunts and boost their claws damage. They also can use a coil attack and summon familiars (snarks or headcrabs). Their hands are glowing when they use their abilities. The available abilities can be configured in source code.
+
 ### New weapons
 
 #### Opposing Force weapons

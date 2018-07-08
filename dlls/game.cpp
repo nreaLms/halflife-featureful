@@ -265,6 +265,9 @@ cvar_t	sk_islave_dmg_zap1 = {"sk_islave_dmg_zap1","0"};
 cvar_t	sk_islave_dmg_zap2 = {"sk_islave_dmg_zap2","0"};
 cvar_t	sk_islave_dmg_zap3 = {"sk_islave_dmg_zap3","0"};
 
+cvar_t sk_islave_zap_rate1 = {"sk_islave_zap_rate1", "1"};
+cvar_t sk_islave_zap_rate2 = {"sk_islave_zap_rate2", "1"};
+cvar_t sk_islave_zap_rate3 = {"sk_islave_zap_rate3", "1.5"};
 
 // Icthyosaur
 cvar_t	sk_ichthyosaur_health1	= {"sk_ichthyosaur_health1","0"};
@@ -981,6 +984,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_islave_dmg_zap1 );// {"sk_islave_dmg_zap1","0"};
 	CVAR_REGISTER( &sk_islave_dmg_zap2 );// {"sk_islave_dmg_zap2","0"};
 	CVAR_REGISTER( &sk_islave_dmg_zap3 );// {"sk_islave_dmg_zap3","0"};
+
+	CVAR_REGISTER( &sk_islave_zap_rate1 );
+	CVAR_REGISTER( &sk_islave_zap_rate2 );
+	CVAR_REGISTER( &sk_islave_zap_rate3 );
 
 	// Icthyosaur
 	CVAR_REGISTER( &sk_ichthyosaur_health1 );// {"sk_ichthyosaur_health1","0"};
