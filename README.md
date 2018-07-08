@@ -4,6 +4,11 @@ Half-Life SDK for Xash3D & GoldSource with some fixes and features that can be u
 
 ## Features
 
+Most of the new features can be enabled or disabled. Go to game_shared/mod_features.h to select features you need.
+Note that some features may require additional files to be included in your mod distribution. These can be models, sounds, sprites, etc.
+
+In case you enable new monsters or weapons don't forget to add their skill values to skill.cfg. Talking monsters will also require changes in sentences.txt.
+
 ### New monsters
 
 #### Opposing Force monsters
@@ -54,10 +59,11 @@ Most Opposing Force monsters are implemented (exceptions are geneworm and pitwor
 * monster_barnacle health can be configured via skill.cfg
 * Houndeye squad leader can play leaderlook animation.
 * Alien grunts, bullsquids, houndeyes, gonomes, pitdrones and voltigores restore health when they eat meat or enemy corpses.
+* Alien slave attack rate can be configured via skill.cfg (In Half-Life it's hardcoded as 1 for easy and normal, and 1.5 for hard difficulty)
 
 ### Alien slave features
 
-Alien slaves (also known as vortigaunts) got many new abilities. Now they gain energy to heal themselves when attack enemies with lightning. They can use free energy to heal or revive ally vortigaunts and boost their claws damage. They also can use a coil attack and summon familiars (snarks or headcrabs). Their hands are glowing when they use their abilities. The available abilities can be configured in source code.
+Alien slaves (also known as vortigaunts) got many new abilities. Now they gain energy to heal themselves when attack enemies with lightning. They can use free energy to heal or revive ally vortigaunts and boost their claws damage. They also can use a coil attack and summon familiars (snarks or headcrabs). Their hands are glowing when they use their abilities. The available abilities can be configured in dlls/islave.cpp.
 
 ### New weapons
 
@@ -106,6 +112,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * Added Explosive Only and Op4Mortar only flags for func_breakable. Breakables with these flags can be destroyed only with explosive weapons and op4mortar shells respectively.
 * monstermaker can have env_warpball template to automatically play teleportation effects on monster spawn.
 * monstermaker can set custom health, body, skin, blood color, relationship class, gibs and model for spawned monsters.
+* Wall health and armor chargers now play "no" sound when player use them having full health or armor.
 
 ## How to build
 
