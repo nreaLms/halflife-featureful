@@ -888,13 +888,13 @@ void CISlave::Spawn()
 	}
 #endif
 
+	MonsterInit();
+
 #if FEATURE_ISLAVE_ENERGY
 	// leader starts with some energy pool
 	if (pev->spawnflags & SF_SQUADMONSTER_LEADER)
 		m_freeEnergy = pev->max_health;
 #endif
-
-	MonsterInit();
 }
 
 //=========================================================
