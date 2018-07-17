@@ -566,7 +566,7 @@ Schedule_t *CBabyCrab::GetScheduleOfType( int Type )
 	return CHeadCrab::GetScheduleOfType( Type );
 }
 
-#ifdef FEATURE_SHOCKTROOPER
+#if FEATURE_SHOCKTROOPER
 class CShockRoach : public CHeadCrab
 {
 public:

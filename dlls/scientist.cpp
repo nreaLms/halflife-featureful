@@ -1418,7 +1418,7 @@ int CSittingScientist::FIdleSpeak( void )
 	return FALSE;
 }
 
-#ifdef FEATURE_CLEANSUIT_SCIENTIST
+#if FEATURE_CLEANSUIT_SCIENTIST
 class CCleansuitScientist : public CScientist
 {
 public:
