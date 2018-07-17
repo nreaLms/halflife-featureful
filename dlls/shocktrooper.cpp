@@ -343,6 +343,10 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			{
 				// Remove any pitch.
 				pRoach->pev->angles.x = 0;
+				CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
+				if (pNewMonster && m_iClass != 0) {
+					pNewMonster->m_iClass = Classify();
+				}
 			}
 		}
 	}

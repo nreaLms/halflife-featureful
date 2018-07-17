@@ -580,6 +580,10 @@ int CBigMomma::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 void CBigMomma::LayHeadcrab( void )
 {
 	CBaseEntity *pChild = CBaseEntity::Create( BIG_CHILDCLASS, pev->origin, pev->angles, edict() );
+	CBaseMonster *pNewMonster = pChild->MyMonsterPointer();
+	if (pNewMonster && m_iClass != 0) {
+		pNewMonster->m_iClass = Classify();
+	}
 
 	pChild->pev->spawnflags |= SF_MONSTER_FALL_TO_GROUND;
 

@@ -833,7 +833,7 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 					pNewMonster->SetConditions( bits_COND_NEW_ENEMY );
 					pNewMonster->m_MonsterState = MONSTERSTATE_COMBAT;
 					pNewMonster->m_IdealMonsterState = MONSTERSTATE_COMBAT;
-					if (Classify() != DefaultClassify()) {
+					if (m_iClass) {
 						pNewMonster->m_iClass = Classify();
 					}
 				}
