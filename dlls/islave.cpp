@@ -690,6 +690,8 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 	CBaseEntity *pEntity = NULL;
 	while( ( pEntity = UTIL_FindEntityByClassname( pEntity, "monster_alien_slave" ) ) != NULL )
 	{
+		if (IRelationship(pEntity) >= R_DL)
+			continue;
 		TraceResult tr;
 
 		UTIL_TraceLine( EyePosition(), pEntity->EyePosition(), ignore_monsters, ENT( pev ), &tr );
@@ -949,7 +951,7 @@ int CISlave::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 
 void CISlave::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	if( bitsDamageType & DMG_SHOCK )
+	if( (bitsDamageType & DMG_SHOCK) && (!pevAttacker || IRelationship(Instance(pevAttacker)) < R_DL) )
 		return;
 
 	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
