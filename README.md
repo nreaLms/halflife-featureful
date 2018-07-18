@@ -60,6 +60,7 @@ Most Opposing Force monsters are implemented (exceptions are geneworm and pitwor
 * Houndeye squad leader can play leaderlook animation.
 * Alien grunts, bullsquids, houndeyes, gonomes, pitdrones and voltigores restore health when they eat meat or enemy corpses.
 * Alien slave attack rate can be configured via skill.cfg (In Half-Life it's hardcoded as 1 for easy and normal, and 1.5 for hard difficulty)
+* Bullsquids can shoot alternative spit projectile that is slow poisonous ball.
 
 ### Alien slave features
 
