@@ -104,6 +104,8 @@ int CSqueakGrenade::Classify( void )
 			case CLASS_PLAYER:
 			case CLASS_HUMAN_PASSIVE:
 			case CLASS_HUMAN_MILITARY:
+			case CLASS_PLAYER_ALLY:
+			case CLASS_PLAYER_ALLY_MILITARY:
 				m_iMyClass = 0;
 				return CLASS_ALIEN_MILITARY; // barney's get mad, grunts get mad at it
 		}
