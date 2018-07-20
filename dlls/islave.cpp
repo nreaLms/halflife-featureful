@@ -974,7 +974,7 @@ Schedule_t	slSlaveAttack1[] =
 	{ 
 		tlSlaveAttack1,
 		ARRAYSIZE ( tlSlaveAttack1 ), 
-		bits_COND_CAN_MELEE_ATTACK1 |
+		//bits_COND_CAN_MELEE_ATTACK1 | // don't interrupt electro attack by melee attack if enemy is close enough for melee attack
 		bits_COND_HEAR_SOUND |
 		bits_COND_HEAVY_DAMAGE, 
 
@@ -1096,19 +1096,25 @@ Schedule_t *CISlave::GetSchedule( void )
 		{
 			if( !HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 			{
-				m_failSchedule = SCHED_CHASE_ENEMY;
-				int sched = SCHED_TAKE_COVER_FROM_ENEMY;
-				if (CanSpawnFamiliar()) {
-					sched = SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR;
+				const int sched = CanSpawnFamiliar() ? (int)SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR : (int)SCHED_TAKE_COVER_FROM_ENEMY;
+				if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) && RANDOM_LONG(0,1)) // give chance to use electro attack to restore health
+				{
+					m_failSchedule = SCHED_RANGE_ATTACK1;
+				}
+				else if (CanSpawnFamiliar())
+				{
 					m_failSchedule = SCHED_ISLAVE_SUMMON_FAMILIAR;
+				}
+				else
+				{
+					m_failSchedule = SCHED_CHASE_ENEMY;
 				}
 
 				if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 				{
 					return GetScheduleOfType( sched );
 				}
-				if( HasConditions( bits_COND_SEE_ENEMY ) && HasConditions( bits_COND_ENEMY_FACING_ME )
-						&& RANDOM_LONG(0,1) ) // give chance to use electro attack to restore health
+				if( HasConditions( bits_COND_SEE_ENEMY ) && HasConditions( bits_COND_ENEMY_FACING_ME ) )
 				{
 					return GetScheduleOfType( sched );
 				}
