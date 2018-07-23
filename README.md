@@ -31,6 +31,7 @@ Most Opposing Force monsters are implemented (exceptions are geneworm and pitwor
 * monster_gonome
 * monster_zombie_barney
 * monster_zombie_soldier
+* monster_op4loader
 
 #### Other new monsters
 

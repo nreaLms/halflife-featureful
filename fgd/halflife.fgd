@@ -3266,6 +3266,28 @@
 		20 : "shoot"
 	]
 ]
+
+@PointClass base(Monster, Sequence) size(-16 -16 -36, 16 16 36) studio("models/loader.mdl") = monster_op4loader : "Loader machine"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle"
+		1 : "boxwalk"
+		2 : "45_left"
+		3 : "heroidle"
+		4 : "freeze"
+		5 : "park"
+		6 : "blocked"
+		7 : "freed"
+		8 : "dropbox"
+		9 : "pivotback"
+	]
+	spawnflags(Flags) =
+	[
+		4 : "Not solid" : 0
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-480 -480 -112, 480 480 24) studio("models/osprey.mdl") = monster_osprey : "Osprey"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =

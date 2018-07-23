@@ -151,5 +151,50 @@ void CGenericMonster::Precache()
 }
 
 //=========================================================
-// AI Schedules Specific to this monster
+// Op4 Loader
 //=========================================================
+
+class CLoader : public CGenericMonster
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int DefaultClassify() {return CLASS_NONE;}
+	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+};
+
+LINK_ENTITY_TO_CLASS(monster_op4loader, CLoader)
+
+void CLoader::Spawn()
+{
+	Precache();
+
+	SetMyModel("models/loader.mdl");
+
+	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+
+	pev->solid = SOLID_SLIDEBOX;
+	pev->movetype = MOVETYPE_STEP;
+	SetMyBloodColor(DONT_BLEED);
+	SetMyHealth(100);
+	m_flFieldOfView = 0.5;
+	m_MonsterState = MONSTERSTATE_NONE;
+
+	MonsterInit();
+	pev->takedamage = DAMAGE_NO;
+
+	if (pev->spawnflags & SF_GENERICMONSTER_NOTSOLID)
+	{
+		pev->solid = SOLID_NOT;
+	}
+}
+
+void CLoader::Precache()
+{
+	PrecacheMyModel("models/loader.mdl");
+}
+
+void CLoader::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+{
+	UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT(1.0,2.0) );
+}
