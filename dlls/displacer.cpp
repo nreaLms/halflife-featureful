@@ -21,6 +21,7 @@
 #include "player.h"
 #include "gamerules.h"
 #include "shake.h"
+#include "displacerball.h"
 
 #if FEATURE_DISPLACER
 
@@ -33,36 +34,6 @@ LINK_ENTITY_TO_CLASS(info_displacer_earth_target, CPointEntity)
 
 int iPortalSprite = 0;
 int iRingSprite = 0;
-//=========================================================
-// Displacement field
-//=========================================================
-class CDisplacerBall : public CBaseEntity
-{
-public:
-	void Spawn( void );
-
-	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles);
-	static void SelfCreate(entvars_t *pevOwner, Vector vecStart);
-
-	void Touch(CBaseEntity *pOther);
-	void EXPORT ExplodeThink( void );
-	void EXPORT KillThink( void );
-	void Circle( void );
-
-	virtual int		Save(CSave &save);
-	virtual int		Restore(CRestore &restore);
-	static	TYPEDESCRIPTION m_SaveData[];
-
-	CBeam* m_pBeam[8];
-
-	void EXPORT FlyThink( void );
-	void ClearBeams( void );
-	void ArmBeam( int iSide );
-
-	int m_iBeams;
-
-	CBaseEntity *pRemoveEnt;
-};
 
 LINK_ENTITY_TO_CLASS(displacer_ball, CDisplacerBall)
 

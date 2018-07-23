@@ -92,6 +92,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 
 #### Opposing Force entities
 
+* env_blowercannon
 * env_spritetrain
 * item_generic
 * monster_skeleton_dead

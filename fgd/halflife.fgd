@@ -857,6 +857,25 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_blowercannon : "Blower Cannon"
+[
+    delay(string) : "Delay" : "0"
+    zoffset(integer) : "Z Offset" : 0
+    target(string) : "Target" : ""
+    weaptype(choices) :"Weapon Type" : 1 =
+    [
+        1: "Spore (Rocket)"
+        2: "Spore (Grenade)"
+        3: "Shock Beam"
+        4: "Displacer Ball"
+    ]
+    firetype(choices) :"Fire Type" : 1 =
+    [
+        1: "Toggle On/Off"
+        2: "Fire When Triggered"
+    ]
+]
+
 @SolidClass base(Targetname) = env_bubbles : "Bubble Volume"
 [
 	density(integer) : "Bubble density" : 2
