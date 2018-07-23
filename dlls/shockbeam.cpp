@@ -62,8 +62,7 @@ void CShock::FlyThink()
 	{
 		entvars_t *pevOwner = VARS(pev->owner);
 		const int iVolume = RANDOM_FLOAT(0.8f, 1);
-		const int iPitch = RANDOM_FLOAT(80, 110);
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "weapons/shock_impact.wav", iVolume, ATTN_NORM, 0, iPitch);
+		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/shock_impact.wav", iVolume, ATTN_NORM);
 		RadiusDamage(pev->origin, pev, pevOwner ? pevOwner : pev, pev->dmg * 3, 144, CLASS_NONE, DMG_SHOCK | DMG_ALWAYSGIB );
 		ClearEffects();
 		SetThink( &CBaseEntity::SUB_Remove );
@@ -95,17 +94,8 @@ void CShock::Touch(CBaseEntity *pOther)
 		return;
 
 	TraceResult tr = UTIL_GetGlobalTrace( );
-	int		iPitch, iVolume;
+	const float volume = RANDOM_FLOAT(0.8f, 0.9f);
 
-	// Lower the volume if touched entity is not a player.
-	iVolume = (!pOther->IsPlayer())
-		? RANDOM_FLOAT(0.4f, 0.5f)
-		: RANDOM_FLOAT(0.8f, 1);
-
-	iPitch = RANDOM_FLOAT(80, 110);
-
-	// splat sound
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "weapons/shock_impact.wav", iVolume, ATTN_NORM, 0, iPitch);
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE(TE_DLIGHT);
 		WRITE_COORD(pev->origin.x);	// X
@@ -118,6 +108,12 @@ void CShock::Touch(CBaseEntity *pOther)
 		WRITE_BYTE( 10 );		// time * 10
 		WRITE_BYTE( 10 );		// decay * 0.1
 	MESSAGE_END( );
+
+	CBaseMonster* pMonster = pOther->MyMonsterPointer();
+	if (pMonster)
+	{
+		pMonster->GlowShellOn( Vector( 0, 220, 255 ), .5f );
+	}
 
 	ClearEffects();
 	if (!pOther->pev->takedamage)
@@ -142,18 +138,7 @@ void CShock::Touch(CBaseEntity *pOther)
 	{
 		ClearMultiDamage();
 		entvars_t *pevOwner = VARS(pev->owner);
-		int damageType = DMG_ENERGYBEAM;
-		if (pOther->pev->deadflag == DEAD_DEAD)
-		{
-			damageType |= DMG_ALWAYSGIB;
-		}
-		else
-		{
-			CBaseMonster* pMonster = pOther->MyMonsterPointer();
-			if (pMonster)
-				pMonster->GlowShellOn( Vector( 0, 220, 255 ), .5f );
-		}
-		pOther->TraceAttack(pev, pev->dmg, pev->velocity.Normalize(), &tr, damageType );
+		pOther->TraceAttack(pev, pev->dmg, pev->velocity.Normalize(), &tr, DMG_ENERGYBEAM | DMG_GIB_CORPSE );
 		ApplyMultiDamage(pev, pevOwner ? pevOwner : pev);
 		if (pOther->IsPlayer() && (UTIL_PointContents(pev->origin) != CONTENTS_WATER))
 		{
@@ -166,8 +151,14 @@ void CShock::Touch(CBaseEntity *pOther)
 			MESSAGE_END();
 		}
 	}
+
+	// splat sound
+	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_impact.wav", volume, ATTN_NORM);
+
+	pev->modelindex = 0;
+	pev->solid = SOLID_NOT;
 	SetThink( &CBaseEntity::SUB_Remove );
-	pev->nextthink = gpGlobals->time;
+	pev->nextthink = gpGlobals->time + 0.01; // let the sound play
 }
 
 void CShock::CreateEffects()
@@ -177,7 +168,7 @@ void CShock::CreateEffects()
 	m_pSprite->pev->scale = 0.4;
 	m_pSprite->SetTransparency( kRenderTransAdd, 255, 255, 255, 170, kRenderFxNoDissipation );
 	m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
-	m_pSprite->pev->flags |= FL_SKIPLOCALHOST;
+	//m_pSprite->pev->flags |= FL_SKIPLOCALHOST;
 
 	m_pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
 
