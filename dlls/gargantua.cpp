@@ -816,8 +816,6 @@ void CGargantua::UpdateOnRemove()
 
 void CGargantua::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
-	ALERT( at_aiconsole, "CGargantua::TraceAttack\n" );
-
 	if( !IsAlive() )
 	{
 		CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
@@ -853,8 +851,6 @@ void CGargantua::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 
 int CGargantua::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	ALERT( at_aiconsole, "CGargantua::TakeDamage\n" );
-
 	if( IsAlive() )
 	{
 		if( !( bitsDamageType & GARG_DAMAGE ) )
