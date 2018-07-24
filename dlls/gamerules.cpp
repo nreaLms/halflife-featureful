@@ -391,7 +391,15 @@ void CGameRules::RefreshSkillData ( void )
 #if FEATURE_SHOCKBEAM
 	gSkillData.plrDmgShockroach = GetSkillCvar( "sk_plr_shockroachs" );
 	gSkillData.plrDmgShockroachM = GetSkillCvar( "sk_plr_shockroachm" );
+#endif
+
+#if FEATURE_SPOREGRENADE
 	gSkillData.plrDmgSpore = GetSkillCvar( "sk_plr_spore" );
+#endif
+
+#if FEATURE_DISPLACER
+	gSkillData.plrDmgDisplacer = GetSkillCvar( "sk_plr_displacer_other" );
+	gSkillData.plrDisplacerRadius = GetSkillCvar( "sk_plr_displacer_radius" );
 #endif
 
 	// MONSTER WEAPONS

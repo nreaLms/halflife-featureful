@@ -688,6 +688,16 @@ cvar_t	sk_plr_spore2 = { "sk_plr_spore2", "0" };
 cvar_t	sk_plr_spore3 = { "sk_plr_spore3", "0" };
 #endif
 
+#if FEATURE_DISPLACER
+cvar_t	sk_plr_displacer1 = { "sk_plr_displacer_other1", "0" };
+cvar_t	sk_plr_displacer2 = { "sk_plr_displacer_other2", "0" };
+cvar_t	sk_plr_displacer3 = { "sk_plr_displacer_other3", "0" };
+
+cvar_t	sk_plr_displacer_radius1 = { "sk_plr_displacer_radius1", "0" };
+cvar_t	sk_plr_displacer_radius2 = { "sk_plr_displacer_radius2", "0" };
+cvar_t	sk_plr_displacer_radius3 = { "sk_plr_displacer_radius3", "0" };
+#endif
+
 // HORNET
 cvar_t	sk_hornet_dmg1 = {"sk_hornet_dmg1","0"};
 cvar_t	sk_hornet_dmg2 = {"sk_hornet_dmg2","0"};
@@ -1394,6 +1404,16 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_spore1 );// { "sk_plr_spore1", "0" };
 	CVAR_REGISTER( &sk_plr_spore2 );// { "sk_plr_spore2", "0" };
 	CVAR_REGISTER( &sk_plr_spore3 );// { "sk_plr_spore3", "0" };
+#endif
+
+#if FEATURE_DISPLACER
+	CVAR_REGISTER( &sk_plr_displacer1 );
+	CVAR_REGISTER( &sk_plr_displacer2 );
+	CVAR_REGISTER( &sk_plr_displacer3 );
+
+	CVAR_REGISTER( &sk_plr_displacer_radius1 );
+	CVAR_REGISTER( &sk_plr_displacer_radius2 );
+	CVAR_REGISTER( &sk_plr_displacer_radius3 );
 #endif
 
 	// WORLD WEAPONS

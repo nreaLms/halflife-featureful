@@ -219,6 +219,10 @@ struct skilldata_t
 #if FEATURE_SPOREGRENADE
 	float plrDmgSpore;
 #endif
+#if FEATURE_DISPLACER
+	float plrDisplacerRadius;
+	float plrDmgDisplacer;
+#endif
 #if FEATURE_MEDKIT
 	float plrDmgMedkit;
 	float plrMedkitTime;

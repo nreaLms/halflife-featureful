@@ -262,7 +262,7 @@ void CDisplacerBall::ExplodeThink( void )
 
 	UTIL_Remove( this );
 
-	::RadiusDamage( pev->origin, pev, pevOwner, 250, 300, CLASS_NONE, DMG_ENERGYBEAM );
+	::RadiusDamage( pev->origin, pev, pevOwner, gSkillData.plrDmgDisplacer, gSkillData.plrDisplacerRadius, CLASS_NONE, DMG_ENERGYBEAM );
 }
 
 void CDisplacerBall::ClearBeams( void )
