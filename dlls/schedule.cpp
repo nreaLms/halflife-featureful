@@ -252,7 +252,7 @@ void CBaseMonster::MaintainSchedule( void )
 					pNewSchedule = GetScheduleOfType( SCHED_FAIL );
 
 				// schedule was invalid because the current task failed to start or complete
-				ALERT( at_aiconsole, "Schedule Failed at %d! (monster: %s)\n", m_iScheduleIndex, STRING(pev->classname) );
+				ALERT( at_aiconsole, "Schedule Failed at %d! (monster: %s, schedule: %s)\n", m_iScheduleIndex, STRING(pev->classname), m_pSchedule ? m_pSchedule->pName : "unknown" );
 				ChangeSchedule( pNewSchedule );
 			}
 			else
