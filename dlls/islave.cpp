@@ -206,6 +206,20 @@ public:
 		return side < 0 ? 2 : 1;
 	}
 
+	void SetHealTargetAsTargetEnt()
+	{
+		if (m_hDead) {
+			m_hTargetEnt = m_hDead;
+		} else if (m_hWounded) {
+			m_hTargetEnt = m_hWounded;
+		}
+	}
+
+	bool CanGoToTargetEnt()
+	{
+		return BuildRoute(m_hTargetEnt->pev->origin, bits_MF_TO_TARGETENT, m_hTargetEnt) == TRUE;
+	}
+
 	int m_iBravery;
 
 	CBeam *m_pBeam[ISLAVE_MAX_BEAMS];
@@ -1124,13 +1138,11 @@ Schedule_t *CISlave::GetSchedule( void )
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
 		if ( HasFreeEnergy() && CheckHealOrReviveTargets()) {
-			if (m_hDead) {
-				m_hTargetEnt = m_hDead;
-			} else if (m_hWounded) {
-				m_hTargetEnt = m_hWounded;
+			SetHealTargetAsTargetEnt();
+			if (CanGoToTargetEnt()) {
+				ALERT(at_aiconsole, "Vort gonna heal or revive friend when idle. State is %s\n", m_MonsterState == MONSTERSTATE_ALERT ? "alert" : "idle");
+				return GetScheduleOfType( SCHED_ISLAVE_HEAL_OR_REVIVE );
 			}
-			ALERT(at_aiconsole, "Vort gonna heal or revive friend when idle. State is %s\n", m_MonsterState == MONSTERSTATE_ALERT ? "alert" : "idle");
-			return GetScheduleOfType( SCHED_ISLAVE_HEAL_OR_REVIVE );
 		}
 		break;
 	default:
@@ -1155,13 +1167,12 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 	case SCHED_CHASE_ENEMY_FAILED:
 		if ( HasFreeEnergy() && CheckHealOrReviveTargets() )
 		{
-			if (m_hDead) {
-				m_hTargetEnt = m_hDead;
-			} else if (m_hWounded) {
-				m_hTargetEnt = m_hWounded;
+			SetHealTargetAsTargetEnt();
+			if (CanGoToTargetEnt())
+			{
+				ALERT(at_aiconsole, "Vort gonna heal or revive friends after chase enemy sched fail\n");
+				return GetScheduleOfType( SCHED_ISLAVE_HEAL_OR_REVIVE );
 			}
-			ALERT(at_aiconsole, "Vort gonna heal or revive friends after chase enemy sched fail\n");
-			return GetScheduleOfType( SCHED_ISLAVE_HEAL_OR_REVIVE );
 		}
 		break;
 	case SCHED_RANGE_ATTACK1:
