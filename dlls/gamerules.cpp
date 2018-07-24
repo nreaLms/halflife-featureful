@@ -351,46 +351,56 @@ void CGameRules::RefreshSkillData ( void )
 
 	// Tripmine
 	gSkillData.plrDmgTripmine = GetSkillCvar( "sk_plr_tripmine" );
-	
+
+#if FEATURE_MEDKIT
 	// Medkit 
 	gSkillData.plrDmgMedkit = GetSkillCvar( "sk_plr_medkitshot" );
-	gSkillData.plrMedkitTime = GetSkillCvar( "sk_plr_medkittime" );
+	gSkillData.plrMedkitTime = GetSkillCvar( "sk_plr_medkittime", 0, true );
+#endif
 
+#if FEATURE_DESERT_EAGLE
 	// Desert Eagle
 	gSkillData.plrDmgEagle = GetSkillCvar( "sk_plr_eagle" );
+#endif
 
+#if FEATURE_PIPEWRENCH
 	// Pipe wrench
 	gSkillData.plrDmgPWrench = GetSkillCvar( "sk_plr_pipewrench" );
+#endif
 
+#if FEATURE_KNIFE
 	// Knife
 	gSkillData.plrDmgKnife = GetSkillCvar( "sk_plr_knife" );
+#endif
 
+#if FEATURE_GRAPPLE
 	// Grapple
 	gSkillData.plrDmgGrapple = GetSkillCvar( "sk_plr_grapple" );
+#endif
 
+#if FEATURE_M249
 	// M249
 	gSkillData.plrDmg556 = GetSkillCvar( "sk_plr_556_bullet" );
+#endif
 
+#if FEATURE_SNIPERRIFLE
 	// 762 Round
 	gSkillData.plrDmg762 = GetSkillCvar( "sk_plr_762_bullet" );
+#endif
 
+#if FEATURE_SHOCKBEAM
 	gSkillData.plrDmgShockroach = GetSkillCvar( "sk_plr_shockroachs" );
 	gSkillData.plrDmgShockroachM = GetSkillCvar( "sk_plr_shockroachm" );
 	gSkillData.plrDmgSpore = GetSkillCvar( "sk_plr_spore" );
+#endif
 
 	// MONSTER WEAPONS
 	gSkillData.monDmg12MM = GetSkillCvar( "sk_12mm_bullet" );
 	gSkillData.monDmgMP5 = GetSkillCvar ("sk_9mmAR_bullet" );
 	gSkillData.monDmg9MM = GetSkillCvar( "sk_9mm_bullet" );
-	gSkillData.monDmg357 = GetSkillCvar( "sk_357_bullet" );
-	if (!gSkillData.monDmg357)
-		gSkillData.monDmg357 = gSkillData.plrDmgEagle;
-	gSkillData.monDmg556 = GetSkillCvar( "sk_556_bullet" );
-	if (!gSkillData.monDmg556)
-		gSkillData.monDmg556 = gSkillData.plrDmg556;
-	gSkillData.monDmg762 = GetSkillCvar( "sk_762_bullet" );
-	if (!gSkillData.monDmg762)
-		gSkillData.monDmg762 = gSkillData.plrDmg762;
+	gSkillData.monDmg357 = GetSkillCvar( "sk_357_bullet", "sk_plr_eagle" );
+	gSkillData.monDmg556 = GetSkillCvar( "sk_556_bullet", "sk_plr_556_bullet" );
+	gSkillData.monDmg762 = GetSkillCvar( "sk_762_bullet", "sk_plr_762_bullet" );
 
 	// MONSTER HORNET
 	gSkillData.monDmgHornet = GetSkillCvar( "sk_hornet_dmg" );

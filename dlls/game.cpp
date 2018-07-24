@@ -594,36 +594,49 @@ cvar_t	sk_plr_tripmine1 = {"sk_plr_tripmine1","0"};
 cvar_t	sk_plr_tripmine2 = {"sk_plr_tripmine2","0"};
 cvar_t	sk_plr_tripmine3 = {"sk_plr_tripmine3","0"};
 
+#if FEATURE_DESERT_EAGLE
 // Desert Eagle
 cvar_t	sk_plr_eagle1 = { "sk_plr_eagle1", "0" };
 cvar_t	sk_plr_eagle2 = { "sk_plr_eagle2", "0" };
 cvar_t	sk_plr_eagle3 = { "sk_plr_eagle3", "0" };
+#endif
 
+#if FEATURE_PIPEWRENCH
 // Pipe wrench
 cvar_t	sk_plr_pipewrench1 = { "sk_plr_pipewrench1", "0" };
 cvar_t	sk_plr_pipewrench2 = { "sk_plr_pipewrench2", "0" };
 cvar_t	sk_plr_pipewrench3 = { "sk_plr_pipewrench3", "0" };
+#endif
 
+#if FEATURE_KNIFE
 // Knife
 cvar_t	sk_plr_knife1 = { "sk_plr_knife1", "0" };
 cvar_t	sk_plr_knife2 = { "sk_plr_knife2", "0" };
 cvar_t	sk_plr_knife3 = { "sk_plr_knife3", "0" };
+#endif
 
+#if FEATURE_GRAPPLE
 // Grapple
 cvar_t	sk_plr_grapple1 = { "sk_plr_grapple1", "0" };
 cvar_t	sk_plr_grapple2 = { "sk_plr_grapple2", "0" };
 cvar_t	sk_plr_grapple3 = { "sk_plr_grapple3", "0" };
+#endif
 
+#if FEATURE_M249
 // M249
 cvar_t	sk_plr_556_bullet1 = { "sk_plr_556_bullet1", "0" };
 cvar_t	sk_plr_556_bullet2 = { "sk_plr_556_bullet2", "0" };
 cvar_t	sk_plr_556_bullet3 = { "sk_plr_556_bullet3", "0" };
+#endif
 
+#if FEATURE_SNIPERRIFLE
 // Sniper rifle
 cvar_t	sk_plr_762_bullet1 = { "sk_plr_762_bullet1", "0" };
 cvar_t	sk_plr_762_bullet2 = { "sk_plr_762_bullet2", "0" };
 cvar_t	sk_plr_762_bullet3 = { "sk_plr_762_bullet3", "0" };
+#endif
 
+#if FEATURE_MEDKIT
 // Medkit
 cvar_t sk_plr_medkitshot1 = {"sk_plr_medkitshot1","10"};
 cvar_t sk_plr_medkitshot2 = {"sk_plr_medkitshot2","10"};
@@ -632,6 +645,7 @@ cvar_t sk_plr_medkitshot3 = {"sk_plr_medkitshot3","10"};
 cvar_t sk_plr_medkittime1 = {"sk_plr_medkittime1","3"};
 cvar_t sk_plr_medkittime2 = {"sk_plr_medkittime2","5"};
 cvar_t sk_plr_medkittime3 = {"sk_plr_medkittime3","0"};
+#endif
 
 // WORLD WEAPONS
 cvar_t	sk_12mm_bullet1 = {"sk_12mm_bullet1","0"};
@@ -658,6 +672,7 @@ cvar_t	sk_762_bullet1 = {"sk_762_bullet1","35"};
 cvar_t	sk_762_bullet2 = {"sk_762_bullet2","40"};
 cvar_t	sk_762_bullet3 = {"sk_762_bullet3","40"};
 
+#if FEATURE_SHOCKBEAM
 cvar_t	sk_plr_shockroachs1 = { "sk_plr_shockroachs1", "0" };
 cvar_t	sk_plr_shockroachs2 = { "sk_plr_shockroachs2", "0" };
 cvar_t	sk_plr_shockroachs3 = { "sk_plr_shockroachs3", "0" };
@@ -665,10 +680,13 @@ cvar_t	sk_plr_shockroachs3 = { "sk_plr_shockroachs3", "0" };
 cvar_t	sk_plr_shockroachm1 = { "sk_plr_shockroachm1", "0" };
 cvar_t	sk_plr_shockroachm2 = { "sk_plr_shockroachm2", "0" };
 cvar_t	sk_plr_shockroachm3 = { "sk_plr_shockroachm3", "0" };
+#endif
 
+#if FEATURE_SPOREGRENADE
 cvar_t	sk_plr_spore1 = { "sk_plr_spore1", "0" };
 cvar_t	sk_plr_spore2 = { "sk_plr_spore2", "0" };
 cvar_t	sk_plr_spore3 = { "sk_plr_spore3", "0" };
+#endif
 
 // HORNET
 cvar_t	sk_hornet_dmg1 = {"sk_hornet_dmg1","0"};
@@ -1303,7 +1321,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_tripmine1 );// {"sk_plr_tripmine1","0"};
 	CVAR_REGISTER( &sk_plr_tripmine2 );// {"sk_plr_tripmine2","0"};
 	CVAR_REGISTER( &sk_plr_tripmine3 );// {"sk_plr_tripmine3","0"};
-	
+
+#if FEATURE_MEDKIT
 	// Medkit
 	CVAR_REGISTER( &sk_plr_medkitshot1 );
 	CVAR_REGISTER( &sk_plr_medkitshot2 );
@@ -1312,37 +1331,51 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_medkittime1 );
 	CVAR_REGISTER( &sk_plr_medkittime2 );
 	CVAR_REGISTER( &sk_plr_medkittime3 );
+#endif
 
+#if FEATURE_DESERT_EAGLE
 	// Desert Eagle
 	CVAR_REGISTER( &sk_plr_eagle1 );// { "sk_plr_eagle1", "0" };
 	CVAR_REGISTER( &sk_plr_eagle2 );// { "sk_plr_eagle2", "0" };
 	CVAR_REGISTER( &sk_plr_eagle3 );// { "sk_plr_eagle3", "0" };
+#endif
 
+#if FEATURE_PIPEWRENCH
 	// Pipe wrench
 	CVAR_REGISTER( &sk_plr_pipewrench1 );// { "sk_plr_pipewrench1", "0" };
 	CVAR_REGISTER( &sk_plr_pipewrench2 );// { "sk_plr_pipewrench2", "0" };
 	CVAR_REGISTER( &sk_plr_pipewrench3 );// { "sk_plr_pipewrench3", "0" };
+#endif
 
+#if FEATURE_KNIFE
 	// Knife
 	CVAR_REGISTER( &sk_plr_knife1 );// { "sk_plr_knife1", "0" };
 	CVAR_REGISTER( &sk_plr_knife2 );// { "sk_plr_knife2", "0" };
 	CVAR_REGISTER( &sk_plr_knife3 );// { "sk_plr_knife3", "0" };
+#endif
 
+#if FEATURE_GRAPPLE
 	// Grapple
 	CVAR_REGISTER( &sk_plr_grapple1 );// { "sk_plr_grapple1", "0" };
 	CVAR_REGISTER( &sk_plr_grapple2 );// { "sk_plr_grapple2", "0" };
 	CVAR_REGISTER( &sk_plr_grapple3 );// { "sk_plr_grapple3", "0" };
+#endif
 
+#if FEATURE_M249
 	// M249
 	CVAR_REGISTER( &sk_plr_556_bullet1 );// { "sk_plr_556_bullet1", "0" };
 	CVAR_REGISTER( &sk_plr_556_bullet2 );// { "sk_plr_556_bullet2", "0" };
 	CVAR_REGISTER( &sk_plr_556_bullet3 );// { "sk_plr_556_bullet3", "0" };
+#endif
 
+#if FEATURE_SNIPERRIFLE
 	// Sniper rifle
 	CVAR_REGISTER( &sk_plr_762_bullet1 );// { "sk_plr_762_bullet1", "0" };
 	CVAR_REGISTER( &sk_plr_762_bullet2 );// { "sk_plr_762_bullet2", "0" };
 	CVAR_REGISTER( &sk_plr_762_bullet3 );// { "sk_plr_762_bullet3", "0" };
+#endif
 
+#if FEATURE_SHOCKBEAM
 	// Shock rifle
 	CVAR_REGISTER( &sk_plr_shockroachs1 );// { "sk_plr_shockroachs1", "0" };
 	CVAR_REGISTER( &sk_plr_shockroachs2 );// { "sk_plr_shockroachs2", "0" };
@@ -1351,10 +1384,13 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_shockroachm1 );// { "sk_plr_shockroachm1", "0" };
 	CVAR_REGISTER( &sk_plr_shockroachm2 );// { "sk_plr_shockroachm2", "0" };
 	CVAR_REGISTER( &sk_plr_shockroachm3 );// { "sk_plr_shockroachm3", "0" };
+#endif
 
+#if FEATURE_SPOREGRENADE
 	CVAR_REGISTER( &sk_plr_spore1 );// { "sk_plr_spore1", "0" };
 	CVAR_REGISTER( &sk_plr_spore2 );// { "sk_plr_spore2", "0" };
 	CVAR_REGISTER( &sk_plr_spore3 );// { "sk_plr_spore3", "0" };
+#endif
 
 	// WORLD WEAPONS
 	CVAR_REGISTER( &sk_12mm_bullet1 );// {"sk_12mm_bullet1","0"};

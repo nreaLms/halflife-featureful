@@ -25,7 +25,7 @@ skilldata_t gSkillData;
 // take the name of a cvar, tack a digit for the skill level
 // on, and return the value.of that Cvar 
 //=========================================================
-float GetSkillCvar( const char *pName )
+float GetSkillCvar(const char *pName , const char *fallback, bool allowZero)
 {
 	float flValue;
 	char szBuffer[64];
@@ -34,9 +34,12 @@ float GetSkillCvar( const char *pName )
 
 	flValue = CVAR_GET_FLOAT( szBuffer );
 
-	if( flValue <= 0 )
+	if( flValue <= 0 && !allowZero)
 	{
-		ALERT( at_console, "\n\n** GetSkillCVar Got a zero for %s **\n\n", szBuffer );
+		if (fallback)
+			flValue = GetSkillCvar(fallback);
+		if (flValue <= 0)
+			ALERT( at_console, "\n\n** GetSkillCVar Got a zero for %s **\n\n", szBuffer );
 	}
 
 	return flValue;
