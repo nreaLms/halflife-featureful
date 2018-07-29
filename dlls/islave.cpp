@@ -116,7 +116,7 @@ enum {
 
 static bool IsVortWounded(CBaseEntity* pEntity)
 {
-	return pEntity->pev->health <= pEntity->pev->max_health / 2;
+	return pEntity->pev->health <= Q_min(pEntity->pev->max_health / 2, 20);
 }
 
 static bool CanBeRevived(CBaseEntity* pEntity)
@@ -217,7 +217,9 @@ public:
 
 	bool CanGoToTargetEnt()
 	{
-		return BuildRoute(m_hTargetEnt->pev->origin, bits_MF_TO_TARGETENT, m_hTargetEnt) == TRUE;
+		if (m_hTargetEnt)
+			return BuildRoute(m_hTargetEnt->pev->origin, bits_MF_TO_TARGETENT, m_hTargetEnt) == TRUE;
+		return false;
 	}
 
 	int m_iBravery;
@@ -560,7 +562,10 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 					CBaseEntity *revivedVort = m_hDead;
 					if (revivedVort) {
+						// TODO: should restore the actual values that the vort had before he died
 						revivedVort->pev->health = 0;
+						revivedVort->pev->rendermode = kRenderNormal;
+						revivedVort->pev->renderamt = 255;
 						revivedVort->Spawn();
 
 						CBaseMonster* monster = revivedVort->MyMonsterPointer();
@@ -1137,11 +1142,14 @@ Schedule_t *CISlave::GetSchedule( void )
 		break;
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
-		if ( HasFreeEnergy() && CheckHealOrReviveTargets()) {
-			SetHealTargetAsTargetEnt();
-			if (CanGoToTargetEnt()) {
-				ALERT(at_aiconsole, "Vort gonna heal or revive friend when idle. State is %s\n", m_MonsterState == MONSTERSTATE_ALERT ? "alert" : "idle");
-				return GetScheduleOfType( SCHED_ISLAVE_HEAL_OR_REVIVE );
+		if( !(IScheduleFlags() & ( bits_COND_NEW_ENEMY | bits_COND_SEE_ENEMY ) )) // ensure there's no enemy
+		{
+			if ( HasFreeEnergy() && CheckHealOrReviveTargets()) {
+				SetHealTargetAsTargetEnt();
+				if (CanGoToTargetEnt()) {
+					ALERT(at_aiconsole, "Vort gonna heal or revive friend when idle. State is %s\n", m_MonsterState == MONSTERSTATE_ALERT ? "alert" : "idle");
+					return GetScheduleOfType( SCHED_ISLAVE_HEAL_OR_REVIVE );
+				}
 			}
 		}
 		break;
