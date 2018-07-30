@@ -244,6 +244,12 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.pitdroneDmgWhip = GetSkillCvar( "sk_pitdrone_dmg_whip" );
 	gSkillData.pitdroneDmgSpit = GetSkillCvar( "sk_pitdrone_dmg_spit" );
 #endif
+#if FEATURE_PITWORM
+	// Pitworm
+	gSkillData.pwormHealth = GetSkillCvar( "sk_pitworm_health" );
+	gSkillData.pwormDmgSwipe = GetSkillCvar( "sk_pitworm_dmg_swipe" );
+	gSkillData.pwormDmgBeam = GetSkillCvar( "sk_pitworm_dmg_beam" );
+#endif
 #if FEATURE_OTIS
 	// Otis
 	gSkillData.otisHealth = GetSkillCvar( "sk_otis_health");

@@ -3447,6 +3447,27 @@
 	initammo(string) : "Initial Ammo" : "6"
 ]
 
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 32) studio("models/pit_worm_up.mdl") = monster_pitworm : "Pit Worm"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle"
+		1 : "idle2"
+		2 : "attack"
+		3 : "scream"
+		4 : "attacklow"
+		5 : "doorclaw1"
+		6 : "doorclaw2"
+		7 : "doorclaw3"
+		8 : "eyeblast"
+		9 : "platclaw1"
+		10 : "platclaw2"
+		11 : "flinch1"
+		12 : "flinch2"
+		13 : "death"
+	]
+]
+
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/skeleton.mdl") = monster_skeleton_dead : "Dead Skeleton"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =

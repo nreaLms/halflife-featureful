@@ -115,6 +115,7 @@ set (SVDLL_SOURCES
 	pathcorner.cpp
 	pipewrench.cpp
 	pitdrone.cpp
+	pitworm.cpp
 	plane.cpp
 	plats.cpp
 	player.cpp

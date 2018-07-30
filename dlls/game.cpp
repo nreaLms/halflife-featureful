@@ -355,6 +355,21 @@ cvar_t	sk_pitdrone_dmg_spit2 = { "sk_pitdrone_dmg_spit2", "0" };
 cvar_t	sk_pitdrone_dmg_spit3 = { "sk_pitdrone_dmg_spit3", "0" };
 #endif
 
+#if FEATURE_PITWORM
+// Pitworm
+cvar_t	sk_pitworm_health1 = { "sk_pitworm_health1", "0" };
+cvar_t	sk_pitworm_health2 = { "sk_pitworm_health2", "0" };
+cvar_t	sk_pitworm_health3 = { "sk_pitworm_health3", "0" };
+
+cvar_t	sk_pitworm_dmg_swipe1 = { "sk_pitworm_dmg_swipe1", "0" };
+cvar_t	sk_pitworm_dmg_swipe2 = { "sk_pitworm_dmg_swipe2", "0" };
+cvar_t	sk_pitworm_dmg_swipe3 = { "sk_pitworm_dmg_swipe3", "0" };
+
+cvar_t	sk_pitworm_dmg_beam1 = { "sk_pitworm_dmg_beam1", "0" };
+cvar_t	sk_pitworm_dmg_beam2 = { "sk_pitworm_dmg_beam2", "0" };
+cvar_t	sk_pitworm_dmg_beam3 = { "sk_pitworm_dmg_beam3", "0" };
+#endif
+
 // Scientist
 cvar_t	sk_scientist_health1 = {"sk_scientist_health1","0"};
 cvar_t	sk_scientist_health2 = {"sk_scientist_health2","0"};
@@ -1104,6 +1119,20 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_pitdrone_dmg_spit1 );// { "sk_pitdrone_dmg_spit1", "0" };
 	CVAR_REGISTER( &sk_pitdrone_dmg_spit2 );// { "sk_pitdrone_dmg_spit2", "0" };
 	CVAR_REGISTER( &sk_pitdrone_dmg_spit3 );// { "sk_pitdrone_dmg_spit3", "0" };
+#endif
+
+#if FEATURE_PITWORM
+	CVAR_REGISTER( &sk_pitworm_health1 );// { "sk_pitworm_health1", "0" };
+	CVAR_REGISTER( &sk_pitworm_health2 );// { "sk_pitworm_health2", "0" };
+	CVAR_REGISTER( &sk_pitworm_health3 );// { "sk_pitworm_health3", "0" };
+
+	CVAR_REGISTER( &sk_pitworm_dmg_swipe1 );// { "sk_pitworm_dmg_swipe1", "0" };
+	CVAR_REGISTER( &sk_pitworm_dmg_swipe2 );// { "sk_pitworm_dmg_swipe2", "0" };
+	CVAR_REGISTER( &sk_pitworm_dmg_swipe3 );// { "sk_pitworm_dmg_swipe3", "0" };
+
+	CVAR_REGISTER( &sk_pitworm_dmg_beam1 );// { "sk_pitworm_dmg_beam1", "0" };
+	CVAR_REGISTER( &sk_pitworm_dmg_beam2 );// { "sk_pitworm_dmg_beam2", "0" };
+	CVAR_REGISTER( &sk_pitworm_dmg_beam3 );// { "sk_pitworm_dmg_beam3", "0" };
 #endif
 
 #if FEATURE_SHOCKTROOPER

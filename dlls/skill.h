@@ -122,6 +122,12 @@ struct skilldata_t
 	float pitdroneDmgSpit;
 #endif
 
+#if FEATURE_PITWORM
+	float pwormHealth;
+	float pwormDmgSwipe;
+	float pwormDmgBeam;
+#endif
+
 #if FEATURE_OTIS
 	float otisHealth;
 #endif
