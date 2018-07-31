@@ -61,8 +61,7 @@ void CShock::FlyThink()
 	if (pev->waterlevel == 3)
 	{
 		entvars_t *pevOwner = VARS(pev->owner);
-		const int iVolume = RANDOM_FLOAT(0.8f, 1);
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/shock_impact.wav", iVolume, ATTN_NORM);
+		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
 		RadiusDamage(pev->origin, pev, pevOwner ? pevOwner : pev, pev->dmg * 3, 144, CLASS_NONE, DMG_SHOCK | DMG_ALWAYSGIB );
 		ClearEffects();
 		SetThink( &CBaseEntity::SUB_Remove );
@@ -94,7 +93,6 @@ void CShock::Touch(CBaseEntity *pOther)
 		return;
 
 	TraceResult tr = UTIL_GetGlobalTrace( );
-	const float volume = RANDOM_FLOAT(0.8f, 0.9f);
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE(TE_DLIGHT);
@@ -153,7 +151,7 @@ void CShock::Touch(CBaseEntity *pOther)
 	}
 
 	// splat sound
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_impact.wav", volume, ATTN_NORM);
+	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
 
 	pev->modelindex = 0;
 	pev->solid = SOLID_NOT;
