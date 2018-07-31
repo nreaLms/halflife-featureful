@@ -38,19 +38,18 @@
 class CPitWorm : public CBaseMonster
 {
 public:
-        int		Save(CSave &save);
-        int		Restore(CRestore &restore);
-        static	TYPEDESCRIPTION m_SaveData[];
-
-        virtual int	ObjectCaps(void) { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-
         void Spawn(void);
         void Precache(void);
         int  DefaultClassify(void);
+        virtual int	ObjectCaps(void) { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
         void IdleSound(void);
         void AlertSound(void);
         void DeathSound(void);
+
+        int		Save(CSave &save);
+        int		Restore(CRestore &restore);
+        static	TYPEDESCRIPTION m_SaveData[];
 
         void AngrySound(void);
         void FlinchSound(void);
@@ -142,7 +141,7 @@ public:
         float m_slowTime;
         Vector m_vecGoalAngles;
         Vector m_vecCurAngles;
-        const Vector m_eyes;
+        Vector m_eyes;
         float m_flDamageTime;
         float m_flDamage;
         float m_flPlayerDamage;
@@ -164,6 +163,8 @@ public:
         static const char* pDeathSounds[];
 };
 
+LINK_ENTITY_TO_CLASS(monster_pitworm, CPitWorm)
+LINK_ENTITY_TO_CLASS(monster_pitworm_up, CPitWorm)
 
 #define PITWORM_HEIGHT					584
 #define PITWORM_EYE_OFFSET				Vector(0, 0, 445)
@@ -208,12 +209,6 @@ public:
 #define PITWORM_AE_SWIPE			( 1 )
 #define PITWORM_AE_EYEBLAST_START	( 2 )
 #define PITWORM_AE_EYEBLAST_END		( 4 )
-
-//=========================================================
-// CPitWorm
-//=========================================================
-LINK_ENTITY_TO_CLASS(monster_pitworm, CPitWorm)
-LINK_ENTITY_TO_CLASS(monster_pitworm_up, CPitWorm)
 
 //=========================================================
 // Save & Restore
@@ -616,12 +611,11 @@ BOOL CPitWorm::CheckRangeAttack1(float flDot, float flDist)
 {
     if(flDist >= 1024 && m_flNextAttackTime > gpGlobals->time)
     {
-        if(m_hEnemy && m_hEnemy->IsAlive())
+        if(m_hEnemy != 0 && m_hEnemy->IsAlive())
             return TRUE;
 
     }
-    else
-        return FALSE;
+    return FALSE;
 }
 
 BOOL CPitWorm::CheckMeleeAttack1(float flDot, float flDist)
@@ -683,7 +677,7 @@ void CPitWorm::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDi
 
 void CPitWorm::Activate()
 {
-    if(!m_hTargetEnt)
+    if(m_hTargetEnt == 0)
         Remember(bits_MEMORY_ADVANCE_NODE);
 }
 
@@ -864,7 +858,7 @@ void CPitWorm::HuntThink(void)
 
         if(!m_fActivated)
         {
-            if(!m_hEnemy)
+            if(m_hEnemy == 0)
             {
                 Look(4096);
                 m_hEnemy = BestVisibleEnemy();
@@ -1280,7 +1274,7 @@ const Vector& CPitWorm::IdealPosition(CBaseEntity* pEnemy) const
 //=========================================================
 void CPitWorm::UpdateBodyControllers(void)
 {
-        if (!m_hEnemy || m_fBeamOn)
+        if (m_hEnemy == 0 || m_fBeamOn)
                 return;
 
         ASSERT(m_hEnemy);
