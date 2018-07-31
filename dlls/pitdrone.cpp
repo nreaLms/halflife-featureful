@@ -30,6 +30,7 @@ int		iPitDroneSpitSprite;
 //=========================================================
 class CPitDroneSpit : public CBaseMonster
 {
+public:
 	void Spawn(void);
 	void Precache(void);
 	int  Classify(void);
@@ -37,7 +38,6 @@ class CPitDroneSpit : public CBaseMonster
 
 	Vector m_vecForward;
 
-public:
 	static CPitDroneSpit *SpitCreate(void);
 };
 
@@ -180,6 +180,7 @@ enum
 
 class CPitDrone : public CBaseMonster
 {
+public:
 	void Spawn(void);
 	void Precache(void);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
