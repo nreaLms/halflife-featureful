@@ -314,6 +314,7 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 			}
 			pEntity = Create( TrooperName(), vecSrc, pev->angles );
 			pGrunt = pEntity->MyMonsterPointer();
+			pGrunt->m_iClass = m_iClass;
 			pGrunt->pev->movetype = MOVETYPE_FLY;
 			pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
 			pGrunt->SetActivity( ACT_GLIDE );
