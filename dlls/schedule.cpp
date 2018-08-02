@@ -1015,7 +1015,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 	case TASK_GET_PATH_TO_ENEMY_CORPSE:
 		{
 			UTIL_MakeVectors( pev->angles );
-			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 64, bits_MF_TO_LOCATION, NULL ) )
+			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * pTask->flData, bits_MF_TO_LOCATION, NULL ) )
 			{
 				TaskComplete();
 			}

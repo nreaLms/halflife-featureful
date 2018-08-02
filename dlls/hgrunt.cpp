@@ -1258,8 +1258,8 @@ Task_t tlGruntVictoryDance[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_WAIT, (float)1.5 },
-	{ TASK_GET_PATH_TO_ENEMY_CORPSE, (float)0 },
+	{ TASK_WAIT, 1.5f },
+	{ TASK_GET_PATH_TO_ENEMY_CORPSE, 64.0f },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },

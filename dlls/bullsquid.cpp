@@ -1119,7 +1119,6 @@ Task_t tlSquidSniffAndEat[] =
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
 	{ TASK_GET_HEALTH_FROM_FOOD, 0.5f },
 	{ TASK_EAT, (float)50 },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0 },
 	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
@@ -1179,9 +1178,9 @@ Task_t tlSquidVictoryDance[] =
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_EAT, (float)10 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_WAIT, (float)0.2 },
+	{ TASK_WAIT, 0.2f },
 	{ TASK_STORE_LASTPOSITION, (float)0 },
-	{ TASK_GET_PATH_TO_ENEMY_CORPSE, (float)0 },
+	{ TASK_GET_PATH_TO_ENEMY_CORPSE, 50.0f },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
@@ -1384,20 +1383,6 @@ void CBullsquid::StartTask( Task_t *pTask )
 
 	switch( pTask->iTask )
 	{
-	case TASK_GET_PATH_TO_ENEMY_CORPSE:
-		{
-			UTIL_MakeVectors( pev->angles );
-			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 50, bits_MF_TO_LOCATION, NULL ) )
-			{
-				TaskComplete();
-			}
-			else
-			{
-				ALERT( at_console, "GetPathToEnemyCorpse failed!!\n" );
-				TaskFail();
-			}
-		}
-		break;
 	case TASK_MELEE_ATTACK2:
 		{
 			switch( RANDOM_LONG( 0, 2 ) )

@@ -52,14 +52,9 @@
 // monster-specific schedule types
 //=========================================================
 
-
 //=========================================================
 // monster-specific tasks
 //=========================================================
-
-enum {
-	TASK_VOLTIGORE_GET_PATH_TO_ENEMY_CORPSE = LAST_COMMON_TASK + 1
-};
 
 //=========================================================
 // Voltigore's energy ball projectile
@@ -869,20 +864,20 @@ Schedule_t slVoltigoreChaseEnemy[] =
 Task_t tlVoltigoreVictoryDance[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_WAIT, (float)0.2 },
-	{ TASK_VOLTIGORE_GET_PATH_TO_ENEMY_CORPSE,	(float)0 },
+	{ TASK_WAIT, 0.2f },
+	{ TASK_GET_PATH_TO_ENEMY_CORPSE,	50.0f },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_STAND },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.2 },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.2f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.2 },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.2f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.2 },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.2f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.2 },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.2f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_STAND },
 };
 
@@ -1012,17 +1007,6 @@ void CVoltigore::StartTask(Task_t *pTask)
 			}
 		}
 		break;
-	case TASK_VOLTIGORE_GET_PATH_TO_ENEMY_CORPSE:
-		UTIL_MakeVectors( pev->angles );
-		if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 50, bits_MF_TO_LOCATION, NULL ) )
-		{
-			TaskComplete();
-		}
-		else
-		{
-			ALERT( at_aiconsole, "VoltigoreGetPathToEnemyCorpse failed!!\n" );
-			TaskFail();
-		}
 	default:
 		CBaseMonster::StartTask(pTask);
 		break;

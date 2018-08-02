@@ -41,7 +41,6 @@ enum
 enum
 {
 	TASK_AGRUNT_SETUP_HIDE_ATTACK = LAST_COMMON_TASK + 1,
-	TASK_AGRUNT_GET_PATH_TO_ENEMY_CORPSE
 };
 
 int iAgruntMuzzleFlash;
@@ -823,7 +822,7 @@ Task_t tlAGruntVictoryDance[] =
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_AGRUNT_THREAT_DISPLAY },
 	{ TASK_WAIT, (float)0.2 },
-	{ TASK_AGRUNT_GET_PATH_TO_ENEMY_CORPSE,	(float)0 },
+	{ TASK_GET_PATH_TO_ENEMY_CORPSE,	50.0f },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
@@ -976,20 +975,6 @@ void CAGrunt::StartTask( Task_t *pTask )
 {
 	switch( pTask->iTask )
 	{
-	case TASK_AGRUNT_GET_PATH_TO_ENEMY_CORPSE:
-		{
-			UTIL_MakeVectors( pev->angles );
-			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 50, bits_MF_TO_LOCATION, NULL ) )
-			{
-				TaskComplete();
-			}
-			else
-			{
-				ALERT( at_aiconsole, "AGruntGetPathToEnemyCorpse failed!!\n" );
-				TaskFail();
-			}
-		}
-		break;
 	case TASK_AGRUNT_SETUP_HIDE_ATTACK:
 		// alien grunt shoots hornets back out into the open from a concealed location.
 		// try to find a spot to throw that gives the smart weapon a good chance of finding the enemy.

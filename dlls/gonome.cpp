@@ -40,11 +40,6 @@
 
 #define		GONOME_MELEE_ATTACK_RADIUS		70
 
-enum 
-{
-	TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE = LAST_COMMON_TASK + 1
-};
-
 //=========================================================
 // Monster's Anim Events Go Here
 //=========================================================
@@ -702,17 +697,17 @@ Schedule_t slGonomeChaseEnemy[] =
 Task_t tlGonomeVictoryDance[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_WAIT, (float)0.1 },
-	{ TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE,	(float)0 },
+	{ TASK_WAIT, 0.1f },
+	{ TASK_GET_PATH_TO_ENEMY_CORPSE,	40.0f },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.25 },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.25 },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_VICTORY_DANCE },
-	{ TASK_GET_HEALTH_FROM_FOOD, (float)0.25 },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 };
 
 Schedule_t slGonomeVictoryDance[] =
@@ -776,25 +771,9 @@ void CGonome::StartTask(Task_t *pTask)
 			CBaseMonster::StartTask(pTask);
 		}
 		break;
-
-	case TASK_GONOME_GET_PATH_TO_ENEMY_CORPSE:
-		{
-			UTIL_MakeVectors( pev->angles );
-			if( BuildRoute( m_vecEnemyLKP - gpGlobals->v_forward * 40, bits_MF_TO_LOCATION, NULL ) )
-			{
-				TaskComplete();
-			}
-			else
-			{
-				ALERT( at_aiconsole, "GonomeGetPathToEnemyCorpse failed!!\n" );
-				TaskFail();
-			}
-		}
-		break;
 	default:
 		CBaseMonster::StartTask(pTask);
 		break;
-
 	}
 }
 
