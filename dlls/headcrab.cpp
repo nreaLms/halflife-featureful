@@ -79,6 +79,7 @@ class CHeadCrab : public CBaseMonster
 {
 public:
 	void Spawn( void );
+	void SpawnHelper(const char* modelName, float health);
 	void Precache( void );
 	void RunTask ( Task_t *pTask );
 	void StartTask ( Task_t *pTask );
@@ -295,21 +296,24 @@ void CHeadCrab::AttackSound()
 void CHeadCrab::Spawn()
 {
 	Precache();
+	SpawnHelper("models/headcrab.mdl", gSkillData.headcrabHealth);
+	MonsterInit();
+}
 
-	SetMyModel( "models/headcrab.mdl" );
+void CHeadCrab::SpawnHelper(const char *modelName, float health)
+{
+	SetMyModel( modelName );
 	UTIL_SetSize( pev, Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects		= 0;
-	SetMyHealth( gSkillData.headcrabHealth );
+	SetMyHealth( health );
 	pev->view_ofs		= Vector( 0, 0, 20 );// position of the eyes relative to monster's origin.
 	pev->yaw_speed		= 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
 	m_flFieldOfView		= 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
-
-	MonsterInit();
 }
 
 //=========================================================
@@ -513,13 +517,11 @@ LINK_ENTITY_TO_CLASS( monster_babycrab, CBabyCrab )
 
 void CBabyCrab::Spawn( void )
 {
-	CHeadCrab::Spawn();
-	SetMyModel( "models/baby_headcrab.mdl" );
+	SpawnHelper("models/baby_headcrab.mdl", gSkillData.headcrabHealth * 0.25); // less health than full grown
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 192;
 	UTIL_SetSize( pev, Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
-	
-	SetMyHealth( gSkillData.headcrabHealth * 0.25 );	// less health than full grown
+	MonsterInit();
 }
 
 void CBabyCrab::Precache( void )
