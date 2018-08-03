@@ -122,13 +122,20 @@ static bool IsVortWounded(CBaseEntity* pEntity)
 static bool CanBeRevived(CBaseEntity* pEntity)
 {
 	if ( pEntity != NULL && pEntity->pev->deadflag == DEAD_DEAD && !FBitSet(pEntity->pev->flags, FL_KILLME) ) {
-		Vector vecDest = pEntity->pev->origin + Vector( 0, 0, 38 );
-		TraceResult trace;
-		UTIL_TraceHull( vecDest, vecDest, dont_ignore_monsters, human_hull, pEntity->edict(), &trace );
+		const Vector vecDest = pEntity->pev->origin + Vector( 0, 0, 38 );
+		TraceResult tr;
+		UTIL_TraceHull( vecDest, vecDest - Vector(0,0,2), dont_ignore_monsters, human_hull, pEntity->edict(), &tr );
 	
-		return !trace.fStartSolid;
+		return !tr.fAllSolid && !tr.fStartSolid;
 	}
 	return false;
+}
+
+static bool CanSpawnAtPosition(const Vector& position, int hullType, edict_t* pentIgnore)
+{
+	TraceResult tr;
+	UTIL_TraceHull( position, position - Vector(0,0,1), dont_ignore_monsters, hullType, pentIgnore, &tr );
+	return !tr.fStartSolid && !tr.fAllSolid;
 }
 
 class CISlave : public CSquadMonster
@@ -156,6 +163,10 @@ public:
 	void IdleSound( void );
 
 	void Killed( entvars_t *pevAttacker, int iGib );
+	void DeathNotice( entvars_t* pevChild )
+	{
+		m_childIsAlive = false;
+	}
 
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
@@ -222,6 +233,32 @@ public:
 		return false;
 	}
 
+	const char* FamiliarName()
+	{
+		if (pev->weapons & ISLAVE_SNARKS) {
+			return "monster_snark";
+		} else if (pev->weapons & ISLAVE_HEADCRABS) {
+			return "monster_headcrab";
+		}
+		return NULL;
+	}
+
+	int FamiliarHull()
+	{
+		return head_hull;
+	}
+
+	Vector GetFamiliarSpawnPosition()
+	{
+		UTIL_MakeVectors( pev->angles );
+		if (pev->weapons & ISLAVE_SNARKS) {
+			return pev->origin + gpGlobals->v_forward * 36 + Vector(0,0,20);
+		} else if (pev->weapons & ISLAVE_HEADCRABS) {
+			return pev->origin + gpGlobals->v_forward * 48 + Vector(0,0,20);
+		}
+		return pev->origin + gpGlobals->v_forward * 36 + Vector(0,0,20);
+	}
+
 	int m_iBravery;
 
 	CBeam *m_pBeam[ISLAVE_MAX_BEAMS];
@@ -247,6 +284,8 @@ public:
 	float m_freeEnergy;
 	short m_clawStrikeNum;
 	bool m_lastAttackWasCoil;
+	float m_nextHealTargetCheck;
+	bool m_childIsAlive;
 
 	static const char *pAttackHitSounds[];
 	static const char *pAttackMissSounds[];
@@ -569,7 +608,17 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 						revivedVort->Spawn();
 
 						CBaseMonster* monster = revivedVort->MyMonsterPointer();
-						if (monster) {
+						if (monster)
+						{
+							if (m_hEnemy)
+							{
+								monster->m_hEnemy = m_hEnemy;
+								monster->m_vecEnemyLKP = m_vecEnemyLKP;
+								monster->SetConditions( bits_COND_NEW_ENEMY );
+								monster->m_MonsterState = MONSTERSTATE_COMBAT;
+								monster->m_IdealMonsterState = MONSTERSTATE_COMBAT;
+							}
+
 							CISlave* islave = (CISlave*)monster;
 							// revived vort starts with zero energy
 							islave->m_freeEnergy = 0;
@@ -702,10 +751,16 @@ BOOL CISlave::CheckRangeAttack2( float flDot, float flDist )
 
 BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 {
+	if (m_nextHealTargetCheck >= gpGlobals->time)
+	{
+		return m_hDead != 0 || m_hWounded != 0;
+	}
+
+	m_nextHealTargetCheck = gpGlobals->time + 1;
 	m_hDead = NULL;
 	m_hWounded = NULL;
 	m_hWounded2 = NULL;
-	
+
 	CBaseEntity *pEntity = NULL;
 	while( ( pEntity = UTIL_FindEntityByClassname( pEntity, "monster_alien_slave" ) ) != NULL )
 	{
@@ -763,14 +818,21 @@ void CISlave::StartTask( Task_t *pTask )
 	{
 	case TASK_ISLAVE_SUMMON_FAMILIAR:
 	{
-		ALERT(at_aiconsole, "start TASK_ISLAVE_FAMILIAR\n");
-		m_IdealActivity = ACT_CROUCH;
-		EMIT_SOUND( edict(), CHAN_BODY, "debris/beamstart1.wav", 1, ATTN_NORM );
-		UTIL_MakeAimVectors( pev->angles );
-		Vector vecSrc = pev->origin + gpGlobals->v_forward * 8;
-		MakeDynamicLight(vecSrc, 10, 15);
-		HandsGlowOn();
-		CreateSummonBeams();
+		if (CanSpawnAtPosition(GetFamiliarSpawnPosition(), FamiliarHull(), edict()))
+		{
+			m_IdealActivity = ACT_CROUCH;
+			EMIT_SOUND( edict(), CHAN_BODY, "debris/beamstart1.wav", 1, ATTN_NORM );
+			UTIL_MakeAimVectors( pev->angles );
+			Vector vecSrc = pev->origin + gpGlobals->v_forward * 8;
+			MakeDynamicLight(vecSrc, 10, 15);
+			HandsGlowOn();
+			CreateSummonBeams();
+		}
+		else
+		{
+			ALERT(at_aiconsole, "Vortigaunt wanted to spawn a familiar, but there's no space\n");
+			TaskFail();
+		}
 		break;
 	}
 		
@@ -793,14 +855,7 @@ void CISlave::RunTask(Task_t *pTask)
 	case TASK_ISLAVE_SUMMON_FAMILIAR:
 		if( m_fSequenceFinished )
 		{
-			UTIL_MakeVectors( pev->angles );
-			if (pev->weapons & ISLAVE_HEADCRABS) {
-				Vector headcrabOrigin = pev->origin + gpGlobals->v_forward * 48 + Vector(0,0,20);
-				SpawnFamiliar("monster_headcrab", headcrabOrigin, head_hull);
-			} else if (pev->weapons & ISLAVE_SNARKS) {
-				Vector snarkOrigin = pev->origin + gpGlobals->v_forward * 36 + Vector(0,0,20);
-				SpawnFamiliar("monster_snark", snarkOrigin, head_hull);
-			}
+			SpawnFamiliar(FamiliarName(), GetFamiliarSpawnPosition(), FamiliarHull());
 			HandsGlowOff();
 			TaskComplete();
 			RemoveSummonBeams();
@@ -831,14 +886,17 @@ void CISlave::PrescheduleThink()
 }
 
 void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hullType)
-{	
-	TraceResult tr;
-	UTIL_TraceHull( origin, origin, dont_ignore_monsters, hullType, edict(), &tr );
-	if (!tr.fStartSolid) {
-		CBaseEntity *pNew = Create( entityName, origin, pev->angles );
+{
+	if (!entityName) {
+		ALERT(at_console, "Null familiar name in SpawnFamiliar!\n");
+		return;
+	}
+	if (CanSpawnAtPosition(origin, hullType, edict())) {
+		CBaseEntity *pNew = Create( entityName, origin, pev->angles, edict() );
 		CBaseMonster *pNewMonster = pNew->MyMonsterPointer( );
 
 		if(pNew) {
+			m_childIsAlive = true;
 			CSprite *pSpr = CSprite::SpriteCreate( "sprites/bexplo.spr", origin, TRUE );
 			pSpr->AnimateAndDie( 20 );
 			pSpr->SetTransparency( kRenderTransAdd,  ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE,  255, kRenderFxNoDissipation );
@@ -1049,8 +1107,9 @@ Schedule_t slSlaveCoverAndSummon[] =
 
 Task_t tlSlaveSummon[] =
 {
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RANGE_ATTACK1 },
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },
 	{ TASK_ISLAVE_SUMMON_FAMILIAR, (float)0 }
 };
 
@@ -1142,7 +1201,7 @@ Schedule_t *CISlave::GetSchedule( void )
 		break;
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
-		if( !(IScheduleFlags() & ( bits_COND_NEW_ENEMY | bits_COND_SEE_ENEMY ) )) // ensure there's no enemy
+		if( !HasConditions( bits_COND_NEW_ENEMY | bits_COND_SEE_ENEMY ) ) // ensure there's no enemy
 		{
 			if ( HasFreeEnergy() && CheckHealOrReviveTargets()) {
 				SetHealTargetAsTargetEnt();
@@ -1168,10 +1227,6 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 		{
 			return CSquadMonster::GetScheduleOfType( SCHED_MELEE_ATTACK1 );
 		}
-		else if ( m_MonsterState == MONSTERSTATE_COMBAT && CanSpawnFamiliar() )
-		{
-			return GetScheduleOfType( SCHED_ISLAVE_SUMMON_FAMILIAR );
-		}
 	case SCHED_CHASE_ENEMY_FAILED:
 		if ( HasFreeEnergy() && CheckHealOrReviveTargets() )
 		{
@@ -1181,6 +1236,10 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 				ALERT(at_aiconsole, "Vort gonna heal or revive friends after chase enemy sched fail\n");
 				return GetScheduleOfType( SCHED_ISLAVE_HEAL_OR_REVIVE );
 			}
+		}
+		else if ( m_MonsterState == MONSTERSTATE_COMBAT && !HasConditions(bits_COND_ENEMY_TOOFAR) && CanSpawnFamiliar() )
+		{
+			return GetScheduleOfType( SCHED_ISLAVE_SUMMON_FAMILIAR );
 		}
 		break;
 	case SCHED_RANGE_ATTACK1:
@@ -1640,7 +1699,7 @@ bool CISlave::CanSpawnFamiliar()
 {
 #if FEATURE_ISLAVE_FAMILIAR
 	if ((pev->weapons & (ISLAVE_SNARKS | ISLAVE_HEADCRABS)) != 0) {
-		if (m_flSpawnFamiliarTime < gpGlobals->time) {
+		if (!m_childIsAlive && m_flSpawnFamiliarTime < gpGlobals->time) {
 			return true;
 		}
 	}
