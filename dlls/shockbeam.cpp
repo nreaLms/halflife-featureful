@@ -108,7 +108,7 @@ void CShock::Touch(CBaseEntity *pOther)
 	MESSAGE_END( );
 
 	CBaseMonster* pMonster = pOther->MyMonsterPointer();
-	if (pMonster)
+	if (pMonster && pMonster->IsAlive())
 	{
 		pMonster->GlowShellOn( Vector( 0, 220, 255 ), .5f );
 	}
