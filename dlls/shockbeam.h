@@ -23,6 +23,7 @@ public:
 
 	void CreateEffects();
 	void ClearEffects();
+	void UpdateOnRemove();
 
 	CBeam *m_pBeam;
 	CBeam *m_pNoise;

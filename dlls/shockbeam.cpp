@@ -134,9 +134,14 @@ void CShock::Touch(CBaseEntity *pOther)
 	}
 	else
 	{
+		int damageType = DMG_SHOCK;
+		if (pMonster && !pMonster->IsAlive())
+		{
+			damageType |= DMG_CLUB;
+		}
 		ClearMultiDamage();
 		entvars_t *pevOwner = VARS(pev->owner);
-		pOther->TraceAttack(pev, pev->dmg, pev->velocity.Normalize(), &tr, DMG_ENERGYBEAM | DMG_GIB_CORPSE );
+		pOther->TraceAttack(pev, pev->dmg, pev->velocity.Normalize(), &tr, damageType );
 		ApplyMultiDamage(pev, pevOwner ? pevOwner : pev);
 		if (pOther->IsPlayer() && (UTIL_PointContents(pev->origin) != CONTENTS_WATER))
 		{
@@ -165,7 +170,7 @@ void CShock::CreateEffects()
 	m_pSprite->SetAttachment( edict(), 0 );
 	m_pSprite->pev->scale = 0.4;
 	m_pSprite->SetTransparency( kRenderTransAdd, 255, 255, 255, 170, kRenderFxNoDissipation );
-	m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
+	//m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
 	//m_pSprite->pev->flags |= FL_SKIPLOCALHOST;
 
 	m_pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
@@ -180,8 +185,12 @@ void CShock::CreateEffects()
 		m_pBeam->SetNoise( 20 );
 		m_pBeam->SetFlags( BEAM_FSHADEOUT );
 		m_pBeam->SetColor( 0, 255, 255 );
-		m_pBeam->pev->spawnflags = SF_BEAM_TEMPORARY;
+		//m_pBeam->pev->spawnflags = SF_BEAM_TEMPORARY;
 		m_pBeam->RelinkBeam();
+	}
+	else
+	{
+		ALERT(at_console, "Could no create shockbeam beam!\n");
 	}
 
 	m_pNoise = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
@@ -196,20 +205,40 @@ void CShock::CreateEffects()
 		m_pNoise->SetNoise( 65 );
 		m_pNoise->SetFlags( BEAM_FSHADEOUT );
 		m_pNoise->SetColor( 255, 255, 173 );
-		m_pNoise->pev->spawnflags = SF_BEAM_TEMPORARY;
+		//m_pNoise->pev->spawnflags = SF_BEAM_TEMPORARY;
 		m_pNoise->RelinkBeam();
+	}
+	else
+	{
+		ALERT(at_console, "Could no create shockbeam noise!\n");
 	}
 }
 
 void CShock::ClearEffects()
 {
-	UTIL_Remove( m_pBeam );
-	m_pBeam = NULL;
+	if (m_pBeam)
+	{
+		UTIL_Remove( m_pBeam );
+		m_pBeam = NULL;
+	}
 
-	UTIL_Remove( m_pNoise );
-	m_pNoise = NULL;
+	if (m_pNoise)
+	{
+		UTIL_Remove( m_pNoise );
+		m_pNoise = NULL;
+	}
 
-	UTIL_Remove( m_pSprite );
-	m_pSprite = NULL;
+	if (m_pSprite)
+	{
+		UTIL_Remove( m_pSprite );
+		m_pSprite = NULL;
+	}
 }
+
+void CShock::UpdateOnRemove()
+{
+	CBaseAnimating::UpdateOnRemove();
+	ClearEffects();
+}
+
 #endif
