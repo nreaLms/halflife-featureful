@@ -2098,11 +2098,19 @@ void CHFGrunt :: DeathSound ( void )
 //=========================================================
 void CHFGrunt :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
+	// reduce damage on vest
+	if (ptr->iHitgroup == HITGROUP_CHEST || ptr->iHitgroup == HITGROUP_STOMACH)
+	{
+		if (bitsDamageType & ( DMG_BULLET | DMG_SLASH | DMG_BLAST ))
+		{
+			flDamage *= 0.5;
+		}
+	}
 	// check for helmet shot
 	if (ptr->iHitgroup == 11)
 	{
 		// make sure we're wearing one
-		if (GetBodygroup( FG_HEAD_GROUP ) == FG_HEAD_MASK && (bitsDamageType & (DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB)))
+		if (bitsDamageType & (DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB))
 		{
 			// absorb damage
 			flDamage -= 20;
