@@ -257,6 +257,10 @@ void CBarnacleGrapple::Precache( void )
 	PRECACHE_MODEL( "sprites/tongue.spr" );
 
 	UTIL_PrecacheOther( "grapple_tip" );
+	ALERT(at_console, "next attack %f, global time: %f", m_flNextPrimaryAttack, gpGlobals->time);
+	m_flNextPrimaryAttack = 0;
+	m_flNextSecondaryAttack = 0;
+	m_flTimeWeaponIdle = 0;
 }
 
 void CBarnacleGrapple::Spawn( void )
@@ -279,7 +283,7 @@ int CBarnacleGrapple::GetItemInfo(ItemInfo *p)
 	p->iMaxAmmo1 = -1;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
-	p->iMaxClip = WEAPON_GRAPPLE;
+	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 0;
 	p->iPosition = 3;
 	p->iId = m_iId = WEAPON_GRAPPLE;
