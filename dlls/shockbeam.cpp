@@ -76,9 +76,9 @@ void CShock::FlyThink()
 void CShock::Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity)
 {
 	CShock *pShock = GetClassPtr((CShock *)NULL);
+	UTIL_SetOrigin(pShock->pev, vecStart);
 	pShock->Spawn();
 
-	UTIL_SetOrigin(pShock->pev, vecStart);
 	pShock->pev->velocity = vecVelocity;
 	pShock->pev->owner = ENT(pevOwner);
 	pShock->pev->angles = angles;
@@ -168,7 +168,7 @@ void CShock::CreateEffects()
 {
 	m_pSprite = CSprite::SpriteCreate( "sprites/flare3.spr", pev->origin, FALSE );
 	m_pSprite->SetAttachment( edict(), 0 );
-	m_pSprite->pev->scale = 0.4;
+	m_pSprite->pev->scale = 0.35;
 	m_pSprite->SetTransparency( kRenderTransAdd, 255, 255, 255, 170, kRenderFxNoDissipation );
 	//m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
 	//m_pSprite->pev->flags |= FL_SKIPLOCALHOST;

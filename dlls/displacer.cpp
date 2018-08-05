@@ -143,9 +143,9 @@ void CDisplacerBall::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVeloc
 void CDisplacerBall::SelfCreate(entvars_t *pevOwner,Vector vecStart)
 {
 	CDisplacerBall *pSelf = GetClassPtr((CDisplacerBall *)NULL);
+	UTIL_SetOrigin(pSelf->pev, vecStart);
 	pSelf->Spawn();
 	pSelf->ClearBeams();
-	UTIL_SetOrigin(pSelf->pev, vecStart);
 
 	pSelf->pev->owner = ENT(pevOwner);
 	pSelf->Circle();

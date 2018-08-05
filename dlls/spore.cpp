@@ -252,8 +252,8 @@ void CSporeGrenade::Spawn(void)
 CBaseEntity* CSporeGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, bool ai)
 {
 	CSporeGrenade *pGrenade = GetClassPtr((CSporeGrenade *)NULL);
-	pGrenade->Spawn();
 	UTIL_SetOrigin(pGrenade->pev, vecStart);
+	pGrenade->Spawn();
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = ENT(pevOwner);
@@ -281,9 +281,9 @@ CBaseEntity* CSporeGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vec
 CBaseEntity *CSporeGrenade::ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity)
 {
 	CSporeGrenade *pGrenade = GetClassPtr((CSporeGrenade *)NULL);
+	UTIL_SetOrigin(pGrenade->pev, vecStart);
 	pGrenade->Spawn();
 	pGrenade->pev->movetype = MOVETYPE_FLY;
-	UTIL_SetOrigin(pGrenade->pev, vecStart);
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
 	pGrenade->pev->owner = ENT(pevOwner);
