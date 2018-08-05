@@ -180,9 +180,9 @@ void CShock::CreateEffects()
 		m_pBeam->EntsInit( entindex(), entindex() );
 		m_pBeam->SetStartAttachment( 1 );
 		m_pBeam->SetEndAttachment( 2 );
-		m_pBeam->SetBrightness( 190 );
-		m_pBeam->SetScrollRate( 20 );
-		m_pBeam->SetNoise( 20 );
+		m_pBeam->SetBrightness( 180 );
+		m_pBeam->SetScrollRate( 10 );
+		m_pBeam->SetNoise( 0 );
 		m_pBeam->SetFlags( BEAM_FSHADEOUT );
 		m_pBeam->SetColor( 0, 255, 255 );
 		//m_pBeam->pev->spawnflags = SF_BEAM_TEMPORARY;
@@ -200,9 +200,9 @@ void CShock::CreateEffects()
 		m_pNoise->EntsInit( entindex(), entindex() );
 		m_pNoise->SetStartAttachment( 1 );
 		m_pNoise->SetEndAttachment( 2 );
-		m_pNoise->SetBrightness( 190 );
-		m_pNoise->SetScrollRate( 20 );
-		m_pNoise->SetNoise( 65 );
+		m_pNoise->SetBrightness( 180 );
+		m_pNoise->SetScrollRate( 30 );
+		m_pNoise->SetNoise( 30 );
 		m_pNoise->SetFlags( BEAM_FSHADEOUT );
 		m_pNoise->SetColor( 255, 255, 173 );
 		//m_pNoise->pev->spawnflags = SF_BEAM_TEMPORARY;
