@@ -30,6 +30,7 @@
 //=========================================================
 #define	FGRUNT_CLIP_SIZE				36 // how many bullets in a clip? - NOTE: 3 round burst sound, so keep as 3 * x!
 #define FGRUNT_LIMP_HEALTH				20
+#define FGRUNT_SENTENCE_VOLUME			0.35
 
 #define FGRUNT_MEDIC_WAIT				5 // Wait before calling for medic again.
 
@@ -63,6 +64,7 @@
 enum
 {
 	TASK_HGRUNT_ALLY_FACE_TOSS_DIR = LAST_TALKMONSTER_TASK + 1,
+	TASK_HGRUNT_ALLY_SPEAK_SENTENCE,
 	TASK_HGRUNT_ALLY_CHECK_FIRE,
 	TASK_HGRUNT_ALLY_FIND_MEDIC,
 	LAST_HGRUNT_ALLY_TASK
@@ -148,9 +150,11 @@ public:
 	Schedule_t *GetSchedule ( void );
 	MONSTERSTATE GetIdealState ( void );
 
+	void AlertSound( void );
 	void DeathSound( void );
 	void PainSound( void );
 	void GibMonster( void );
+	void SpeakSentence( void );
 	void TalkInit( void );
 
 	BOOL FOkToSpeak( void );
@@ -204,6 +208,9 @@ protected:
 	void KickImpl(float kickDamage);
 	void PrecacheHelper();
 	void SpawnHelper(const char* defaultModel, float defaultHealth);
+	const char* SentenceByNumber(int sentence) {
+		return pGruntSentences[sentence];
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
@@ -517,6 +524,7 @@ Task_t tlFGruntEstablishLineOfFire[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_HGRUNT_ALLY_ELOF_FAIL	},
 	{ TASK_GET_PATH_TO_ENEMY,	(float)0						},
+	{ TASK_HGRUNT_ALLY_SPEAK_SENTENCE,(float)0						},
 	{ TASK_RUN_PATH,			(float)0						},
 	{ TASK_WAIT_FOR_MOVEMENT,	(float)0						},
 };
@@ -708,6 +716,7 @@ Task_t	tlFGruntTakeCover1[] =
 	{ TASK_SET_FAIL_SCHEDULE,		(float)SCHED_HGRUNT_ALLY_TAKECOVER_FAILED	},
 	{ TASK_WAIT,					(float)0.2							},
 	{ TASK_FIND_COVER_FROM_ENEMY,	(float)0							},
+	{ TASK_HGRUNT_ALLY_SPEAK_SENTENCE,	(float)0								},
 	{ TASK_RUN_PATH,				(float)0							},
 	{ TASK_WAIT_FOR_MOVEMENT,		(float)0							},
 	{ TASK_REMEMBER,				(float)bits_MEMORY_INCOVER			},
@@ -1134,7 +1143,10 @@ void CHFGrunt :: StartTask( Task_t *pTask )
 		}
 		TaskComplete();
 		break;
-
+	case TASK_HGRUNT_ALLY_SPEAK_SENTENCE:
+		SpeakSentence();
+		TaskComplete();
+		break;
 	case TASK_HGRUNT_ALLY_FIND_MEDIC:
 			// First try looking for a medic in my squad
 			if ( InSquad() )
@@ -1162,6 +1174,7 @@ void CHFGrunt :: StartTask( Task_t *pTask )
 						CBaseMonster *pMonster = pFriend->MyMonsterPointer();
 						if (CallForMedic(pMonster)) {
 							TaskComplete();
+							break;
 						}
 					}
 				}
@@ -1170,7 +1183,7 @@ void CHFGrunt :: StartTask( Task_t *pTask )
 			{
 				TaskFail();
 			}
-			m_flMedicWaitTime = FGRUNT_MEDIC_WAIT + gpGlobals->time; // Call again in ten seconds anyway.
+			m_flMedicWaitTime = FGRUNT_MEDIC_WAIT + gpGlobals->time;
 		break;
 
 	case TASK_WALK_PATH:
@@ -1281,6 +1294,21 @@ void CHFGrunt::DropMyItems(BOOL isGibbed)
 		DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
 	}
 	pev->weapons = 0;
+}
+
+void CHFGrunt::SpeakSentence( void )
+{
+	if( m_iSentence == FGRUNT_SENT_NONE )
+	{
+		// no sentence cued up.
+		return;
+	}
+
+	if( FOkToSpeak() )
+	{
+		SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(m_iSentence), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch );
+		JustSpoke();
+	}
 }
 
 //=========================================================
@@ -1871,7 +1899,7 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			if ( FOkToSpeak() )
 			{
-				SENTENCEG_PlayRndSz(ENT(pev), "FG_ALERT", VOL_NORM, ATTN_NORM, 0, m_voicePitch);
+				SENTENCEG_PlayRndSz(ENT(pev), SentenceByNumber(FGRUNT_SENT_ALERT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 				JustSpoke();
 			}
 
@@ -2078,6 +2106,14 @@ void CHFGrunt :: PainSound ( void )
 			case 5: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/gr_pain6.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
 		}
 		m_flNextPainTime = gpGlobals->time + 1;
+	}
+}
+
+void CHFGrunt::AlertSound()
+{
+	if (m_hEnemy !=0 && FOkToSpeak())
+	{
+		SENTENCEG_PlayRndSz( ENT(pev), "FG_ATTACK", FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 	}
 }
 
@@ -2513,7 +2549,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 
 				if (FOkToSpeak())
 				{
-					SENTENCEG_PlayRndSz( ENT(pev), "FG_GREN", VOL_NORM, ATTN_NORM, 0, m_voicePitch);
+					SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_GREN), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 					JustSpoke();
 				}
 				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
@@ -2589,10 +2625,10 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 									(m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE) &&
 									(m_hEnemy->Classify() != CLASS_MACHINE))
 								// monster
-								SENTENCEG_PlayRndSz( ENT(pev), "FG_ALERT", VOL_NORM, ATTN_NORM, 0, m_voicePitch);
+								SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_MONSTER), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 							else if ( ( m_hEnemy != 0 ) && m_hEnemy->IsPlayer() )
 								// player
-								SENTENCEG_PlayRndSz( ENT(pev), "FG_ATTACK", VOL_NORM, ATTN_NORM, 0, m_voicePitch);
+								SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_ALERT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 
 							JustSpoke();
 						}
@@ -2628,11 +2664,9 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 
 				if ( iPercent <= 90 && m_hEnemy != 0 )
 				{
-					if (FOkToSpeak()) // && RANDOM_LONG(0,1))
+					if (FOkToSpeak())
 					{
-						//SENTENCEG_PlayRndSz( ENT(pev), "HG_COVER", VOL_NORM, ATTN_NORM, 0, m_voicePitch);
 						m_iSentence = FGRUNT_SENT_COVER;
-						//JustSpoke();
 					}
 					// only try to take cover if we actually have an enemy!
 
@@ -2693,13 +2727,17 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 					//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 					if (FOkToSpeak())
 					{
-						SENTENCEG_PlayRndSz( ENT(pev), "FG_THROW", VOL_NORM, ATTN_NORM, 0, m_voicePitch);
+						SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_THROW), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 						JustSpoke();
 					}
 					return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
 				}
 				else if ( OccupySlot( bits_SLOTS_HGRUNT_ENGAGE ) )
 				{
+					if( FOkToSpeak() )
+					{
+						m_iSentence = FGRUNT_SENT_CHARGE;
+					}
 					return GetScheduleOfType( SCHED_HGRUNT_ALLY_ESTABLISH_LINE_OF_FIRE );
 				}
 				else
@@ -2709,7 +2747,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 					// grunt's covered position. Good place for a taunt, I guess?
 					if (FOkToSpeak() && RANDOM_LONG(0,1))
 					{
-						SENTENCEG_PlayRndSz( ENT(pev), "FG_TAUNT", VOL_NORM, ATTN_NORM, 0, m_voicePitch);
+						SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_TAUNT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 						JustSpoke();
 					}
 					return GetScheduleOfType( SCHED_STANDOFF );
@@ -2731,7 +2769,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 		if ( pev->health < pev->max_health/2 && ( m_flMedicWaitTime < gpGlobals->time ))
 		{
 			// Find a medic
-			return GetScheduleOfType( SCHED_HGRUNT_ALLY_FIND_MEDIC ); // Unresolved
+			return GetScheduleOfType( SCHED_HGRUNT_ALLY_FIND_MEDIC );
 		}
 		if ( m_hEnemy == 0 && IsFollowing() )
 		{
@@ -3436,7 +3474,7 @@ Schedule_t *CMedic::GetSchedule()
 		StopHealing();
 	}
 	if ( FBitSet( pev->weapons, MEDIC_EAGLE|MEDIC_HANDGUN ) &&
-		 GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE || GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NONE) {
+		 (GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE || GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NONE)) {
 		return slMedicDrawGun;
 	}
 	switch( m_MonsterState )
@@ -3476,6 +3514,10 @@ void CMedic::Spawn()
 
 	SpawnHelper("models/hgrunt_medic.mdl", gSkillData.medicHealth);
 
+	if (!pev->weapons)
+	{
+		pev->weapons |= MEDIC_EAGLE; // some medics on existing maps don't have a weapon selected
+	}
 	m_cClipSize = MEDIC_CLIP_SIZE_EAGLE;
 	if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
 	{
