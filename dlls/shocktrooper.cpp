@@ -121,6 +121,7 @@ public:
 	int DefaultGibCount() {
 		return 6;
 	}
+	void DropShockRoach();
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -265,25 +266,9 @@ float CStrooper::SentenceAttn()
 //=========================================================
 void CStrooper::GibMonster(void)
 {
-	Vector	vecGunPos;
-	Vector	vecGunAngles;
-
 	if (GetBodygroup(STROOPER_GUN_GROUP) != STROOPER_GUN_NONE)
-	{// throw a shockroach if the shock trooper has one
-		GetAttachment(0, vecGunPos, vecGunAngles);
-
-		CBaseEntity* pRoach = DropItem("monster_shockroach", vecGunPos, vecGunAngles);
-
-		if (pRoach)
-		{
-			pRoach->pev->owner = edict();
-
-			if (m_hEnemy)
-				pRoach->pev->angles = (pev->origin - m_hEnemy->pev->origin).Normalize();
-
-			// Remove any pitch.
-			pRoach->pev->angles.x = 0;
-		}
+	{
+		DropShockRoach();
 	}
 
 	CBaseMonster::GibMonster();
@@ -318,36 +303,9 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 	case STROOPER_AE_DROP_GUN:
 	{
-		// switch to body group with no gun.
 		if (GetBodygroup(STROOPER_GUN_GROUP) != STROOPER_GUN_NONE)
 		{
-			Vector	vecGunPos;
-			Vector	vecGunAngles;
-
-			GetAttachment(0, vecGunPos, vecGunAngles);
-			SetBodygroup(STROOPER_GUN_GROUP, STROOPER_GUN_NONE);
-
-			Vector vecDropAngles = vecGunAngles;
-
-
-			if (m_hEnemy)
-				vecDropAngles = UTIL_VecToAngles(m_hEnemy->pev->origin - pev->origin);
-
-
-			// Remove any pitch.
-			vecDropAngles.x = 0;
-
-			// now spawn a shockroach.
-			CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecGunPos, vecDropAngles, edict() );
-			if (pRoach)
-			{
-				// Remove any pitch.
-				pRoach->pev->angles.x = 0;
-				CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
-				if (pNewMonster && m_iClass != 0) {
-					pNewMonster->m_iClass = Classify();
-				}
-			}
+			DropShockRoach();
 		}
 	}
 	break;
@@ -677,6 +635,34 @@ void CStrooper::SetActivity(Activity NewActivity)
 void CStrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	CSquadMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+}
+
+void CStrooper::DropShockRoach()
+{
+	Vector	vecGunPos;
+	Vector	vecGunAngles;
+
+	GetAttachment(0, vecGunPos, vecGunAngles);
+	SetBodygroup(STROOPER_GUN_GROUP, STROOPER_GUN_NONE);
+
+	Vector vecDropAngles = vecGunAngles;
+
+	// Remove any pitch.
+	vecDropAngles.x = 0;
+	vecDropAngles.z = 0;
+
+	Vector vecPos = pev->origin;
+	vecPos.z += 32;
+
+	// now spawn a shockroach.
+	CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecPos, vecDropAngles, edict() );
+	if (pRoach)
+	{
+		CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
+		if (pNewMonster && m_iClass != 0) {
+			pNewMonster->m_iClass = Classify();
+		}
+	}
 }
 
 #endif
