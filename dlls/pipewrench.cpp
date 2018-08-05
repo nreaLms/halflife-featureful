@@ -90,11 +90,13 @@ int CPipeWrench::AddToPlayer( CBasePlayer *pPlayer )
 
 BOOL CPipeWrench::Deploy()
 {
+	m_iSwingMode = 0;
 	return DefaultDeploy("models/v_pipe_wrench.mdl", "models/p_pipe_wrench.mdl", PIPEWRENCH_DRAW, "crowbar");
 }
 
 void CPipeWrench::Holster(int skiplocal /* = 0 */)
 {
+	m_iSwingMode = 0;
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 	SendWeaponAnim(PIPEWRENCH_HOLSTER);
 }

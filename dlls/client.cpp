@@ -1788,6 +1788,18 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 						cd->vuser2.y = ( (CEagle *)pl->m_pActiveItem )->m_fEagleLaserActive;
 					}
 #endif
+#if FEATURE_PIPEWRENCH
+					else if( pl->m_pActiveItem->m_iId == WEAPON_PIPEWRENCH )
+					{
+						cd->vuser2.y = ( (CPipeWrench *)pl->m_pActiveItem )->m_iSwingMode;
+					}
+#endif
+#if FEATURE_KNIFE
+					else if( pl->m_pActiveItem->m_iId == WEAPON_KNIFE )
+					{
+						cd->vuser2.y = ( (CKnife *)pl->m_pActiveItem )->m_iSwingMode;
+					}
+#endif
 				}
 			}
 		}

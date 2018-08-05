@@ -937,6 +937,18 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive = (int)from->client.vuser2[1];
 	}
 #endif
+#if FEATURE_PIPEWRENCH
+	if( player.m_pActiveItem->m_iId == WEAPON_PIPEWRENCH )
+	{
+		( (CPipeWrench *)player.m_pActiveItem )->m_iSwingMode = (int)from->client.vuser2[1];
+	}
+#endif
+#if FEATURE_KNIFE
+	if( player.m_pActiveItem->m_iId == WEAPON_KNIFE )
+	{
+		( (CKnife *)player.m_pActiveItem )->m_iSwingMode = (int)from->client.vuser2[1];
+	}
+#endif
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -997,7 +1009,19 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 #if FEATURE_DESERT_EAGLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_EAGLE )
 	{
-		from->client.vuser2[1] = ( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive;;
+		from->client.vuser2[1] = ( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive;
+	}
+#endif
+#if FEATURE_PIPEWRENCH
+	else if( player.m_pActiveItem->m_iId == WEAPON_PIPEWRENCH )
+	{
+		from->client.vuser2[1] = ( (CPipeWrench *)player.m_pActiveItem )->m_iSwingMode;
+	}
+#endif
+#if FEATURE_KNIFE
+	else if( player.m_pActiveItem->m_iId == WEAPON_KNIFE )
+	{
+		from->client.vuser2[1] = ( (CKnife *)player.m_pActiveItem )->m_iSwingMode;
 	}
 #endif
 
