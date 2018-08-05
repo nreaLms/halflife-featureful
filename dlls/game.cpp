@@ -370,6 +370,21 @@ cvar_t	sk_pitworm_dmg_beam2 = { "sk_pitworm_dmg_beam2", "0" };
 cvar_t	sk_pitworm_dmg_beam3 = { "sk_pitworm_dmg_beam3", "0" };
 #endif
 
+#if FEATURE_GENEWORM
+// Geneworm
+cvar_t	sk_geneworm_health1 = { "sk_geneworm_health1", "0" };
+cvar_t	sk_geneworm_health2 = { "sk_geneworm_health2", "0" };
+cvar_t	sk_geneworm_health3 = { "sk_geneworm_health3", "0" };
+
+cvar_t	sk_geneworm_dmg_spit1 = { "sk_geneworm_dmg_spit1", "0" };
+cvar_t	sk_geneworm_dmg_spit2 = { "sk_geneworm_dmg_spit2", "0" };
+cvar_t	sk_geneworm_dmg_spit3 = { "sk_geneworm_dmg_spit3", "0" };
+
+cvar_t	sk_geneworm_dmg_hit1 = { "sk_geneworm_dmg_hit1", "0" };
+cvar_t	sk_geneworm_dmg_hit2 = { "sk_geneworm_dmg_hit2", "0" };
+cvar_t	sk_geneworm_dmg_hit3 = { "sk_geneworm_dmg_hit3", "0" };
+#endif
+
 // Scientist
 cvar_t	sk_scientist_health1 = {"sk_scientist_health1","0"};
 cvar_t	sk_scientist_health2 = {"sk_scientist_health2","0"};
@@ -1133,6 +1148,21 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_pitworm_dmg_beam1 );// { "sk_pitworm_dmg_beam1", "0" };
 	CVAR_REGISTER( &sk_pitworm_dmg_beam2 );// { "sk_pitworm_dmg_beam2", "0" };
 	CVAR_REGISTER( &sk_pitworm_dmg_beam3 );// { "sk_pitworm_dmg_beam3", "0" };
+#endif
+
+#if FEATURE_GENEWORM
+	// Geneworm
+	CVAR_REGISTER( &sk_geneworm_health1 );// { "sk_geneworm_health1", "0" };
+	CVAR_REGISTER( &sk_geneworm_health2 );// { "sk_geneworm_health2", "0" };
+	CVAR_REGISTER( &sk_geneworm_health3 );// { "sk_geneworm_health3", "0" };
+
+	CVAR_REGISTER( &sk_geneworm_dmg_spit1 );// { "sk_geneworm_dmg_spit1", "0" };
+	CVAR_REGISTER( &sk_geneworm_dmg_spit2 );// { "sk_geneworm_dmg_spit2", "0" };
+	CVAR_REGISTER( &sk_geneworm_dmg_spit3 );// { "sk_geneworm_dmg_spit3", "0" };
+
+	CVAR_REGISTER( &sk_geneworm_dmg_hit1);// { "sk_geneworm_dmg_hit1", "0" };
+	CVAR_REGISTER( &sk_geneworm_dmg_hit2 );// { "sk_geneworm_dmg_hit2", "0" };
+	CVAR_REGISTER( &sk_geneworm_dmg_hit3 );// { "sk_geneworm_dmg_hit3", "0" };
 #endif
 
 #if FEATURE_SHOCKTROOPER

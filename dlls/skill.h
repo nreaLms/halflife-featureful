@@ -128,6 +128,12 @@ struct skilldata_t
 	float pwormDmgBeam;
 #endif
 
+#if FEATURE_GENEWORM
+	float gwormHealth;
+	float gwormDmgSpit;
+	float gwormDmgHit;
+#endif
+
 #if FEATURE_OTIS
 	float otisHealth;
 #endif

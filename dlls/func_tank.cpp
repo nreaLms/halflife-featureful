@@ -763,6 +763,7 @@ private:
 };
 
 LINK_ENTITY_TO_CLASS( func_tanklaser, CFuncTankLaser )
+LINK_ENTITY_TO_CLASS( func_tanklaser_of, CFuncTankLaser )
 
 TYPEDESCRIPTION	CFuncTankLaser::m_SaveData[] =
 {

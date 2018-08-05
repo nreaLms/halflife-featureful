@@ -43,6 +43,7 @@ set SOURCES=agrunt.cpp^
 	gargantua.cpp^
 	gauss.cpp^
 	genericmonster.cpp^
+	geneworm.cpp^
 	ggrenade.cpp^
 	globals.cpp^
 	glock.cpp^

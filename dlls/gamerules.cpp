@@ -250,6 +250,12 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.pwormDmgSwipe = GetSkillCvar( "sk_pitworm_dmg_swipe" );
 	gSkillData.pwormDmgBeam = GetSkillCvar( "sk_pitworm_dmg_beam" );
 #endif
+#if FEATURE_GENEWORM
+	// Geneworm
+	gSkillData.gwormHealth = GetSkillCvar( "sk_geneworm_health" );
+	gSkillData.gwormDmgSpit = GetSkillCvar( "sk_geneworm_dmg_spit" );
+	gSkillData.gwormDmgHit = GetSkillCvar( "sk_geneworm_dmg_hit" );
+#endif
 #if FEATURE_OTIS
 	// Otis
 	gSkillData.otisHealth = GetSkillCvar( "sk_otis_health");

@@ -13,7 +13,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 
 #### Opposing Force monsters
 
-Most Opposing Force monsters are implemented (exception is geneworm boss).
+Most Opposing Force monsters are implemented (exceptions are some monsters that are used only in training room)
 
 * monster_cleansuit_scientist
 * monster_otis
@@ -26,6 +26,7 @@ Most Opposing Force monsters are implemented (exception is geneworm boss).
 * monster_shocktrooper
 * monster_shockroach
 * monster_pitworm (works a bit different from original)
+* monster_geneworm
 * monster_human_grunt_ally
 * monster_human_medic_ally (healing works a bit different from original)
 * monster_human_torch_ally
