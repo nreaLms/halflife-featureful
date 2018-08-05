@@ -169,9 +169,6 @@ public:
 
 	bool CallForMedic(CBaseMonster *pMember);
 
-	// UNDONE: What is this for?  It isn't used?
-	float	m_flPlayerDamage;// how much pain has the player inflicted on me?
-
 	// checking the feasibility of a grenade toss is kind of costly, so we do it every couple of seconds,
 	// not every server frame.
 	float m_flNextGrenadeCheck;
@@ -179,7 +176,7 @@ public:
 	float m_flLastEnemySightTime;
 	float m_flMedicWaitTime;
 
-	float	m_flLinkToggle;// how much pain has the player inflicted on me?
+	bool	m_flLinkToggle;
 
 	Vector	m_vecTossVelocity;
 
@@ -188,12 +185,14 @@ public:
 	BOOL	m_fFirstEncounter;// only put on the handsign show in the squad's first encounter.
 	int		m_cClipSize;
 
-	int		m_iBrassShell;
-	int		m_iShotgunShell;
-
 	int		m_iSentence;
 	int		m_iHead;
 
+	float m_flLastHitByPlayer;
+	int m_iPlayerHits;
+
+	int		m_iBrassShell;
+	int		m_iShotgunShell;
 	int		m_iM249Shell;
 	int		m_iM249Link;
 
@@ -256,6 +255,8 @@ TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
 	DEFINE_FIELD( CHFGrunt, m_fFirstEncounter, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CHFGrunt, m_cClipSize, FIELD_INTEGER ),
 	DEFINE_FIELD( CHFGrunt, m_iHead, FIELD_INTEGER ),
+	DEFINE_FIELD( CHFGrunt, m_flLastHitByPlayer, FIELD_TIME ),
+	DEFINE_FIELD( CHFGrunt, m_iPlayerHits, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CHFGrunt, CTalkMonster )
@@ -1945,6 +1946,8 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 	m_fFirstEncounter	= TRUE;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector ( 0, 0, 55 );
+	m_flLastHitByPlayer = gpGlobals->time;
+	m_iPlayerHits = 0;
 }
 
 //=========================================================
@@ -2141,14 +2144,12 @@ int CHFGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	if ( m_MonsterState != MONSTERSTATE_PRONE && (pevAttacker->flags & FL_CLIENT) && IsFriendWithPlayerBeforeProvoked() )
 	{
-		m_flPlayerDamage += flDamage;
-
 		// This is a heurstic to determine if the player intended to harm me
 		// If I have an enemy, we can't establish intent (may just be crossfire)
 		if ( m_hEnemy == 0 )
 		{
 			// If the player was facing directly at me, or I'm already suspicious, get mad
-			if ( (m_afMemory & bits_MEMORY_SUSPICIOUS) || IsFacing( pevAttacker, pev->origin ) )
+			if ( gpGlobals->time - m_flLastHitByPlayer < 4.0 && m_iPlayerHits > 2 && ((m_afMemory & bits_MEMORY_SUSPICIOUS) || IsFacing( pevAttacker, pev->origin )) )
 			{
 				// Alright, now I'm pissed!
 				PlaySentence( "FG_MAD", 4, VOL_NORM, ATTN_NORM );
@@ -2158,6 +2159,11 @@ int CHFGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			}
 			else
 			{
+				if ( gpGlobals->time - m_flLastHitByPlayer < 4.0 )
+					m_iPlayerHits++;
+				else
+					m_iPlayerHits = 0;
+				m_flLastHitByPlayer = gpGlobals->time;
 				// Hey, be careful with that
 				PlaySentence( "FG_SHOT", 4, VOL_NORM, ATTN_NORM );
 				Remember( bits_MEMORY_SUSPICIOUS );
