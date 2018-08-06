@@ -753,6 +753,17 @@ int CBaseEntity::DamageDecal( int bitsDamageType )
 // will keep a pointer to it after this call.
 CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner )
 {
+	CBaseEntity *pEntity = CreateNoSpawn(szName, vecOrigin, vecAngles, pentOwner);
+	if (pEntity)
+		DispatchSpawn( pEntity->edict() );
+	return pEntity;
+}
+
+/*
+ * Same as Create, but does not call DispatchSpawn. This allows to change some parameters before call to Spawn()
+ */
+CBaseEntity *CBaseEntity::CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner )
+{
 	edict_t	*pent;
 	CBaseEntity *pEntity;
 
@@ -772,6 +783,5 @@ CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, c
 	pEntity->pev->owner = pentOwner;
 	pEntity->pev->origin = vecOrigin;
 	pEntity->pev->angles = vecAngles;
-	DispatchSpawn( pEntity->edict() );
 	return pEntity;
 }
