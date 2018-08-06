@@ -57,7 +57,7 @@
 //=========================================================
 // monster-specific conditions
 //=========================================================
-#define bits_COND_FGRUNT_NOFIRE	( bits_COND_SPECIAL1 )
+#define bits_COND_FGRUNT_NOFIRE	( bits_COND_NOFIRE )
 //=========================================================
 // monster-specific tasks
 //=========================================================
