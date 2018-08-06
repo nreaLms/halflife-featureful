@@ -22,6 +22,7 @@
 #include	"soundent.h"
 #include	"customentity.h"
 #include	"decals.h"
+#include	"hgrunt.h"
 #include	"mod_features.h"
 
 #if FEATURE_OPFOR_GRUNT
@@ -2802,53 +2803,67 @@ void CHFGrunt::DeclineFollowing( void )
 // repelling down a line.
 //=========================================================
 
-class CHFGruntRepel : public CBaseMonster
+class CHFGruntRepel : public CHGruntRepel
 {
 public:
-	void Spawn( void );
-	void Precache( void );
-	void EXPORT RepelUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	int m_iSpriteTexture;	// Don't save, precache
-	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	void KeyValue(KeyValueData* pkvd);
+	const char* TrooperName() {
+		return "monster_human_grunt_ally";
+	}
+	void PrepareBeforeSpawn(CBaseEntity* pEntity);
+
+	int Save( CSave &save );
+	int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	int head;
 };
 
-LINK_ENTITY_TO_CLASS( monster_hgrunt_ally_repel, CHFGruntRepel )
+LINK_ENTITY_TO_CLASS( monster_grunt_ally_repel, CHFGruntRepel )
 
-void CHFGruntRepel::Spawn( void )
+TYPEDESCRIPTION	CHFGruntRepel::m_SaveData[] =
 {
-	Precache( );
-	pev->solid = SOLID_NOT;
+	DEFINE_FIELD( CHFGruntRepel, head, FIELD_INTEGER ),
+};
 
-	SetUse( &CHFGruntRepel::RepelUse );
+IMPLEMENT_SAVERESTORE( CHFGruntRepel, CHGruntRepel )
+
+void CHFGruntRepel::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "head" ) )
+	{
+		head = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CHGruntRepel::KeyValue( pkvd );
 }
 
-void CHFGruntRepel::Precache( void )
+void CHFGruntRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 {
-	UTIL_PrecacheOther( "monster_human_grunt_ally" );
-	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
+	CHFGrunt* grunt = (CHFGrunt*)pEntity;
+	grunt->m_iHead = head;
 }
 
-void CHFGruntRepel::RepelUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+class CMedicRepel : public CHFGruntRepel
 {
-	TraceResult tr;
-	UTIL_TraceLine( pev->origin, pev->origin + Vector( 0, 0, -4096.0), dont_ignore_monsters, ENT(pev), &tr);
+public:
+	const char* TrooperName() {
+		return "monster_human_medic_ally";
+	}
+};
 
-	CBaseEntity *pEntity = Create( "monster_human_grunt_ally", pev->origin, pev->angles );
-	CBaseMonster *pGrunt = pEntity->MyMonsterPointer( );
-	pGrunt->pev->movetype = MOVETYPE_FLY;
-	pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
-	pGrunt->SetActivity( ACT_GLIDE );
-	pGrunt->m_vecLastPosition = tr.vecEndPos;
+LINK_ENTITY_TO_CLASS( monster_medic_ally_repel, CMedicRepel )
 
-	CBeam *pBeam = CBeam::BeamCreate( "sprites/rope.spr", 10 );
-	pBeam->PointEntInit( pev->origin + Vector(0,0,112), pGrunt->entindex() );
-	pBeam->SetFlags( BEAM_FSOLID );
-	pBeam->SetColor( 255, 255, 255 );
-	pBeam->SetThink( &CHFGruntRepel::SUB_Remove );
-	pBeam->pev->nextthink = gpGlobals->time + -4096.0 * tr.flFraction / pGrunt->pev->velocity.z + 0.5;
+class CTorchRepel : public CHGruntRepel
+{
+public:
+	const char* TrooperName() {
+		return "monster_human_torch_ally";
+	}
+};
 
-	UTIL_Remove( this );
-}
+LINK_ENTITY_TO_CLASS( monster_torch_ally_repel, CTorchRepel )
 
 //=========================================================
 // FGrunt Dead PROP

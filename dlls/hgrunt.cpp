@@ -2306,22 +2306,32 @@ void CHGruntRepel::Spawn( void )
 {
 	Precache();
 	pev->solid = SOLID_NOT;
+	pev->effects |= EF_NODRAW;
 
 	SetUse( &CHGruntRepel::RepelUse );
 }
 
+const char* CHGruntRepel::TrooperName()
+{
+	return "monster_human_grunt";
+}
+
 void CHGruntRepel::Precache( void )
 {
-	UTIL_PrecacheOther( "monster_human_grunt" );
+	UTIL_PrecacheOther( TrooperName() );
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
+	if (!FStringNull(pev->model))
+		PRECACHE_MODEL(STRING(pev->model));
+	if (!FStringNull(m_gibModel))
+		PRECACHE_MODEL(STRING(m_gibModel));
+}
+
+void CHGruntRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
+{
+
 }
 
 void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-{
-	RepelUseHelper( "monster_human_grunt", pActivator, pCaller, useType, value );
-}
-
-void CHGruntRepel::RepelUseHelper( const char* monsterName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	TraceResult tr;
 	UTIL_TraceLine( pev->origin, pev->origin + Vector( 0, 0, -4096.0 ), dont_ignore_monsters, ENT( pev ), &tr );
@@ -2330,8 +2340,24 @@ void CHGruntRepel::RepelUseHelper( const char* monsterName, CBaseEntity *pActiva
 		return NULL;
 	*/
 
-	CBaseEntity *pEntity = Create( monsterName, pev->origin, pev->angles );
+	CBaseEntity *pEntity = CreateNoSpawn( TrooperName(), pev->origin, pev->angles );
+	if (!pEntity) {
+		UTIL_Remove( this );
+		return;
+	}
 	CBaseMonster *pGrunt = pEntity->MyMonsterPointer();
+	if (!pGrunt) {
+		UTIL_Remove( this );
+		return;
+	}
+	pEntity->pev->weapons = pev->weapons;
+	pEntity->pev->health = pev->health;
+	pEntity->pev->model = pev->model;
+	pGrunt->m_iClass = m_iClass;
+	pGrunt->m_bloodColor = m_bloodColor;
+	pGrunt->m_gibModel = m_gibModel;
+	PrepareBeforeSpawn(pEntity);
+	DispatchSpawn(pEntity->edict());
 	pGrunt->pev->movetype = MOVETYPE_FLY;
 	pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
 	pGrunt->SetActivity( ACT_GLIDE );

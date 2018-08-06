@@ -78,7 +78,6 @@ public:
 
 	void DropMyItems(BOOL isGibbed);
 
-protected:
 	int head;
 };
 
@@ -301,30 +300,43 @@ void CMassn::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, 
 class CAssassinRepel : public CHGruntRepel
 {
 public:
-	void Spawn();
-	void Precache(void);
-	void EXPORT RepelUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void KeyValue(KeyValueData* pkvd);
+	const char* TrooperName() {
+		return "monster_male_assassin";
+	}
+	void PrepareBeforeSpawn(CBaseEntity* pEntity);
+
+	int Save( CSave &save );
+	int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	int head;
 };
 
 LINK_ENTITY_TO_CLASS(monster_assassin_repel, CAssassinRepel)
 
-void CAssassinRepel::Spawn()
+TYPEDESCRIPTION	CAssassinRepel::m_SaveData[] =
 {
-	Precache();
-	pev->solid = SOLID_NOT;
+	DEFINE_FIELD( CAssassinRepel, head, FIELD_INTEGER ),
+};
 
-	SetUse( &CAssassinRepel::RepelUse );
+IMPLEMENT_SAVERESTORE( CAssassinRepel, CHGruntRepel )
+
+void CAssassinRepel::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "head" ) )
+	{
+		head = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CHGruntRepel::KeyValue( pkvd );
 }
 
-void CAssassinRepel::Precache(void)
+void CAssassinRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 {
-	UTIL_PrecacheOther("monster_male_assassin");
-	m_iSpriteTexture = PRECACHE_MODEL("sprites/rope.spr");
-}
-
-void CAssassinRepel::RepelUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
-{
-	RepelUseHelper( "monster_male_assassin", pActivator, pCaller, useType, value );
+	CMassn* massn = (CMassn*)pEntity;
+	massn->head = head;
 }
 
 class CDeadMassn : public CDeadMonster
