@@ -2025,15 +2025,15 @@
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/agrunt.mdl") = monster_alien_grunt_dead : "Dead Alien Grunt"
 [
-	sequence(Choices) : "Animation Sequence (editor)" : 24 =
+	sequence(Choices) : "Animation Sequence (editor)" : 25 =
 	[
-		24 : "dieforward"
-        26 : "diebackward"
+		25 : "diesimple"
+		26 : "diebackward"
 	]
 	pose(Choices) : "Pose" : 0 =
 	[
 		0 : "On Stomach"
-        1 : "On Back"
+		1 : "On Back"
 	]
 ]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave : "Vortigaunt"
@@ -3876,6 +3876,19 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+	]
+]
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper_dead : "Dead Shock Trooper"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 29 =
+	[
+		29 : "diesimple"
+		30 : "diebackwards"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On Stomach"
+		1 : "On Back"
 	]
 ]
 

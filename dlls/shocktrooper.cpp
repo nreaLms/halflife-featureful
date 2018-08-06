@@ -38,6 +38,8 @@
 #define GUN_SHOCKRIFLE				0
 #define STROOPER_GUN_NONE					1
 
+#define STRIIPER_GIB_COUNT 6
+
 //=========================================================
 // Monster's Anim Events Go Here
 //=========================================================
@@ -119,7 +121,7 @@ public:
 		return "models/strooper_gibs.mdl";
 	}
 	int DefaultGibCount() {
-		return 6;
+		return STRIIPER_GIB_COUNT;
 	}
 	void DropShockRoach();
 
@@ -663,6 +665,45 @@ void CStrooper::DropShockRoach()
 			pNewMonster->m_iClass = Classify();
 		}
 	}
+}
+
+class CDeadStrooper : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	void Precache();
+	int	DefaultClassify ( void ) { return	CLASS_RACEX_SHOCK; }
+	const char* DefaultGibModel() {
+		return "models/strooper_gibs.mdl";
+	}
+	int DefaultGibCount() {
+		return STRIIPER_GIB_COUNT;
+	}
+
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[2];
+};
+
+const char *CDeadStrooper::m_szPoses[] = { "diesimple", "diebackwards" };
+
+const char* CDeadStrooper::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_shocktrooper_dead, CDeadStrooper )
+
+void CDeadStrooper::Precache()
+{
+	PRECACHE_MODEL("models/strooper_gibs.mdl");
+}
+
+void CDeadStrooper::Spawn( )
+{
+	Precache();
+	SpawnHelper("models/strooper.mdl", BLOOD_COLOR_YELLOW, gSkillData.strooperHealth/2);
+	MonsterInitDead();
+	pev->frame = 255;
 }
 
 #endif

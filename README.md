@@ -55,6 +55,7 @@ Most Opposing Force monsters are implemented (exceptions are some monsters that 
 * monster_human_medic_ally_dead (was not in Opposing Force)
 * monster_human_torch_ally_dead (was not in Opposing Force)
 * monster_alien_grunt_dead
+* monster_shocktrooper_dead (Opposing Force had monster_ShockTrooper_dead, but it was bugged)
 
 ### Monster features
 

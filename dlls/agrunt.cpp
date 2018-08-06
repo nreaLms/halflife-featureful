@@ -1187,7 +1187,7 @@ public:
 	static const char *m_szPoses[2];
 };
 
-const char *CDeadAgrunt::m_szPoses[] = { "dieforward", "diebackward" };
+const char *CDeadAgrunt::m_szPoses[] = { "diesimple", "diebackward" };
 
 const char* CDeadAgrunt::getPos(int pos) const
 {
