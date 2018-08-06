@@ -3468,6 +3468,34 @@
 	]
 ]
 
+@PointClass base(Monster, Sequence) size(-95 -95 0, 95 95 190) studio("models/geneworm.mdl") = monster_geneworm : "Gene Worm"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 15 =
+	[
+		0 : "melee1"
+		1 : "melee2"
+		2 : "melee3"
+		3 : "dattack1"
+		4 : "dattack2"
+		5 : "dattack3"
+		6 : "eyepain1"
+		7 : "eyepain2"
+		8 : "bigpain1"
+		9 : "bigpain2"
+		10 : "bigpain3"
+		11 : "bigpain4"
+		12 : "mad"
+		13 : "scream1"
+		14 : "scream2"
+		15 : "idle"
+		16 : "idlepain"
+		17 : "idlepain2"
+		18 : "idlepain3"
+		19 : "death"
+		20 : "entry"
+	]
+]
+
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/skeleton.mdl") = monster_skeleton_dead : "Dead Skeleton"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -4583,6 +4611,20 @@
 ]
 
 @SolidClass base(Trigger) = trigger_once : "Trigger: Activate once" []
+
+@SolidClass base(Targetname,Target) = trigger_geneworm_hit : "Trigger GeneWorm Hit"
+[
+	spawnflags(flags) =
+	[
+		1: "Target Once" : 0
+		2: "Start Off" : 0
+		8: "No clients" : 0
+		16:"FireClientOnly" : 0
+		32:"TouchClientOnly" : 0
+	]
+	master(string) : "Master"
+	delay(string) : "Delay before trigger" : "0"
+]
 
 @PointClass base(Targetx, Targetname) = trigger_playerfreeze : "Trigger Player Freeze" []
 

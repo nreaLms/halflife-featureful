@@ -480,19 +480,19 @@ TYPEDESCRIPTION CGeneWorm::m_SaveData[] =
     DEFINE_FIELD(CGeneWorm, m_orificeGlow, FIELD_CLASSPTR),
     DEFINE_FIELD(CGeneWorm, m_pBall, FIELD_CLASSPTR),
     DEFINE_FIELD(CGeneWorm, m_iWasHit, FIELD_INTEGER),
-    DEFINE_FIELD(CGeneWorm, m_flNextMeleeTime, FIELD_FLOAT),
-    DEFINE_FIELD(CGeneWorm, m_flNextRangeTime, FIELD_FLOAT),
+    DEFINE_FIELD(CGeneWorm, m_flNextMeleeTime, FIELD_TIME),
+    DEFINE_FIELD(CGeneWorm, m_flNextRangeTime, FIELD_TIME),
     DEFINE_FIELD(CGeneWorm, m_fRightEyeHit, FIELD_BOOLEAN),
     DEFINE_FIELD(CGeneWorm, m_fLeftEyeHit, FIELD_BOOLEAN),
-    DEFINE_FIELD(CGeneWorm, m_flOrificeOpenTime, FIELD_FLOAT),
+    DEFINE_FIELD(CGeneWorm, m_flOrificeOpenTime, FIELD_TIME),
     DEFINE_FIELD(CGeneWorm, m_fSpawningTrooper, FIELD_BOOLEAN),
     DEFINE_FIELD(CGeneWorm, m_fActivated, FIELD_BOOLEAN),
     DEFINE_FIELD(CGeneWorm, m_fSpiting, FIELD_BOOLEAN),
-    DEFINE_FIELD(CGeneWorm, m_flDeathStart, FIELD_FLOAT),
-    DEFINE_FIELD(CGeneWorm, m_flMadDelayTime, FIELD_FLOAT),
+    DEFINE_FIELD(CGeneWorm, m_flDeathStart, FIELD_TIME),
+    DEFINE_FIELD(CGeneWorm, m_flMadDelayTime, FIELD_TIME),
     DEFINE_FIELD(CGeneWorm, m_iLevel, FIELD_INTEGER),
     DEFINE_FIELD(CGeneWorm, m_fGetMad, FIELD_BOOLEAN),
-    DEFINE_FIELD(CGeneWorm, m_flSpitStartTime, FIELD_FLOAT),
+    DEFINE_FIELD(CGeneWorm, m_flSpitStartTime, FIELD_TIME),
 };
 IMPLEMENT_SAVERESTORE(CGeneWorm, CBaseMonster)
 
@@ -672,6 +672,7 @@ void CGeneWorm::DyingThink(void)
 {
     CBaseEntity *entity;
     pev->nextthink = gpGlobals->time + 0.1;
+    GlowShellUpdate();
 
     DispatchAnimEvents();
     StudioFrameAdvance();
@@ -1013,6 +1014,7 @@ void CGeneWorm::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDi
 void CGeneWorm::HuntThink(void)
 {
     pev->nextthink = gpGlobals->time + 0.1;
+    GlowShellUpdate();
 
     if(!m_fActivated)
         return;
