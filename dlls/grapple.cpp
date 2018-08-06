@@ -257,7 +257,6 @@ void CBarnacleGrapple::Precache( void )
 	PRECACHE_MODEL( "sprites/tongue.spr" );
 
 	UTIL_PrecacheOther( "grapple_tip" );
-	ALERT(at_console, "next attack %f, global time: %f", m_flNextPrimaryAttack, gpGlobals->time);
 	m_flNextPrimaryAttack = 0;
 	m_flNextSecondaryAttack = 0;
 	m_flTimeWeaponIdle = 0;
