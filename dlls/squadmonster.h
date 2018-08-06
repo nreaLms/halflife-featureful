@@ -118,5 +118,6 @@ public:
 
 	MONSTERSTATE GetIdealState( void );
 	Schedule_t *GetScheduleOfType( int iType );
+	void StartTask( Task_t *pTask );
 };
 #endif // SQUADMONSTER_H

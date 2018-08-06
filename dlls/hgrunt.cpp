@@ -113,15 +113,7 @@ enum
 {
 	TASK_GRUNT_FACE_TOSS_DIR = LAST_COMMON_TASK + 1,
 	TASK_GRUNT_SPEAK_SENTENCE,
-	TASK_GRUNT_CHECK_FIRE
 };
-
-//=========================================================
-// monster-specific conditions
-//=========================================================
-#define bits_COND_GRUNT_NOFIRE	( bits_COND_SPECIAL1 )
-
-
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt, CHGrunt )
 
@@ -1029,13 +1021,6 @@ void CHGrunt::StartTask( Task_t *pTask )
 
 	switch( pTask->iTask )
 	{
-	case TASK_GRUNT_CHECK_FIRE:
-		if( !NoFriendlyFire() )
-		{
-			SetConditions( bits_COND_GRUNT_NOFIRE );
-		}
-		TaskComplete();
-		break;
 	case TASK_GRUNT_SPEAK_SENTENCE:
 		SpeakSentence();
 		TaskComplete();
@@ -1367,19 +1352,19 @@ Task_t tlGruntSignalSuppress[] =
 	{ TASK_FACE_IDEAL, (float)0 },
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY, (float)ACT_SIGNAL2 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0},
+	{ TASK_CHECK_FIRE, (float)0},
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 };
 
@@ -1392,7 +1377,7 @@ Schedule_t slGruntSignalSuppress[] =
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND |
-		bits_COND_GRUNT_NOFIRE |
+		bits_COND_NOFIRE |
 		bits_COND_NO_AMMO_LOADED,
 		bits_SOUND_DANGER,
 		"SignalSuppress"
@@ -1403,19 +1388,19 @@ Task_t tlGruntSuppress[] =
 {
 	{ TASK_STOP_MOVING, 0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 };
 
@@ -1428,7 +1413,7 @@ Schedule_t slGruntSuppress[] =
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND |
-		bits_COND_GRUNT_NOFIRE |
+		bits_COND_NOFIRE |
 		bits_COND_NO_AMMO_LOADED,
 		bits_SOUND_DANGER,
 		"Suppress"
@@ -1627,16 +1612,16 @@ Task_t tlGruntRangeAttack1A[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY, (float)ACT_CROUCH },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 };
 
@@ -1650,7 +1635,7 @@ Schedule_t slGruntRangeAttack1A[] =
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
 		bits_COND_HEAR_SOUND |
-		bits_COND_GRUNT_NOFIRE |
+		bits_COND_NOFIRE |
 		bits_COND_NO_AMMO_LOADED,
 		bits_SOUND_DANGER,
 		"Range Attack1A"
@@ -1665,16 +1650,16 @@ Task_t tlGruntRangeAttack1B[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY, (float)ACT_IDLE_ANGRY },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_GRUNT_CHECK_FIRE, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 };
 
@@ -1688,7 +1673,7 @@ Schedule_t slGruntRangeAttack1B[] =
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
 		bits_COND_NO_AMMO_LOADED |
-		bits_COND_GRUNT_NOFIRE |
+		bits_COND_NOFIRE |
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_DANGER,
 		"Range Attack1B"

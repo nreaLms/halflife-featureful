@@ -209,19 +209,46 @@ Schedule_t slIdleBaStand[] =
 	},
 };
 
+Task_t tlBaRangeAttack1[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_CHECK_FIRE, (float)0 },
+	{ TASK_RANGE_ATTACK1, (float)0 },
+};
+
+Schedule_t slBaRangeAttack1[] =
+{
+	{
+		tlBaRangeAttack1,
+		ARRAYSIZE( tlBaRangeAttack1 ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_ENEMY_OCCLUDED |
+		bits_COND_NO_AMMO_LOADED |
+		bits_COND_NOFIRE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"Range Attack1"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES( CBarney )
 {
 	slBaFollow,
 	slBarneyEnemyDraw,
 	slBaFaceTarget,
 	slIdleBaStand,
+	slBaRangeAttack1,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CBarney, CTalkMonster )
 
 void CBarney::StartTask( Task_t *pTask )
 {
-	CTalkMonster::StartTask( pTask );	
+	CTalkMonster::StartTask( pTask );
 }
 
 void CBarney::RunTask( Task_t *pTask )
@@ -413,6 +440,7 @@ void CBarney::SpawnImpl(const char* modelName, float health)
 	pev->view_ofs = Vector ( 0, 0, 50 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
+	m_HackedGunPos = Vector ( 0, 0, 55 );
 
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
@@ -697,7 +725,9 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 			return slIdleBaStand;
 		}
 		else
-			return psched;	
+			return psched;
+	case SCHED_RANGE_ATTACK1:
+		return slBaRangeAttack1;
 	}
 
 	return CTalkMonster::GetScheduleOfType( Type );
