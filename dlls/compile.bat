@@ -30,6 +30,7 @@ set SOURCES=agrunt.cpp^
 	defaultai.cpp^
 	displacer.cpp^
 	doors.cpp^
+	drillsergeant.cpp^
 	eagle.cpp^
 	effects.cpp^
 	egon.cpp^
@@ -95,6 +96,7 @@ set SOURCES=agrunt.cpp^
 	playermonster.cpp^
 	python.cpp^
 	rat.cpp^
+	recruit.cpp^
 	roach.cpp^
 	rpg.cpp^
 	satchel.cpp^

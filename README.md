@@ -13,8 +13,6 @@ In case you enable new monsters or weapons don't forget to add their skill value
 
 #### Opposing Force monsters
 
-Most Opposing Force monsters are implemented (exceptions are some monsters that are used only in training room)
-
 * monster_cleansuit_scientist
 * monster_otis
 * monster_blkop_osprey
@@ -30,6 +28,8 @@ Most Opposing Force monsters are implemented (exceptions are some monsters that 
 * monster_human_grunt_ally
 * monster_human_medic_ally (healing works a bit different from original)
 * monster_human_torch_ally
+* monster_drillsergeant
+* monster_recruit
 * monster_gonome
 * monster_zombie_barney
 * monster_zombie_soldier

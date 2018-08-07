@@ -60,6 +60,7 @@ set (SVDLL_SOURCES
 	defaultai.cpp
 	displacer.cpp
 	doors.cpp
+	drillsergeant.cpp
 	eagle.cpp
 	effects.cpp
 	egon.cpp
@@ -125,6 +126,7 @@ set (SVDLL_SOURCES
 	playermonster.cpp
 	python.cpp
 	rat.cpp
+	recruit.cpp
 	roach.cpp
 	rpg.cpp
 	satchel.cpp
