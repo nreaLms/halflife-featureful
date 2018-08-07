@@ -24,6 +24,10 @@
 #include	"mod_features.h"
 
 #if FEATURE_PITDRONE
+
+#define FEATURE_PITDRONE_SPAWN_WITH_SPIKES 1
+#define FEATURE_PITDRONE_ALWAYS_CAN_RELOAD 1
+
 int		iPitDroneSpitSprite;
 //=========================================================
 // CPitDrone's spit projectile
