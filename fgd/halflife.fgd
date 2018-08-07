@@ -1805,6 +1805,12 @@
     reset_delay(integer) : "Reset delay"
 ]
 
+@PointClass base(Weapon, Targetx) size(-16 -16 0, 16 16 36) studio("models/nuke_case.mdl") = item_nuclearbomb : "Nuclear Bomb"
+[
+	initialstate(integer) : "Initial State" : 0
+	wait(integer) : "Wait" : 1
+]
+
 //
 // lights
 //

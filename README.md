@@ -98,6 +98,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * env_blowercannon
 * env_spritetrain
 * item_generic
+* item_nuclearbomb
 * monster_skeleton_dead
 * op4mortar
 * trigger_playerfreeze

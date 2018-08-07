@@ -111,6 +111,7 @@ set (SVDLL_SOURCES
 	multiplay_gamerules.cpp
 	nihilanth.cpp
 	nodes.cpp
+	nuclearbomb.cpp
 	observer.cpp
 	op4mortar.cpp
 	osprey.cpp
