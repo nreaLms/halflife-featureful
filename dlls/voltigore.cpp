@@ -26,15 +26,14 @@
 #include	"decals.h"
 #include	"soundent.h"
 #include	"game.h"
+#include	"squadmonster.h"
+#include	"weapons.h"
 #include	"mod_features.h"
 
 #if FEATURE_VOLTIFORE
 #define		VOLTIGORE_SPRINT_DIST	256 // how close the voltigore has to get before starting to sprint and refusing to swerve
 
 #define		VOLTIGORE_MAX_BEAMS		12
-
-#define		VOLTIGORE_CLASSNAME				"monster_alien_voltigore"
-#define		VOLTIGORE_BABY_CLASSNAME		"monster_alien_babyvoltigore"
 
 #define VOLTIGORE_ZAP_RED 180
 #define VOLTIGORE_ZAP_GREEN 16
@@ -131,6 +130,7 @@ void CVoltigoreEnergyBall::Shoot(entvars_t *pevOwner, Vector vecStart, Vector ve
 	UTIL_SetOrigin(pEnergyBall->pev, vecStart);
 	pEnergyBall->pev->velocity = vecVelocity;
 	pEnergyBall->pev->owner = ENT(pevOwner);
+	pEnergyBall->pev->angles = pevOwner->angles;
 
 	pEnergyBall->SetThink(&CVoltigoreEnergyBall::BeamThink);
 	pEnergyBall->pev->nextthink = gpGlobals->time + 0.1;
@@ -147,14 +147,19 @@ void CVoltigoreEnergyBall::Touch(CBaseEntity *pOther)
 	TraceResult tr;
 	if (!pOther->pev->takedamage)
 	{
-
 		// make a splat on the wall
 		UTIL_TraceLine(pev->origin, pev->origin + pev->velocity * 10, dont_ignore_monsters, ENT(pev), &tr);
 		UTIL_DecalTrace(&tr, DECAL_SCORCH1 + RANDOM_LONG(0, 1));
 	}
 	else
 	{
-		pOther->TakeDamage(pev, VARS( pev->owner ), gSkillData.voltigoreDmgBeam, DMG_SHOCK);
+		tr = UTIL_GetGlobalTrace();
+		ClearMultiDamage();
+		entvars_t* attacker = VARS( pev->owner );
+		if (!attacker)
+			attacker = pev;
+		pOther->TraceAttack(attacker, gSkillData.voltigoreDmgBeam, pev->velocity, &tr, DMG_SHOCK);
+		ApplyMultiDamage(pev, attacker);
 	}
 	pev->velocity = Vector(0,0,0);
 
@@ -173,12 +178,11 @@ void CVoltigoreEnergyBall::BeamThink(void)
 		while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, 32)) != NULL) {
 			if ( pEntity->pev->takedamage && pEntity->MyMonsterPointer()) {
 				bool shouldDamage = true;
-				bool someVoltigore = FClassnameIs(pEntity->pev, "monster_alien_voltigore") || FClassnameIs(pEntity->pev, "monster_alien_babyvoltigore");
-				if (pev->owner && someVoltigore) {
-					CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
-					if (owner && owner->MyMonsterPointer()) {
-						const int relationship = owner->MyMonsterPointer()->IRelationship(pEntity);
-						if (relationship < R_DL) {
+				if (pev->owner) {
+					CBaseMonster* owner = GetMonsterPointer(pev->owner);
+					if (owner) {
+						const int relationship = owner->IRelationship(pEntity);
+						if (relationship == R_AL) {
 							shouldDamage = false;
 						}
 					}
@@ -217,7 +221,6 @@ void CVoltigoreEnergyBall::CreateBeam(int nIndex, const Vector& vecPos, int widt
 	m_pBeam[nIndex]->SetColor(VOLTIGORE_ZAP_RED, VOLTIGORE_ZAP_GREEN, VOLTIGORE_ZAP_BLUE);
 	m_pBeam[nIndex]->SetBrightness(brightness);
 	m_pBeam[nIndex]->SetNoise(VOLTIGORE_ZAP_NOISE);
-	//m_pBeam[nIndex]->SetFlags( SF_BEAM_SHADEIN );
 }
 
 //=========================================================
@@ -276,20 +279,14 @@ void CVoltigoreEnergyBall::UpdateBeams()
 
 	TraceResult tr;
 	const Vector vecSrc = pev->origin;
-	const Vector directionVector = pev->velocity.Normalize();
 	const int baseDistance = VOLTIGORE_ZAP_DISTANCE;
+	UTIL_MakeVectors(pev->angles);
 	for (i = 0; i < m_iBeams; ++i)
 	{
 		for (j = 0; j < 3; ++j)
 		{
-			const float randomX = RANDOM_FLOAT(-1, 0.1);
-			const float randomY = RANDOM_FLOAT(-1, 0.1);
 			//ALERT(at_console, "Randomize: %f %f\n", randomX, randomY);
-			Vector vecTarget = vecSrc + Vector(
-						directionVector.x * randomX,
-						directionVector.y * randomY,
-						RANDOM_LONG(0, 1) ? 1 : -1
-					) * baseDistance;
+			Vector vecTarget = vecSrc + (gpGlobals->v_right * RANDOM_FLOAT(-1,1) + gpGlobals->v_up * RANDOM_FLOAT(-1,1)) * baseDistance;
 			TraceResult tr1;
 			UTIL_TraceLine(vecSrc, vecTarget, ignore_monsters, ENT(pev), &tr1);
 			if (tr1.flFraction != 1.0f) {
@@ -315,7 +312,7 @@ void CVoltigoreEnergyBall::UpdateBeams()
 //=========================================================
 // CVoltigore
 //=========================================================
-class CVoltigore : public CBaseMonster
+class CVoltigore : public CSquadMonster
 {
 public:
 	virtual void Spawn(void);
@@ -396,7 +393,7 @@ TYPEDESCRIPTION	CVoltigore::m_SaveData[] =
 	DEFINE_FIELD(CVoltigore, m_pBeamGlow, FIELD_CLASSPTR),
 };
 
-IMPLEMENT_SAVERESTORE(CVoltigore, CBaseMonster)
+IMPLEMENT_SAVERESTORE(CVoltigore, CSquadMonster)
 
 const char* CVoltigore::pAlertSounds[] =
 {
@@ -493,7 +490,7 @@ int CVoltigore::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 		}
 	}
 
-	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CSquadMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
@@ -539,7 +536,7 @@ BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 //=========================================================
 void CVoltigore::RunAI(void)
 {
-	CBaseMonster::RunAI();
+	CSquadMonster::RunAI();
 
 	if (m_fShouldUpdateBeam)
 	{
@@ -552,7 +549,7 @@ void CVoltigore::RunAI(void)
 void CVoltigore::GibMonster()
 {
 	GibBeamDamage();
-	CBaseMonster::GibMonster();
+	CSquadMonster::GibMonster();
 }
 
 //=========================================================
@@ -714,7 +711,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 	break;
 
 	default:
-		CBaseMonster::HandleAnimEvent(pEvent);
+		CSquadMonster::HandleAnimEvent(pEvent);
 	}
 }
 
@@ -735,9 +732,9 @@ void CVoltigore::Spawn()
 	SetMyHealth(gSkillData.voltigoreHealth);
 	m_flFieldOfView		= 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
+	m_afCapability = bits_CAP_TURN_HEAD | bits_CAP_SQUAD;
 
 	m_flNextZapTime	= gpGlobals->time;
-
 
 	m_fShouldUpdateBeam = FALSE;
 	m_pBeamGlow = NULL;
@@ -901,7 +898,7 @@ DEFINE_CUSTOM_SCHEDULES(CVoltigore)
 	slVoltigoreVictoryDance
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CVoltigore, CBaseMonster)
+IMPLEMENT_CUSTOM_SCHEDULES(CVoltigore, CSquadMonster)
 
 //=========================================================
 // GetSchedule 
@@ -916,7 +913,7 @@ Schedule_t *CVoltigore::GetSchedule(void)
 		if (HasConditions(bits_COND_ENEMY_DEAD))
 		{
 			// call base class, all code to handle dead enemies is centralized there.
-			return CBaseMonster::GetSchedule();
+			return CSquadMonster::GetSchedule();
 		}
 
 		if (HasConditions(bits_COND_NEW_ENEMY))
@@ -941,7 +938,7 @@ Schedule_t *CVoltigore::GetSchedule(void)
 	}
 	}
 
-	return CBaseMonster::GetSchedule();
+	return CSquadMonster::GetSchedule();
 }
 
 //=========================================================
@@ -962,7 +959,7 @@ Schedule_t* CVoltigore::GetScheduleOfType(int Type)
 		break;
 	}
 
-	return CBaseMonster::GetScheduleOfType(Type);
+	return CSquadMonster::GetScheduleOfType(Type);
 }
 
 //=========================================================
@@ -991,7 +988,7 @@ void CVoltigore::StartTask(Task_t *pTask)
 			// Play the beam 'glow' sound.
 			EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, "debris/beamstart1.wav", 1, ATTN_NORM, 0, PITCH_HIGH);
 
-			CBaseMonster::StartTask(pTask);
+			CSquadMonster::StartTask(pTask);
 		}
 		break;
 	case TASK_GET_PATH_TO_ENEMY:
@@ -1008,7 +1005,7 @@ void CVoltigore::StartTask(Task_t *pTask)
 		}
 		break;
 	default:
-		CBaseMonster::StartTask(pTask);
+		CSquadMonster::StartTask(pTask);
 		break;
 	}
 }
@@ -1055,7 +1052,7 @@ void CVoltigore::Killed(entvars_t *pevAttacker, int iGib)
 		iTimes++;
 	}
 
-	CBaseMonster::Killed(pevAttacker, iGib);
+	CSquadMonster::Killed(pevAttacker, iGib);
 }
 
 void CVoltigore::GibBeamDamage()
@@ -1228,7 +1225,7 @@ void CBabyVoltigore::Spawn()
 	Precache();
 
 	SetMyModel("models/baby_voltigore.mdl");
-	UTIL_SetSize(pev, Vector(-32, -32, 0), Vector(32, 32, 36));
+	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 32));
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
@@ -1237,6 +1234,7 @@ void CBabyVoltigore::Spawn()
 	SetMyHealth(gSkillData.babyVoltigoreHealth);
 	m_flFieldOfView		= 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
+	m_afCapability = bits_CAP_TURN_HEAD | bits_CAP_SQUAD;
 
 	m_flNextZapTime	= gpGlobals->time;
 
@@ -1303,7 +1301,7 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 BOOL CBabyVoltigore::CheckMeleeAttack1(float flDot, float flDist)
 {
-	return CBaseMonster::CheckMeleeAttack1(flDot, flDist);
+	return CSquadMonster::CheckMeleeAttack1(flDot, flDist);
 }
 
 //=========================================================
@@ -1322,11 +1320,11 @@ void CBabyVoltigore::StartTask(Task_t *pTask)
 	case TASK_MELEE_ATTACK1:
 	{
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackMeleeSounds), RANDOM_FLOAT(0.5, 0.6), ATTN_NONE, 0, RANDOM_LONG(110, 120));
-		CBaseMonster::StartTask(pTask);
+		CSquadMonster::StartTask(pTask);
 	}
 	break;
 	default:
-		CBaseMonster::StartTask(pTask);
+		CSquadMonster::StartTask(pTask);
 		break;
 	}
 }
@@ -1334,12 +1332,12 @@ void CBabyVoltigore::StartTask(Task_t *pTask)
 void CBabyVoltigore::Killed(entvars_t* pevAttacker, int iGib)
 {
 	DestroyBeams();
-	CBaseMonster::Killed(pevAttacker, iGib);
+	CSquadMonster::Killed(pevAttacker, iGib);
 }
 
 void CBabyVoltigore::GibMonster()
 {
-	CBaseMonster::GibMonster();
+	CSquadMonster::GibMonster();
 }
 
 BOOL CBabyVoltigore::CheckRangeAttack1(float flDot, float flDist)
@@ -1360,7 +1358,7 @@ Schedule_t *CBabyVoltigore::GetSchedule(void)
 		if (HasConditions(bits_COND_ENEMY_DEAD))
 		{
 			// call base class, all code to handle dead enemies is centralized there.
-			return CBaseMonster::GetSchedule();
+			return CSquadMonster::GetSchedule();
 		}
 
 		if (HasConditions(bits_COND_NEW_ENEMY))
@@ -1379,7 +1377,7 @@ Schedule_t *CBabyVoltigore::GetSchedule(void)
 	}
 	}
 
-	return CBaseMonster::GetSchedule();
+	return CSquadMonster::GetSchedule();
 }
 
 Schedule_t *CBabyVoltigore::GetScheduleOfType(int Type)
