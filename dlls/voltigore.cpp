@@ -642,7 +642,12 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		// we should be able to read the position of bones at runtime for this info.
 		vecSpitOffset = (gpGlobals->v_right * 8 + gpGlobals->v_forward * 37 + gpGlobals->v_up * 23);
 		vecSpitOffset = (pev->origin + vecSpitOffset);
-		vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
+		Vector vecEnemyPosition;
+		if (m_hEnemy != 0)
+			vecEnemyPosition = (m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs);
+		else
+			vecEnemyPosition = m_vecEnemyLKP;
+		vecSpitDir = (vecEnemyPosition - vecSpitOffset).Normalize();
 
 		vecSpitDir.x += RANDOM_FLOAT(-0.01, 0.01);
 		vecSpitDir.y += RANDOM_FLOAT(-0.01, 0.01);

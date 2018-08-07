@@ -517,7 +517,12 @@ void CPitDrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 		vecSpitOffset = (gpGlobals->v_right * 4 + gpGlobals->v_forward * 37 + gpGlobals->v_up * 40);
 		vecSpitOffset = (pev->origin + vecSpitOffset);
 		//vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
-		vecSpitDir = (m_hEnemy->BodyTarget(pev->origin) - vecSpitOffset).Normalize();
+		Vector vecEnemyPosition;
+		if (m_hEnemy != 0)
+			vecEnemyPosition = m_hEnemy->BodyTarget(pev->origin);
+		else
+			vecEnemyPosition = m_vecEnemyLKP;
+		vecSpitDir = (vecEnemyPosition - vecSpitOffset).Normalize();
 
 		vecSpitDir.x += RANDOM_FLOAT(-0.01, 0.01);
 		vecSpitDir.y += RANDOM_FLOAT(-0.01, 0.01);

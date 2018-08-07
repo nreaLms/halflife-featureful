@@ -694,7 +694,11 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				// we should be able to read the position of bones at runtime for this info.
 				Vector vecSpitOffset = ( gpGlobals->v_right * 8 + gpGlobals->v_forward * 37 + gpGlobals->v_up * 23 );
 				vecSpitOffset = ( pev->origin + vecSpitOffset );
-				Vector vecEnemyPosition( m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs / 2 );
+				Vector vecEnemyPosition;
+				if (m_hEnemy != 0)
+					vecEnemyPosition = m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs / 2;
+				else
+					vecEnemyPosition = m_vecEnemyLKP;
 				Vector vecSpitDir = ( vecEnemyPosition - vecSpitOffset ).Normalize();
 
 				bool bigSpit = false;

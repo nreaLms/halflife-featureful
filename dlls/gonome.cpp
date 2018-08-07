@@ -422,13 +422,18 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 		GetAttachment(0, vecArmPos, vecArmAng);
 
 		vecSpitOffset = vecArmPos;
-		vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
+		Vector vecEnemyPosition;
+		if (m_hEnemy != 0)
+			vecEnemyPosition = (m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs);
+		else
+			vecEnemyPosition = m_vecEnemyLKP;
+		vecSpitDir = (vecEnemyPosition - vecSpitOffset).Normalize();
 
 		vecSpitDir.x += RANDOM_FLOAT(-0.05, 0.05);
 		vecSpitDir.y += RANDOM_FLOAT(-0.05, 0.05);
 		vecSpitDir.z += RANDOM_FLOAT(-0.05, 0);
 
-		CGonomeGuts::Shoot(pev, vecSpitOffset, vecSpitDir * 1200); // Default: 900
+		CGonomeGuts::Shoot(pev, vecSpitOffset, vecSpitDir * 900);
 	}
 	break;
 
