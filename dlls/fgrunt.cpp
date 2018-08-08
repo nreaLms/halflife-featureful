@@ -2196,7 +2196,7 @@ int CHFGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		}
 	}
 
-	return CTalkMonster :: TakeDamage ( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return ret;
 }
 
 //=========================================================
