@@ -985,15 +985,14 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 			MakeIdealYaw( m_vecEnemyLKP );
 
-			// add pain to the conditions 
-			// !!!HACKHACK - fudged for now. Do we want to have a virtual function to determine what is light and 
-			// heavy damage per monster class?
+			// add pain to the conditions
 			if( flDamage > 0 )
 			{
 				SetConditions( bits_COND_LIGHT_DAMAGE );
 			}
 
-			if( flDamage >= 20 )
+			const float heavyDamageValue = Q_min(60, Q_max(20, pev->max_health/3));
+			if( flDamage >= heavyDamageValue )
 			{
 				SetConditions( bits_COND_HEAVY_DAMAGE );
 			}
