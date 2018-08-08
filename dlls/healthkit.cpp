@@ -301,6 +301,14 @@ public:
 	void SetNeedleState(int state);
 	void SetNeedleController(float yaw);
 	void UpdateOnRemove();
+	void UpdateJar()
+	{
+		if (m_jar)
+		{
+			const float jarBoneControllerValue = (m_iJuice / gSkillData.healthchargerCapacity) * 11 - 11;
+			m_jar->SetBoneController(0,  jarBoneControllerValue );
+		}
+	}
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -335,7 +343,6 @@ TYPEDESCRIPTION CWallHealthDecay::m_SaveData[] =
 	DEFINE_FIELD( CWallHealthDecay, m_iJuice, FIELD_INTEGER ),
 	DEFINE_FIELD( CWallHealthDecay, m_iState, FIELD_INTEGER ),
 	DEFINE_FIELD( CWallHealthDecay, m_flSoundTime, FIELD_TIME ),
-	DEFINE_FIELD( CWallHealthDecay, m_jar, FIELD_CLASSPTR),
 	DEFINE_FIELD( CWallHealthDecay, m_playingChargeSound, FIELD_BOOLEAN),
 };
 
@@ -353,12 +360,6 @@ void CWallHealthDecay::Spawn()
 	UTIL_SetOrigin(pev, pev->origin);
 	m_iJuice = gSkillData.healthchargerCapacity;
 	pev->skin = 0;
-
-	m_jar = GetClassPtr( (CWallHealthJarDecay *)NULL );
-	m_jar->Spawn();
-	m_jar->pev->classname = MAKE_STRING("item_healthcharger_jar");
-	UTIL_SetOrigin( m_jar->pev, pev->origin );
-	m_jar->pev->angles = pev->angles;
 
 	InitBoneControllers();
 
@@ -383,6 +384,15 @@ void CWallHealthDecay::Precache(void)
 	PRECACHE_SOUND( "items/medshot4.wav" );
 	PRECACHE_SOUND( "items/medshotno1.wav" );
 	PRECACHE_SOUND( "items/medcharge4.wav" );
+
+	m_jar = GetClassPtr( (CWallHealthJarDecay *)NULL );
+	if (m_jar)
+	{
+		m_jar->Spawn();
+		UTIL_SetOrigin( m_jar->pev, pev->origin );
+		m_jar->pev->angles = pev->angles;
+		UpdateJar();
+	}
 }
 
 void CWallHealthDecay::SearchForPlayer()
@@ -503,8 +513,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	if( pActivator->TakeHealth( 1, DMG_GENERIC ) )
 	{
 		m_iJuice--;
-		const float jarBoneControllerValue = (m_iJuice / gSkillData.healthchargerCapacity) * 11 - 11;
-		m_jar->SetBoneController(0,  jarBoneControllerValue );
+		UpdateJar();
 
 		if (soundType == 1)
 		{
@@ -537,7 +546,7 @@ void CWallHealthDecay::Recharge( void )
 {
 	EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
 	m_iJuice = gSkillData.healthchargerCapacity;
-	m_jar->SetBoneController(0, 0);
+	UpdateJar();
 	pev->skin = 0;
 	SetNeedleState(Still);
 	SetThink( &CWallHealthDecay::SearchForPlayer );

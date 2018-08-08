@@ -282,8 +282,6 @@ TYPEDESCRIPTION CRechargeDecay::m_SaveData[] =
 	DEFINE_FIELD( CRechargeDecay, m_iJuice, FIELD_INTEGER ),
 	DEFINE_FIELD( CRechargeDecay, m_iState, FIELD_INTEGER ),
 	DEFINE_FIELD( CRechargeDecay, m_flSoundTime, FIELD_TIME ),
-	DEFINE_FIELD( CRechargeDecay, m_glass, FIELD_CLASSPTR),
-	DEFINE_FIELD( CRechargeDecay, m_beam, FIELD_CLASSPTR),
 	DEFINE_FIELD( CRechargeDecay, m_playingChargeSound, FIELD_BOOLEAN),
 };
 
@@ -302,16 +300,9 @@ void CRechargeDecay::Spawn()
 	m_iJuice = gSkillData.suitchargerCapacity;
 	pev->skin = 0;
 
-	m_glass = GetClassPtr( (CRechargeGlassDecay *)NULL );
-	m_glass->Spawn();
-	m_glass->pev->classname = MAKE_STRING("item_recharge_glass");
-	UTIL_SetOrigin( m_glass->pev, pev->origin );
-	m_glass->pev->angles = pev->angles;
-
 	InitBoneControllers();
 	SetBoneController(1, 360);
 
-	CreateBeam();
 	if (m_iJuice > 0)
 	{
 		m_iState = Still;
@@ -334,6 +325,12 @@ void CRechargeDecay::Precache(void)
 	PRECACHE_SOUND( "items/suitchargeno1.wav" );
 	PRECACHE_SOUND( "items/suitchargeok1.wav" );
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
+
+	CreateBeam();
+	m_glass = GetClassPtr( (CRechargeGlassDecay *)NULL );
+	m_glass->Spawn();
+	UTIL_SetOrigin( m_glass->pev, pev->origin );
+	m_glass->pev->angles = pev->angles;
 }
 
 void CRechargeDecay::SearchForPlayer()
