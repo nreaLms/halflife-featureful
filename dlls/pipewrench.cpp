@@ -121,7 +121,7 @@ void CPipeWrench::SecondaryAttack(void)
 	}
 	m_iSwingMode = 1;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.3;
-	m_flNextSecondaryAttack = GetNextAttackDelay(0.1);
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1;
 }
 
 void CPipeWrench::Smack()
@@ -174,7 +174,7 @@ int CPipeWrench::Swing(int fFirst)
 		// miss
 		if ( fFirst ) {
 			m_flNextPrimaryAttack = GetNextAttackDelay(0.7);
-			m_flNextSecondaryAttack = GetNextAttackDelay(0.7);
+			m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.7;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5.0;
 			// player "shoot" animation
 			m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -289,7 +289,7 @@ int CPipeWrench::Swing(int fFirst)
 		pev->nextthink = UTIL_WeaponTimeBase() + 0.2;
 #endif
 		m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-		m_flNextSecondaryAttack = GetNextAttackDelay(0.5);
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 	}
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5.0;
 	return fDidHit;
