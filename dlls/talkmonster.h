@@ -133,6 +133,7 @@ public:
 	int				FOkToSpeak( void );
 	void			TrySmellTalk( void );
 	CBaseEntity		*EnumFriends( CBaseEntity *pentPrevious, int listNumber, BOOL bTrace );
+	CBaseEntity		*EnumFriends(CBaseEntity *pentPrevious, const char* pszFriend, BOOL bTrace );
 	void			AlertFriends( void );
 	void			ShutUpFriends( void );
 	BOOL			IsTalking( void );

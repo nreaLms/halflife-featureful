@@ -620,12 +620,16 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 
 CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, BOOL bTrace )
 {
+	const char *pszFriend = m_szFriends[FriendNumber( listNumber )];
+	return EnumFriends(pPrevious, pszFriend, bTrace);
+}
+
+CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, const char* pszFriend, BOOL bTrace )
+{
 	CBaseEntity *pFriend = pPrevious;
-	const char *pszFriend;
 	TraceResult tr;
 	Vector vecCheck;
 
-	pszFriend = m_szFriends[FriendNumber( listNumber )];
 	while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
 	{
 		if( pFriend == this || !pFriend->IsAlive() )

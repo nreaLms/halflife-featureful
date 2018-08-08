@@ -1153,18 +1153,14 @@ void CHFGrunt :: StartTask( Task_t *pTask )
 			if ( !TaskIsComplete() )
 			{
 				CBaseEntity *pFriend = NULL;
-				int i;
 
-				// for each friend in this bsp...
-				for ( i = 0; i < TLK_CFRIENDS; i++ )
+				// for each medic in this bsp...
+				while (pFriend = EnumFriends( pFriend, "monster_human_medic_ally", TRUE ))
 				{
-					while (pFriend = EnumFriends( pFriend, i, TRUE ))
-					{
-						CBaseMonster *pMonster = pFriend->MyMonsterPointer();
-						if (CallForMedic(pMonster)) {
-							TaskComplete();
-							break;
-						}
+					CBaseMonster *pMonster = pFriend->MyMonsterPointer();
+					if (CallForMedic(pMonster)) {
+						TaskComplete();
+						break;
 					}
 				}
 			}
