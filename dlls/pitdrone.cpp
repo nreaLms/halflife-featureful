@@ -78,7 +78,6 @@ void CPitDroneSpit::Spawn(void)
 	UTIL_SetOrigin(pev, pev->origin);
 	UTIL_MakeAimVectors(pev->angles);
 	m_vecForward = gpGlobals->v_forward;
-	SetTouch(&CPitDroneSpit::Touch);
 }
 
 void CPitDroneSpit::Precache(void)
