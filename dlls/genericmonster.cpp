@@ -48,7 +48,7 @@ LINK_ENTITY_TO_CLASS( monster_generic, CGenericMonster )
 //=========================================================
 int CGenericMonster::DefaultClassify( void )
 {
-	return CLASS_PLAYER_ALLY;
+	return pev->takedamage ? CLASS_PLAYER_ALLY : CLASS_NONE;
 }
 
 //=========================================================
