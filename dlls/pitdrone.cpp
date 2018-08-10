@@ -25,6 +25,13 @@
 
 #if FEATURE_PITDRONE
 
+/*
+ * In Opposing Force pitdrone spawned via monstermaker did not have spikes
+ * That's probably a bug, because number of spikes is set in level editor,
+ * so spawned pitdrones always had 0 spikes.
+ * Having no spikes after spawn also prevented spike reloading.
+ * Those who want to keep original Opposing Force behavior can set these constants to zero.
+ */
 #define FEATURE_PITDRONE_SPAWN_WITH_SPIKES 1
 #define FEATURE_PITDRONE_ALWAYS_CAN_RELOAD 1
 
@@ -38,23 +45,10 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int  Classify(void);
-	void EXPORT Touch(CBaseEntity *pOther);
-
-	Vector m_vecForward;
-
-	static CPitDroneSpit *SpitCreate(void);
+	void Touch(CBaseEntity *pOther);
 };
 
 LINK_ENTITY_TO_CLASS(pitdronespit, CPitDroneSpit)
-
-CPitDroneSpit *CPitDroneSpit::SpitCreate(void)
-{
-	// Create a new entity with CShock private data
-	CPitDroneSpit *pSpit = GetClassPtr((CPitDroneSpit *)NULL);
-	pSpit->Spawn();
-
-	return pSpit;
-}
 
 int	CPitDroneSpit::Classify(void)
 {
@@ -76,8 +70,6 @@ void CPitDroneSpit::Spawn(void)
 
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 	UTIL_SetOrigin(pev, pev->origin);
-	UTIL_MakeAimVectors(pev->angles);
-	m_vecForward = gpGlobals->v_forward;
 }
 
 void CPitDroneSpit::Precache(void)

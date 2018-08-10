@@ -42,11 +42,11 @@
 
 // free energy dependent abilities
 
-// whether vortigaunts can heal allies
+// whether vortigaunts can heal allies using a free energy
 #define FEATURE_ISLAVE_HEAL (1 && FEATURE_ISLAVE_ENERGY)
-// whether vortigaunts can revive other vortigaunts
+// whether vortigaunts can revive other vortigaunts using a free energy
 #define FEATURE_ISLAVE_REVIVE (1 && FEATURE_ISLAVE_ENERGY)
-// whether vortigaunts can have damage boost on melee attacks
+// whether vortigaunts have damage boost on melee attacks when energy level is positive
 #define FEATURE_ISLAVE_ARMBOOST (1 && FEATURE_ISLAVE_ENERGY)
 
 //=========================================================
