@@ -1266,9 +1266,9 @@
 [
 	// dmdelay(integer) : "Deathmatch recharge delay" : 0
 	_minlight(string) : "Minimum light level"
-	TriggerOnEmpty(destination) : "Trigger On Empty"
-	TriggerOnRecharged(destination) : "Trigger On Recharged"
-	TriggerOnFirstUse(destination) : "Trigger On First Use"
+	TriggerOnEmpty(target_destination) : "Trigger On Empty"
+	TriggerOnRecharged(target_destination) : "Trigger On Recharged"
+	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
 ]
 
 @SolidClass base(Targetname, RenderFields, ZHLT) = func_illusionary : "Fake Wall/Light"
@@ -1364,9 +1364,9 @@
 [
 	// dmdelay(integer) : "Deathmatch recharge delay" : 0
 	_minlight(string) : "Minimum light level"
-	TriggerOnEmpty(destination) : "Trigger On Empty"
-	TriggerOnRecharged(destination) : "Trigger On Recharged"
-	TriggerOnFirstUse(destination) : "Trigger On First Use"
+	TriggerOnEmpty(target_destination) : "Trigger On Empty"
+	TriggerOnRecharged(target_destination) : "Trigger On Recharged"
+	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
 ]
 
 @SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT) = func_rot_button : "RotatingButton"
