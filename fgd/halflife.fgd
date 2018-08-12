@@ -4936,6 +4936,19 @@
 	]
 ]
 
+@PointClass base(Targetname) = trigger_killmonster : "Trigger Kill Monster"
+[
+	spawnflags(flags) =
+	[
+		1: "Remove On fire" : 1
+		2: "Kill by target name" : 1
+		4: "Kill by class name" : 0
+		8: "Kill by squad name" : 0
+		16: "Always gib" : 0
+	]
+	target(string) : "Target" : : "Kill all monsters with such target, class or squad name"
+]
+
 @SolidClass base(Angles) = trigger_monsterjump : "Trigger monster jump"
 [
 	master(string) : "Master"

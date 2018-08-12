@@ -28,6 +28,7 @@
 #include "trains.h"			// trigger_camera has train functionality
 #include "gamerules.h"
 #include "skill.h"
+#include "monsters.h"
 
 #define	SF_TRIGGER_PUSH_START_OFF	2//spawnflag that makes trigger_push spawn turned OFF
 #define SF_TRIGGER_HURT_TARGETONCE	1// Only fire hurt target once
@@ -2551,6 +2552,99 @@ void CTriggerPlayerFreeze::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 		( (CBasePlayer *)( (CBaseEntity *)pActivator ) )->EnableControl( TRUE );
 	else
 		( (CBasePlayer *)( (CBaseEntity *)pActivator ) )->EnableControl( FALSE );
+}
+
+#define SF_KILLMONSTER_FIREONCE 1
+#define SF_KILLMONSTER_KILL_BY_TARGETNAME 2
+#define SF_KILLMONSTER_KILL_BY_CLASSNAME 4
+#define SF_KILLMONSTER_KILL_BY_SQUADNAME 8
+#define SF_KILLMONSTER_GIBALWAYS 16
+
+class CTriggerKillMonster : public CBaseEntity
+{
+public:
+	void Spawn( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
+protected:
+	void KillMonster(CBaseEntity* pEntity);
+};
+
+LINK_ENTITY_TO_CLASS( trigger_killmonster, CTriggerKillMonster )
+
+void CTriggerKillMonster::Spawn()
+{
+	pev->effects |= EF_NODRAW;
+}
+
+void CTriggerKillMonster::KillMonster(CBaseEntity *pEntity)
+{
+	CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+	if (pEntity->IsAlive() && pMonster)
+	{
+		entvars_t* inflictor = pev;
+		switch (RANDOM_LONG(0,4)) {
+		case 0:
+			pMonster->m_LastHitGroup = HITGROUP_GENERIC;
+			break;
+		case 1:
+			pMonster->m_LastHitGroup = HITGROUP_STOMACH;
+			break;
+		case 2:
+			pMonster->m_LastHitGroup = HITGROUP_STOMACH;
+			break;
+		case 3:
+			pMonster->m_LastHitGroup = HITGROUP_GENERIC;
+			inflictor = NULL;
+			break;
+		default:
+			break;
+		}
+		pEntity->pev->health = 0;
+		int damageType = DMG_GENERIC;
+		if (pev->spawnflags & SF_KILLMONSTER_GIBALWAYS)
+			damageType |= DMG_ALWAYSGIB;
+		pEntity->TakeDamage(pev, pev, 1, damageType );
+	}
+}
+
+void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (FStringNull( pev->target ))
+		return;
+
+	CBaseEntity* pEntity;
+	if ( pev->spawnflags & SF_KILLMONSTER_KILL_BY_TARGETNAME )
+	{
+		pEntity = NULL;
+		while((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->target))) != NULL)
+		{
+			KillMonster(pEntity);
+		}
+	}
+
+	if ( pev->spawnflags & SF_KILLMONSTER_KILL_BY_CLASSNAME )
+	{
+		pEntity = NULL;
+		while((pEntity = UTIL_FindEntityByClassname(pEntity, STRING(pev->target))) != NULL)
+		{
+			KillMonster(pEntity);
+		}
+	}
+
+	if ( pev->spawnflags & SF_KILLMONSTER_KILL_BY_SQUADNAME )
+	{
+		pEntity = NULL;
+		while((pEntity = UTIL_FindEntityByString(pEntity, "netname", STRING(pev->target))) != NULL)
+		{
+			KillMonster(pEntity);
+		}
+	}
+
+	if( pev->spawnflags & SF_RELAY_FIREONCE )
+		UTIL_Remove( this );
 }
 
 #if FEATURE_GENEWORM
