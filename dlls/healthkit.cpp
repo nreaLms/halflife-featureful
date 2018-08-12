@@ -22,6 +22,7 @@
 #include "player.h"
 #include "items.h"
 #include "gamerules.h"
+#include "wallcharger.h"
 
 extern int gmsgItemPickup;
 
@@ -93,44 +94,86 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 }
 
 //-------------------------------------------------------------
-// Wall mounted health kit
+// Base class for wall chargers
 //-------------------------------------------------------------
-class CWallHealth : public CBaseToggle
+
+void CWallCharger::Spawn()
 {
-public:
-	void Spawn();
-	void Precache( void );
-	void EXPORT Off( void );
-	void EXPORT Recharge( void );
-	void KeyValue( KeyValueData *pkvd );
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual int ObjectCaps( void ) { return ( CBaseToggle::ObjectCaps() | FCAP_CONTINUOUS_USE ) & ~FCAP_ACROSS_TRANSITION; }
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
+	Precache();
 
-	static TYPEDESCRIPTION m_SaveData[];
+	pev->solid = SOLID_BSP;
+	pev->movetype = MOVETYPE_PUSH;
 
-	float m_flNextCharge;
-	int m_iReactivate ; // DeathMatch Delay until reactvated
-	int m_iJuice;
-	int m_iOn;			// 0 = off, 1 = startup, 2 = going
-	float m_flSoundTime;
+	UTIL_SetOrigin( pev, pev->origin );		// set size and link into world
+	UTIL_SetSize( pev, pev->mins, pev->maxs );
+	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	m_iJuice = ChargerCapacity();
+	pev->frame = 0;
+}
+
+void CWallCharger::Precache()
+{
+	PRECACHE_SOUND( ChargeStartSound() );
+	PRECACHE_SOUND( DenySound() );
+	PRECACHE_SOUND( LoopingSound() );
+	const char* rechargeSound = RechargeSound();
+	if (rechargeSound)
+		PRECACHE_SOUND(rechargeSound);
+}
+
+int CWallCharger::ObjectCaps( void )
+{
+	return ( CBaseToggle::ObjectCaps() | FCAP_CONTINUOUS_USE ) & ~FCAP_ACROSS_TRANSITION;
+}
+
+void CWallCharger::Off()
+{
+	// Stop looping sound.
+	if( m_iOn > 1 )
+		STOP_SOUND( ENT( pev ), CHAN_STATIC, LoopingSound() );
+
+	m_iOn = 0;
+
+	SetThink( &CBaseEntity::SUB_DoNothing );
+	if ( !m_iJuice )
+	{
+		if ( ( m_iReactivate = RechargeTime() ) > 0 )
+		{
+			pev->nextthink = pev->ltime + m_iReactivate;
+			SetThink( &CWallCharger::Recharge );
+		}
+	}
+}
+
+void CWallCharger::Recharge( void )
+{
+	if (m_triggerOnRecharged)
+	{
+		FireTargets( STRING( m_triggerOnRecharged ), this, this, USE_TOGGLE, 0 );
+	}
+	const char* rechargeSound = RechargeSound();
+	if (rechargeSound)
+		EMIT_SOUND( ENT( pev ), CHAN_ITEM, rechargeSound, 1.0, ATTN_NORM );
+	m_iJuice = ChargerCapacity();
+	pev->frame = 0;
+	SetThink( &CBaseEntity::SUB_DoNothing );
+}
+
+TYPEDESCRIPTION CWallCharger::m_SaveData[] =
+{
+	DEFINE_FIELD( CWallCharger, m_flNextCharge, FIELD_TIME ),
+	DEFINE_FIELD( CWallCharger, m_iReactivate, FIELD_INTEGER ),
+	DEFINE_FIELD( CWallCharger, m_iJuice, FIELD_INTEGER ),
+	DEFINE_FIELD( CWallCharger, m_iOn, FIELD_INTEGER ),
+	DEFINE_FIELD( CWallCharger, m_flSoundTime, FIELD_TIME ),
+	DEFINE_FIELD( CWallCharger, m_triggerOnFirstUse, FIELD_STRING ),
+	DEFINE_FIELD( CWallCharger, m_triggerOnEmpty, FIELD_STRING ),
+	DEFINE_FIELD( CWallCharger, m_triggerOnRecharged, FIELD_STRING ),
 };
 
-TYPEDESCRIPTION CWallHealth::m_SaveData[] =
-{
-	DEFINE_FIELD( CWallHealth, m_flNextCharge, FIELD_TIME ),
-	DEFINE_FIELD( CWallHealth, m_iReactivate, FIELD_INTEGER ),
-	DEFINE_FIELD( CWallHealth, m_iJuice, FIELD_INTEGER ),
-	DEFINE_FIELD( CWallHealth, m_iOn, FIELD_INTEGER ),
-	DEFINE_FIELD( CWallHealth, m_flSoundTime, FIELD_TIME ),
-};
+IMPLEMENT_SAVERESTORE( CWallCharger, CBaseEntity )
 
-IMPLEMENT_SAVERESTORE( CWallHealth, CBaseEntity )
-
-LINK_ENTITY_TO_CLASS( func_healthcharger, CWallHealth )
-
-void CWallHealth::KeyValue( KeyValueData *pkvd )
+void CWallCharger::KeyValue( KeyValueData *pkvd )
 {
 	if( FStrEq(pkvd->szKeyName, "style" ) ||
 		FStrEq( pkvd->szKeyName, "height" ) ||
@@ -145,32 +188,26 @@ void CWallHealth::KeyValue( KeyValueData *pkvd )
 		m_iReactivate = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerOnEmpty" ) )
+	{
+		m_triggerOnEmpty = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerOnRecharged" ) )
+	{
+		m_triggerOnRecharged = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerOnFirstUse" ) )
+	{
+		m_triggerOnFirstUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseToggle::KeyValue( pkvd );
 }
 
-void CWallHealth::Spawn()
-{
-	Precache();
-
-	pev->solid = SOLID_BSP;
-	pev->movetype = MOVETYPE_PUSH;
-
-	UTIL_SetOrigin( pev, pev->origin );		// set size and link into world
-	UTIL_SetSize( pev, pev->mins, pev->maxs );
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
-	m_iJuice = (int)gSkillData.healthchargerCapacity;
-	pev->frame = 0;
-}
-
-void CWallHealth::Precache()
-{
-	PRECACHE_SOUND( "items/medshot4.wav" );
-	PRECACHE_SOUND( "items/medshotno1.wav" );
-	PRECACHE_SOUND( "items/medcharge4.wav" );
-}
-
-void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	// Make sure that we have a caller
 	if( !pActivator )
@@ -182,6 +219,10 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	// if there is no juice left, turn it off
 	if( m_iJuice <= 0 )
 	{
+		if (m_triggerOnEmpty && pev->frame == 0)
+		{
+			FireTargets( STRING( m_triggerOnEmpty ), this, this, USE_TOGGLE, 0 );
+		}
 		pev->frame = 1;
 		Off();
 	}
@@ -192,13 +233,13 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		if( m_flSoundTime <= gpGlobals->time )
 		{
 			m_flSoundTime = gpGlobals->time + 0.62;
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshotno1.wav", 1.0, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_ITEM, DenySound(), SoundVolume(), ATTN_NORM );
 		}
 		return;
 	}
 
 	pev->nextthink = pev->ltime + 0.25;
-	SetThink( &CWallHealth::Off );
+	SetThink( &CWallCharger::Off );
 
 	// Time to recharge yet?
 	if( m_flNextCharge >= gpGlobals->time )
@@ -208,8 +249,13 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	m_flNextCharge = gpGlobals->time + 0.1;
 
 	// charge the player
-	if( pActivator->TakeHealth( 1, DMG_GENERIC ) )
+	if( GiveCharge(pActivator) )
 	{
+		if (m_triggerOnFirstUse)
+		{
+			FireTargets( STRING( m_triggerOnFirstUse ), this, this, USE_TOGGLE, 0 );
+			m_triggerOnFirstUse = 0;
+		}
 		m_iJuice--;
 	}
 	else
@@ -217,10 +263,10 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		if( m_flSoundTime <= gpGlobals->time )
 		{
 			m_flSoundTime = gpGlobals->time + 0.62;
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshotno1.wav", 1.0, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_ITEM, DenySound(), SoundVolume(), ATTN_NORM );
 		}
 		if( m_iOn > 1 )
-			STOP_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav" );
+			STOP_SOUND( ENT( pev ), CHAN_STATIC, LoopingSound() );
 		m_iOn = 0;
 		return;
 	}
@@ -229,40 +275,36 @@ void CWallHealth::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	if( !m_iOn )
 	{
 		m_iOn++;
-		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_ITEM, ChargeStartSound(), 1.0, ATTN_NORM );
 		m_flSoundTime = 0.56 + gpGlobals->time;
 	}
 	if( ( m_iOn == 1 ) && ( m_flSoundTime <= gpGlobals->time ) )
 	{
 		m_iOn++;
-		EMIT_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav", 1.0, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_STATIC, LoopingSound(), 1.0, ATTN_NORM );
 	}
 }
 
-void CWallHealth::Recharge( void )
+//-------------------------------------------------------------
+// Wall mounted health kit
+//-------------------------------------------------------------
+class CWallHealth : public CWallCharger
 {
-	EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
-	m_iJuice = (int)gSkillData.healthchargerCapacity;
-	pev->frame = 0;
-	SetThink( &CBaseEntity::SUB_DoNothing );
-}
-
-void CWallHealth::Off( void )
-{
-	// Stop looping sound.
-	if( m_iOn > 1 )
-		STOP_SOUND( ENT( pev ), CHAN_STATIC, "items/medcharge4.wav" );
-
-	m_iOn = 0;
-
-	if( ( !m_iJuice ) && ( ( m_iReactivate = (int)g_pGameRules->FlHealthChargerRechargeTime() ) > 0 ) )
+public:
+	const char* LoopingSound() { return "items/medcharge4.wav"; }
+	int RechargeTime() { return (int)g_pGameRules->FlHealthChargerRechargeTime(); }
+	const char* RechargeSound() { return "items/medshot4.wav"; }
+	int ChargerCapacity() { return (int)gSkillData.healthchargerCapacity; }
+	const char* DenySound() { return "items/medshotno1.wav"; }
+	const char* ChargeStartSound() { return "items/medshot4.wav"; }
+	float SoundVolume() { return 1.0f; }
+	bool GiveCharge(CBaseEntity* pActivator)
 	{
-		pev->nextthink = pev->ltime + m_iReactivate;
-		SetThink( &CWallHealth::Recharge );
+		return pActivator->TakeHealth( 1, DMG_GENERIC ) > 0;
 	}
-	else
-		SetThink( &CBaseEntity::SUB_DoNothing );
-}
+};
+
+LINK_ENTITY_TO_CLASS( func_healthcharger, CWallHealth )
 
 //-------------------------------------------------------------
 // Wall mounted health kit (PS2 && Decay)
