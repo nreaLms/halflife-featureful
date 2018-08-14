@@ -150,6 +150,74 @@ void CGenericMonster::Precache()
 		PRECACHE_MODEL( STRING(m_gibModel) );
 }
 
+class CDeadGenericMonster : public CBaseMonster
+{
+public:
+	void Precache();
+	void Spawn();
+	void KeyValue( KeyValueData *pkvd );
+	int DefaultClassify() { return CLASS_HUMAN_PASSIVE; }
+
+	string_t pose; // no need to save
+};
+
+LINK_ENTITY_TO_CLASS( monster_generic_dead, CDeadGenericMonster )
+
+void CDeadGenericMonster::Precache()
+{
+	if (!FStringNull(pev->model))
+		PRECACHE_MODEL( STRING( pev->model ) );
+	if (!FStringNull(m_gibModel))
+		PRECACHE_MODEL( STRING(m_gibModel) );
+}
+
+void CDeadGenericMonster::Spawn()
+{
+	Precache();
+	if (FStringNull(pev->model))
+	{
+		ALERT(at_console, "Spawning monster_generic_dead without model!\n");
+	}
+	else
+	{
+		SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	}
+
+	pev->effects		= 0;
+	pev->yaw_speed		= 8;
+	pev->sequence		= 0;
+	SetMyBloodColor( BLOOD_COLOR_RED );
+
+	if (FStringNull(pose))
+	{
+		ALERT(at_console, "Spawning monster_generic_dead without pose!\n");
+	}
+	else
+	{
+		pev->sequence = LookupSequence( STRING(pose) );
+		if (pev->sequence == -1)
+		{
+			ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), STRING(pose), STRING(pev->model) );
+		}
+	}
+
+	SetMyHealth( 8 );
+	MonsterInitDead();
+	if (pev->spawnflags & SF_GENERICMONSTER_NOTSOLID)
+		pev->solid = SOLID_NOT;
+}
+
+void CDeadGenericMonster::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "pose"))
+	{
+		pose = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseMonster::KeyValue( pkvd );
+}
+
 //=========================================================
 // Op4 Loader
 //=========================================================

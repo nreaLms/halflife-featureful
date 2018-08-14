@@ -2496,8 +2496,21 @@
 	]
 	model(studio) : "model"
 	body(integer) : "Body" : 0
-	skin(Integer) : "skin"
+	skin(integer) : "Skin"
 ]
+
+@PointClass base(DeadMonster, Sequence) size(-16 -16 -36, 16 16 36) studio() = monster_generic_dead : "Generic Script Monster"
+[
+	spawnflags(Flags) =
+	[
+		4 : "Not solid"	: 0
+	]
+	model(studio) : "model"
+	body(integer) : "Body"
+	skin(integer) : "Skin"
+	pose(string) : "Pose (string)"
+]
+
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/gman.mdl") = monster_gman : "G-Man"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
