@@ -46,6 +46,7 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
+	void KeyValue(KeyValueData* pkvd);
 	int DefaultClassify( void ) { return CLASS_MACHINE; }
 	int BloodColor( void ) { return DONT_BLEED; }
 	void Killed( entvars_t *pevAttacker, int iGib );
@@ -107,6 +108,13 @@ protected:
 	void SpawnImpl(const char* modelName);
 	void PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs);
 	virtual const char* TrooperName();
+	float RotorVolume() const {
+		if (pev->armorvalue > 0.0f && pev->armorvalue <= 1.0f)
+		{
+			return pev->armorvalue;
+		}
+		return VOL_NORM;
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_osprey, COsprey )
@@ -210,6 +218,17 @@ void COsprey::PrecacheImpl(const char* modelName, const char* tailGibs, const ch
 	m_iTailGibs = PRECACHE_MODEL( tailGibs );
 	m_iBodyGibs = PRECACHE_MODEL( bodyGibs );
 	m_iEngineGibs = PRECACHE_MODEL( engineGibs );
+}
+
+void COsprey::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "rotorvolume" ) )
+	{
+		pev->armorvalue = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseMonster::KeyValue( pkvd );
 }
 
 void COsprey::CommandUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -457,7 +476,7 @@ void COsprey::Flight()
 
 	if( m_iSoundState == 0 )
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", 1.0, 0.15, 0, 110 );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), 0.15, 0, 110 );
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", 0.5, 0.2, 0, 110 );
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
@@ -485,7 +504,7 @@ void COsprey::Flight()
 			if( pitch != m_iPitch )
 			{
 				m_iPitch = pitch;
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", 1.0, 0.15, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
+				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), 0.15, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 				// ALERT( at_console, "%.0f\n", pitch );
 			}
 		}

@@ -2118,6 +2118,7 @@
 		8 : "NoWreckage"	: 0
 		64 : "Start Inactive" : 0
 	]
+	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
 ]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/baby_headcrab.mdl") = monster_babycrab : "Baby Headcrab"
 [
@@ -2353,6 +2354,7 @@
 		8 : "NoWreckage"  : 0
 		64 : "Start Inactive" : 0
 	]
+	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
 ]
 
 @PointClass base(Monster, Sequence) size(-480 -480 -112, 480 480 24) studio("models/blkop_osprey.mdl") = monster_blkop_osprey : "Black Ops Osprey"
@@ -2361,6 +2363,7 @@
 	[
 		64 : "Start Inactive" : 0
 	]
+	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
 ]
 
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/floater.mdl") = monster_bloater : "Bloater"
@@ -3650,6 +3653,7 @@
 	[
 		64 : "Start Inactive" : 0
 	]
+	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
 ]
 
 @PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis : "Otis"

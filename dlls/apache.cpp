@@ -36,6 +36,7 @@ class CApache : public CBaseMonster
 
 	void Spawn( void );
 	void Precache( void );
+	void KeyValue(KeyValueData* pkvd);
 	int DefaultClassify( void ) { return CLASS_HUMAN_MILITARY; }
 	int BloodColor( void ) { return DONT_BLEED; }
 	void Killed( entvars_t *pevAttacker, int iGib );
@@ -92,6 +93,13 @@ class CApache : public CBaseMonster
 protected:
 	void SpawnImpl(const char* modelName);
 	void PrecacheImpl(const char* modelName, const char* gibModel);
+	float RotorVolume() const {
+		if (pev->armorvalue > 0.0f && pev->armorvalue <= 1.0f)
+		{
+			return pev->armorvalue;
+		}
+		return VOL_NORM;
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_apache, CApache )
@@ -188,6 +196,17 @@ void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
 	m_iBodyGibs = PRECACHE_MODEL( gibModel );
 
 	UTIL_PrecacheOther( "hvr_rocket" );
+}
+
+void CApache::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "rotorvolume" ) )
+	{
+		pev->armorvalue = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseMonster::KeyValue( pkvd );
 }
 
 void CApache::NullThink( void )
@@ -708,7 +727,7 @@ void CApache::Flight( void )
 	// make rotor, engine sounds
 	if( m_iSoundState == 0 )
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav", 1.0, 0.3, 0, 110 );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3, 0, 110 );
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", 0.5, 0.2, 0, 110 );
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
@@ -736,7 +755,7 @@ void CApache::Flight( void )
 			if( flVol > 1.0 ) 
 				flVol = 1.0;
 
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav", 1.0, 0.3, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 		}
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", flVol, 0.2, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 	
