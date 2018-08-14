@@ -1484,6 +1484,8 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 //
 #define	PLAYER_SEARCH_RADIUS	(float)64
 
+extern cvar_t use_through_walls;
+
 void CBasePlayer::PlayerUse( void )
 {
 	if( IsObserver() )
@@ -1548,6 +1550,16 @@ void CBasePlayer::PlayerUse( void )
 			// if it's "hull" is in the view cone
 			vecLOS = UTIL_ClampVectorToBox( vecLOS, pObject->pev->size * 0.5 );
 
+			if (!use_through_walls.value)
+			{
+				TraceResult tr;
+				UTIL_TraceLine(pev->origin, pObject->Center(), dont_ignore_monsters, edict(), &tr);
+				if (tr.flFraction < 1.0f && tr.pHit != pObject->edict())
+				{
+					continue;
+				}
+			}
+
 			flDot = DotProduct( vecLOS , gpGlobals->v_forward );
 			if( flDot > flMaxDot )
 			{
@@ -1564,7 +1576,6 @@ void CBasePlayer::PlayerUse( void )
 	// Found an object
 	if( pObject )
 	{
-		//!!!UNDONE: traceline here to prevent USEing buttons through walls			
 		int caps = pObject->ObjectCaps();
 
 		if( m_afButtonPressed & IN_USE )

@@ -124,6 +124,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * Wall health and armor chargers now play "no" sound when player use them having full health or armor.
 * func_plat, func_train and func_door sound attenuation can be configured in level editor.
 * Monsters and models scale can be changed (like in Spirit of Half-Life)
+* Added use_through_walls cvar to prevent using things through walls (experimental).
 
 ## How to build
 
