@@ -46,6 +46,7 @@ class CBarney : public CTalkMonster
 public:
 	void Spawn( void );
 	void Precache( void );
+	void KeyValue(KeyValueData* pkvd);
 	void SetYawSpeed( void );
 	int ISoundMask( void );
 	void BarneyFirePistol( const char* shotSound, Bullet bullet );
@@ -86,6 +87,7 @@ public:
 	// UNDONE: What is this for?  It isn't used?
 	float m_flPlayerDamage;// how much pain has the player inflicted on me?
 
+	int bodystate;
 	CUSTOM_SCHEDULES
 	
 protected:
@@ -455,8 +457,19 @@ void CBarney::Spawn()
 {
 	Precache();
 	SpawnImpl("models/barney.mdl", gSkillData.barneyHealth);
-	pev->body = 0; // gun in holster
-	m_fGunDrawn = FALSE;
+	if (bodystate == -1) {
+		bodystate = RANDOM_LONG(0,1);
+	}
+	if (bodystate == 1)
+	{
+		m_fGunDrawn = TRUE;
+		pev->body = BARNEY_BODY_GUNDRAWN;
+	}
+	else
+	{
+		pev->body = BARNEY_BODY_GUNHOLSTERED;
+		m_fGunDrawn = FALSE;
+	}
 	MonsterInit();
 	if (IsFriendWithPlayerBeforeProvoked()) {
 		SetUse( &CTalkMonster::FollowerUse );
@@ -524,6 +537,17 @@ void CBarney::TalkInit()
 
 	// get voice for head - just one barney voice for now
 	m_voicePitch = 100;
+}
+
+void CBarney::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "bodystate"))
+	{
+		bodystate = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CTalkMonster::KeyValue( pkvd );
 }
 
 static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
@@ -897,7 +921,6 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	
 	int head;
-	int bodystate;
 };
 
 LINK_ENTITY_TO_CLASS( monster_otis, COtis )
@@ -997,11 +1020,6 @@ void COtis::KeyValue( KeyValueData *pkvd )
 	if (FStrEq(pkvd->szKeyName, "head"))
 	{
 		head = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else if (FStrEq(pkvd->szKeyName, "bodystate"))
-	{
-		bodystate = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

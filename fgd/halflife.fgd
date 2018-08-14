@@ -229,7 +229,7 @@
 [
 	UseSentence(String) : "Use Sentence"
 	UnUseSentence(String) : "Un-Use Sentence"
-	suspicious(choices) : "Suspicious" : 0 =
+	suspicious(choices) : "Suspicious" =
 	[
 		0 : "No"
 		1 : "Yes"
@@ -2249,6 +2249,12 @@
 		68 : "pepsiswing"
 		69 : "pepsipush"
 		70 : "buttonpush"
+	]
+    bodystate(Choices) : "Gun State" =
+	[
+		-1 : "Random"
+		0 : "Gun Holstered"
+		1 : "Gun Drawn"
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") = monster_barney_dead : "Dead Barney"
