@@ -65,6 +65,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Alien grunts, bullsquids, houndeyes, gonomes, pitdrones and voltigores restore health when they eat meat or enemy corpses.
 * Alien slave attack rate can be configured via skill.cfg (In Half-Life it's hardcoded as 1 for easy and normal, and 1.5 for hard difficulty)
 * Bullsquids can shoot alternative spit projectile that is slow poisonous ball.
+* Configurable sound volume for apache and osprey rotors.
 
 ### Alien slave features
 
@@ -112,6 +113,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 #### Others
 
 * env_warpball - easy way to create a teleportation effect for monster spawns. Also can be set as a template for monstermaker.
+* trigger_killmonster - kill monster (possibly gibbing), playing random death animation.
 
 ### Other features
 
@@ -120,6 +122,8 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * monstermaker can have env_warpball template to automatically play teleportation effects on monster spawn.
 * monstermaker can set custom health, body, skin, blood color, relationship class, gibs and model for spawned monsters.
 * Wall health and armor chargers now play "no" sound when player use them having full health or armor.
+* func_plat, func_train and func_door sound attenuation can be configured in level editor.
+* Monsters and models scale can be changed (like in Spirit of Half-Life)
 
 ## How to build
 
