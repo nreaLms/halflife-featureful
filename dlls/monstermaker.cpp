@@ -247,6 +247,7 @@ void CMonsterMaker::MakeMonster( void )
 	pevCreate->body = pev->body;
 	pevCreate->skin = pev->skin;
 	pevCreate->health = pev->health;
+	pevCreate->scale = pev->scale;
 	if (!FStringNull(m_customModel))
 		pevCreate->model = m_customModel;
 

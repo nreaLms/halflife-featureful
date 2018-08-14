@@ -194,6 +194,7 @@
 		256: "Pre-Disaster" 	: 0
 		512: "Fade Corpse"	: 0
 	]
+	scale(string) : "Scale (1.0 = normal size)"
 	health(string) : "Custom Health"
 	model(studio) : "Custom Model"
 	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" = 
@@ -1798,6 +1799,7 @@
 	sequencename(string) : "Sequence Name" : "idle"
 	skin(integer) : "Skin" : 0
 	body(integer) : "Body" : 0
+	scale(string) : "Scale (1.0 = normal size)"
 ]
 
 @PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
@@ -4574,6 +4576,7 @@
 	m_imaxlivechildren(integer) : "Max live children" : 5
 	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
 	new_model(studio) : "Custom model"
+	scale(string) : "Scale (1.0 = normal size)"
 	health(integer) : "Custom health"
 	body(integer) : "Body"
 	skin(integer) : "Skin"
