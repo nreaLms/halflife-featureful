@@ -25,6 +25,27 @@
 #include "cbase.h"
 #include "trains.h"
 #include "saverestore.h"
+#include "soundradius.h"
+
+float SoundAttenuation(short soundRadius)
+{
+	switch (soundRadius) {
+	case SOUND_RADIUS_SMALL:
+		return ATTN_IDLE;
+	case SOUND_RADIUS_MEDIUM:
+		return ATTN_STATIC;
+	case SOUND_RADIUS_LARGE:
+		return ATTN_NORM;
+	case SOUND_RADIUS_HUGE:
+		return 0.5;
+	case SOUND_RADIUS_ENORMOUS:
+		return 0.25;
+	case SOUND_RADIUS_EVERYWHERE:
+		return ATTN_NONE;
+	default:
+		return ATTN_NORM;
+	}
+}
 
 static void PlatSpawnInsideTrigger(entvars_t* pevPlatform);
 
@@ -47,6 +68,12 @@ public:
 	BYTE m_bMoveSnd;			// sound a plat makes while moving
 	BYTE m_bStopSnd;			// sound a plat makes when it stops
 	float m_volume;			// Sound volume
+	short m_soundRadius;
+
+	float SoundAttenuation() const
+	{
+		return ::SoundAttenuation(m_soundRadius);
+	}
 };
 
 TYPEDESCRIPTION	CBasePlatTrain::m_SaveData[] =
@@ -54,6 +81,7 @@ TYPEDESCRIPTION	CBasePlatTrain::m_SaveData[] =
 	DEFINE_FIELD( CBasePlatTrain, m_bMoveSnd, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBasePlatTrain, m_bStopSnd, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBasePlatTrain, m_volume, FIELD_FLOAT ),
+	DEFINE_FIELD( CBasePlatTrain, m_soundRadius, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CBasePlatTrain, CBaseToggle )
@@ -93,6 +121,11 @@ void CBasePlatTrain::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "volume" ) )
 	{
 		m_volume = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
+	{
+		m_soundRadius = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -416,7 +449,7 @@ void CFuncPlat::PlatUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 void CFuncPlat::GoDown( void )
 {
 	if( pev->noiseMovement )
-		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, SoundAttenuation() );
 
 	ASSERT( m_toggle_state == TS_AT_TOP || m_toggle_state == TS_GOING_UP );
 	m_toggle_state = TS_GOING_DOWN;
@@ -433,7 +466,7 @@ void CFuncPlat::HitBottom( void )
 		STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ) );
 
 	if( pev->noiseStopMoving )
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, STRING( pev->noiseStopMoving ), m_volume, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, STRING( pev->noiseStopMoving ), m_volume, SoundAttenuation() );
 
 	ASSERT( m_toggle_state == TS_GOING_DOWN );
 	m_toggle_state = TS_AT_BOTTOM;
@@ -445,7 +478,7 @@ void CFuncPlat::HitBottom( void )
 void CFuncPlat::GoUp( void )
 {
 	if( pev->noiseMovement )
-		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, SoundAttenuation() );
 
 	ASSERT( m_toggle_state == TS_AT_BOTTOM || m_toggle_state == TS_GOING_DOWN );
 	m_toggle_state = TS_GOING_UP;
@@ -462,7 +495,7 @@ void CFuncPlat::HitTop( void )
 		STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ) );
 
 	if( pev->noiseStopMoving )
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, STRING( pev->noiseStopMoving ), m_volume, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, STRING( pev->noiseStopMoving ), m_volume, SoundAttenuation() );
 
 	ASSERT( m_toggle_state == TS_GOING_UP );
 	m_toggle_state = TS_AT_TOP;
@@ -670,7 +703,7 @@ void CFuncTrain::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		pev->nextthink = 0;
 		pev->velocity = g_vecZero;
 		if( pev->noiseStopMoving )
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, SoundAttenuation() );
 	}
 }
 
@@ -693,7 +726,7 @@ void CFuncTrain::Wait( void )
 		if( pev->noiseMovement )
 			STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noiseMovement ) );
 		if( pev->noiseStopMoving )
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, SoundAttenuation() );
 		pev->nextthink = 0;
 		return;
 	}
@@ -706,7 +739,7 @@ void CFuncTrain::Wait( void )
 		if( pev->noiseMovement )
 			STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noiseMovement ) );
 		if( pev->noiseStopMoving )
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, SoundAttenuation() );
 		SetThink( &CFuncTrain::Next );
 	}
 	else
@@ -731,7 +764,7 @@ void CFuncTrain::Next( void )
 			STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noiseMovement ) );
 		// Play stop sound
 		if( pev->noiseStopMoving )
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, SoundAttenuation() );
 		return;
 	}
 
@@ -768,7 +801,7 @@ void CFuncTrain::Next( void )
 		if( pev->noiseMovement )
 		{
 			STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noiseMovement ) );
-			EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, SoundAttenuation() );
 		}
 
 		ClearBits( pev->effects, EF_NOINTERP );

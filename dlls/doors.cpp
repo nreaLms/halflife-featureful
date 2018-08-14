@@ -24,6 +24,7 @@
 #include "doors.h"
 #include "game.h"
 #include "weapons.h"
+#include "soundradius.h"
 
 extern void SetMovedir( entvars_t *ev );
 
@@ -73,6 +74,13 @@ public:
 	BYTE m_bLockedSentence;	
 	BYTE m_bUnlockedSound;	
 	BYTE m_bUnlockedSentence;
+
+	short m_soundRadius;
+
+	float SoundAttenuation() const
+	{
+		return ::SoundAttenuation(m_soundRadius);
+	}
 };
 
 TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
@@ -85,6 +93,8 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_bLockedSentence, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_bUnlockedSound, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_bUnlockedSentence, FIELD_CHARACTER ),
+
+	DEFINE_FIELD( CBaseDoor, m_soundRadius, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CBaseDoor, CBaseToggle )
@@ -606,7 +616,7 @@ void CBaseDoor::DoorGoUp( void )
 	// filter them out and leave a client stuck with looping door sounds!
 	if( !FBitSet( pev->spawnflags, SF_DOOR_SILENT ) )
 		if( m_toggle_state != TS_GOING_UP && m_toggle_state != TS_GOING_DOWN )
-			EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMoving ), 1, ATTN_NORM );
+			EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMoving ), 1, SoundAttenuation() );
 
 	m_toggle_state = TS_GOING_UP;
 
@@ -647,7 +657,7 @@ void CBaseDoor::DoorHitTop( void )
 	if( !FBitSet( pev->spawnflags, SF_DOOR_SILENT ) )
 	{
 		STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMoving ) );
-		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseArrived ), 1, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseArrived ), 1, SoundAttenuation() );
 	}
 
 	ASSERT( m_toggle_state == TS_GOING_UP );
@@ -686,7 +696,7 @@ void CBaseDoor::DoorGoDown( void )
 {
 	if( !FBitSet( pev->spawnflags, SF_DOOR_SILENT ) )
 		if( m_toggle_state != TS_GOING_UP && m_toggle_state != TS_GOING_DOWN )
-			EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMoving ), 1, ATTN_NORM );	
+			EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMoving ), 1, SoundAttenuation() );
 #ifdef DOOR_ASSERT
 	ASSERT( m_toggle_state == TS_AT_TOP );
 #endif // DOOR_ASSERT
@@ -707,7 +717,7 @@ void CBaseDoor::DoorHitBottom( void )
 	if( !FBitSet( pev->spawnflags, SF_DOOR_SILENT ) )
 	{
 		STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMoving ) );
-		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseArrived ), 1, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseArrived ), 1, SoundAttenuation() );
 	}
 
 	ASSERT( m_toggle_state == TS_GOING_DOWN );

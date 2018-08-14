@@ -428,6 +428,13 @@
 		7: "Gen. Containment"
 		8: "Maintenance area"
 	]
+	soundradius(choices) : "Sound radius" : 0 =
+	[
+		0: "Default"
+		1: "Huge"
+		2: "Enormous"
+		3: "Play Everywhere"
+	]
 	_minlight(string) : "Minimum light level"
 ]
 
@@ -504,6 +511,13 @@
 		8: "quick stop"
 	]
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
+	soundradius(choices) : "Sound radius" : 0 =
+	[
+		0: "Default (large)"
+		1: "Huge"
+		2: "Enormous"
+		3: "Play Everywhere"
+	]
 ]
 
 @BaseClass base(Targetname, RenderFields, Global, PlatSounds) = Trackchange
@@ -1547,6 +1561,13 @@
 	dmg(integer) : "Damage on crush" : 0
 	skin(integer) : "Contents" : 0
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
+	soundradius(choices) : "Sound radius" : 0 =
+	[
+		0: "Default (large)"
+		1: "Huge"
+		2: "Enormous"
+		3: "Play Everywhere"
+	]
 	spawnflags(flags) =
 	[
 		8 : "Not solid" : 0
