@@ -2912,9 +2912,12 @@ void CBaseMonster::ReportAIState( void )
 		ALERT( level, "No Schedule, " );
 
 	if( m_hEnemy != 0 )
-		ALERT( level, "\nEnemy is %s", STRING( m_hEnemy->pev->classname ) );
+		ALERT( level, "Enemy is %s. ", STRING( m_hEnemy->pev->classname ) );
 	else
-		ALERT( level, "No enemy" );
+		ALERT( level, "No enemy. " );
+
+	if ( m_hTargetEnt != 0 )
+		ALERT( level, "Target ent: %s. ", STRING( m_hTargetEnt->pev->classname ) );
 
 	if( IsMoving() )
 	{
