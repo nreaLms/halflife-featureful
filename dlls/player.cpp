@@ -2398,6 +2398,10 @@ void CBasePlayer::CheckSuitUpdate()
 	// if in range of radiation source, ping geiger counter
 	UpdateGeigerCounter();
 
+#if FEATURE_SUIT_NO_SOUNDS
+	return;
+#endif
+
 	if( g_pGameRules->IsMultiplayer() )
 	{
 		// don't bother updating HEV voice in multiplayer.
@@ -2455,6 +2459,10 @@ void CBasePlayer::SetSuitUpdate( const char *name, int fgroup, int iNoRepeatTime
 	// Ignore suit updates if no suit
 	if( !( pev->weapons & ( 1 << WEAPON_SUIT ) ) )
 		return;
+
+#if FEATURE_SUIT_NO_SOUNDS
+	return;
+#endif
 
 	if( g_pGameRules->IsMultiplayer() )
 	{

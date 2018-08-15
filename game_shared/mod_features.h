@@ -81,6 +81,7 @@
 #endif
 
 // Misc features
+#define FEATURE_SUIT_NO_SOUNDS 0
 #define FEATURE_OPFOR_DECALS 0
 #define FEATURE_OPFOR_NIGHTVISION 0
 #define FEATURE_CS_NIGHTVISION 0
