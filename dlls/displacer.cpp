@@ -297,8 +297,13 @@ int CDisplacer::GetItemInfo(ItemInfo *p)
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iFlags = 0;
+#if FEATURE_OPFOR
+	p->iSlot = 5;
+	p->iPosition = 1;
+#else
 	p->iSlot = 1;
 	p->iPosition = 3;
+#endif
 	p->iId = m_iId = WEAPON_DISPLACER;
 	p->iWeight = DISPLACER_WEIGHT;
 

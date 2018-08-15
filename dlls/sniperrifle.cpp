@@ -64,8 +64,13 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = 5;
+#if FEATURE_OPFOR
+	p->iSlot = 5;
+	p->iPosition = 2;
+#else
 	p->iSlot = 2;
 	p->iPosition = 4;
+#endif
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_SNIPERRIFLE;
 	p->iWeight = 10;

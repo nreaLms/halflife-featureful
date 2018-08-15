@@ -22,7 +22,13 @@
 #pragma once
 #ifndef HUD_H
 #define HUD_H
+#include "mod_features.h"
+
+#if FEATURE_OPFOR
+#define RGB_YELLOWISH 0x0000A000
+#else
 #define RGB_YELLOWISH 0x00FFA000 //255,160,0
+#endif
 #define RGB_REDISH 0x00FF1010 //255,160,0
 #define RGB_GREENISH 0x0000A000 //0,160,0
 
@@ -30,7 +36,6 @@
 #include "cl_dll.h"
 #include "ammo.h"
 #include "dlight.h"
-#include "mod_features.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
@@ -552,6 +557,10 @@ private:
 
 	int m_HUD_title_life;
 	int m_HUD_title_half;
+#if FEATURE_OPFOR
+	int m_HUD_title_opposing;
+	int m_HUD_title_force;
+#endif
 };
 
 //

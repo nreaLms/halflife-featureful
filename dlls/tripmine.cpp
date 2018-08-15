@@ -91,7 +91,7 @@ void CTripmineGrenade::Spawn( void )
 	pev->sequence = TRIPMINE_WORLD;
 	ResetSequenceInfo();
 	pev->framerate = 0;
-#if FEATURE_TRIPMINE_OPFOR_SIZE
+#if FEATURE_TRIPMINE_NONSOLID
 	if (pev->angles.y >= 270.0 || pev->angles.y <= 90.0) {
 		UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 1, 1, 1 ) );
 	} else {
@@ -277,7 +277,7 @@ void CTripmineGrenade::BeamBreakThink( void )
 			m_hOwner = CBaseEntity::Instance( tr.pHit );	// reset owner too
 	}
 
-#if FEATURE_TRIPMINE_OPFOR_SIZE
+#if FEATURE_TRIPMINE_NONSOLID
 	if (tr.fStartSolid)
 	{
 		bBlowup = 1;

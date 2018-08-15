@@ -705,6 +705,9 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( func_tank, CFuncTankGun )
+#if FEATURE_OPFOR
+LINK_ENTITY_TO_CLASS( func_tank_of, CFuncTankGun )
+#endif
 
 void CFuncTankGun::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker )
 {
@@ -763,7 +766,9 @@ private:
 };
 
 LINK_ENTITY_TO_CLASS( func_tanklaser, CFuncTankLaser )
+#if FEATURE_OPFOR
 LINK_ENTITY_TO_CLASS( func_tanklaser_of, CFuncTankLaser )
+#endif
 
 TYPEDESCRIPTION	CFuncTankLaser::m_SaveData[] =
 {
@@ -910,6 +915,9 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( func_tankmortar, CFuncTankMortar )
+#if FEATURE_OPFOR
+LINK_ENTITY_TO_CLASS( func_tankmortar_of, CFuncTankMortar )
+#endif
 
 void CFuncTankMortar::KeyValue( KeyValueData *pkvd )
 {
@@ -965,6 +973,9 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( func_tankcontrols, CFuncTankControls )
+#if FEATURE_OPFOR
+LINK_ENTITY_TO_CLASS( func_tankcontrols_of, CFuncTankControls )
+#endif
 
 TYPEDESCRIPTION	CFuncTankControls::m_SaveData[] =
 {

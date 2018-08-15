@@ -19,11 +19,17 @@
 #pragma once
 #ifndef CDLL_DLL_H
 #define CDLL_DLL_H
+#include "mod_features.h"
 
 #define MAX_WEAPONS		32		// ???
 
+#if FEATURE_OPFOR
+#define MAX_WEAPON_SLOTS		7
+#define MAX_ITEM_TYPES			8
+#else
 #define MAX_WEAPON_SLOTS		5	// hud item selection slots
 #define MAX_ITEM_TYPES			6	// hud item selection slots
+#endif
 
 #define MAX_ITEMS				5	// hard coded item types
 

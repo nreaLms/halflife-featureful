@@ -28,14 +28,23 @@
 #include	"soundent.h"
 #include	"mod_features.h"
 
-#define NUM_SCIENTIST_HEADS		4 // four heads available for scientist model
+#define		NUM_SCIENTIST_HEADS		4 // four heads available for scientist model, used when randoming a scientist head
+
+// used for body change when scientist uses the needle
+#if FEATURE_OPFOR
+#define		NUM_SCIENTIST_BODIES		6
+#else
+#define		NUM_SCIENTIST_BODIES 4
+#endif
 
 enum
 {
 	HEAD_GLASSES = 0,
 	HEAD_EINSTEIN = 1,
 	HEAD_LUTHER = 2,
-	HEAD_SLICK = 3
+	HEAD_SLICK = 3,
+	HEAD_EINSTEIN_WITH_BOOK = 4,
+	HEAD_SLICK_WITH_STICK = 5
 };
 
 enum
@@ -623,13 +632,13 @@ void CScientist::HandleAnimEvent( MonsterEvent_t *pEvent )
 	case SCIENTIST_AE_NEEDLEON:
 		{
 			int oldBody = pev->body;
-			pev->body = ( oldBody % NUM_SCIENTIST_HEADS ) + NUM_SCIENTIST_HEADS * 1;
+			pev->body = ( oldBody % NUM_SCIENTIST_BODIES ) + NUM_SCIENTIST_BODIES * 1;
 		}
 		break;
 	case SCIENTIST_AE_NEEDLEOFF:
 		{
 			int oldBody = pev->body;
-			pev->body = ( oldBody % NUM_SCIENTIST_HEADS ) + NUM_SCIENTIST_HEADS * 0;
+			pev->body = ( oldBody % NUM_SCIENTIST_BODIES ) + NUM_SCIENTIST_BODIES * 0;
 		}
 		break;
 	default:
@@ -744,12 +753,14 @@ void CScientist::TalkInit()
 		m_voicePitch = 105;
 		break;	//glasses
 	case HEAD_EINSTEIN:
+	case HEAD_EINSTEIN_WITH_BOOK:
 		m_voicePitch = 100;
 		break;	//einstein
 	case HEAD_LUTHER:
 		m_voicePitch = 95;
 		break;	//luther
 	case HEAD_SLICK:
+	case HEAD_SLICK_WITH_STICK:
 		m_voicePitch = 100;
 		break;	//slick
 	}
