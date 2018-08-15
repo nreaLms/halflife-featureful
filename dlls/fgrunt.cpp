@@ -1327,11 +1327,7 @@ void CHFGrunt :: CheckAmmo ( void )
 //=========================================================
 int	CHFGrunt :: DefaultClassify ( void )
 {
-#if FEATURE_OPFOR_ALLY_RELATIONSHIP
 	return CLASS_PLAYER_ALLY_MILITARY;
-#else
-	return	CLASS_PLAYER_ALLY;
-#endif
 }
 //=========================================================
 // SetYawSpeed - allows each sequence to have a different
