@@ -98,6 +98,7 @@ set SOURCES=agrunt.cpp^
 	rat.cpp^
 	recruit.cpp^
 	roach.cpp^
+	ropes.cpp^
 	rpg.cpp^
 	satchel.cpp^
 	schedule.cpp^
