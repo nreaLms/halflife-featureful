@@ -221,6 +221,7 @@
 		13 : "Alien bioweapon"
 		14 : "Race X predator"
 		15 : "Race X shock"
+		16 : "Opfor ally"
 	]
 	gibmodel(studio) : "Custom gib model"
 ]
@@ -2991,6 +2992,7 @@
 
 	head(Choices) : "Heads" : -1 =
 	[
+		-2 : "Random"
 		-1 : "Default"
 		0 : "Gas Mask"
 		1 : "Beret"
@@ -3097,6 +3099,7 @@
 	]
 	head(Choices) : "Heads" : -1 =
 	[
+		-2 : "Random"
 		-1 : "Default"
 		0 : "Gas Mask"
 		1 : "Beret"
@@ -3140,6 +3143,7 @@
 	]
 	head(Choices) : "Heads" : 0 =
 	[
+		-2 : "Random"
 		0 : "Gas Mask"
 		1 : "Beret"
 		2 : "Ops Mask"
@@ -4666,6 +4670,7 @@
 		13 : "Alien bioweapon"
 		14 : "Race X predator"
 		15 : "Race X shock"
+		16 : "Opfor ally"
 	]
 	gibmodel(studio) : "Custom gib model"
 ]

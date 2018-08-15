@@ -466,11 +466,10 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 		UTIL_TraceLine(posVecs[j], enemyVec[j], dont_ignore_monsters, ENT(pev), &tr);
 		if (tr.flFraction != 1.0 && tr.pHit != 0)
 		{
-			CBaseEntity* ent = CBaseEntity::Instance(tr.pHit);
-			CBaseMonster* monster = ent->MyMonsterPointer();
+			CBaseMonster* monster = GetMonsterPointer(tr.pHit);
 			if (monster != 0 && FBitSet(monster->pev->flags, FL_MONSTER|FL_CLIENT) && monster->pev->deadflag != DEAD_DEAD && IRelationship(monster) == R_AL)
 			{
-				ALERT(at_aiconsole, "Ally %s at fire line. Don't shoot!\n", STRING(ent->pev->classname));
+				ALERT(at_aiconsole, "Ally %s at fire line. Don't shoot!\n", STRING(monster->pev->classname));
 				return FALSE;
 			}
 		}

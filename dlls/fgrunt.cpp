@@ -1905,7 +1905,15 @@ void CHFGrunt :: Spawn()
 
 	SpawnHelper("models/hgrunt_opfor.mdl", gSkillData.fgruntHealth);
 
-	if ( m_iHead < 0 || m_iHead >= FG_HEAD_COUNT )
+	if ( m_iHead <= -2 )
+	{
+		// skip major and MP heads
+		m_iHead = RANDOM_LONG(0, FG_HEAD_SAW_BLACK+1);
+		if (m_iHead == FG_HEAD_SAW_BLACK+1) {
+			m_iHead = FG_HEAD_BERET_BLACK;
+		}
+	}
+	else if ( m_iHead < 0 || m_iHead >= FG_HEAD_COUNT )
 		m_iHead = 0;
 
 	if ( pev->weapons == 0 || pev->weapons == -1 )
@@ -2924,7 +2932,15 @@ void CDeadFGrunt :: Spawn( )
 		SetBodygroup( FG_TORSO_GROUP, FG_TORSO_M249 );
 	}
 
-	if ( m_iHead < 0 || m_iHead >= FG_HEAD_COUNT )
+	if ( m_iHead <= -2 )
+	{
+		// skip major and MP heads
+		m_iHead = RANDOM_LONG(0, FG_HEAD_SAW_BLACK+1);
+		if (m_iHead == FG_HEAD_SAW_BLACK+1) {
+			m_iHead = FG_HEAD_BERET_BLACK;
+		}
+	}
+	else if ( m_iHead < 0 || m_iHead >= FG_HEAD_COUNT )
 		m_iHead = 0;
 
 	SetBodygroup( FG_HEAD_GROUP, m_iHead );

@@ -59,7 +59,7 @@ const char *CTalkMonster::m_szFriends[TLK_CFRIENDS] =
 	"monster_otis",
 	"monster_cleansuit_scientist",
 	"monster_sitting_scientist",
-	"monster_sitting_cleansuit_scientist"
+	"monster_sitting_cleansuit_scientist",
 	"monster_human_grunt_ally",
 	"monster_human_torch_ally",
 	"monster_human_medic_ally"
@@ -659,16 +659,16 @@ CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, const char* pszF
 
 void CTalkMonster::AlertFriends( void )
 {
-	CBaseEntity *pFriend = NULL;
 	int i;
 
 	// for each friend in this bsp...
 	for( i = 0; i < TLK_CFRIENDS; i++ )
 	{
-		while( ( pFriend = EnumFriends( pFriend, i, TRUE ) ) )
+		CBaseEntity *pFriend = NULL;
+		while( ( pFriend = EnumFriends( pFriend, i, TRUE ) ) != NULL )
 		{
 			CBaseMonster *pMonster = pFriend->MyMonsterPointer();
-			if( pMonster->IsAlive() )
+			if( pMonster && pMonster->IsAlive() )
 			{
 				// don't provoke a friend that's playing a death animation. They're a goner
 				pMonster->m_afMemory |= bits_MEMORY_PROVOKED;
