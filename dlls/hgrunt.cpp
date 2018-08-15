@@ -2013,16 +2013,19 @@ Schedule_t *CHGrunt::GetSchedule( void )
 						// before he starts pluggin away.
 						if( FOkToSpeak() )// && RANDOM_LONG( 0, 1 ) )
 						{
-							if( ( m_hEnemy != 0 ) && m_hEnemy->IsPlayer() )
-								// player
-								SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-							else if( ( m_hEnemy != 0 ) &&
-									( m_hEnemy->Classify() != CLASS_PLAYER_ALLY ) &&
-									( m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE ) &&
-									( m_hEnemy->Classify() != CLASS_MACHINE ) &&
-									( m_hEnemy->Classify() != CLASS_PLAYER_ALLY_MILITARY ))
-								// monster
-								SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_MONSTER), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+							if ( m_hEnemy != 0 )
+							{
+								int classify = m_hEnemy->Classify();
+								if( classify != CLASS_PLAYER_ALLY &&
+										classify != CLASS_HUMAN_PASSIVE &&
+										classify != CLASS_MACHINE &&
+										classify != CLASS_PLAYER_ALLY_MILITARY &&
+										classify != CLASS_HUMAN_MILITARY )
+									// monster
+									SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_MONSTER), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+								else
+									SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+							}
 
 							JustSpoke();
 						}
