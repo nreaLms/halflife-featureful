@@ -18,6 +18,9 @@
 
 #include "pm_materials.h"
 #include "mod_features.h"
+#if FEATURE_ROPE
+#include "ropes.h"
+#endif
 
 #define PLAYER_FATAL_FALL_SPEED		1024// approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED	580// approx 20 feet
@@ -38,6 +41,8 @@
 #define	PFLAG_LATCHING		( 1<<6 )	// Player is latching to a target
 #define	PFLAG_ATTACHED		( 1<<7 )	// Player is attached by a barnacle tongue tip
 
+
+#define PFLAG_ONROPE		( 1<<8 )
 //
 // generic player
 //
@@ -338,6 +343,30 @@ public:
 	friend class CTriggerXenReturn;
 
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
+
+#if FEATURE_ROPE
+	bool m_bIsClimbing;
+	float m_flLastClimbTime;
+	CRope *m_pRope;
+	BOOL IsOnRope()
+	{
+		return ( m_afPhysicsFlags & PFLAG_ONROPE ) != 0;
+	}
+
+	void SetRope( CBaseEntity *pRope )
+	{
+		m_pRope = (CRope*)pRope;
+	}
+	void SetOnRopeState( bool onRope )
+	{
+	  if( onRope )
+		m_afPhysicsFlags |= PFLAG_ONROPE;
+	  else
+		m_afPhysicsFlags &= ~PFLAG_ONROPE;
+
+	}
+	CRope* GetRope() { return m_pRope; }
+#endif
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

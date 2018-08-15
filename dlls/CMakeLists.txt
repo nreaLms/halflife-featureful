@@ -128,6 +128,7 @@ set (SVDLL_SOURCES
 	rat.cpp
 	recruit.cpp
 	roach.cpp
+	ropes.cpp
 	rpg.cpp
 	satchel.cpp
 	schedule.cpp
@@ -166,6 +167,10 @@ set (SVDLL_SOURCES
 	../pm_shared/pm_shared.c
 	../game_shared/tex_materials.c
 )
+
+if(NOT MSVC)
+	set_source_files_properties(ropes.cpp PROPERTIES COMPILE_FLAGS -O0)
+endif()
 
 include_directories (. wpn_shared ../common ../engine ../pm_shared ../game_shared ../public)
 
