@@ -67,6 +67,8 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Alien slave attack rate can be configured via skill.cfg (In Half-Life it's hardcoded as 1 for easy and normal, and 1.5 for hard difficulty)
 * Bullsquids can shoot alternative spit projectile that is slow poisonous ball.
 * Configurable sound volume for apache and osprey rotors.
+* Human grunts take into account allies that are not in their squad when checking for friendly fire.
+* Security guards now check for friendly fire too.
 
 ### Alien slave features
 
