@@ -91,7 +91,6 @@ public:
 	void StartTask( Task_t *pTask );
 	int ObjectCaps( void ) { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	virtual int FriendNumber( int arrayNumber );
 	void SetActivity( Activity newActivity );
 	Activity GetStoppedActivity( void );
 	int ISoundMask( void );
@@ -1094,15 +1093,6 @@ void CScientist::Heal( void )
 	// Don't heal again for 1 minute
 	m_healTime = gpGlobals->time + 60;
 }
-
-int CScientist::FriendNumber( int arrayNumber )
-{
-	static int array[TLK_CFRIENDS] = { 1, 3, 4, 5, 0, 2, 8, 6, 7 };
-	if( arrayNumber < TLK_CFRIENDS )
-		return array[arrayNumber];
-	return arrayNumber;
-}
-
 
 //=========================================================
 // Dead Scientist PROP
