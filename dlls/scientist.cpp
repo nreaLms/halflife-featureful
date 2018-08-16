@@ -1152,7 +1152,6 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual void SetAnswerQuestion( CTalkMonster *pSpeaker );
-	int FriendNumber( int arrayNumber );
 
 	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
 
@@ -1250,14 +1249,6 @@ void CSittingScientist::Precache( void )
 int CSittingScientist::DefaultClassify( void )
 {
 	return CLASS_HUMAN_PASSIVE;
-}
-
-int CSittingScientist::FriendNumber( int arrayNumber )
-{
-	static int array[TLK_CFRIENDS] = { 4, 5, 1, 3, 0, 2, 8, 7, 6 };
-	if( arrayNumber < TLK_CFRIENDS )
-		return array[arrayNumber];
-	return arrayNumber;
 }
 
 //=========================================================
