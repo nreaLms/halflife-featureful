@@ -135,6 +135,8 @@ public:
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
 	BOOL CheckMeleeAttack1 ( float flDot, float flDist );
 	void DeclineFollowing( void );
+	int MaxFollowers() { return -1; }
+	int TalkFriendCategory() { return TALK_FRIEND_SOLDIER; }
 	void PrescheduleThink ( void );
 	Vector GetGunPosition( void );
 	void Shoot ( void );

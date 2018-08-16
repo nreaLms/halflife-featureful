@@ -52,17 +52,17 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
 
 // array of friend names
-const char *CTalkMonster::m_szFriends[TLK_CFRIENDS] =
+CTalkMonster::TalkFriend CTalkMonster::m_szFriends[TLK_CFRIENDS] =
 {
-	"monster_barney",
-	"monster_scientist",
-	"monster_otis",
-	"monster_cleansuit_scientist",
-	"monster_sitting_scientist",
-	"monster_sitting_cleansuit_scientist",
-	"monster_human_grunt_ally",
-	"monster_human_torch_ally",
-	"monster_human_medic_ally"
+	{"monster_barney", true, TALK_FRIEND_PERSONNEL},
+	{"monster_scientist", true, TALK_FRIEND_PERSONNEL},
+	{"monster_otis", true, TALK_FRIEND_PERSONNEL},
+	{"monster_cleansuit_scientist", true, TALK_FRIEND_PERSONNEL},
+	{"monster_sitting_scientist", false, TALK_FRIEND_PERSONNEL},
+	{"monster_sitting_cleansuit_scientist", false, TALK_FRIEND_PERSONNEL},
+	{"monster_human_grunt_ally", true, TALK_FRIEND_SOLDIER},
+	{"monster_human_torch_ally", true, TALK_FRIEND_SOLDIER},
+	{"monster_human_medic_ally", true, TALK_FRIEND_SOLDIER}
 };
 
 //=========================================================
@@ -620,7 +620,8 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 
 CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, BOOL bTrace )
 {
-	const char *pszFriend = m_szFriends[FriendNumber( listNumber )];
+	TalkFriend &talkFriend = m_szFriends[ listNumber ];
+	const char *pszFriend = talkFriend.name;
 	return EnumFriends(pPrevious, pszFriend, bTrace);
 }
 
@@ -700,15 +701,20 @@ void CTalkMonster::ShutUpFriends( void )
 // UNDONE: Check this in Restore to keep restored monsters from joining a full list of followers
 void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 {
-	CBaseEntity *pFriend = NULL;
-	int i, count;
-
-	count = 0;
+	if (maxFollowers < 0)
+		return;
+	int i, count = 0;
 
 	// for each friend in this bsp...
 	for( i = 0; i < TLK_CFRIENDS; i++ )
 	{
-		while( ( pFriend = EnumFriends( pFriend, i, FALSE ) ) )
+		TalkFriend& talkFriend = m_szFriends[i];
+		if (!talkFriend.canFollow) // no sense in limiting friends who can't move, like sitting scientists
+			continue;
+		if (maxFollowers && talkFriend.category != TalkFriendCategory()) // so scientists and security guards won't limit soldiers
+			continue;
+		CBaseEntity *pFriend = NULL;
+		while( ( pFriend = EnumFriends( pFriend, talkFriend.name, FALSE ) ) )
 		{
 			CBaseMonster *pMonster = pFriend->MyMonsterPointer();
 			if( pMonster )
@@ -800,7 +806,7 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 		if( fPlayer )
 			pszFriend = "player";
 		else
-			pszFriend = m_szFriends[FriendNumber( i )];
+			pszFriend = m_szFriends[ i ].name;
 
 		if( !pszFriend )
 			continue;
@@ -1401,7 +1407,7 @@ void CTalkMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 		}
 		else if( CanFollow() )
 		{
-			LimitFollowers( pCaller, 1 );
+			LimitFollowers( pCaller, MaxFollowers() );
 
 			if( m_afMemory & bits_MEMORY_PROVOKED )
 				ALERT( at_console, "I'm not following you, you evil person!\n" );
