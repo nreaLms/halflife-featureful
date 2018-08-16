@@ -100,7 +100,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 #### Opposing Force entities
 
 * env_blowercannon
-* env_spritetrain
+* env_spritetrain (also supports animated sprites)
 * item_generic
 * item_nuclearbomb
 * monster_skeleton_dead
@@ -115,6 +115,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 
 #### Others
 
+* env_modeltrain - like env_spritetrain, but with animated model and configurable movement sound.
 * env_warpball - easy way to create a teleportation effect for monster spawns. Also can be set as a template for monstermaker.
 * trigger_killmonster - kill monster (possibly gibbing), playing random death animation.
 

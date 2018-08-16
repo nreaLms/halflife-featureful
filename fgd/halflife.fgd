@@ -1153,7 +1153,7 @@
 [
 	framerate(string) : "Framerate" : "10.0"
 	model(sprite) : "Sprite Name" : "sprites/glow01.spr"
-	scale(string) : "Scale" : ""
+	scale(string) : "Scale"
 	spawnflags(flags) =
 	[
 		1: "Start on" : 0
@@ -1161,12 +1161,30 @@
 	]
 ]
 
-@PointClass sprite() base(Targetname) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_spritetrain : "Sprite Train"
+@PointClass studio() base(Targetname) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_modeltrain : "Sprite Train"
 [
-  target(target_source) : "First stop target"
-  model(sprite) : "Sprite Name" : "sprites/glow01.spr"
-  speed(integer) : "Speed (units per second)" : 64
-  scale(string) : "Sprite Scale"
+	target(target_source) : "First stop target"
+	model(studio) : "Model"
+	speed(integer) : "Speed (units per second)" : 64
+	scale(string) : "Model Scale"
+	noise(sound) : "Move Sound"
+	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
+	soundradius(choices) : "Sound radius" : 0 =
+	[
+		0: "Default (large)"
+		1: "Huge"
+		2: "Enormous"
+		3: "Play Everywhere"
+	]
+]
+
+@PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_spritetrain : "Sprite Train"
+[
+	target(target_source) : "First stop target"
+	model(sprite) : "Sprite Name" : "sprites/glow01.spr"
+	speed(integer) : "Speed (units per second)" : 64
+	scale(string) : "Sprite Scale"
+	framerate(string) : "Framerate" : "10.0"
 ]
 
 @PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
