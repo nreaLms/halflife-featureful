@@ -1912,7 +1912,7 @@ void CHFGrunt :: Spawn()
 	else if ( m_iHead < 0 || m_iHead >= FG_HEAD_COUNT )
 		m_iHead = 0;
 
-	if ( pev->weapons == 0 || pev->weapons == -1 )
+	if ( pev->weapons <= 0 )
 	{
 		pev->weapons = FGRUNT_9MMAR;
 	}
@@ -3006,13 +3006,16 @@ void CTorch::Spawn()
 
 	SpawnHelper("models/hgrunt_torch.mdl", gSkillData.torchHealth);
 
+	if (!pev->weapons)
+		pev->weapons = TORCH_EAGLE;
+
 	if ( FBitSet( pev->weapons, TORCH_EAGLE ) )
 	{
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_EAGLE );
+		pev->body = TORCH_GUN_EAGLE;
 	}
 	if ( FBitSet( pev->weapons, TORCH_BLOWTORCH ) )
 	{
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_TORCH );
+		pev->body = TORCH_GUN_TORCH;
 	}
 	m_cClipSize = TORCH_CLIP_SIZE;
 	m_cAmmoLoaded		= m_cClipSize;
@@ -3119,7 +3122,7 @@ BOOL CTorch::CheckRangeAttack2(float flDot, float flDist)
 
 void CTorch::GibMonster()
 {
-	if ( FBitSet( pev->weapons, TORCH_EAGLE ) && GetBodygroup(TORCH_GUN_GROUP) != TORCH_GUN_NONE )
+	if ( FBitSet( pev->weapons, TORCH_EAGLE ) && pev->body != TORCH_GUN_NONE )
 	{// throw a gun if the grunt has one
 		DropMyItems(TRUE);
 	}
@@ -3129,7 +3132,7 @@ void CTorch::GibMonster()
 void CTorch::DropMyItems(BOOL isGibbed)
 {
 	if (!isGibbed) {
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_NONE );
+		pev->body = TORCH_GUN_NONE;
 	}
 	Vector	vecGunPos;
 	Vector	vecGunAngles;
@@ -3307,15 +3310,15 @@ void CDeadTorch::Spawn( )
 
 	if ( pev->weapons <= 0 )
 	{
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_NONE );
+		pev->body = TORCH_GUN_NONE;
 	}
 	else if ( FBitSet( pev->weapons, TORCH_EAGLE ) )
 	{
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_EAGLE );
+		pev->body = TORCH_GUN_EAGLE;
 	}
 	else if ( FBitSet( pev->weapons, TORCH_BLOWTORCH ) )
 	{
-		SetBodygroup( TORCH_GUN_GROUP, TORCH_GUN_TORCH );
+		pev->body = TORCH_GUN_TORCH;
 	}
 	MonsterInitDead();
 }
