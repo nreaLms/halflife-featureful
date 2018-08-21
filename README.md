@@ -69,6 +69,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Configurable sound volume for apache and osprey rotors.
 * Human grunts take into account allies that are not in their squad when checking for friendly fire.
 * Security guards now check for friendly fire too.
+* Security guards can be spawned with gun drawn.
 
 ### Alien slave features
 
@@ -100,6 +101,8 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 #### Opposing Force entities
 
 * env_blowercannon
+* env_electrified_wire
+* env_rope
 * env_spritetrain (also supports animated sprites)
 * item_generic
 * item_nuclearbomb
@@ -129,6 +132,8 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * func_plat, func_train and func_door sound attenuation can be configured in level editor.
 * Monsters and models scale can be changed (like in Spirit of Half-Life)
 * Added use_through_walls cvar to prevent using things through walls (experimental).
+* func_tank can be configured to have a limited number of ammo.
+* func_breakable can contain new items (e.g. Opposing Force weapons and ammo).
 
 ## How to build
 

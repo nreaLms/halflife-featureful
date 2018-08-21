@@ -4668,7 +4668,7 @@
 
 @PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = monstermaker : "Monster Maker"
 [
-	target(string) : "Target On Release"
+	target(target_destination) : "Target On Release"
 	monstertype(string) : "Monster Type"
 	netname(string) : "Childrens' Name"
 	spawnflags(Flags) =
