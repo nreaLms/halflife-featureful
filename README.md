@@ -134,6 +134,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * Added use_through_walls cvar to prevent using things through walls (experimental).
 * func_tank can be configured to have a limited number of ammo.
 * func_breakable can contain new items (e.g. Opposing Force weapons and ammo).
+* Amount of health provided by soda may be configured via skill.cfg
 
 ## How to build
 

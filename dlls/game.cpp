@@ -759,6 +759,9 @@ cvar_t	sk_scientist_heal1	= { "sk_scientist_heal1","0" };
 cvar_t	sk_scientist_heal2	= { "sk_scientist_heal2","0" };	
 cvar_t	sk_scientist_heal3	= { "sk_scientist_heal3","0" };	
 
+cvar_t	sk_soda1	= { "sk_soda1","1" };		
+cvar_t	sk_soda2	= { "sk_soda2","1" };		
+cvar_t	sk_soda3	= { "sk_soda3","1" };		
 
 // monster damage adjusters
 cvar_t	sk_monster_head1	= { "sk_monster_head1","2" };
@@ -1531,6 +1534,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_scientist_heal1 );
 	CVAR_REGISTER( &sk_scientist_heal2 );
 	CVAR_REGISTER( &sk_scientist_heal3 );
+	
+	CVAR_REGISTER( &sk_soda1 );
+	CVAR_REGISTER( &sk_soda2 );
+	CVAR_REGISTER( &sk_soda3 );
 
 	// monster damage adjusters
 	CVAR_REGISTER( &sk_monster_head1 );
