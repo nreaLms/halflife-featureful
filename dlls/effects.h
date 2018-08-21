@@ -275,7 +275,7 @@ public:
 
 	void		DoSparks( const Vector &start, const Vector &end );
 	CBaseEntity *RandomTargetname( const char *szName );
-	void		BeamDamage( TraceResult *ptr );
+	void		BeamDamage( TraceResult *ptr, entvars_t *pevAttacker = NULL );
 	// Init after BeamCreate()
 	void		BeamInit( const char *pSpriteName, int width );
 	void		PointsInit( const Vector &start, const Vector &end );
@@ -313,7 +313,7 @@ public:
 	void	TurnOff( void );
 	int	IsOn( void );
 
-	void	FireAtPoint( TraceResult &point );
+	void	FireAtPoint( TraceResult &point, entvars_t *pevAttacker = NULL );
 
 	void	EXPORT StrikeThink( void );
 	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );

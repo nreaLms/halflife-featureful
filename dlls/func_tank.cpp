@@ -29,6 +29,9 @@
 #define SF_TANK_LINEOFSIGHT		0x0010
 #define SF_TANK_CANCONTROL		0x0020
 #define SF_TANK_SOUNDON			0x8000
+#define SF_TANK_SMOKE_ON_EMPTY	0x0040
+#define SF_TANK_SMOKE_IN_ORIGIN	0x0080
+
 
 enum TANKBULLET
 {
@@ -95,6 +98,10 @@ public:
 	void ControllerPostFrame( void );
 	virtual void StopFire( void ){}
 
+	inline bool HaveBullets() { return m_bulletCount != 0; }
+	void RemoveBullet();
+	void OnEmptyGun();
+
 protected:
 	CBasePlayer* m_pController;
 	float		m_flNextAttack;
@@ -128,6 +135,8 @@ protected:
 	Vector		m_sightOrigin;	// Last sight of target
 	int			m_spread;		// firing spread
 	string_t	m_iszMaster;	// Master entity (game_team_master or multisource)
+	int			m_bulletCount;	// Bullet count left. Negative means infinite.
+	float		m_flEmptySoundTime;
 };
 
 TYPEDESCRIPTION	CFuncTank::m_SaveData[] =
@@ -158,6 +167,7 @@ TYPEDESCRIPTION	CFuncTank::m_SaveData[] =
 	DEFINE_FIELD( CFuncTank, m_flNextAttack, FIELD_TIME ),
 	DEFINE_FIELD( CFuncTank, m_iBulletDamage, FIELD_INTEGER ),
 	DEFINE_FIELD( CFuncTank, m_iszMaster, FIELD_STRING ),
+	DEFINE_FIELD( CFuncTank, m_bulletCount, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTank, CBaseEntity )
@@ -195,6 +205,10 @@ void CFuncTank::Spawn( void )
 		m_spread = 0;
 
 	pev->oldorigin = pev->origin;
+	
+	if (!m_bulletCount) {
+		m_bulletCount = -1;
+	}
 }
 
 void CFuncTank::Precache( void )
@@ -207,6 +221,8 @@ void CFuncTank::Precache( void )
 
 	if( pev->noise )
 		PRECACHE_SOUND( STRING( pev->noise ) );
+
+	PRECACHE_SOUND("weapons/357_cock1.wav");
 }
 
 void CFuncTank::KeyValue( KeyValueData *pkvd )
@@ -309,6 +325,11 @@ void CFuncTank::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "maxRange" ) )
 	{
 		m_maxRange = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "bulletCount" ) )
+	{
+		m_bulletCount = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "master" ) )
@@ -416,6 +437,36 @@ void CFuncTank::ControllerPostFrame( void )
 		m_flNextAttack = gpGlobals->time + ( 1 / m_fireRate );
 	}
 }
+
+void CFuncTank::RemoveBullet()
+{
+	if (m_bulletCount > 0) {
+		m_bulletCount--;
+		if (!m_bulletCount) {
+			if (pev->spawnflags & SF_TANK_SMOKE_ON_EMPTY) {
+				Vector pos = (pev->spawnflags & SF_TANK_SMOKE_IN_ORIGIN) ? pev->origin : BarrelPosition();
+				MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+					WRITE_BYTE( TE_SMOKE );
+					WRITE_COORD( pos.x );
+					WRITE_COORD( pos.y );
+					WRITE_COORD( pos.z );
+					WRITE_SHORT( g_sModelIndexSmoke );
+					WRITE_BYTE( 20 ); // scale * 10
+					WRITE_BYTE( 5 ); // framerate
+				MESSAGE_END();
+			}
+		}
+	}
+}
+
+void CFuncTank::OnEmptyGun()
+{
+	if (m_flEmptySoundTime < gpGlobals->time) {
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM );
+		m_flEmptySoundTime = gpGlobals->time + 0.5;
+	}
+}
+
 ////////////// END NEW STUFF //////////////
 
 void CFuncTank::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -639,6 +690,11 @@ void CFuncTank::AdjustAnglesForBarrel( Vector &angles, float distance )
 // Fire targets and spawn sprites
 void CFuncTank::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker )
 {
+	if (!HaveBullets()) {
+		OnEmptyGun();
+		return;
+	}
+	
 	if( m_fireLast != 0 )
 	{
 		if( m_iszSpriteSmoke )
@@ -712,6 +768,11 @@ LINK_ENTITY_TO_CLASS( func_tank_of, CFuncTankGun )
 void CFuncTankGun::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker )
 {
 	int i;
+	
+	if (!HaveBullets()) {
+		OnEmptyGun();
+		return;
+	}
 
 	if( m_fireLast != 0 )
 	{
@@ -721,18 +782,21 @@ void CFuncTankGun::Fire( const Vector &barrelEnd, const Vector &forward, entvars
 		int bulletCount = (int)( ( gpGlobals->time - m_fireLast ) * m_fireRate );
 		if( bulletCount > 0 )
 		{
-			for( i = 0; i < bulletCount; i++ )
+			for( i = 0; i < bulletCount && HaveBullets(); i++ )
 			{
 				switch( m_bulletType )
 				{
 				case TANK_BULLET_9MM:
 					FireBullets( 1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_9MM, 1, m_iBulletDamage, pevAttacker );
+					RemoveBullet();
 					break;
 				case TANK_BULLET_MP5:
 					FireBullets( 1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_MP5, 1, m_iBulletDamage, pevAttacker );
+					RemoveBullet();
 					break;
 				case TANK_BULLET_12MM:
 					FireBullets( 1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_12MM, 1, m_iBulletDamage, pevAttacker );
+					RemoveBullet();
 					break;
 				default:
 				case TANK_BULLET_NONE:
@@ -835,6 +899,11 @@ void CFuncTankLaser::Think( void )
 
 void CFuncTankLaser::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker )
 {
+	if (!HaveBullets()) {
+		OnEmptyGun();
+		return;
+	}
+	
 	int i;
 	TraceResult tr;
 
@@ -846,7 +915,7 @@ void CFuncTankLaser::Fire( const Vector &barrelEnd, const Vector &forward, entva
 		int bulletCount = (int)( ( gpGlobals->time - m_fireLast ) * m_fireRate );
 		if( bulletCount )
 		{
-			for( i = 0; i < bulletCount; i++ )
+			for( i = 0; i < bulletCount && HaveBullets(); i++ )
 			{
 				m_pLaser->pev->origin = barrelEnd;
 				TankTrace( barrelEnd, forward, gTankSpread[m_spread], tr );
@@ -854,15 +923,16 @@ void CFuncTankLaser::Fire( const Vector &barrelEnd, const Vector &forward, entva
 				m_laserTime = gpGlobals->time;
 				m_pLaser->TurnOn();
 				m_pLaser->pev->dmgtime = gpGlobals->time - 1.0;
-				m_pLaser->FireAtPoint( tr );
+				m_pLaser->FireAtPoint( tr, pevAttacker );
 				m_pLaser->pev->nextthink = 0;
+				RemoveBullet();
 			}
-			CFuncTank::Fire( barrelEnd, forward, pev );
+			CFuncTank::Fire( barrelEnd, forward, pevAttacker );
 		}
 	}
 	else
 	{
-		CFuncTank::Fire( barrelEnd, forward, pev );
+		CFuncTank::Fire( barrelEnd, forward, pevAttacker );
 	}
 }
 
@@ -889,6 +959,11 @@ void CFuncTankRocket::Precache( void )
 
 void CFuncTankRocket::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker )
 {
+	if (!HaveBullets()) {
+		OnEmptyGun();
+		return;
+	}
+	
 	int i;
 
 	if( m_fireLast != 0 )
@@ -896,10 +971,12 @@ void CFuncTankRocket::Fire( const Vector &barrelEnd, const Vector &forward, entv
 		int bulletCount = (int)( ( gpGlobals->time - m_fireLast ) * m_fireRate );
 		if( bulletCount > 0 )
 		{
-			for( i = 0; i < bulletCount; i++ )
+			for( i = 0; i < bulletCount && HaveBullets(); i++ )
 			{
-				CBaseEntity::Create( "rpg_rocket", barrelEnd, pev->angles, edict() );
+				CBaseEntity* owner = CBaseEntity::Instance(pevAttacker);
+				CBaseEntity::Create( "rpg_rocket", barrelEnd, pev->angles, owner ? owner->edict() : edict() );
 			}
+			RemoveBullet();
 			CFuncTank::Fire( barrelEnd, forward, pev );
 		}
 	}
@@ -932,6 +1009,11 @@ void CFuncTankMortar::KeyValue( KeyValueData *pkvd )
 
 void CFuncTankMortar::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker )
 {
+	if (!HaveBullets()) {
+		OnEmptyGun();
+		return;
+	}
+	
 	if( m_fireLast != 0 )
 	{
 		int bulletCount = (int)( ( gpGlobals->time - m_fireLast ) * m_fireRate );
@@ -945,8 +1027,9 @@ void CFuncTankMortar::Fire( const Vector &barrelEnd, const Vector &forward, entv
 
 			TankTrace( barrelEnd, forward, gTankSpread[m_spread], tr );
 
-			ExplosionCreate( tr.vecEndPos, pev->angles, edict(), pev->impulse, TRUE );
+			ExplosionCreate( tr.vecEndPos, pev->angles, edict(), pev->impulse, TRUE, pevAttacker );
 
+			RemoveBullet();
 			CFuncTank::Fire( barrelEnd, forward, pev );
 		}
 	}

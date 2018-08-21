@@ -463,6 +463,8 @@
 		1 : "Active" : 0
 		16: "Only Direct" : 0
 		32: "Controllable" : 0
+		64: "Smoke when no ammo" : 0
+		128: "Smoke in origin" : 0
 	]
 
 	// Mainly for use with 1009 team settings (game_team_master)
@@ -495,6 +497,7 @@
 	minRange(string) : "Minmum target range" : "0"
 	maxRange(string) : "Maximum target range" : "0"
 	_minlight(string) : "Minimum light level"
+	bulletCount(integer) : "Bullet count" : 0 : "Less or equal to 0 means infinite number of bullets"
 ]
 
 @BaseClass = PlatSounds
