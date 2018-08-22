@@ -4861,6 +4861,7 @@ void CDeadHEV :: Spawn( void )
 	MonsterInitDead();
 }
 
+#define STRIP_SUIT 1
 class CStripWeapons : public CPointEntity
 {
 public:
@@ -4884,8 +4885,12 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		pPlayer = (CBasePlayer *)CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
 	}
 
-	if( pPlayer )
-		pPlayer->RemoveAllItems( FALSE );
+	if( pPlayer ) {
+		const bool removeSuit = (pev->spawnflags & STRIP_SUIT) ? true : false;
+		pPlayer->RemoveAllItems( removeSuit );
+		if (removeSuit)
+			pPlayer->FlashlightTurnOff();
+	}
 }
 
 class CRevertSaved : public CPointEntity
