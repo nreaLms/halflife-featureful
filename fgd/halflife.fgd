@@ -1319,6 +1319,7 @@
 		8: "Maintenance area"
 	]
 	_minlight(string) : "Minimum light level"
+	target_on_locked(target_destination) : "Target on locked" : : "Trigger if used when locked"
 ]
 
 @SolidClass base(Global,RenderFields, Targetname, Angles, ZHLT) = func_conveyor : "Conveyor Belt"

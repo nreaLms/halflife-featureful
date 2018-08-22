@@ -269,6 +269,8 @@ TYPEDESCRIPTION CBaseButton::m_SaveData[] =
 	DEFINE_FIELD( CBaseButton, m_bUnlockedSentence, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseButton, m_strChangeTarget, FIELD_STRING ),
 	//DEFINE_FIELD( CBaseButton, m_ls, FIELD_??? ),   // This is restored in Precache()
+	DEFINE_FIELD( CBaseButton, m_targetOnLocked, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_targetOnLockedTime, FIELD_TIME ),
 };
 	
 IMPLEMENT_SAVERESTORE( CBaseButton, CBaseToggle )
@@ -402,6 +404,11 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "sounds" ) )
 	{
 		m_sounds = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "target_on_locked" ) )
+	{
+		m_targetOnLocked = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else 
@@ -706,6 +713,7 @@ void CBaseButton::ButtonTouch( CBaseEntity *pOther )
 
 	if( !UTIL_IsMasterTriggered( m_sMaster, pOther ) )
 	{
+		OnLocked();
 		// play button locked sound
 		PlayLockSounds( pev, &m_ls, TRUE, TRUE );
 		return;
@@ -733,6 +741,7 @@ void CBaseButton::ButtonActivate()
 
 	if( !UTIL_IsMasterTriggered( m_sMaster, m_hActivator ) )
 	{
+		OnLocked();
 		// button is locked, play locked sound
 		PlayLockSounds( pev, &m_ls, TRUE, TRUE );
 		return;
@@ -751,6 +760,18 @@ void CBaseButton::ButtonActivate()
 		LinearMove( m_vecPosition2, pev->speed );
 	else
 		AngularMove( m_vecAngle2, pev->speed );
+}
+
+void CBaseButton::OnLocked()
+{
+	if (!FStringNull(m_targetOnLocked))
+	{
+		if (m_targetOnLockedTime < gpGlobals->time)
+		{
+			FireTargets(STRING(m_targetOnLocked), m_hActivator, this, USE_TOGGLE, 0.0f);
+			m_targetOnLockedTime = gpGlobals->time + 2.0f;
+		}
+	}
 }
 
 //

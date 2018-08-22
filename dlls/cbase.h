@@ -688,6 +688,7 @@ public:
 	
 	enum BUTTON_CODE { BUTTON_NOTHING, BUTTON_ACTIVATE, BUTTON_RETURN };
 	BUTTON_CODE ButtonResponseToTouch( void );
+	void OnLocked();
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 	// Buttons that don't take damage can be IMPULSE used
@@ -707,6 +708,8 @@ public:
 	BYTE m_bUnlockedSound;	
 	BYTE m_bUnlockedSentence;
 	int m_sounds;
+	string_t m_targetOnLocked;
+	float m_targetOnLockedTime;
 };
 
 //
