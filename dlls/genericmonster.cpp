@@ -38,9 +38,34 @@ public:
 	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int ISoundMask( void );
+	void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
+	void IdleHeadTurn( Vector &vecFriend );
+	void MonsterThink();
+	void Killed( entvars_t *pevAttacker, int iGib );
+
+	int Save( CSave &save );
+	int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+private:
+	float m_talkTime;
+	EHANDLE m_hTalkTarget;
+	float m_flIdealYaw;
+	float m_flCurrentYaw;
+
 };
 
 LINK_ENTITY_TO_CLASS( monster_generic, CGenericMonster )
+
+TYPEDESCRIPTION CGenericMonster::m_SaveData[] =
+{
+	DEFINE_FIELD( CGenericMonster, m_talkTime, FIELD_FLOAT ),
+	DEFINE_FIELD( CGenericMonster, m_hTalkTarget, FIELD_EHANDLE ),
+	DEFINE_FIELD( CGenericMonster, m_flIdealYaw, FIELD_FLOAT ),
+	DEFINE_FIELD( CGenericMonster, m_flCurrentYaw, FIELD_FLOAT ),
+};
+
+IMPLEMENT_SAVERESTORE( CGenericMonster, CBaseMonster )
 
 //=========================================================
 // Classify - indicates this monster's place in the 
@@ -132,6 +157,8 @@ void CGenericMonster::Spawn()
 		m_afCapability = bits_CAP_TURN_HEAD;
 	}
 
+	m_flIdealYaw = m_flCurrentYaw = 0;
+
 	if( pev->spawnflags & SF_GENERICMONSTER_NOTSOLID )
 	{
 		pev->solid = SOLID_NOT;
@@ -148,6 +175,70 @@ void CGenericMonster::Precache()
 		PRECACHE_MODEL( STRING( pev->model ) );
 	if (!FStringNull(m_gibModel))
 		PRECACHE_MODEL( STRING(m_gibModel) );
+}
+
+void CGenericMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
+{
+	m_talkTime = gpGlobals->time + duration;
+	PlaySentence( pszSentence, duration, volume, attenuation );
+
+	m_hTalkTarget = pListener;
+}
+
+void CGenericMonster::IdleHeadTurn( Vector &vecFriend )
+{
+	// turn head in desired direction only if ent has a turnable head
+	if( m_afCapability & bits_CAP_TURN_HEAD )
+	{
+		float yaw = VecToYaw( vecFriend - pev->origin ) - pev->angles.y;
+
+		if( yaw > 180 )
+			yaw -= 360;
+		if( yaw < -180 )
+			yaw += 360;
+
+		m_flIdealYaw = yaw;
+	}
+}
+
+void CGenericMonster::MonsterThink()
+{
+	if( m_afCapability & bits_CAP_TURN_HEAD )
+		{
+		if( m_hTalkTarget != 0 )
+		{
+			if( gpGlobals->time > m_talkTime )
+			{
+				m_flIdealYaw = 0;
+				m_hTalkTarget = 0;
+			}
+			else
+			{
+				IdleHeadTurn( m_hTalkTarget->pev->origin );
+			}
+		}
+
+		if( m_flCurrentYaw != m_flIdealYaw )
+		{
+			if( m_flCurrentYaw <= m_flIdealYaw )
+			{
+				m_flCurrentYaw += Q_min( m_flIdealYaw - m_flCurrentYaw, 20.0f );
+			}
+			else
+			{
+				m_flCurrentYaw -= Q_min( m_flCurrentYaw - m_flIdealYaw, 20.0f );
+			}
+			SetBoneController( 0, m_flCurrentYaw );
+		}
+	}
+
+	CBaseMonster::MonsterThink();
+}
+
+void CGenericMonster::Killed(entvars_t *pevAttacker, int iGib)
+{
+	SentenceStop();
+	CBaseMonster::Killed(pevAttacker, iGib);
 }
 
 class CDeadGenericMonster : public CBaseMonster
