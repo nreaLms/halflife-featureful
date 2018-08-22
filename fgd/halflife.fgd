@@ -1207,6 +1207,7 @@
 		1: "Remove on fire" : 0
 		2: "Kill center" : 0
 		4: "No screen shake" : 1
+		8: "Dynamic light" : 0
 	]
 	noise1(sound) : "Custom sound 1"
 	noise2(sound) : "Custom sound 2"

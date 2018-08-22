@@ -2241,6 +2241,7 @@ void CItemSoda::CanTouch( CBaseEntity *pOther )
 #define SF_REMOVE_ON_FIRE	0x0001
 #define SF_KILL_CENTER		0x0002
 #define SF_WARPBALL_NOSHAKE	0x0004
+#define SF_WARPBALL_DYNLIGHT	0x0008
 
 #define WARPBALL_SPRITE "sprites/fexplo1.spr"
 #define WARPBALL_BEAM "sprites/lgtning.spr"
@@ -2418,7 +2419,8 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 
 	CSprite *pSpr = CSprite::SpriteCreate( SpriteModel(), vecOrigin, TRUE );
-	pSpr->AnimateAndDie( 18 );
+	const float frameRate = 18;
+	pSpr->AnimateAndDie( frameRate );
 
 	int red = pev->rendercolor.x;
 	int green = pev->rendercolor.y;
@@ -2431,6 +2433,23 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	pSpr->SetTransparency( RenderMode(),  red, green, blue, RenderAmount(), RenderFx() );
 	pSpr->SetScale(Scale());
+
+	if (pev->spawnflags & SF_WARPBALL_DYNLIGHT)
+	{
+		const int lifeTime = (15*pSpr->Frames())/frameRate;
+		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
+			WRITE_BYTE( TE_DLIGHT );
+			WRITE_COORD( vecOrigin.x );	// X
+			WRITE_COORD( vecOrigin.y );	// Y
+			WRITE_COORD( vecOrigin.z );	// Z
+			WRITE_BYTE( 20 * Scale() );		// radius * 0.1
+			WRITE_BYTE( red );		// r
+			WRITE_BYTE( green );		// g
+			WRITE_BYTE( blue );		// b
+			WRITE_BYTE( lifeTime );		// time * 10
+			WRITE_BYTE( lifeTime/2 );		// decay * 0.1
+		MESSAGE_END();
+	}
 
 	EMIT_SOUND( pos, CHAN_ITEM, WarpballSound2(), 1, ATTN_NORM );
 
