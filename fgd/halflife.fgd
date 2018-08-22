@@ -1193,14 +1193,14 @@
 @PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
 [
 	model(sprite) : "Sprite Name" : "sprites/fexplo1.spr"
-	amplitude(string) : "Shake Amplitude 0-16" : ""
-	duration(string) : "Shake Duration (seconds)" : ""
-	frequency(string) : "Shake Frequency (0.1 = jerk, 255.0 = rumble)" : ""
+	amplitude(string) : "Shake Amplitude 0-16"
+	duration(string) : "Shake Duration (seconds)"
+	frequency(string) : "Shake Frequency (0.1 = jerk, 255.0 = rumble)"
 	radius(integer) : "Shake and Beam Radius" : 192
-	scale(string) : "Sprite Scale" : ""
-	warp_target(target_destination) : "Warp target" : ""
-	damage_delay(string) : "Damage delay" : ""
-	beamcolor(color255) : "Beam color" : ""
+	scale(string) : "Sprite Scale"
+	warp_target(target_destination) : "Warp target"
+	damage_delay(string) : "Damage delay"
+	beamcolor(color255) : "Beam color"
 	beamcount(integer) : "Max beam count" : 20
 	spawnflags(flags) =
 	[
@@ -1208,6 +1208,8 @@
 		2: "Kill center" : 0
 		4: "No screen shake" : 1
 	]
+	noise1(sound) : "Custom sound 1"
+	noise2(sound) : "Custom sound 2"
 ]
 
 @SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object" 

@@ -2307,11 +2307,14 @@ public:
 	inline void SetDamageDelay( float delay ) {
 		pev->frags = delay;
 	}
-	inline void SetScale( float scale ) {
-		pev->scale = scale;
-	}
 	inline void SetMaxBeamCount( int beamCount ) {
 		pev->team = beamCount;
+	}
+	inline const char* WarpballSound1() {
+		return pev->noise1 ? STRING(pev->noise1) : WARPBALL_SOUND1;
+	}
+	inline const char* WarpballSound2() {
+		return pev->noise2 ? STRING(pev->noise2) : WARPBALL_SOUND2;
 	}
 
 	Vector vecOrigin;
@@ -2352,11 +2355,6 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 		SetDamageDelay( atof( pkvd->szValue ) );
 		pkvd->fHandled = TRUE;
 	}
-	else if ( FStrEq( pkvd->szKeyName, "scale" ) ) 
-	{
-		SetScale( atof( pkvd->szValue ) );
-		pkvd->fHandled = TRUE;
-	}
 	else if ( FStrEq( pkvd->szKeyName, "beamcolor" ) ) 
 	{
 		float red, green, blue;
@@ -2377,13 +2375,19 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 void CEnvWarpBall::Precache( void )
 {
 	m_beamTexture = PRECACHE_MODEL( WARPBALL_BEAM );
-	if (pev->model) {
+	if (pev->model)
 		PRECACHE_MODEL( STRING(pev->model) );
-	} else {
+	else
 		PRECACHE_MODEL( WARPBALL_SPRITE );
-	}
-	PRECACHE_SOUND( WARPBALL_SOUND1 );
-	PRECACHE_SOUND( WARPBALL_SOUND2 );
+
+	if (pev->noise1)
+		PRECACHE_SOUND(STRING(pev->noise1));
+	else
+		PRECACHE_SOUND( WARPBALL_SOUND1 );
+	if (pev->noise2)
+		PRECACHE_SOUND(STRING(pev->noise2));
+	else
+		PRECACHE_SOUND( WARPBALL_SOUND2 );
 }
 
 void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -2407,7 +2411,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		vecOrigin = pev->origin;
 		pos = edict();
 	}
-	EMIT_SOUND( pos, CHAN_BODY, WARPBALL_SOUND1, 1, ATTN_NORM );
+	EMIT_SOUND( pos, CHAN_BODY, WarpballSound1(), 1, ATTN_NORM );
 	
 	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
 		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
@@ -2428,7 +2432,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	pSpr->SetTransparency( RenderMode(),  red, green, blue, RenderAmount(), RenderFx() );
 	pSpr->SetScale(Scale());
 
-	EMIT_SOUND( pos, CHAN_ITEM, WARPBALL_SOUND2, 1, ATTN_NORM );
+	EMIT_SOUND( pos, CHAN_ITEM, WarpballSound2(), 1, ATTN_NORM );
 
 	int beamRed = pev->punchangle.x;
 	int beamGreen = pev->punchangle.y;
