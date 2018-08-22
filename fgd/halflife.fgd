@@ -579,7 +579,7 @@
 	]
 ]
 
-@BaseClass = Recharger
+@BaseClass base(Targetname) = Recharger
 [
 	TriggerOnEmpty(target_destination) : "Trigger On Empty"
 	TriggerOnRecharged(target_destination) : "Trigger On Recharged"

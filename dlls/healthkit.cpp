@@ -135,7 +135,7 @@ void CWallCharger::Off()
 	m_iOn = 0;
 
 	SetThink( &CBaseEntity::SUB_DoNothing );
-	if ( !m_iJuice )
+	if ( m_iJuice <= 0 )
 	{
 		if ( ( m_iReactivate = RechargeTime() ) > 0 )
 		{
@@ -226,12 +226,32 @@ void CWallCharger::KeyValue( KeyValueData *pkvd )
 
 void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	// Make sure that we have a caller
-	if( !pActivator )
-		return;
-	// if it's not a player, ignore
-	if( !pActivator->IsPlayer() )
-		return;
+	if (!pActivator || !pActivator->IsPlayer())
+	{
+		if (useType == USE_TOGGLE)
+		{
+			useType = m_iJuice > 0 ? USE_OFF : USE_ON;
+		}
+		switch (useType) {
+		case USE_OFF:
+			if (m_iJuice > 0)
+			{
+				EMIT_SOUND( ENT( pev ), CHAN_ITEM, DenySound(), SoundVolume(), ATTN_NORM );
+				m_iJuice = 0;
+				pev->frame = 1;
+				Off();
+			}
+			return;
+		case USE_ON:
+			if (m_iJuice <= 0)
+			{
+				Recharge();
+			}
+			return;
+		default:
+			return;
+		}
+	}
 
 	// if there is no juice left, turn it off
 	if( m_iJuice <= 0 )
