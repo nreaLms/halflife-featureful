@@ -33,12 +33,12 @@
 class CRecharge : public CWallCharger
 {
 public:
-	const char* LoopingSound() { return "items/suitcharge1.wav"; }
+	const char* DefaultLoopingSound() { return "items/suitcharge1.wav"; }
 	int RechargeTime() { return (int)g_pGameRules->FlHEVChargerRechargeTime(); }
-	const char* RechargeSound() { return NULL; }
+	const char* DefaultRechargeSound() { return NULL; }
 	int ChargerCapacity() { return (int)gSkillData.suitchargerCapacity; }
-	const char* DenySound() { return "items/suitchargeno1.wav"; }
-	const char* ChargeStartSound() { return "items/suitchargeok1.wav"; }
+	const char* DefaultDenySound() { return "items/suitchargeno1.wav"; }
+	const char* DefaultChargeStartSound() { return "items/suitchargeok1.wav"; }
 	float SoundVolume() { return 0.85f; }
 	bool GiveCharge(CBaseEntity* pActivator)
 	{

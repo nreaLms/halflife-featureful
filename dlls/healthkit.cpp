@@ -159,6 +159,23 @@ void CWallCharger::Recharge( void )
 	SetThink( &CBaseEntity::SUB_DoNothing );
 }
 
+const char* CWallCharger::LoopingSound()
+{
+	return pev->noise ? STRING(pev->noise) : DefaultLoopingSound();
+}
+const char* CWallCharger::DenySound()
+{
+	return pev->noise1 ? STRING(pev->noise1) : DefaultDenySound();
+}
+const char* CWallCharger::ChargeStartSound()
+{
+	return pev->noise2 ? STRING(pev->noise2) : DefaultChargeStartSound();
+}
+const char* CWallCharger::RechargeSound()
+{
+	return pev->noise3 ? STRING(pev->noise3) : DefaultRechargeSound();
+}
+
 TYPEDESCRIPTION CWallCharger::m_SaveData[] =
 {
 	DEFINE_FIELD( CWallCharger, m_flNextCharge, FIELD_TIME ),
@@ -291,12 +308,12 @@ void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 class CWallHealth : public CWallCharger
 {
 public:
-	const char* LoopingSound() { return "items/medcharge4.wav"; }
+	const char* DefaultLoopingSound() { return "items/medcharge4.wav"; }
 	int RechargeTime() { return (int)g_pGameRules->FlHealthChargerRechargeTime(); }
-	const char* RechargeSound() { return "items/medshot4.wav"; }
+	const char* DefaultRechargeSound() { return "items/medshot4.wav"; }
 	int ChargerCapacity() { return (int)gSkillData.healthchargerCapacity; }
-	const char* DenySound() { return "items/medshotno1.wav"; }
-	const char* ChargeStartSound() { return "items/medshot4.wav"; }
+	const char* DefaultDenySound() { return "items/medshotno1.wav"; }
+	const char* DefaultChargeStartSound() { return "items/medshot4.wav"; }
 	float SoundVolume() { return 1.0f; }
 	bool GiveCharge(CBaseEntity* pActivator)
 	{

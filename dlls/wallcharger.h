@@ -9,12 +9,16 @@ public:
 	void Precache( void );
 	void EXPORT Off( void );
 	void EXPORT Recharge( void );
-	virtual const char* LoopingSound() = 0;
+	const char* LoopingSound();
+	virtual const char* DefaultLoopingSound() = 0;
 	virtual int RechargeTime() = 0;
-	virtual const char* RechargeSound() = 0;
+	const char* RechargeSound();
+	virtual const char* DefaultRechargeSound() = 0;
 	virtual int ChargerCapacity() = 0;
-	virtual const char* DenySound() = 0;
-	virtual const char* ChargeStartSound() = 0;
+	const char* DenySound();
+	virtual const char* DefaultDenySound() = 0;
+	const char* ChargeStartSound();
+	virtual const char* DefaultChargeStartSound() = 0;
 	virtual float SoundVolume() = 0;
 	virtual bool GiveCharge(CBaseEntity* pActivator) = 0;
 

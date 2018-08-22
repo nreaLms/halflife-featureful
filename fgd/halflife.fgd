@@ -579,6 +579,17 @@
 	]
 ]
 
+@BaseClass = Recharger
+[
+	TriggerOnEmpty(target_destination) : "Trigger On Empty"
+	TriggerOnRecharged(target_destination) : "Trigger On Recharged"
+	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
+	noise(sound) : "Charging sound"
+	noise1(sound) : "Deny sound"
+	noise2(sound) : "Start charging sound"
+	noise3(sound) : "Recharge sound"
+]
+
 //
 // Entities
 //
@@ -1349,13 +1360,10 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Global, RenderFields, ZHLT) = func_healthcharger: "Wall health recharger"
+@SolidClass base(Global, Recharger, RenderFields, ZHLT) = func_healthcharger: "Wall health recharger"
 [
 	// dmdelay(integer) : "Deathmatch recharge delay" : 0
 	_minlight(string) : "Minimum light level"
-	TriggerOnEmpty(target_destination) : "Trigger On Empty"
-	TriggerOnRecharged(target_destination) : "Trigger On Recharged"
-	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
 ]
 
 @SolidClass base(Targetname, RenderFields, ZHLT) = func_illusionary : "Fake Wall/Light"
@@ -1447,13 +1455,10 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Global,RenderFields, ZHLT) = func_recharge: "Battery recharger"
+@SolidClass base(Global, Recharger, RenderFields, ZHLT) = func_recharge: "Battery recharger"
 [
 	// dmdelay(integer) : "Deathmatch recharge delay" : 0
 	_minlight(string) : "Minimum light level"
-	TriggerOnEmpty(target_destination) : "Trigger On Empty"
-	TriggerOnRecharged(target_destination) : "Trigger On Recharged"
-	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
 ]
 
 @SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT) = func_rot_button : "RotatingButton"
