@@ -324,6 +324,22 @@ int CBaseMonster::GibCount()
 	return FStringNull(m_gibModel) ? DefaultGibCount() : 4;
 }
 
+bool CBaseMonster::IsAlienMonster()
+{
+	switch (DefaultClassify()) {
+	case CLASS_ALIEN_MILITARY:
+	case CLASS_ALIEN_PASSIVE:
+	case CLASS_ALIEN_MONSTER:
+	case CLASS_ALIEN_PREY:
+	case CLASS_ALIEN_PREDATOR:
+	case CLASS_RACEX_PREDATOR:
+	case CLASS_RACEX_SHOCK:
+		return true;
+	default:
+		return false;
+	}
+}
+
 void CBaseMonster::FadeMonster( void )
 {
 	StopAnimation();

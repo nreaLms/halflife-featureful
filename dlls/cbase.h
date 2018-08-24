@@ -352,6 +352,7 @@ public:
 	virtual	BOOL FVisible( const Vector &vecOrigin );
 
 	virtual int SizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
+	virtual bool IsAlienMonster() { return false; }
 };
 
 // Ugly technique to override base member functions

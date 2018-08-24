@@ -243,6 +243,7 @@ const char* CBaseMonster::DefaultGibModel() {return 0;}
 const char* CBaseMonster::GibModel() {return 0;}
 int CBaseMonster::DefaultGibCount() {return 0;}
 int CBaseMonster::GibCount() {return 0;}
+bool CBaseMonster::IsAlienMonster() {return false;}
 
 int TrainSpeed( int iSpeed, int iMax ) { return 0; }
 void CBasePlayer::DeathSound( void ) { }
@@ -260,6 +261,7 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle ) { }
 void CBasePlayer::PlayerUse( void ) { }
 void CBasePlayer::Jump() { }
 void CBasePlayer::Duck() { }
+int  CBasePlayer::DefaultClassify( void ) { return 0; }
 int  CBasePlayer::Classify( void ) { return 0; }
 void CBasePlayer::PreThink(void) { }
 void CBasePlayer::CheckTimeBasedDamage()  { }

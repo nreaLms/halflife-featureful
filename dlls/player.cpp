@@ -1686,6 +1686,12 @@ void CBasePlayer::Duck()
 //
 // ID's player as such.
 //
+
+int CBasePlayer::DefaultClassify( void )
+{
+	return CLASS_PLAYER;
+}
+
 int CBasePlayer::Classify( void )
 {
 	return CLASS_PLAYER;

@@ -2613,13 +2613,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 
 							if (m_hEnemy != 0)
 							{
-								int classify = m_hEnemy->Classify();
-								if (classify != CLASS_PLAYER_ALLY &&
-										classify != CLASS_HUMAN_MILITARY &&
-										classify != CLASS_HUMAN_PASSIVE &&
-										classify != CLASS_MACHINE &&
-										classify != CLASS_PLAYER_ALLY_MILITARY)
-									// monster
+								if (m_hEnemy->IsAlienMonster())
 									SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_MONSTER), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 								else
 									SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_ALERT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);

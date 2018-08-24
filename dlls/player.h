@@ -257,6 +257,7 @@ public:
 	void UpdatePlayerSound ( void );
 	void DeathSound ( void );
 
+	int DefaultClassify();
 	int Classify ( void );
 	void SetAnimation( PLAYER_ANIM playerAnim );
 	void SetWeaponAnimType( const char *szExtention );

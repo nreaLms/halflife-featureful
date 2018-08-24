@@ -2015,13 +2015,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 						{
 							if ( m_hEnemy != 0 )
 							{
-								int classify = m_hEnemy->Classify();
-								if( classify != CLASS_PLAYER_ALLY &&
-										classify != CLASS_HUMAN_PASSIVE &&
-										classify != CLASS_MACHINE &&
-										classify != CLASS_PLAYER_ALLY_MILITARY &&
-										classify != CLASS_HUMAN_MILITARY )
-									// monster
+								if( m_hEnemy->IsAlienMonster() )
 									SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_MONSTER), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
 								else
 									SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );

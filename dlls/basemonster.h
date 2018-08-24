@@ -353,6 +353,8 @@ public:
 	virtual int DefaultGibCount();
 	int GibCount();
 
+	virtual bool IsAlienMonster();
+
 	//
 	// Glowshell effects
 	//
