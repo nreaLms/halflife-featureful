@@ -23,6 +23,7 @@
 #include "decals.h"
 #include "func_break.h"
 #include "shake.h"
+#include "soundradius.h"
 #include "mod_features.h"
 
 #define	SF_GIBSHOOTER_REPEATABLE		1 // allows a gibshooter to be refired
@@ -2317,6 +2318,9 @@ public:
 	inline const char* WarpballSound2() {
 		return pev->noise2 ? STRING(pev->noise2) : WARPBALL_SOUND2;
 	}
+	inline float SoundAttenuation() {
+		return ::SoundAttenuation((short)pev->oldbuttons);
+	}
 
 	Vector vecOrigin;
 	int m_beamTexture;
@@ -2369,6 +2373,11 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 		SetMaxBeamCount( atoi(pkvd->szValue) );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
+	{
+		pev->oldbuttons = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -2412,7 +2421,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		vecOrigin = pev->origin;
 		pos = edict();
 	}
-	EMIT_SOUND( pos, CHAN_BODY, WarpballSound1(), 1, ATTN_NORM );
+	EMIT_SOUND( pos, CHAN_BODY, WarpballSound1(), 1, SoundAttenuation() );
 	
 	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
 		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
@@ -2451,7 +2460,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		MESSAGE_END();
 	}
 
-	EMIT_SOUND( pos, CHAN_ITEM, WarpballSound2(), 1, ATTN_NORM );
+	EMIT_SOUND( pos, CHAN_ITEM, WarpballSound2(), 1, SoundAttenuation() );
 
 	int beamRed = pev->punchangle.x;
 	int beamGreen = pev->punchangle.y;

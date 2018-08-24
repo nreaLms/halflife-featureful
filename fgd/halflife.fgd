@@ -1222,6 +1222,13 @@
 	]
 	noise1(sound) : "Custom sound 1"
 	noise2(sound) : "Custom sound 2"
+	soundradius(choices) : "Sound radius" : 0 =
+	[
+		0: "Default (large)"
+		1: "Huge"
+		2: "Enormous"
+		3: "Play Everywhere"
+	]
 ]
 
 @SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object" 
