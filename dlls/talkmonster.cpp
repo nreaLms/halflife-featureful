@@ -605,7 +605,8 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 {
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
 	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE 
-			&& !m_fStartSuspicious && IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
+			&& !m_fStartSuspicious && IsFriendWithPlayerBeforeProvoked() // no point in alerting friends if player is already foe
+			&& !HasMemory( bits_MEMORY_KILLED ) ) // corpses don't alert friends upon gibbing
 	{
 		AlertFriends();
 		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
