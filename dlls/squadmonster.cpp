@@ -469,7 +469,7 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 			CBaseMonster* monster = GetMonsterPointer(tr.pHit);
 			if (monster != 0 && FBitSet(monster->pev->flags, FL_MONSTER|FL_CLIENT) && monster->pev->deadflag != DEAD_DEAD && IRelationship(monster) == R_AL)
 			{
-				ALERT(at_aiconsole, "Ally %s at fire line. Don't shoot!\n", STRING(monster->pev->classname));
+				ALERT(at_aiconsole, "%s: Ally %s at fire line. Don't shoot!\n", STRING(pev->classname), STRING(monster->pev->classname));
 				return FALSE;
 			}
 		}
@@ -607,22 +607,32 @@ BOOL CSquadMonster::SquadEnemySplit( void )
 }
 
 //=========================================================
-// FValidateCover - determines whether or not the chosen
-// cover location is a good one to move to. (currently based
-// on proximity to others in the squad)
+// SquadMemberInRange - determines whether or not squad members
+// or ally monsters are in the chosen location.
 //=========================================================
 BOOL CSquadMonster::SquadMemberInRange( const Vector &vecLocation, float flDist )
 {
-	if( !InSquad() )
-		return FALSE;
-
-	CSquadMonster *pSquadLeader = MySquadLeader();
-
-	for( int i = 0; i < MAX_SQUAD_MEMBERS; i++ )
+	if( InSquad() )
 	{
-		CSquadMonster *pSquadMember = pSquadLeader->MySquadMember( i );
-		if( pSquadMember && ( vecLocation - pSquadMember->pev->origin ).Length2D() <= flDist )
+		CSquadMonster *pSquadLeader = MySquadLeader();
+
+		for( int i = 0; i < MAX_SQUAD_MEMBERS; i++ )
+		{
+			CSquadMonster *pSquadMember = pSquadLeader->MySquadMember( i );
+			if( pSquadMember && ( vecLocation - pSquadMember->pev->origin ).Length2D() <= flDist )
+				return TRUE;
+		}
+	}
+	CBaseEntity* pEntity = NULL;
+	while ( (pEntity = UTIL_FindEntityInSphere(pEntity, vecLocation, flDist)) != NULL )
+	{
+		CBaseMonster* monster = pEntity->MyMonsterPointer();
+		if (monster != 0 && FBitSet(monster->pev->flags, FL_MONSTER|FL_CLIENT) && monster->pev->deadflag != DEAD_DEAD && IRelationship(monster) == R_AL)
+		{
+			ALERT(at_aiconsole, "%s: Ally %s at search radius.\n", STRING(pev->classname), STRING(monster->pev->classname));
 			return TRUE;
+		}
+
 	}
 	return FALSE;
 }
