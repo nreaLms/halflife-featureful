@@ -539,6 +539,8 @@
 		2: "Enormous"
 		3: "Play Everywhere"
 	]
+	custommovesnd(sound) : "Custom move sound"
+	customstopsnd(sound) : "Custom stop sound"
 ]
 
 @BaseClass base(Targetname, RenderFields, Global, PlatSounds) = Trackchange
@@ -1653,6 +1655,8 @@
 		2: "Enormous"
 		3: "Play Everywhere"
 	]
+	custommovesnd(sound) : "Custom move sound"
+	customstopsnd(sound) : "Custom stop sound"
 	spawnflags(flags) =
 	[
 		8 : "Not solid" : 0
