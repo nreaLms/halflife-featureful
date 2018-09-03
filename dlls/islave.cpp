@@ -993,6 +993,8 @@ void CISlave::Precache()
 	PRECACHE_SOUND( "zombie/zo_pain2.wav" );
 	PRECACHE_SOUND( "headcrab/hc_headbite.wav" );
 	PRECACHE_SOUND( "weapons/cbar_miss1.wav" );
+	PRECACHE_SOUND( "aslave/slv_word5.wav" );
+	PRECACHE_SOUND( "aslave/slv_word7.wav" );
 
 	PRECACHE_SOUND_ARRAY(pAttackHitSounds);
 	PRECACHE_SOUND_ARRAY(pAttackMissSounds);
