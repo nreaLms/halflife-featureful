@@ -591,6 +591,10 @@
 	noise1(sound) : "Deny sound"
 	noise2(sound) : "Start charging sound"
 	noise3(sound) : "Recharge sound"
+	spawnflags(flags) =
+	[
+		1: "Start off" : 0
+	]
 ]
 
 //
