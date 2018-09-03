@@ -193,6 +193,7 @@
 		128: "WaitForScript" 	: 0
 		256: "Pre-Disaster" 	: 0
 		512: "Fade Corpse"	: 0
+		1024: "No yellow blobs" : 0
 	]
 	scale(string) : "Scale (1.0 = normal size)"
 	health(string) : "Custom Health"

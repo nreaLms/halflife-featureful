@@ -2070,11 +2070,14 @@ void CBaseMonster::StartMonster( void )
 		pev->origin.z += 1;
 		DROP_TO_FLOOR( ENT( pev ) );
 
-		// Try to move the monster to make sure it's not stuck in a brush.
-		if( !WALK_MOVE( ENT( pev ), 0, 0, WALKMOVE_NORMAL ) )
+		if (!FBitSet(pev->spawnflags, SF_MONSTER_NO_YELLOW_BLOBS))
 		{
-			ALERT( at_error, "Monster %s stuck in wall--level design error\n", STRING( pev->classname ) );
-			pev->effects = EF_BRIGHTFIELD;
+			// Try to move the monster to make sure it's not stuck in a brush.
+			if( !WALK_MOVE( ENT( pev ), 0, 0, WALKMOVE_NORMAL ) )
+			{
+				ALERT( at_error, "Monster %s stuck in wall--level design error\n", STRING( pev->classname ) );
+				pev->effects = EF_BRIGHTFIELD;
+			}
 		}
 	}
 	else 
