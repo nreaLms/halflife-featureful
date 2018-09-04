@@ -744,6 +744,18 @@ void UTIL_ScreenFadeWrite( const ScreenFade &fade, CBaseEntity *pEntity )
 	MESSAGE_END();
 }
 
+static int CalculateFadeAlpha( const Vector& fadeSource, CBaseEntity* pEntity, int baseAlpha )
+{
+	UTIL_MakeVectors(pEntity->pev->v_angle);
+	const Vector a = gpGlobals->v_forward;
+	const Vector b = (fadeSource - (pEntity->pev->origin + pEntity->pev->view_ofs)).Normalize();
+	const float dot = DotProduct(a,b);
+	if (dot >= 0)
+		return (int)(baseAlpha*Q_min(dot+0.134, 1.0));
+	else
+		return 0;
+}
+
 void UTIL_ScreenFadeAll( const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
 {
 	int i;
@@ -759,12 +771,33 @@ void UTIL_ScreenFadeAll( const Vector &color, float fadeTime, float fadeHold, in
 	}
 }
 
+void UTIL_ScreenFadeAll( const Vector& fadeSource, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
+{
+	int i;
+
+	for( i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
+		if (pPlayer)
+		{
+			UTIL_ScreenFade( fadeSource, pPlayer, color, fadeTime, fadeHold, alpha, flags );
+		}
+	}
+}
+
 void UTIL_ScreenFade( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
 {
 	ScreenFade fade;
 
 	UTIL_ScreenFadeBuild( fade, color, fadeTime, fadeHold, alpha, flags );
 	UTIL_ScreenFadeWrite( fade, pEntity );
+}
+
+void UTIL_ScreenFade( const Vector& fadeSource, CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
+{
+	alpha = CalculateFadeAlpha(fadeSource, pEntity, alpha);
+	if (alpha > 0)
+		UTIL_ScreenFade( pEntity, color, fadeTime, fadeHold, alpha, flags );
 }
 
 void UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage )

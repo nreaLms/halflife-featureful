@@ -1910,6 +1910,7 @@ LINK_ENTITY_TO_CLASS( env_fade, CFade )
 #define SF_FADE_IN			0x0001		// Fade in, not out
 #define SF_FADE_MODULATE		0x0002		// Modulate, don't blend
 #define SF_FADE_ONLYONE			0x0004
+#define SF_FADE_BLINDDIRECT		0x0008
 
 void CFade::Spawn( void )
 {
@@ -1949,12 +1950,26 @@ void CFade::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 	{
 		if( pActivator->IsNetClient() )
 		{
-			UTIL_ScreenFade( pActivator, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+			if (FBitSet(pev->spawnflags, SF_FADE_BLINDDIRECT))
+			{
+				UTIL_ScreenFade( pev->origin, pActivator, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+			}
+			else
+			{
+				UTIL_ScreenFade( pActivator, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+			}
 		}
 	}
 	else
 	{
-		UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+		if (FBitSet(pev->spawnflags, SF_FADE_BLINDDIRECT))
+		{
+			UTIL_ScreenFadeAll( pev->origin, pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+		}
+		else
+		{
+			UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
+		}
 	}
 	SUB_UseTargets( this, USE_TOGGLE, 0 );
 }
