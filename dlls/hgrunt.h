@@ -54,6 +54,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	virtual bool ShouldCheckGrenadeForAlly() { return true; }
 
 	// checking the feasibility of a grenade toss is kind of costly, so we do it every couple of seconds,
 	// not every server frame.

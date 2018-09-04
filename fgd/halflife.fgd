@@ -3069,6 +3069,7 @@
 		8 : "Shotgun"
 		10 : "Shotgun + HG"
 		16 : "Saw"
+		18 : "Saw + HG"
 	]
 
 	head(Choices) : "Heads" : -1 =

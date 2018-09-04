@@ -223,6 +223,10 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 //=========================================================
 BOOL CMassn::CheckRangeAttack2( float flDot, float flDist )
 {
+	if( !FBitSet( pev->weapons, ( MASSN_HANDGRENADE | MASSN_GRENADELAUNCHER ) ) )
+	{
+		return FALSE;
+	}
 	return CheckRangeAttack2Impl(gSkillData.massnGrenadeSpeed, flDot, flDist);
 }
 

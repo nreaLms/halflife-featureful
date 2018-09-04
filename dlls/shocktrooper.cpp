@@ -292,6 +292,10 @@ BOOL CStrooper::CheckRangeAttack1(float flDot, float flDist)
 
 BOOL CStrooper::CheckRangeAttack2( float flDot, float flDist )
 {
+	if( !FBitSet( pev->weapons, STROOPER_HANDGRENADE ) )
+	{
+		return FALSE;
+	}
 	return CheckRangeAttack2Impl(gSkillData.strooperGrenadeSpeed, flDot, flDist);
 }
 

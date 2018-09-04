@@ -574,7 +574,7 @@ BOOL CSquadMonster::FValidateCover( const Vector &vecCoverLocation )
 		return TRUE;
 	}
 
-	if( SquadMemberInRange( vecCoverLocation, 128 ) )
+	if( AllyMonsterInRange( vecCoverLocation, 128 ) )
 	{
 		// another squad member is too close to this piece of cover.
 		return FALSE;
@@ -610,7 +610,7 @@ BOOL CSquadMonster::SquadEnemySplit( void )
 // SquadMemberInRange - determines whether or not squad members
 // or ally monsters are in the chosen location.
 //=========================================================
-BOOL CSquadMonster::SquadMemberInRange( const Vector &vecLocation, float flDist )
+BOOL CSquadMonster::AllyMonsterInRange( const Vector &vecLocation, float flDist )
 {
 	if( InSquad() )
 	{

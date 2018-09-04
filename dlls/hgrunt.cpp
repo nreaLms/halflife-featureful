@@ -412,16 +412,15 @@ BOOL CHGrunt::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 BOOL CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 {
+	if( !FBitSet( pev->weapons, ( HGRUNT_HANDGRENADE | HGRUNT_GRENADELAUNCHER ) ) )
+	{
+		return FALSE;
+	}
 	return CheckRangeAttack2Impl(gSkillData.hgruntGrenadeSpeed, flDot, flDist);
 }
 
 BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist )
 {
-	if( !FBitSet( pev->weapons, ( HGRUNT_HANDGRENADE | HGRUNT_GRENADELAUNCHER ) ) )
-	{
-		return FALSE;
-	}
-	
 	// if the grunt isn't moving, it's ok to check.
 	if( m_flGroundSpeed != 0 )
 	{
@@ -473,10 +472,10 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 			vecTarget = vecTarget + ( ( vecTarget - pev->origin).Length() / grenadeSpeed ) * m_hEnemy->pev->velocity;
 	}
 
-	// are any of my squad members near the intended grenade impact area?
-	if( InSquad() )
+	// are any of my allies near the intended grenade impact area?
+	if( ShouldCheckGrenadeForAlly() )
 	{
-		if( SquadMemberInRange( vecTarget, 256 ) )
+		if( AllyMonsterInRange( vecTarget, 256 ) )
 		{
 			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.

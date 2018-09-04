@@ -105,7 +105,7 @@ public:
 	void SquadPasteEnemyInfo( void );
 	void SquadCopyEnemyInfo( void );
 	BOOL SquadEnemySplit( void );
-	BOOL SquadMemberInRange( const Vector &vecLocation, float flDist );
+	BOOL AllyMonsterInRange( const Vector &vecLocation, float flDist );
 
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return this; }
 
