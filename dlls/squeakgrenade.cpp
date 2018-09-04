@@ -440,6 +440,10 @@ class CPenguinGrenade : public CSqueakGrenade
 	void Killed(entvars_t *pevAttacker, int iGib);
 	float AdditionalExplosionDamage();
 	float MaximumExplosionDamage();
+	float ExplosionRadius()
+	{
+		return Q_min(gSkillData.plrDmgHandGrenade*5, pev->dmg * 2.5);
+	}
 };
 
 void CPenguinGrenade::Spawn()
