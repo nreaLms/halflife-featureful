@@ -1900,7 +1900,11 @@
 @PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_battery.mdl") = item_battery : "HEV battery" []
 @PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit" []
 @PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []
-@PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_security.mdl") = item_security : "Security card" []
+@PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_security.mdl") = item_security : "Security card"
+[
+	message(string) : "Message" : : "Message from titles.txt to show on pickup"
+	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
+]
 @PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_suit.mdl") = item_suit : "HEV Suit"
 [
 	spawnflags(Flags) =

@@ -174,7 +174,7 @@ void CItem::Materialize( void )
 class CItemSuit : public CItem
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_suit.mdl" );
 		CItem::Spawn();
@@ -203,7 +203,7 @@ LINK_ENTITY_TO_CLASS( item_suit, CItemSuit )
 class CItemBattery : public CItem
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_battery.mdl" );
 		CItem::Spawn();
@@ -257,7 +257,7 @@ LINK_ENTITY_TO_CLASS( item_battery, CItemBattery )
 class CItemAntidote : public CItem
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_antidote.mdl" );
 		CItem::Spawn();
@@ -280,7 +280,7 @@ LINK_ENTITY_TO_CLASS( item_antidote, CItemAntidote )
 class CItemSecurity : public CItem
 {
 	void Spawn( void )
-	{ 
+	{
 		Precache();
 		SET_MODEL( ENT( pev ), "models/w_security.mdl" );
 		CItem::Spawn();
@@ -288,10 +288,21 @@ class CItemSecurity : public CItem
 	void Precache( void )
 	{
 		PRECACHE_MODEL( "models/w_security.mdl" );
+		if (!FStringNull(pev->noise))
+			PRECACHE_SOUND( "items/gunpickup4.wav" );
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
 		pPlayer->m_rgItems[ITEM_SECURITY] += 1;
+
+		if (!FStringNull(pev->noise))
+			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
+		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
+			WRITE_STRING( STRING( pev->classname ) );
+		MESSAGE_END();
+		if (!FStringNull(pev->message))
+			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
+
 		return TRUE;
 	}
 };

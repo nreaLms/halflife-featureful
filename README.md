@@ -140,6 +140,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * func_tank can be configured to have a limited number of ammo.
 * func_breakable can contain new items (e.g. Opposing Force weapons and ammo).
 * Amount of health provided by soda may be configured via skill.cfg
+* item_security can show message and play sound on pickup. If item_security is featured in hud.txt the sprite will be shown upon item pickup.
 
 ## How to build
 
