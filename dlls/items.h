@@ -26,6 +26,8 @@ public:
 	virtual BOOL MyTouch( CBasePlayer *pPlayer )
 	{
 		return FALSE;
-	};
+	}
+	void SetMyModel( const char* model );
+	void PrecacheMyModel( const char* model );
 };
 #endif // ITEMS_H

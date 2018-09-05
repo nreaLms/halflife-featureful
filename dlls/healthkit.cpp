@@ -28,6 +28,7 @@ extern int gmsgItemPickup;
 
 class CHealthKit : public CItem
 {
+public:
 	void Spawn( void );
 	void Precache( void );
 	BOOL MyTouch( CBasePlayer *pPlayer );
@@ -52,14 +53,14 @@ IMPLEMENT_SAVERESTORE( CHealthKit, CItem )
 void CHealthKit::Spawn( void )
 {
 	Precache();
-	SET_MODEL( ENT( pev ), "models/w_medkit.mdl" );
+	SetMyModel( "models/w_medkit.mdl" );
 
 	CItem::Spawn();
 }
 
 void CHealthKit::Precache( void )
 {
-	PRECACHE_MODEL( "models/w_medkit.mdl" );
+	PrecacheMyModel( "models/w_medkit.mdl" );
 	PRECACHE_SOUND( "items/smallmedkit1.wav" );
 }
 
