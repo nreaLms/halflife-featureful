@@ -289,7 +289,7 @@ class CItemSecurity : public CItem
 	{
 		PRECACHE_MODEL( "models/w_security.mdl" );
 		if (!FStringNull(pev->noise))
-			PRECACHE_SOUND( "items/gunpickup4.wav" );
+			PRECACHE_SOUND( STRING(pev->noise) );
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
