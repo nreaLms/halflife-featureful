@@ -29,6 +29,7 @@
 #include "effects.h"
 #include "customentity.h"
 #include "wallcharger.h"
+#include "weapons.h"
 
 class CRecharge : public CWallCharger
 {
@@ -42,12 +43,12 @@ public:
 	float SoundVolume() { return 0.85f; }
 	bool GiveCharge(CBaseEntity* pActivator)
 	{
-		if (pActivator->pev->armorvalue < 100)
+		if (pActivator->pev->armorvalue < MAX_NORMAL_BATTERY)
 		{
 			pActivator->pev->armorvalue += 1;
 
-			if( pActivator->pev->armorvalue > 100 )
-				pActivator->pev->armorvalue = 100;
+			if( pActivator->pev->armorvalue > MAX_NORMAL_BATTERY )
+				pActivator->pev->armorvalue = MAX_NORMAL_BATTERY;
 
 			return true;
 		}
@@ -296,7 +297,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	// charge the player
-	if( pActivator->pev->armorvalue < 100 )
+	if( pActivator->pev->armorvalue < MAX_NORMAL_BATTERY )
 	{
 		m_iJuice--;
 		pActivator->pev->armorvalue += 1;
@@ -304,8 +305,8 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		SetBoneController(1, 360 - boneControllerValue);
 		SetBoneController(2,  boneControllerValue);
 
-		if( pActivator->pev->armorvalue > 100 )
-			pActivator->pev->armorvalue = 100;
+		if( pActivator->pev->armorvalue > MAX_NORMAL_BATTERY )
+			pActivator->pev->armorvalue = MAX_NORMAL_BATTERY;
 	}
 
 	// govern the rate of charge
