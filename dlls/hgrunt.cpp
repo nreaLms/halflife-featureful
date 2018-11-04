@@ -473,14 +473,12 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 	}
 
 	// are any of my allies near the intended grenade impact area?
-	if( ShouldCheckGrenadeForAlly() )
+	if( AllyMonsterInRange( vecTarget, 256 ) )
 	{
-		if( AllyMonsterInRange( vecTarget, 256 ) )
-		{
-			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
-			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
-			m_fThrowGrenade = FALSE;
-		}
+		// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
+		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+		m_fThrowGrenade = FALSE;
+		return m_fThrowGrenade;
 	}
 
 	if( ( vecTarget - pev->origin ).Length2D() <= 256 )
