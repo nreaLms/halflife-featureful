@@ -765,6 +765,20 @@ LINK_ENTITY_TO_CLASS( func_tank, CFuncTankGun )
 LINK_ENTITY_TO_CLASS( func_tank_of, CFuncTankGun )
 #endif
 
+static int TankBulletToBulletType(int tankBullet)
+{
+	switch (tankBullet) {
+	case TANK_BULLET_9MM:
+		return BULLET_MONSTER_9MM;
+	case TANK_BULLET_MP5:
+		return BULLET_MONSTER_MP5;
+	case TANK_BULLET_12MM:
+		return BULLET_MONSTER_12MM;
+	default:
+		return BULLET_NONE;
+	}
+}
+
 void CFuncTankGun::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker )
 {
 	int i;
@@ -784,24 +798,13 @@ void CFuncTankGun::Fire( const Vector &barrelEnd, const Vector &forward, entvars
 		{
 			for( i = 0; i < bulletCount && HaveBullets(); i++ )
 			{
-				switch( m_bulletType )
+				if (m_bulletType != TANK_BULLET_NONE)
 				{
-				case TANK_BULLET_9MM:
-					FireBullets( 1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_9MM, 1, m_iBulletDamage, pevAttacker );
+					FireBullets( 1, barrelEnd, forward, gTankSpread[m_spread], 4096, TankBulletToBulletType(m_bulletType), 1, m_iBulletDamage, pevAttacker );
 					RemoveBullet();
-					break;
-				case TANK_BULLET_MP5:
-					FireBullets( 1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_MP5, 1, m_iBulletDamage, pevAttacker );
-					RemoveBullet();
-					break;
-				case TANK_BULLET_12MM:
-					FireBullets( 1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_12MM, 1, m_iBulletDamage, pevAttacker );
-					RemoveBullet();
-					break;
-				default:
-				case TANK_BULLET_NONE:
-					break;
 				}
+				else
+					break;
 			}
 			CFuncTank::Fire( barrelEnd, forward, pevAttacker );
 		}

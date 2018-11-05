@@ -329,7 +329,6 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 				break;
 			case BULLET_PLAYER_MP5:
 			case BULLET_PLAYER_556:
-			case BULLET_PLAYER_762:
 				if( !tracer )
 				{
 					EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
@@ -341,6 +340,7 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 				break;
 			case BULLET_PLAYER_357:
 			case BULLET_PLAYER_EAGLE:
+			case BULLET_PLAYER_762:
 				EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
 				EV_HLDM_DecalGunshot( &tr, iBulletType );
 				break;
