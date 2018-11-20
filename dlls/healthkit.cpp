@@ -396,6 +396,7 @@ public:
 		if (m_jar)
 		{
 			const float jarBoneControllerValue = (m_iJuice / gSkillData.healthchargerCapacity) * 11 - 11;
+			ALERT(at_console, "Jar controller value: %f\n", jarBoneControllerValue);
 			m_jar->SetBoneController(0,  jarBoneControllerValue );
 		}
 	}
@@ -440,6 +441,7 @@ IMPLEMENT_SAVERESTORE( CWallHealthDecay, CBaseAnimating )
 
 void CWallHealthDecay::Spawn()
 {
+	m_iJuice = gSkillData.healthchargerCapacity;
 	Precache();
 
 	pev->solid = SOLID_SLIDEBOX;
@@ -448,7 +450,6 @@ void CWallHealthDecay::Spawn()
 	SET_MODEL(ENT(pev), "models/health_charger_body.mdl");
 	UTIL_SetSize(pev, Vector(-12, -16, 0), Vector(12, 16, 48));
 	UTIL_SetOrigin(pev, pev->origin);
-	m_iJuice = gSkillData.healthchargerCapacity;
 	pev->skin = 0;
 
 	InitBoneControllers();

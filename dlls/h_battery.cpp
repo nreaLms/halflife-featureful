@@ -137,6 +137,7 @@ IMPLEMENT_SAVERESTORE( CRechargeDecay, CBaseAnimating )
 
 void CRechargeDecay::Spawn()
 {
+	m_iJuice = gSkillData.suitchargerCapacity;
 	Precache();
 
 	pev->solid = SOLID_SLIDEBOX;
@@ -145,7 +146,6 @@ void CRechargeDecay::Spawn()
 	SET_MODEL(ENT(pev), "models/hev.mdl");
 	UTIL_SetSize(pev, Vector(-12, -16, 0), Vector(12, 16, 48));
 	UTIL_SetOrigin(pev, pev->origin);
-	m_iJuice = gSkillData.suitchargerCapacity;
 	pev->skin = 0;
 
 	InitBoneControllers();
