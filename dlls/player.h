@@ -318,6 +318,8 @@ public:
 	void SetCustomDecalFrames( int nFrames );
 	int GetCustomDecalFrames( void );
 
+	void SetMovementMode();
+
 	Vector m_vecLastViewAngles;
 
 	float m_flStartCharge;
@@ -343,6 +345,7 @@ public:
 	friend class CDisplacer;
 	friend class CTriggerXenReturn;
 
+	short m_movementState; // no need to save
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
 
 #if FEATURE_ROPE

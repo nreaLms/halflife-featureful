@@ -200,6 +200,10 @@ int gmsgStatusValue = 0;
 int gmsgNightvision = 0;
 #endif
 
+#if FEATURE_MOVE_MODE
+int gmsgMovementState = 0;
+#endif
+
 void LinkUserMessages( void )
 {
 	// Already taken care of?
@@ -248,6 +252,9 @@ void LinkUserMessages( void )
 	gmsgStatusValue = REG_USER_MSG( "StatusValue", 3 );
 #if FEATURE_NIGHTVISION
 	gmsgNightvision = REG_USER_MSG( "Nightvision", 1 );
+#endif
+#if FEATURE_MOVE_MODE
+	gmsgMovementState = REG_USER_MSG( "MoveMode", 2 );
 #endif
 }
 
@@ -1845,8 +1852,53 @@ void CBasePlayer::UpdateStatusBar()
 #define	CLIMB_PUNCH_X			-7  // how far to 'punch' client X axis when climbing
 #define CLIMB_PUNCH_Z			7	// how far to 'punch' client Z axis when climbing
 
+enum
+{
+	MovementStand,
+	MovementRun,
+	MovementCrouch,
+	MovementJump,
+};
+
+void CBasePlayer::SetMovementMode()
+{
+#if FEATURE_MOVE_MODE
+	if (!m_fGameHUDInitialized)
+		return;
+	short currentMovementState;
+	if (!FBitSet( pev->flags, FL_ONGROUND ))
+	{
+		currentMovementState = MovementJump;
+	}
+	else if (FBitSet( pev->flags, FL_DUCKING ))
+	{
+		currentMovementState = MovementCrouch;
+	}
+	else if (pev->velocity.Length2D() > 220)
+	{
+		currentMovementState = MovementRun;
+	}
+	else
+	{
+		currentMovementState = MovementStand;
+	}
+	if (currentMovementState != m_movementState)
+	{
+		m_movementState = currentMovementState;
+		if( gmsgMovementState )
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgMovementState, NULL, pev );
+				WRITE_SHORT( m_movementState );
+			MESSAGE_END();
+		}
+	}
+#endif
+}
+
 void CBasePlayer::PreThink( void )
 {
+	SetMovementMode();
+
 	int buttonsChanged = ( m_afButtonLast ^ pev->button );	// These buttons have changed this frame
 
 	// Debounced button codes for pressed/released
@@ -3109,6 +3161,8 @@ void CBasePlayer::Precache( void )
 		m_fInitHUD = TRUE;
 
 	pev->fov = m_iFOV;	// Vit_amiN: restore the FOV on level change or map/saved game load
+
+	m_movementState = MovementStand;
 }
 
 int CBasePlayer::Save( CSave &save )

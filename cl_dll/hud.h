@@ -603,6 +603,39 @@ private:
 //
 //-----------------------------------------------------
 //
+#if FEATURE_MOVE_MODE
+class CHudMoveMode: public CHudBase
+{
+	enum
+	{
+		MovementStand,
+		MovementRun,
+		MovementCrouch,
+		MovementJump,
+	};
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	void Reset( void );
+	int MsgFunc_MoveMode( const char *pszName,  int iSize, void *pbuf );
+
+private:
+	HSPRITE m_hSpriteStand;
+	HSPRITE m_hSpriteRun;
+	HSPRITE m_hSpriteCrouch;
+	HSPRITE m_hSpriteJump;
+	wrect_t *m_prcStand;
+	wrect_t *m_prcRun;
+	wrect_t *m_prcCrouch;
+	wrect_t *m_prcJump;
+	short m_movementState;
+};
+#endif
+
+//
+//-----------------------------------------------------
+//
 class CHud
 {
 private:
@@ -667,6 +700,9 @@ public:
 	CHudBattery		m_Battery;
 	CHudTrain		m_Train;
 	CHudFlashlight	m_Flash;
+#if FEATURE_MOVE_MODE
+	CHudMoveMode	m_MoveMode;
+#endif
 	CHudMessage		m_Message;
 	CHudStatusBar   m_StatusBar;
 	CHudDeathNotice m_DeathNotice;

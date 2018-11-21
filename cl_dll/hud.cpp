@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include "parsemsg.h"
 #include "hud_servers.h"
+#include "mod_features.h"
 
 #include "demo.h"
 #include "demo_api.h"
@@ -223,6 +224,9 @@ void CHud::Init( void )
 	m_Train.Init();
 	m_Battery.Init();
 	m_Flash.Init();
+#if FEATURE_MOVE_MODE
+	m_MoveMode.Init();
+#endif
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();
@@ -403,6 +407,9 @@ void CHud::VidInit( void )
 	m_Train.VidInit();
 	m_Battery.VidInit();
 	m_Flash.VidInit();
+#if FEATURE_MOVE_MODE
+	m_MoveMode.VidInit();
+#endif
 	m_Message.VidInit();
 	m_StatusBar.VidInit();
 	m_DeathNotice.VidInit();
@@ -589,3 +596,88 @@ float CHud::GetSensitivity( void )
 {
 	return m_flMouseSensitivity;
 }
+
+#if FEATURE_MOVE_MODE
+DECLARE_MESSAGE( m_MoveMode, MoveMode )
+
+int CHudMoveMode::Init()
+{
+	m_movementState = MovementStand;
+	HOOK_MESSAGE(MoveMode);
+	m_iFlags |= HUD_ACTIVE;
+	gHUD.AddHudElem(this);
+	return 1;
+}
+
+void CHudMoveMode::Reset()
+{
+	m_movementState = MovementStand;
+}
+
+int CHudMoveMode::VidInit()
+{
+	int HUD_mode_stand = gHUD.GetSpriteIndex("mode_stand");
+	int HUD_mode_run = gHUD.GetSpriteIndex("mode_run");
+	int HUD_mode_crouch = gHUD.GetSpriteIndex("mode_crouch");
+	int HUD_mode_jump = gHUD.GetSpriteIndex("mode_jump");
+
+	m_hSpriteStand = gHUD.GetSprite(HUD_mode_stand);
+	m_hSpriteRun = gHUD.GetSprite(HUD_mode_run);
+	m_hSpriteCrouch = gHUD.GetSprite(HUD_mode_crouch);
+	m_hSpriteJump = gHUD.GetSprite(HUD_mode_jump);
+
+	m_prcStand = &gHUD.GetSpriteRect(HUD_mode_stand);
+	m_prcRun = &gHUD.GetSpriteRect(HUD_mode_run);
+	m_prcCrouch = &gHUD.GetSpriteRect(HUD_mode_crouch);
+	m_prcJump = &gHUD.GetSpriteRect(HUD_mode_jump);
+
+	return 1;
+}
+
+int CHudMoveMode::Draw(float flTime)
+{
+	if ( gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & HIDEHUD_ALL)
+		 || !( gHUD.m_iWeaponBits & (1 << (WEAPON_SUIT))) )
+	{
+		return 1;
+	}
+	int r, g, b, x, y;
+	wrect_t rc;
+	HSPRITE sprite;
+	UnpackRGB( r,g,b, RGB_YELLOWISH );
+
+	switch (m_movementState) {
+	case MovementRun:
+		sprite = m_hSpriteRun;
+		rc = *m_prcRun;
+		break;
+	case MovementCrouch:
+		sprite = m_hSpriteCrouch;
+		rc = *m_prcCrouch;
+		break;
+	case MovementJump:
+		sprite = m_hSpriteJump;
+		rc = *m_prcJump;
+		break;
+	default:
+		sprite = m_hSpriteStand;
+		rc = *m_prcStand;
+		break;
+	}
+
+	int width = rc.right - rc.left;
+	y = ( rc.bottom - rc.top ) * 2;
+	x = ScreenWidth - width - width / 2;
+
+	SPR_Set( sprite, r, g, b );
+	SPR_DrawAdditive( 0,  x, y, &rc );
+	return 1;
+}
+
+int CHudMoveMode::MsgFunc_MoveMode(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+	m_movementState = READ_SHORT();
+	return 1;
+}
+#endif
