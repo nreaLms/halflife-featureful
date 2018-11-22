@@ -64,6 +64,8 @@ public:
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	virtual float OneSlashDamage() { return gSkillData.zombieDmgOneSlash; }
+	virtual float BothSlashDamage() { return gSkillData.zombieDmgBothSlash; }
 protected:
 	void HandleAnimEventHelper( MonsterEvent_t *pEvent, float dmg, vec3_t velocityAdd, float punchz );
 	void ZombieSpawnHelper(const char* modelName, float health);
@@ -219,15 +221,15 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 	switch( pEvent->event )
 	{
 		case ZOMBIE_AE_ATTACK_RIGHT:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieDmgOneSlash, -gpGlobals->v_right * 100, -18 );
+			HandleAnimEventHelper(pEvent, OneSlashDamage(), -gpGlobals->v_right * 100, -18 );
 		break;
 
 		case ZOMBIE_AE_ATTACK_LEFT:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieDmgOneSlash, gpGlobals->v_right * 100, 18 );
+			HandleAnimEventHelper(pEvent, OneSlashDamage(), gpGlobals->v_right * 100, 18 );
 		break;
 
 		case ZOMBIE_AE_ATTACK_BOTH:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieDmgBothSlash, gpGlobals->v_forward * -100, 0 );
+			HandleAnimEventHelper(pEvent, BothSlashDamage(), gpGlobals->v_forward * -100, 0 );
 		break;
 
 		default:
@@ -326,7 +328,8 @@ class CZombieBarney : public CZombie
 {
 	void Spawn( void );
 	void Precache( void );
-	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	float OneSlashDamage() { return gSkillData.zombieBarneyDmgOneSlash; }
+	float BothSlashDamage() { return gSkillData.zombieBarneyDmgBothSlash; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie_barney, CZombieBarney )
@@ -342,28 +345,6 @@ void CZombieBarney::Precache()
 	PRECACHE_MODEL("models/zombie_barney.mdl");
 	PrecacheSounds();
 }
-
-void CZombieBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
-{
-	switch( pEvent->event )
-	{
-		case ZOMBIE_AE_ATTACK_RIGHT:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieBarneyDmgOneSlash, -gpGlobals->v_right * 100, -18 );
-		break;
-
-		case ZOMBIE_AE_ATTACK_LEFT:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieBarneyDmgOneSlash, gpGlobals->v_right * 100, 18 );
-		break;
-
-		case ZOMBIE_AE_ATTACK_BOTH:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieBarneyDmgBothSlash, gpGlobals->v_forward * -100, 0 );
-		break;
-
-		default:
-			CBaseMonster::HandleAnimEvent( pEvent );
-			break;
-	}
-}
 #endif
 
 #if FEATURE_ZOMBIE_SOLDIER
@@ -371,7 +352,8 @@ class CZombieSoldier : public CZombie
 {
 	void Spawn( void );
 	void Precache( void );
-	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	float OneSlashDamage() { return gSkillData.zombieSoldierDmgOneSlash; }
+	float BothSlashDamage() { return gSkillData.zombieSoldierDmgBothSlash; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_zombie_soldier, CZombieSoldier )
@@ -386,28 +368,6 @@ void CZombieSoldier::Precache()
 {
 	PRECACHE_MODEL("models/zombie_soldier.mdl");
 	PrecacheSounds();
-}
-
-void CZombieSoldier::HandleAnimEvent( MonsterEvent_t *pEvent )
-{
-	switch( pEvent->event )
-	{
-		case ZOMBIE_AE_ATTACK_RIGHT:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieSoldierDmgOneSlash, -gpGlobals->v_right * 100, -18 );
-		break;
-
-		case ZOMBIE_AE_ATTACK_LEFT:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieSoldierDmgOneSlash, gpGlobals->v_right * 100, 18 );
-		break;
-
-		case ZOMBIE_AE_ATTACK_BOTH:
-			HandleAnimEventHelper(pEvent, gSkillData.zombieSoldierDmgBothSlash, gpGlobals->v_forward * -100, 0 );
-		break;
-
-		default:
-			CBaseMonster::HandleAnimEvent( pEvent );
-			break;
-	}
 }
 
 class CDeadZombieSoldier : public CDeadMonster
