@@ -2449,6 +2449,7 @@ void CTriggerCamera::Move()
 	pev->velocity = ( ( pev->movedir * pev->speed ) * fraction ) + ( pev->velocity * ( 1 - fraction ) );
 }
 
+#if FEATURE_DISPLACER
 class CTriggerXenReturn : public CTriggerTeleport
 {
 public:
@@ -2533,6 +2534,7 @@ void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
 	// Play teleport sound.
 	EMIT_SOUND(ENT(pOther->pev), CHAN_STATIC, "debris/beamstart7.wav", 1, ATTN_NORM );
 }
+#endif
 
 class CTriggerPlayerFreeze : public CBaseDelay
 {

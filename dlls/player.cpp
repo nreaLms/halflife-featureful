@@ -118,8 +118,9 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD( CBasePlayer, m_pTank, FIELD_EHANDLE ),
 	DEFINE_FIELD( CBasePlayer, m_iHideHUD, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_iFOV, FIELD_INTEGER ),
-
+#if FEATURE_DISPLACER
 	DEFINE_FIELD(CBasePlayer, m_fInXen, FIELD_BOOLEAN),
+#endif
 #if FEATURE_NIGHTVISION
 	DEFINE_FIELD(CBasePlayer, m_fNVGisON, FIELD_BOOLEAN),
 #endif
@@ -3110,8 +3111,9 @@ void CBasePlayer::Spawn( void )
 	m_lastx = m_lasty = 0;
 
 	m_flNextChatTime = gpGlobals->time;
-
+#if FEATURE_DISPLACER
 	m_fInXen = FALSE;
+#endif
 
 	g_pGameRules->PlayerSpawn( this );
 }
@@ -3161,8 +3163,9 @@ void CBasePlayer::Precache( void )
 		m_fInitHUD = TRUE;
 
 	pev->fov = m_iFOV;	// Vit_amiN: restore the FOV on level change or map/saved game load
-
+#if FEATURE_MOVE_MODE
 	m_movementState = MovementStand;
+#endif
 }
 
 int CBasePlayer::Save( CSave &save )

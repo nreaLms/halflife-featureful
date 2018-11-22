@@ -337,15 +337,17 @@ public:
 	char m_SbarString1[SBAR_STRING_SIZE];
 
 	float m_flNextChatTime;
-
+#if FEATURE_DISPLACER
 	BOOL	m_fInXen;
+#endif
 #if FEATURE_NIGHTVISION
 	BOOL	m_fNVGisON;
 #endif
 	friend class CDisplacer;
 	friend class CTriggerXenReturn;
-
+#if FEATURE_MOVE_MODE
 	short m_movementState; // no need to save
+#endif
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
 
 #if FEATURE_ROPE
