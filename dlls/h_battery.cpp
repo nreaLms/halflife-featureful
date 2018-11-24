@@ -59,7 +59,7 @@ public:
 LINK_ENTITY_TO_CLASS( func_recharge, CRecharge )
 
 //-------------------------------------------------------------
-// Wall mounted health kit (PS2 && Decay)
+// Wall mounted suit charger (PS2 && Decay)
 //-------------------------------------------------------------
 
 class CRechargeGlassDecay : public CBaseAnimating

@@ -4071,7 +4071,6 @@
 		7 : "die1"
 	]
 ]
-@PointClass base(Weapon,Targetx,RenderFields, Sequence) studio("models/w_satchel.mdl") = monster_satchelcharge : "Live Satchel Charge" []
 
 @PointClass base(Monster, TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist : "Cleansuit Scientist" 
 [

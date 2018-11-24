@@ -396,7 +396,6 @@ public:
 		if (m_jar)
 		{
 			const float jarBoneControllerValue = (m_iJuice / gSkillData.healthchargerCapacity) * 11 - 11;
-			ALERT(at_console, "Jar controller value: %f\n", jarBoneControllerValue);
 			m_jar->SetBoneController(0,  jarBoneControllerValue );
 		}
 	}
