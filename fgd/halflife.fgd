@@ -1929,7 +1929,7 @@
 @PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
 @PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
 
-@PointClass base(Targetname, Angles) size(-48 -48 0, 48 48 32 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
+@PointClass base(Targetname, Angles) size(-12 -16 0, 12 16 48 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
 [
     unlocked_target(string) : "Unlocked target"
     locked_target(string) : "Locked target"

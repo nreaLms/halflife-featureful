@@ -559,7 +559,7 @@ void CEyeScanner::KeyValue(KeyValueData *pkvd)
 void CEyeScanner::Spawn()
 {
 	Precache();
-	pev->solid = SOLID_NOT;
+	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
 	pev->takedamage = DAMAGE_NO;
 	pev->health = 1;
