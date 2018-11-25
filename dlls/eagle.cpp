@@ -5,6 +5,7 @@
 // $NoKeywords: $																	 //
 //===================================================================================//
 //Modifided by Lost_Gamer_
+// Various fixes by FreeSlave
 
 #include "extdll.h"
 #include "util.h"
