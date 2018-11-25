@@ -26,6 +26,9 @@
 #include "shake.h"
 #include "hltv.h"
 
+extern cvar_t *cl_rollspeed;
+extern cvar_t *cl_rollangle;
+
 // Spectator Mode
 extern "C" 
 {
@@ -324,16 +327,19 @@ Roll is induced by movement and damage
 */
 void V_CalcViewRoll( struct ref_params_s *pparams )
 {
-	float side;
 	cl_entity_t *viewentity;
 
 	viewentity = gEngfuncs.GetEntityByIndex( pparams->viewentity );
 	if( !viewentity )
 		return;
 
+#if FEATURE_STRAFE_BOBBING
+	pparams->viewangles[ROLL] = V_CalcRoll (pparams->viewangles, pparams->simvel, cl_rollangle->value, cl_rollspeed->value ) * 4;
+#else
+	float side;
 	side = V_CalcRoll( viewentity->angles, pparams->simvel, pparams->movevars->rollangle, pparams->movevars->rollspeed );
-
 	pparams->viewangles[ROLL] += side;
+#endif
 
 	if( pparams->health <= 0 && ( pparams->viewheight[2] != 0 ) )
 	{
@@ -590,7 +596,11 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 
 	for( i = 0; i < 3; i++ )
 	{
+#if FEATURE_STRAFE_BOBBING
+		view->origin[i] += bob * 0.4 * pparams->right[i];
+#else
 		view->origin[i] += bob * 0.4 * pparams->forward[i];
+#endif
 	}
 	view->origin[2] += bob;
 
