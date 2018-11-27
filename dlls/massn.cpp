@@ -62,6 +62,14 @@ public:
 	void GibMonster();
 	void PlayUseSentence();
 	void PlayUnUseSentence();
+	int	DefaultClassify ( void )
+	{
+#if FEATURE_BLACKOPS_CLASS
+		return CLASS_HUMAN_BLACKOPS;
+#else
+		return CHGrunt::DefaultClassify();
+#endif
+	}
 
 	BOOL FOkToSpeak(void);
 
@@ -359,7 +367,14 @@ class CDeadMassn : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_HUMAN_MILITARY; }
+	int	DefaultClassify ( void )
+	{
+#if FEATURE_BLACKOPS_CLASS
+		return CLASS_HUMAN_BLACKOPS;
+#else
+		return CLASS_HUMAN_MILITARY;
+#endif
+	}
 
 	void KeyValue( KeyValueData *pkvd );
 	const char* getPos(int pos) const;

@@ -29,6 +29,7 @@ extern DLL_GLOBAL int		g_iSkillLevel;
 
 class CApache : public CBaseMonster
 {
+public:
 	int Save( CSave &save );
 	int Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
@@ -1066,6 +1067,14 @@ class CBlkopApache : public CApache
 public:
 	void Spawn();
 	void Precache();
+	int	DefaultClassify ( void )
+	{
+#if FEATURE_BLACKOPS_CLASS
+		return CLASS_HUMAN_BLACKOPS;
+#else
+		return CApache::DefaultClassify();
+#endif
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_blkop_apache, CBlkopApache )

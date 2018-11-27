@@ -254,6 +254,7 @@
 		14 : "Race X predator"
 		15 : "Race X shock"
 		16 : "Opfor ally"
+		17 : "Blackops"
 	]
 	gibmodel(studio) : "Custom gib model"
 	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
@@ -5139,6 +5140,7 @@
 		14 : "Race X predator"
 		15 : "Race X shock"
 		16 : "Opfor ally"
+		17 : "Blackops"
 	]
 	gibmodel(studio) : "Custom gib model"
 	weapons(Choices) : "Grunt/Assassin Weapons" =

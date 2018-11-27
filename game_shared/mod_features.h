@@ -42,6 +42,12 @@
 // whether race x and alien military are enemies
 #define FEATURE_RACEX_AND_AMIL_ENEMIES 1
 
+// whether race x and alien monsters are enemies
+#define FEATURE_RACEX_AND_AMONSTERS_ENEMIES 0
+
+// whether blackops monsters have a separate class which is enemy to military
+#define FEATURE_BLACKOPS_CLASS 0
+
 // whether monsters get health from eating meat or enemy corpses
 #define FEATURE_EAT_FOR_HEALTH 1
 

@@ -859,6 +859,14 @@ public:
 	void Spawn();
 	void Precache();
 	void PrepareGruntBeforeSpawn(CBaseEntity* pGrunt);
+	int	DefaultClassify ( void )
+	{
+#if FEATURE_BLACKOPS_CLASS
+		return CLASS_HUMAN_BLACKOPS;
+#else
+		return COsprey::DefaultClassify();
+#endif
+	}
 protected:
 	const char* TrooperName();
 };

@@ -2440,6 +2440,12 @@ int CBaseMonster::IDefaultRelationship(int classify)
 #define R_PA R_NO
 #endif
 
+#if FEATURE_RACEX_AND_AMONSTERS_ENEMIES
+#define R_AX R_DL
+#else
+#define R_AX R_NO
+#endif
+
 #if FEATURE_OPFOR_ALLY_RELATIONSHIP
 #define R_OA R_DL
 #else
@@ -2449,24 +2455,25 @@ int CBaseMonster::IDefaultRelationship(int classify)
 int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 {
 	static int iEnemy[CLASS_NUMBER_OF_CLASSES][CLASS_NUMBER_OF_CLASSES] =
-	{			 //   NONE	 MACH	 PLYR	 HPASS	 HMIL	 AMIL	 APASS	 AMONST	APREY	 APRED	 INSECT	PLRALY	PBWPN	ABWPN	XPRED	XSHOCK	ALMIL
-	/*NONE*/		{ R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO},
-	/*MACHINE*/		{ R_NO	,R_NO	,R_DL	,R_DL	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL},
-	/*PLAYER*/		{ R_NO	,R_DL	,R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO},
-	/*HUMANPASSIVE*/{ R_NO	,R_NO	,R_AL	,R_AL	,R_HT	,R_FR	,R_NO	,R_HT	,R_DL	,R_FR	,R_NO	,R_AL,	R_NO,	R_NO,	R_DL,	R_DL,	R_OA},
-	/*HUMANMILITAR*/{ R_NO	,R_NO	,R_HT	,R_DL	,R_NO	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_HT,	R_NO,	R_NO,	R_HT,	R_HT,	R_DL},
-	/*ALIENMILITAR*/{ R_NO	,R_DL	,R_HT	,R_DL	,R_HT	,R_AL	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_PA,	R_XA,	R_HT},
-	/*ALIENPASSIVE*/{ R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO},
-	/*ALIENMONSTER*/{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_NO,	R_NO,	R_DL},
-	/*ALIENPREY   */{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO	,R_NO	,R_NO	,R_FR	,R_NO	,R_DL,	R_NO,	R_NO,	R_FR,	R_NO,	R_DL},
-	/*ALIENPREDATO*/{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO	,R_NO	,R_HT	,R_DL	,R_NO	,R_DL,	R_NO,	R_NO,	R_DL,	R_NO,	R_DL},
-	/*INSECT*/		{ R_FR	,R_FR	,R_FR	,R_FR	,R_FR	,R_NO	,R_FR	,R_FR	,R_FR	,R_FR	,R_NO	,R_FR,	R_NO,	R_NO,	R_NO,	R_NO,	R_FR},
-	/*PLAYERALLY*/	{ R_NO	,R_DL	,R_AL	,R_AL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_AL,	R_NO,	R_NO,	R_DL,	R_DL,	R_OA},
-	/*PBIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL},
-	/*ABIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL},
-	/*XPREDATOR*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_PA	,R_NO	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO,	R_NO,	R_NO,	R_AL,	R_AL,	R_DL},
-	/*XSHOCK*/		{ R_NO	,R_DL	,R_DL	,R_DL	,R_HT	,R_XA	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_HT},
-	/*PLRALLYMIL*/	{ R_NO	,R_DL	,R_AL	,R_OA	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_OA,	R_NO,	R_NO,	R_DL,	R_HT,	R_AL},
+	{			 //   NONE	 MACH	 PLYR	 HPASS	 HMIL	 AMIL	 APASS	 AMONST	APREY	 APRED	 INSECT	PLRALY	PBWPN	ABWPN	XPRED	XSHOCK	ALMIL BLOPS
+	/*NONE*/		{ R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO},
+	/*MACHINE*/		{ R_NO	,R_NO	,R_DL	,R_DL	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL},
+	/*PLAYER*/		{ R_NO	,R_DL	,R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_DL},
+	/*HUMANPASSIVE*/{ R_NO	,R_NO	,R_AL	,R_AL	,R_HT	,R_FR	,R_NO	,R_HT	,R_DL	,R_FR	,R_NO	,R_AL,	R_NO,	R_NO,	R_DL,	R_DL,	R_OA,	R_DL},
+	/*HUMANMILITAR*/{ R_NO	,R_NO	,R_HT	,R_DL	,R_NO	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_HT,	R_NO,	R_NO,	R_HT,	R_HT,	R_DL,	R_DL},
+	/*ALIENMILITAR*/{ R_NO	,R_DL	,R_HT	,R_DL	,R_HT	,R_AL	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_PA,	R_XA,	R_HT,	R_HT},
+	/*ALIENPASSIVE*/{ R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO},
+	/*ALIENMONSTER*/{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_AX,	R_AX,	R_DL,	R_DL},
+	/*ALIENPREY   */{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO	,R_NO	,R_NO	,R_FR	,R_NO	,R_DL,	R_NO,	R_NO,	R_FR,	R_FR,	R_DL,	R_DL},
+	/*ALIENPREDATO*/{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_NO	,R_NO	,R_NO	,R_HT	,R_DL	,R_NO	,R_DL,	R_NO,	R_NO,	R_DL,	R_AX,	R_DL,	R_DL},
+	/*INSECT*/		{ R_FR	,R_FR	,R_FR	,R_FR	,R_FR	,R_NO	,R_FR	,R_FR	,R_FR	,R_FR	,R_NO	,R_FR,	R_NO,	R_NO,	R_NO,	R_NO,	R_FR,	R_FR},
+	/*PLAYERALLY*/	{ R_NO	,R_DL	,R_AL	,R_AL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_AL,	R_NO,	R_NO,	R_DL,	R_DL,	R_OA,	R_DL},
+	/*PBIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL},
+	/*ABIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL},
+	/*XPREDATOR*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_PA	,R_NO	,R_AX	,R_DL	,R_DL	,R_NO	,R_NO,	R_NO,	R_NO,	R_AL,	R_AL,	R_DL,	R_DL},
+	/*XSHOCK*/		{ R_NO	,R_DL	,R_DL	,R_DL	,R_HT	,R_XA	,R_NO	,R_AX	,R_AX	,R_AX	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_HT,	R_HT},
+	/*PLRALLYMIL*/	{ R_NO	,R_DL	,R_AL	,R_OA	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_OA,	R_NO,	R_NO,	R_DL,	R_HT,	R_AL,	R_DL},
+	/*BLACKOPS*/	{ R_NO	,R_NO	,R_HT	,R_DL	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_HT,	R_NO,	R_NO,	R_HT,	R_HT,	R_DL,	R_AL},
 	};
 	if (classify1 >= CLASS_NUMBER_OF_CLASSES || classify1 < 0 || classify2 >= CLASS_NUMBER_OF_CLASSES || classify2 < 0 )
 	{
