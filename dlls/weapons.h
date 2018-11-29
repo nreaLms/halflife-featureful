@@ -268,6 +268,7 @@ typedef struct
 {
 	const char *pszName;
 	int iId;
+	int iMaxAmmo;
 } AmmoInfo;
 
 // Items that the player has in their inventory that they can use
@@ -314,6 +315,8 @@ public:
 
 	virtual CBasePlayerItem *GetWeaponPtr( void ) { return NULL; };
 
+	static const AmmoInfo& GetAmmoInfo( const char* name );
+
 	static ItemInfo ItemInfoArray[ MAX_WEAPONS ];
 	static AmmoInfo AmmoInfoArray[ MAX_AMMO_SLOTS ];
 
@@ -357,8 +360,8 @@ public:
 	virtual int AddWeapon( void ) { ExtractAmmo( this ); return TRUE; };	// Return TRUE if you want to add yourself to the player
 
 	// generic "shared" ammo handlers
-	BOOL AddPrimaryAmmo(int iCount, const char *szName, int iMaxClip, int iMaxCarry );
-	BOOL AddSecondaryAmmo( int iCount, const char *szName, int iMaxCarry );
+	BOOL AddPrimaryAmmo(int iCount);
+	BOOL AddSecondaryAmmo(int iCount);
 
 	virtual void UpdateItemInfo( void ) {};	// updates HUD state
 
@@ -501,7 +504,6 @@ class CWeaponBox : public CBaseEntity
 	void Touch( CBaseEntity *pOther );
 	void KeyValue( KeyValueData *pkvd );
 	BOOL IsEmpty( void );
-	int  GiveAmmo( int iCount, const char *szName, int iMax, int *pIndex = NULL );
 	void SetObjectCollisionBox( void );
 
 public:

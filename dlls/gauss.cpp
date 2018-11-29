@@ -616,7 +616,7 @@ class CGaussAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY ) != -1 )
+		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium" ) != -1 )
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
 			return TRUE;

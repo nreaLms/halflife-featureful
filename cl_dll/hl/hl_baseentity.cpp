@@ -307,7 +307,7 @@ BOOL CBasePlayer::HasPlayerItem( CBasePlayerItem *pCheckItem ) { return FALSE; }
 BOOL CBasePlayer::SwitchWeapon( CBasePlayerItem *pWeapon )  { return FALSE; }
 Vector CBasePlayer::GetGunPosition( void ) { return g_vecZero; }
 const char *CBasePlayer::TeamID( void ) { return ""; }
-int CBasePlayer::GiveAmmo( int iCount, const char *szName, int iMax ) { return 0; }
+int CBasePlayer::GiveAmmo( int iCount, const char *szName ) { return 0; }
 void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { } 
 void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { } 
 void CBasePlayer::SetMovementMode() {}
@@ -319,7 +319,6 @@ void SpawnBlood( Vector vecSpot, int bloodColor, float flDamage ) { }
 int DamageDecal( CBaseEntity *pEntity, int bitsDamageType ) { return 0; }
 void DecalGunshot( TraceResult *pTrace, int iBulletType ) { }
 void EjectBrass( const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype ) { }
-void AddAmmoNameToAmmoRegistry( const char *szAmmoname ) { }
 int CBasePlayerItem::Restore( class CRestore & ) { return 1; }
 int CBasePlayerItem::Save( class CSave & ) { return 1; }
 int CBasePlayerWeapon::Restore( class CRestore & ) { return 1; }
@@ -343,8 +342,8 @@ int CBasePlayerWeapon::AddDuplicate( CBasePlayerItem *pOriginal ) { return 0; }
 int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer ) { return FALSE; }
 int CBasePlayerWeapon::AddToPlayerDefault( CBasePlayer *pPlayer ) { return FALSE; }
 int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer ) { return 0; }
-BOOL CBasePlayerWeapon::AddPrimaryAmmo( int iCount, const char *szName, int iMaxClip, int iMaxCarry ) { return TRUE; }
-BOOL CBasePlayerWeapon::AddSecondaryAmmo( int iCount, const char *szName, int iMax ) { return TRUE; }
+BOOL CBasePlayerWeapon::AddPrimaryAmmo( int iCount ) { return TRUE; }
+BOOL CBasePlayerWeapon::AddSecondaryAmmo( int iCount ) { return TRUE; }
 BOOL CBasePlayerWeapon::IsUseable( void ) { return TRUE; }
 int CBasePlayerWeapon::PrimaryAmmoIndex( void ) { return -1; }
 int CBasePlayerWeapon::SecondaryAmmoIndex( void ) { return -1; }

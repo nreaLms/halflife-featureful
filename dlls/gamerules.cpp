@@ -37,21 +37,15 @@ int g_teamplay = 0;
 
 //=========================================================
 //=========================================================
-BOOL CGameRules::CanHaveAmmo( CBasePlayer *pPlayer, const char *pszAmmoName, int iMaxCarry )
+BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName )
 {
-	int iAmmoIndex;
-
-	if( pszAmmoName )
+	const AmmoInfo& ammoInfo = CBasePlayerItem::GetAmmoInfo(pszAmmoName);
+	if( ammoInfo.pszName )
 	{
-		iAmmoIndex = pPlayer->GetAmmoIndex( pszAmmoName );
-
-		if( iAmmoIndex > -1 )
+		if( pPlayer->AmmoInventory( ammoInfo.iId ) < ammoInfo.iMaxAmmo )
 		{
-			if( pPlayer->AmmoInventory( iAmmoIndex ) < iMaxCarry )
-			{
-				// player has room for more of this type of ammo
-				return TRUE;
-			}
+			// player has room for more of this type of ammo
+			return TRUE;
 		}
 	}
 
@@ -84,7 +78,7 @@ BOOL CGameRules::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerItem *pWeap
 
 	if( pWeapon->pszAmmo1() )
 	{
-		if( !CanHaveAmmo( pPlayer, pWeapon->pszAmmo1(), pWeapon->iMaxAmmo1() ) )
+		if( !CanHaveAmmo( pPlayer, pWeapon->pszAmmo1() ) )
 		{
 			// we can't carry anymore ammo for this gun. We can only 
 			// have the gun if we aren't already carrying one of this type

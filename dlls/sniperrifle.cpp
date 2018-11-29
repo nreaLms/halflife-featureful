@@ -250,7 +250,7 @@ class CSniperrifleAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = (pOther->GiveAmmo( 5, "762", _762_MAX_CARRY) != -1);
+		int bResult = (pOther->GiveAmmo( 5, "762") != -1);
 		if (bResult)
 		{
 			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
