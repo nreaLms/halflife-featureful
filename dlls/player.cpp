@@ -3317,7 +3317,7 @@ void CBasePlayer::SelectItem( const char *pstr )
 			break;
 	}
 
-	if( !pItem )
+	if( !pItem || !pItem->CanDeploy() )
 		return;
 
 	if( pItem == m_pActiveItem )
@@ -3341,7 +3341,7 @@ void CBasePlayer::SelectItem( const char *pstr )
 
 void CBasePlayer::SelectLastItem( void )
 {
-	if( !m_pLastItem )
+	if( !m_pLastItem || !m_pLastItem->CanDeploy() )
 	{
 		return;
 	}
