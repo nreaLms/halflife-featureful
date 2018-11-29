@@ -3744,7 +3744,6 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "ammo_ARgrenades" );
 		GiveNamedItem( "weapon_handgrenade" );
 		GiveNamedItem( "weapon_tripmine" );
-#ifndef OEM_BUILD
 		GiveNamedItem( "weapon_357" );
 		GiveNamedItem( "ammo_357" );
 		GiveNamedItem( "weapon_crossbow" );
@@ -3757,7 +3756,6 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_satchel" );
 		GiveNamedItem( "weapon_snark" );
 		GiveNamedItem( "weapon_hornetgun" );
-#endif
 #if FEATURE_MEDKIT
 		GiveNamedItem( "weapon_medkit" );
 #endif

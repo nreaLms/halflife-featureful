@@ -12,7 +12,6 @@
 *   use or distribution of this code by or to any unlicensed person is illegal.
 *
 ****/
-#if !defined( OEM_BUILD ) && !defined( HLDEMO_BUILD )
 
 //=========================================================
 // hassassin - Human assassin, fast and stealthy
@@ -991,4 +990,3 @@ Schedule_t *CHAssassin::GetScheduleOfType( int Type )
 
 	return CBaseMonster::GetScheduleOfType( Type );
 }
-#endif

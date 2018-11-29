@@ -326,7 +326,6 @@ void W_Precache( void )
 	// 9mm ammo box
 	UTIL_PrecacheOther( "ammo_9mmbox" );
 
-#if !defined( OEM_BUILD ) && !defined( HLDEMO_BUILD )
 	// python
 	UTIL_PrecacheOtherWeapon( "weapon_357" );
 	UTIL_PrecacheOther( "ammo_357" );
@@ -345,16 +344,15 @@ void W_Precache( void )
 
 	// egon
 	UTIL_PrecacheOtherWeapon( "weapon_egon" );
-#endif
+
 	// tripmine
 	UTIL_PrecacheOtherWeapon( "weapon_tripmine" );
-#if !defined( OEM_BUILD ) && !defined( HLDEMO_BUILD )
+
 	// satchel charge
 	UTIL_PrecacheOtherWeapon( "weapon_satchel" );
-#endif
+
 	// hand grenade
 	UTIL_PrecacheOtherWeapon("weapon_handgrenade");
-#if !defined( OEM_BUILD ) && !defined( HLDEMO_BUILD )
 	// squeak grenade
 	UTIL_PrecacheOtherWeapon( "weapon_snark" );
 
@@ -367,7 +365,6 @@ void W_Precache( void )
 	{
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
 	}
-#endif
 #if FEATURE_DESERT_EAGLE
 	UTIL_PrecacheOtherWeapon( "weapon_eagle" );
 #endif

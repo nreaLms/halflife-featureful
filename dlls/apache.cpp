@@ -12,7 +12,6 @@
 *   use or distribution of this code by or to any unlicensed person is illegal.
 *
 ****/
-#ifndef OEM_BUILD
 
 #include "extdll.h"
 #include "util.h"
@@ -1078,6 +1077,4 @@ void CBlkopApache::Precache( void )
 {
 	PrecacheImpl("models/blkop_apache.mdl", "models/metalplategibs_dark.mdl");
 }
-#endif
-
 #endif

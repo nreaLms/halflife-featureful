@@ -12,7 +12,6 @@
 *   use or distribution of this code by or to any unlicensed person is illegal.
 *
 ****/
-#ifndef OEM_BUILD
 
 //=========================================================
 // Gargantua
@@ -1716,6 +1715,4 @@ float CBabyGargantua::FlameTimeDivider()
 {
 	return 1.5;
 }
-#endif
-
 #endif
