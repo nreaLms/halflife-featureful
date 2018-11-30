@@ -249,6 +249,8 @@ public:
 
 #define WEAPON_IS_ONTARGET 0x40
 
+#define AMMO_PICKUP_SOUND "items/9mmclip1.wav"
+
 typedef struct
 {
 	int		iSlot;
@@ -430,11 +432,16 @@ class CBasePlayerAmmo : public CBaseEntity
 {
 public:
 	virtual void Spawn( void );
+	virtual void Precache();
 	void EXPORT DefaultTouch( CBaseEntity *pOther ); // default weapon touch
-	virtual BOOL AddAmmo( CBaseEntity *pOther ) { return TRUE; };
+	virtual BOOL AddAmmo( CBaseEntity *pOther );
 
 	CBaseEntity* Respawn( void );
 	void EXPORT Materialize( void );
+
+	virtual const char* MyModel() = 0;
+	virtual int MyAmount() = 0;
+	virtual const char* AmmoName() = 0;
 };
 
 extern DLL_GLOBAL	short	g_sModelIndexLaser;// holds the index for the laser beam

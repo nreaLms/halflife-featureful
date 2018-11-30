@@ -532,19 +532,10 @@ void CRpg::UpdateSpot( void )
 
 class CRpgAmmo : public CBasePlayerAmmo
 {
-	void Spawn( void )
-	{
-		Precache();
-		SET_MODEL( ENT( pev ), "models/w_rpgammo.mdl" );
-		CBasePlayerAmmo::Spawn();
+	const char* MyModel() {
+		return "models/w_rpgammo.mdl";
 	}
-	void Precache( void )
-	{
-		PRECACHE_MODEL( "models/w_rpgammo.mdl" );
-		PRECACHE_SOUND( "items/9mmclip1.wav" );
-	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
+	int MyAmount() {
 		int iGive;
 #ifdef CLIENT_DLL
 	if( bIsMultiplayer() )
@@ -559,13 +550,10 @@ class CRpgAmmo : public CBasePlayerAmmo
 		{
 			iGive = AMMO_RPGCLIP_GIVE;
 		}
-
-		if( pOther->GiveAmmo( iGive, "rockets" ) != -1 )
-		{
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
-			return TRUE;
-		}
-		return FALSE;
+		return iGive;
+	}
+	const char* AmmoName() {
+		return "rockets";
 	}
 };
 

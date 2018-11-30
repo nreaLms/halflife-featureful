@@ -270,25 +270,14 @@ void CM249::UpdateTape()
 
 class CM249AmmoClip : public CBasePlayerAmmo
 {
-	void Spawn(void)
-	{
-		Precache();
-		SET_MODEL(ENT(pev), "models/w_saw_clip.mdl");
-		CBasePlayerAmmo::Spawn();
+	const char* MyModel() {
+		return "models/w_saw_clip.mdl";
 	}
-	void Precache(void)
-	{
-		PRECACHE_MODEL("models/w_saw_clip.mdl");
-		PRECACHE_SOUND("items/9mmclip1.wav");
+	int MyAmount() {
+		return AMMO_556CLIP_GIVE;
 	}
-	BOOL AddAmmo(CBaseEntity *pOther)
-	{
-		int bResult = (pOther->GiveAmmo(AMMO_556CLIP_GIVE, "556") != -1);
-		if (bResult)
-		{
-			EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
-		}
-		return bResult;
+	const char* AmmoName() {
+		return "556";
 	}
 };
 

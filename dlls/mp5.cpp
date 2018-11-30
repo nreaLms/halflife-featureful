@@ -259,25 +259,14 @@ BOOL CMP5::IsUseable()
 
 class CMP5AmmoClip : public CBasePlayerAmmo
 {
-	void Spawn( void )
-	{
-		Precache();
-		SET_MODEL( ENT( pev ), "models/w_9mmARclip.mdl" );
-		CBasePlayerAmmo::Spawn();
+	const char* MyModel() {
+		return "models/w_9mmARclip.mdl";
 	}
-	void Precache( void )
-	{
-		PRECACHE_MODEL( "models/w_9mmARclip.mdl" );
-		PRECACHE_SOUND( "items/9mmclip1.wav" );
+	int MyAmount() {
+		return AMMO_MP5CLIP_GIVE;
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
-		int bResult = ( pOther->GiveAmmo( AMMO_MP5CLIP_GIVE, "9mm" ) != -1 );
-		if( bResult )
-		{
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
-		}
-		return bResult;
+	const char* AmmoName() {
+		return "9mm";
 	}
 };
 
@@ -286,25 +275,14 @@ LINK_ENTITY_TO_CLASS( ammo_9mmAR, CMP5AmmoClip )
 
 class CMP5Chainammo : public CBasePlayerAmmo
 {
-	void Spawn( void )
-	{ 
-		Precache();
-		SET_MODEL( ENT( pev ), "models/w_chainammo.mdl" );
-		CBasePlayerAmmo::Spawn();
+	const char* MyModel() {
+		return "models/w_chainammo.mdl";
 	}
-	void Precache( void )
-	{
-		PRECACHE_MODEL( "models/w_chainammo.mdl" );
-		PRECACHE_SOUND( "items/9mmclip1.wav" );
+	int MyAmount() {
+		return AMMO_CHAINBOX_GIVE;
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
-		int bResult = ( pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, "9mm" ) != -1 );
-		if( bResult )
-		{
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
-		}
-		return bResult;
+	const char* AmmoName() {
+		return "9mm";
 	}
 };
 
@@ -312,26 +290,14 @@ LINK_ENTITY_TO_CLASS( ammo_9mmbox, CMP5Chainammo )
 
 class CMP5AmmoGrenade : public CBasePlayerAmmo
 {
-	void Spawn( void )
-	{
-		Precache();
-		SET_MODEL( ENT( pev ), "models/w_ARgrenade.mdl" );
-		CBasePlayerAmmo::Spawn();
+	const char* MyModel() {
+		return "models/w_ARgrenade.mdl";
 	}
-	void Precache( void )
-	{
-		PRECACHE_MODEL( "models/w_ARgrenade.mdl" );
-		PRECACHE_SOUND( "items/9mmclip1.wav" );
+	int MyAmount() {
+		return AMMO_M203BOX_GIVE;
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
-		int bResult = ( pOther->GiveAmmo( AMMO_M203BOX_GIVE, "ARgrenades" ) != -1 );
-
-		if( bResult )
-		{
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
-		}
-		return bResult;
+	const char* AmmoName() {
+		return "ARgrenades";
 	}
 };
 

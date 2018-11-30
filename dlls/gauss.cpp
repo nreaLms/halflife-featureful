@@ -603,25 +603,14 @@ void CGauss::WeaponIdle( void )
 
 class CGaussAmmo : public CBasePlayerAmmo
 {
-	void Spawn( void )
-	{ 
-		Precache();
-		SET_MODEL( ENT( pev ), "models/w_gaussammo.mdl" );
-		CBasePlayerAmmo::Spawn();
+	const char* MyModel() {
+		return "models/w_gaussammo.mdl";
 	}
-	void Precache( void )
-	{
-		PRECACHE_MODEL( "models/w_gaussammo.mdl" );
-		PRECACHE_SOUND( "items/9mmclip1.wav" );
+	int MyAmount() {
+		return AMMO_URANIUMBOX_GIVE;
 	}
-	BOOL AddAmmo( CBaseEntity *pOther ) 
-	{ 
-		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium" ) != -1 )
-		{
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
-			return TRUE;
-		}
-		return FALSE;
+	const char* AmmoName() {
+		return "uranium";
 	}
 };
 

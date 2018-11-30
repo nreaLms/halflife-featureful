@@ -263,25 +263,14 @@ void CPython::WeaponIdle( void )
 
 class CPythonAmmo : public CBasePlayerAmmo
 {
-	void Spawn( void )
-	{ 
-		Precache();
-		SET_MODEL( ENT(pev), "models/w_357ammobox.mdl" );
-		CBasePlayerAmmo::Spawn();
+	const char* MyModel() {
+		return "models/w_357ammobox.mdl";
 	}
-	void Precache( void )
-	{
-		PRECACHE_MODEL( "models/w_357ammobox.mdl" );
-		PRECACHE_SOUND( "items/9mmclip1.wav" );
+	int MyAmount() {
+		return AMMO_357BOX_GIVE;
 	}
-	BOOL AddAmmo( CBaseEntity *pOther )
-	{ 
-		if( pOther->GiveAmmo( AMMO_357BOX_GIVE, "357" ) != -1 )
-		{
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
-			return TRUE;
-		}
-		return FALSE;
+	const char* AmmoName() {
+		return "357";
 	}
 };
 

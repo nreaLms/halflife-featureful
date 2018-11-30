@@ -1069,12 +1069,21 @@ void CBasePlayerWeapon::Holster( int skiplocal /* = 0 */ )
 
 void CBasePlayerAmmo::Spawn( void )
 {
+	Precache();
+	SET_MODEL( ENT( pev ), MyModel() );
+
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
 	SetTouch( &CBasePlayerAmmo::DefaultTouch );
+}
+
+void CBasePlayerAmmo::Precache()
+{
+	PRECACHE_MODEL( MyModel() );
+	PRECACHE_SOUND( AMMO_PICKUP_SOUND );
 }
 
 CBaseEntity* CBasePlayerAmmo::Respawn( void )
@@ -1131,6 +1140,22 @@ void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther )
 		SetThink( &CBaseEntity::SUB_Remove );
 		pev->nextthink = gpGlobals->time + .1;
 	}
+}
+
+BOOL CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
+{
+	int amount = MyAmount();
+	const char* ammoName = AmmoName();
+
+	if (!ammoName)
+		return FALSE;
+
+	if ( pOther->GiveAmmo( amount, ammoName ) != -1 );
+	{
+		EMIT_SOUND( ENT( pev ), CHAN_ITEM, AMMO_PICKUP_SOUND, 1, ATTN_NORM );
+		return TRUE;
+	}
+	return FALSE;
 }
 
 //=========================================================
