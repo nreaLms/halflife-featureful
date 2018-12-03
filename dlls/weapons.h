@@ -271,6 +271,7 @@ typedef struct
 	const char *pszName;
 	int iId;
 	int iMaxAmmo;
+	bool isExhaustible;
 } AmmoInfo;
 
 // Items that the player has in their inventory that they can use

@@ -3490,7 +3490,7 @@ void CBloodSplat::Spray( void )
 }
 
 //==============================================
-void CBasePlayer::GiveNamedItem( const char *pszName )
+void CBasePlayer::GiveNamedItem(const char *pszName , int spawnFlags)
 {
 	edict_t	*pent;
 
@@ -3504,6 +3504,7 @@ void CBasePlayer::GiveNamedItem( const char *pszName )
 	}
 	VARS( pent )->origin = pev->origin;
 	pent->v.spawnflags |= SF_NORESPAWN;
+	pent->v.spawnflags |= spawnFlags;
 
 	DispatchSpawn( pent );
 	DispatchTouch( pent, ENT( pev ) );
@@ -4038,15 +4039,49 @@ int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 	if( iAdd < 1 )
 		return i;
 
-	m_rgAmmo[i] += iAdd;
-
-	if( gmsgAmmoPickup )  // make sure the ammo messages have been linked first
+	// horrific HACK to give player an exhaustible weapon as a real weapon, not just ammo
+	bool addedAsWeapon = false;
+	if (ammoInfo.isExhaustible)
 	{
-		// Send the message that ammo has been picked up
-		MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
-			WRITE_BYTE( i );		// ammo ID
-			WRITE_BYTE( iAdd );		// amount
-		MESSAGE_END();
+		for (int j=0; j<MAX_WEAPONS; ++j) {
+			const ItemInfo& II = CBasePlayerItem::ItemInfoArray[j];
+			if ((II.iFlags & ITEM_FLAG_EXHAUSTIBLE) && II.pszAmmo1 && FStrEq(szName, II.pszAmmo1)) {
+				// we found a weapon that uses this ammo type
+
+				int weaponId = II.iId;
+				const char* weaponName = II.pszName;
+
+				if ((pev->weapons & (1 << weaponId)) == 0) {
+					// player does not have this weapon
+					CBasePlayerWeapon* weapon = (CBasePlayerWeapon*)Create(weaponName, pev->origin, pev->angles);
+					if (weapon) {
+						weapon->pev->spawnflags |= SF_NORESPAWN;
+						weapon->m_iDefaultAmmo = iAdd;
+						if (AddPlayerItem(weapon)) {
+							weapon->AttachToPlayer(this);
+							addedAsWeapon = true;
+						}
+						else
+							UTIL_Remove(weapon);
+					}
+				}
+
+				break;
+			}
+		}
+	}
+
+	if (!addedAsWeapon)
+	{
+		m_rgAmmo[i] += iAdd;
+		if( gmsgAmmoPickup )  // make sure the ammo messages have been linked first
+		{
+			// Send the message that ammo has been picked up
+			MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
+				WRITE_BYTE( i );		// ammo ID
+				WRITE_BYTE( iAdd );		// amount
+			MESSAGE_END();
+		}
 	}
 
 	return i;

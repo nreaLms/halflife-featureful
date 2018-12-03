@@ -285,7 +285,7 @@ public:
 	void SelectItem(const char *pstr);
 	void ItemPreFrame( void );
 	void ItemPostFrame( void );
-	void GiveNamedItem( const char *szName );
+	void GiveNamedItem( const char *szName, int spawnFlags = 0 );
 	void EnableControl(BOOL fControl);
 
 	int  GiveAmmo( int iAmount, const char *szName );

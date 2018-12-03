@@ -213,7 +213,7 @@ void ExplodeModel( const Vector &vecOrigin, float speed, int model, int count )
 int giAmmoIndex = 0;
 
 // Precaches the ammo and queues the ammo info for sending to clients
-void AddAmmoNameToAmmoRegistry( const char *szAmmoname, int maxAmmo )
+void AddAmmoNameToAmmoRegistry( const char *szAmmoname, int maxAmmo, bool isExhaustible )
 {
 	// make sure it's not already in the registry
 	for( int i = 0; i < MAX_AMMO_SLOTS; i++ )
@@ -233,6 +233,7 @@ void AddAmmoNameToAmmoRegistry( const char *szAmmoname, int maxAmmo )
 	CBasePlayerItem::AmmoInfoArray[giAmmoIndex].pszName = szAmmoname;
 	CBasePlayerItem::AmmoInfoArray[giAmmoIndex].iId = giAmmoIndex;
 	CBasePlayerItem::AmmoInfoArray[giAmmoIndex].iMaxAmmo = maxAmmo;
+	CBasePlayerItem::AmmoInfoArray[giAmmoIndex].isExhaustible = isExhaustible;
 }
 
 // Precaches the weapon and queues the weapon info for sending to clients
@@ -259,12 +260,12 @@ void UTIL_PrecacheOtherWeapon( const char *szClassname )
 
 			if( II.pszAmmo1 && *II.pszAmmo1 )
 			{
-				AddAmmoNameToAmmoRegistry( II.pszAmmo1, II.iMaxAmmo1 );
+				AddAmmoNameToAmmoRegistry( II.pszAmmo1, II.iMaxAmmo1, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
 			}
 
 			if( II.pszAmmo2 && *II.pszAmmo2 )
 			{
-				AddAmmoNameToAmmoRegistry( II.pszAmmo2, II.iMaxAmmo2 );
+				AddAmmoNameToAmmoRegistry( II.pszAmmo2, II.iMaxAmmo2, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
 			}
 		}
 	}
@@ -1340,18 +1341,6 @@ void CWeaponBox::Kill( void )
 	UTIL_Remove( this );
 }
 
-static const char* IsAmmoForExhaustibleWeapon(const char* ammoName, int& weaponId)
-{
-	for (int i=0; i<MAX_WEAPONS; ++i) {
-		ItemInfo& II = CBasePlayerItem::ItemInfoArray[i];
-		if ((II.iFlags & ITEM_FLAG_EXHAUSTIBLE) && II.pszAmmo1 && FStrEq(ammoName, II.pszAmmo1)) {
-			weaponId = II.iId;
-			return II.pszName;
-		}
-	}
-	return 0;
-}
-
 //=========================================================
 // CWeaponBox - Touch: try to add my contents to the toucher
 // if the toucher is a player.
@@ -1383,35 +1372,6 @@ void CWeaponBox::Touch( CBaseEntity *pOther )
 	{
 		if( !FStringNull( m_rgiszAmmo[i] ) )
 		{
-			// horrific HACK to give player an exhaustible weapon as a real weapon, not just ammo
-			int exhaustibleWeaponId;
-			const char* weaponName = IsAmmoForExhaustibleWeapon(STRING(m_rgiszAmmo[i]), exhaustibleWeaponId);
-			if (weaponName) {
-				bool foundWeapon = false;
-				for( int j = 0; j < MAX_ITEM_TYPES && !foundWeapon; j++ )
-				{
-					CBasePlayerItem *pPlayerItem = pPlayer->m_rgpPlayerItems[j];
-					while( pPlayerItem )
-					{
-						if (pPlayerItem->m_iId == exhaustibleWeaponId) {
-							foundWeapon = true;
-							break;
-						}
-						pPlayerItem = pPlayerItem->m_pNext;
-					}
-				}
-				if (!foundWeapon) {
-					CBasePlayerWeapon* weapon = (CBasePlayerWeapon*)Create(weaponName, pev->origin, pev->angles);
-					if (weapon) {
-						weapon->pev->spawnflags |= SF_NORESPAWN;
-						weapon->m_iDefaultAmmo = 0;
-						if (pPlayer->AddPlayerItem(weapon)) {
-							weapon->AttachToPlayer(pPlayer);
-						}
-					}
-				}
-			}
-
 			// there's some ammo of this type. 
 			pPlayer->GiveAmmo( m_rgAmmo[i], STRING( m_rgiszAmmo[i] ) );
 
