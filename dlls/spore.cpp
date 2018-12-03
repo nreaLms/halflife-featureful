@@ -532,7 +532,7 @@ void CSporeAmmo :: AmmoTouch ( CBaseEntity *pOther )
 	if (borntime)
 		return;
 
-	int bResult = (pOther->GiveAmmo( AMMO_SPORE_GIVE, "Spores" ) != -1);
+	int bResult = (pOther->GiveAmmo( AMMO_SPORE_GIVE, "spores" ) != -1);
 	if (bResult)
 	{
 		EMIT_SOUND(ENT(pev), CHAN_ITEM, "weapons/spore_ammo.wav", 1, ATTN_NORM);
