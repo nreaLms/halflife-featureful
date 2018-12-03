@@ -191,7 +191,7 @@ public:
 
 	// Client connection/disconnection
 	virtual BOOL ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ] );
-	virtual void InitHUD( CBasePlayer *pl );		// the client dll is ready for updating
+	virtual void InitHUD(CBasePlayer *pPlayer );		// the client dll is ready for updating
 	virtual void ClientDisconnected( edict_t *pClient );
 
 	// Client damage rules

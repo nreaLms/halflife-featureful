@@ -212,9 +212,13 @@ class CItemSuit : public CItem
 			// pass
 		}
 		else if( pev->spawnflags & SF_SUIT_SHORTLOGON )
+		{
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_A0" );		// short version of suit logon,
+		}
 		else
+		{
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_AAx" );	// long version of suit logon
+		}
 
 		pPlayer->pev->weapons |= ( 1 << WEAPON_SUIT );
 		return TRUE;

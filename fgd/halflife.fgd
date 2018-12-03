@@ -1777,6 +1777,59 @@
 	master(string) : "Master"
 ]
 
+@PointClass base(Targetname) = game_player_settings : "Initial player setting in singleplayer"
+[
+	spawnflags(flags) =
+	[
+		1: "Use Only" : 0
+		2: "Give Suit" : 0
+		4: "Give Crowbar" : 0
+		8: "Give Glock": 0
+		16: "Give Python": 0
+		32: "Give MP5": 0
+		64: "Give Shotgun": 0
+		128: "Give Crossbow": 0
+		256: "Give RPG": 0
+		512: "Give Gauss": 0
+		1024: "Give Egon": 0
+		2048: "Give Hornetgun": 0
+		4096: "Give Pipe Wrench": 0
+		8192: "Give Knife": 0
+		16384: "Give Grapple": 0
+		32768: "Give Desert Eagle": 0
+		65536: "Give Sniper rifle": 0
+		131072: "Give M249": 0
+		262144: "Give Displacer": 0
+		524288: "Give Shock rifle": 0
+		1048576: "Give Spore launcher": 0
+		2097152: "Give Medkit": 0
+		8388608: "Give Long Jump": 0
+	]
+	_9mm(integer) : "9mm bullets"
+	_357(integer) : "357 bullets"
+	buckshot(integer) : "Shotgun shells"
+	bolts(integer) : "Crossbow bolts"
+	ARgrenades(integer) : "AR grenades"
+	rockets(integer) : "Rockets"
+	uranium(integer) : "Uranium"
+	Hand_Grenade(integer) : "Hand grenades"
+	Satchel_Charge(integer) : "Satchels"
+	Trip_Mine(integer) : "Trip mines"
+	Snarks(integer) : "Snarks"
+	_556(integer) : "556 bullets"
+	_762(integer) : "762 bullets"
+	Spores(integer) : "Spores"
+	Penguins(integer) : "Penguins"
+	suitlogon(choices) : "Suit logon" : 0 =
+	[
+		0: "Long logon"
+		1: "Short logon"
+		2: "No logon"
+	]
+	health(integer) : "Starting health"
+	armorvalue(integer) : "Starting armor"
+]
+
 @PointClass base(Targetname, Targetx) = game_team_master : "Team based master/relay"
 [
 	spawnflags(flags) =

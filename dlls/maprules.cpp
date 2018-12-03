@@ -29,6 +29,7 @@
 //#include "maprules.h" //empty file
 #include "cbase.h"
 #include "player.h"
+#include "weapons.h"
 
 class CRuleEntity : public CBaseEntity
 {
@@ -871,5 +872,234 @@ void CGamePlayerTeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	if( RemoveOnFire() )
 	{
 		UTIL_Remove( this );
+	}
+}
+
+/*
+ * Starting player settings, like initial health, armor, weapons and items
+ */
+#define SF_PLAYER_SETTING_USEONLY (1 << 0)
+#define SF_PLAYER_SETTINGS_SUIT (1 << 1)
+#define SF_PLAYER_SETTINGS_CROWBAR (1 << 2)
+#define SF_PLAYER_SETTINGS_GLOCK (1 << 3)
+#define SF_PLAYER_SETTINGS_PYTHON (1 << 4)
+#define SF_PLAYER_SETTINGS_MP5 (1 << 5)
+#define SF_PLAYER_SETTINGS_SHOTGUN (1 << 6)
+#define SF_PLAYER_SETTINGS_CROSSBOW (1 << 7)
+#define SF_PLAYER_SETTINGS_RPG (1 << 8)
+#define SF_PLAYER_SETTINGS_GAUSS (1 << 9)
+#define SF_PLAYER_SETTINGS_EGON (1 << 10)
+#define SF_PLAYER_SETTINGS_HORNETGUN (1 << 11)
+#define SF_PLAYER_SETTINGS_PIPEWRENCH (1 << 12)
+#define SF_PLAYER_SETTINGS_KNIFE (1 << 13)
+#define SF_PLAYER_SETTINGS_GRAPPLE (1 << 14)
+#define SF_PLAYER_SETTINGS_DESERT_EAGLE (1 << 15)
+#define SF_PLAYER_SETTINGS_SNIPERRIFLE (1 << 16)
+#define SF_PLAYER_SETTINGS_M249 (1 << 17)
+#define SF_PLAYER_SETTINGS_DISPACER (1 << 18)
+#define SF_PLAYER_SETTINGS_SHOCKRIFLE (1 << 19)
+#define SF_PLAYER_SETTINGS_SPORELAUNCHER (1 << 20)
+#define SF_PLAYER_SETTINGS_MEDKIT (1 << 21)
+#define SF_PLAYER_SETTINGS_LONGJUMP (1 << 23)
+
+class CGamePlayerSettings : public CRulePointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+	{
+		EquipPlayer(pActivator);
+	}
+	inline BOOL	UseOnly( void ) { return (pev->spawnflags & SF_PLAYER_SETTING_USEONLY) ? TRUE : FALSE; }
+	void Touch( CBaseEntity *pOther )
+	{
+		if( UseOnly() )
+			return;
+
+		EquipPlayer( pOther );
+	}
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+private:
+	void EquipPlayer( CBaseEntity *pPlayer );
+	enum
+	{
+		SuitLongLogon,
+		SuitShortLogon,
+		SuitNoLogon
+	};
+	int m_ammoCounts[MAX_AMMO_SLOTS];
+	int m_suitLogon;
+};
+
+LINK_ENTITY_TO_CLASS( game_player_settings, CGamePlayerSettings )
+
+TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
+{
+	DEFINE_ARRAY( CGamePlayerSettings, m_ammoCounts, FIELD_INTEGER, MAX_AMMO_SLOTS ),
+	DEFINE_FIELD( CGamePlayerSettings, m_suitLogon, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE( CGamePlayerSettings, CRulePointEntity )
+
+void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
+{
+	const char* ammoName = pkvd->szKeyName;
+	// some ammo names with spaces
+	if (FStrEq(ammoName, "Hand_Grenade"))
+		ammoName = "Hand Grenade";
+	else if (FStrEq(ammoName, "Satchel_Charge"))
+		ammoName = "Satchel Charge";
+	else if (FStrEq(ammoName, "Trip_Mine"))
+		ammoName = "Trip Mine";
+	else if (*ammoName == '_')
+		ammoName++;
+
+	const AmmoInfo& ammoInfo = CBasePlayerItem::GetAmmoInfo(ammoName);
+	if (ammoInfo.pszName)
+	{
+		m_ammoCounts[ammoInfo.iId] = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "suitlogon"))
+	{
+		m_suitLogon = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CRulePointEntity::KeyValue(pkvd);
+}
+
+void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
+{
+	if (!pPlayer || !pPlayer->IsPlayer())
+		return;
+
+	CBasePlayer* player = (CBasePlayer*)pPlayer;
+
+	if (pev->health > 0 && pev->health <= player->pev->max_health)
+	{
+		player->pev->health = (int)pev->health;
+	}
+	if (pev->armorvalue > 0 && pev->armorvalue <= MAX_NORMAL_BATTERY)
+	{
+		player->pev->armorvalue = (int)pev->armorvalue;
+	}
+
+	if (pev->spawnflags & SF_PLAYER_SETTINGS_SUIT)
+	{
+		player->GiveNamedItem("item_suit", m_suitLogon ? (1 << (m_suitLogon-1)) : m_suitLogon);
+		if (pev->spawnflags & SF_PLAYER_SETTINGS_LONGJUMP)
+		{
+			player->GiveNamedItem("item_longjump");
+		}
+	}
+
+	const int weaponFlags[] = {
+		SF_PLAYER_SETTINGS_CROWBAR,
+		SF_PLAYER_SETTINGS_GLOCK,
+		SF_PLAYER_SETTINGS_PYTHON,
+		SF_PLAYER_SETTINGS_MP5,
+		SF_PLAYER_SETTINGS_SHOTGUN,
+		SF_PLAYER_SETTINGS_CROSSBOW,
+		SF_PLAYER_SETTINGS_RPG,
+		SF_PLAYER_SETTINGS_GAUSS,
+		SF_PLAYER_SETTINGS_EGON,
+		SF_PLAYER_SETTINGS_HORNETGUN,
+		SF_PLAYER_SETTINGS_PIPEWRENCH,
+		SF_PLAYER_SETTINGS_KNIFE,
+		SF_PLAYER_SETTINGS_GRAPPLE,
+		SF_PLAYER_SETTINGS_DESERT_EAGLE,
+		SF_PLAYER_SETTINGS_SNIPERRIFLE,
+		SF_PLAYER_SETTINGS_M249,
+		SF_PLAYER_SETTINGS_DISPACER,
+		SF_PLAYER_SETTINGS_SHOCKRIFLE,
+		SF_PLAYER_SETTINGS_SPORELAUNCHER,
+		SF_PLAYER_SETTINGS_MEDKIT
+	};
+	const int weaponIds[sizeof(weaponFlags)/sizeof(int)] = {
+		WEAPON_CROWBAR,
+		WEAPON_GLOCK,
+		WEAPON_PYTHON,
+		WEAPON_MP5,
+		WEAPON_SHOTGUN,
+		WEAPON_CROSSBOW,
+		WEAPON_RPG,
+		WEAPON_GAUSS,
+		WEAPON_EGON,
+		WEAPON_HORNETGUN,
+#if FEATURE_PIPEWRENCH
+		WEAPON_PIPEWRENCH,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_KNIFE
+		WEAPON_KNIFE,
+#else
+		WEAPON_NONE,
+#endif
+#if WEAPON_GRAPPLE
+		WEAPON_GRAPPLE,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_DESERT_EAGLE
+		WEAPON_EAGLE,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_SNIPERRIFLE
+		WEAPON_SNIPERRIFLE,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_M249
+		WEAPON_M249,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_DISPLACER
+		WEAPON_DISPLACER,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_SHOCKRIFLE
+		WEAPON_SHOCKRIFLE,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_SPORELAUNCHER
+		WEAPON_SPORELAUNCHER,
+#else
+		WEAPON_NONE,
+#endif
+#if FEATURE_MEDKIT
+		WEAPON_MEDKIT
+#else
+		WEAPON_NONE
+#endif
+	};
+	int i;
+	for (i=0; i<MAX_AMMO_SLOTS; ++i)
+	{
+		const AmmoInfo& ammoInfo = CBasePlayerItem::AmmoInfoArray[i];
+		if (m_ammoCounts[i] && ammoInfo.pszName)
+		{
+			player->GiveAmmo(m_ammoCounts[i], ammoInfo.pszName);
+		}
+	}
+	for (i=0; i<sizeof(weaponFlags)/sizeof(int); ++i)
+	{
+		if (pev->spawnflags & weaponFlags[i])
+		{
+			const ItemInfo& itemInfo = CBasePlayerItem::ItemInfoArray[weaponIds[i]];
+			if (itemInfo.pszName)
+			{
+				player->GiveNamedItem(itemInfo.pszName);
+			}
+		}
 	}
 }

@@ -80,6 +80,11 @@ BOOL CHalfLifeRules::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerItem 
 		return FALSE;
 	}
 
+	if( !pPlayer->m_settingsLoaded && pWeapon->iWeight() < pPlayer->m_pActiveItem->iWeight() )
+	{
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
@@ -97,7 +102,7 @@ BOOL CHalfLifeRules::ClientConnected( edict_t *pEntity, const char *pszName, con
 	return TRUE;
 }
 
-void CHalfLifeRules::InitHUD( CBasePlayer *pl )
+void CHalfLifeRules::InitHUD( CBasePlayer *pPlayer )
 {
 }
 
@@ -134,6 +139,15 @@ BOOL CHalfLifeRules::AllowAutoTargetCrosshair( void )
 //=========================================================
 void CHalfLifeRules::PlayerThink( CBasePlayer *pPlayer )
 {
+	if ( !pPlayer->m_fInitHUD && !pPlayer->m_settingsLoaded)
+	{
+		CBaseEntity* pSettingEntity = UTIL_FindEntityByClassname( NULL, "game_player_settings" );
+		if ( pSettingEntity )
+		{
+			pSettingEntity->Touch( pPlayer );
+		}
+		pPlayer->m_settingsLoaded = true;
+	}
 }
 
 //=========================================================
