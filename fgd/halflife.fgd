@@ -1915,6 +1915,7 @@
 	spawnflags(Flags) =
 	[
 		1 : "Short Logon" : 0
+		2 : "No logon" : 0
 	]
 ]
 @PointClass base(Weapon, Targetx) studio() = item_generic : "Generic scenery item"

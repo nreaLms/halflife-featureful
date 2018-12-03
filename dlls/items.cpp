@@ -188,6 +188,7 @@ void CItem::PrecacheMyModel(const char *model)
 }
 
 #define SF_SUIT_SHORTLOGON		0x0001
+#define SF_SUIT_NOLOGON		0x0002
 
 class CItemSuit : public CItem
 {
@@ -206,7 +207,11 @@ class CItemSuit : public CItem
 		if( pPlayer->pev->weapons & ( 1<<WEAPON_SUIT ) )
 			return FALSE;
 
-		if( pev->spawnflags & SF_SUIT_SHORTLOGON )
+		if ( pev->spawnflags & SF_SUIT_NOLOGON )
+		{
+			// pass
+		}
+		else if( pev->spawnflags & SF_SUIT_SHORTLOGON )
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_A0" );		// short version of suit logon,
 		else
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_AAx" );	// long version of suit logon
