@@ -588,6 +588,11 @@ void CEyeScanner::Precache()
 	PRECACHE_SOUND("buttons/blip1.wav");
 	PRECACHE_SOUND("buttons/blip2.wav");
 	PRECACHE_SOUND("buttons/button11.wav");
+
+	if( m_Activity != m_IdealActivity )
+	{
+		SetActivity( m_IdealActivity );
+	}
 }
 
 void CEyeScanner::PlayBeep()
