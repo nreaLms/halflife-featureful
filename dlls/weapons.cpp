@@ -1151,7 +1151,7 @@ BOOL CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
 	if (!ammoName)
 		return FALSE;
 
-	if ( pOther->GiveAmmo( amount, ammoName ) != -1 );
+	if ( pOther->GiveAmmo( amount, ammoName ) != -1 )
 	{
 		EMIT_SOUND( ENT( pev ), CHAN_ITEM, AMMO_PICKUP_SOUND, 1, ATTN_NORM );
 		return TRUE;
