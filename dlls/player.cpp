@@ -1865,7 +1865,7 @@ enum
 void CBasePlayer::SetMovementMode()
 {
 #if FEATURE_MOVE_MODE
-	if (!m_fGameHUDInitialized)
+	if (m_fInitHUD)
 		return;
 	short currentMovementState;
 	if (!FBitSet( pev->flags, FL_ONGROUND ))
