@@ -334,7 +334,7 @@ class CZombieBarney : public CZombie
 
 LINK_ENTITY_TO_CLASS( monster_zombie_barney, CZombieBarney )
 
-void CZombieBarney :: Spawn()
+void CZombieBarney::Spawn()
 {
 	Precache( );
 	ZombieSpawnHelper("models/zombie_barney.mdl", gSkillData.zombieBarneyHealth);
@@ -342,7 +342,7 @@ void CZombieBarney :: Spawn()
 
 void CZombieBarney::Precache()
 {
-	PRECACHE_MODEL("models/zombie_barney.mdl");
+	PrecacheMyModel("models/zombie_barney.mdl");
 	PrecacheSounds();
 }
 #endif
@@ -366,7 +366,7 @@ void CZombieSoldier::Spawn()
 
 void CZombieSoldier::Precache()
 {
-	PRECACHE_MODEL("models/zombie_soldier.mdl");
+	PrecacheMyModel("models/zombie_soldier.mdl");
 	PrecacheSounds();
 }
 
