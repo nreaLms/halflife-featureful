@@ -4962,6 +4962,12 @@ void CDeadHEV :: Spawn( void )
 class CStripWeapons : public CPointEntity
 {
 public:
+	void Precache()
+	{
+		if (!FStringNull(pev->noise))
+			PRECACHE_SOUND( STRING(pev->noise) );
+	}
+
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 private:
@@ -4987,6 +4993,8 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		pPlayer->RemoveAllItems( removeSuit );
 		if (removeSuit)
 			pPlayer->FlashlightTurnOff();
+		if (!FStringNull(pev->noise))
+			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
 	}
 }
 

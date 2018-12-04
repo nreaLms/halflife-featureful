@@ -4879,6 +4879,7 @@
 	[
 		1 : "Remove suit" : 0
 	]
+	noise(sound) : "Sound on trigger"
 ]
 
 @PointClass base(Targetname, Targetx) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sentence : "Scripted Sentence"
