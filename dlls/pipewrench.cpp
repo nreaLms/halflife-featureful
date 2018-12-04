@@ -245,7 +245,10 @@ int CPipeWrench::Swing(int fFirst)
 				}
 				m_pPlayer->m_iWeaponVolume = MELEE_BODYHIT_VOLUME;
 				if ( !pEntity->IsAlive() )
-					  return TRUE;
+				{
+					m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
+					return TRUE;
+				}
 				else
 					  flVol = 0.1;
 
