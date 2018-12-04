@@ -455,6 +455,7 @@ void CTentacle::Cycle( void )
 {
 	// ALERT( at_console, "%s %.2f %d %d\n", STRING( pev->targetname ), pev->origin.z, m_MonsterState, m_IdealMonsterState );
 	pev->nextthink = gpGlobals-> time + 0.1;
+	GlowShellUpdate();
 
 	// ALERT( at_console, "%s %d %d %d %f %f\n", STRING( pev->targetname ), pev->sequence, m_iGoalAnim, m_iDir, pev->framerate, pev->health );
 
@@ -739,6 +740,7 @@ void CTentacle::CommandUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 void CTentacle::DieThink( void )
 {
 	pev->nextthink = gpGlobals-> time + 0.1;
+	GlowShellUpdate();
 
 	DispatchAnimEvents();
 	StudioFrameAdvance();
