@@ -128,6 +128,7 @@ public:
 	CRechargeGlassDecay* m_glass;
 	BOOL m_playingChargeSound;
 	CBeam* m_beam;
+	float m_lastYaw;
 
 protected:
 	void SetMySequence(const char* sequence);
@@ -197,7 +198,8 @@ void CRechargeDecay::SearchForPlayer()
 {
 	StudioFrameAdvance();
 	CBaseEntity* pEntity = 0;
-	float delay = 0.05;
+	float delay = 0.1;
+	pev->nextthink = gpGlobals->time + delay;
 	UTIL_MakeVectors( pev->angles );
 	while((pEntity = UTIL_FindEntityInSphere(pEntity, Center(), 64)) != 0) { // this must be in sync with PLAYER_SEARCH_RADIUS from player.cpp
 		if (pEntity->IsPlayer() && pEntity->IsAlive()) {
@@ -214,10 +216,13 @@ void CRechargeDecay::SearchForPlayer()
 				break;
 			case Still:
 				SetChargeState(Deploy);
-				delay = 0.1;
 				break;
 			case Deploy:
-				SetChargeState(Idle);
+				if (m_fSequenceFinished)
+				{
+					TurnBeamOn();
+					SetChargeState(Idle);
+				}
 				break;
 			case Idle:
 				break;
@@ -233,10 +238,17 @@ void CRechargeDecay::SearchForPlayer()
 		case Idle:
 		case RetractShot:
 			SetChargeState(RetractArm);
-			delay = 0.2;
 			break;
 		case RetractArm:
-			SetChargeState(Still);
+			if (m_fSequenceFinished)
+			{
+				SetChargeState(Still);
+				SetChargeController(0);
+			}
+			else
+			{
+				SetChargeController(m_lastYaw*0.75);
+			}
 			break;
 		case Still:
 			break;
@@ -244,7 +256,6 @@ void CRechargeDecay::SearchForPlayer()
 			break;
 		}
 	}
-	pev->nextthink = gpGlobals->time + delay;
 }
 
 void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -332,7 +343,6 @@ void CRechargeDecay::Recharge( void )
 	m_iJuice = gSkillData.healthchargerCapacity;
 	SetBoneController(1, 360);
 	SetBoneController(2, 0);
-	TurnBeamOn();
 	pev->skin = 0;
 	SetChargeState(Still);
 	SetThink( &CRechargeDecay::SearchForPlayer );
@@ -342,6 +352,7 @@ void CRechargeDecay::Recharge( void )
 void CRechargeDecay::Off( void )
 {
 	StudioFrameAdvance();
+	pev->nextthink = gpGlobals->time + 0.1;
 	switch (m_iState) {
 	case GiveShot:
 	case Healing:
@@ -350,7 +361,6 @@ void CRechargeDecay::Off( void )
 			m_playingChargeSound = FALSE;
 		}
 		SetChargeState(RetractShot);
-		pev->nextthink = gpGlobals->time + 0.1;
 		break;
 	case RetractShot:
 		if (m_iJuice > 0) {
@@ -359,20 +369,26 @@ void CRechargeDecay::Off( void )
 			pev->nextthink = gpGlobals->time;
 		} else {
 			SetChargeState(RetractArm);
-			pev->nextthink = gpGlobals->time + 0.2;
 		}
 		break;
 	case RetractArm:
 	{
-		if( ( m_iJuice <= 0 ) )
+		if( m_fSequenceFinished )
 		{
-			TurnBeamOff();
-			SetChargeState(Inactive);
-			const float rechargeTime = g_pGameRules->FlHEVChargerRechargeTime();
-			if (rechargeTime > 0 ) {
-				pev->nextthink = gpGlobals->time + rechargeTime;
-				SetThink( &CRechargeDecay::Recharge );
+			SetChargeController(0);
+			if ( m_iJuice <= 0 )
+			{
+				SetChargeState(Inactive);
+				const float rechargeTime = g_pGameRules->FlHEVChargerRechargeTime();
+				if (rechargeTime > 0 ) {
+					pev->nextthink = gpGlobals->time + rechargeTime;
+					SetThink( &CRechargeDecay::Recharge );
+				}
 			}
+		}
+		else
+		{
+			SetChargeController(m_lastYaw*0.75);
 		}
 		break;
 	}
@@ -395,18 +411,15 @@ void CRechargeDecay::SetMySequence(const char *sequence)
 void CRechargeDecay::SetChargeState(int state)
 {
 	m_iState = state;
-	if (state == RetractArm)
-		SetChargeController(0);
 	switch (state) {
 	case Still:
-		TurnBeamOff();
 		SetMySequence("rest");
 		break;
 	case Deploy:
+		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1.0, ATTN_NORM );
 		SetMySequence("deploy");
 		break;
 	case Idle:
-		TurnBeamOn();
 		SetMySequence("prep_charge");
 		break;
 	case GiveShot:
@@ -419,6 +432,7 @@ void CRechargeDecay::SetChargeState(int state)
 		SetMySequence("retract_charge");
 		break;
 	case RetractArm:
+		TurnBeamOff();
 		SetMySequence("retract_arm");
 		break;
 	case Inactive:
@@ -442,6 +456,7 @@ void CRechargeDecay::TurnChargeToPlayer(const Vector& player)
 
 void CRechargeDecay::SetChargeController(float yaw)
 {
+	m_lastYaw = yaw;
 	SetBoneController(3, yaw);
 }
 
