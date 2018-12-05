@@ -183,6 +183,7 @@ void CRechargeDecay::Precache(void)
 
 void CRechargeDecay::SearchForPlayer()
 {
+	StudioFrameAdvance();
 	CBaseEntity* pEntity = 0;
 	float delay = 0.05;
 	UTIL_MakeVectors( pev->angles );
@@ -329,6 +330,7 @@ void CRechargeDecay::Recharge( void )
 
 void CRechargeDecay::Off( void )
 {
+	StudioFrameAdvance();
 	switch (m_iState) {
 	case GiveShot:
 	case Healing:

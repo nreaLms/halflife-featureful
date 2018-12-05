@@ -487,6 +487,7 @@ void CWallHealthDecay::Precache(void)
 
 void CWallHealthDecay::SearchForPlayer()
 {
+	StudioFrameAdvance();
 	CBaseEntity* pEntity = 0;
 	float delay = 0.05;
 	UTIL_MakeVectors( pev->angles );
@@ -645,6 +646,7 @@ void CWallHealthDecay::Recharge( void )
 
 void CWallHealthDecay::Off( void )
 {
+	StudioFrameAdvance();
 	switch (m_iState) {
 	case GiveShot:
 	case Healing:
