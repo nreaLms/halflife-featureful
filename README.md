@@ -116,6 +116,10 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * item_healthcharger
 * item_recharge
 
+#### Spirit entities
+
+* env_model
+
 #### Others
 
 * env_modeltrain - like env_spritetrain, but with animated model and configurable movement sound.
