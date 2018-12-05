@@ -94,6 +94,16 @@ public:
 	void SetChargeState(int state);
 	void SetChargeController(float yaw);
 	void UpdateOnRemove();
+	void TurnBeamOn()
+	{
+		if (m_beam)
+			ClearBits(m_beam->pev->effects, EF_NODRAW);
+	}
+	void TurnBeamOff()
+	{
+		if (m_beam)
+			SetBits(m_beam->pev->effects, EF_NODRAW);
+	}
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -175,6 +185,8 @@ void CRechargeDecay::Precache(void)
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 
 	CreateBeam();
+	if (m_iState != Idle)
+		TurnBeamOff();
 	m_glass = GetClassPtr( (CRechargeGlassDecay *)NULL );
 	m_glass->Spawn();
 	UTIL_SetOrigin( m_glass->pev, pev->origin );
@@ -320,8 +332,7 @@ void CRechargeDecay::Recharge( void )
 	m_iJuice = gSkillData.healthchargerCapacity;
 	SetBoneController(1, 360);
 	SetBoneController(2, 0);
-	if (m_beam)
-		m_beam->SetBrightness( 225 );
+	TurnBeamOn();
 	pev->skin = 0;
 	SetChargeState(Still);
 	SetThink( &CRechargeDecay::SearchForPlayer );
@@ -355,8 +366,7 @@ void CRechargeDecay::Off( void )
 	{
 		if( ( m_iJuice <= 0 ) )
 		{
-			if (m_beam)
-				m_beam->SetBrightness(0);
+			TurnBeamOff();
 			SetChargeState(Inactive);
 			const float rechargeTime = g_pGameRules->FlHEVChargerRechargeTime();
 			if (rechargeTime > 0 ) {
@@ -389,12 +399,14 @@ void CRechargeDecay::SetChargeState(int state)
 		SetChargeController(0);
 	switch (state) {
 	case Still:
+		TurnBeamOff();
 		SetMySequence("rest");
 		break;
 	case Deploy:
 		SetMySequence("deploy");
 		break;
 	case Idle:
+		TurnBeamOn();
 		SetMySequence("prep_charge");
 		break;
 	case GiveShot:
@@ -435,9 +447,12 @@ void CRechargeDecay::SetChargeController(float yaw)
 
 void CRechargeDecay::CreateBeam()
 {
-	CBeam* beam = CBeam::BeamCreate( "sprites/lgtning.spr", 5 );
+	CBeam *beam = GetClassPtr( (CBeam *)NULL );
 	if( !beam )
 		return;
+
+	beam->BeamInit( "sprites/lgtning.spr", 5 );
+
 	beam->SetType( BEAM_ENTS );
 	beam->SetStartEntity( entindex() );
 	beam->SetEndEntity( entindex() );
