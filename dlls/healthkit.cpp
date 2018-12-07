@@ -386,7 +386,7 @@ public:
 	void EXPORT Off( void );
 	void EXPORT Recharge( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual int ObjectCaps( void ) { return ( CBaseAnimating::ObjectCaps() | FCAP_CONTINUOUS_USE ) & ~FCAP_ACROSS_TRANSITION; }
+	virtual int ObjectCaps( void ) { return ( CBaseAnimating::ObjectCaps() | FCAP_CONTINUOUS_USE ); }
 	void TurnNeedleToPlayer(const Vector &player);
 	void SetNeedleState(int state);
 	void SetNeedleController(float yaw);
