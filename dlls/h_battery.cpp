@@ -198,11 +198,10 @@ void CRechargeDecay::SearchForPlayer()
 {
 	StudioFrameAdvance();
 	CBaseEntity* pEntity = 0;
-	float delay = 0.1;
-	pev->nextthink = gpGlobals->time + delay;
+	pev->nextthink = gpGlobals->time + 0.1;
 	UTIL_MakeVectors( pev->angles );
 	while((pEntity = UTIL_FindEntityInSphere(pEntity, Center(), 64)) != 0) { // this must be in sync with PLAYER_SEARCH_RADIUS from player.cpp
-		if (pEntity->IsPlayer() && pEntity->IsAlive()) {
+		if (pEntity->IsPlayer() && pEntity->IsAlive() && FBitSet(pEntity->pev->weapons, 1 << WEAPON_SUIT)) {
 			if (DotProduct(pEntity->pev->origin - pev->origin, gpGlobals->v_forward) < 0) {
 				continue;
 			}
@@ -267,17 +266,6 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	if( !pActivator->IsPlayer() )
 		return;
 
-	if (m_iState != Idle && m_iState != GiveShot && m_iState != Healing && m_iState != Inactive)
-		return;
-
-	// if there is no juice left, turn it off
-	if( (m_iState == Healing || m_iState == GiveShot) && m_iJuice <= 0 )
-	{
-		pev->skin = 1;
-		SetThink(&CRechargeDecay::Off);
-		pev->nextthink = gpGlobals->time;
-	}
-
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
 	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->armorvalue >= 100 )
 	{
@@ -289,8 +277,21 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		return;
 	}
 
-	SetThink(&CRechargeDecay::Off);
-	pev->nextthink = gpGlobals->time + 0.25;
+	if (m_iState != Idle && m_iState != GiveShot && m_iState != Healing && m_iState != Inactive)
+		return;
+
+	// if there is no juice left, turn it off
+	if( (m_iState == Healing || m_iState == GiveShot) && m_iJuice <= 0 )
+	{
+		pev->skin = 1;
+		SetThink(&CRechargeDecay::Off);
+		pev->nextthink = gpGlobals->time;
+	}
+	else
+	{
+		SetThink(&CRechargeDecay::Off);
+		pev->nextthink = gpGlobals->time + 0.25;
+	}
 
 	// Time to recharge yet?
 	if( m_flNextCharge >= gpGlobals->time )
@@ -324,6 +325,8 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	if( pActivator->pev->armorvalue < MAX_NORMAL_BATTERY )
 	{
 		m_iJuice--;
+		if (m_iJuice <= 0)
+			pev->skin = 1;
 		pActivator->pev->armorvalue += 1;
 		const float boneControllerValue = (m_iJuice / gSkillData.suitchargerCapacity) * 360;
 		SetBoneController(1, 360 - boneControllerValue);

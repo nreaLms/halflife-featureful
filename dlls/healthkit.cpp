@@ -490,10 +490,10 @@ void CWallHealthDecay::SearchForPlayer()
 {
 	StudioFrameAdvance();
 	CBaseEntity* pEntity = 0;
-	float delay = 0.05;
+	pev->nextthink = gpGlobals->time + 0.1;
 	UTIL_MakeVectors( pev->angles );
 	while((pEntity = UTIL_FindEntityInSphere(pEntity, Center(), 64)) != 0) { // this must be in sync with PLAYER_SEARCH_RADIUS from player.cpp
-		if (pEntity->IsPlayer() && pEntity->IsAlive()) {
+		if (pEntity->IsPlayer() && pEntity->IsAlive() && FBitSet(pEntity->pev->weapons, 1 << WEAPON_SUIT)) {
 			if (DotProduct(pEntity->pev->origin - pev->origin, gpGlobals->v_forward) < 0) {
 				continue;
 			}
@@ -507,7 +507,6 @@ void CWallHealthDecay::SearchForPlayer()
 				break;
 			case Still:
 				SetNeedleState(Deploy);
-				delay = 0.1;
 				break;
 			case Deploy:
 				if (m_fSequenceFinished)
@@ -529,7 +528,6 @@ void CWallHealthDecay::SearchForPlayer()
 		case Idle:
 		case RetractShot:
 			SetNeedleState(RetractArm);
-			delay = 0.2;
 			break;
 		case RetractArm:
 			if (m_fSequenceFinished)
@@ -548,7 +546,6 @@ void CWallHealthDecay::SearchForPlayer()
 			break;
 		}
 	}
-	pev->nextthink = gpGlobals->time + delay;
 }
 
 void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -559,17 +556,6 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	// if it's not a player, ignore
 	if( !pActivator->IsPlayer() )
 		return;
-
-	if (m_iState != Idle && m_iState != GiveShot && m_iState != Healing && m_iState != Inactive)
-		return;
-
-	// if there is no juice left, turn it off
-	if( (m_iState == Healing || m_iState == GiveShot) && m_iJuice <= 0 )
-	{
-		pev->skin = 1;
-		SetThink(&CWallHealthDecay::Off);
-		pev->nextthink = gpGlobals->time;
-	}
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
 	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) )
@@ -582,8 +568,21 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		return;
 	}
 
-	SetThink(&CWallHealthDecay::Off);
-	pev->nextthink = gpGlobals->time + 0.25;
+	if (m_iState != Idle && m_iState != GiveShot && m_iState != Healing && m_iState != Inactive)
+		return;
+
+	// if there is no juice left, turn it off
+	if( (m_iState == Healing || m_iState == GiveShot) && m_iJuice <= 0 )
+	{
+		pev->skin = 1;
+		SetThink(&CWallHealthDecay::Off);
+		pev->nextthink = gpGlobals->time;
+	}
+	else
+	{
+		SetThink(&CWallHealthDecay::Off);
+		pev->nextthink = gpGlobals->time + 0.25;
+	}
 
 	// Time to recharge yet?
 	if( m_flNextCharge >= gpGlobals->time )
@@ -616,6 +615,8 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	if( pActivator->TakeHealth( 1, DMG_GENERIC ) )
 	{
 		m_iJuice--;
+		if (m_iJuice <= 0)
+			pev->skin = 1;
 		UpdateJar();
 
 		if (soundType == 1)
