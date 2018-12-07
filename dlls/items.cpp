@@ -28,6 +28,7 @@
 #include "skill.h"
 #include "items.h"
 #include "gamerules.h"
+#include "animation.h"
 
 extern int gmsgItemPickup;
 
@@ -503,7 +504,7 @@ void CItemGeneric::SequenceThink(void)
 }
 
 // Derive from CBaseMonster to use SetActivity
-class CEyeScanner : public CBaseMonster
+class CEyeScanner : public CBaseAnimating
 {
 public:
 	void KeyValue( KeyValueData *pkvd );
@@ -511,10 +512,10 @@ public:
 	void Precache(void);
 	void EXPORT PlayBeep();
 	void EXPORT WaitForSequenceEnd();
-	int ObjectCaps( void ) { return CBaseMonster::ObjectCaps() | FCAP_IMPULSE_USE; }
+	int ObjectCaps( void ) { return CBaseAnimating::ObjectCaps() | FCAP_IMPULSE_USE; }
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	int Classify();
+	void SetActivity(Activity NewActivity);
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -525,6 +526,7 @@ public:
 	string_t lockedTarget;
 	string_t unlockerName;
 	string_t activatorName;
+	Activity m_Activity;
 };
 
 TYPEDESCRIPTION CEyeScanner::m_SaveData[] =
@@ -533,11 +535,40 @@ TYPEDESCRIPTION CEyeScanner::m_SaveData[] =
 	DEFINE_FIELD( CEyeScanner, lockedTarget, FIELD_STRING ),
 	DEFINE_FIELD( CEyeScanner, unlockerName, FIELD_STRING ),
 	DEFINE_FIELD( CEyeScanner, activatorName, FIELD_STRING ),
+	DEFINE_FIELD( CEyeScanner, m_Activity, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CEyeScanner, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CEyeScanner, CBaseAnimating )
 
 LINK_ENTITY_TO_CLASS( item_eyescanner, CEyeScanner )
+
+void CEyeScanner::SetActivity( Activity NewActivity )
+{
+	int iSequence;
+
+	iSequence = LookupActivity( NewActivity );
+
+	// Set to the desired anim, or default anim if the desired is not present
+	if( iSequence > ACTIVITY_NOT_AVAILABLE )
+	{
+		if( pev->sequence != iSequence || !m_fSequenceLoops )
+		{
+			// don't reset frame between walk and run
+			if( !( m_Activity == ACT_WALK || m_Activity == ACT_RUN ) || !( NewActivity == ACT_WALK || NewActivity == ACT_RUN ) )
+				pev->frame = 0;
+		}
+
+		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
+		ResetSequenceInfo();
+	}
+	else
+	{
+		ALERT( at_aiconsole, "%s has no sequence for act:%d\n", STRING( pev->classname ), NewActivity );
+		pev->sequence = 0;
+	}
+
+	m_Activity = NewActivity;
+}
 
 void CEyeScanner::KeyValue(KeyValueData *pkvd)
 {
@@ -558,11 +589,11 @@ void CEyeScanner::KeyValue(KeyValueData *pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "reset_delay")) // Dunno if it affects anything in PC version of Decay
 	{
-		m_flWait = atof(pkvd->szValue);
+		//m_flWait = atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CBaseMonster::KeyValue( pkvd );
+		CBaseAnimating::KeyValue( pkvd );
 }
 
 void CEyeScanner::Spawn()
@@ -589,10 +620,7 @@ void CEyeScanner::Precache()
 	PRECACHE_SOUND("buttons/blip2.wav");
 	PRECACHE_SOUND("buttons/button11.wav");
 
-	if( m_Activity != m_IdealActivity )
-	{
-		SetActivity( m_IdealActivity );
-	}
+	SetActivity( m_Activity );
 }
 
 void CEyeScanner::PlayBeep()
@@ -648,11 +676,6 @@ void CEyeScanner::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		SetThink(&CEyeScanner::WaitForSequenceEnd);
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
-}
-
-int CEyeScanner::Classify()
-{
-	return CLASS_NONE;
 }
 
 int CEyeScanner::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
