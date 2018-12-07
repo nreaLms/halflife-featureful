@@ -2649,6 +2649,135 @@ void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 		UTIL_Remove( this );
 }
 
+#define SF_TRIGGER_TIMER_START_ON 1
+#define SF_TRIGGER_TIMER_NO_FIRST_DELAY 32
+
+class CTriggerTimer : public CBaseEntity
+{
+public:
+	void Spawn();
+	void KeyValue( KeyValueData *pkvd );
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void Think();
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	float GetRandomDelay();
+	void SetActive(BOOL active);
+
+	int m_triggerNumberLimit;
+	int m_triggerCounter;
+	float m_minDelay;
+	float m_maxDelay;
+	BOOL m_active;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_timer, CTriggerTimer )
+
+TYPEDESCRIPTION	CTriggerTimer::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerTimer, m_triggerNumberLimit, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerTimer, m_triggerCounter, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerTimer, m_minDelay, FIELD_FLOAT ),
+	DEFINE_FIELD( CTriggerTimer, m_maxDelay, FIELD_FLOAT ),
+	DEFINE_FIELD( CTriggerTimer, m_active, FIELD_BOOLEAN ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerTimer, CBaseEntity )
+
+void CTriggerTimer::KeyValue( KeyValueData *pkvd )
+{
+	if ( FStrEq( pkvd->szKeyName, "min_delay") ) {
+		m_minDelay = atof( pkvd->szValue );
+		if (m_minDelay < 0) {
+			m_minDelay = 0;
+		}
+		pkvd->fHandled = TRUE;
+	} else if ( FStrEq( pkvd->szKeyName, "max_delay") ) {
+		m_maxDelay = atof( pkvd->szValue );
+		if (m_maxDelay < 0) {
+			m_maxDelay = 0;
+		}
+		pkvd->fHandled = TRUE;
+	} else if ( FStrEq( pkvd->szKeyName, "trigger_number") ) {
+		m_triggerNumberLimit = atoi( pkvd->szValue );
+		if (m_triggerNumberLimit < 0) {
+			m_triggerNumberLimit = 0;
+		}
+		pkvd->fHandled = TRUE;
+	} else {
+		CBaseEntity::KeyValue( pkvd );
+	}
+}
+
+void CTriggerTimer::Spawn()
+{
+	m_triggerCounter = 0;
+	m_active = FALSE;
+	if (pev->spawnflags & SF_TRIGGER_TIMER_START_ON) {
+		SetActive(TRUE);
+		pev->nextthink += 0.1; // some little delay of spawn
+	}
+}
+
+void CTriggerTimer::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	switch (useType) {
+	case USE_OFF:
+		SetActive(FALSE);
+		break;
+	case USE_ON:
+		SetActive(TRUE);
+		break;
+	default:
+		SetActive(!m_active);
+		break;
+	}
+}
+
+void CTriggerTimer::Think()
+{
+	if (m_active) {
+		if (!FStringNull(pev->target)) {
+			FireTargets(STRING(pev->target), this, this, USE_TOGGLE, 0);
+			if (m_triggerNumberLimit) {
+				m_triggerCounter++;
+				if (m_triggerCounter >= m_triggerNumberLimit) {
+					SetActive(FALSE);
+					return;
+				}
+			}
+		}
+
+		pev->nextthink = gpGlobals->time + GetRandomDelay();
+	}
+}
+
+float CTriggerTimer::GetRandomDelay()
+{
+	return RANDOM_FLOAT(m_minDelay, Q_max(m_maxDelay, m_minDelay));
+}
+
+void CTriggerTimer::SetActive(BOOL active)
+{
+	if (m_active == active)
+		return;
+	m_active = active;
+	if (m_active)
+	{
+		if (FBitSet(pev->spawnflags, SF_TRIGGER_TIMER_NO_FIRST_DELAY))
+			pev->nextthink = gpGlobals->time;
+		else
+			pev->nextthink = gpGlobals->time + GetRandomDelay();
+	}
+	else
+	{
+		m_triggerCounter = 0;
+	}
+}
+
 #if FEATURE_GENEWORM
 //=========================================================
 // CTriggerGenewormHit

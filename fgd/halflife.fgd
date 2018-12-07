@@ -5252,6 +5252,18 @@
 	]
 ]
 
+@PointClass base(Targetname, Target) = trigger_timer : "Trigger Timer" : "Continuously fire the same target over random delays. trigger_timer can be activated with On use. trigger_timer stops firing its target if it was triggered with Off use. Toggle use toggles trigger_timer's state."
+[
+	spawnflags(flags) =
+	[
+		1 : "Start on" : 0 : "Automatically activate trigger_timer on the first map load"
+		32 : "Don't delay first fire" : 0 : "Don't use random delay on the first target fire upon the activation"
+	]
+	min_delay(string) : "Minimum delay"
+	max_delay(string) : "Maximum delay"
+	trigger_number(integer) : "Trigger number limit" : 0 : "Stop after triggering this number of targets. 0 means no limit"
+]
+
 @SolidClass base(Trigger) = trigger_teleport : "Trigger teleport" []
 
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []
