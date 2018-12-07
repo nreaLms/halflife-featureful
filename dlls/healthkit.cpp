@@ -231,6 +231,11 @@ void CWallCharger::KeyValue( KeyValueData *pkvd )
 		m_triggerOnFirstUse = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "capacity" ) )
+	{
+		pev->health = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseToggle::KeyValue( pkvd );
 }
@@ -342,7 +347,7 @@ public:
 	const char* DefaultLoopingSound() { return "items/medcharge4.wav"; }
 	int RechargeTime() { return (int)g_pGameRules->FlHealthChargerRechargeTime(); }
 	const char* DefaultRechargeSound() { return "items/medshot4.wav"; }
-	int ChargerCapacity() { return (int)gSkillData.healthchargerCapacity; }
+	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.healthchargerCapacity); }
 	const char* DefaultDenySound() { return "items/medshotno1.wav"; }
 	const char* DefaultChargeStartSound() { return "items/medshot4.wav"; }
 	float SoundVolume() { return 1.0f; }
@@ -380,6 +385,7 @@ LINK_ENTITY_TO_CLASS(item_healthcharger_jar, CWallHealthJarDecay)
 class CWallHealthDecay : public CBaseAnimating
 {
 public:
+	void KeyValue( KeyValueData *pkvd );
 	void Spawn();
 	void Precache(void);
 	void EXPORT SearchForPlayer();
@@ -395,10 +401,11 @@ public:
 	{
 		if (m_jar)
 		{
-			const float jarBoneControllerValue = (m_iJuice / gSkillData.healthchargerCapacity) * 11 - 11;
+			const float jarBoneControllerValue = (m_iJuice / (float)ChargerCapacity()) * 11 - 11;
 			m_jar->SetBoneController(0,  jarBoneControllerValue );
 		}
 	}
+	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.healthchargerCapacity); }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -439,9 +446,20 @@ TYPEDESCRIPTION CWallHealthDecay::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CWallHealthDecay, CBaseAnimating )
 
+void CWallHealthDecay::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "capacity" ) )
+	{
+		pev->health = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseAnimating::KeyValue( pkvd );
+}
+
 void CWallHealthDecay::Spawn()
 {
-	m_iJuice = gSkillData.healthchargerCapacity;
+	m_iJuice = ChargerCapacity();
 	Precache();
 
 	pev->solid = SOLID_SLIDEBOX;
@@ -649,7 +667,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 void CWallHealthDecay::Recharge( void )
 {
 	EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/medshot4.wav", 1.0, ATTN_NORM );
-	m_iJuice = gSkillData.healthchargerCapacity;
+	m_iJuice = ChargerCapacity();
 	UpdateJar();
 	pev->skin = 0;
 	SetNeedleState(Still);

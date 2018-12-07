@@ -595,6 +595,7 @@
 	noise1(sound) : "Deny sound"
 	noise2(sound) : "Start charging sound"
 	noise3(sound) : "Recharge sound"
+	capacity(integer) : "Custom capacity"
 	spawnflags(flags) =
 	[
 		1: "Start off" : 0
@@ -2008,8 +2009,14 @@
 	scale(string) : "Scale (1.0 = normal size)"
 ]
 
-@PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
-@PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
+@PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit"
+[
+	capacity(integer) : "Custom capacity"
+]
+@PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/hev.mdl") = item_recharge : "Wall Recharger"
+[
+	capacity(integer) : "Custom capacity"
+]
 
 @PointClass base(Targetname, Angles) size(-16 -16 0, 16 16 48 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
 [

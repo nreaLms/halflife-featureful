@@ -37,7 +37,7 @@ public:
 	const char* DefaultLoopingSound() { return "items/suitcharge1.wav"; }
 	int RechargeTime() { return (int)g_pGameRules->FlHEVChargerRechargeTime(); }
 	const char* DefaultRechargeSound() { return NULL; }
-	int ChargerCapacity() { return (int)gSkillData.suitchargerCapacity; }
+	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.suitchargerCapacity); }
 	const char* DefaultDenySound() { return "items/suitchargeno1.wav"; }
 	const char* DefaultChargeStartSound() { return "items/suitchargeok1.wav"; }
 	float SoundVolume() { return 0.85f; }
@@ -83,6 +83,7 @@ LINK_ENTITY_TO_CLASS(item_recharge_glass, CRechargeGlassDecay)
 class CRechargeDecay : public CBaseAnimating
 {
 public:
+	void KeyValue( KeyValueData *pkvd );
 	void Spawn();
 	void Precache(void);
 	void EXPORT SearchForPlayer();
@@ -105,6 +106,7 @@ public:
 			SetBits(m_beam->pev->effects, EF_NODRAW);
 	}
 
+	int ChargerCapacity() { return (int)(pev->health > 0 ? pev->health : gSkillData.suitchargerCapacity); }
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 
@@ -146,9 +148,20 @@ TYPEDESCRIPTION CRechargeDecay::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CRechargeDecay, CBaseAnimating )
 
+void CRechargeDecay::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "capacity" ) )
+	{
+		pev->health = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseAnimating::KeyValue( pkvd );
+}
+
 void CRechargeDecay::Spawn()
 {
-	m_iJuice = gSkillData.suitchargerCapacity;
+	m_iJuice = ChargerCapacity();
 	Precache();
 
 	pev->solid = SOLID_SLIDEBOX;
@@ -328,7 +341,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		if (m_iJuice <= 0)
 			pev->skin = 1;
 		pActivator->pev->armorvalue += 1;
-		const float boneControllerValue = (m_iJuice / gSkillData.suitchargerCapacity) * 360;
+		const float boneControllerValue = (m_iJuice / (float)ChargerCapacity()) * 360;
 		SetBoneController(1, 360 - boneControllerValue);
 		SetBoneController(2,  boneControllerValue);
 
@@ -343,7 +356,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 void CRechargeDecay::Recharge( void )
 {
 //	/EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitcharge1.wav", 1.0, ATTN_NORM );
-	m_iJuice = gSkillData.healthchargerCapacity;
+	m_iJuice = ChargerCapacity();
 	SetBoneController(1, 360);
 	SetBoneController(2, 0);
 	pev->skin = 0;
