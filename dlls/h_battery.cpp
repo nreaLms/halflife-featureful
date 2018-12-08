@@ -86,8 +86,9 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Spawn();
 	void Precache(void);
-	void EXPORT SearchForPlayer();
-	void EXPORT Off( void );
+	void EXPORT AnimateAndWork();
+	void SearchForPlayer();
+	void Off( void );
 	void EXPORT Recharge( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int ObjectCaps( void ) { return ( CBaseAnimating::ObjectCaps() | FCAP_CONTINUOUS_USE ); }
@@ -127,6 +128,8 @@ public:
 	int m_iJuice;
 	int m_iState;
 	float m_flSoundTime;
+	float m_goToOffTime;
+	BOOL m_goingToOff;
 	CRechargeGlassDecay* m_glass;
 	BOOL m_playingChargeSound;
 	CBeam* m_beam;
@@ -143,6 +146,8 @@ TYPEDESCRIPTION CRechargeDecay::m_SaveData[] =
 	DEFINE_FIELD( CRechargeDecay, m_iJuice, FIELD_INTEGER ),
 	DEFINE_FIELD( CRechargeDecay, m_iState, FIELD_INTEGER ),
 	DEFINE_FIELD( CRechargeDecay, m_flSoundTime, FIELD_TIME ),
+	DEFINE_FIELD( CRechargeDecay, m_goToOffTime, FIELD_TIME ),
+	DEFINE_FIELD( CRechargeDecay, m_goingToOff, FIELD_BOOLEAN),
 	DEFINE_FIELD( CRechargeDecay, m_playingChargeSound, FIELD_BOOLEAN),
 };
 
@@ -178,7 +183,7 @@ void CRechargeDecay::Spawn()
 	if (m_iJuice > 0)
 	{
 		m_iState = Still;
-		SetThink(&CRechargeDecay::SearchForPlayer);
+		SetThink(&CRechargeDecay::AnimateAndWork);
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 	else
@@ -207,11 +212,25 @@ void CRechargeDecay::Precache(void)
 	m_glass->pev->angles = pev->angles;
 }
 
-void CRechargeDecay::SearchForPlayer()
+void CRechargeDecay::AnimateAndWork()
 {
 	StudioFrameAdvance();
-	CBaseEntity* pEntity = 0;
 	pev->nextthink = gpGlobals->time + 0.1;
+
+	if (m_goingToOff)
+	{
+		if (m_goToOffTime <= gpGlobals->time)
+			Off();
+	}
+	else
+	{
+		SearchForPlayer();
+	}
+}
+
+void CRechargeDecay::SearchForPlayer()
+{
+	CBaseEntity* pEntity = 0;
 	UTIL_MakeVectors( pev->angles );
 	while((pEntity = UTIL_FindEntityInSphere(pEntity, Center(), 64)) != 0) { // this must be in sync with PLAYER_SEARCH_RADIUS from player.cpp
 		if (pEntity->IsPlayer() && pEntity->IsAlive() && FBitSet(pEntity->pev->weapons, 1 << WEAPON_SUIT)) {
@@ -280,7 +299,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		return;
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->armorvalue >= 100 )
+	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->armorvalue >= MAX_NORMAL_BATTERY )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
@@ -293,17 +312,16 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	if (m_iState != Idle && m_iState != GiveShot && m_iState != Healing && m_iState != Inactive)
 		return;
 
+	m_goingToOff = TRUE;
 	// if there is no juice left, turn it off
 	if( (m_iState == Healing || m_iState == GiveShot) && m_iJuice <= 0 )
 	{
 		pev->skin = 1;
-		SetThink(&CRechargeDecay::Off);
-		pev->nextthink = gpGlobals->time;
+		pev->nextthink = m_goToOffTime = gpGlobals->time;
 	}
 	else
 	{
-		SetThink(&CRechargeDecay::Off);
-		pev->nextthink = gpGlobals->time + 0.25;
+		m_goToOffTime = gpGlobals->time + 0.25;
 	}
 
 	// Time to recharge yet?
@@ -361,14 +379,12 @@ void CRechargeDecay::Recharge( void )
 	SetBoneController(2, 0);
 	pev->skin = 0;
 	SetChargeState(Still);
-	SetThink( &CRechargeDecay::SearchForPlayer );
+	SetThink( &CRechargeDecay::AnimateAndWork );
 	pev->nextthink = gpGlobals->time;
 }
 
 void CRechargeDecay::Off( void )
 {
-	StudioFrameAdvance();
-	pev->nextthink = gpGlobals->time + 0.1;
 	switch (m_iState) {
 	case GiveShot:
 	case Healing:
@@ -381,7 +397,7 @@ void CRechargeDecay::Off( void )
 	case RetractShot:
 		if (m_iJuice > 0) {
 			SetChargeState(Idle);
-			SetThink( &CRechargeDecay::SearchForPlayer );
+			m_goingToOff = FALSE;
 			pev->nextthink = gpGlobals->time;
 		} else {
 			SetChargeState(RetractArm);
