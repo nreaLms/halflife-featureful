@@ -141,8 +141,9 @@ void CShock::Touch(CBaseEntity *pOther)
 		}
 		ClearMultiDamage();
 		entvars_t *pevOwner = VARS(pev->owner);
-		pOther->TraceAttack(pev, pev->dmg, pev->velocity.Normalize(), &tr, damageType );
-		ApplyMultiDamage(pev, pevOwner ? pevOwner : pev);
+		entvars_t *pevAttacker = pevOwner ? pevOwner : pev;
+		pOther->TraceAttack(pevAttacker, pev->dmg, pev->velocity.Normalize(), &tr, damageType );
+		ApplyMultiDamage(pev, pevAttacker);
 		if (pOther->IsPlayer() && (UTIL_PointContents(pev->origin) != CONTENTS_WATER))
 		{
 			const Vector position = tr.vecEndPos;
