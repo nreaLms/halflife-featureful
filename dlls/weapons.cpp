@@ -294,6 +294,9 @@ void W_Precache( void )
 	UTIL_PrecacheOther( "item_antidote" );
 	UTIL_PrecacheOther( "item_security" );
 	UTIL_PrecacheOther( "item_longjump" );
+#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
+	UTIL_PrecacheOther( "item_flashlight" );
+#endif
 
 	// shotgun
 	UTIL_PrecacheOtherWeapon( "weapon_shotgun" );

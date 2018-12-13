@@ -190,6 +190,9 @@ void CItem::PrecacheMyModel(const char *model)
 
 #define SF_SUIT_SHORTLOGON		0x0001
 #define SF_SUIT_NOLOGON		0x0002
+#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
+#define SF_SUIT_FLASHLIGHT 0x0004
+#endif
 
 class CItemSuit : public CItem
 {
@@ -222,6 +225,12 @@ class CItemSuit : public CItem
 		}
 
 		pPlayer->pev->weapons |= ( 1 << WEAPON_SUIT );
+#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
+		if (FBitSet(pev->spawnflags, SF_SUIT_FLASHLIGHT))
+		{
+			pPlayer->pev->weapons |= ( 1 << WEAPON_FLASHLIGHT );
+		}
+#endif
 		return TRUE;
 	}
 };
@@ -382,6 +391,35 @@ class CItemLongJump : public CItem
 };
 
 LINK_ENTITY_TO_CLASS( item_longjump, CItemLongJump )
+
+#if FEATURE_FLASHLIGHT_ITEM
+class CItemFlashlight : public CItem
+{
+	void Spawn( void )
+	{
+		Precache( );
+		SetMyModel("models/w_flashlight.mdl");
+		CItem::Spawn( );
+	}
+	void Precache( void )
+	{
+		PrecacheMyModel ("models/w_flashlight.mdl");
+		PRECACHE_SOUND( "items/gunpickup2.wav" );
+	}
+	BOOL MyTouch( CBasePlayer *pPlayer )
+	{
+		if ( pPlayer->pev->weapons & (1<<WEAPON_FLASHLIGHT) )
+			return FALSE;
+		pPlayer->pev->weapons |= (1<<WEAPON_FLASHLIGHT);
+		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
+			WRITE_STRING( STRING(pev->classname) );
+		MESSAGE_END();
+		EMIT_SOUND_SUIT( pPlayer->edict(), "items/gunpickup2.wav" );
+		return TRUE;
+	}
+};
+LINK_ENTITY_TO_CLASS(item_flashlight, CItemFlashlight)
+#endif
 
 //=========================================================
 // Generic item

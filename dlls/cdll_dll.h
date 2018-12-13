@@ -46,6 +46,8 @@
 #define HUD_PRINTTALK		3
 #define HUD_PRINTCENTER		4
 
-
+#if FEATURE_FLASHLIGHT_ITEM
+#define WEAPON_FLASHLIGHT	30
+#endif
 #define WEAPON_SUIT		31
 #endif

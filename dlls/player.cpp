@@ -3544,7 +3544,14 @@ void CBasePlayer::FlashlightTurnOn( void )
 		return;
 	}
 
-	if( (pev->weapons & ( 1 << WEAPON_SUIT ) ) )
+	bool hasFlashlight = false;
+#if FEATURE_FLASHLIGHT_ITEM
+	hasFlashlight = hasFlashlight || (pev->weapons & (1 << WEAPON_FLASHLIGHT));
+#endif
+#if FEATURE_SUIT_FLASHLIGHT
+	hasFlashlight = hasFlashlight || (pev->weapons & (1 << WEAPON_SUIT));
+#endif
+	if( hasFlashlight )
 	{
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
 #if FEATURE_NIGHTVISION
@@ -3735,6 +3742,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 	case 101:
 		gEvilImpulse101 = TRUE;
 		GiveNamedItem( "item_suit" );
+#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
+		GiveNamedItem( "item_flashlight" );
+#endif
 		GiveNamedItem( "item_battery" );
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_9mmhandgun" );

@@ -117,8 +117,15 @@ public:
 #define	WEAPON_PENGUIN			26
 #endif
 
+#if FEATURE_FLASHLIGHT_ITEM
+#define WEAPON_ALLWEAPONS		(~((1<<WEAPON_SUIT)|(1<<WEAPON_FLASHLIGHT)))
+#else
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
+#endif
 
+#if FEATURE_FLASHLIGHT_ITEM
+#define WEAPON_FLASHLIGHT	30
+#endif
 #define WEAPON_SUIT				31	// ?????
 
 #define MAX_WEAPONS			32
