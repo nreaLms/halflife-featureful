@@ -1000,7 +1000,8 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	}
 
 #if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
-	player->GiveNamedItem("item_flashlight");
+	if (pev->spawnflags & SF_PLAYER_SETTINGS_FLASHLIGHT)
+		player->GiveNamedItem("item_flashlight");
 #endif
 
 	const int weaponFlags[] = {
