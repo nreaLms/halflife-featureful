@@ -3578,9 +3578,10 @@ void CBasePlayer::FlashlightTurnOn( void )
 	}
 }
 
-void CBasePlayer::FlashlightTurnOff( void )
+void CBasePlayer::FlashlightTurnOff( bool playOffSound )
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
+	if (playOffSound)
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
 #if FEATURE_NIGHTVISION
 	m_fNVGisON = FALSE;
 #if FEATURE_OPFOR_NIGHTVISION
@@ -5002,7 +5003,7 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		const bool removeSuit = (pev->spawnflags & STRIP_SUIT) ? true : false;
 		pPlayer->RemoveAllItems( removeSuit );
 		if (removeSuit)
-			pPlayer->FlashlightTurnOff();
+			pPlayer->FlashlightTurnOff(false);
 		if (!FStringNull(pev->noise))
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
 	}
