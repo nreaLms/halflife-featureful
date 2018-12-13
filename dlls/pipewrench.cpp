@@ -175,7 +175,7 @@ int CPipeWrench::Swing(int fFirst)
 	{
 		// miss
 		if ( fFirst ) {
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.7);
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.7f;
 			m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.7f;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5.0f;
 			// player "shoot" animation
