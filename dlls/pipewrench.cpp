@@ -424,22 +424,25 @@ void CPipeWrench::BigSwing(void)
 
 void CPipeWrench::WeaponIdle(void)
 {
-	if ( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
-		return;
 	if ( m_iSwingMode == 1 )
 	{
 		if ( gpGlobals->time > m_flBigSwingStart + 1.0 )
 		{
 			m_iSwingMode = 2;
-			m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.2;
-			BigSwing();
-			m_iSwingMode = 0;
-			return;
 		}
+	}
+	else if (m_iSwingMode == 2)
+	{
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1;
+		BigSwing();
+		m_iSwingMode = 0;
+		return;
 	}
 	else
 	{
 		m_iSwingMode = 0;
+		if ( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
+			return;
 		int iAnim;
 		float flRand = UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.0, 1.0 );
 

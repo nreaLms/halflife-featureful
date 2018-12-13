@@ -417,22 +417,26 @@ void CKnife::Stab()
 
 void CKnife::WeaponIdle( void )
 {
-	if ( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
-		return;
 	if ( m_iSwingMode == 1 )
 	{
 		if ( gpGlobals->time > m_flStabStart + 0.8 )
 		{
 			m_iSwingMode = 2;
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.0;
-			m_flNextSecondaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1;
-			Stab();
-			m_iSwingMode = 0;
-			return;
 		}
+	}
+	else if (m_iSwingMode == 2)
+	{
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.9;
+		m_flNextSecondaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
+		Stab();
+		m_iSwingMode = 0;
+		return;
 	}
 	else
 	{
+		m_iSwingMode = 0;
+		if ( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
+			return;
 		int iAnim;
 		float flRand = UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, 1 );
 		if( flRand > 0.9 )
