@@ -5260,7 +5260,7 @@
 	]
 ]
 
-@PointClass base(Targetname, Target) = trigger_timer : "Trigger Timer" : "Continuously fire the same target over random delays. trigger_timer can be activated with On use. trigger_timer stops firing its target if it was triggered with Off use. Toggle use toggles trigger_timer's state."
+@PointClass base(Targetname, Target) = trigger_timer : "Continuously fire the same target over random delays. trigger_timer can be activated with 'On' use. trigger_timer stops firing its target if it was triggered with 'Off' use. 'Toggle' use toggles trigger_timer's state."
 [
 	spawnflags(flags) =
 	[
