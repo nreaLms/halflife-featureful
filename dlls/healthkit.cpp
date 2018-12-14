@@ -432,7 +432,8 @@ public:
 	BOOL m_goingToOff;
 	CWallHealthJarDecay* m_jar;
 	BOOL m_playingChargeSound;
-	float m_lastYaw;
+	float m_currentYaw;
+	float m_goalYaw;
 
 protected:
 	void SetMySequence(const char* sequence);
@@ -514,6 +515,12 @@ void CWallHealthDecay::AnimateAndWork()
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
 
+	if (m_goalYaw < 0)
+		m_currentYaw = Q_max(m_currentYaw - 15, m_goalYaw);
+	else
+		m_currentYaw = Q_min(m_currentYaw + 15, m_goalYaw);
+	SetBoneController(0, m_currentYaw);
+
 	if (m_goingToOff)
 	{
 		if (m_goToOffTime <= gpGlobals->time)
@@ -537,7 +544,8 @@ void CWallHealthDecay::SearchForPlayer()
 			TurnNeedleToPlayer(pEntity->pev->origin);
 			switch (m_iState) {
 			case RetractShot:
-				SetNeedleState(Idle);
+				if( m_fSequenceFinished )
+					SetNeedleState(Idle);
 				break;
 			case RetractArm:
 				SetNeedleState(Deploy);
@@ -574,7 +582,7 @@ void CWallHealthDecay::SearchForPlayer()
 			}
 			else
 			{
-				SetNeedleController(m_lastYaw*0.75);
+				SetNeedleController(m_currentYaw*0.75);
 			}
 			break;
 		case Still:
@@ -633,7 +641,10 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		soundType = 1;
 		break;
 	case GiveShot:
-		SetNeedleState(Healing);
+		if (m_fSequenceFinished)
+		{
+			SetNeedleState(Healing);
+		}
 		break;
 	case Healing:
 		if (!m_playingChargeSound && m_flSoundTime <= gpGlobals->time)
@@ -705,19 +716,24 @@ void CWallHealthDecay::Off( void )
 		SetNeedleState(RetractShot);
 		break;
 	case RetractShot:
-		if (m_iJuice > 0) {
-			SetNeedleState(Idle);
-			m_goingToOff = FALSE;
-			pev->nextthink = gpGlobals->time;
-		} else {
-			SetNeedleState(RetractArm);
+		if( m_fSequenceFinished )
+		{
+			if (m_iJuice > 0) {
+				SetNeedleState(Idle);
+				m_goingToOff = FALSE;
+				pev->nextthink = gpGlobals->time;
+			} else {
+				SetNeedleState(RetractArm);
+			}
 		}
+
 		break;
 	case RetractArm:
 	{
 		if( m_fSequenceFinished )
 		{
-			SetNeedleController(0);
+			m_currentYaw = m_goalYaw = 0;
+			SetBoneController(0, m_currentYaw);
 			if( ( m_iJuice <= 0 ) )
 			{
 				SetNeedleState(Inactive);
@@ -730,7 +746,7 @@ void CWallHealthDecay::Off( void )
 		}
 		else
 		{
-			SetNeedleController(m_lastYaw*0.75);
+			SetNeedleController(m_currentYaw*0.75);
 		}
 		break;
 	}
@@ -797,8 +813,7 @@ void CWallHealthDecay::TurnNeedleToPlayer(const Vector& player)
 
 void CWallHealthDecay::SetNeedleController(float yaw)
 {
-	m_lastYaw = yaw;
-	SetBoneController(0, yaw);
+	m_goalYaw = yaw;
 }
 
 void CWallHealthDecay::UpdateOnRemove()

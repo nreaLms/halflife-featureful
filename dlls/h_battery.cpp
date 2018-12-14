@@ -80,6 +80,9 @@ void CRechargeGlassDecay::Spawn()
 
 LINK_ENTITY_TO_CLASS(item_recharge_glass, CRechargeGlassDecay)
 
+#define RECHARGER_COIL_CONTROLLER 1
+#define RECHARGER_COIL_CONTROLLER2 2
+#define RECHARGER_ARM_CONTROLLER 3
 class CRechargeDecay : public CBaseAnimating
 {
 public:
@@ -133,7 +136,8 @@ public:
 	CRechargeGlassDecay* m_glass;
 	BOOL m_playingChargeSound;
 	CBeam* m_beam;
-	float m_lastYaw;
+	float m_currentYaw;
+	float m_goalYaw;
 
 protected:
 	void SetMySequence(const char* sequence);
@@ -178,7 +182,7 @@ void CRechargeDecay::Spawn()
 	pev->skin = 0;
 
 	InitBoneControllers();
-	SetBoneController(1, 360);
+	SetBoneController(RECHARGER_COIL_CONTROLLER, 360);
 
 	if (m_iJuice > 0)
 	{
@@ -217,6 +221,12 @@ void CRechargeDecay::AnimateAndWork()
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1;
 
+	if (m_goalYaw < 0)
+		m_currentYaw = Q_max(m_currentYaw - 10, m_goalYaw);
+	else
+		m_currentYaw = Q_min(m_currentYaw + 10, m_goalYaw);
+	SetBoneController(RECHARGER_ARM_CONTROLLER, m_currentYaw);
+
 	if (m_goingToOff)
 	{
 		if (m_goToOffTime <= gpGlobals->time)
@@ -240,7 +250,8 @@ void CRechargeDecay::SearchForPlayer()
 			TurnChargeToPlayer(pEntity->pev->origin);
 			switch (m_iState) {
 			case RetractShot:
-				SetChargeState(Idle);
+				if( m_fSequenceFinished )
+					SetChargeState(Idle);
 				break;
 			case RetractArm:
 				SetChargeState(Deploy);
@@ -278,7 +289,7 @@ void CRechargeDecay::SearchForPlayer()
 			}
 			else
 			{
-				SetChargeController(m_lastYaw*0.75);
+				SetChargeController(m_currentYaw*0.75);
 			}
 			break;
 		case Still:
@@ -336,7 +347,10 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1.0, ATTN_NORM );
 		break;
 	case GiveShot:
-		SetChargeState(Healing);
+		if (m_fSequenceFinished)
+		{
+			SetChargeState(Healing);
+		}
 		break;
 	case Healing:
 		if (!m_playingChargeSound && m_flSoundTime <= gpGlobals->time)
@@ -360,8 +374,8 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 			pev->skin = 1;
 		pActivator->pev->armorvalue += 1;
 		const float boneControllerValue = (m_iJuice / (float)ChargerCapacity()) * 360;
-		SetBoneController(1, 360 - boneControllerValue);
-		SetBoneController(2,  boneControllerValue);
+		SetBoneController(RECHARGER_COIL_CONTROLLER, 360 - boneControllerValue);
+		SetBoneController(RECHARGER_COIL_CONTROLLER2,  boneControllerValue);
 
 		if( pActivator->pev->armorvalue > MAX_NORMAL_BATTERY )
 			pActivator->pev->armorvalue = MAX_NORMAL_BATTERY;
@@ -375,8 +389,8 @@ void CRechargeDecay::Recharge( void )
 {
 //	/EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitcharge1.wav", 1.0, ATTN_NORM );
 	m_iJuice = ChargerCapacity();
-	SetBoneController(1, 360);
-	SetBoneController(2, 0);
+	SetBoneController(RECHARGER_COIL_CONTROLLER, 360);
+	SetBoneController(RECHARGER_COIL_CONTROLLER2, 0);
 	pev->skin = 0;
 	SetChargeState(Still);
 	SetThink( &CRechargeDecay::AnimateAndWork );
@@ -395,19 +409,23 @@ void CRechargeDecay::Off( void )
 		SetChargeState(RetractShot);
 		break;
 	case RetractShot:
-		if (m_iJuice > 0) {
-			SetChargeState(Idle);
-			m_goingToOff = FALSE;
-			pev->nextthink = gpGlobals->time;
-		} else {
-			SetChargeState(RetractArm);
+		if (m_fSequenceFinished)
+		{
+			if (m_iJuice > 0) {
+				SetChargeState(Idle);
+				m_goingToOff = FALSE;
+				pev->nextthink = gpGlobals->time;
+			} else {
+				SetChargeState(RetractArm);
+			}
 		}
 		break;
 	case RetractArm:
 	{
 		if( m_fSequenceFinished )
 		{
-			SetChargeController(0);
+			m_currentYaw = m_goalYaw = 0;
+			SetBoneController(RECHARGER_ARM_CONTROLLER, m_currentYaw);
 			if ( m_iJuice <= 0 )
 			{
 				SetChargeState(Inactive);
@@ -420,7 +438,7 @@ void CRechargeDecay::Off( void )
 		}
 		else
 		{
-			SetChargeController(m_lastYaw*0.75);
+			SetChargeController(m_currentYaw*0.75);
 		}
 		break;
 	}
@@ -488,8 +506,7 @@ void CRechargeDecay::TurnChargeToPlayer(const Vector& player)
 
 void CRechargeDecay::SetChargeController(float yaw)
 {
-	m_lastYaw = yaw;
-	SetBoneController(3, yaw);
+	m_goalYaw = yaw;
 }
 
 void CRechargeDecay::CreateBeam()
