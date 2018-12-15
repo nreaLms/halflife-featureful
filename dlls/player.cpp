@@ -1871,6 +1871,16 @@ void CBasePlayer::SetMovementMode()
 	if (!FBitSet( pev->flags, FL_ONGROUND ))
 	{
 		currentMovementState = MovementJump;
+		if (IsOnLadder())
+		{
+			currentMovementState = MovementStand;
+		}
+#if FEATURE_ROPE
+		if (IsOnRope())
+		{
+			currentMovementState = MovementStand;
+		}
+#endif
 	}
 	else if (FBitSet( pev->flags, FL_DUCKING ))
 	{
