@@ -541,7 +541,6 @@ void CItemGeneric::SequenceThink(void)
 	}
 }
 
-// Derive from CBaseMonster to use SetActivity
 class CEyeScanner : public CBaseAnimating
 {
 public:
