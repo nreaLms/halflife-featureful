@@ -1146,6 +1146,11 @@
 	]
 	scale(string) : "Gib Sprite Scale" : ""
 	skin(integer) : "Gib Skin" : 0
+	spawnflags(Flags) =
+	[
+		1 : "Repeatable" 	: 0
+		2 : "Scale models" : 0
+	]
 ]
 
 @PointClass iconsprite("sprites/speaker.spr") = env_sound : "DSP Sound"

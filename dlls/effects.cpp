@@ -1660,6 +1660,7 @@ void CGibShooter::ShootThink( void )
 	}
 }
 
+#define SF_ENVSHOOTER_SCALEMODELS 2
 class CEnvShooter : public CGibShooter
 {
 	void Precache( void );
@@ -1735,7 +1736,27 @@ CGib *CEnvShooter::CreateGib( void )
 	pGib->pev->renderamt = pev->renderamt;
 	pGib->pev->rendercolor = pev->rendercolor;
 	pGib->pev->renderfx = pev->renderfx;
-	pGib->pev->scale = pev->scale;
+
+	/*
+	 * Some env_shooters in Half-Life maps have a custom scale value.
+	 * It did not have any effect in original Half-Life because models did not get scaled.
+	 * Not we have spirit-like scaling which may cause visual issues.
+	 * To avoid unintended scaling we allow model scaling only when the corresponding flag is set.
+	*/
+	const char* model = STRING(pev->model);
+	const char* found = strstr(model, ".mdl");
+	if (found && strlen(found) == 4)
+	{
+		if (FBitSet(pev->spawnflags, SF_ENVSHOOTER_SCALEMODELS))
+		{
+			pGib->pev->scale = pev->scale;
+		}
+	}
+	else
+	{
+		pGib->pev->scale = pev->scale;
+	}
+
 	pGib->pev->skin = pev->skin;
 
 	return pGib;
