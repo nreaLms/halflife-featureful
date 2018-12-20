@@ -4863,6 +4863,46 @@
 	]
 ]
 
+@PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_trigger : "MultiTarget Trigger. Use this entity instead of multi_manager so JACK could draw connections to its targets."
+[
+	target1(target_destination) : "Target 1"
+	delay1(string) : "Delay 1"
+	target2(target_destination) : "Target 2"
+	delay2(string) : "Delay 2"
+	target3(target_destination) : "Target 3"
+	delay3(string) : "Delay 3"
+	target4(target_destination) : "Target 4"
+	delay4(string) : "Delay 4"
+	target5(target_destination) : "Target 5"
+	delay5(string) : "Delay 5"
+	target6(target_destination) : "Target 6"
+	delay6(string) : "Delay 6"
+	target7(target_destination) : "Target 7"
+	delay7(string) : "Delay 7"
+	target8(target_destination) : "Target 8"
+	delay8(string) : "Delay 8"
+	target9(target_destination) : "Target 9"
+	delay9(string) : "Delay 9"
+	target10(target_destination) : "Target 10"
+	delay10(string) : "Delay 10"
+	target11(target_destination) : "Target 11"
+	delay11(string) : "Delay 11"
+	target12(target_destination) : "Target 12"
+	delay12(string) : "Delay 12"
+	target13(target_destination) : "Target 13"
+	delay13(string) : "Delay 13"
+	target14(target_destination) : "Target 14"
+	delay14(string) : "Delay 14"
+	target15(target_destination) : "Target 15"
+	delay15(string) : "Delay 15"
+	target16(target_destination) : "Target 16"
+	delay16(string) : "Delay 16"
+	spawnflags(Flags) =
+	[
+		1 : "multithreaded" : 0
+	]
+]
+
 @PointClass base(Targetname, Target) color(128 255 128) iconsprite("sprites/multisource.spr") = multisource : "Multisource"
 [
 	globalstate(string) : "Global State Master"

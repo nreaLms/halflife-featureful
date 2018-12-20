@@ -445,6 +445,68 @@ void CMultiManager::ManagerReport( void )
 }
 #endif
 
+class CMultiTrigger : public CMultiManager
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Spawn( void );
+};
+
+LINK_ENTITY_TO_CLASS( multi_trigger, CMultiTrigger )
+
+void CMultiTrigger::KeyValue( KeyValueData *pkvd )
+{
+	int num, index;
+	if ( strncmp(pkvd->szKeyName, "target", 6) == 0 && isdigit(pkvd->szKeyName[6]))
+	{
+		num = atoi(pkvd->szKeyName + 6);
+		if (num <= 0 || num > MAX_MULTI_TARGETS)
+			return;
+
+		index = num - 1;
+		m_iTargetName[index] = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( strncmp(pkvd->szKeyName, "delay", 5) == 0 && isdigit(pkvd->szKeyName[5]))
+	{
+		num = atoi(pkvd->szKeyName + 5);
+		if (num <= 0 || num > MAX_MULTI_TARGETS)
+			return;
+		index = num - 1;
+		m_flTargetDelay[index] = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+}
+
+void CMultiTrigger::Spawn( void )
+{
+	for (int i=0; i<MAX_MULTI_TARGETS; ++i)
+	{
+		if (!m_iTargetName[i])
+		{
+			for (int j=i+1; j<MAX_MULTI_TARGETS; ++j)
+			{
+				if (m_iTargetName[j])
+				{
+					m_iTargetName[i] = m_iTargetName[j];
+					m_flTargetDelay[i] = m_flTargetDelay[j];
+					m_iTargetName[j] = 0;
+					break;
+				}
+			}
+		}
+		if (m_iTargetName[i])
+			m_cTargets = i+1;
+		else
+			break;
+	}
+	CMultiManager::Spawn();
+	/* Set multi_manager classname so multisource will check this entity too
+	 * This should be ok, since save/restore data is the same.
+	 */
+	pev->classname = MAKE_STRING("multi_manager");
+}
+
 //***********************************************************
 //
 // Render parameters trigger
