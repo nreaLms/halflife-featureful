@@ -1472,7 +1472,6 @@ public:
 	void SecondaryAttack(void);
 	BOOL Deploy(void);
 	void Holster(int skiplocal = 0);
-	void ItemPostFrame(void);
 	void Reload(void);
 	void WeaponIdle(void);
 	void CreateChargeEffect(void);

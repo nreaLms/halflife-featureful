@@ -133,12 +133,6 @@ void CShockrifle::Holster(int skiplocal /* = 0 */)
 	}
 }
 
-void CShockrifle::ItemPostFrame( void )
-{
-	CBasePlayerWeapon::ItemPostFrame();
-	Reload();
-}
-
 void CShockrifle::PrimaryAttack()
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -229,6 +223,8 @@ void CShockrifle::Reload(void)
 
 void CShockrifle::WeaponIdle(void)
 {
+	Reload();
+
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
 
