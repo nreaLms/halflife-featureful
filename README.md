@@ -94,7 +94,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 
 #### Other new weapons
 
-* weapon_medkit - TFC-like medkit that allows to heal allies
+* weapon_medkit - TFC-like medkit that allows to heal allies (not enabled by default)
 
 ### Other new entities
 
@@ -125,6 +125,10 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * env_modeltrain - like env_spritetrain, but with animated model and configurable movement sound.
 * env_warpball - easy way to create a teleportation effect for monster spawns. Also can be set as a template for monstermaker.
 * trigger_killmonster - kill monster (possibly gibbing), playing random death animation.
+* trigger_timer - continuously fire the same target over random delays.
+* game_player_settings - give starting weapons, configure starting armor and health in singleplayer.
+* multi_trigger - alternative to multi_manager for which J.A.C.K. can show connections to its targets.
+* item_flashlight can be enabled to give player flashlight without giving a suit.
 
 ### Wall chargers features
 
@@ -138,9 +142,10 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * Added Explosive Only and Op4Mortar only flags for func_breakable. Breakables with these flags can be destroyed only with explosive weapons and op4mortar shells respectively.
 * monstermaker can have env_warpball template to automatically play teleportation effects on monster spawn.
 * monstermaker can set custom health, body, skin, blood color, relationship class, gibs and model for spawned monsters.
+* New flag for monstermaker - No ground check. The hack to remove the check for space under the monstermaker. Useful for spawning flying monsters or monsters that should fall.
 * func_plat, func_train and func_door sound attenuation can be configured in level editor.
 * Monsters and models scale can be changed (like in Spirit of Half-Life)
-* Added use_through_walls cvar to prevent using things through walls (experimental).
+* Added use_through_walls cvar to prevent using things through walls (experimental, will be made into compile-time feature).
 * func_tank can be configured to have a limited number of ammo.
 * func_breakable can contain new items (e.g. Opposing Force weapons and ammo).
 * Amount of health provided by soda may be configured via skill.cfg
