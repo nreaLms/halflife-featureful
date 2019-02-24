@@ -1914,8 +1914,29 @@ void CHFGrunt :: Spawn()
 			m_iHead = FG_HEAD_BERET_BLACK;
 		}
 	}
-	else if ( m_iHead < 0 || m_iHead >= FG_HEAD_COUNT )
-		m_iHead = 0;
+	else if ( m_iHead == -1 )
+	{
+		if (FBitSet(pev->spawnflags, SF_SQUADMONSTER_LEADER))
+		{
+			m_iHead = RANDOM_LONG(0,1) ? FG_HEAD_BERET : FG_HEAD_BERET_BLACK;
+		}
+		else if (FBitSet(pev->weapons, FGRUNT_SHOTGUN))
+		{
+			m_iHead = FG_HEAD_SHOTGUN;
+		}
+		else if (FBitSet(pev->weapons, FGRUNT_9MMAR))
+		{
+			m_iHead = FG_HEAD_MASK;
+		}
+		else if (FBitSet(pev->weapons, FGRUNT_M249))
+		{
+			m_iHead = RANDOM_LONG(FG_HEAD_SAW, FG_HEAD_SAW_BLACK);
+		}
+		else
+			m_iHead = FG_HEAD_MASK;
+	}
+	else if ( m_iHead >= FG_HEAD_COUNT )
+		m_iHead = FG_HEAD_MASK;
 
 	if ( pev->weapons <= 0 )
 	{
