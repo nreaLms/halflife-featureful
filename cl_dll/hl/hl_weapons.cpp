@@ -949,6 +949,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CKnife *)player.m_pActiveItem )->m_iSwingMode = (int)from->client.vuser2[1];
 	}
 #endif
+#if FEATURE_M249
+	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
+	{
+		( (CM249 *)player.m_pActiveItem )->m_fReloadLaunched = from->client.vuser2[1];
+	}
+#endif
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -1022,6 +1028,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	else if( player.m_pActiveItem->m_iId == WEAPON_KNIFE )
 	{
 		from->client.vuser2[1] = ( (CKnife *)player.m_pActiveItem )->m_iSwingMode;
+	}
+#endif
+#if FEATURE_M249
+	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
+	{
+		from->client.vuser2[1] = ( (CM249 *)player.m_pActiveItem )->m_fReloadLaunched;
 	}
 #endif
 

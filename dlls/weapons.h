@@ -1312,6 +1312,7 @@ public:
 	BOOL Deploy(void);
 	void Holster();
 	void Reload(void);
+	void WeaponTick();
 	void WeaponIdle(void);
 	virtual BOOL ShouldWeaponIdle(void) { return TRUE; }
 
@@ -1328,10 +1329,7 @@ public:
 
 	void UpdateTape();
 
-	enum M249_RELOAD_STATE { RELOAD_STATE_NONE = 0, RELOAD_STATE_OPEN, RELOAD_STATE_FILL };
-
-	int m_iReloadState;
-	float m_flReloadStart;
+	BOOL m_fReloadLaunched;
 
 private:
 	unsigned short m_usM249;
