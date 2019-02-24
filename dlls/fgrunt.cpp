@@ -2072,7 +2072,10 @@ void CHFGrunt :: TalkInit()
 	m_szGrp[TLK_UNUSE] =	"FG_WAIT";
 	m_szGrp[TLK_STOP] =		"FG_STOP";
 
-	m_szGrp[TLK_NOSHOOT] =	"FG_SCARED";
+	/* FG_SCARED in opfor has sentences more suitable for FG_HEAR.
+	 * Disabling for now.
+	*/
+	//m_szGrp[TLK_NOSHOOT] =	"FG_SCARED";
 	m_szGrp[TLK_HELLO] =	"FG_HELLO";
 
 	m_szGrp[TLK_PLHURT1] =	"FG_CURE";
