@@ -134,6 +134,8 @@ public:
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
 	BOOL CheckMeleeAttack1 ( float flDot, float flDist );
+	void IdleRespond();
+	void AskQuestion();
 	void DeclineFollowing( void );
 	int MaxFollowers() { return -1; }
 	int TalkFriendCategory() { return TALK_FRIEND_SOLDIER; }
@@ -200,6 +202,8 @@ public:
 
 	static const char *pGruntSentences[];
 
+	static int g_fGruntAllyQuestion;
+
 	CUSTOM_SCHEDULES
 
 protected:
@@ -212,6 +216,8 @@ protected:
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
+
+int CHFGrunt::g_fGruntAllyQuestion = 0;
 
 class CMedic : public CHFGrunt
 {
@@ -2058,6 +2064,33 @@ void CHFGrunt :: TalkInit()
 	m_szGrp[TLK_MORTAL] =	"FG_MORTAL";
 }
 
+void CHFGrunt::IdleRespond()
+{
+	if (g_fGruntAllyQuestion == 1)
+	{
+		// Answer to FG_CHECK
+		PlaySentence( "FG_CLEAR", RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+	}
+	else
+	{
+		CTalkMonster::IdleRespond();
+	}
+	g_fGruntAllyQuestion = 0;
+}
+
+void CHFGrunt::AskQuestion()
+{
+	if (RANDOM_LONG(0,50))
+	{
+		CTalkMonster::AskQuestion();
+		g_fGruntAllyQuestion = 2;
+	}
+	else
+	{
+		PlaySentence( "FG_CHECK", RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+		g_fGruntAllyQuestion = 1;
+	}
+}
 
 static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
 {

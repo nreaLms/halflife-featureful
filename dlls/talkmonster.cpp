@@ -893,6 +893,39 @@ void CTalkMonster::IdleRespond( void )
 	PlaySentence( m_szGrp[TLK_ANSWER], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
 }
 
+void CTalkMonster::AskQuestion()
+{
+	const char *szQuestionGroup;
+
+	if( FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) )
+		szQuestionGroup = m_szGrp[TLK_PQUESTION];
+	else
+		szQuestionGroup = m_szGrp[TLK_QUESTION];
+
+	PlaySentence( szQuestionGroup, RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+}
+
+void CTalkMonster::MakeIdleStatement()
+{
+	const char *szIdleGroup;
+
+	// set idle groups based on pre/post disaster
+	if( FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) )
+		szIdleGroup = m_szGrp[TLK_PIDLE];
+	else
+		szIdleGroup = m_szGrp[TLK_IDLE];
+
+	PlaySentence( szIdleGroup, RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+}
+
+float CTalkMonster::RandomSentenceDuraion()
+{
+	if( FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) )
+		return RANDOM_FLOAT( 4.8, 5.2 );
+	else
+		return RANDOM_FLOAT( 2.8, 3.2 );
+}
+
 int CTalkMonster::FOkToSpeak( void )
 {
 	// if in the grip of a barnacle, don't speak
@@ -1010,28 +1043,9 @@ int CTalkMonster::FIdleSpeak( void )
 { 
 	// try to start a conversation, or make statement
 	//int pitch;
-	const char *szIdleGroup;
-	const char *szQuestionGroup;
-	float duration;
 
 	if( !FOkToSpeak() )
 		return FALSE;
-
-	// set idle groups based on pre/post disaster
-	if( FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) )
-	{
-		szIdleGroup = m_szGrp[TLK_PIDLE];
-		szQuestionGroup = m_szGrp[TLK_PQUESTION];
-		// set global min delay for next conversation
-		duration = RANDOM_FLOAT( 4.8, 5.2 );
-	}
-	else
-	{
-		szIdleGroup = m_szGrp[TLK_IDLE];
-		szQuestionGroup = m_szGrp[TLK_QUESTION];
-		// set global min delay for next conversation
-		duration = RANDOM_FLOAT( 2.8, 3.2 );
-	}
 
 	//pitch = GetVoicePitch();
 
@@ -1049,7 +1063,7 @@ int CTalkMonster::FIdleSpeak( void )
 					( m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health / 8 ) )
 				{
 					//EMIT_SOUND_DYN(ENT( pev ), CHAN_VOICE, m_szGrp[TLK_PLHURT3], 1.0, ATTN_IDLE, 0, pitch );
-					PlaySentence( m_szGrp[TLK_PLHURT3], duration, VOL_NORM, ATTN_IDLE );
+					PlaySentence( m_szGrp[TLK_PLHURT3], RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidDamageHeavy );
 					return TRUE;
 				}
@@ -1057,7 +1071,7 @@ int CTalkMonster::FIdleSpeak( void )
 					( m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health / 4 ) )
 				{
 					//EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, m_szGrp[TLK_PLHURT2], 1.0, ATTN_IDLE, 0, pitch );
-					PlaySentence( m_szGrp[TLK_PLHURT2], duration, VOL_NORM, ATTN_IDLE );
+					PlaySentence( m_szGrp[TLK_PLHURT2], RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidDamageMedium );
 					return TRUE;
 				}
@@ -1065,7 +1079,7 @@ int CTalkMonster::FIdleSpeak( void )
 					( m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health / 2 ) )
 				{
 					//EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, m_szGrp[TLK_PLHURT1], 1.0, ATTN_IDLE, 0, pitch );
-					PlaySentence( m_szGrp[TLK_PLHURT1], duration, VOL_NORM, ATTN_IDLE );
+					PlaySentence( m_szGrp[TLK_PLHURT1], RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidDamageLight );
 					return TRUE;
 				}
@@ -1084,8 +1098,7 @@ int CTalkMonster::FIdleSpeak( void )
 
 	if( pFriend && !( pFriend->IsMoving() ) && ( RANDOM_LONG( 0, 99 ) < 75 ) )
 	{
-		PlaySentence( szQuestionGroup, duration, VOL_NORM, ATTN_IDLE );
-		//SENTENCEG_PlayRndSz( ENT( pev ), szQuestionGroup, 1.0, ATTN_IDLE, 0, pitch );
+		AskQuestion();
 
 		// force friend to answer
 		CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
@@ -1106,7 +1119,7 @@ int CTalkMonster::FIdleSpeak( void )
 		if( pFriend )
 		{
 			m_hTalkTarget = pFriend;
-			PlaySentence( szIdleGroup, duration, VOL_NORM, ATTN_IDLE );
+			MakeIdleStatement();
 			m_nSpeak++;
 			return TRUE;
 		}

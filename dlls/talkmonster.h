@@ -132,7 +132,10 @@ public:
 	
 	// Conversations / communication
 	int				GetVoicePitch( void );
-	void			IdleRespond( void );
+	virtual void	IdleRespond( void );
+	virtual void	AskQuestion( void );
+	virtual void	MakeIdleStatement( void );
+	float			RandomSentenceDuraion( void );
 	int				FIdleSpeak( void );
 	int				FIdleStare( void );
 	int				FIdleHello( void );
