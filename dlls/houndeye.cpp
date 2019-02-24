@@ -35,7 +35,20 @@ extern CGraph WorldGraph;
 #define	HOUNDEYE_MAX_ATTACK_RADIUS		384
 #define	HOUNDEYE_SQUAD_BONUS			(float)1.1
 
-#define HOUNDEYE_EYE_FRAMES 4 // how many different switchable maps for the eye
+enum
+{
+	HOUNDEYE_EYE_OPEN = 0,
+	HOUNDEYE_EYE_HALFCLOSED,
+	HOUNDEYE_EYE_CLOSED,
+	HOUNDEYE_EYE_FRAMES
+};
+
+enum
+{
+	HOUNDEYE_BLINK,
+	HOUNDEYE_DONT_BLINK,
+	HOUNDEYE_HALF_BLINK,
+};
 
 #define HOUNDEYE_SOUND_STARTLE_VOLUME	128 // how loud a sound has to be to badly scare a sleeping houndeye
 
@@ -49,7 +62,8 @@ enum
 	TASK_HOUND_THREAT_DISPLAY,
 	TASK_HOUND_FALL_ASLEEP,
 	TASK_HOUND_WAKE_UP,
-	TASK_HOUND_HOP_BACK
+	TASK_HOUND_HOP_BACK,
+	TASK_HOUND_HALF_ASLEEP,
 };
 
 //=========================================================
@@ -112,7 +126,7 @@ public:
 
 	int m_iSpriteTexture;
 	BOOL m_fAsleep;// some houndeyes sleep in idle mode if this is set, the houndeye is lying down
-	BOOL m_fDontBlink;// don't try to open/close eye if this bit is set!
+	short m_iBlink;
 	Vector	m_vecPackCenter; // the center of the pack. The leader maintains this by averaging the origins of all pack members.
 };
 
@@ -122,7 +136,7 @@ TYPEDESCRIPTION	CHoundeye::m_SaveData[] =
 {
 	DEFINE_FIELD( CHoundeye, m_iSpriteTexture, FIELD_INTEGER ),
 	DEFINE_FIELD( CHoundeye, m_fAsleep, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CHoundeye, m_fDontBlink, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CHoundeye, m_iBlink, FIELD_SHORT ),
 	DEFINE_FIELD( CHoundeye, m_vecPackCenter, FIELD_POSITION_VECTOR ),
 };
 
@@ -305,9 +319,9 @@ void CHoundeye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain1.wav", 1, ATTN_NORM );
 			break;
 		case HOUND_AE_CLOSE_EYE:
-			if( !m_fDontBlink )
+			if( m_iBlink == HOUNDEYE_BLINK )
 			{
-				pev->skin = HOUNDEYE_EYE_FRAMES - 1;
+				pev->skin = HOUNDEYE_EYE_CLOSED;
 			}
 			break;
 		default:
@@ -335,7 +349,7 @@ void CHoundeye::Spawn()
 	m_flFieldOfView		= 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_fAsleep		= FALSE; // everyone spawns awake
-	m_fDontBlink		= FALSE;
+	m_iBlink		= HOUNDEYE_BLINK;
 	m_afCapability		|= bits_CAP_SQUAD;
 
 	MonsterInit();
@@ -672,6 +686,13 @@ void CHoundeye::StartTask( Task_t *pTask )
 
 	switch( pTask->iTask )
 	{
+	case TASK_HOUND_HALF_ASLEEP:
+		{
+			pev->skin = HOUNDEYE_EYE_HALFCLOSED;
+			m_iBlink = HOUNDEYE_HALF_BLINK;
+			m_iTaskStatus = TASKSTATUS_COMPLETE;
+			break;
+		}
 	case TASK_HOUND_FALL_ASLEEP:
 		{
 			m_fAsleep = TRUE; // signal that hound is lying down (must stand again before doing anything else!)
@@ -686,14 +707,14 @@ void CHoundeye::StartTask( Task_t *pTask )
 		}
 	case TASK_HOUND_OPEN_EYE:
 		{
-			m_fDontBlink = FALSE; // turn blinking back on and that code will automatically open the eye
+			pev->skin = HOUNDEYE_EYE_OPEN;
+			m_iBlink = HOUNDEYE_BLINK; // turn blinking back on and that code will automatically open the eye
 			m_iTaskStatus = TASKSTATUS_COMPLETE;
 			break;
 		}
 	case TASK_HOUND_CLOSE_EYE:
 		{
-			pev->skin = 0;
-			m_fDontBlink = TRUE; // tell blink code to leave the eye alone.
+			m_iBlink = HOUNDEYE_DONT_BLINK; // tell blink code to leave the eye alone.
 			break;
 		}
 	case TASK_HOUND_THREAT_DISPLAY:
@@ -784,9 +805,13 @@ void CHoundeye::RunTask( Task_t *pTask )
 		}
 	case TASK_HOUND_CLOSE_EYE:
 		{
-			if( pev->skin < HOUNDEYE_EYE_FRAMES - 1 )
+			if( pev->skin < HOUNDEYE_EYE_CLOSED )
 			{
 				pev->skin++;
+			}
+			if ( pev->skin == HOUNDEYE_EYE_CLOSED )
+			{
+				TaskComplete();
 			}
 			break;
 		}
@@ -847,17 +872,28 @@ void CHoundeye::PrescheduleThink( void )
 	}
 
 	// at random, initiate a blink if not already blinking or sleeping
-	if( !m_fDontBlink )
+	if( m_iBlink == HOUNDEYE_BLINK )
 	{
-		if( ( pev->skin == 0 ) && RANDOM_LONG( 0, 0x7F ) == 0 )
+		if( ( pev->skin == HOUNDEYE_EYE_OPEN ) && RANDOM_LONG( 0, 0x7F ) == 0 )
 		{
 			// start blinking!
 			pev->skin = HOUNDEYE_EYE_FRAMES - 1;
 		}
-		else if( pev->skin != 0 )
+		else if( pev->skin != HOUNDEYE_EYE_OPEN )
 		{
 			// already blinking
 			pev->skin--;
+		}
+	}
+	else if ( m_iBlink == HOUNDEYE_HALF_BLINK )
+	{
+		if ( pev->skin == HOUNDEYE_EYE_HALFCLOSED && RANDOM_LONG( 0, 0x3F ) == 0 )
+		{
+			pev->skin = HOUNDEYE_EYE_CLOSED;
+		}
+		else if (pev->skin != HOUNDEYE_EYE_HALFCLOSED)
+		{
+			pev->skin = HOUNDEYE_EYE_HALFCLOSED;
 		}
 	}
 
@@ -952,13 +988,13 @@ Task_t	tlHoundSleep[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE			},
 	{ TASK_WAIT_RANDOM,			(float)5				},
+	{ TASK_HOUND_HALF_ASLEEP,	(float)0				},
 	{ TASK_PLAY_SEQUENCE,		(float)ACT_CROUCH		},
 	{ TASK_SET_ACTIVITY,		(float)ACT_CROUCHIDLE	},
 	{ TASK_HOUND_FALL_ASLEEP,	(float)0				},
-	{ TASK_WAIT_RANDOM,			(float)25				},
 	{ TASK_HOUND_CLOSE_EYE,		(float)0				},
-	//{ TASK_WAIT,				(float)10				},
-	//{ TASK_WAIT_RANDOM,			(float)10				},
+	{ TASK_WAIT,				(float)5				},
+	{ TASK_WAIT_RANDOM,			(float)20				},
 };
 
 Schedule_t	slHoundSleep[] =
@@ -982,9 +1018,10 @@ Schedule_t	slHoundSleep[] =
 Task_t	tlHoundWakeLazy[] =
 {
 	{ TASK_STOP_MOVING,			(float)0			},
-	{ TASK_HOUND_OPEN_EYE,		(float)0			},
+	{ TASK_HOUND_HALF_ASLEEP,	(float)0			},
 	{ TASK_WAIT_RANDOM,			(float)2.5			},
 	{ TASK_PLAY_SEQUENCE,		(float)ACT_STAND	},
+	{ TASK_HOUND_OPEN_EYE,		(float)0			},
 	{ TASK_HOUND_WAKE_UP,		(float)0			},
 };
 
@@ -1261,6 +1298,11 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 		}
 	case SCHED_FAIL:
 		{
+			if ( m_iBlink == HOUNDEYE_HALF_BLINK )
+			{
+				pev->skin = HOUNDEYE_EYE_OPEN;
+				m_iBlink = HOUNDEYE_BLINK;
+			}
 			if( m_MonsterState == MONSTERSTATE_COMBAT )
 			{
 				if( !FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
