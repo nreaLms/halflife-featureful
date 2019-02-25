@@ -107,11 +107,7 @@ int CRecruit::ISoundMask( void)
 
 int CRecruit::DefaultClassify(void)
 {
-#if FEATURE_OPFOR_ALLY_RELATIONSHIP
 	return CLASS_PLAYER_ALLY_MILITARY;
-#else
-	return	CLASS_PLAYER_ALLY;
-#endif
 }
 
 void CRecruit::PainSound( void )

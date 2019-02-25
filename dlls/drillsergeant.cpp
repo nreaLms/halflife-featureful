@@ -127,11 +127,7 @@ int CDrillSergeant::ISoundMask( void)
 
 int CDrillSergeant::DefaultClassify(void)
 {
-#if FEATURE_OPFOR_ALLY_RELATIONSHIP
 	return CLASS_PLAYER_ALLY_MILITARY;
-#else
-	return	CLASS_PLAYER_ALLY;
-#endif
 }
 
 void CDrillSergeant::PainSound( void )
