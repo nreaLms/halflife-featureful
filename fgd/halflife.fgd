@@ -5287,6 +5287,8 @@
 	[
 		1: "Once Only" : 0
 		2: "Start Off" : 0
+		8: "No clients": 0
+		16: "No monsters": 0
 	]
 	speed(integer) : "Speed of push" : 40
 ]

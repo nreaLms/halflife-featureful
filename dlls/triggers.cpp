@@ -30,10 +30,14 @@
 #include "skill.h"
 #include "monsters.h"
 
-#define	SF_TRIGGER_PUSH_START_OFF	2//spawnflag that makes trigger_push spawn turned OFF
+#define SF_TRIGGER_PUSH_ONCE		1
+#define SF_TRIGGER_PUSH_START_OFF	2//spawnflag that makes trigger_push spawn turned OFF
+#define SF_TRIGGER_PUSH_NO_CLIENTS	8
+#define SF_TRIGGER_PUSH_NO_MONSTERS	16
+
 #define SF_TRIGGER_HURT_TARGETONCE	1// Only fire hurt target once
-#define	SF_TRIGGER_HURT_START_OFF	2//spawnflag that makes trigger_push spawn turned OFF
-#define	SF_TRIGGER_HURT_NO_CLIENTS	8//spawnflag that makes trigger_push spawn turned OFF
+#define	SF_TRIGGER_HURT_START_OFF	2//spawnflag that makes trigger_hurt spawn turned OFF
+#define	SF_TRIGGER_HURT_NO_CLIENTS	8//don't trigger on clients
 #define SF_TRIGGER_HURT_CLIENTONLYFIRE	16// trigger hurt will only fire its target if it is hurting a client
 #define SF_TRIGGER_HURT_CLIENTONLYTOUCH 32// only clients may touch this trigger.
 
@@ -1843,7 +1847,7 @@ void CTriggerPush::Spawn()
 
 	// this flag was changed and flying barrels on c2a5 stay broken
 	if( FStrEq( STRING( gpGlobals->mapname ), "c2a5" ) && pev->spawnflags & 4 )
-		pev->spawnflags |= SF_TRIG_PUSH_ONCE;
+		pev->spawnflags |= SF_TRIGGER_PUSH_ONCE;
 
 	if( FBitSet( pev->spawnflags, SF_TRIGGER_PUSH_START_OFF ) )// if flagged to Start Turned Off, make trigger nonsolid.
 		pev->solid = SOLID_NOT;
@@ -1867,10 +1871,15 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 		return;
 	}
 
+	if ( FBitSet( pev->spawnflags, SF_TRIGGER_PUSH_NO_CLIENTS ) && FBitSet(pOther->pev->flags, FL_CLIENT) )
+		return;
+	if ( FBitSet( pev->spawnflags, SF_TRIGGER_PUSH_NO_MONSTERS ) && FBitSet(pOther->pev->flags, FL_MONSTER) )
+		return;
+
 	if( pevToucher->solid != SOLID_NOT && pevToucher->solid != SOLID_BSP )
 	{
 		// Instant trigger, just transfer velocity and remove
-		if( FBitSet( pev->spawnflags, SF_TRIG_PUSH_ONCE ) )
+		if( FBitSet( pev->spawnflags, SF_TRIGGER_PUSH_ONCE ) )
 		{
 			pevToucher->velocity = pevToucher->velocity + ( pev->speed * pev->movedir );
 			if( pevToucher->velocity.z > 0 )

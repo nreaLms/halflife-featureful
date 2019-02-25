@@ -496,8 +496,6 @@ extern DLL_GLOBAL int			g_Language;
 #define TELE_PLAYER_ONLY	1
 #define TELE_SILENT			2
 
-#define SF_TRIG_PUSH_ONCE		1
-
 // Sound Utilities
 
 // sentence groups
