@@ -99,9 +99,6 @@ public:
 
 class CCineAI : public CCineMonster
 {
-	BOOL StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty );
-	void PossessEntity( void );
 	BOOL FCanOverrideState ( void );
-	virtual void FixScriptMonsterSchedule( CBaseMonster *pMonster );
 };
 #endif //SCRIPTED_H

@@ -5003,6 +5003,11 @@
 		4 : "Instantaneous"
 		5 : "No - Turn to Face"
 	]
+	m_iFinishSchedule(Choices) : "AI Schedule when done" : 0 =
+	[
+		0 : "Default AI"
+		1 : "Ambush"
+	]
 	spawnflags(Flags) =
 	[
 		4 : "Repeatable"	: 0
