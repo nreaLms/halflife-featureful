@@ -95,6 +95,7 @@ public:
 	int m_saved_effects;
 	//Vector m_vecOrigOrigin;
 	BOOL m_interruptable;
+	string_t m_iszFireOnAnimStart;
 };
 
 class CCineAI : public CCineMonster

@@ -152,6 +152,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * Amount of health provided by soda may be configured via skill.cfg
 * item_security can show message and play sound on pickup. If item_security is featured in hud.txt the sprite will be shown upon item pickup.
 * trigger_push has No clients and No monsters flags (like in Sven Co-op).
+* 'Fire on Animation start' property for scripted sequence - allows to sync animation start and firing a trigger (useful for retina animations).
 
 ## How to build
 

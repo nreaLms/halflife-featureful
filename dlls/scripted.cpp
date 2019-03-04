@@ -88,6 +88,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_iFinishSchedule = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "m_iszFireOnAnimStart" ) )
+	{
+		m_iszFireOnAnimStart = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -111,6 +116,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_saved_effects, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_iFinishSchedule, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_interruptable, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CCineMonster, m_iszFireOnAnimStart, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -399,6 +405,14 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 
 		SequenceDone( pTarget );
 		return FALSE;
+	}
+
+	if ( m_iszPlay != 0 && iszSeq == m_iszPlay )
+	{
+		if( !FStringNull( m_iszFireOnAnimStart ) )
+		{
+			FireTargets( STRING( m_iszFireOnAnimStart ), NULL, this, USE_TOGGLE, 0 );
+		}
 	}
 
 	pTarget->pev->sequence = pTarget->LookupSequence( STRING( iszSeq ) );

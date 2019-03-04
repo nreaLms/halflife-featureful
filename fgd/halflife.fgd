@@ -4993,6 +4993,7 @@
 	m_iszEntity(string) : "Target Monster"
 	m_iszPlay(string) : "Action Animation" : ""
 	m_iszIdle(string) : "Idle Animation" : ""
+	m_iszFireOnAnimStart : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_flRadius(integer) : "Search Radius" : 512
 	m_flRepeat(integer) : "Repeat Rate ms" : 0
 	m_fMoveTo(choices) : "Move to Position" : 0 =
