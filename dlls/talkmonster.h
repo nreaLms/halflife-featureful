@@ -56,6 +56,7 @@ typedef enum
 	TLK_STARE,
 	TLK_USE,
 	TLK_UNUSE,
+	TLK_DECLINE,
 	TLK_STOP,
 	TLK_NOSHOOT,
 	TLK_HELLO,
@@ -187,6 +188,7 @@ public:
 	float		m_useTime;						// Don't allow +USE until this time
 	string_t			m_iszUse;						// Custom +USE sentence group (follow)
 	string_t			m_iszUnUse;						// Custom +USE sentence group (stop following)
+	string_t			m_iszDecline;					// Custom +USE sentence group (decline following)
 
 	float		m_flLastSaidSmelled;// last time we talked about something that stinks
 	float		m_flStopTalkTime;// when in the future that I'll be done saying this sentence.

@@ -2068,6 +2068,7 @@ void CHFGrunt :: TalkInit()
 	m_szGrp[TLK_STARE] =	"FG_STARE";
 	m_szGrp[TLK_USE] =		"FG_OK";
 	m_szGrp[TLK_UNUSE] =	"FG_WAIT";
+	m_szGrp[TLK_DECLINE] =	"FG_STOP";
 	m_szGrp[TLK_STOP] =		"FG_STOP";
 
 	/* FG_SCARED in opfor has sentences more suitable for FG_HEAR.
@@ -2848,7 +2849,7 @@ MONSTERSTATE CHFGrunt :: GetIdealState ( void )
 }
 void CHFGrunt::DeclineFollowing( void )
 {
-	PlaySentence( "FG_STOP", 2, VOL_NORM, ATTN_NORM );
+	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
 }
 //=========================================================
 // CHFGruntRepel - when triggered, spawns a

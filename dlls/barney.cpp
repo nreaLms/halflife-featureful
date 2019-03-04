@@ -517,6 +517,7 @@ void CBarney::TalkInit()
 	m_szGrp[TLK_STARE] = "BA_STARE";
 	m_szGrp[TLK_USE] = "BA_OK";
 	m_szGrp[TLK_UNUSE] = "BA_WAIT";
+	m_szGrp[TLK_DECLINE] = "BA_POK";
 	m_szGrp[TLK_STOP] = "BA_STOP";
 
 	m_szGrp[TLK_NOSHOOT] = "BA_SCARED";
@@ -853,7 +854,7 @@ MONSTERSTATE CBarney::GetIdealState( void )
 
 void CBarney::DeclineFollowing( void )
 {
-	PlaySentence( "BA_POK", 2, VOL_NORM, ATTN_NORM );
+	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
 }
 
 //=========================================================
@@ -911,8 +912,7 @@ public:
 	int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
-	
-	void DeclineFollowing( void );
+
 	Schedule_t *GetSchedule ( void );
 	
 	void KeyValue( KeyValueData *pkvd );
@@ -961,6 +961,7 @@ void COtis::TalkInit()
 	m_szGrp[TLK_STARE] =	"OT_STARE";
 	m_szGrp[TLK_USE] =		"OT_OK";
 	m_szGrp[TLK_UNUSE] =	"OT_WAIT";
+	m_szGrp[TLK_DECLINE] =	"OT_POK";
 	m_szGrp[TLK_STOP] =		"OT_STOP";
 	
 	m_szGrp[TLK_NOSHOOT] =	"OT_SCARED";
@@ -1001,11 +1002,6 @@ int COtis::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float fl
 void COtis::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	TraceAttackImpl( pevAttacker, flDamage, vecDir, ptr, bitsDamageType, false);
-}
-
-void COtis::DeclineFollowing( void )
-{
-	PlaySentence( "OT_POK", 2, VOL_NORM, ATTN_NORM );
 }
 
 Schedule_t* COtis :: GetSchedule ( void )

@@ -47,6 +47,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_flStopTalkTime, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_hTalkTarget, FIELD_EHANDLE ),
 	DEFINE_FIELD( CTalkMonster, m_fStartSuspicious, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CTalkMonster, m_iszDecline, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
@@ -1327,6 +1328,10 @@ void CTalkMonster::PrescheduleThink( void )
 			Remember(bits_MEMORY_PROVOKED);
 		}
 	}
+	if (IsFollowing() && IsLockedByMaster())
+	{
+		StopFollowing(TRUE);
+	}
 }
 
 // try to smell something
@@ -1418,8 +1423,8 @@ void CTalkMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 
 	if( pCaller != NULL && pCaller->IsPlayer() && IRelationship(pCaller) < R_DL && IRelationship(pCaller) != R_FR )
 	{
-		// Pre-disaster followers can't be used
-		if( pev->spawnflags & SF_MONSTER_PREDISASTER )
+		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...
+		if (IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster))
 		{
 			DeclineFollowing();
 		}
@@ -1454,6 +1459,11 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 		m_iszUnUse = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq( pkvd->szKeyName, "RefusalSentence" )) // Same name as in Spirit
+	{
+		m_iszDecline = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "suspicious" ) )
 	{
 		m_fStartSuspicious = atoi( pkvd->szValue );
@@ -1469,4 +1479,6 @@ void CTalkMonster::Precache( void )
 		m_szGrp[TLK_USE] = STRING( m_iszUse );
 	if( m_iszUnUse )
 		m_szGrp[TLK_UNUSE] = STRING( m_iszUnUse );
+	if ( m_iszDecline )
+		m_szGrp[TLK_DECLINE] = STRING( m_iszDecline );
 }

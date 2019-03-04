@@ -235,6 +235,8 @@
 [
 	UseSentence(String) : "Use Sentence"
 	UnUseSentence(String) : "Un-Use Sentence"
+	RefusalSentence(String) : "Refusal Sentence"
+	master(string) : "Master" : : "Decline following if locked by master"
 	suspicious(choices) : "Suspicious" =
 	[
 		0 : "No"

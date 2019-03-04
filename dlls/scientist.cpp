@@ -430,7 +430,7 @@ void CScientist::DeclineFollowing( void )
 {
 	Talk( 10 );
 	m_hTalkTarget = m_hEnemy;
-	PlaySentence( "SC_POK", 2, VOL_NORM, ATTN_NORM );
+	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
 }
 
 void CScientist::Scream( void )
@@ -726,6 +726,7 @@ void CScientist::TalkInit()
 	m_szGrp[TLK_STARE] = "SC_STARE";
 	m_szGrp[TLK_USE] = "SC_OK";
 	m_szGrp[TLK_UNUSE] = "SC_WAIT";
+	m_szGrp[TLK_DECLINE] = "SC_POK";
 	m_szGrp[TLK_STOP] = "SC_STOP";
 	m_szGrp[TLK_NOSHOOT] = "SC_SCARED";
 	m_szGrp[TLK_HELLO] = "SC_HELLO";
