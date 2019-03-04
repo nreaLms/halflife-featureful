@@ -63,6 +63,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Health, relationship class, blood color, gibs and model can be customized in map editor.
 * monster_barnacle health can be configured via skill.cfg
 * Houndeye squad leader can play leaderlook animation.
+* Houndeye shut their eyes when sleeping.
 * Alien grunts, bullsquids, houndeyes, gonomes, pitdrones and voltigores restore health when they eat meat or enemy corpses.
 * Alien slave attack rate can be configured via skill.cfg (In Half-Life it's hardcoded as 1 for easy and normal, and 1.5 for hard difficulty)
 * Bullsquids can shoot alternative spit projectile that is slow poisonous ball.
@@ -150,6 +151,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * func_breakable can contain new items (e.g. Opposing Force weapons and ammo).
 * Amount of health provided by soda may be configured via skill.cfg
 * item_security can show message and play sound on pickup. If item_security is featured in hud.txt the sprite will be shown upon item pickup.
+* trigger_push has No clients and No monsters flags (like in Sven Co-op).
 
 ## How to build
 
