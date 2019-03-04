@@ -655,20 +655,13 @@ void CBaseMonster::Killed( entvars_t *pevAttacker, int iGib )
 		return;
 	}
 
-	Remember( bits_MEMORY_KILLED );
-
 	// clear the deceased's sound channels.(may have been firing or reloading when killed)
 	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM );
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
 	// Make sure this condition is fired too (TakeDamage breaks out before this happens on death)
 	SetConditions( bits_COND_LIGHT_DAMAGE );
 
-	// tell owner ( if any ) that we're dead.This is mostly for MonsterMaker functionality.
-	CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );
-	if( pOwner )
-	{
-		pOwner->DeathNotice( pev );
-	}
+	OnDying();
 
 	if( ShouldGibMonster( iGib ) )
 	{
@@ -690,6 +683,17 @@ void CBaseMonster::Killed( entvars_t *pevAttacker, int iGib )
 	//pev->enemy = ENT( pevAttacker );//why? (sjb)
 
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
+}
+
+void CBaseMonster::OnDying()
+{
+	Remember( bits_MEMORY_KILLED );
+	// tell owner ( if any ) that we're dead.This is mostly for MonsterMaker functionality.
+	CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );
+	if( pOwner )
+	{
+		pOwner->DeathNotice( pev );
+	}
 }
 
 //

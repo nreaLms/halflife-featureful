@@ -1787,8 +1787,6 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 		case HGRUNT_ALLY_AE_DROP_GUN:
 		{
-			m_hTargetEnt = 0;
-			SetUse( NULL );
 			DropMyItems(FALSE);
 		}
 		break;

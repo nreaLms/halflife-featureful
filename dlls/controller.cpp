@@ -87,7 +87,7 @@ public:
 	static const char *pDeathSounds[];
 
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void OnDying();
 	void GibMonster( void );
 
 	CSprite *m_pBall[2];	// hand balls
@@ -184,7 +184,7 @@ int CController::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
-void CController::Killed( entvars_t *pevAttacker, int iGib )
+void CController::OnDying()
 {
 	// shut off balls
 	/*
@@ -205,8 +205,7 @@ void CController::Killed( entvars_t *pevAttacker, int iGib )
 		m_pBall[1]->SUB_StartFadeOut();
 		m_pBall[1] = NULL;
 	}
-
-	CSquadMonster::Killed( pevAttacker, iGib );
+	CSquadMonster::OnDying();
 }
 
 void CController::GibMonster( void )

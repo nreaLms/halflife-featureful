@@ -73,7 +73,7 @@ public:
 	void TalkInit( void );
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void OnDying();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -691,7 +691,7 @@ void CBarney::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	TraceAttackImpl( pevAttacker, flDamage, vecDir, ptr, bitsDamageType, true);
 }
 
-void CBarney::Killed( entvars_t *pevAttacker, int iGib )
+void CBarney::OnDying()
 {
 	if( pev->body < BARNEY_BODY_GUNGONE )
 	{
@@ -705,9 +705,7 @@ void CBarney::Killed( entvars_t *pevAttacker, int iGib )
 
 		DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
 	}
-
-	SetUse( NULL );	
-	CTalkMonster::Killed( pevAttacker, iGib );
+	CTalkMonster::OnDying();
 }
 
 //=========================================================
@@ -912,7 +910,7 @@ public:
 	
 	int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void OnDying();
 	
 	void DeclineFollowing( void );
 	Schedule_t *GetSchedule ( void );
@@ -1051,7 +1049,7 @@ void COtis::HandleAnimEvent( MonsterEvent_t *pEvent )
 	}
 }
 
-void COtis::Killed( entvars_t *pevAttacker, int iGib )
+void COtis::OnDying()
 {
 	if ( GetBodygroup(1) != OTIS_BODY_GUNHOLSTERED )
 	{
@@ -1061,12 +1059,10 @@ void COtis::Killed( entvars_t *pevAttacker, int iGib )
 		SetBodygroup(1, OTIS_BODY_GUNHOLSTERED);
 
 		GetAttachment( 0, vecGunPos, vecGunAngles );
-		
-		CBaseEntity *pGun = DropItem( DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles );
-	}
 
-	SetUse( NULL );	
-	CTalkMonster::Killed( pevAttacker, iGib );
+		DropItem( DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles );
+	}
+	CTalkMonster::OnDying();
 }
 
 class CDeadOtis : public CDeadBarney

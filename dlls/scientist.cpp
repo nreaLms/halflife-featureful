@@ -113,8 +113,6 @@ public:
 
 	void TalkInit( void );
 
-	void Killed( entvars_t *pevAttacker, int iGib );
-
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
@@ -826,12 +824,6 @@ void CScientist::PainSound( void )
 void CScientist::DeathSound( void )
 {
 	PainSound();
-}
-
-void CScientist::Killed( entvars_t *pevAttacker, int iGib )
-{
-	SetUse( NULL );	
-	CTalkMonster::Killed( pevAttacker, iGib );
 }
 
 void CScientist::SetActivity( Activity newActivity )

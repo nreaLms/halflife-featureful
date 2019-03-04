@@ -162,7 +162,7 @@ public:
 	void AlertSound( void );
 	void IdleSound( void );
 
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void OnDying();
 	void DeathNotice( entvars_t* pevChild )
 	{
 		m_childIsAlive = false;
@@ -456,14 +456,14 @@ int CISlave::ISoundMask( void )
 		bits_SOUND_PLAYER;
 }
 
-void CISlave::Killed( entvars_t *pevAttacker, int iGib )
+void CISlave::OnDying()
 {
 	ClearBeams();
 	UTIL_Remove(m_handGlow1);
 	m_handGlow1 = NULL;
 	UTIL_Remove(m_handGlow2);
 	m_handGlow2 = NULL;
-	CSquadMonster::Killed( pevAttacker, iGib );
+	CSquadMonster::OnDying();
 }
 
 //=========================================================

@@ -228,6 +228,7 @@ public:
 	void PrescheduleThink( void );
 
 	void Killed( entvars_t *pevAttacker, int iGib );
+	void OnDying();
 	void DeathEffect( void );
 
 	void EyeOff( void );
@@ -887,10 +888,15 @@ void CGargantua::DeathEffect( void )
 
 void CGargantua::Killed( entvars_t *pevAttacker, int iGib )
 {
+	CBaseMonster::Killed( pevAttacker, GIB_NEVER );
+}
+
+void CGargantua::OnDying()
+{
 	EyeOff();
 	UTIL_Remove( m_pEyeGlow );
 	m_pEyeGlow = NULL;
-	CBaseMonster::Killed( pevAttacker, GIB_NEVER );
+	CBaseMonster::OnDying();
 }
 
 //=========================================================

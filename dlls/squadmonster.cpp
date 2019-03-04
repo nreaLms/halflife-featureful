@@ -117,10 +117,7 @@ void CSquadMonster::ScheduleChange ( void )
 	VacateSlot();
 }
 
-//=========================================================
-// Killed
-//=========================================================
-void CSquadMonster::Killed( entvars_t *pevAttacker, int iGib )
+void CSquadMonster::OnDying()
 {
 	VacateSlot();
 
@@ -128,8 +125,7 @@ void CSquadMonster::Killed( entvars_t *pevAttacker, int iGib )
 	{
 		MySquadLeader()->SquadRemove( this );
 	}
-
-	CBaseMonster::Killed( pevAttacker, iGib );
+	CBaseMonster::OnDying();
 }
 
 // These functions are still awaiting conversion to CSquadMonster 

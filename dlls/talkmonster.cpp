@@ -604,19 +604,23 @@ void CTalkMonster::RunTask( Task_t *pTask )
 void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 {
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
-	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE 
+	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE
 			&& !m_fStartSuspicious && IsFriendWithPlayerBeforeProvoked() // no point in alerting friends if player is already foe
 			&& !HasMemory( bits_MEMORY_KILLED ) ) // corpses don't alert friends upon gibbing
 	{
 		AlertFriends();
 		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
 	}
+	CSquadMonster::Killed( pevAttacker, iGib );
+}
 
+void CTalkMonster::OnDying()
+{
 	m_hTargetEnt = 0;
 	// Don't finish that sentence
 	StopTalking();
 	SetUse( NULL );
-	CSquadMonster::Killed( pevAttacker, iGib );
+	CSquadMonster::OnDying();
 }
 
 CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, BOOL bTrace )

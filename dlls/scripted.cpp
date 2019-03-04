@@ -677,9 +677,10 @@ BOOL CBaseMonster::CineCleanup()
 		pev->deadflag = DEAD_DEAD;
 		UTIL_SetSize( pev, pev->mins, Vector( pev->maxs.x, pev->maxs.y, pev->mins.z + 2 ) );
 
+		OnDying();
 		if( pOldCine && FBitSet( pOldCine->pev->spawnflags, SF_SCRIPT_LEAVECORPSE ) )
 		{
-			SetUse( NULL );		// BUGBUG -- This doesn't call Killed()
+			SetUse( NULL );
 			SetThink( NULL );	// This will probably break some stuff
 			SetTouch( NULL );
 		}
@@ -754,8 +755,9 @@ BOOL CBaseMonster::CineCleanup()
 	else
 	{
 		// Dropping out because he got killed
-		// Can't call killed() no attacker and weirdness (late gibbing) may result
+		// Now we call OnDying instead
 		m_IdealMonsterState = MONSTERSTATE_DEAD;
+		OnDying();
 		SetConditions( bits_COND_LIGHT_DAMAGE );
 		pev->deadflag = DEAD_DYING;
 		FCheckAITrigger();
