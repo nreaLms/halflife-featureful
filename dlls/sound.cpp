@@ -994,7 +994,7 @@ typedef struct sentenceg
 	unsigned char rgblru[CSENTENCE_LRU_MAX];
 } SENTENCEG;
 
-#define CSENTENCEG_MAX 200					// max number of sentence groups
+#define CSENTENCEG_MAX 256					// max number of sentence groups
 // globals
 
 SENTENCEG rgsentenceg[CSENTENCEG_MAX];
@@ -1350,6 +1350,8 @@ void SENTENCEG_Init()
 				rgsentenceg[isentencegs].count++;
 		}
 	}
+
+	//ALERT(at_console, "Number of sentence groups: %d\nNumber of sentences: %d\n", isentencegs, gcallsentences);
 
 	g_engfuncs.pfnFreeFile( pMemFile );
 
