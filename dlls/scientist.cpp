@@ -410,6 +410,22 @@ Schedule_t slFear[] =
 	},
 };
 
+Task_t	tlDisarmNeedle[] =
+{
+	{ TASK_PLAY_SEQUENCE,		(float)ACT_DISARM	},			// Put away the needle
+};
+
+Schedule_t	slDisarmNeedle[] =
+{
+	{
+		tlDisarmNeedle,
+		ARRAYSIZE ( tlDisarmNeedle ),
+		0,	// Don't interrupt or he'll end up running around with a needle all the time
+		0,
+		"DisarmNeedle"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES( CScientist )
 {
 	slFollow,
@@ -424,6 +440,7 @@ DEFINE_CUSTOM_SCHEDULES( CScientist )
 	slSciPanic,
 	slFollowScared,
 	slFaceTargetScared,
+	slDisarmNeedle,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CScientist, CTalkMonster )
@@ -880,6 +897,9 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 
 Schedule_t *CScientist::GetSchedule( void )
 {
+	if (pev->body >= NUM_SCIENTIST_BODIES)
+		return slDisarmNeedle;
+
 	// so we don't keep calling through the EHANDLE stuff
 	CBaseEntity *pEnemy = m_hEnemy;
 
