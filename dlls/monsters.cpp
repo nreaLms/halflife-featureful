@@ -2892,7 +2892,8 @@ void CBaseMonster::ReportAIState( void )
 
 	static const char *pStateNames[] = { "None", "Idle", "Combat", "Alert", "Hunt", "Prone", "Scripted", "Dead" };
 
-	ALERT( level, "%s: ", STRING(pev->classname) );
+	ALERT( level, "%s: , ", STRING(pev->classname) );
+	ALERT( level, "Classify: %d, ", Classify() );
 	if( (int)m_MonsterState < ARRAYSIZE( pStateNames ) )
 		ALERT( level, "State: %s, ", pStateNames[m_MonsterState] );
 	int i = 0;
@@ -2943,21 +2944,24 @@ void CBaseMonster::ReportAIState( void )
 	{
 		if( !pSquadMonster->InSquad() )
 		{
-			ALERT( level, "not " );
+			ALERT( level, "not In Squad" );
 		}
-
-		ALERT( level, "In Squad, " );
-
-		if( !pSquadMonster->IsLeader() )
+		else
 		{
-			ALERT( level, "not " );
+			if( pSquadMonster->IsLeader() )
+			{
+				ALERT( level, "InSquad, Leader." );
+			}
+			else
+			{
+				CSquadMonster* myLeader = pSquadMonster->MySquadLeader();
+				ALERT( level, "Leader: %s.", FStringNull(myLeader->pev->targetname) ? STRING(myLeader->pev->classname) : STRING(myLeader->pev->targetname) );
+			}
 		}
-
-		ALERT( level, "Leader." );
 	}
 
 	ALERT( level, "\n" );
-	ALERT( level, "Yaw speed:%3.1f,Health: %3.1f\n", pev->yaw_speed, pev->health );
+	ALERT( level, "Yaw speed:%3.1f, Health: %3.1f\n", pev->yaw_speed, pev->health );
 	if( pev->spawnflags & SF_MONSTER_PRISONER )
 		ALERT( level, " PRISONER! " );
 	if( pev->spawnflags & SF_MONSTER_PREDISASTER )
