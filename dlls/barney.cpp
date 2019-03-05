@@ -809,6 +809,11 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 
+		if ( WantsToCallMedic() )
+		{
+			return GetScheduleOfType( SCHED_FIND_MEDIC );
+		}
+
 		if( m_hEnemy == 0 && IsFollowingPlayer() )
 		{
 			if( !FollowedPlayer()->IsAlive() )

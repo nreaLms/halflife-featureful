@@ -100,6 +100,8 @@ public:
 	BOOL DisregardEnemy( CBaseEntity *pEnemy ) { return !pEnemy->IsAlive() || ( gpGlobals->time - m_fearTime ) > 15; }
 
 	virtual BOOL	CanHeal( void );
+	void StartFollowingHealTarget(CBaseEntity* pTarget);
+	bool ReadyToHeal();
 	void Heal( void );
 	void Scream( void );
 
@@ -564,8 +566,11 @@ void CScientist::RunTask( Task_t *pTask )
 		{
 			if( TargetDistance() > 90 )
 				TaskComplete();
-			pev->ideal_yaw = UTIL_VecToYaw( m_hTargetEnt->pev->origin - pev->origin );
-			ChangeYaw( pev->yaw_speed );
+			if (m_hTargetEnt != 0)
+			{
+				pev->ideal_yaw = UTIL_VecToYaw( m_hTargetEnt->pev->origin - pev->origin );
+				ChangeYaw( pev->yaw_speed );
+			}
 		}
 		break;
 	default:
@@ -921,6 +926,11 @@ Schedule_t *CScientist::GetSchedule( void )
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 
+		if ( WantsToCallMedic() )
+		{
+			return GetScheduleOfType( SCHED_FIND_MEDIC );
+		}
+
 		// Cower when you hear something scary
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
 		{
@@ -942,7 +952,7 @@ Schedule_t *CScientist::GetSchedule( void )
 		}
 
 		// Behavior for following the player
-		if( IsFollowingPlayer() )
+		if( m_hTargetEnt != 0 && FollowedPlayer() == m_hTargetEnt )
 		{
 			if( !FollowedPlayer()->IsAlive() )
 			{
@@ -976,6 +986,12 @@ Schedule_t *CScientist::GetSchedule( void )
 					return GetScheduleOfType( SCHED_FEAR );					// React to something scary
 				return GetScheduleOfType( SCHED_TARGET_FACE_SCARED );	// face and follow, but I'm scared!
 			}
+		}
+		// was called by other ally
+		else if (m_healTime <= gpGlobals->time && m_hTargetEnt != 0
+				 && m_hTargetEnt->IsAlive() && (m_hTargetEnt->pev->health < m_hTargetEnt->pev->max_health) )
+		{
+			return slHeal;
 		}
 
 		if( HasConditions( bits_COND_CLIENT_PUSH ) )	// Player wants me to move
@@ -1071,6 +1087,26 @@ BOOL CScientist::CanHeal( void )
 		return FALSE;
 
 	return TRUE;
+}
+
+void CScientist::StartFollowingHealTarget(CBaseEntity *pTarget)
+{
+	if( m_pCine )
+		m_pCine->CancelScript();
+
+	if( m_hEnemy != 0 )
+		m_IdealMonsterState = MONSTERSTATE_ALERT;
+
+	m_hTargetEnt = pTarget;
+	ClearConditions( bits_COND_CLIENT_PUSH );
+	ClearSchedule();
+	ChangeSchedule(slHeal);
+	ALERT(at_aiconsole, "Scientist started to follow injured %s\n", STRING(pTarget->pev->classname));
+}
+
+bool CScientist::ReadyToHeal()
+{
+	return AbleToFollow() && ( m_healTime <= gpGlobals->time ) && m_pSchedule != slHeal;
 }
 
 void CScientist::Heal( void )
@@ -1410,6 +1446,7 @@ public:
 	void Spawn();
 	void Precache();
 	BOOL CanHeal();
+	bool ReadyToHeal() {return false;}
 };
 
 LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist, CCleansuitScientist )

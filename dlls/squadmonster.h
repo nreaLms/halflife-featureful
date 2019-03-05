@@ -68,6 +68,10 @@ public:
 	// squad member info
 	int m_iMySlot;// this is the behaviour slot that the monster currently holds in the squad. 
 
+	// Medic related
+	virtual bool	ReadyToHeal() {return false;}
+	virtual void	StartFollowingHealTarget(CBaseEntity* pTarget) {}
+
 	int CheckEnemy( CBaseEntity *pEnemy );
 	void StartMonster( void );
 	void VacateSlot( void );

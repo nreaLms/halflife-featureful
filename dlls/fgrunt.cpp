@@ -33,8 +33,6 @@
 #define FGRUNT_LIMP_HEALTH				20
 #define FGRUNT_SENTENCE_VOLUME			0.35
 
-#define FGRUNT_MEDIC_WAIT				5 // Wait before calling for medic again.
-
 #define FGRUNT_9MMAR					( 1 << 0)
 #define FGRUNT_HANDGRENADE			( 1 << 1)
 #define FGRUNT_GRENADELAUNCHER		( 1 << 2)
@@ -62,7 +60,6 @@ enum
 {
 	TASK_HGRUNT_ALLY_FACE_TOSS_DIR = LAST_TALKMONSTER_TASK + 1,
 	TASK_HGRUNT_ALLY_SPEAK_SENTENCE,
-	TASK_HGRUNT_ALLY_FIND_MEDIC,
 	LAST_HGRUNT_ALLY_TASK
 };
 //=========================================================
@@ -113,7 +110,6 @@ enum
 	SCHED_HGRUNT_ALLY_WAIT_FACE_ENEMY,
 	SCHED_HGRUNT_ALLY_TAKECOVER_FAILED,// special schedule type that forces analysis of conditions and picks the best possible schedule to recover from this type of failure.
 	SCHED_HGRUNT_ALLY_ELOF_FAIL,
-	SCHED_HGRUNT_ALLY_FIND_MEDIC,
 	LAST_HGRUNT_ALLY_SCHEDULE,
 };
 
@@ -147,6 +143,7 @@ public:
 	void DeclineFollowing( void );
 	int MaxFollowers() { return -1; }
 	int TalkFriendCategory() { return TALK_FRIEND_SOLDIER; }
+	void PlayCallForMedic();
 	void PrescheduleThink ( void );
 	Vector GetGunPosition( void );
 	void Shoot ( void );
@@ -178,8 +175,6 @@ public:
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
-
-	bool CallForMedic(CBaseMonster *pMember);
 
 	// checking the feasibility of a grenade toss is kind of costly, so we do it every couple of seconds,
 	// not every server frame.
@@ -249,6 +244,7 @@ public:
 	void FirePistol ( const char* shotSound, Bullet bullet );
 	bool Heal();
 	void StartFollowingHealTarget(CBaseEntity* pTarget);
+	bool ReadyToHeal();
 	void RestoreTargetEnt();
 	void StopHealing();
 	CBaseEntity* HealTarget();
@@ -272,7 +268,6 @@ TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
 {
 	DEFINE_FIELD( CHFGrunt, m_flNextGrenadeCheck, FIELD_TIME ),
 	DEFINE_FIELD( CHFGrunt, m_flNextPainTime, FIELD_TIME ),
-	DEFINE_FIELD( CHFGrunt, m_flMedicWaitTime, FIELD_TIME ),
 	DEFINE_FIELD( CHFGrunt, m_vecTossVelocity, FIELD_VECTOR ),
 	DEFINE_FIELD( CHFGrunt, m_fThrowGrenade, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CHFGrunt, m_fStanding, FIELD_BOOLEAN ),
@@ -1068,36 +1063,6 @@ Schedule_t	slFGruntRepelLand[] =
 	},
 };
 
-//=========================================================
-// Find medic. Grunt stops moving and calls the nearest medic,
-// if none is around, we don't do much. I don't think I have much
-// to put in here, other than to make the grunt stop moving, and
-// run the medic calling task, I guess.
-//=========================================================
-Task_t	tlFGruntFindMedic[] =
-{
-	{ TASK_STOP_MOVING,					(float)0	},
-	{ TASK_HGRUNT_ALLY_FIND_MEDIC,		(float)0	},
-};
-
-Schedule_t	slFGruntFindMedic[] =
-{
-	{
-		tlFGruntFindMedic,
-		ARRAYSIZE ( tlFGruntFindMedic ),
-		bits_COND_NEW_ENEMY			|
-		bits_COND_SEE_FEAR			|
-		bits_COND_LIGHT_DAMAGE		|
-		bits_COND_HEAVY_DAMAGE		|
-		bits_COND_HEAR_SOUND		|
-		bits_COND_PROVOKED,
-		bits_SOUND_DANGER,
-
-		"FGrunt Find Medic"
-	},
-};
-
-
 DEFINE_CUSTOM_SCHEDULES( CHFGrunt )
 {
 	slFGruntFollow,
@@ -1124,30 +1089,10 @@ DEFINE_CUSTOM_SCHEDULES( CHFGrunt )
 	slFGruntRepel,
 	slFGruntRepelAttack,
 	slFGruntRepelLand,
-	slFGruntFindMedic,
 };
 
 
 IMPLEMENT_CUSTOM_SCHEDULES( CHFGrunt, CTalkMonster )
-
-bool CHFGrunt::CallForMedic(CBaseMonster *pMember)
-{
-	if ( pMember && pMember != this && pMember->pev->deadflag == DEAD_NO && FClassnameIs( pMember->pev, "monster_human_medic_ally" ) )
-	{
-		CMedic* medic = (CMedic*)pMember;
-		ALERT( at_aiconsole, "Injured Grunt found Medic\n" );
-
-		if ( medic->AbleToFollow() && medic->HasHealCharge() && !medic->InHealSchedule() )
-		{
-			EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
-			ALERT( at_aiconsole, "Injured Grunt called for Medic\n" );
-			medic->StartFollowingHealTarget(this);
-			medic->ChangeSchedule(medic->GetScheduleOfType(SCHED_MEDIC_HEAL));
-			return true;
-		}
-	}
-	return false;
-}
 
 void CHFGrunt :: StartTask( Task_t *pTask )
 {
@@ -1158,40 +1103,6 @@ void CHFGrunt :: StartTask( Task_t *pTask )
 	case TASK_HGRUNT_ALLY_SPEAK_SENTENCE:
 		SpeakSentence();
 		TaskComplete();
-		break;
-	case TASK_HGRUNT_ALLY_FIND_MEDIC:
-			// First try looking for a medic in my squad
-			if ( InSquad() )
-			{
-				CSquadMonster *pSquadLeader = MySquadLeader( );
-				if ( pSquadLeader ) for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
-				{
-					CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
-					if (CallForMedic(pMember)) {
-						TaskComplete();
-					}
-				}
-			}
-			// If not, search bsp.
-			if ( !TaskIsComplete() )
-			{
-				CBaseEntity *pFriend = NULL;
-
-				// for each medic in this bsp...
-				while (pFriend = EnumFriends( pFriend, "monster_human_medic_ally", TRUE ))
-				{
-					CBaseMonster *pMonster = pFriend->MyMonsterPointer();
-					if (CallForMedic(pMonster)) {
-						TaskComplete();
-						break;
-					}
-				}
-			}
-			if ( !TaskIsComplete() )
-			{
-				TaskFail();
-			}
-			m_flMedicWaitTime = FGRUNT_MEDIC_WAIT + gpGlobals->time;
 		break;
 
 	case TASK_WALK_PATH:
@@ -1423,6 +1334,11 @@ void CHFGrunt :: PrescheduleThink ( void )
 		}
 	}
 	CTalkMonster::PrescheduleThink();
+}
+
+void CHFGrunt::PlayCallForMedic()
+{
+	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
 }
 
 //=========================================================
@@ -2325,11 +2241,6 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 			return &slFGruntTakeCoverFromBestSound[ 0 ];
 		}
 		break;
-	case SCHED_HGRUNT_ALLY_FIND_MEDIC:
-		{
-			return &slFGruntFindMedic[ 0 ];
-		}
-		break;
 	case SCHED_HGRUNT_ALLY_TAKECOVER_FAILED:
 		{
 			if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) && OccupySlot( bits_SLOTS_HGRUNT_ENGAGE ) )
@@ -2824,10 +2735,9 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 		{
 			return GetScheduleOfType ( SCHED_RELOAD );
 		}
-		if ( pev->health < pev->max_health/2 && ( m_flMedicWaitTime < gpGlobals->time ))
+		if ( WantsToCallMedic() )
 		{
-			// Find a medic
-			return GetScheduleOfType( SCHED_HGRUNT_ALLY_FIND_MEDIC );
+			return GetScheduleOfType( SCHED_FIND_MEDIC );
 		}
 		if ( m_hEnemy == 0 && IsFollowingPlayer() )
 		{
@@ -3574,7 +3484,8 @@ Schedule_t *CMedic::GetSchedule()
 	case MONSTERSTATE_ALERT:
 		if ( m_hEnemy == 0 )
 		{
-			if (IsFollowingPlayer()) {
+			if (m_hTargetEnt != 0 && FollowedPlayer() == m_hTargetEnt)
+			{
 				if ( TargetDistance() <= 128 )
 				{
 					if ( CheckHealCharge() && m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health * 0.75 ) {
@@ -3583,7 +3494,7 @@ Schedule_t *CMedic::GetSchedule()
 					}
 				}
 			}
-			// was called by other grunt
+			// was called by other ally
 			else if (HasHealCharge() && HasHealTarget()) {
 				return GetScheduleOfType(SCHED_MEDIC_HEAL);
 			}
@@ -3809,7 +3720,8 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 	m_hTargetEnt = pTarget;
 	ClearConditions( bits_COND_CLIENT_PUSH );
 	ClearSchedule();
-	ALERT(at_aiconsole, "Medic started to follow injured grunt\n");
+	ChangeSchedule(GetScheduleOfType(SCHED_MEDIC_HEAL));
+	ALERT(at_aiconsole, "Medic started to follow injured %s\n", STRING(pTarget->pev->classname));
 }
 
 void CMedic::RestoreTargetEnt()
@@ -3863,6 +3775,11 @@ bool CMedic::CheckHealCharge()
 		return false;
 	}
 	return true;
+}
+
+bool CMedic::ReadyToHeal()
+{
+	return AbleToFollow() && HasHealCharge() && !InHealSchedule();
 }
 
 bool CMedic::InHealSchedule()

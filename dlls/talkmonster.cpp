@@ -30,6 +30,8 @@
 //=========================================================
 float CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: used so that two NPCs don't talk at once
 
+#define CALL_MEDIC_DELAY				5 // Wait before calling for medic again.
+
 // NOTE: m_voicePitch & m_szGrp should be fixed up by precache each save/restore
 
 TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
@@ -48,6 +50,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_hTalkTarget, FIELD_EHANDLE ),
 	DEFINE_FIELD( CTalkMonster, m_fStartSuspicious, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CTalkMonster, m_iszDecline, FIELD_STRING ),
+	DEFINE_FIELD( CTalkMonster, m_flMedicWaitTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
@@ -55,15 +58,16 @@ IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
 // array of friend names
 CTalkMonster::TalkFriend CTalkMonster::m_szFriends[TLK_CFRIENDS] =
 {
-	{"monster_barney", true, TALK_FRIEND_PERSONNEL},
-	{"monster_scientist", true, TALK_FRIEND_PERSONNEL},
-	{"monster_otis", true, TALK_FRIEND_PERSONNEL},
-	{"monster_cleansuit_scientist", true, TALK_FRIEND_PERSONNEL},
-	{"monster_sitting_scientist", false, TALK_FRIEND_PERSONNEL},
-	{"monster_sitting_cleansuit_scientist", false, TALK_FRIEND_PERSONNEL},
-	{"monster_human_grunt_ally", true, TALK_FRIEND_SOLDIER},
-	{"monster_human_torch_ally", true, TALK_FRIEND_SOLDIER},
-	{"monster_human_medic_ally", true, TALK_FRIEND_SOLDIER}
+	// Classname						CanFollow	CanHeal	Friend type
+	{"monster_barney",						true,	false,	TALK_FRIEND_PERSONNEL},
+	{"monster_scientist",					true,	true, 	TALK_FRIEND_PERSONNEL},
+	{"monster_otis",						true,	false,	TALK_FRIEND_PERSONNEL},
+	{"monster_cleansuit_scientist",			true,	false,	TALK_FRIEND_PERSONNEL},
+	{"monster_sitting_scientist",			false,	false,	TALK_FRIEND_PERSONNEL},
+	{"monster_sitting_cleansuit_scientist", false,	false,	TALK_FRIEND_PERSONNEL},
+	{"monster_human_grunt_ally",			true,	false,	TALK_FRIEND_SOLDIER},
+	{"monster_human_torch_ally",			true,	false,	TALK_FRIEND_SOLDIER},
+	{"monster_human_medic_ally",			true,	true,	TALK_FRIEND_SOLDIER}
 };
 
 //=========================================================
@@ -338,6 +342,36 @@ Schedule_t slTlkIdleEyecontact[] =
 	},
 };
 
+//=========================================================
+// Find medic. Grunt stops moving and calls the nearest medic,
+// if none is around, we don't do much. I don't think I have much
+// to put in here, other than to make the grunt stop moving, and
+// run the medic calling task, I guess.
+//=========================================================
+Task_t	tlFindMedic[] =
+{
+	{ TASK_STOP_MOVING,		(float)0	},
+	{ TASK_FIND_MEDIC,		(float)0	},
+	{ TASK_WAIT,			(float)2	},
+};
+
+Schedule_t	slFindMedic[] =
+{
+	{
+		tlFindMedic,
+		ARRAYSIZE ( tlFindMedic ),
+		bits_COND_NEW_ENEMY			|
+		bits_COND_SEE_FEAR			|
+		bits_COND_LIGHT_DAMAGE		|
+		bits_COND_HEAVY_DAMAGE		|
+		bits_COND_HEAR_SOUND		|
+		bits_COND_PROVOKED,
+		bits_SOUND_DANGER,
+
+		"Find Medic"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 {
 	slIdleResponse,
@@ -351,6 +385,7 @@ DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 	slTlkIdleWatchClient,
 	&slTlkIdleWatchClient[1],
 	slTlkIdleEyecontact,
+	slFindMedic,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CTalkMonster, CSquadMonster )
@@ -364,6 +399,32 @@ void CTalkMonster::SetActivity( Activity newActivity )
 //		newActivity = ACT_IDLE;
 
 	CSquadMonster::SetActivity( newActivity );
+}
+
+bool CTalkMonster::TryCallForMedic(CBaseEntity* pOther)
+{
+	if ( pOther && pOther != this && pOther->pev->deadflag == DEAD_NO )
+	{
+		CSquadMonster* medic = pOther->MySquadMonsterPointer();
+
+		if ( medic != 0 && medic->ReadyToHeal() )
+		{
+			PlayCallForMedic();
+			ALERT( at_aiconsole, "Injured %s called for %s\n", STRING(pev->classname), STRING(medic->pev->classname) );
+			medic->StartFollowingHealTarget(this);
+			return true;
+		}
+	}
+	return false;
+}
+
+void CTalkMonster::PlayCallForMedic()
+{
+	if (!FBitSet( m_bitsSaid, bit_saidWoundLight | bit_saidWoundHeavy ))
+	{
+		PlaySentence( m_szGrp[TLK_WOUND], 2, VOL_NORM, ATTN_NORM );
+		SetBits( m_bitsSaid, bit_saidWoundLight | bit_saidWoundHeavy );
+	}
 }
 
 void CTalkMonster::StartTask( Task_t *pTask )
@@ -466,6 +527,48 @@ void CTalkMonster::StartTask( Task_t *pTask )
 	case TASK_PLAY_SCRIPT:
 		m_hTalkTarget = NULL;
 		CSquadMonster::StartTask( pTask );
+		break;
+	case TASK_FIND_MEDIC:
+		{
+			// First try looking for a medic in my squad
+			if ( InSquad() )
+			{
+				CSquadMonster *pSquadLeader = MySquadLeader( );
+				if ( pSquadLeader ) for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
+				{
+					CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
+					if (TryCallForMedic(pMember))
+					{
+						TaskComplete();
+					}
+				}
+			}
+			// If not, search bsp.
+			if ( !TaskIsComplete() )
+			{
+				// for each medic in this bsp...
+				for( int i = 0; i < TLK_CFRIENDS; i++ )
+				{
+					TalkFriend& talkFriend = m_szFriends[i];
+					if (!talkFriend.canHeal)
+						continue;
+					CBaseEntity *pFriend = NULL;
+					while (pFriend = EnumFriends( pFriend, talkFriend.name, TRUE ))
+					{
+						if (TryCallForMedic(pFriend))
+						{
+							TaskComplete();
+							break;
+						}
+					}
+				}
+			}
+			if ( !TaskIsComplete() )
+			{
+				TaskFail();
+			}
+			m_flMedicWaitTime = CALL_MEDIC_DELAY + gpGlobals->time;
+		}
 		break;
 	default:
 		CSquadMonster::StartTask( pTask );
@@ -1211,6 +1314,27 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
+bool CTalkMonster::IsWounded()
+{
+	return pev->health <= pev->max_health * 0.75;
+}
+
+bool CTalkMonster::IsHeavilyWounded()
+{
+	return pev->health <= pev->max_health * 0.5;
+}
+
+int CTalkMonster::TakeHealth(float flHealth, int bitsDamageType)
+{
+	int ret = CSquadMonster::TakeHealth(flHealth, bitsDamageType);
+	// Clear bits upon healing so monster could say it again when injured again
+	if ( !IsHeavilyWounded() )
+		ClearBits( m_bitsSaid, bit_saidWoundHeavy );
+	if ( !IsWounded() )
+		ClearBits( m_bitsSaid, bit_saidWoundLight );
+	return ret;
+}
+
 Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 {
 	switch( Type )
@@ -1237,7 +1361,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			}
 
 			// sustained light wounds?
-			if( !FBitSet( m_bitsSaid, bit_saidWoundLight ) && ( pev->health <= ( pev->max_health * 0.75 ) ) )
+			if( !FBitSet( m_bitsSaid, bit_saidWoundLight ) && IsWounded() )
 			{
 				//SENTENCEG_PlayRndSz( ENT( pev ), m_szGrp[TLK_WOUND], 1.0, ATTN_IDLE, 0, GetVoicePitch() );
 				//CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 2.8, 3.2 );
@@ -1246,7 +1370,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 				return slIdleStand;
 			}
 			// sustained heavy wounds?
-			else if( !FBitSet( m_bitsSaid, bit_saidWoundHeavy ) && ( pev->health <= ( pev->max_health * 0.5 ) ) )
+			else if( !FBitSet( m_bitsSaid, bit_saidWoundHeavy ) && IsHeavilyWounded() )
 			{
 				//SENTENCEG_PlayRndSz( ENT( pev ), m_szGrp[TLK_MORTAL], 1.0, ATTN_IDLE, 0, GetVoicePitch() );
 				//CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 2.8, 3.2 );
@@ -1295,6 +1419,11 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			// slIdleStand, return slIdleSciStand
 		}
 		break;
+	case SCHED_FIND_MEDIC:
+		{
+			return slFindMedic;
+		}
+		break;
 	}
 
 	return CSquadMonster::GetScheduleOfType( Type );
@@ -1332,6 +1461,11 @@ void CTalkMonster::PrescheduleThink( void )
 	{
 		StopFollowing(TRUE, false);
 	}
+}
+
+bool CTalkMonster::WantsToCallMedic()
+{
+	return IsHeavilyWounded() && ( m_flMedicWaitTime < gpGlobals->time );
 }
 
 // try to smell something
