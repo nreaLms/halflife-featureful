@@ -809,12 +809,12 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 
-		if( m_hEnemy == 0 && IsFollowing() )
+		if( m_hEnemy == 0 && IsFollowingPlayer() )
 		{
-			if( !m_hTargetEnt->IsAlive() )
+			if( !FollowedPlayer()->IsAlive() )
 			{
 				// UNDONE: Comment about the recently dead player here?
-				StopFollowing( FALSE );
+				StopFollowing( FALSE, false );
 				break;
 			}
 			else

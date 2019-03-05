@@ -114,7 +114,15 @@ enum
 	SCHED_HGRUNT_ALLY_TAKECOVER_FAILED,// special schedule type that forces analysis of conditions and picks the best possible schedule to recover from this type of failure.
 	SCHED_HGRUNT_ALLY_ELOF_FAIL,
 	SCHED_HGRUNT_ALLY_FIND_MEDIC,
+	LAST_HGRUNT_ALLY_SCHEDULE,
 };
+
+enum
+{
+	SCHED_MEDIC_HEAL = LAST_HGRUNT_ALLY_SCHEDULE,
+	SCHED_MEDIC_HEAL_FAILED,
+};
+
 class CHFGrunt : public CTalkMonster
 {
 public:
@@ -231,6 +239,9 @@ public:
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	Schedule_t *GetSchedule ( void );
+	Schedule_t *GetScheduleOfType(int Type);
+	CBaseEntity* FollowedPlayer();
+	void ClearFollowedPlayer();
 	void SetAnswerQuestion(CTalkMonster *pSpeaker);
 
 	void DropMyItems(BOOL isGibbed);
@@ -238,10 +249,12 @@ public:
 	void FirePistol ( const char* shotSound, Bullet bullet );
 	bool Heal();
 	void StartFollowingHealTarget(CBaseEntity* pTarget);
+	void RestoreTargetEnt();
 	void StopHealing();
 	CBaseEntity* HealTarget();
 	inline bool HasHealTarget() { return HealTarget() != 0; }
 	inline bool HasHealCharge() { return m_flHealCharge >= 1; }
+	bool InHealSchedule();
 	bool CheckHealCharge();
 
 	virtual int Save( CSave &save );
@@ -252,6 +265,7 @@ public:
 	float m_flHealCharge;
 	BOOL m_fDepleteLine;
 	BOOL m_fHealing;
+	EHANDLE m_hLeadingPlayer;
 };
 
 TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
@@ -1122,11 +1136,13 @@ bool CHFGrunt::CallForMedic(CBaseMonster *pMember)
 	{
 		CMedic* medic = (CMedic*)pMember;
 		ALERT( at_aiconsole, "Injured Grunt found Medic\n" );
-		if ( medic->CanFollow() && medic->HasHealCharge() && !medic->HasHealTarget() )
+
+		if ( medic->AbleToFollow() && medic->HasHealCharge() && !medic->InHealSchedule() )
 		{
 			EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
 			ALERT( at_aiconsole, "Injured Grunt called for Medic\n" );
 			medic->StartFollowingHealTarget(this);
+			medic->ChangeSchedule(medic->GetScheduleOfType(SCHED_MEDIC_HEAL));
 			return true;
 		}
 	}
@@ -2218,6 +2234,7 @@ int CHFGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	// make sure friends talk about it if player hurts talkmonsters...
 	int ret = CTalkMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+
 	if ( !IsAlive() || pev->deadflag == DEAD_DYING )
 		return ret;
 
@@ -2385,7 +2402,7 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 					return &slFGruntFail[ 0 ];
 				}
 			}
-			if ( IsFollowing() )
+			if ( FollowedPlayer() )
 			{
 				return &slFGruntFail[ 0 ];
 			}
@@ -2812,12 +2829,12 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 			// Find a medic
 			return GetScheduleOfType( SCHED_HGRUNT_ALLY_FIND_MEDIC );
 		}
-		if ( m_hEnemy == 0 && IsFollowing() )
+		if ( m_hEnemy == 0 && IsFollowingPlayer() )
 		{
-			if ( !m_hTargetEnt->IsAlive() )
+			if ( !FollowedPlayer()->IsAlive() )
 			{
 				// UNDONE: Comment about the recently dead player here?
-				StopFollowing( FALSE );
+				StopFollowing( FALSE, false );
 				break;
 			}
 			else
@@ -2846,6 +2863,7 @@ MONSTERSTATE CHFGrunt :: GetIdealState ( void )
 {
 	return CTalkMonster::GetIdealState();
 }
+
 void CHFGrunt::DeclineFollowing( void )
 {
 	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
@@ -3405,17 +3423,19 @@ enum
 {
 	TASK_MEDIC_SAY_HEAL = LAST_HGRUNT_ALLY_TASK + 1,
 	TASK_MEDIC_HEAL,
+	TASK_MEDIC_RESTORE_TARGET_ENT,
 };
 
 Task_t	tlMedicHeal[] =
 {
+	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_MEDIC_HEAL_FAILED },
 	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move within 50 of target ent (client)
-	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_TARGET_CHASE },	// If you fail, catch up with that guy! (change this to put syringe away and then chase)
 	{ TASK_FACE_IDEAL,						(float)0		},
 	{ TASK_MEDIC_SAY_HEAL,					(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_ARM	},			// Whip out the needle
 	{ TASK_MEDIC_HEAL,						(float)0	},	// Put it in the player
 	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_DISARM	},			// Put away the needle
+	{ TASK_MEDIC_RESTORE_TARGET_ENT,		(float)0 }
 };
 
 Schedule_t	slMedicHeal[] =
@@ -3452,6 +3472,7 @@ TYPEDESCRIPTION	CMedic::m_SaveData[] =
 	DEFINE_FIELD( CMedic, m_flHealCharge, FIELD_FLOAT ),
 	DEFINE_FIELD( CMedic, m_fDepleteLine, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMedic, m_fHealing, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CMedic, m_hLeadingPlayer, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CMedic, CHFGrunt )
@@ -3492,6 +3513,10 @@ void CMedic::StartTask(Task_t *pTask)
 		m_hTalkTarget = m_hTargetEnt;
 		PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
 		TaskComplete();
+		break;
+	case TASK_MEDIC_RESTORE_TARGET_ENT:
+		TaskComplete();
+		RestoreTargetEnt();
 		break;
 	default:
 		CHFGrunt::StartTask(pTask);
@@ -3549,22 +3574,50 @@ Schedule_t *CMedic::GetSchedule()
 	case MONSTERSTATE_ALERT:
 		if ( m_hEnemy == 0 )
 		{
-			if (IsFollowing()) {
+			if (IsFollowingPlayer()) {
 				if ( TargetDistance() <= 128 )
 				{
 					if ( CheckHealCharge() && m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health * 0.75 ) {
 						ALERT(at_aiconsole, "Medic is going to heal a player\n");
-						return slMedicHeal;
+						return GetScheduleOfType(SCHED_MEDIC_HEAL);
 					}
 				}
 			}
 			// was called by other grunt
 			else if (HasHealCharge() && HasHealTarget()) {
-				return slMedicHeal;
+				return GetScheduleOfType(SCHED_MEDIC_HEAL);
 			}
 		}
 	}
 	return CHFGrunt::GetSchedule();
+}
+
+Schedule_t *CMedic::GetScheduleOfType(int Type)
+{
+	switch (Type) {
+	case SCHED_MEDIC_HEAL:
+		return slMedicHeal;
+	case SCHED_MEDIC_HEAL_FAILED:
+		RestoreTargetEnt();
+		return GetScheduleOfType(SCHED_TARGET_CHASE);
+	default:
+		return CHFGrunt::GetScheduleOfType(Type);
+	}
+}
+
+CBaseEntity* CMedic::FollowedPlayer()
+{
+	if (m_hLeadingPlayer != 0 && m_hLeadingPlayer->IsPlayer())
+		return m_hLeadingPlayer;
+	return CHFGrunt::FollowedPlayer();
+}
+
+void CMedic::ClearFollowedPlayer()
+{
+	if (m_hLeadingPlayer)
+		m_hLeadingPlayer = 0;
+	else
+		CHFGrunt::ClearFollowedPlayer();
 }
 
 void CMedic::SetAnswerQuestion(CTalkMonster *pSpeaker)
@@ -3746,6 +3799,7 @@ void CMedic::FirePistol(const char *shotSound , Bullet bullet)
 
 void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 {
+	m_hLeadingPlayer = m_hTargetEnt;
 	if( m_pCine )
 		m_pCine->CancelScript();
 
@@ -3756,6 +3810,23 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 	ClearConditions( bits_COND_CLIENT_PUSH );
 	ClearSchedule();
 	ALERT(at_aiconsole, "Medic started to follow injured grunt\n");
+}
+
+void CMedic::RestoreTargetEnt()
+{
+	if (m_hLeadingPlayer != 0)
+	{
+		ALERT(at_aiconsole, "Medic restoring old target\n");
+		m_hTargetEnt = m_hLeadingPlayer;
+		m_hLeadingPlayer = 0;
+		if( m_pCine )
+			m_pCine->CancelScript();
+
+		if( m_hEnemy != 0 )
+			m_IdealMonsterState = MONSTERSTATE_ALERT;
+		ClearConditions( bits_COND_CLIENT_PUSH );
+		ClearSchedule();
+	}
 }
 
 void CMedic::StopHealing()
@@ -3792,6 +3863,11 @@ bool CMedic::CheckHealCharge()
 		return false;
 	}
 	return true;
+}
+
+bool CMedic::InHealSchedule()
+{
+	return m_pSchedule == slMedicHeal;
 }
 
 //=========================================================

@@ -1328,9 +1328,9 @@ void CTalkMonster::PrescheduleThink( void )
 			Remember(bits_MEMORY_PROVOKED);
 		}
 	}
-	if (IsFollowing() && IsLockedByMaster())
+	if (IsFollowingPlayer() && IsLockedByMaster())
 	{
-		StopFollowing(TRUE);
+		StopFollowing(TRUE, false);
 	}
 }
 
@@ -1364,19 +1364,19 @@ int CTalkMonster::IRelationship( CBaseEntity *pTarget )
 	return CSquadMonster::IRelationship( pTarget );
 }
 
-void CTalkMonster::StopFollowing( BOOL clearSchedule )
+void CTalkMonster::StopFollowing(BOOL clearSchedule , bool saySentence)
 {
-	if( IsFollowing() )
+	if( IsFollowingPlayer() )
 	{
-		if( !( m_afMemory & bits_MEMORY_PROVOKED ) )
+		if( saySentence && !( m_afMemory & bits_MEMORY_PROVOKED ) )
 		{
 			PlaySentence( m_szGrp[TLK_UNUSE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-			m_hTalkTarget = m_hTargetEnt;
+			m_hTalkTarget = FollowedPlayer();
 		}
 
-		if( m_movementGoal == MOVEGOAL_TARGETENT )
+		if( m_movementGoal == MOVEGOAL_TARGETENT && m_hTargetEnt == FollowedPlayer() )
 			RouteClear(); // Stop him from walking toward the player
-		m_hTargetEnt = 0;
+		ClearFollowedPlayer();
 		if( clearSchedule )
 			ClearSchedule();
 		if( m_hEnemy != 0 )
@@ -1384,7 +1384,7 @@ void CTalkMonster::StopFollowing( BOOL clearSchedule )
 	}
 }
 
-void CTalkMonster::StartFollowing( CBaseEntity *pLeader )
+void CTalkMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 {
 	if( m_pCine )
 		m_pCine->CancelScript();
@@ -1393,13 +1393,22 @@ void CTalkMonster::StartFollowing( CBaseEntity *pLeader )
 		m_IdealMonsterState = MONSTERSTATE_ALERT;
 
 	m_hTargetEnt = pLeader;
-	PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-	m_hTalkTarget = m_hTargetEnt;
+	if (saySentence)
+	{
+		PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
+		m_hTalkTarget = m_hTargetEnt;
+	}
+
 	ClearConditions( bits_COND_CLIENT_PUSH );
 	ClearSchedule();
 }
 
 BOOL CTalkMonster::CanFollow( void )
+{
+	return AbleToFollow() && !IsFollowingPlayer();
+}
+
+BOOL CTalkMonster::AbleToFollow()
 {
 	if( m_MonsterState == MONSTERSTATE_SCRIPT )
 	{
@@ -1411,8 +1420,29 @@ BOOL CTalkMonster::CanFollow( void )
 
 	if( !IsAlive() )
 		return FALSE;
+	return TRUE;
+}
 
-	return !IsFollowing();
+BOOL CTalkMonster::IsFollowingPlayer(CBaseEntity *pLeader)
+{
+	return FollowedPlayer() == pLeader;
+}
+
+BOOL CTalkMonster::IsFollowingPlayer()
+{
+	return FollowedPlayer() != 0;
+}
+
+CBaseEntity* CTalkMonster::FollowedPlayer()
+{
+	if (m_hTargetEnt != 0 && m_hTargetEnt->IsPlayer())
+		return m_hTargetEnt;
+	return NULL;
+}
+
+void CTalkMonster::ClearFollowedPlayer()
+{
+	m_hTargetEnt = 0;
 }
 
 void CTalkMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )

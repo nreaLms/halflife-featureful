@@ -942,12 +942,12 @@ Schedule_t *CScientist::GetSchedule( void )
 		}
 
 		// Behavior for following the player
-		if( IsFollowing() )
+		if( IsFollowingPlayer() )
 		{
-			if( !m_hTargetEnt->IsAlive() )
+			if( !FollowedPlayer()->IsAlive() )
 			{
 				// UNDONE: Comment about the recently dead player here?
-				StopFollowing( FALSE );
+				StopFollowing( FALSE, false );
 				break;
 			}
 
@@ -1010,7 +1010,7 @@ MONSTERSTATE CScientist::GetIdealState( void )
 	case MONSTERSTATE_IDLE:
 		if( HasConditions( bits_COND_NEW_ENEMY ) )
 		{
-			if( IsFollowing() )
+			if( IsFollowingPlayer() )
 			{
 				int relationship = IRelationship( m_hEnemy );
 				if( relationship != R_FR || ( relationship != R_HT && !HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) ) )
@@ -1025,7 +1025,7 @@ MONSTERSTATE CScientist::GetIdealState( void )
 		else if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{
 			// Stop following if you take damage
-			if( IsFollowing() )
+			if( IsFollowingPlayer() )
 				StopFollowing( TRUE );
 		}
 		break;
@@ -1475,3 +1475,47 @@ void CSittingCleansuitScientist::Spawn()
 
 LINK_ENTITY_TO_CLASS( monster_sitting_cleansuit_scientist, CSittingCleansuitScientist )
 #endif
+
+//=========================================================
+// Dead Worker PROP
+//=========================================================
+class CDeadWorker : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
+
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[6];
+};
+const char *CDeadWorker::m_szPoses[] = { "lying_on_back", "lying_on_stomach", "dead_sitting", "dead_table1", "dead_table2", "dead_table3" };
+
+const char* CDeadWorker::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_worker_dead, CDeadWorker )
+
+void CDeadWorker :: Spawn( )
+{
+	SpawnHelper("models/worker.mdl");
+	MonsterInitDead();
+}
+
+class CDeadGus : public CDeadWorker
+{
+	void Spawn( void );
+};
+
+LINK_ENTITY_TO_CLASS( monster_gus_dead, CDeadGus )
+
+void CDeadGus :: Spawn( )
+{
+	SpawnHelper("models/gus.mdl");
+	if (pev->body == -1)
+	{
+		pev->body = RANDOM_LONG(0,1);
+	}
+	MonsterInitDead();
+}

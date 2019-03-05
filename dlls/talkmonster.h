@@ -153,9 +153,13 @@ public:
 
 	// For following
 	BOOL			CanFollow( void );
-	BOOL			IsFollowing( void ) { return m_hTargetEnt != 0 && m_hTargetEnt->IsPlayer(); }
-	void			StopFollowing( BOOL clearSchedule );
-	void			StartFollowing( CBaseEntity *pLeader );
+	BOOL			AbleToFollow();
+	BOOL	IsFollowingPlayer( CBaseEntity* pLeader );
+	BOOL	IsFollowingPlayer( void );
+	virtual	CBaseEntity* FollowedPlayer();
+	virtual void ClearFollowedPlayer();
+	virtual void	StopFollowing(BOOL clearSchedule, bool saySentence = true );
+	virtual void	StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
 	virtual void	DeclineFollowing( void ) {}
 	void			LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
 	virtual int		MaxFollowers() { return 3; }
