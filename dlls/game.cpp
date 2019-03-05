@@ -759,6 +759,10 @@ cvar_t	sk_scientist_heal1	= { "sk_scientist_heal1","0" };
 cvar_t	sk_scientist_heal2	= { "sk_scientist_heal2","0" };	
 cvar_t	sk_scientist_heal3	= { "sk_scientist_heal3","0" };	
 
+cvar_t	sk_scientist_heal_time1	= { "sk_scientist_heal_time1", "60" };
+cvar_t	sk_scientist_heal_time2	= { "sk_scientist_heal_time2", "60" };
+cvar_t	sk_scientist_heal_time3	= { "sk_scientist_heal_time3", "60" };
+
 cvar_t	sk_soda1	= { "sk_soda1","1" };		
 cvar_t	sk_soda2	= { "sk_soda2","1" };		
 cvar_t	sk_soda3	= { "sk_soda3","1" };		
@@ -1534,6 +1538,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_scientist_heal1 );
 	CVAR_REGISTER( &sk_scientist_heal2 );
 	CVAR_REGISTER( &sk_scientist_heal3 );
+
+	CVAR_REGISTER( &sk_scientist_heal_time1 );
+	CVAR_REGISTER( &sk_scientist_heal_time2 );
+	CVAR_REGISTER( &sk_scientist_heal_time3 );
 	
 	CVAR_REGISTER( &sk_soda1 );
 	CVAR_REGISTER( &sk_soda2 );

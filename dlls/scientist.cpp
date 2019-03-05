@@ -1108,7 +1108,7 @@ void CScientist::Heal( void )
 
 	m_hTargetEnt->TakeHealth( gSkillData.scientistHeal, DMG_GENERIC );
 	// Don't heal again for 1 minute
-	m_healTime = gpGlobals->time + 60;
+	m_healTime = gpGlobals->time + gSkillData.scientistHealTime;
 }
 
 //=========================================================

@@ -427,6 +427,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.healthchargerCapacity = GetSkillCvar ( "sk_healthcharger" );
 	gSkillData.healthkitCapacity = GetSkillCvar ( "sk_healthkit" );
 	gSkillData.scientistHeal = GetSkillCvar ( "sk_scientist_heal" );
+	gSkillData.scientistHealTime = GetSkillCvar ( "sk_scientist_heal_time" );
 	gSkillData.sodaHeal = GetSkillCvar( "sk_soda" );
 
 	// monster damage adj
