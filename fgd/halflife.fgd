@@ -237,6 +237,16 @@
 	UnUseSentence(String) : "Un-Use Sentence"
 	RefusalSentence(String) : "Refusal Sentence"
 	master(string) : "Master" : : "Decline following if locked by master"
+	tolerance(choices) : "Tolerance level" : : "Tolerance to player's hits" =
+	[
+		0 : "Default" : "Monster-specific behavior"
+		1 : "Zero" : "Get provoked on any hit"
+		2 : "Low" : "Get provoked by direct hit or on second hit"
+		3 : "Average" : "Get provoked by some hits"
+		4 : "High" : "Get provoked by some hits, but tends to forgive after some time"
+		5 : "Absolute" : "Never get provoked"
+		6 : "Absolute, don't alert friends" : "Never get provoked, don't alert friends upon death"
+	]
 	suspicious(choices) : "Suspicious" =
 	[
 		0 : "No"

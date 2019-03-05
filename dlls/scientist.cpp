@@ -90,7 +90,7 @@ public:
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	int ObjectCaps( void ) { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; }
-	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	int DefaultToleranceLevel() { return TOLERANCE_ZERO; }
 	void SetActivity( Activity newActivity );
 	Activity GetStoppedActivity( void );
 	int ISoundMask( void );
@@ -748,6 +748,9 @@ void CScientist::TalkInit()
 	m_szGrp[TLK_WOUND] = "SC_WOUND";
 	m_szGrp[TLK_MORTAL] = "SC_MORTAL";
 
+	m_szGrp[TLK_SHOT] = NULL;
+	m_szGrp[TLK_MAD] = NULL;
+
 	// get voice for head
 	switch( pev->body % 3 )
 	{
@@ -767,18 +770,6 @@ void CScientist::TalkInit()
 		m_voicePitch = 100;
 		break;	//slick
 	}
-}
-
-int CScientist::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
-{
-	if( pevInflictor && pevInflictor->flags & FL_CLIENT && IsFriendWithPlayerBeforeProvoked() )
-	{
-		Remember( bits_MEMORY_PROVOKED );
-		StopFollowing( TRUE );
-	}
-
-	// make sure friends talk about it if player hurts scientist...
-	return CTalkMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 //=========================================================

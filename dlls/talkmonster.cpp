@@ -51,6 +51,9 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_fStartSuspicious, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CTalkMonster, m_iszDecline, FIELD_STRING ),
 	DEFINE_FIELD( CTalkMonster, m_flMedicWaitTime, FIELD_TIME ),
+	DEFINE_FIELD( CTalkMonster, m_iTolerance, FIELD_SHORT ),
+	DEFINE_FIELD( CTalkMonster, m_flLastHitByPlayer, FIELD_TIME ),
+	DEFINE_FIELD( CTalkMonster, m_iPlayerHits, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CSquadMonster )
@@ -708,7 +711,8 @@ void CTalkMonster::RunTask( Task_t *pTask )
 void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 {
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
-	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE
+	if( MyToleranceLevel() < TOLERANCE_ABSOLUTE_NO_ALERTS
+			&& ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE
 			&& !m_fStartSuspicious && IsFriendWithPlayerBeforeProvoked() // no point in alerting friends if player is already foe
 			&& !HasMemory( bits_MEMORY_KILLED ) ) // corpses don't alert friends upon gibbing
 	{
@@ -1295,6 +1299,7 @@ void CTalkMonster::SetAnswerQuestion( CTalkMonster *pSpeaker )
 
 int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	int ret = CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 	if( IsAlive() )
 	{
 		// if player damaged this entity, have other friends talk about it
@@ -1310,8 +1315,89 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 				pTalkMonster->ChangeSchedule( slIdleStopShooting );
 			}
 		}
+		ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 	}
-	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return ret;
+}
+
+static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
+{
+	Vector vecDir = reference - pevTest->origin;
+	vecDir.z = 0;
+	vecDir = vecDir.Normalize();
+	Vector forward, angle;
+	angle = pevTest->v_angle;
+	angle.x = 0;
+	UTIL_MakeVectorsPrivate( angle, forward, NULL, NULL );
+
+	// He's facing me, he meant it
+	if( DotProduct( forward, vecDir ) > 0.96 )	// +/- 15 degrees or so
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+{
+	if( m_MonsterState != MONSTERSTATE_PRONE && ( pevAttacker->flags & FL_CLIENT ) && IsFriendWithPlayerBeforeProvoked() )
+	{
+		const int myTolerance = MyToleranceLevel();
+		if ( myTolerance <= TOLERANCE_ZERO )
+		{
+			PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
+			Remember( bits_MEMORY_PROVOKED );
+			StopFollowing( TRUE );
+			return;
+		}
+		// This is a heurstic to determine if the player intended to harm me
+		// If I have an enemy, we can't establish intent (may just be crossfire)
+		if( m_hEnemy == 0 )
+		{
+			bool getMad = false;
+			// If the player was facing directly at me, or I'm already suspicious
+			const bool intendedHit = ( m_afMemory & bits_MEMORY_SUSPICIOUS ) || IsFacing( pevAttacker, pev->origin );
+			if (myTolerance <= TOLERANCE_LOW)
+			{
+				getMad = intendedHit;
+			}
+			else if (myTolerance <= TOLERANCE_AVERAGE)
+			{
+				getMad = intendedHit && m_iPlayerHits >= 2;
+			}
+			else if (myTolerance <= TOLERANCE_HIGH)
+			{
+				getMad = intendedHit && gpGlobals->time - m_flLastHitByPlayer < 4.0 && m_iPlayerHits >= 3;
+			}
+			else
+			{
+				getMad = false;
+			}
+			if( getMad )
+			{
+				// Alright, now I'm pissed!
+				PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
+
+				Remember( bits_MEMORY_PROVOKED );
+				StopFollowing( TRUE );
+			}
+			else
+			{
+				if ( myTolerance >= TOLERANCE_HIGH && gpGlobals->time - m_flLastHitByPlayer >= 4.0 )
+					m_iPlayerHits = 0;
+				m_iPlayerHits++;
+
+				m_flLastHitByPlayer = gpGlobals->time;
+				// Hey, be careful with that
+				PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
+				Remember( bits_MEMORY_SUSPICIOUS );
+			}
+		}
+		else if( !( m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO )
+		{
+			PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
+		}
+	}
 }
 
 bool CTalkMonster::IsWounded()
@@ -1631,6 +1717,11 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "suspicious" ) )
 	{
 		m_fStartSuspicious = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "tolerance" ) )
+	{
+		m_iTolerance = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else 

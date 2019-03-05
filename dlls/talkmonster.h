@@ -69,6 +69,8 @@ typedef enum
 	TLK_SMELL,
 	TLK_WOUND,
 	TLK_MORTAL,
+	TLK_SHOT,
+	TLK_MAD,
 
 	TLK_CGROUPS					// MUST be last entry
 } TALKGROUPNAMES;
@@ -106,6 +108,17 @@ enum
 	LAST_TALKMONSTER_TASK			// MUST be last
 };
 
+enum
+{
+	TOLERANCE_DEFAULT,
+	TOLERANCE_ZERO,
+	TOLERANCE_LOW,
+	TOLERANCE_AVERAGE,
+	TOLERANCE_HIGH,
+	TOLERANCE_ABSOLUTE,
+	TOLERANCE_ABSOLUTE_NO_ALERTS,
+};
+
 class CTalkMonster : public CSquadMonster
 {
 public:
@@ -134,6 +147,7 @@ public:
 	void			RunTask( Task_t *pTask );
 	void			HandleAnimEvent( MonsterEvent_t *pEvent );
 	void			PrescheduleThink( void );
+	void			ReactToPlayerHit(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	
 	// Conversations / communication
 	int				GetVoicePitch( void );
@@ -184,6 +198,8 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	virtual int DefaultToleranceLevel() { return TOLERANCE_LOW; }
+	int MyToleranceLevel() { return m_iTolerance ? m_iTolerance : DefaultToleranceLevel(); }
 
 	struct TalkFriend
 	{
@@ -211,6 +227,10 @@ public:
 
 	EHANDLE		m_hTalkTarget;	// who to look at while talking
 	BOOL m_fStartSuspicious;
+	short m_iTolerance;
+	float m_flLastHitByPlayer;
+	int m_iPlayerHits;
+
 	CUSTOM_SCHEDULES
 };
 

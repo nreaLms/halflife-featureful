@@ -57,7 +57,7 @@ public:
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	virtual int ObjectCaps( void ) { return CTalkMonster :: ObjectCaps() | FCAP_IMPULSE_USE; }
-	int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
+	int DefaultToleranceLevel() { return TOLERANCE_LOW; }
 	BOOL CheckRangeAttack1( float flDot, float flDist );
 
 	void DeclineFollowing( void );
@@ -84,16 +84,12 @@ public:
 	float m_checkAttackTime;
 	BOOL m_lastAttackCheck;
 
-	// UNDONE: What is this for?  It isn't used?
-	float m_flPlayerDamage;// how much pain has the player inflicted on me?
-
 	int bodystate;
 	CUSTOM_SCHEDULES
 	
 protected:
 	void SpawnImpl(const char* modelName, float health);
 	void PrecacheImpl( const char* modelName );
-	int TakeDamageImpl( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType, const char* madSentence, const char* shotSentence );
 	void TraceAttackImpl( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet);
 	Schedule_t *GetScheduleImpl(const char *sentenceKill);
 };
@@ -106,7 +102,6 @@ TYPEDESCRIPTION	CBarney::m_SaveData[] =
 	DEFINE_FIELD( CBarney, m_painTime, FIELD_TIME ),
 	DEFINE_FIELD( CBarney, m_checkAttackTime, FIELD_TIME ),
 	DEFINE_FIELD( CBarney, m_lastAttackCheck, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CBarney, m_flPlayerDamage, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CBarney, CTalkMonster )
@@ -536,6 +531,9 @@ void CBarney::TalkInit()
 	m_szGrp[TLK_WOUND] = "BA_WOUND";
 	m_szGrp[TLK_MORTAL] = "BA_MORTAL";
 
+	m_szGrp[TLK_SHOT] = "BA_SHOT";
+	m_szGrp[TLK_MAD] = "BA_MAD";
+
 	// get voice for head - just one barney voice for now
 	m_voicePitch = 100;
 }
@@ -549,69 +547,6 @@ void CBarney::KeyValue(KeyValueData *pkvd)
 	}
 	else
 		CTalkMonster::KeyValue( pkvd );
-}
-
-static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
-{
-	Vector vecDir = reference - pevTest->origin;
-	vecDir.z = 0;
-	vecDir = vecDir.Normalize();
-	Vector forward, angle;
-	angle = pevTest->v_angle;
-	angle.x = 0;
-	UTIL_MakeVectorsPrivate( angle, forward, NULL, NULL );
-
-	// He's facing me, he meant it
-	if( DotProduct( forward, vecDir ) > 0.96 )	// +/- 15 degrees or so
-	{
-		return TRUE;
-	}
-	return FALSE;
-}
-
-int CBarney::TakeDamageImpl(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType, const char* madSentence, const char* shotSentence )
-{
-	// make sure friends talk about it if player hurts talkmonsters...
-	int ret = CTalkMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
-	if( !IsAlive() || pev->deadflag == DEAD_DYING )
-		return ret;
-
-	if( m_MonsterState != MONSTERSTATE_PRONE && ( pevAttacker->flags & FL_CLIENT ) && IsFriendWithPlayerBeforeProvoked() )
-	{
-		m_flPlayerDamage += flDamage;
-
-		// This is a heurstic to determine if the player intended to harm me
-		// If I have an enemy, we can't establish intent (may just be crossfire)
-		if( m_hEnemy == 0 )
-		{
-			// If the player was facing directly at me, or I'm already suspicious, get mad
-			if( ( m_afMemory & bits_MEMORY_SUSPICIOUS ) || IsFacing( pevAttacker, pev->origin ) )
-			{
-				// Alright, now I'm pissed!
-				PlaySentence( madSentence, 4, VOL_NORM, ATTN_NORM );
-
-				Remember( bits_MEMORY_PROVOKED );
-				StopFollowing( TRUE );
-			}
-			else
-			{
-				// Hey, be careful with that
-				PlaySentence( shotSentence, 4, VOL_NORM, ATTN_NORM );
-				Remember( bits_MEMORY_SUSPICIOUS );
-			}
-		}
-		else if( !( m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO )
-		{
-			PlaySentence( shotSentence, 4, VOL_NORM, ATTN_NORM );
-		}
-	}
-
-	return ret;
-}
-
-int CBarney::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
-{
-	return TakeDamageImpl( pevInflictor, pevAttacker, flDamage, bitsDamageType, "BA_MAD", "BA_SHOT" );
 }
 
 //=========================================================
@@ -914,7 +849,6 @@ public:
 	
 	void AlertSound( void );
 	
-	int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
 
@@ -984,6 +918,9 @@ void COtis::TalkInit()
 	
 	m_szGrp[TLK_WOUND] =	"OT_WOUND";
 	m_szGrp[TLK_MORTAL] =	"OT_MORTAL";
+
+	m_szGrp[TLK_SHOT] = "OT_SHOT";
+	m_szGrp[TLK_MAD] = "OT_MAD";
 	
 	m_voicePitch = 100;
 }
@@ -997,11 +934,6 @@ void COtis :: AlertSound( void )
 			PlaySentence( "OT_ATTACK", RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE );
 		}
 	}
-}
-
-int COtis::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
-{
-	return TakeDamageImpl( pevInflictor, pevAttacker, flDamage, bitsDamageType, "OT_MAD", "OT_SHOT" );
 }
 
 void COtis::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)

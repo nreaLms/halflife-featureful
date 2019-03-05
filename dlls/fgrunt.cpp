@@ -170,6 +170,7 @@ public:
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	int DefaultToleranceLevel() { return TOLERANCE_HIGH; }
 	int IRelationship ( CBaseEntity *pTarget );
 
 	virtual int		Save( CSave &save );
@@ -193,9 +194,6 @@ public:
 
 	int		m_iSentence;
 	int		m_iHead;
-
-	float m_flLastHitByPlayer;
-	int m_iPlayerHits;
 
 	int		m_iBrassShell;
 	int		m_iShotgunShell;
@@ -274,8 +272,6 @@ TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
 	DEFINE_FIELD( CHFGrunt, m_fFirstEncounter, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CHFGrunt, m_cClipSize, FIELD_INTEGER ),
 	DEFINE_FIELD( CHFGrunt, m_iHead, FIELD_INTEGER ),
-	DEFINE_FIELD( CHFGrunt, m_flLastHitByPlayer, FIELD_TIME ),
-	DEFINE_FIELD( CHFGrunt, m_iPlayerHits, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CHFGrunt, CTalkMonster )
@@ -2016,6 +2012,9 @@ void CHFGrunt :: TalkInit()
 
 	m_szGrp[TLK_WOUND] =	"FG_WOUND";
 	m_szGrp[TLK_MORTAL] =	"FG_MORTAL";
+
+	m_szGrp[TLK_SHOT] = "FG_SHOT";
+	m_szGrp[TLK_MAD] = "FG_MAD";
 }
 
 void CHFGrunt::IdleRespond()
@@ -2045,24 +2044,6 @@ void CHFGrunt::AskQuestion()
 		g_fGruntAllyQuestion = 1;
 	}
 }
-
-static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
-{
-	Vector vecDir = (reference - pevTest->origin);
-	vecDir.z = 0;
-	vecDir = vecDir.Normalize();
-	Vector forward, angle;
-	angle = pevTest->v_angle;
-	angle.x = 0;
-	UTIL_MakeVectorsPrivate( angle, forward, NULL, NULL );
-	// He's facing me, he meant it
-	if ( DotProduct( forward, vecDir ) > 0.96 )	// +/- 15 degrees or so
-	{
-		return TRUE;
-	}
-	return FALSE;
-}
-
 
 //=========================================================
 // PainSound
@@ -2148,46 +2129,7 @@ int CHFGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 {
 	Forget( bits_MEMORY_INCOVER );
 
-	// make sure friends talk about it if player hurts talkmonsters...
-	int ret = CTalkMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
-
-	if ( !IsAlive() || pev->deadflag == DEAD_DYING )
-		return ret;
-
-	if ( m_MonsterState != MONSTERSTATE_PRONE && (pevAttacker->flags & FL_CLIENT) && IsFriendWithPlayerBeforeProvoked() )
-	{
-		// This is a heurstic to determine if the player intended to harm me
-		// If I have an enemy, we can't establish intent (may just be crossfire)
-		if ( m_hEnemy == 0 )
-		{
-			// If the player was facing directly at me, or I'm already suspicious, get mad
-			if ( gpGlobals->time - m_flLastHitByPlayer < 4.0 && m_iPlayerHits > 2 && ((m_afMemory & bits_MEMORY_SUSPICIOUS) || IsFacing( pevAttacker, pev->origin )) )
-			{
-				// Alright, now I'm pissed!
-				PlaySentence( "FG_MAD", 4, VOL_NORM, ATTN_NORM );
-
-				Remember( bits_MEMORY_PROVOKED );
-				StopFollowing( TRUE );
-			}
-			else
-			{
-				if ( gpGlobals->time - m_flLastHitByPlayer < 4.0 )
-					m_iPlayerHits++;
-				else
-					m_iPlayerHits = 0;
-				m_flLastHitByPlayer = gpGlobals->time;
-				// Hey, be careful with that
-				PlaySentence( "FG_SHOT", 4, VOL_NORM, ATTN_NORM );
-				Remember( bits_MEMORY_SUSPICIOUS );
-			}
-		}
-		else if ( !(m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO )
-		{
-			PlaySentence( "FG_SHOT", 4, VOL_NORM, ATTN_NORM );
-		}
-	}
-
-	return ret;
+	return CTalkMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
