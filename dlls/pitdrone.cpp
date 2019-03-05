@@ -24,6 +24,7 @@
 #include	"soundent.h"
 #include	"game.h"
 #include	"weapons.h"
+#include	"squadmonster.h"
 #include	"mod_features.h"
 
 #if FEATURE_PITDRONE
@@ -176,7 +177,7 @@ enum
 #define PIT_DRONE_AE_THROW			( 6 )
 #define PIT_DRONE_AE_RELOAD			( 7 )
 
-class CPitDrone : public CBaseMonster
+class CPitDrone : public CSquadMonster
 {
 public:
 	void Spawn(void);
@@ -240,7 +241,7 @@ TYPEDESCRIPTION	CPitDrone::m_SaveData[] =
 	DEFINE_FIELD(CPitDrone, m_flNextSpitTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CPitDrone, CBaseMonster)
+IMPLEMENT_SAVERESTORE(CPitDrone, CSquadMonster)
 
 void CPitDrone::KeyValue(KeyValueData *pkvd)
 {
@@ -251,7 +252,7 @@ void CPitDrone::KeyValue(KeyValueData *pkvd)
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CBaseMonster::KeyValue(pkvd);
+		CSquadMonster::KeyValue(pkvd);
 }
 
 //=========================================================
@@ -259,7 +260,7 @@ void CPitDrone::KeyValue(KeyValueData *pkvd)
 //=========================================================
 int CPitDrone::IgnoreConditions(void)
 {
-	int iIgnore = CBaseMonster::IgnoreConditions();
+	int iIgnore = CSquadMonster::IgnoreConditions();
 
 	if ((m_Activity == ACT_MELEE_ATTACK1) || (m_Activity == ACT_MELEE_ATTACK2))
 	{
@@ -339,7 +340,7 @@ int CPitDrone::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float
 		}
 	}
 
-	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CSquadMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
@@ -349,7 +350,7 @@ BOOL CPitDrone::CheckMeleeAttack1(float flDot, float flDist)
 {
 	// Give a better chance for MeleeAttack2
 	if (RANDOM_LONG(0,2) == 0) {
-		return CBaseMonster::CheckMeleeAttack1(flDot, flDist);
+		return CSquadMonster::CheckMeleeAttack1(flDot, flDist);
 	}
 	return FALSE;
 }
@@ -550,7 +551,7 @@ void CPitDrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 
 	default:
-		CBaseMonster::HandleAnimEvent(pEvent);
+		CSquadMonster::HandleAnimEvent(pEvent);
 	}
 }
 
@@ -608,6 +609,7 @@ void CPitDrone::Spawn()
 	SetMyHealth( gSkillData.pitdroneHealth );
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
+	m_afCapability		= bits_CAP_SQUAD | bits_CAP_DOORS_GROUP;
 
 	m_flNextSpitTime = gpGlobals->time;
 
@@ -709,7 +711,7 @@ void CPitDrone::DeathSound(void)
 void CPitDrone::RunAI(void)
 {
 	// first, do base class stuff
-	CBaseMonster::RunAI();
+	CSquadMonster::RunAI();
 
 	if (m_hEnemy != 0 && m_Activity == ACT_RUN)
 	{
@@ -916,7 +918,7 @@ DEFINE_CUSTOM_SCHEDULES(CPitDrone)
 	slPDroneHideReload
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CPitDrone, CBaseMonster)
+IMPLEMENT_CUSTOM_SCHEDULES(CPitDrone, CSquadMonster)
 
 //=========================================================
 // GetSchedule 
@@ -956,7 +958,7 @@ Schedule_t *CPitDrone::GetSchedule(void)
 		if (HasConditions(bits_COND_ENEMY_DEAD))
 		{
 			// call base class, all code to handle dead enemies is centralized there.
-			return CBaseMonster::GetSchedule();
+			return CSquadMonster::GetSchedule();
 		}
 
 		if (HasConditions(bits_COND_NEW_ENEMY))
@@ -1006,7 +1008,7 @@ Schedule_t *CPitDrone::GetSchedule(void)
 	}
 	}
 
-	return CBaseMonster::GetSchedule();
+	return CSquadMonster::GetSchedule();
 }
 
 //=========================================================
@@ -1036,7 +1038,7 @@ Schedule_t* CPitDrone::GetScheduleOfType(int Type)
 		break;
 	}
 
-	return CBaseMonster::GetScheduleOfType(Type);
+	return CSquadMonster::GetScheduleOfType(Type);
 }
 
 //=========================================================
@@ -1073,7 +1075,7 @@ void CPitDrone::StartTask(Task_t *pTask)
 	}
 	default:
 	{
-		CBaseMonster::StartTask(pTask);
+		CSquadMonster::StartTask(pTask);
 		break;
 	}
 	}
@@ -1099,7 +1101,7 @@ void CPitDrone::RunTask(Task_t *pTask)
 		}
 	default:
 		{
-			CBaseMonster::RunTask( pTask );
+			CSquadMonster::RunTask( pTask );
 			break;
 		}
 	}
