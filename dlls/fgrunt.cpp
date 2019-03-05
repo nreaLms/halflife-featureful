@@ -1889,8 +1889,7 @@ void CHFGrunt :: Spawn()
 
 	m_cAmmoLoaded		= m_cClipSize;
 
-	MonsterInit();
-	SetUse( &CHFGrunt::FollowerUse );
+	TalkMonsterInit();
 }
 
 void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
@@ -2938,8 +2937,7 @@ void CTorch::Spawn()
 	m_cClipSize = TORCH_CLIP_SIZE;
 	m_cAmmoLoaded		= m_cClipSize;
 	m_pBeam = NULL;
-	MonsterInit();
-	SetUse( &CTorch::FollowerUse );
+	TalkMonsterInit();
 }
 
 void CTorch::Precache()
@@ -3513,8 +3511,7 @@ void CMedic::Spawn()
 	SetBodygroup(MEDIC_HEAD_GROUP, m_iHead);
 
 	m_flHealCharge = gSkillData.medicHeal;
-	MonsterInit();
-	SetUse( &CMedic::FollowerUse );
+	TalkMonsterInit();
 }
 
 void CMedic::Precache()

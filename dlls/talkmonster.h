@@ -148,7 +148,8 @@ public:
 	void			HandleAnimEvent( MonsterEvent_t *pEvent );
 	void			PrescheduleThink( void );
 	void			ReactToPlayerHit(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
-	
+	void			TalkMonsterInit();
+
 	// Conversations / communication
 	int				GetVoicePitch( void );
 	virtual void	IdleRespond( void );

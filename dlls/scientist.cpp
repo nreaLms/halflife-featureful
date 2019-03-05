@@ -688,10 +688,7 @@ void CScientist::Spawn()
 {
 	Precache( );
 	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
-	MonsterInit();
-	if (IsFriendWithPlayerBeforeProvoked()) {
-		SetUse( &CTalkMonster::FollowerUse );
-	}
+	TalkMonsterInit();
 }
 
 //=========================================================
@@ -1446,8 +1443,7 @@ void CCleansuitScientist::Spawn()
 {
 	Precache( );
 	SciSpawnHelper("models/cleansuit_scientist.mdl", gSkillData.cleansuitScientistHealth);
-	MonsterInit();
-	SetUse( &CScientist::FollowerUse );
+	TalkMonsterInit();
 }
 
 void CCleansuitScientist::Precache()

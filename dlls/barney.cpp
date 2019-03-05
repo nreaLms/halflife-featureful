@@ -441,11 +441,7 @@ void CBarney::SpawnImpl(const char* modelName, float health)
 
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
-	MonsterInit();
-	
-	if (IsFriendWithPlayerBeforeProvoked()) {
-		SetUse( &CTalkMonster::FollowerUse );
-	}
+	TalkMonsterInit();
 }
 
 void CBarney::Spawn()
@@ -464,10 +460,6 @@ void CBarney::Spawn()
 	{
 		pev->body = BARNEY_BODY_GUNHOLSTERED;
 		m_fGunDrawn = FALSE;
-	}
-	MonsterInit();
-	if (IsFriendWithPlayerBeforeProvoked()) {
-		SetUse( &CTalkMonster::FollowerUse );
 	}
 }
 
@@ -878,8 +870,6 @@ void COtis::Spawn()
  	if (bodystate == OTIS_BODY_GUNDRAWN) {
  		m_fGunDrawn = TRUE;	
  	}
-	MonsterInit();
-	SetUse( &COtis :: FollowerUse );
 }
 
 void COtis::Precache()

@@ -1400,6 +1400,14 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 	}
 }
 
+void CTalkMonster::TalkMonsterInit()
+{
+	MonsterInit();
+	if (IsFriendWithPlayerBeforeProvoked()) {
+		SetUse( &CTalkMonster::FollowerUse );
+	}
+}
+
 bool CTalkMonster::IsWounded()
 {
 	return pev->health <= pev->max_health * 0.75;
