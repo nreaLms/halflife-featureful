@@ -71,6 +71,9 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Human grunts take into account allies that are not in their squad when checking for friendly fire.
 * Security guards now check for friendly fire too.
 * Security guards can be spawned with gun drawn.
+* Scientists can heal other allies beside the player (e.g. security guards and other scientists)
+* The delay before scientist can heal again can be configured via skill.cfg (1 minute by default)
+* Talk monsters can have a configurable tolerance level to player hits.
 
 ### Alien slave features
 
