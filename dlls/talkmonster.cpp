@@ -829,10 +829,10 @@ void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 		CBaseEntity *pFriend = NULL;
 		while( ( pFriend = EnumFriends( pFriend, talkFriend.name, FALSE ) ) )
 		{
-			CBaseMonster *pMonster = pFriend->MyMonsterPointer();
+			CTalkMonster *pMonster = (CTalkMonster*)pFriend->MyMonsterPointer();
 			if( pMonster )
 			{
-				if( pMonster->m_hTargetEnt == pPlayer )
+				if( pMonster->FollowedPlayer() == pPlayer )
 				{
 					count++;
 					if( count > maxFollowers )
