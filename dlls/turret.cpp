@@ -102,6 +102,8 @@ public:
 	int MoveTurret( void );
 	virtual void Shoot( Vector &vecSrc, Vector &vecDirToEnemy ) { };
 
+	void SetEnemy(CBaseEntity* enemy);
+
 	float m_flMaxSpin;		// Max time to spin the barrel w/o a target
 	int m_iSpin;
 
@@ -242,6 +244,7 @@ void CBaseTurret::KeyValue( KeyValueData *pkvd )
 void CBaseTurret::Spawn()
 { 
 	Precache();
+	pev->max_health = pev->health;
 	pev->nextthink		= gpGlobals->time + 1;
 	pev->movetype		= MOVETYPE_FLY;
 	pev->sequence		= 0;
@@ -853,7 +856,7 @@ void CBaseTurret::SearchThink( void )
 	if( m_hEnemy == 0 )
 	{
 		Look( TURRET_RANGE );
-		m_hEnemy = BestVisibleEnemy();
+		SetEnemy(BestVisibleEnemy());
 	}
 
 	// If we've found a target, spin up the barrel and start to attack
@@ -909,7 +912,7 @@ void CBaseTurret::AutoSearchThink( void )
 	if( m_hEnemy == 0 )
 	{
 		Look( TURRET_RANGE );
-		m_hEnemy = BestVisibleEnemy();
+		SetEnemy(BestVisibleEnemy());
 	}
 
 	if( m_hEnemy != 0 )
@@ -930,6 +933,7 @@ void CBaseTurret::TurretDeath( void )
 	if( pev->deadflag != DEAD_DEAD )
 	{
 		pev->deadflag = DEAD_DEAD;
+		FCheckAITrigger();
 
 		float flRndSound = RANDOM_FLOAT( 0, 1 );
 
@@ -1018,6 +1022,12 @@ int CBaseTurret::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	pev->health -= flDamage;
 	if( pev->health <= 0 )
 	{
+		//HACK to trigger on death condition
+		const int deadflag = pev->deadflag;
+		pev->deadflag = DEAD_DEAD;
+		FCheckAITrigger();
+		pev->deadflag = deadflag;
+
 		pev->health = 0;
 		pev->takedamage = DAMAGE_NO;
 		pev->dmgtime = gpGlobals->time;
@@ -1030,6 +1040,10 @@ int CBaseTurret::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 		pev->nextthink = gpGlobals->time + 0.1;
 
 		return 0;
+	} else {
+		SetConditions(bits_COND_LIGHT_DAMAGE);
+		FCheckAITrigger();
+		ClearConditions(bits_COND_LIGHT_DAMAGE);
 	}
 
 	if( pev->health <= 10 )
@@ -1136,6 +1150,16 @@ int CBaseTurret::Classify( void )
 	return CLASS_NONE;
 }
 
+void CBaseTurret::SetEnemy(CBaseEntity *enemy)
+{
+	m_hEnemy = enemy;
+	if (m_hEnemy) {
+		SetConditions(bits_COND_SEE_ENEMY);
+		FCheckAITrigger();
+		ClearConditions(bits_COND_SEE_ENEMY);
+	}
+}
+
 int CBaseTurret::DefaultClassify()
 {
 	return CLASS_MACHINE;
@@ -1231,6 +1255,10 @@ int CSentry::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 		pev->nextthink = gpGlobals->time + 0.1;
 
 		return 0;
+	} else {
+		SetConditions(bits_COND_LIGHT_DAMAGE);
+		FCheckAITrigger();
+		ClearConditions(bits_COND_LIGHT_DAMAGE);
 	}
 
 	return 1;
@@ -1255,6 +1283,7 @@ void CSentry::SentryDeath( void )
 	if( pev->deadflag != DEAD_DEAD )
 	{
 		pev->deadflag = DEAD_DEAD;
+		FCheckAITrigger();
 
 		float flRndSound = RANDOM_FLOAT( 0, 1 );
 
