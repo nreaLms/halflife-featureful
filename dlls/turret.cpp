@@ -1266,7 +1266,7 @@ int CSentry::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 
 void CSentry::SentryTouch( CBaseEntity *pOther )
 {
-	if( pOther && ( pOther->IsPlayer() || ( pOther->pev->flags & FL_MONSTER ) ) && IDefaultRelationship(m_iClass, pOther->Classify()) >= R_DL )
+	if( pOther && ( pOther->IsPlayer() || ( pOther->pev->flags & FL_MONSTER ) ) && IDefaultRelationship(m_iClass ? m_iClass : DefaultClassify(), pOther->Classify()) >= R_DL )
 	{
 		TakeDamage( pOther->pev, pOther->pev, 0, 0 );
 	}
