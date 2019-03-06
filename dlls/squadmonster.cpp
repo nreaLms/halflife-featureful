@@ -424,7 +424,7 @@ void CSquadMonster::StartMonster( void )
 
 		if( iSquadSize )
 		{
-			ALERT( at_aiconsole, "Squad of %d %s formed\n", iSquadSize, STRING( pev->classname ) );
+			ALERT( at_aiconsole, "Squad of %d monsters formed. Leader is %s\n", iSquadSize, STRING( pev->classname ) );
 		}
 
 		if( IsLeader() && FClassnameIs( pev, "monster_human_grunt" ) )
