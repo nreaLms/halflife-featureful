@@ -202,6 +202,7 @@ int CBaseMonster::FindHintNode( void ) { return NO_NODE; }
 void CBaseMonster::ReportAIState( void ) { }
 void CBaseMonster::KeyValue( KeyValueData *pkvd ) { }
 BOOL CBaseMonster::FCheckAITrigger( void ) { return FALSE; }
+BOOL CBaseMonster::FCheckAITrigger( short ) { return FALSE; }
 int CBaseMonster::CanPlaySequence( BOOL fDisregardMonsterState, int interruptLevel ) { return FALSE; }
 BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset ) { return FALSE; }
 Vector CBaseMonster::ShootAtEnemy( const Vector &shootOrigin ) { return g_vecZero; }

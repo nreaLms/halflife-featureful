@@ -188,6 +188,19 @@
 		10: "See Player Unconditional"
 		11: "See Player, Not In Combat"
 	]
+	TriggerAltCondition(Choices) : "Trigger Alternative Condition" : 0 : "Alternative condition to fire TriggerTarget (useful to make an important ally fire the same target both when either provoked or dead which is usually a load game condition)" =
+	[
+		0 : "No Trigger"
+		1 : "See Player, Mad at Player"
+		2 : "Take Damage"
+		3 : "50% Health Remaining"
+		4 : "Death"
+		7 : "Hear World"
+		8 : "Hear Player"
+		9 : "Hear Combat"
+		10: "See Player Unconditional"
+		11: "See Player, Not In Combat"
+	]
 	spawnflags(Flags) =
 	[
 		1 : "WaitTillSeen" 	: 0

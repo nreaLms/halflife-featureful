@@ -97,7 +97,8 @@ public:
 	float m_flDistTooFar;	// if enemy farther away than this, bits_COND_ENEMY_TOOFAR set in CheckEnemy
 	float m_flDistLook;	// distance monster sees (Default 2048)
 
-	int m_iTriggerCondition;// for scripted AI, this is the condition that will cause the activation of the monster's TriggerTarget
+	short m_iTriggerCondition;// for scripted AI, this is the condition that will cause the activation of the monster's TriggerTarget
+	short m_iTriggerAltCondition;
 	string_t m_iszTriggerTarget;// name of target that should be fired. 
 
 	Vector m_HackedGunPos;	// HACK until we can query end of gun
@@ -281,7 +282,8 @@ public:
 	CBaseEntity *CheckTraceHullAttack( float flDist, int iDamage, int iDmgType );
 	BOOL FacingIdeal( void );
 
-	BOOL FCheckAITrigger( void );// checks and, if necessary, fires the monster's trigger target. 
+	BOOL FCheckAITrigger( void );// checks and, if necessary, fires the monster's trigger target.
+	BOOL FCheckAITrigger( short condition );// checks and, if necessary, fires the monster's trigger target.
 	BOOL NoFriendlyFire( void );
 
 	BOOL BBoxFlat( void );

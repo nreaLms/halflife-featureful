@@ -99,7 +99,8 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_flHungryTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_flDistTooFar, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseMonster, m_flDistLook, FIELD_FLOAT ),
-	DEFINE_FIELD( CBaseMonster, m_iTriggerCondition, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseMonster, m_iTriggerCondition, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseMonster, m_iTriggerAltCondition, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_iszTriggerTarget, FIELD_STRING ),
 
 	DEFINE_FIELD( CBaseMonster, m_HackedGunPos, FIELD_VECTOR ),
@@ -2983,7 +2984,12 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerCondition" ) )
 	{
-		m_iTriggerCondition = atoi( pkvd->szValue );
+		m_iTriggerCondition = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerAltCondition" ) )
+	{
+		m_iTriggerAltCondition = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "bloodcolor" ) )
@@ -3014,19 +3020,19 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 //
 // Returns TRUE if the target is fired.
 //=========================================================
-BOOL CBaseMonster::FCheckAITrigger( void )
+BOOL CBaseMonster::FCheckAITrigger( short condition )
 {
 	BOOL fFireTarget;
 
-	if( m_iTriggerCondition == AITRIGGER_NONE )
+	if( condition == AITRIGGER_NONE )
 	{
 		// no conditions, so this trigger is never fired.
-		return FALSE; 
+		return FALSE;
 	}
 
 	fFireTarget = FALSE;
 
-	switch( m_iTriggerCondition )
+	switch( condition )
 	{
 	case AITRIGGER_SEEPLAYER_ANGRY_AT_PLAYER:
 		if( m_hEnemy != 0 && m_hEnemy->IsPlayer() && HasConditions( bits_COND_SEE_ENEMY ) )
@@ -3041,9 +3047,9 @@ BOOL CBaseMonster::FCheckAITrigger( void )
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_NOT_IN_COMBAT:
-		if( HasConditions( bits_COND_SEE_CLIENT ) && 
-			 m_MonsterState != MONSTERSTATE_COMBAT	&& 
-			 m_MonsterState != MONSTERSTATE_PRONE	&& 
+		if( HasConditions( bits_COND_SEE_CLIENT ) &&
+			 m_MonsterState != MONSTERSTATE_COMBAT	&&
+			 m_MonsterState != MONSTERSTATE_PRONE	&&
 			 m_MonsterState != MONSTERSTATE_SCRIPT)
 		{
 			fFireTarget = TRUE;
@@ -3069,7 +3075,7 @@ BOOL CBaseMonster::FCheckAITrigger( void )
 		break;
 /*
 
-  // !!!UNDONE - no persistant game state that allows us to track these two. 
+  // !!!UNDONE - no persistant game state that allows us to track these two.
 
 	case AITRIGGER_SQUADMEMBERDIE:
 		break;
@@ -3102,10 +3108,19 @@ BOOL CBaseMonster::FCheckAITrigger( void )
 		ALERT( at_aiconsole, "AI Trigger Fire Target\n" );
 		FireTargets( STRING( m_iszTriggerTarget ), this, this, USE_TOGGLE, 0 );
 		m_iTriggerCondition = AITRIGGER_NONE;
+		m_iTriggerAltCondition = AITRIGGER_NONE;
 		return TRUE;
 	}
 
 	return FALSE;
+}
+
+BOOL CBaseMonster::FCheckAITrigger( void )
+{
+	BOOL ret = FCheckAITrigger( m_iTriggerCondition );
+	if (!ret)
+		return FCheckAITrigger( m_iTriggerAltCondition );
+	return ret;
 }
 
 //=========================================================	
