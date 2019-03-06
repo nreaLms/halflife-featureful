@@ -252,7 +252,9 @@ void CSquadMonster::SquadMakeEnemy( CBaseEntity *pEnemy )
 		if( pMember )
 		{
 			// reset members who aren't activly engaged in fighting
-			if( pMember->m_hEnemy != pEnemy && !pMember->HasConditions( bits_COND_SEE_ENEMY ) )
+			if( pMember->m_hEnemy != pEnemy && !pMember->HasConditions( bits_COND_SEE_ENEMY )
+					// My enemy might be not an enemy for member of my squad, e.g. if I was provoked by player.
+					&& pMember->IRelationship(pEnemy) >= R_DL )
 			{
 				if( pMember->m_hEnemy != 0 )
 				{
