@@ -3676,7 +3676,6 @@ void CMedic::RestoreTargetEnt()
 		if( m_hEnemy != 0 )
 			m_IdealMonsterState = MONSTERSTATE_ALERT;
 		ClearConditions( bits_COND_CLIENT_PUSH );
-		ClearSchedule();
 	}
 }
 
