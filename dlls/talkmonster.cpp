@@ -713,7 +713,7 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
 	if( MyToleranceLevel() < TOLERANCE_ABSOLUTE_NO_ALERTS
 			&& ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE
-			&& !m_fStartSuspicious && IsFriendWithPlayerBeforeProvoked() // no point in alerting friends if player is already foe
+			&& IsFriendWithPlayerBeforeProvoked() // no point in alerting friends if player is already foe
 			&& !HasMemory( bits_MEMORY_KILLED ) ) // corpses don't alert friends upon gibbing
 	{
 		AlertFriends();
@@ -729,6 +729,15 @@ void CTalkMonster::OnDying()
 	StopTalking();
 	SetUse( NULL );
 	CSquadMonster::OnDying();
+}
+
+void CTalkMonster::StartMonster()
+{
+	CBaseMonster::StartMonster();
+	if (m_fStartSuspicious) {
+		ALERT(at_console, "Talk Monster Pre-Provoked\n");
+		Remember(bits_MEMORY_PROVOKED);
+	}
 }
 
 CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, int listNumber, BOOL bTrace )
@@ -1314,8 +1323,8 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 				CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
 				pTalkMonster->ChangeSchedule( slIdleStopShooting );
 			}
+			ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 		}
-		ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 	}
 	return ret;
 }
@@ -1340,63 +1349,60 @@ static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
 
 void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
-	if( m_MonsterState != MONSTERSTATE_PRONE && ( pevAttacker->flags & FL_CLIENT ) && IsFriendWithPlayerBeforeProvoked() )
+	const int myTolerance = MyToleranceLevel();
+	if ( myTolerance <= TOLERANCE_ZERO )
 	{
-		const int myTolerance = MyToleranceLevel();
-		if ( myTolerance <= TOLERANCE_ZERO )
+		PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
+		Remember( bits_MEMORY_PROVOKED );
+		StopFollowing( TRUE );
+		return;
+	}
+	// This is a heurstic to determine if the player intended to harm me
+	// If I have an enemy, we can't establish intent (may just be crossfire)
+	if( m_hEnemy == 0 )
+	{
+		bool getMad = false;
+		// If the player was facing directly at me, or I'm already suspicious
+		const bool intendedHit = ( m_afMemory & bits_MEMORY_SUSPICIOUS ) || IsFacing( pevAttacker, pev->origin );
+		if (myTolerance <= TOLERANCE_LOW)
 		{
+			getMad = intendedHit;
+		}
+		else if (myTolerance <= TOLERANCE_AVERAGE)
+		{
+			getMad = intendedHit && m_iPlayerHits >= 2;
+		}
+		else if (myTolerance <= TOLERANCE_HIGH)
+		{
+			getMad = intendedHit && gpGlobals->time - m_flLastHitByPlayer < 4.0 && m_iPlayerHits >= 3;
+		}
+		else
+		{
+			getMad = false;
+		}
+		if( getMad )
+		{
+			// Alright, now I'm pissed!
 			PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
+
 			Remember( bits_MEMORY_PROVOKED );
 			StopFollowing( TRUE );
-			return;
 		}
-		// This is a heurstic to determine if the player intended to harm me
-		// If I have an enemy, we can't establish intent (may just be crossfire)
-		if( m_hEnemy == 0 )
+		else
 		{
-			bool getMad = false;
-			// If the player was facing directly at me, or I'm already suspicious
-			const bool intendedHit = ( m_afMemory & bits_MEMORY_SUSPICIOUS ) || IsFacing( pevAttacker, pev->origin );
-			if (myTolerance <= TOLERANCE_LOW)
-			{
-				getMad = intendedHit;
-			}
-			else if (myTolerance <= TOLERANCE_AVERAGE)
-			{
-				getMad = intendedHit && m_iPlayerHits >= 2;
-			}
-			else if (myTolerance <= TOLERANCE_HIGH)
-			{
-				getMad = intendedHit && gpGlobals->time - m_flLastHitByPlayer < 4.0 && m_iPlayerHits >= 3;
-			}
-			else
-			{
-				getMad = false;
-			}
-			if( getMad )
-			{
-				// Alright, now I'm pissed!
-				PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
+			if ( myTolerance >= TOLERANCE_HIGH && gpGlobals->time - m_flLastHitByPlayer >= 4.0 )
+				m_iPlayerHits = 0;
+			m_iPlayerHits++;
 
-				Remember( bits_MEMORY_PROVOKED );
-				StopFollowing( TRUE );
-			}
-			else
-			{
-				if ( myTolerance >= TOLERANCE_HIGH && gpGlobals->time - m_flLastHitByPlayer >= 4.0 )
-					m_iPlayerHits = 0;
-				m_iPlayerHits++;
-
-				m_flLastHitByPlayer = gpGlobals->time;
-				// Hey, be careful with that
-				PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
-				Remember( bits_MEMORY_SUSPICIOUS );
-			}
-		}
-		else if( !( m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO )
-		{
+			m_flLastHitByPlayer = gpGlobals->time;
+			// Hey, be careful with that
 			PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
+			Remember( bits_MEMORY_SUSPICIOUS );
 		}
+	}
+	else if( !( m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO )
+	{
+		PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
 	}
 }
 
@@ -1545,12 +1551,6 @@ void CTalkMonster::PrescheduleThink( void )
 	{
 		SetConditions( bits_COND_CLIENT_UNSEEN );
 	}
-	if (m_fStartSuspicious) {
-		if (!HasMemory(bits_MEMORY_PROVOKED)) {
-			ALERT(at_console, "Talk Monster Pre-Provoked\n");
-			Remember(bits_MEMORY_PROVOKED);
-		}
-	}
 	if (IsFollowingPlayer() && IsLockedByMaster())
 	{
 		StopFollowing(TRUE, false);
@@ -1590,6 +1590,12 @@ int CTalkMonster::IRelationship( CBaseEntity *pTarget )
 		if( m_afMemory & bits_MEMORY_PROVOKED )
 			return R_HT;
 	return CSquadMonster::IRelationship( pTarget );
+}
+
+bool CTalkMonster::IsFriendWithPlayerBeforeProvoked()
+{
+	const int relation = IDefaultRelationship(CLASS_PLAYER);
+	return !m_fStartSuspicious && relation < R_DL && relation != R_FR;
 }
 
 void CTalkMonster::StopFollowing(BOOL clearSchedule , bool saySentence)

@@ -72,11 +72,7 @@ void CDrillSergeant::Spawn()
 
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
-	MonsterInit();
-
-	if (IsFriendWithPlayerBeforeProvoked()) {
-		SetUse( &CDrillSergeant::DrillUse );
-	}
+	TalkMonsterInit();
 }
 
 void CDrillSergeant::DrillUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)

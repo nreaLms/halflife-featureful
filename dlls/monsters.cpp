@@ -2237,12 +2237,6 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 	return iEnemy[classify1][classify2];
 }
 
-bool CBaseMonster::IsFriendWithPlayerBeforeProvoked()
-{
-	int relation = IDefaultRelationship(CLASS_PLAYER);
-	return relation < R_DL && relation != R_FR;
-}
-
 //=========================================================
 // FindCover - tries to find a nearby node that will hide
 // the caller from its enemy. 

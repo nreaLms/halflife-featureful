@@ -144,7 +144,6 @@ public:
 	virtual int IRelationship( CBaseEntity *pTarget );
 	int IDefaultRelationship(CBaseEntity *pTarget );
 	int IDefaultRelationship( int classify );
-	bool IsFriendWithPlayerBeforeProvoked();
 	
 	static int IDefaultRelationship(int classify1, int classify2);
 	
