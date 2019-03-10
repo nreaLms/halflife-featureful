@@ -210,7 +210,7 @@
 		128: "WaitForScript" 	: 0
 		256: "Pre-Disaster" 	: 0
 		512: "Fade Corpse"	: 0
-		1024: "No yellow blobs" : 0
+		8192: "No yellow blobs" : 0
 	]
 	scale(string) : "Scale (1.0 = normal size)"
 	health(string) : "Custom Health"
@@ -2479,6 +2479,10 @@
 		0 : "Gun Holstered"
 		1 : "Gun Drawn"
 	]
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Gun" : 0
+	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") = monster_barney_dead : "Dead Barney"
 [
@@ -2594,6 +2598,10 @@
 		50 : "repel_die"
 		51 : "working"
 		52 : "standing"
+	]
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Gun" : 0
 	]
 ]
 
@@ -2849,6 +2857,10 @@
 		80 : "pipetoss"
 		81 : "plunger"
 	]
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Gun" : 0
+	]
 ]
 @PointClass base(Weapon, Targetx, RenderFields, Sequence) studio("models/w_grenade.mdl") = monster_handgrenade : "Live Handgrenade" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/headcrab.mdl") = monster_headcrab : "Head Crab"
@@ -3003,6 +3015,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
 	]
 	netname(string) : "Squad Name"
 	weapons(Choices) : "Weapons" : 1 =
@@ -3182,6 +3195,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
 	]
 
 	weapons(Choices) : "Weapons" : 3 =
@@ -3291,7 +3305,7 @@
 	]
 	spawnflags(Flags) =
 	[
-		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
 	]
 	netname(string) : "Squad Name"
 	weapons(Choices) : "Weapons" : 3 =
@@ -3418,6 +3432,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
 	]
 
 	head(Choices) : "Heads" : -1 =
@@ -3502,6 +3517,10 @@
 		1 : "Desert Eagle"
 		2 : "9mm Handgun"
 		4 : "Hypodermic Needle"
+	]
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Gun" : 0
 	]
 ]
 
@@ -3595,6 +3614,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
 	]
 	weapons(Choices) : "Weapons" : 1 =
 	[
@@ -3664,6 +3684,10 @@
 	[
 		1 : "Desert Eagle"
 		2 : "Blow Torch"
+	]
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Gun" : 0
 	]
 ]
 
@@ -3755,6 +3779,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
 	]
 
 	head(Choices) : "Heads" : 0 =
@@ -4002,6 +4027,10 @@
 		0 : "Head with hair"
 		1 : "Bald Head"
 	]
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Gun" : 0
+	]
 ]
 
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis_dead : "Dead Otis"
@@ -4161,6 +4190,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+		1024: "Don't Drop Roach" : 0
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/strooper.mdl") = monster_shocktrooper_dead : "Dead Shock Trooper"
@@ -4831,6 +4861,7 @@
 	// 	2 : "PVS On/Off" : 0  // not implemented
 		4 : "Cyclic" : 0
 		8 : "MonsterClip" : 0
+		1024: "Don't Drop Gun" : 0
 		2048 : "No ground check" : 0
 	]
 

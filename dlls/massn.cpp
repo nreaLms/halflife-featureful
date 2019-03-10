@@ -140,21 +140,23 @@ void CMassn::GibMonster( void )
 
 void CMassn::DropMyItems(BOOL isGibbed)
 {
-	Vector vecGunPos;
-	Vector vecGunAngles;
-	GetAttachment( 0, vecGunPos, vecGunAngles );
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	{
+		Vector vecGunPos;
+		Vector vecGunAngles;
+		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-	if (!isGibbed) {
-		SetBodygroup( MASSN_GUN_GROUP, MASSN_GUN_NONE );
-	}
-
-	if( FBitSet( pev->weapons, MASSN_SNIPERRIFLE ) ) {
-		DropMyItem( "weapon_sniperrifle", vecGunPos, vecGunAngles, isGibbed );
-	} else if ( FBitSet( pev->weapons, MASSN_9MMAR ) ) {
-		DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
-	}
-	if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) ) {
-		DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+		if (!isGibbed) {
+			SetBodygroup( MASSN_GUN_GROUP, MASSN_GUN_NONE );
+		}
+		if( FBitSet( pev->weapons, MASSN_SNIPERRIFLE ) ) {
+			DropMyItem( "weapon_sniperrifle", vecGunPos, vecGunAngles, isGibbed );
+		} else if ( FBitSet( pev->weapons, MASSN_9MMAR ) ) {
+			DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
+		}
+		if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) ) {
+			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+		}
 	}
 	pev->weapons = 0;
 }
@@ -388,7 +390,7 @@ void CDeadMassn::Spawn( )
 	{
 		SetBodygroup(MASSN_GUN_GROUP, MASSN_GUN_MP5);
 	}
-	if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
+	if (FBitSet( pev->weapons, MASSN_SNIPERRIFLE ))
 	{
 		SetBodygroup(MASSN_GUN_GROUP, MASSN_GUN_SNIPERRIFLE);
 	}

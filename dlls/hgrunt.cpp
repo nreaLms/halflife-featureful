@@ -233,21 +233,23 @@ void CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const 
 
 void CHGrunt::DropMyItems(BOOL isGibbed)
 {
-	Vector vecGunPos;
-	Vector vecGunAngles;
-	GetAttachment( 0, vecGunPos, vecGunAngles );
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	{
+		Vector vecGunPos;
+		Vector vecGunAngles;
+		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-	if (!isGibbed) {
-		SetBodygroup( GUN_GROUP, GUN_NONE );
-	}
-
-	if( FBitSet( pev->weapons, HGRUNT_SHOTGUN ) ) {
-		DropMyItem( "weapon_shotgun", vecGunPos, vecGunAngles, isGibbed );
-	} else if ( FBitSet( pev->weapons, HGRUNT_9MMAR ) ) {
-		DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
-	}
-	if( FBitSet( pev->weapons, HGRUNT_GRENADELAUNCHER ) ) {
-		DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+		if (!isGibbed) {
+			SetBodygroup( GUN_GROUP, GUN_NONE );
+		}
+		if( FBitSet( pev->weapons, HGRUNT_SHOTGUN ) ) {
+			DropMyItem( "weapon_shotgun", vecGunPos, vecGunAngles, isGibbed );
+		} else if ( FBitSet( pev->weapons, HGRUNT_9MMAR ) ) {
+			DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
+		}
+		if( FBitSet( pev->weapons, HGRUNT_GRENADELAUNCHER ) ) {
+			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+		}
 	}
 	pev->weapons = 0;
 }
@@ -2343,6 +2345,10 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	if (!pGrunt) {
 		UTIL_Remove( this );
 		return;
+	}
+	if (FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	{
+		SetBits(pEntity->pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN);
 	}
 	pEntity->pev->weapons = pev->weapons;
 	pEntity->pev->health = pev->health;

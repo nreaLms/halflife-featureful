@@ -1182,32 +1182,32 @@ void CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const
 
 void CHFGrunt::DropMyItems(BOOL isGibbed)
 {
-	Vector vecGunPos;
-	Vector vecGunAngles;
-	GetAttachment( 0, vecGunPos, vecGunAngles );
-
-	if (!isGibbed) {
-		SetBodygroup( FG_GUN_GROUP, FG_GUN_NONE );
-	}
-
-	GetAttachment( 0, vecGunPos, vecGunAngles );
-
-	if (FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
 	{
-		DropMyItem( "weapon_shotgun", vecGunPos, vecGunAngles, isGibbed );
-	}
-	else if (FBitSet( pev->weapons, FGRUNT_9MMAR ))
-	{
-		DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
-	}
-	else if (FBitSet( pev->weapons, FGRUNT_M249 ))
-	{
-		DropMyItem( M249_DROP_NAME, vecGunPos, vecGunAngles, isGibbed );
-	}
+		Vector vecGunPos;
+		Vector vecGunAngles;
+		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-	if (FBitSet( pev->weapons, FGRUNT_GRENADELAUNCHER ))
-	{
-		DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+		if (!isGibbed) {
+			SetBodygroup( FG_GUN_GROUP, FG_GUN_NONE );
+		}
+		if (FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
+		{
+			DropMyItem( "weapon_shotgun", vecGunPos, vecGunAngles, isGibbed );
+		}
+		else if (FBitSet( pev->weapons, FGRUNT_9MMAR ))
+		{
+			DropMyItem( "weapon_9mmAR", vecGunPos, vecGunAngles, isGibbed );
+		}
+		else if (FBitSet( pev->weapons, FGRUNT_M249 ))
+		{
+			DropMyItem( M249_DROP_NAME, vecGunPos, vecGunAngles, isGibbed );
+		}
+
+		if (FBitSet( pev->weapons, FGRUNT_GRENADELAUNCHER ))
+		{
+			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+		}
 	}
 	pev->weapons = 0;
 }
@@ -3048,13 +3048,16 @@ void CTorch::GibMonster()
 
 void CTorch::DropMyItems(BOOL isGibbed)
 {
-	if (!isGibbed) {
-		pev->body = TORCH_GUN_NONE;
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	{
+		if (!isGibbed) {
+			pev->body = TORCH_GUN_NONE;
+		}
+		Vector	vecGunPos;
+		Vector	vecGunAngles;
+		GetAttachment( 0, vecGunPos, vecGunAngles );
+		DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
 	}
-	Vector	vecGunPos;
-	Vector	vecGunAngles;
-	GetAttachment( 0, vecGunPos, vecGunAngles );
-	DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
 }
 
 void CTorch::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
@@ -3618,16 +3621,19 @@ void CMedic::GibMonster()
 
 void CMedic::DropMyItems(BOOL isGibbed)
 {
-	if (!isGibbed) {
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
-	}
-	Vector	vecGunPos;
-	Vector	vecGunAngles;
-	GetAttachment( 0, vecGunPos, vecGunAngles );
-	if (FBitSet(pev->weapons, MEDIC_EAGLE))
-		DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
-	else if (FBitSet(pev->weapons, MEDIC_HANDGUN)) {
-		DropMyItem("weapon_9mmhandgun", vecGunPos, vecGunAngles, isGibbed);
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	{
+		if (!isGibbed) {
+			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
+		}
+		Vector	vecGunPos;
+		Vector	vecGunAngles;
+		GetAttachment( 0, vecGunPos, vecGunAngles );
+		if (FBitSet(pev->weapons, MEDIC_EAGLE))
+			DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
+		else if (FBitSet(pev->weapons, MEDIC_HANDGUN)) {
+			DropMyItem("weapon_9mmhandgun", vecGunPos, vecGunAngles, isGibbed);
+		}
 	}
 }
 
