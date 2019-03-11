@@ -45,6 +45,7 @@ cvar_t bhopcap		= { "mp_bhopcap", "1", FCVAR_SERVER };
 
 cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
 cvar_t use_through_walls = { "use_through_walls", "1", FCVAR_SERVER };
+cvar_t tridepth = { "tridepth", "1", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
 
@@ -824,6 +825,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );
 	CVAR_REGISTER( &use_through_walls );
+	CVAR_REGISTER( &tridepth );
 
 	CVAR_REGISTER( &teamplay );
 	CVAR_REGISTER( &fraglimit );
