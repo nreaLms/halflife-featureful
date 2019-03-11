@@ -643,7 +643,7 @@ void CEyeScanner::Spawn()
 {
 	Precache();
 	pev->solid = SOLID_NOT;
-	pev->movetype = MOVETYPE_FLY;
+	pev->movetype = MOVETYPE_NONE;
 	pev->takedamage = DAMAGE_NO;
 	pev->health = 1;
 	pev->weapons = 0;
@@ -651,7 +651,7 @@ void CEyeScanner::Spawn()
 
 	SET_MODEL(ENT(pev), "models/EYE_SCANNER.mdl");
 	UTIL_SetOrigin(pev, pev->origin);
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 48));
+	UTIL_SetSize(pev, Vector(-12, -12, 32), Vector(12, 12, 72));
 	SetActivity(ACT_CROUCHIDLE);
 	ResetSequenceInfo();
 	SetThink(NULL);
