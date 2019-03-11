@@ -81,6 +81,7 @@ enum
 	SCHED_MOVE_AWAY,		// Try to get out of the player's way
 	SCHED_MOVE_AWAY_FOLLOW,	// same, but follow afterward
 	SCHED_MOVE_AWAY_FAIL,	// Turn back toward player
+	SCHED_FOLLOW_FALLIBLE,
 	SCHED_FIND_MEDIC,
 
 	LAST_TALKMONSTER_SCHEDULE		// MUST be last

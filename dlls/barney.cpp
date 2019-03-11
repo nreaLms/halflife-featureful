@@ -109,26 +109,6 @@ IMPLEMENT_SAVERESTORE( CBarney, CTalkMonster )
 //=========================================================
 // AI Schedules Specific to this monster
 //=========================================================
-Task_t tlBaFollow[] =
-{
-	{ TASK_MOVE_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
-	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_FACE },
-};
-
-Schedule_t slBaFollow[] =
-{
-	{
-		tlBaFollow,
-		ARRAYSIZE( tlBaFollow ),
-		bits_COND_NEW_ENEMY |
-		bits_COND_LIGHT_DAMAGE |
-		bits_COND_HEAVY_DAMAGE |
-		bits_COND_HEAR_SOUND |
-		bits_COND_PROVOKED,
-		bits_SOUND_DANGER,
-		"Follow"
-	},
-};
 
 //=========================================================
 // BarneyDraw - much better looking draw schedule for when
@@ -234,7 +214,6 @@ Schedule_t slBaRangeAttack1[] =
 
 DEFINE_CUSTOM_SCHEDULES( CBarney )
 {
-	slBaFollow,
 	slBarneyEnemyDraw,
 	slBaFaceTarget,
 	slIdleBaStand,
@@ -663,7 +642,7 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 		else
 			return psched;
 	case SCHED_TARGET_CHASE:
-		return slBaFollow;
+		return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
 	case SCHED_IDLE_STAND:
 		// call base class default so that scientist will talk
 		// when standing during idle

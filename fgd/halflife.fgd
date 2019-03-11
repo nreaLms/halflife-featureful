@@ -4309,6 +4309,10 @@
 		2 : "Luther"
 		3 : "Slick"
 	]
+	spawnflags(Flags) =
+	[
+		32768 : "Don't stop following" : 0
+	]
 ]
 
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist_dead : "Dead Cleansuit Scientist"
@@ -4356,7 +4360,7 @@
 
 @PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist : "Scared Scientist" 
 [
-      body(Choices) : "Body" : -1 =
+	body(Choices) : "Body" : -1 =
 	[
 		-1 : "Random"
 		0 : "Glasses"
@@ -4494,6 +4498,10 @@
 		125 : "gluonshow"
 		126 : "crouch"
 		127 : "kneel"
+	]
+	spawnflags(Flags) =
+	[
+		32768 : "Don't stop following" : 0
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist_dead : "Dead Scientist"

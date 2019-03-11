@@ -37,6 +37,8 @@
 #define		NUM_SCIENTIST_BODIES 4
 #endif
 
+#define SF_SCI_DONT_STOP_FOLLOWING (1 << 15)
+
 enum
 {
 	HEAD_GLASSES = 0,
@@ -145,27 +147,6 @@ IMPLEMENT_SAVERESTORE( CScientist, CTalkMonster )
 //=========================================================
 // AI Schedules Specific to this monster
 //=========================================================
-Task_t	tlFollow[] =
-{
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_CANT_FOLLOW },	// If you fail, bail out of follow
-	{ TASK_MOVE_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
-	//{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_FACE },
-};
-
-Schedule_t slFollow[] =
-{
-	{
-		tlFollow,
-		ARRAYSIZE( tlFollow ),
-		bits_COND_NEW_ENEMY |
-		bits_COND_LIGHT_DAMAGE |
-		bits_COND_HEAVY_DAMAGE |
-		bits_COND_HEAR_SOUND,
-		bits_SOUND_COMBAT |
-		bits_SOUND_DANGER,
-		"Follow"
-	},
-};
 
 Task_t tlFollowScared[] =
 {
@@ -428,7 +409,6 @@ Schedule_t	slDisarmNeedle[] =
 
 DEFINE_CUSTOM_SCHEDULES( CScientist )
 {
-	slFollow,
 	slFaceTarget,
 	slIdleSciStand,
 	slFear,
@@ -866,7 +846,10 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 		else
 			return psched;
 	case SCHED_TARGET_CHASE:
-		return slFollow;
+		if (FBitSet(pev->spawnflags, SF_SCI_DONT_STOP_FOLLOWING))
+			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
+		else
+			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW_FALLIBLE);
 	case SCHED_CANT_FOLLOW:
 		return slStopFollowing;
 	case SCHED_PANIC:

@@ -372,26 +372,7 @@ int CHFGrunt::IRelationship ( CBaseEntity *pTarget )
 //=========================================================
 // AI Schedules Specific to this monster
 //=========================================================
-Task_t	tlFGruntFollow[] =
-{
-	{ TASK_MOVE_TO_TARGET_RANGE,(float)128		},	// Move within 128 of target ent (client)
-	{ TASK_SET_SCHEDULE,		(float)SCHED_TARGET_FACE },
-};
 
-Schedule_t	slFGruntFollow[] =
-{
-	{
-		tlFGruntFollow,
-		ARRAYSIZE ( tlFGruntFollow ),
-		bits_COND_NEW_ENEMY		|
-		bits_COND_LIGHT_DAMAGE	|
-		bits_COND_HEAVY_DAMAGE	|
-		bits_COND_HEAR_SOUND |
-		bits_COND_PROVOKED,
-		bits_SOUND_DANGER,
-		"Follow"
-	},
-};
 Task_t	tlFGruntFaceTarget[] =
 {
 	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
@@ -1062,7 +1043,6 @@ Schedule_t	slFGruntRepelLand[] =
 
 DEFINE_CUSTOM_SCHEDULES( CHFGrunt )
 {
-	slFGruntFollow,
 	slFGruntFaceTarget,
 	slFGruntIdleStand,
 	slFGruntFail,
@@ -2157,7 +2137,7 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_TARGET_CHASE:
 		{
-			return slFGruntFollow;
+			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
 		}
 		break;
 	case SCHED_IDLE_STAND:
