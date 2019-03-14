@@ -616,11 +616,11 @@
 	TriggerOnEmpty(target_destination) : "Trigger On Empty"
 	TriggerOnRecharged(target_destination) : "Trigger On Recharged"
 	TriggerOnFirstUse(target_destination) : "Trigger On First Use"
-	noise(sound) : "Charging sound"
-	noise1(sound) : "Deny sound"
-	noise2(sound) : "Start charging sound"
-	noise3(sound) : "Recharge sound"
-	capacity(integer) : "Custom capacity"
+	CustomLoopSound(sound) : "Custom Loop Sound"
+	CustomDeniedSound(sound) : "Custom Denied Sound"
+	CustomStartSound(sound) : "Custom Start Sound"
+	CustomRechargeSound(sound) : "Custom Recharge Sound"
+	CustomJuice(integer) : "Custom Juice Amount"
 	spawnflags(flags) =
 	[
 		1: "Start off" : 0
