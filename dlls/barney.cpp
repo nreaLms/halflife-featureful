@@ -56,7 +56,7 @@ public:
 
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
-	virtual int ObjectCaps( void ) { return CTalkMonster :: ObjectCaps() | FCAP_IMPULSE_USE; }
+	virtual int ObjectCaps( void ) { return CTalkMonster :: ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYDIRECT_USE; }
 	int DefaultToleranceLevel() { return TOLERANCE_LOW; }
 	BOOL CheckRangeAttack1( float flDot, float flDist );
 

@@ -94,7 +94,7 @@ public:
 	void Off( void );
 	void EXPORT Recharge( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual int ObjectCaps( void ) { return ( CBaseAnimating::ObjectCaps() | FCAP_CONTINUOUS_USE ); }
+	virtual int ObjectCaps( void ) { return ( CBaseAnimating::ObjectCaps() | FCAP_CONTINUOUS_USE | FCAP_ONLYDIRECT_USE ); }
 	void TurnChargeToPlayer(const Vector &player);
 	void SetChargeState(int state);
 	void SetChargeController(float yaw);

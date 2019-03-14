@@ -624,6 +624,7 @@
 	spawnflags(flags) =
 	[
 		1: "Start off" : 0
+		16: "Direct use only": 0
 	]
 ]
 
@@ -1343,6 +1344,7 @@
 	spawnflags(flags) =
 	[
 		1: "Don't move" : 0
+		16: "Direct use only": 0
 		32: "Toggle" : 0
 		64: "Sparks" : 0
 		256:"Touch Activates": 0
@@ -1411,10 +1413,22 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Door, ZHLT) = func_door : "Basic door" []
+@SolidClass base(Door, ZHLT) = func_door : "Basic door"
+[
+	directuse(choices) : "Direct use only" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+]
 
 @SolidClass base(Door, ZHLT) = func_door_rotating : "Rotating door"
 [
+	directuse(choices) : "Direct use only" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 	spawnflags(flags) =
 	[
 		2 : "Reverse Dir" : 0
@@ -1566,6 +1580,7 @@
 	[
 		1 : "Not solid" : 0
 		2 : "Reverse Dir" : 0
+		16: "Direct use only": 0
 		32: "Toggle" : 0
 		64: "X Axis" : 0
 		128: "Y Axis" : 0

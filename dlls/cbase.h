@@ -41,6 +41,8 @@ CBaseEntity
 #define		FCAP_DIRECTIONAL_USE			0x00000040		// Player sends +/- 1 when using (currently only tracktrains)
 #define		FCAP_MASTER				0x00000080		// Can be used to "master" other entities (like multisource)
 
+#define		FCAP_ONLYDIRECT_USE			0x00000100 // Don't allow using through walls, from sohl
+
 // UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 #define		FCAP_FORCE_TRANSITION		0x00000080		// ALWAYS goes across transitions
 
@@ -666,7 +668,7 @@ public:
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 	// Buttons that don't take damage can be IMPULSE used
-	virtual int ObjectCaps( void ) { return (CBaseToggle:: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | (pev->takedamage?0:FCAP_IMPULSE_USE); }
+	virtual int ObjectCaps( void );
 
 	BOOL m_fStayPushed;	// button stays pushed in until touched again?
 	BOOL m_fRotating;		// a rotating button?  default is a sliding button.

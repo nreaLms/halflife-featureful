@@ -1546,49 +1546,57 @@ void CBasePlayer::PlayerUse( void )
 	Vector vecLOS;
 	float flMaxDot = VIEW_FIELD_NARROW;
 	float flDot;
+	TraceResult tr;
+	int caps;
 
 	UTIL_MakeVectors( pev->v_angle );// so we know which way we are facing
 
-	while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, PLAYER_SEARCH_RADIUS ) ) != NULL )
+	UTIL_TraceLine( pev->origin + pev->view_ofs,
+						pev->origin + pev->view_ofs + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS),
+						dont_ignore_monsters, ENT(pev), &tr );
+	if (tr.pHit)
 	{
-		if( pObject->ObjectCaps() & ( FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE ) )
+		pObject = CBaseEntity::Instance(tr.pHit);
+		if (!pObject || !(pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE)))
 		{
-			// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
-			// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
-			// when player hits the use key. How many objects can be in that area, anyway? (sjb)
-			vecLOS = ( VecBModelOrigin( pObject->pev ) - ( pev->origin + pev->view_ofs ) );
-
-			// This essentially moves the origin of the target to the corner nearest the player to test to see 
-			// if it's "hull" is in the view cone
-			vecLOS = UTIL_ClampVectorToBox( vecLOS, pObject->pev->size * 0.5 );
-
-			if (!use_through_walls.value)
-			{
-				TraceResult tr;
-				UTIL_TraceLine(pev->origin, pObject->Center(), dont_ignore_monsters, edict(), &tr);
-				if (tr.flFraction < 1.0f && tr.pHit != pObject->edict())
-				{
-					continue;
-				}
-			}
-
-			flDot = DotProduct( vecLOS , gpGlobals->v_forward );
-			if( flDot > flMaxDot )
-			{
-				// only if the item is in front of the user
-				pClosest = pObject;
-				flMaxDot = flDot;
-				//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
-			}
-			//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
+			pObject = NULL;
 		}
 	}
-	pObject = pClosest;
+
+	if (!pObject && use_through_walls.value)
+	{
+		while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, PLAYER_SEARCH_RADIUS ) ) != NULL )
+		{
+			caps = pObject->ObjectCaps();
+			if( caps & ( FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE ) && !(caps & FCAP_ONLYDIRECT_USE) )
+			{
+				// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
+				// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
+				// when player hits the use key. How many objects can be in that area, anyway? (sjb)
+				vecLOS = ( VecBModelOrigin( pObject->pev ) - ( pev->origin + pev->view_ofs ) );
+
+				// This essentially moves the origin of the target to the corner nearest the player to test to see
+				// if it's "hull" is in the view cone
+				vecLOS = UTIL_ClampVectorToBox( vecLOS, pObject->pev->size * 0.5 );
+
+				flDot = DotProduct( vecLOS , gpGlobals->v_forward );
+				if( flDot > flMaxDot )
+				{
+					// only if the item is in front of the user
+					pClosest = pObject;
+					flMaxDot = flDot;
+					//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
+				}
+				//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
+			}
+		}
+		pObject = pClosest;
+	}
 
 	// Found an object
 	if( pObject )
 	{
-		int caps = pObject->ObjectCaps();
+		caps = pObject->ObjectCaps();
 
 		if( m_afButtonPressed & IN_USE )
 			EMIT_SOUND( ENT(pev), CHAN_ITEM, "common/wpn_select.wav", 0.4, ATTN_NORM );

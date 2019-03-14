@@ -28,6 +28,7 @@
 
 #define SF_BUTTON_DONTMOVE		1
 #define SF_ROTBUTTON_NOTSOLID		1
+#define SF_BUTTON_ONLYDIRECT	16	// sohl compatibility flag
 #define	SF_BUTTON_TOGGLE		32	// button stays pushed until reactivated
 #define	SF_BUTTON_SPARK_IF_OFF		64	// button sparks in OFF state
 #define SF_BUTTON_TOUCH_ONLY		256	// button only fires as a result of USE key.
@@ -254,6 +255,13 @@ void CMultiSource::Register( void )
 		pentTarget = FIND_ENTITY_BY_STRING( pentTarget, "classname", "multi_manager" );
 	}
 	pev->spawnflags &= ~SF_MULTI_INIT;
+}
+
+int CBaseButton::ObjectCaps( void )
+{
+	return (CBaseToggle:: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) |
+			(pev->takedamage?0:FCAP_IMPULSE_USE) |
+			(FBitSet(pev->spawnflags, SF_BUTTON_ONLYDIRECT)?FCAP_ONLYDIRECT_USE:0);
 }
 
 // CBaseButton

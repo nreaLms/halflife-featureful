@@ -43,7 +43,8 @@ public:
 	virtual int ObjectCaps( void ) 
 	{ 
 		if( pev->spawnflags & SF_ITEM_USE_ONLY )
-			return ( CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_IMPULSE_USE;
+			return ( CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_IMPULSE_USE |
+					(m_iDirectUse ? FCAP_ONLYDIRECT_USE : 0);
 		else
 			return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION);
 	};
@@ -75,6 +76,8 @@ public:
 	BYTE m_bUnlockedSound;	
 	BYTE m_bUnlockedSentence;
 
+	BOOL	m_iDirectUse;
+
 	short m_soundRadius;
 
 	float SoundAttenuation() const
@@ -93,6 +96,8 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_bLockedSentence, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_bUnlockedSound, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_bUnlockedSentence, FIELD_CHARACTER ),
+
+	DEFINE_FIELD( CBaseDoor, m_iDirectUse, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseDoor, m_soundRadius, FIELD_SHORT ),
 };
@@ -237,6 +242,11 @@ void CBaseDoor::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence" ) )
 	{
 		m_bUnlockedSentence = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "directuse"))
+	{
+		m_iDirectUse = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "WaveHeight" ) )
