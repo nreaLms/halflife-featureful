@@ -35,7 +35,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * monster_zombie_soldier
 * monster_op4loader
 
-#### Other new monsters
+#### Sven Co-op monsters
 
 * monster_babygarg - smaller version of Gargantua monster
 
@@ -73,7 +73,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Security guards can be spawned with gun drawn.
 * Scientists can heal other allies beside the player (e.g. security guards and other scientists)
 * The delay before scientist can heal again can be configured via skill.cfg (1 minute by default)
-* Talk monsters can have a configurable tolerance level to player hits.
+* Ally monsters can have a configurable tolerance level to player hits.
 
 ### Alien slave features
 
@@ -140,21 +140,41 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * Chargers sounds can be configured in level editor.
 * Chargers can be turned off and on by triggers.
 
+### Spirit compat features
+
+Very limited set of spirit-compatible features is implemented. *Move-with* is **NOT** implemented.
+
+* func_train has 'Origin on paths' flag.
+* Custom move and stop sounds can be configured for func_train and func_plat
+* Monsters and models scale can be configured.
+* 'Direct use only' flag for buttons and 'Direct use only' parameter for doors.
+* 'Don't Drop Gun' flag for some monsters and monstermaker.
+
+Note that the full compatibility with Spirit maps is not a goal.
+
+### Sven Co-op compat features
+
+Besides opfor entities there're some features made for compatibility with Sven Co-op maps.
+
+* trigger_push has 'No clients' and 'No monsters' flags
+* 'Explosive Only' flag for breakables.
+* Some spawnobject values in breakables are compatible with Sven Co-op.
+
+Note that the full compatibility with Sven Co-op maps is not a goal.
+
 ### Other features
 
 * Nightvision can be enabled instead of flashlight. Both Opposing Force and Counter Strike nightvision versions are implemented.
-* Added Explosive Only and Op4Mortar only flags for func_breakable. Breakables with these flags can be destroyed only with explosive weapons and op4mortar shells respectively.
+* 'Op4Mortar only' flag for breakables. Breakables with this flag can be destroyed only with op4mortar shells.
 * monstermaker can have env_warpball template to automatically play teleportation effects on monster spawn.
 * monstermaker can set custom health, body, skin, blood color, relationship class, gibs and model for spawned monsters.
 * New flag for monstermaker - No ground check. The hack to remove the check for space under the monstermaker. Useful for spawning flying monsters or monsters that should fall.
 * func_plat, func_train and func_door sound attenuation can be configured in level editor.
-* Monsters and models scale can be changed (like in Spirit of Half-Life)
 * Added use_through_walls cvar to prevent using things through walls (experimental, will be made into compile-time feature).
 * func_tank can be configured to have a limited number of ammo.
 * func_breakable can contain new items (e.g. Opposing Force weapons and ammo).
 * Amount of health provided by soda may be configured via skill.cfg
 * item_security can show message and play sound on pickup. If item_security is featured in hud.txt the sprite will be shown upon item pickup.
-* trigger_push has No clients and No monsters flags (like in Sven Co-op).
 * 'Fire on Animation start' property for scripted sequence - allows to sync animation start and firing a trigger (useful for retina animations).
 
 ## How to build
