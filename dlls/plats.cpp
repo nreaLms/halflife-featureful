@@ -676,6 +676,17 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual void TrainThink() {}
+	Vector DestinationVector(entvars_t* pevTarg)
+	{
+		if (FBitSet(pev->spawnflags, SF_TRAIN_RESPECT_ORIGIN))
+		{
+			return pevTarg->origin;
+		}
+		else
+		{
+			return pevTarg->origin - ( pev->mins + pev->maxs ) * 0.5;
+		}
+	}
 
 	entvars_t *m_pevCurrentTarget;
 	int m_sounds;
@@ -711,7 +722,8 @@ void CFuncTrain::Blocked( CBaseEntity *pOther )
 
 	m_flActivateFinished = gpGlobals->time + 0.5;
 
-	pOther->TakeDamage( pev, pev, pev->dmg, DMG_CRUSH );
+	if (pev->dmg)
+		pOther->TakeDamage( pev, pev, pev->dmg, DMG_CRUSH );
 }
 
 void CFuncTrain::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -821,7 +833,7 @@ void CFuncTrain::Next( void )
 	{
 		// Path corner has indicated a teleport to the next corner.
 		SetBits( pev->effects, EF_NOINTERP );
-		UTIL_SetOrigin( pev, pTarg->pev->origin - ( pev->mins + pev->maxs ) * 0.5 );
+		UTIL_SetOrigin( pev, DestinationVector(pTarg->pev) );
 		Wait(); // Get on with doing the next path corner.
 	}
 	else
@@ -839,7 +851,7 @@ void CFuncTrain::Next( void )
 
 		ClearBits( pev->effects, EF_NOINTERP );
 		SetMoveDone( &CFuncTrain::ThinkWait );
-		LinearMove( pTarg->pev->origin - ( pev->mins + pev->maxs )* 0.5, pev->speed );
+		LinearMove( DestinationVector(pTarg->pev), pev->speed );
 	}
 }
 
@@ -859,7 +871,7 @@ void CFuncTrain::Activate( void )
 		pev->target = pevTarg->target;
 		m_pevCurrentTarget = pevTarg;// keep track of this since path corners change our target for us.
 
-		UTIL_SetOrigin( pev, pevTarg->origin - ( pev->mins + pev->maxs ) * 0.5 );
+		UTIL_SetOrigin( pev, DestinationVector(pevTarg) );
 
 		if( FStringNull( pev->targetname ) )
 		{	// not triggered, so start immediately
@@ -890,12 +902,12 @@ void CFuncTrain::Spawn( void )
 	if( FStringNull(pev->target) )
 		ALERT( at_console, "FuncTrain with no target" );
 
-	if( pev->dmg == 0 )
+	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
 		pev->dmg = 2;
 
 	pev->movetype = MOVETYPE_PUSH;
 
-	if( FBitSet( pev->spawnflags, SF_TRACKTRAIN_PASSABLE ) )
+	if( FBitSet( pev->spawnflags, SF_TRAIN_PASSABLE ) )
 		pev->solid = SOLID_NOT;
 	else
 		pev->solid = SOLID_BSP;

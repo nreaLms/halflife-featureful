@@ -1744,6 +1744,8 @@
 	spawnflags(flags) =
 	[
 		8 : "Not solid" : 0
+		32 : "Respect origin brush" : 0
+		64 : "No default damage" : 0
 	]
 	_minlight(string) : "Minimum light level"
 ]
