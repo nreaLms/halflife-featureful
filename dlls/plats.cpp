@@ -678,7 +678,7 @@ public:
 	virtual void TrainThink() {}
 	Vector DestinationVector(entvars_t* pevTarg)
 	{
-		if (FBitSet(pev->spawnflags, SF_TRAIN_RESPECT_ORIGIN))
+		if (FBitSet(pev->spawnflags, SF_TRAIN_SETORIGIN))
 		{
 			return pevTarg->origin;
 		}
