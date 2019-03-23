@@ -457,10 +457,33 @@ Schedule_t slGargSwipe[] =
 	},
 };
 
+Task_t tlGargStomp[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_RANGE_ATTACK1, (float)0 },
+};
+
+Schedule_t slGargStomp[] =
+{
+	{
+		tlGargStomp,
+		ARRAYSIZE( tlGargStomp ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_ENEMY_OCCLUDED |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"GargStomp"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES( CGargantua )
 {
 	slGargFlame,
 	slGargSwipe,
+	slGargStomp,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CGargantua, CBaseMonster )
@@ -1053,7 +1076,10 @@ Schedule_t *CGargantua::GetScheduleOfType( int Type )
 			return slGargFlame;
 		case SCHED_MELEE_ATTACK1:
 			return slGargSwipe;
-		break;
+		case SCHED_RANGE_ATTACK1:
+			return slGargStomp;
+		default:
+			break;
 	}
 
 	return CBaseMonster::GetScheduleOfType( Type );
