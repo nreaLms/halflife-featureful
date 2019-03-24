@@ -2926,7 +2926,7 @@
 	body(Choices) : "Body" : 1 =
 	[
 		0 : "Gordon Freeman"
-		1 : "Hevsuit sciensit"
+		1 : "Hevsuit scientist"
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_hgrunt_dead : "Dead Human Grunt"
