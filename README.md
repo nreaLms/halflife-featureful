@@ -23,8 +23,8 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * monster_pitdrone
 * monster_shocktrooper
 * monster_shockroach
-* monster_pitworm (works a bit different from original)
-* monster_geneworm
+* monster_pitworm (works a bit different from original, might be buggy)
+* monster_geneworm (buggy)
 * monster_human_grunt_ally
 * monster_human_medic_ally (healing works a bit different from original)
 * monster_human_torch_ally
@@ -74,6 +74,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Scientists can heal other allies beside the player (e.g. security guards and other scientists)
 * The delay before scientist can heal again can be configured via skill.cfg (1 minute by default)
 * Ally monsters can have a configurable tolerance level to player hits.
+* Monsters can have an alternative trigger condition to fire their trigger target.
 
 ### Alien slave features
 
@@ -116,7 +117,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 
 #### Decay entities
 
-* item_eyescanner
+* item_eyescanner (works a bit different, may be not compatible with Decay PC maps)
 * item_healthcharger
 * item_recharge
 
@@ -134,13 +135,15 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * multi_trigger - alternative to multi_manager for which J.A.C.K. can show connections to its targets.
 * item_flashlight can be enabled to give player flashlight without giving a suit.
 
-### Wall chargers features
+### New flags and parameters compatible with exising addons and mods
 
-* Wall health and armor chargers now play "no" sound when player use them having full health or armor.
-* Chargers sounds can be configured in level editor.
-* Chargers can be turned off and on by triggers.
+#### Opposing Force
 
-### Spirit compat features
+Besides opfor entites (mentioned above) some opfor-specific parameters were added:
+
+* 'Suspicious' parameter for scientists and security guards that make them pre-provoked towards the player.
+
+#### Spirit
 
 Very limited set of spirit-compatible features is implemented. *Move-with* is **NOT** implemented.
 
@@ -149,21 +152,26 @@ Very limited set of spirit-compatible features is implemented. *Move-with* is **
 * Monsters and models scale can be configured.
 * 'Direct use only' flag for buttons and 'Direct use only' parameter for doors.
 * 'Don't Drop Gun' flag for some monsters and monstermaker.
+* Ally monsters can be 'locked' by master, so they decline following even if they are not pre-disaster.
+* 'Decline following' sentence can be configured.
 
 Note that the full compatibility with Spirit maps is not a goal.
 
-### Sven Co-op compat features
+#### Sven Co-op
 
 Besides opfor entities there're some features made for compatibility with Sven Co-op maps.
 
 * trigger_push has 'No clients' and 'No monsters' flags
 * 'Explosive Only' flag for breakables.
 * Some spawnobject values in breakables are compatible with Sven Co-op.
+* Wall chargers sounds and capacity can be configured in level editor.
 
 Note that the full compatibility with Sven Co-op maps is not a goal.
 
 ### Other features
 
+* Wall health and armor chargers now play "no" sound when player use them having full health or armor.
+* Wall chargers can be turned off and on by triggers.
 * Nightvision can be enabled instead of flashlight. Both Opposing Force and Counter Strike nightvision versions are implemented.
 * 'Op4Mortar only' flag for breakables. Breakables with this flag can be destroyed only with op4mortar shells.
 * monstermaker can have env_warpball template to automatically play teleportation effects on monster spawn.
