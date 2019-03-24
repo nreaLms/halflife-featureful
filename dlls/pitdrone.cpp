@@ -143,7 +143,7 @@ void CPitDroneSpit::Touch(CBaseEntity *pOther)
 #define	PITDRONE_SPRINT_DIST			255
 #define PITDRONE_FLINCH_DELAY			2		// at most one flinch every n secs
 #define PITDRONE_MAX_HORNS	6
-#define PITDRONE_GIB_COUNT	7
+#define PITDRONE_GIB_COUNT	5
 
 //=========================================================
 // monster-specific schedule types
@@ -208,7 +208,7 @@ public:
 		return "models/pit_drone_gibs.mdl";
 	}
 	int DefaultGibCount() {
-		return 5;
+		return PITDRONE_GIB_COUNT;
 	}
 
 	CUSTOM_SCHEDULES
@@ -1105,5 +1105,41 @@ void CPitDrone::RunTask(Task_t *pTask)
 			break;
 		}
 	}
+}
+
+class CDeadPitdrone : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	void Precache();
+	int	DefaultClassify ( void ) { return	CLASS_RACEX_PREDATOR; }
+	const char* DefaultGibModel() {
+		return "models/pit_drone_gibs.mdl";
+	}
+	int DefaultGibCount() {
+		return PITDRONE_GIB_COUNT;
+	}
+
+	const char* getPos(int pos) const;
+};
+
+const char* CDeadPitdrone::getPos(int pos) const
+{
+	return "die2";
+}
+
+LINK_ENTITY_TO_CLASS( monster_pitdrone_dead, CDeadPitdrone )
+
+void CDeadPitdrone::Precache()
+{
+	PRECACHE_MODEL("models/pit_drone_gibs.mdl");
+}
+
+void CDeadPitdrone::Spawn( )
+{
+	Precache();
+	SpawnHelper("models/pit_drone.mdl", BLOOD_COLOR_YELLOW, gSkillData.pitdroneHealth/2);
+	MonsterInitDead();
+	pev->frame = 255;
 }
 #endif

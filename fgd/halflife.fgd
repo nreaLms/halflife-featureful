@@ -4097,6 +4097,18 @@
 	initammo(string) : "Initial Ammo" : "6"
 ]
 
+@PointClass base(DeadMonster) studio("models/pit_drone.mdl") = monster_pitdrone_dead : "Dead Pitdrone"
+[
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "Dead"
+	]
+	sequence(Choices) : "Animation Sequence (editor)" : 17 =
+	[
+		17 : "die2"
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 32) studio("models/pit_worm_up.mdl") = monster_pitworm : "Pit Worm"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -4734,6 +4746,19 @@
 		43 : "c2a3_snack_getup"
 	]
 ]
+@PointClass base(DeadMonster) studio("models/zombie.mdl") = monster_zombie_dead : "Dead Zombie"
+[
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On back"
+		1 : "On stomach"
+	]
+	sequence(Choices) : "Animation Sequence (editor)" : 15 =
+	[
+		15 : "dieheadshot"
+		19 : "dieforward"
+	]
+]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_barney.mdl") = monster_zombie_barney : "Barney Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -4782,6 +4807,19 @@
 		41 : "vent_c1a3"
 		42 : "haulzombie"
 		43 : "c2a3_snack_getup"
+	]
+]
+@PointClass base(DeadMonster) studio("models/zombie_barney.mdl") = monster_zombie_barney_dead : "Dead Barney Zombie"
+[
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On back"
+		1 : "On stomach"
+	]
+	sequence(Choices) : "Animation Sequence (editor)" : 15 =
+	[
+		15 : "dieheadshot"
+		19 : "dieforward"
 	]
 ]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie_soldier.mdl") = monster_zombie_soldier : "Soldier Zombie"

@@ -323,6 +323,32 @@ int CZombie::IgnoreConditions( void )
 	return iIgnore;
 }
 
+class CDeadZombie : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MONSTER; }
+
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[2];
+};
+
+const char *CDeadZombie::m_szPoses[] = { "dieheadshot", "dieforward" };
+
+const char* CDeadZombie::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_zombie_dead, CDeadZombie )
+
+void CDeadZombie::Spawn( )
+{
+	SpawnHelper("models/zombie.mdl", BLOOD_COLOR_YELLOW);
+	MonsterInitDead();
+	pev->frame = 255;
+}
+
 #if FEATURE_ZOMBIE_BARNEY
 class CZombieBarney : public CZombie
 {
@@ -344,6 +370,21 @@ void CZombieBarney::Precache()
 {
 	PrecacheMyModel("models/zombie_barney.mdl");
 	PrecacheSounds();
+}
+
+class CDeadZombieBarney : public CDeadZombie
+{
+public:
+	void Spawn( void );
+};
+
+LINK_ENTITY_TO_CLASS( monster_zombie_barney_dead, CDeadZombieBarney )
+
+void CDeadZombieBarney::Spawn( )
+{
+	SpawnHelper("models/zombie_barney.mdl", BLOOD_COLOR_YELLOW);
+	MonsterInitDead();
+	pev->frame = 255;
 }
 #endif
 
