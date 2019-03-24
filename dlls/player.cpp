@@ -1568,7 +1568,8 @@ void CBasePlayer::PlayerUse( void )
 		while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, PLAYER_SEARCH_RADIUS ) ) != NULL )
 		{
 			caps = pObject->ObjectCaps();
-			if( caps & ( FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE ) && !(caps & FCAP_ONLYDIRECT_USE) )
+			if( caps & ( FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE ) &&
+					(!(caps & FCAP_ONLYDIRECT_USE) || pObject->pev->solid == SOLID_NOT ))
 			{
 				// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
 				// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
