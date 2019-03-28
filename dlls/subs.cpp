@@ -191,7 +191,7 @@ void CBaseEntity::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, flo
 void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	edict_t *pentTarget = NULL;
-	if( !targetName )
+	if( !targetName || *targetName == '\0' )
 		return;
 
 	ALERT( at_aiconsole, "Firing: (%s)\n", targetName );

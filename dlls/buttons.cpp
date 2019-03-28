@@ -122,6 +122,233 @@ void CEnvGlobal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, newState );
 }
 
+//==================================================
+//LRC- a simple entity, just maintains a state
+//==================================================
+
+#define SF_ENVSTATE_START_ON		1
+#define SF_ENVSTATE_DEBUG			2
+
+enum
+{
+	STATE_OFF,
+	STATE_TURN_OFF,
+	STATE_ON,
+	STATE_TURN_ON,
+};
+
+static const char* GetStringForUseType(USE_TYPE useType)
+{
+	switch (useType) {
+	case USE_OFF:
+		return "USE_OFF";
+	case USE_ON:
+		return "USE_ON";
+	case USE_TOGGLE:
+		return "USE_TOGGLE";
+	case USE_SET:
+		return "USE_SET";
+	default:
+		return "USE_UNKNOWN";
+	}
+}
+
+class CEnvState : public CPointEntity
+{
+public:
+	void	Spawn( void );
+	void	Think( void );
+	void	KeyValue( KeyValueData *pkvd );
+	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	int		ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
+
+	BOOL	IsLockedByMaster( void ) { return !UTIL_IsMasterTriggered(m_sMaster, NULL); }
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+
+	BOOL			IsTriggered(CBaseEntity *pActivator) { return m_iState == STATE_ON; }
+
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	int			m_iState;
+	float		m_fTurnOnTime;
+	float		m_fTurnOffTime;
+	string_t	m_sMaster;
+};
+
+void CEnvState::Spawn( void )
+{
+	if (pev->spawnflags & SF_ENVSTATE_START_ON)
+		m_iState = STATE_ON;
+	else
+		m_iState = STATE_OFF;
+}
+
+TYPEDESCRIPTION CEnvState::m_SaveData[] =
+{
+	DEFINE_FIELD( CEnvState, m_iState, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvState, m_fTurnOnTime, FIELD_FLOAT ),
+	DEFINE_FIELD( CEnvState, m_fTurnOffTime, FIELD_FLOAT ),
+	DEFINE_FIELD( CEnvState, m_sMaster, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CEnvState, CPointEntity )
+
+LINK_ENTITY_TO_CLASS( env_state, CEnvState )
+
+void CEnvState::KeyValue( KeyValueData *pkvd )
+{
+	if ( FStrEq(pkvd->szKeyName, "turnontime") )
+	{
+		m_fTurnOnTime = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "turnofftime") )
+	{
+		m_fTurnOffTime = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "master") )
+	{
+		m_sMaster = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CEnvState::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if (!ShouldToggle(useType, m_iState == STATE_ON) || IsLockedByMaster())
+	{
+		if (pev->spawnflags & SF_ENVSTATE_DEBUG)
+		{
+			ALERT(at_console,"DEBUG: env_state \"%s\" ",STRING(pev->targetname));
+			if (IsLockedByMaster())
+				ALERT(at_console,"ignored trigger %s; locked by master \"%s\".\n",GetStringForUseType(useType),STRING(m_sMaster));
+			else if (useType == USE_ON)
+				ALERT(at_console,"ignored trigger USE_ON; already on\n");
+			else if (useType == USE_OFF)
+				ALERT(at_console,"ignored trigger USE_OFF; already off\n");
+			else
+				ALERT(at_console,"ignored trigger %s.\n",GetStringForUseType(useType));
+		}
+		return;
+	}
+
+	switch (m_iState)
+	{
+	case STATE_ON:
+	case STATE_TURN_ON:
+		if (m_fTurnOffTime)
+		{
+			m_iState = STATE_TURN_OFF;
+			if (pev->spawnflags & SF_ENVSTATE_DEBUG)
+			{
+				ALERT(at_console,"DEBUG: env_state \"%s\" triggered; will turn off in %f seconds.\n", STRING(pev->targetname), m_fTurnOffTime);
+			}
+			pev->nextthink = gpGlobals->time + m_fTurnOffTime;
+		}
+		else
+		{
+			m_iState = STATE_OFF;
+			if (pev->spawnflags & SF_ENVSTATE_DEBUG)
+			{
+				ALERT(at_console,"DEBUG: env_state \"%s\" triggered, turned off", STRING(pev->targetname));
+				if (pev->target)
+				{
+					ALERT(at_console,": firing \"%s\"",STRING(pev->target));
+					if (pev->noise2)
+						ALERT(at_console," and \"%s\"",STRING(pev->noise2));
+				}
+				else if (pev->noise2)
+					ALERT(at_console,": firing \"%s\"",STRING(pev->noise2));
+				ALERT(at_console,".\n");
+			}
+			FireTargets(STRING(pev->target),pActivator,this,USE_OFF,0);
+			FireTargets(STRING(pev->noise2),pActivator,this,USE_TOGGLE,0);
+			pev->nextthink = -1;
+		}
+		break;
+	case STATE_OFF:
+	case STATE_TURN_OFF:
+		if (m_fTurnOnTime)
+		{
+			m_iState = STATE_TURN_ON;
+			if (pev->spawnflags & SF_ENVSTATE_DEBUG)
+			{
+				ALERT(at_console,"DEBUG: env_state \"%s\" triggered; will turn on in %f seconds.\n", STRING(pev->targetname), m_fTurnOnTime);
+			}
+			pev->nextthink = gpGlobals->time + m_fTurnOnTime;
+		}
+		else
+		{
+			m_iState = STATE_ON;
+			if (pev->spawnflags & SF_ENVSTATE_DEBUG)
+			{
+				ALERT(at_console,"DEBUG: env_state \"%s\" triggered, turned on",STRING(pev->targetname));
+				if (pev->target)
+				{
+					ALERT(at_console,": firing \"%s\"",STRING(pev->target));
+					if (pev->noise1)
+						ALERT(at_console," and \"%s\"",STRING(pev->noise1));
+				}
+				else if (pev->noise1)
+					ALERT(at_console,": firing \"%s\"", STRING(pev->noise1));
+				ALERT(at_console,".\n");
+			}
+			FireTargets(STRING(pev->target),pActivator,this,USE_ON,0);
+			FireTargets(STRING(pev->noise1),pActivator,this,USE_TOGGLE,0);
+			pev->nextthink = -1;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void CEnvState::Think( void )
+{
+	if (m_iState == STATE_TURN_ON)
+	{
+		m_iState = STATE_ON;
+		if (pev->spawnflags & SF_ENVSTATE_DEBUG)
+		{
+			ALERT(at_console,"DEBUG: env_state \"%s\" turned itself on",STRING(pev->targetname));
+			if (pev->target)
+			{
+				ALERT(at_console,": firing %s",STRING(pev->target));
+				if (pev->noise1)
+					ALERT(at_console," and %s",STRING(pev->noise1));
+			}
+			else if (pev->noise1)
+				ALERT(at_console,": firing %s",STRING(pev->noise1));
+			ALERT(at_console,".\n");
+		}
+		FireTargets(STRING(pev->target),this,this,USE_ON,0);
+		FireTargets(STRING(pev->noise1),this,this,USE_TOGGLE,0);
+	}
+	else if (m_iState == STATE_TURN_OFF)
+	{
+		m_iState = STATE_OFF;
+		if (pev->spawnflags & SF_ENVSTATE_DEBUG)
+		{
+			ALERT(at_console,"DEBUG: env_state \"%s\" turned itself off",STRING(pev->targetname));
+			if (pev->target)
+				ALERT(at_console,": firing %s",STRING(pev->target));
+				if (pev->noise2)
+					ALERT(at_console," and %s",STRING(pev->noise2));
+			else if (pev->noise2)
+				ALERT(at_console,": firing %s",STRING(pev->noise2));
+			ALERT(at_console,".\n");
+		}
+		FireTargets(STRING(pev->target),this,this,USE_OFF,0);
+		FireTargets(STRING(pev->noise2),this,this,USE_TOGGLE,0);
+	}
+}
+
+
 TYPEDESCRIPTION CMultiSource::m_SaveData[] =
 {
 	//!!!BUGBUG FIX

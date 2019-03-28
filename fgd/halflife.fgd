@@ -1273,6 +1273,21 @@
 	framerate(string) : "Framerate" : "10.0"
 ]
 
+@PointClass base(Targetname) color(128 128 255) = env_state : "Local State"
+[
+	target(target_destination) : "Target (on & off)"
+	noise1(target_destination) : "Fire when turned on"
+	noise2(target_destination) : "Fire when turned off"
+	turnontime(string) : "Time taken to turn on"
+	turnofftime(string) : "Time taken to turn off"
+	master(string) : "Master"
+	spawnflags(flags) =
+	[
+		1 : "Start On" : 0
+		2 : "Debug Mode" : 0
+	]
+]
+
 @PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
 [
 	model(sprite) : "Sprite Name" : "sprites/fexplo1.spr"
