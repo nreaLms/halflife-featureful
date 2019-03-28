@@ -1132,6 +1132,7 @@ LINK_ENTITY_TO_CLASS( monster_pitdrone_dead, CDeadPitdrone )
 
 void CDeadPitdrone::Precache()
 {
+	CDeadMonster::Precache();
 	PRECACHE_MODEL("models/pit_drone_gibs.mdl");
 }
 

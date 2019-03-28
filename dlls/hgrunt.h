@@ -6,6 +6,51 @@
 #include	"monsters.h"
 #include	"squadmonster.h"
 
+//=========================================================
+// monster-specific schedule types
+//=========================================================
+enum
+{
+	SCHED_GRUNT_SUPPRESS = LAST_COMMON_SCHEDULE + 1,
+	SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE,// move to a location to set up an attack against the enemy. (usually when a friendly is in the way).
+	SCHED_GRUNT_COVER_AND_RELOAD,
+	SCHED_GRUNT_SWEEP,
+	SCHED_GRUNT_FOUND_ENEMY,
+	SCHED_GRUNT_REPEL,
+	SCHED_GRUNT_REPEL_ATTACK,
+	SCHED_GRUNT_REPEL_LAND,
+	SCHED_GRUNT_WAIT_FACE_ENEMY,
+	SCHED_GRUNT_TAKECOVER_FAILED,// special schedule type that forces analysis of conditions and picks the best possible schedule to recover from this type of failure.
+	SCHED_GRUNT_ELOF_FAIL
+};
+
+//=========================================================
+// monster-specific tasks
+//=========================================================
+enum
+{
+	TASK_GRUNT_FACE_TOSS_DIR = LAST_COMMON_TASK + 1,
+	TASK_GRUNT_SPEAK_SENTENCE,
+};
+
+typedef enum
+{
+	HGRUNT_SENT_NONE = -1,
+	HGRUNT_SENT_GREN = 0,
+	HGRUNT_SENT_ALERT,
+	HGRUNT_SENT_MONSTER,
+	HGRUNT_SENT_COVER,
+	HGRUNT_SENT_THROW,
+	HGRUNT_SENT_CHARGE,
+	HGRUNT_SENT_TAUNT,
+	HGRUNT_SENT_CHECK,
+	HGRUNT_SENT_QUEST,
+	HGRUNT_SENT_IDLE,
+	HGRUNT_SENT_CLEAR,
+	HGRUNT_SENT_ANSWER,
+	HGRUNT_SENT_COUNT,
+} HGRUNT_SENTENCE_TYPES;
+
 class CHGrunt : public CSquadMonster
 {
 public:
@@ -45,7 +90,7 @@ public:
 
 	int IRelationship( CBaseEntity *pTarget );
 
-	BOOL FOkToSpeak( void );
+	virtual BOOL FOkToSpeak( void );
 	void JustSpoke( void );
 	void DropMyItems(BOOL isGibbed);
 	void DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, BOOL isGibbed);
@@ -75,17 +120,22 @@ public:
 
 	int m_iSentence;
 
-	static const char *pGruntSentences[];
 
 protected:
+	static const char *pGruntSentences[HGRUNT_SENT_COUNT];
+
 	void SpawnHelper(const char* modelName, int health, int bloodColor = BLOOD_COLOR_RED);
 	void PrecacheHelper(const char* modelName);
 	void PlayFirstBurstSounds();
 	BOOL CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist );
+	virtual int GetRangeAttack1Sequence();
+	virtual int GetRangeAttack2Sequence();
+	virtual Schedule_t* ScheduleOnRangeAttack1();
+
 	virtual float SentenceVolume();
 	virtual float SentenceAttn();
 	virtual const char* SentenceByNumber(int sentence);
-	virtual Schedule_t* ScheduleOnRangeAttack1();
+	virtual int* GruntQuestionVar();
 };
 
 class CHGruntRepel : public CBaseMonster

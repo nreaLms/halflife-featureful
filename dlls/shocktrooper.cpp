@@ -69,38 +69,6 @@
 #define		STROOPER_AE_CAUGHT_ENEMY	( 10 ) // shocktrooper established sight with an enemy (player only) that had previously eluded the squad.
 #define		STROOPER_AE_DROP_GUN		( 11 ) // shocktrooper (probably dead) is dropping his shockrifle.
 
-
-//=========================================================
-// monster-specific schedule types
-//=========================================================
-enum
-{
-	SCHED_STROOPER_SUPPRESS = LAST_COMMON_SCHEDULE + 1,
-	SCHED_STROOPER_ESTABLISH_LINE_OF_FIRE,// move to a location to set up an attack against the enemy. (usually when a friendly is in the way).
-	SCHED_STROOPER_COVER_AND_RELOAD,
-	SCHED_STROOPER_SWEEP,
-	SCHED_STROOPER_FOUND_ENEMY,
-	SCHED_STROOPER_REPEL,
-	SCHED_STROOPER_REPEL_ATTACK,
-	SCHED_STROOPER_REPEL_LAND,
-	SCHED_STROOPER_WAIT_FACE_ENEMY,
-	SCHED_STROOPER_TAKECOVER_FAILED,// special schedule type that forces analysis of conditions and picks the best possible schedule to recover from this type of failure.
-	SCHED_STROOPER_ELOF_FAIL,
-};
-
-//=========================================================
-// monster-specific tasks
-//=========================================================
-enum
-{
-	TASK_STROOPER_FACE_TOSS_DIR = LAST_COMMON_TASK + 1,
-	TASK_STROOPER_SPEAK_SENTENCE,
-	TASK_STROOPER_CHECK_FIRE,
-};
-
-int g_fStrooperQuestion;	// true if an idle grunt asked a question. Cleared when someone answers.
-int iStrooperMuzzleFlash;
-
 //=========================================================
 // shocktrooper
 //=========================================================
@@ -120,8 +88,6 @@ public:
 		pev->absmax = pev->origin + Vector( 24, 24, 72 );
 	}
 
-	void SetActivity(Activity NewActivity);
-
 	void DeathSound(void);
 	void PainSound(void);
 	void GibMonster(void);
@@ -131,7 +97,6 @@ public:
 	int	Save(CSave &save);
 	int Restore(CRestore &restore);
 
-	void SpeakSentence();
 	const char* DefaultGibModel() {
 		return "models/strooper_gibs.mdl";
 	}
@@ -149,16 +114,23 @@ public:
 	float m_blinkTime;
 	float m_eyeChangeTime;
 
-	static const char *pGruntSentences[];
-
+	static int iStrooperMuzzleFlash;
 protected:
+	static const char *pTrooperSentences[HGRUNT_SENT_COUNT];
+
+	int GetRangeAttack1Sequence();
+	int GetRangeAttack2Sequence();
+	Schedule_t* ScheduleOnRangeAttack1();
+
 	float SentenceVolume();
 	float SentenceAttn();
 	const char* SentenceByNumber(int sentence);
-	Schedule_t* ScheduleOnRangeAttack1();
+	virtual int* GruntQuestionVar();
 };
 
 LINK_ENTITY_TO_CLASS(monster_shocktrooper, CStrooper)
+
+int CStrooper::iStrooperMuzzleFlash = 0;
 
 TYPEDESCRIPTION	CStrooper::m_SaveData[] =
 {
@@ -170,7 +142,7 @@ TYPEDESCRIPTION	CStrooper::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CStrooper, CHGrunt)
 
-const char *CStrooper::pGruntSentences[] =
+const char *CStrooper::pTrooperSentences[] =
 {
 	"ST_GREN",		// grenade scared grunt
 	"ST_ALERT",		// sees player
@@ -186,41 +158,15 @@ const char *CStrooper::pGruntSentences[] =
 	"ST_ANSWER",
 };
 
-typedef enum
-{
-	STROOPER_SENT_NONE = -1,
-	STROOPER_SENT_GREN = 0,
-	STROOPER_SENT_ALERT,
-	STROOPER_SENT_MONSTER,
-	STROOPER_SENT_COVER,
-	STROOPER_SENT_THROW,
-	STROOPER_SENT_CHARGE,
-	STROOPER_SENT_TAUNT,
-	STROOPER_SENT_CHECK,
-	STROOPER_SENT_QUEST,
-	STROOPER_SENT_IDLE,
-	STROOPER_SENT_CLEAR,
-	STROOPER_SENT_ANSWER,
-} STROOPER_SENTENCE_TYPES;
-
-void CStrooper::SpeakSentence( void )
-{
-	if( m_iSentence == STROOPER_SENT_NONE )
-	{
-		// no sentence cued up.
-		return;
-	}
-
-	if( FOkToSpeak() )
-	{
-		SENTENCEG_PlayRndSz( ENT( pev ), pGruntSentences[m_iSentence], STROOPER_SENTENCE_VOLUME, STROOPER_ATTN, 0, m_voicePitch );
-		JustSpoke();
-	}
-}
-
 const char* CStrooper::SentenceByNumber(int sentence)
 {
-	return pGruntSentences[sentence];
+	return pTrooperSentences[sentence];
+}
+
+int* CStrooper::GruntQuestionVar()
+{
+	static int g_fStrooperQuestion = 0;
+	return &g_fStrooperQuestion;
 }
 
 Schedule_t* CStrooper::ScheduleOnRangeAttack1()
@@ -233,7 +179,7 @@ Schedule_t* CStrooper::ScheduleOnRangeAttack1()
 		if( MySquadLeader()->m_fEnemyEluded && !HasConditions( bits_COND_ENEMY_FACING_ME ) )
 		{
 			MySquadLeader()->m_fEnemyEluded = FALSE;
-			return GetScheduleOfType( SCHED_STROOPER_FOUND_ENEMY );
+			return GetScheduleOfType( SCHED_GRUNT_FOUND_ENEMY );
 		}
 	}
 
@@ -265,6 +211,25 @@ Schedule_t* CStrooper::ScheduleOnRangeAttack1()
 		}
 	}
 	return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+}
+
+int CStrooper::GetRangeAttack1Sequence()
+{
+	if (m_fStanding)
+	{
+		// get aimable sequence
+		return LookupSequence("standing_mp5");
+	}
+	else
+	{
+		// get crouching shoot
+		return LookupSequence("crouching_mp5");
+	}
+}
+
+int CStrooper::GetRangeAttack2Sequence()
+{
+	return LookupSequence("throwgrenade");
 }
 
 float CStrooper::SentenceVolume()
@@ -403,7 +368,7 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 		if (FOkToSpeak())
 		{
-			SENTENCEG_PlayRndSz(ENT(pev), "ST_ALERT", STROOPER_SENTENCE_VOLUME, STROOPER_ATTN, 0, m_voicePitch);
+			SENTENCEG_PlayRndSz(ENT(pev), SentenceByNumber(HGRUNT_SENT_ALERT), STROOPER_SENTENCE_VOLUME, STROOPER_ATTN, 0, m_voicePitch);
 			JustSpoke();
 		}
 
@@ -563,93 +528,6 @@ void CStrooper::DeathSound(void)
 	}
 }
 
-
-//=========================================================
-// SetActivity
-//=========================================================
-void CStrooper::SetActivity(Activity NewActivity)
-{
-	int	iSequence = ACTIVITY_NOT_AVAILABLE;
-	void *pmodel = GET_MODEL_PTR(ENT(pev));
-
-	switch (NewActivity)
-	{
-	case ACT_RANGE_ATTACK1:
-		// shocktrooper is either shooting standing or shooting crouched
-		if (m_fStanding)
-		{
-			// get aimable sequence
-			iSequence = LookupSequence("standing_mp5");
-		}
-		else
-		{
-			// get crouching shoot
-			iSequence = LookupSequence("crouching_mp5");
-		}
-		break;
-	case ACT_RANGE_ATTACK2:
-		// shocktrooper is going to throw a grenade.
-
-		// get toss anim
-		iSequence = LookupSequence("throwgrenade");
-		break;
-
-	case ACT_RUN:
-		if (pev->health <= STROOPER_LIMP_HEALTH)
-		{
-			// limp!
-			iSequence = LookupActivity(ACT_RUN_HURT);
-		}
-		else
-		{
-			iSequence = LookupActivity(NewActivity);
-		}
-		break;
-	case ACT_WALK:
-		if (pev->health <= STROOPER_LIMP_HEALTH)
-		{
-			// limp!
-			iSequence = LookupActivity(ACT_WALK_HURT);
-		}
-		else
-		{
-			iSequence = LookupActivity(NewActivity);
-		}
-		break;
-	case ACT_IDLE:
-		if (m_MonsterState == MONSTERSTATE_COMBAT)
-		{
-			NewActivity = ACT_IDLE_ANGRY;
-		}
-		iSequence = LookupActivity(NewActivity);
-		break;
-	default:
-		iSequence = LookupActivity(NewActivity);
-		break;
-	}
-
-	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-
-	// Set to the desired anim, or default anim if the desired is not present
-	if (iSequence > ACTIVITY_NOT_AVAILABLE)
-	{
-		if (pev->sequence != iSequence || !m_fSequenceLoops)
-		{
-			pev->frame = 0;
-		}
-
-		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
-		ResetSequenceInfo();
-		SetYawSpeed();
-	}
-	else
-	{
-		// Not available try to get default anim
-		ALERT(at_console, "%s has no sequence for act:%d\n", STRING(pev->classname), NewActivity);
-		pev->sequence = 0;	// Set to the reset anim (if it's there)
-	}
-}
-
 //=========================================================
 // TraceAttack - reimplemented in shock trooper because they never have helmets
 //=========================================================
@@ -678,7 +556,7 @@ void CStrooper::DropShockRoach()
 		vecPos.z += 32;
 
 		// now spawn a shockroach.
-		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecPos, vecDropAngles, edict() );
+		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecPos, vecDropAngles );
 		if (pRoach)
 		{
 			CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
@@ -717,6 +595,7 @@ LINK_ENTITY_TO_CLASS( monster_shocktrooper_dead, CDeadStrooper )
 
 void CDeadStrooper::Precache()
 {
+	CDeadMonster::Precache();
 	PRECACHE_MODEL("models/strooper_gibs.mdl");
 }
 
