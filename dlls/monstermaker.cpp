@@ -263,8 +263,7 @@ void CMonsterMaker::MakeMonster( void )
 			SetBits(pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GRUN);
 		if (m_classify)
 			createdMonster->m_iClass = m_classify;
-		if (m_bloodColor)
-			createdMonster->m_bloodColor = m_bloodColor;
+		createdMonster->SetMyBloodColor(m_bloodColor);
 		if (!FStringNull(m_gibModel))
 			createdMonster->m_gibModel = m_gibModel;
 		if (createdMonster->IsInitiallyDead())

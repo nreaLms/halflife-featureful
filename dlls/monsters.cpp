@@ -3037,6 +3037,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "bloodcolor" ) )
 	{
 		m_bloodColor = atoi( pkvd->szValue );
+		// Check for values 1 and 2 for Sven Co-op compatibility
+		if (m_bloodColor == 1)
+			m_bloodColor = BLOOD_COLOR_RED;
+		else if (m_bloodColor == 2)
+			m_bloodColor = BLOOD_COLOR_YELLOW;
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "classify" ) )

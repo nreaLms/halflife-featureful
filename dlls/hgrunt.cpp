@@ -2324,7 +2324,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pEntity->pev->health = pev->health;
 	pEntity->pev->model = pev->model;
 	pGrunt->m_iClass = m_iClass;
-	pGrunt->m_bloodColor = m_bloodColor;
+	pGrunt->SetMyBloodColor(m_bloodColor);
 	pGrunt->m_gibModel = m_gibModel;
 	PrepareBeforeSpawn(pEntity);
 	DispatchSpawn(pEntity->edict());
