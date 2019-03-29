@@ -130,6 +130,12 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * env_model
 * env_state
 
+#### Sven Co-op entities
+
+* trigger_random
+* trigger_random_time
+* trigger_random_unique
+
 #### Others
 
 * env_modeltrain - like env_spritetrain, but with animated model and configurable movement sound.

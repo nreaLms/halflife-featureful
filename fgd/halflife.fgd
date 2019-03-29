@@ -5467,6 +5467,61 @@
 	speed(integer) : "Speed of push" : 40
 ]
 
+@BaseClass = Random
+[
+	target_count(integer) : "Target Count" : 0 : "Amount of random targets you have specified. This is now optional and left for compatibility with Sven Co-op trigger_random"
+	target1(target_destination) : "Target 1"
+	target2(target_destination) : "Target 2"
+	target3(target_destination) : "Target 3"
+	target4(target_destination) : "Target 4"
+	target5(target_destination) : "Target 5"
+	target6(target_destination) : "Target 6"
+	target7(target_destination) : "Target 7"
+	target8(target_destination) : "Target 8"
+	target9(target_destination) : "Target 9"
+	target10(target_destination) : "Target 10"
+	target11(target_destination) : "Target 11"
+	target12(target_destination) : "Target 12"
+	target13(target_destination) : "Target 13"
+	target14(target_destination) : "Target 14"
+	target15(target_destination) : "Target 15"
+	target16(target_destination) : "Target 16"
+]
+
+@PointClass base(Targetname, Random) = trigger_random : "Trigger Random"
+[
+	spawnflags(flags) =
+	[
+		1 : "Start on (Timed only)" : 0
+		2 : "Trigger Once (Timed only)" : 0
+		4 : "Reusable (Unique only)" : 0
+		8 : "Timed" : 0
+		16 : "Unique" : 0
+	]
+	min_delay(string) : "Minimum delay (Timed only)"
+	max_delay(string) : "Maximum delay (Timed only)"
+	trigger_number(integer) : "Trigger number limit (Timed only)" : 0 : "Stop after triggering this number of targets. This was not in Sven Co-op and a special addition. A flexible replacement for Trigger Once flag."
+]
+
+@PointClass base(Targetname, Random) = trigger_random_time : "Trigger Random Time. Outdated entity for Sven Co-op 3.0 compatibility."
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+		2 : "Trigger Once" : 0
+	]
+	min_delay(string) : "Minimum Delay (0 = off)" : "3.0"
+	max_delay(string) : "Maximum Delay (0 = off)" : "7.0"
+]
+
+@PointClass base(Targetname, Random) = trigger_random_unique : "Trigger Random Unique. Outdated entity for Sven Co-op 3.0 compatibility."
+[
+	spawnflags(Flags) =
+	[
+		1 : "Re-usable" : 0
+	]
+]
+
 @PointClass base(Targetname, Targetx) iconsprite("sprites/trigger_relay.spr") = trigger_relay : "Trigger Relay"
 [
 	spawnflags(flags) =
