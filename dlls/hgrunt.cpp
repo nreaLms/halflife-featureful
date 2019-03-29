@@ -1190,6 +1190,11 @@ Schedule_t* CHGrunt::ScheduleOnRangeAttack1()
 	}
 }
 
+float CHGrunt::LimpHealth()
+{
+	return HGRUNT_LIMP_HEALTH;
+}
+
 //=========================================================
 // AI Schedules Specific to this monster
 //=========================================================
@@ -1832,7 +1837,7 @@ void CHGrunt::SetActivity( Activity NewActivity )
 		iSequence = GetRangeAttack2Sequence();
 		break;
 	case ACT_RUN:
-		if( pev->health <= HGRUNT_LIMP_HEALTH )
+		if( pev->health <= LimpHealth() )
 		{
 			// limp!
 			iSequence = LookupActivity( ACT_RUN_HURT );
@@ -1843,7 +1848,7 @@ void CHGrunt::SetActivity( Activity NewActivity )
 		}
 		break;
 	case ACT_WALK:
-		if( pev->health <= HGRUNT_LIMP_HEALTH )
+		if( pev->health <= LimpHealth() )
 		{
 			// limp!
 			iSequence = LookupActivity( ACT_WALK_HURT );

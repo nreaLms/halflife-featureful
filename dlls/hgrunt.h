@@ -131,6 +131,7 @@ protected:
 	virtual int GetRangeAttack1Sequence();
 	virtual int GetRangeAttack2Sequence();
 	virtual Schedule_t* ScheduleOnRangeAttack1();
+	virtual float LimpHealth();
 
 	virtual float SentenceVolume();
 	virtual float SentenceAttn();

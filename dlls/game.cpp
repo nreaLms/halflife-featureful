@@ -392,6 +392,12 @@ cvar_t	sk_scientist_health1 = {"sk_scientist_health1","0"};
 cvar_t	sk_scientist_health2 = {"sk_scientist_health2","0"};
 cvar_t	sk_scientist_health3 = {"sk_scientist_health3","0"};
 
+#if FEATURE_ROBOGRUNT
+cvar_t	sk_rgrunt_explode1 = {"sk_rgrunt_explode1","0"};
+cvar_t	sk_rgrunt_explode2 = {"sk_rgrunt_explode2","0"};
+cvar_t	sk_rgrunt_explode3 = {"sk_rgrunt_explode3","0"};
+#endif
+
 #if FEATURE_SHOCKTROOPER
 // Shock Roach
 cvar_t	sk_shockroach_health1 = { "sk_shockroach_health1", "0" };
@@ -1175,6 +1181,13 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_geneworm_dmg_hit2 );// { "sk_geneworm_dmg_hit2", "0" };
 	CVAR_REGISTER( &sk_geneworm_dmg_hit3 );// { "sk_geneworm_dmg_hit3", "0" };
 #endif
+
+#if FEATURE_ROBOGRUNT
+	CVAR_REGISTER( &sk_rgrunt_explode1 );
+	CVAR_REGISTER( &sk_rgrunt_explode2 );
+	CVAR_REGISTER( &sk_rgrunt_explode3 );
+#endif
+
 
 #if FEATURE_SHOCKTROOPER
 	// ShockTrooper

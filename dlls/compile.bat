@@ -96,6 +96,7 @@ set SOURCES=agrunt.cpp ^
 	playermonster.cpp ^
 	python.cpp ^
 	rat.cpp ^
+	rgrunt.cpp ^
 	recruit.cpp ^
 	roach.cpp ^
 	ropes.cpp ^

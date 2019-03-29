@@ -4266,6 +4266,40 @@
 	]
 ]
 
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/rgrunt.mdl") = monster_robogrunt : "Robot Grunt"
+[
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
+	]
+	netname(string) : "Squad Name"
+	weapons(Choices) : "Weapons" : 1 =
+	[
+		1 : "9mmAR"
+		3 : "9mmAR + HG"
+		5 : "9mmAR + GL"
+		8 : "Shotgun"
+		10 : "Shotgun + HG"
+	]
+]
+
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) = monster_robogrunt_repel : "Robot Grunt"
+[
+	weapons(Choices) : "Weapons" : 1 =
+	[
+		1 : "9mmAR"
+		3 : "9mmAR + HG"
+		5 : "9mmAR + GL"
+		8 : "Shotgun"
+		10 : "Shotgun + HG"
+	]
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Gun" : 0
+	]
+]
+
 @PointClass base(Monster, TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist : "Cleansuit Scientist" 
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 13 =

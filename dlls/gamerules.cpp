@@ -254,6 +254,10 @@ void CGameRules::RefreshSkillData ( void )
 	// Otis
 	gSkillData.otisHealth = GetSkillCvar( "sk_otis_health");
 #endif
+#if FEATURE_ROBOGRUNT
+	// Robogrunt
+	gSkillData.rgruntExplode = GetSkillCvar( "sk_rgrunt_explode" );
+#endif
 	// Scientist
 	gSkillData.scientistHealth = GetSkillCvar( "sk_scientist_health" );
 #if FEATURE_SHOCKTROOPER
