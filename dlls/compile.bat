@@ -61,6 +61,7 @@ set SOURCES=agrunt.cpp ^
 	headcrab.cpp ^
 	healthkit.cpp ^
 	hgrunt.cpp ^
+	hwgrunt.cpp ^
 	hornet.cpp ^
 	hornetgun.cpp ^
 	houndeye.cpp ^

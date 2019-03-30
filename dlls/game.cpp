@@ -240,6 +240,12 @@ cvar_t	sk_hgrunt_gspeed1 = {"sk_hgrunt_gspeed1","0"};
 cvar_t	sk_hgrunt_gspeed2 = {"sk_hgrunt_gspeed2","0"};
 cvar_t	sk_hgrunt_gspeed3 = {"sk_hgrunt_gspeed3","0"};
 
+#if FEATURE_HWGRUNT
+cvar_t	sk_hwgrunt_health1 = {"sk_hwgrunt_health1","0"};
+cvar_t	sk_hwgrunt_health2 = {"sk_hwgrunt_health2","0"};
+cvar_t	sk_hwgrunt_health3 = {"sk_hwgrunt_health3","0"};
+#endif
+
 // Houndeye
 cvar_t	sk_houndeye_health1 = {"sk_houndeye_health1","0"};
 cvar_t	sk_houndeye_health2 = {"sk_houndeye_health2","0"};
@@ -1037,6 +1043,13 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_hgrunt_gspeed1 );
 	CVAR_REGISTER( &sk_hgrunt_gspeed2 );
 	CVAR_REGISTER( &sk_hgrunt_gspeed3 );
+
+#if FEATURE_HWGRUNT
+	// HWgrunt
+	CVAR_REGISTER( &sk_hwgrunt_health1 );
+	CVAR_REGISTER( &sk_hwgrunt_health2 );
+	CVAR_REGISTER( &sk_hwgrunt_health3 );
+#endif
 
 	// Houndeye
 	CVAR_REGISTER( &sk_houndeye_health1 );// {"sk_houndeye_health1","0"};

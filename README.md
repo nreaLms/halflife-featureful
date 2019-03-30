@@ -38,6 +38,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 #### Sven Co-op monsters
 
 * monster_babygarg - smaller version of Gargantua monster
+* monster_hwgrunt
 * monster_robogrunt
 
 #### Opposing Force dead monsters

@@ -86,6 +86,10 @@ struct skilldata_t
 	float hgruntShotgunPellets;
 	float hgruntGrenadeSpeed;
 
+#if FEATURE_HWGRUNT
+	float hwgruntHealth;
+#endif
+
 	float houndeyeHealth;
 	float houndeyeDmgBlast;
 

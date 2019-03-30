@@ -91,6 +91,7 @@ set (SVDLL_SOURCES
 	headcrab.cpp
 	healthkit.cpp
 	hgrunt.cpp
+	hwgrunt.cpp
 	hornet.cpp
 	hornetgun.cpp
 	houndeye.cpp

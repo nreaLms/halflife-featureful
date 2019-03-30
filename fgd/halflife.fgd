@@ -3745,6 +3745,65 @@
 	]
 ]
 
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/hwgrunt.mdl") = monster_hwgrunt : "Heavy Weapons Grunt"
+[
+	netname(string) : "Squad Name"
+
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
+	]
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle"
+		1 : "idle2"
+		2 : "creeping_walk"
+		3 : "run"
+		4 : "turnl"
+		5 : "turnr"
+		6 : "attack"
+		7 : "spinup"
+		8 : "spindown"
+		9 : "small_pain"
+		10 : "small_pain2"
+		11 : "die_backwards"
+		12 : "die_crumple"
+		13 : "die_violent"
+		14 : "repel_repel"
+		15 : "repel_land"
+	]
+]
+@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/hwgrunt.mdl") = monster_hwgrunt_repel : "Heavy Weapons Grunt (Repel)"
+[
+	netname(string) : "Squad Name"
+
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+		1024: "Don't Drop Gun" : 0
+	]
+    sequence(Choices) : "Animation Sequence (editor)" : 14 =
+	[
+		0 : "idle"
+		1 : "idle2"
+		2 : "creeping_walk"
+		3 : "run"
+		4 : "turnl"
+		5 : "turnr"
+		6 : "attack"
+		7 : "spinup"
+		8 : "spindown"
+		9 : "small_pain"
+		10 : "small_pain2"
+		11 : "die_backwards"
+		12 : "die_crumple"
+		13 : "die_violent"
+		14 : "repel_repel"
+		15 : "repel_land"
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/icky.mdl") = monster_ichthyosaur : "Ichthyosaur"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
