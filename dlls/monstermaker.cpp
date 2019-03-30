@@ -27,6 +27,7 @@
 #define	SF_MONSTERMAKER_START_ON	1 // start active ( if has targetname )
 #define	SF_MONSTERMAKER_CYCLIC		4 // drop one monster every time fired.
 #define SF_MONSTERMAKER_MONSTERCLIP	8 // Children are blocked by monsterclip
+#define SF_MONSTERMAKER_PRISONER	16
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
@@ -64,6 +65,8 @@ public:
 	string_t m_customModel;
 	int m_classify;
 	int m_iPose;
+	BOOL m_notSolid;
+	BOOL m_gag;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -80,6 +83,8 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_customModel, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_classify, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_iPose, FIELD_INTEGER ),
+	DEFINE_FIELD( CMonsterMaker, m_notSolid, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CMonsterMaker, m_gag, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -119,6 +124,31 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "pose" ) )
 	{
 		m_iPose = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "notsolid" ) )
+	{
+		m_notSolid = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "gag" ) )
+	{
+		m_gag = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_target" ) )
+	{
+		m_iszTriggerTarget = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_condition" ) )
+	{
+		m_iTriggerCondition = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_alt_condition" ) )
+	{
+		m_iTriggerCondition = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -252,20 +282,34 @@ void CMonsterMaker::MakeMonster( void )
 	if (!FStringNull(m_customModel))
 		pevCreate->model = m_customModel;
 
-	// Children hit monsterclip brushes
-	if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_MONSTERCLIP ))
-		SetBits( pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP );
-
 	CBaseMonster* createdMonster = GetMonsterPointer(pent);
 	if (createdMonster)
 	{
+		// Children hit monsterclip brushes
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_MONSTERCLIP ))
+			SetBits( pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP );
+
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PRISONER ))
+			SetBits( pevCreate->spawnflags, SF_MONSTER_PRISONER );
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_DONT_DROP_GUN))
 			SetBits(pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GRUN);
+		if (m_gag > 0)
+			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
+		pevCreate->weapons = pev->weapons;
+
 		if (m_classify)
 			createdMonster->m_iClass = m_classify;
 		createdMonster->SetMyBloodColor(m_bloodColor);
 		if (!FStringNull(m_gibModel))
 			createdMonster->m_gibModel = m_gibModel;
+
+		if (!FStringNull(m_iszTriggerTarget))
+		{
+			createdMonster->m_iszTriggerTarget = m_iszTriggerTarget;
+			createdMonster->m_iTriggerCondition = m_iTriggerCondition;
+			createdMonster->m_iTriggerCondition = m_iTriggerCondition;
+		}
+
 		if (createdMonster->IsInitiallyDead())
 		{
 			CDeadMonster* deadMonster = (CDeadMonster*)createdMonster;
@@ -275,15 +319,20 @@ void CMonsterMaker::MakeMonster( void )
 
 	DispatchSpawn( ENT( pevCreate ) );
 	pevCreate->owner = edict();
+	if (m_notSolid > 0)
+	{
+		pevCreate->solid = SOLID_NOT;
+	}
 
 	if ( !FStringNull( pev->message ) && !FStringNull( pev->targetname ) )
 	{
 		CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
 		if ( foundEntity && FClassnameIs(foundEntity->pev, "env_warpball"))
 		{
+			edict_t* oldInflictor = foundEntity->pev->dmg_inflictor;
 			foundEntity->pev->dmg_inflictor = edict();
 			foundEntity->Use(this, this, USE_TOGGLE, 0.0f);
-			foundEntity->pev->dmg_inflictor = 0;
+			foundEntity->pev->dmg_inflictor = oldInflictor;
 		}
 	}
 

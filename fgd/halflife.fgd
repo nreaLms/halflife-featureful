@@ -5032,6 +5032,7 @@
 	// 	2 : "PVS On/Off" : 0  // not implemented
 		4 : "Cyclic" : 0
 		8 : "MonsterClip" : 0
+		16 : "Prisoner" : 0
 		1024: "Don't Drop Gun" : 0
 		2048 : "No ground check" : 0
 	]
@@ -5056,6 +5057,8 @@
 	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
 	[
 		0 : "Default"
+		1 : "Human (red)"
+		2 : "Alien (yellow)"
 		247 : "Human (red)"
 		195 : "Alien (yellow)"
 		-1 : "Don't bleed"
@@ -5080,6 +5083,54 @@
 		16 : "Opfor ally"
 	]
 	gibmodel(studio) : "Custom gib model"
+	weapons(Choices) : "Grunt/Assassin Weapons" =
+	[
+		0 : "Default"
+		1 : "9mmAR"
+		3 : "9mmAR + HG"
+		5 : "9mmAR + GL"
+		8 : "Shotgun"
+		10 : "Shotgun + HG"
+		16 : "Saw"
+		18 : "Saw + HG"
+	]
+    notsolid(Choices) : "Not Solid" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	gag(Choices) : "Gag" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	trigger_target(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
+	trigger_condition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
+	[
+		0 : "No Trigger"
+		1 : "See Player, Mad at Player"
+		2 : "Take Damage"
+		3 : "50% Health Remaining"
+		4 : "Death"
+		7 : "Hear World"
+		8 : "Hear Player"
+		9 : "Hear Combat"
+		10: "See Player Unconditional"
+		11: "See Player, Not In Combat"
+	]
+	trigger_alt_condition(Choices) : "Trigger Alternative Condition" : : "Alternative condition to fire TriggerTarget (useful to make an important ally fire the same target both when either provoked or dead which is usually a load game condition)" =
+	[
+		0 : "No Trigger"
+		1 : "See Player, Mad at Player"
+		2 : "Take Damage"
+		3 : "50% Health Remaining"
+		4 : "Death"
+		7 : "Hear World"
+		8 : "Hear Player"
+		9 : "Hear Combat"
+		10: "See Player Unconditional"
+		11: "See Player, Not In Combat"
+	]
 ]
 
 @PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager"
