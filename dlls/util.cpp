@@ -883,6 +883,26 @@ void UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage )
 			UTIL_HudMessage( pPlayer, textparms, pMessage );
 	}
 }
+
+extern int gmsgCaption;
+void UTIL_ShowCaption(const char *messageId, int holdTime, bool radio)
+{
+	if (!messageId || !*messageId)
+		return;
+	if (*messageId == '!')
+	{
+		messageId = messageId+1;
+	}
+
+	if (holdTime > 255)
+		holdTime = 255;
+
+	MESSAGE_BEGIN( MSG_ALL, gmsgCaption );
+		WRITE_BYTE(holdTime);
+		WRITE_BYTE(radio ? 1 : 0);
+		WRITE_STRING(messageId);
+	MESSAGE_END();
+}
 				 
 extern int gmsgTextMsg, gmsgSayText;
 void UTIL_ClientPrintAll( int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4 )

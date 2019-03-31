@@ -252,6 +252,8 @@ cvar_t* cl_flashlight_custom = NULL;
 cvar_t* cl_flashlight_radius = NULL;
 cvar_t* cl_flashlight_fade_distance = NULL;
 
+cvar_t *cl_subtitles = NULL;
+
 void ShutdownInput( void );
 
 //DECLARE_MESSAGE( m_Logo, Logo )
@@ -646,6 +648,8 @@ void CHud::Init( void )
 	CreateIntegerCvarConditionally(cl_flashlight_radius, "cl_flashlight_radius", clientFeatures.flashlight.radius);
 	CreateIntegerCvarConditionally(cl_flashlight_fade_distance, "cl_flashlight_fade_distance", clientFeatures.flashlight.fade_distance);
 
+	cl_subtitles = CVAR_CREATE( "cl_subtitles", "1", FCVAR_ARCHIVE );
+
 	m_pSpriteList = NULL;
 
 	// Clear any old HUD list
@@ -694,6 +698,8 @@ void CHud::Init( void )
 #endif
 
 	m_Menu.Init();
+
+	m_Caption.Init();
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
 }
@@ -1159,6 +1165,8 @@ void CHud::VidInit( void )
 	m_Scoreboard.VidInit();
 #endif
 	m_Nightvision.VidInit();
+
+	m_Caption.VidInit();
 
 	memset(&fog, 0, sizeof(fog));
 }

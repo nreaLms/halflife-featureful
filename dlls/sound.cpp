@@ -644,6 +644,9 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 			return;
 	}
 
+	if (!m_fLooping)
+		UTIL_ShowCaption(szSoundFile, 0, true);
+
 	// Directly change pitch if arg passed. Only works if sound is already playing.
 	if( useType == USE_SET && m_fActive )		// Momentary buttons will pass down a float in here
 	{

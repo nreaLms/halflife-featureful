@@ -244,6 +244,69 @@ protected:
 };
 #endif
 
+struct CaptionProfile_t
+{
+	char firstLetter;
+	char secondLetter;
+	int r, g, b;
+};
+
+#define CAPTION_SIZE 320
+
+struct Caption_t
+{
+	char name[32];
+	CaptionProfile_t* profile;
+	char message[CAPTION_SIZE];
+};
+
+#define SUB_MAX_LINES 5
+
+struct Subtitle_t
+{
+	const Caption_t* caption;
+	int lineOffsets[SUB_MAX_LINES];
+	int lineEndOffsets[SUB_MAX_LINES];
+	int r, g, b;
+	float timeLeft;
+	int lineCount;
+	bool radio;
+};
+
+#define CAPTION_PROFILES_MAX 32
+#define CAPTIONS_MAX 256
+
+class CHudCaption : public CHudBase
+{
+public:
+	int Init();
+	int VidInit();
+	int Draw(float flTime);
+	void Reset();
+
+	int MsgFunc_Caption( const char *pszName, int iSize, void *pbuf );
+	void AddSubtitle(const Subtitle_t& sub);
+	void CalculateLineOffsets(Subtitle_t& sub);
+	void RecalculateLineOffsets();
+
+	void UserCmd_DumpCaptions();
+
+	bool ParseCaptionsFile();
+	void SortCaptions();
+	const Caption_t* CaptionLookup(const char* name);
+
+protected:
+	CaptionProfile_t profiles[CAPTION_PROFILES_MAX];
+	Caption_t captions[CAPTIONS_MAX];
+	int profileCount;
+	int captionCount;
+
+	Subtitle_t subtitles[4];
+	int sub_count;
+	bool captionsInit;
+	HSPRITE m_hVoiceIcon;
+};
+
 #if !USE_VGUI || USE_NOVGUI_SCOREBOARD
 class CHudScoreboard : public CHudBase
 {
@@ -764,7 +827,7 @@ public:
 
 	int m_iFontHeight;
 	int DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b );
-	int DrawHudString( int x, int y, int iMaxX, const char *szString, int r, int g, int b );
+	int DrawHudString( int x, int y, int iMaxX, const char *szString, int r, int g, int b, int length = -1 );
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b );
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth( int iNumber, int iFlags );
@@ -878,6 +941,7 @@ public:
 	CHudMOTD	m_MOTD;
 #endif
 	CHudNightvision m_Nightvision;
+	CHudCaption		m_Caption;
 
 	void Init( void );
 	void VidInit( void );

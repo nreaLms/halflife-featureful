@@ -254,15 +254,17 @@ const unsigned char colors[8][3] =
 {240, 180,  24}
 };
 
-int CHud::DrawHudString( int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b )
+int CHud::DrawHudString(int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b , int length)
 {
 	// xash3d: reset unicode state
 	TextMessageDrawChar( 0, 0, 0, 0, 0, 0 );
 
+	const char* start = szIt;
+
 	// draw the string until we hit the null character or a newline character
-	for( ; *szIt != 0 && *szIt != '\n'; szIt++ )
+	for( ; (length == -1 || szIt - start < length) && *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int w = gHUD.m_scrinfo.charWidths['M'];
+		int w = gHUD.m_scrinfo.charWidths[(unsigned char)*szIt];
 		if( xpos + w  > iMaxX )
 			return xpos;
 		if( ( *szIt == '^' ) && ( *( szIt + 1 ) >= '0') && ( *( szIt + 1 ) <= '7') )

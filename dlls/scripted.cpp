@@ -1590,6 +1590,8 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 		}
 	}
 
+	UTIL_ShowCaption(STRING( m_iszSentence ), ceil(m_flDuration)+1, false);
+
 	pTarget->PlayScriptedSentence( STRING( m_iszSentence ), m_flDuration,  m_flVolume, m_flAttenuation, bConcurrent, pListener );
 	if (m_followAction)
 	{

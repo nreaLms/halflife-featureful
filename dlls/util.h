@@ -384,6 +384,9 @@ typedef struct hudtextparms_s
 extern void			UTIL_HudMessageAll( const hudtextparms_t &textparms, const char *pMessage );
 extern void			UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage );
 
+// show captions
+extern void UTIL_ShowCaption(const char* messageId, int holdTime, bool radio);
+
 // for handy use with ClientPrint params
 extern char *UTIL_dtos1( int d );
 extern char *UTIL_dtos2( int d );
