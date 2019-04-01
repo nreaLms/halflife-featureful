@@ -96,15 +96,17 @@ void CItem::Spawn( void )
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
 	SetTouch( &CItem::ItemTouch );
+	SetThink( &CItem::FallThink );
+	pev->nextthink = gpGlobals->time+0.1;
+}
 
-	if (!gEvilImpulse101)
+void CItem::FallThink()
+{
+	if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
 	{
-		if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
-		{
-			ALERT(at_error, "Item %s fell out of level at %f,%f,%f\n", STRING( pev->classname ), pev->origin.x, pev->origin.y, pev->origin.z);
-			UTIL_Remove( this );
-			return;
-		}
+		ALERT(at_error, "Item %s fell out of level at %f,%f,%f\n", STRING( pev->classname ), pev->origin.x, pev->origin.y, pev->origin.z);
+		UTIL_Remove( this );
+		return;
 	}
 }
 
