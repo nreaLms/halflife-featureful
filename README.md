@@ -134,6 +134,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 #### Sven Co-op entities
 
 * env_xenmaker
+* squadmaker (Actually just an alias to monstermaker since it has most of squadmaker features already, not all of them though)
 * trigger_random
 * trigger_random_time
 * trigger_random_unique

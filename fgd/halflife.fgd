@@ -5052,7 +5052,7 @@
 	]
 ]
 
-@PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = monstermaker : "Monster Maker"
+@BaseClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
 	target(target_destination) : "Target On Release"
 	monstertype(string) : "Monster Type"
@@ -5163,6 +5163,8 @@
 		11: "See Player, Not In Combat"
 	]
 ]
+@PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
+@PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []
 
 @PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager"
 [

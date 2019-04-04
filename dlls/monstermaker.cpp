@@ -70,6 +70,7 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
+LINK_ENTITY_TO_CLASS( squadmaker, CMonsterMaker )
 
 TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 {
@@ -106,7 +107,7 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 		m_iszMonsterClassname = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if ( FStrEq( pkvd->szKeyName, "warpball" ) )
+	else if ( FStrEq( pkvd->szKeyName, "warpball" ) || FStrEq( pkvd->szKeyName, "xenmaker" ) )
 	{
 		pev->message = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
