@@ -327,12 +327,12 @@ void CMonsterMaker::MakeMonster( void )
 	if ( !FStringNull( pev->message ) && !FStringNull( pev->targetname ) )
 	{
 		CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
-		if ( foundEntity && FClassnameIs(foundEntity->pev, "env_warpball"))
+		if ( foundEntity && (FClassnameIs(foundEntity->pev, "env_warpball")
+							 || FClassnameIs(foundEntity->pev, "env_xenmaker")))
 		{
-			edict_t* oldInflictor = foundEntity->pev->dmg_inflictor;
 			foundEntity->pev->dmg_inflictor = edict();
 			foundEntity->Use(this, this, USE_TOGGLE, 0.0f);
-			foundEntity->pev->dmg_inflictor = oldInflictor;
+			foundEntity->pev->dmg_inflictor = NULL;
 		}
 	}
 

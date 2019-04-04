@@ -1318,6 +1318,35 @@
 	]
 ]
 
+@PointClass base(Target, Targetname) size(-24 -24 -24,24 24 24) = env_xenmaker :"Xen Portal. This entity is present just for compatibility with Sven Co-op"
+[
+	spawnflags(flags) =
+	[
+		1: "Try Once" : 0
+		2: "No Spawn" : 0
+	]
+
+	monstertype(string) : "Monster Type" : "monster_headcrab"
+
+	m_flBeamRadius(integer) : "Beam Radius (max)" : 255
+	m_iBeamAlpha(integer) : "Beam Alpha" : 128
+	m_iBeamCount(integer) : "Beam Count" : 8
+	m_vBeamColor(color255) : "Beam Color" : "217 226 146"
+
+	m_flLightRadius(integer) : "Light Radius" : 160
+	m_vLightColor(color255) : "Light Color" : "39 209 137"
+
+	m_flStartSpriteFramerate(integer) : "Sprite1 Framerate" : 12
+	m_flStartSpriteScale(string) : "Sprite1 Scale" : "1.0"
+	m_iStartSpriteAlpha(integer) : "Sprite1 Alpha" : 255
+	m_vStartSpriteColor(color255) : "Sprite1 Color" : "65 209 61"
+
+	m_flEndSpriteFramerate(integer) : "Sprite2 Framerate" : 12
+	m_flEndSpriteScale(string) : "Sprite2 Scale" : "1.0"
+	m_iEndSpriteAlpha(integer) : "Sprite2 Alpha" : 255
+	m_vEndSpriteColor(color255) : "Sprite2 Color" : "159 240 214"
+]
+
 @SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object" 
 [
 	spawnflags(flags) =

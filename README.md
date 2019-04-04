@@ -133,6 +133,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 
 #### Sven Co-op entities
 
+* env_xenmaker
 * trigger_random
 * trigger_random_time
 * trigger_random_unique
@@ -171,7 +172,7 @@ Note that the full compatibility with Spirit maps is not a goal.
 
 #### Sven Co-op
 
-Besides opfor entities there're some features made for compatibility with Sven Co-op maps.
+Besides some opfor and sven co-op entities mentioned above there're some features made for compatibility with Sven Co-op maps.
 
 * trigger_push has 'No clients' and 'No monsters' flags
 * 'Explosive Only' flag for breakables.
