@@ -1296,6 +1296,7 @@
 	frequency(string) : "Shake Frequency (0.1 = jerk, 255.0 = rumble)"
 	radius(integer) : "Shake and Beam Radius" : 192
 	scale(string) : "Sprite Scale"
+	framerate(string) : "Sprite Framerate"
 	warp_target(target_destination) : "Warp target"
 	damage_delay(string) : "Damage delay"
 	beamcolor(color255) : "Beam color"
@@ -1306,6 +1307,7 @@
 		2: "Kill center" : 0
 		4: "No screen shake" : 1
 		8: "Dynamic light" : 0
+		16: "No sounds" : 0
 	]
 	noise1(sound) : "Custom sound 1"
 	noise2(sound) : "Custom sound 2"

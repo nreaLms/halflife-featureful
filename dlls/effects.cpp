@@ -2522,6 +2522,7 @@ void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, const B
 #define SF_KILL_CENTER		0x0002
 #define SF_WARPBALL_NOSHAKE	0x0004
 #define SF_WARPBALL_DYNLIGHT	0x0008
+#define SF_WARPBALL_NOSOUND	0x0010
 
 #define WARPBALL_SPRITE "sprites/fexplo1.spr"
 #define WARPBALL_BEAM "sprites/lgtning.spr"
@@ -2599,6 +2600,9 @@ public:
 	}
 	inline float SoundAttenuation() {
 		return ::SoundAttenuation((short)pev->oldbuttons);
+	}
+	inline int SpriteFramerate() {
+		return pev->framerate ? pev->framerate : 12;
 	}
 
 	Vector vecOrigin;
@@ -2700,15 +2704,15 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		vecOrigin = pev->origin;
 		pos = edict();
 	}
-	EMIT_SOUND( pos, CHAN_BODY, WarpballSound1(), 1, SoundAttenuation() );
+	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
+		EMIT_SOUND( pos, CHAN_BODY, WarpballSound1(), 1, SoundAttenuation() );
 	
 	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
 		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
 	}
 
 	CSprite *pSpr = CSprite::SpriteCreate( SpriteModel(), vecOrigin, TRUE );
-	const float frameRate = 18;
-	pSpr->AnimateAndDie( frameRate );
+	pSpr->AnimateAndDie( SpriteFramerate() );
 
 	int red = pev->rendercolor.x;
 	int green = pev->rendercolor.y;
@@ -2724,7 +2728,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	if (pev->spawnflags & SF_WARPBALL_DYNLIGHT)
 	{
-		const int lifeTime = (15*pSpr->Frames())/frameRate;
+		const int lifeTime = 15;
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
 			WRITE_BYTE( TE_DLIGHT );
 			WRITE_COORD( vecOrigin.x );	// X
@@ -2739,7 +2743,8 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		MESSAGE_END();
 	}
 
-	EMIT_SOUND( pos, CHAN_ITEM, WarpballSound2(), 1, SoundAttenuation() );
+	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
+		EMIT_SOUND( pos, CHAN_ITEM, WarpballSound2(), 1, SoundAttenuation() );
 
 	int beamRed = pev->punchangle.x;
 	int beamGreen = pev->punchangle.y;
