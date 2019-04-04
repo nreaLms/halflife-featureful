@@ -156,7 +156,13 @@
 	rendercolor(color255) : "FX Color (R G B)" : "0 0 0"
 ]
 
-@BaseClass base(Appearflags, Angles) flags(Angle) size(-16 -16 -36, 16 16 36) color(0 255 0) offset(0 0 36) = PlayerClass []
+@BaseClass base(Appearflags, Angles, Targetname) flags(Angle) size(-16 -16 -36, 16 16 36) color(0 255 0) offset(0 0 36) = PlayerClass
+[
+	spawnflags(Flags) =
+	[
+		2 : "Start off" : 0
+	]
+]
 
 @BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence) = DeadMonster
 [

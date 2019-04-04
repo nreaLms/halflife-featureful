@@ -54,7 +54,26 @@ void CNullEntity::Spawn( void )
 
 LINK_ENTITY_TO_CLASS( info_null, CNullEntity )
 
-class CBaseDMStart : public CPointEntity
+class CSpawnPoint : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+#define SF_SPAWNPOINT_OFF 2
+
+void CSpawnPoint::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (ShouldToggle(useType, !FBitSet(pev->spawnflags, SF_SPAWNPOINT_OFF)))
+	{
+		if (FBitSet(pev->spawnflags, SF_SPAWNPOINT_OFF))
+			ClearBits(pev->spawnflags, SF_SPAWNPOINT_OFF);
+		else
+			SetBits(pev->spawnflags, SF_SPAWNPOINT_OFF);
+	}
+}
+
+class CBaseDMStart : public CSpawnPoint
 {
 public:
 	void KeyValue( KeyValueData *pkvd );
@@ -65,7 +84,8 @@ private:
 
 // These are the new entry points to entities. 
 LINK_ENTITY_TO_CLASS( info_player_deathmatch, CBaseDMStart )
-LINK_ENTITY_TO_CLASS( info_player_start, CPointEntity )
+LINK_ENTITY_TO_CLASS( info_player_start, CSpawnPoint )
+LINK_ENTITY_TO_CLASS( info_player_coop, CSpawnPoint )
 LINK_ENTITY_TO_CLASS( info_landmark, CPointEntity )
 
 void CBaseDMStart::KeyValue( KeyValueData *pkvd )
@@ -76,7 +96,7 @@ void CBaseDMStart::KeyValue( KeyValueData *pkvd )
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CPointEntity::KeyValue( pkvd );
+		CSpawnPoint::KeyValue( pkvd );
 }
 
 BOOL CBaseDMStart::IsTriggered( CBaseEntity *pEntity )

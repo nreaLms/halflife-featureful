@@ -2922,12 +2922,14 @@ pt_end:
 #endif
 }
 
+#define SF_SPAWNPOINT_OFF 2
+
 // checks if the spot is clear of players
 BOOL IsSpawnPointValid( CBaseEntity *pPlayer, CBaseEntity *pSpot )
 {
 	CBaseEntity *ent = NULL;
 
-	if( !pSpot->IsTriggered( pPlayer ) )
+	if( FBitSet(pSpot->pev->spawnflags, SF_SPAWNPOINT_OFF) || !pSpot->IsTriggered( pPlayer ) )
 	{
 		return FALSE;
 	}
@@ -2944,6 +2946,8 @@ BOOL IsSpawnPointValid( CBaseEntity *pPlayer, CBaseEntity *pSpot )
 
 DLL_GLOBAL CBaseEntity	*g_pLastSpawn;
 inline int FNullEnt( CBaseEntity *ent ) { return ( ent == NULL ) || FNullEnt( ent->edict() ); }
+
+inline bool SpawnPointIsOn( CBaseEntity* ent ) { return !FNullEnt(ent) && !FBitSet(ent->pev->spawnflags, SF_SPAWNPOINT_OFF); }
 
 /*
 ============
@@ -2965,10 +2969,10 @@ edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer )
 	if( g_pGameRules->IsCoOp() )
 	{
 		pSpot = UTIL_FindEntityByClassname( g_pLastSpawn, "info_player_coop" );
-		if( !FNullEnt( pSpot ) )
+		if( SpawnPointIsOn( pSpot ) )
 			goto ReturnSpot;
 		pSpot = UTIL_FindEntityByClassname( g_pLastSpawn, "info_player_start" );
-		if( !FNullEnt(pSpot) ) 
+		if( SpawnPointIsOn(pSpot) )
 			goto ReturnSpot;
 	}
 	else if( g_pGameRules->IsDeathmatch() )
@@ -2977,7 +2981,7 @@ edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer )
 		// Randomize the start spot
 		for( int i = RANDOM_LONG( 1, 5 ); i > 0; i-- )
 			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
-		if( FNullEnt( pSpot ) )  // skip over the null point
+		if( !SpawnPointIsOn( pSpot ) )  // skip over the null point
 			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
 
 		CBaseEntity *pFirstSpot = pSpot;
@@ -3004,7 +3008,7 @@ edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer )
 		} while( pSpot != pFirstSpot ); // loop if we're not back to the start
 
 		// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
-		if( !FNullEnt( pSpot ) )
+		if( SpawnPointIsOn( pSpot ) )
 		{
 			CBaseEntity *ent = NULL;
 			while( ( ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 ) ) != NULL )
@@ -3021,7 +3025,7 @@ edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer )
 	if( FStringNull( gpGlobals->startspot ) || !strlen(STRING( gpGlobals->startspot ) ) )
 	{
 		pSpot = UTIL_FindEntityByClassname( NULL, "info_player_start" );
-		if( !FNullEnt( pSpot ) )
+		if( SpawnPointIsOn( pSpot ) )
 			goto ReturnSpot;
 	}
 	else

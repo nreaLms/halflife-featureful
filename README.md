@@ -175,6 +175,7 @@ Note that the full compatibility with Spirit maps is not a goal.
 
 Besides some opfor and sven co-op entities mentioned above there're some features made for compatibility with Sven Co-op maps.
 
+* info_player_deathmatch can be turned on and off.
 * trigger_push has 'No clients' and 'No monsters' flags
 * 'Explosive Only' flag for breakables.
 * Some spawnobject values in breakables are compatible with Sven Co-op.
