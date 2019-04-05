@@ -4080,6 +4080,11 @@
 	[
 		64 : "Start Inactive" : 0
 	]
+	grunttype(Choices) : "Grunt Type" : : "Note: you need to set an appropriate relationship for osprey to spawn ally grunts" =
+	[
+		0 : "Human Grunts (default)"
+		1 : "Opposing Force Grunts"
+	]
 	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
 ]
 

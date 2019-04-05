@@ -60,6 +60,7 @@ public:
 	void EXPORT FindAllThink( void );
 	void EXPORT HoverThink( void );
 	CBaseMonster *MakeGrunt( Vector vecSrc );
+	virtual void PrepareGruntBeforeSpawn(CBaseEntity* pGrunt);
 	void EXPORT CrashTouch( CBaseEntity *pOther );
 	void EXPORT DyingThink( void );
 	void EXPORT CommandUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -227,6 +228,11 @@ void COsprey::KeyValue(KeyValueData *pkvd)
 		pev->armorvalue = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	if( FStrEq(pkvd->szKeyName, "grunttype" ) )
+	{
+		pev->oldbuttons = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseMonster::KeyValue( pkvd );
 }
@@ -310,7 +316,12 @@ BOOL COsprey::HasDead()
 
 const char* COsprey::TrooperName()
 {
-	return "monster_human_grunt";
+#if FEATURE_OPFOR_GRUNT
+	if (pev->oldbuttons == 1)
+		return "monster_human_grunt_ally";
+	else
+#endif
+		return "monster_human_grunt";
 }
 
 CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
@@ -333,8 +344,17 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 			}
 			pEntity = CreateNoSpawn( TrooperName(), vecSrc, pev->angles );
 			pGrunt = pEntity->MyMonsterPointer();
+			// If player is my enemy and default relationship of my grunts with player is ally, reverse their relationship
+			if (IDefaultRelationship(CLASS_PLAYER) >= R_DL && IDefaultRelationship(pGrunt->DefaultClassify(), CLASS_PLAYER) < R_DL)
+			{
+				pGrunt->m_reverseRelationship = TRUE;
+			}
+			else if (IDefaultRelationship(CLASS_PLAYER) < R_DL && IDefaultRelationship(pGrunt->DefaultClassify(), CLASS_PLAYER) >= R_DL)
+			{
+				pGrunt->m_reverseRelationship = TRUE;
+			}
 			pGrunt->m_iClass = m_iClass;
-			pGrunt->m_reverseRelationship = m_reverseRelationship;
+			PrepareGruntBeforeSpawn(pGrunt);
 			DispatchSpawn(pEntity->edict());
 			pGrunt->pev->movetype = MOVETYPE_FLY;
 			pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
@@ -355,6 +375,19 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 	}
 	// ALERT( at_console, "none dead\n");
 	return NULL;
+}
+
+void COsprey::PrepareGruntBeforeSpawn(CBaseEntity *pGrunt)
+{
+	if (pev->oldbuttons == 1)
+	{
+		KeyValueData kvd;
+		char buf[128] = {0};
+		sprintf(buf, "%d", -1);
+		kvd.szKeyName = "head";
+		kvd.szValue = buf;
+		pGrunt->KeyValue(&kvd);
+	}
 }
 
 void COsprey::HoverThink( void )
@@ -824,6 +857,7 @@ class CBlkopOsprey : public COsprey
 public:
 	void Spawn();
 	void Precache();
+	void PrepareGruntBeforeSpawn(CBaseEntity* pGrunt);
 protected:
 	const char* TrooperName();
 };
@@ -838,6 +872,16 @@ void CBlkopOsprey::Spawn()
 void CBlkopOsprey::Precache()
 {
 	PrecacheImpl("models/blkop_osprey.mdl", "models/blkop_tailgibs.mdl", "models/blkop_bodygibs.mdl", "models/blkop_enginegibs.mdl");
+}
+
+void CBlkopOsprey::PrepareGruntBeforeSpawn(CBaseEntity *pGrunt)
+{
+	KeyValueData kvd;
+	char buf[128] = {0};
+	sprintf(buf, "%d", -1);
+	kvd.szKeyName = "head";
+	kvd.szValue = buf;
+	pGrunt->KeyValue(&kvd);
 }
 
 const char* CBlkopOsprey::TrooperName()
