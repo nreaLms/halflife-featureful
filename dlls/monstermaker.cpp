@@ -149,7 +149,7 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "trigger_alt_condition" ) )
 	{
-		m_iTriggerCondition = (short)atoi( pkvd->szValue );
+		m_iTriggerAltCondition = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "respawn_as_playerally" ) )
@@ -315,7 +315,7 @@ void CMonsterMaker::MakeMonster( void )
 		{
 			createdMonster->m_iszTriggerTarget = m_iszTriggerTarget;
 			createdMonster->m_iTriggerCondition = m_iTriggerCondition;
-			createdMonster->m_iTriggerCondition = m_iTriggerCondition;
+			createdMonster->m_iTriggerAltCondition = m_iTriggerAltCondition;
 		}
 
 		if (createdMonster->IsInitiallyDead())
