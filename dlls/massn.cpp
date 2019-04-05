@@ -52,6 +52,7 @@ enum
 class CMassn : public CHGrunt
 {
 public:
+	const char* ReverseRelationshipModel() { return "models/massnf.mdl"; }
 	void KeyValue(KeyValueData* pkvd);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	BOOL CheckRangeAttack2(float flDot, float flDist);

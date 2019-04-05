@@ -152,6 +152,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 		m_iTriggerCondition = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "respawn_as_playerally" ) )
+	{
+		m_reverseRelationship = atoi( pkvd->szValue ) != 0;
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseMonster::KeyValue( pkvd );
 }
@@ -214,7 +219,8 @@ void CMonsterMaker::Precache( void )
 		PRECACHE_MODEL(STRING(m_customModel));
 	if (!FStringNull(m_gibModel))
 		PRECACHE_MODEL(STRING(m_gibModel));
-	UTIL_PrecacheOther( STRING( m_iszMonsterClassname ) );
+
+	UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship );
 }
 
 //=========================================================
@@ -300,6 +306,7 @@ void CMonsterMaker::MakeMonster( void )
 
 		if (m_classify)
 			createdMonster->m_iClass = m_classify;
+		createdMonster->m_reverseRelationship = m_reverseRelationship;
 		createdMonster->SetMyBloodColor(m_bloodColor);
 		if (!FStringNull(m_gibModel))
 			createdMonster->m_gibModel = m_gibModel;

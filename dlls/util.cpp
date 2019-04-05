@@ -1581,6 +1581,26 @@ void UTIL_PrecacheOther( const char *szClassname )
 	REMOVE_ENTITY( pent );
 }
 
+void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship)
+{
+	edict_t	*pent = CREATE_NAMED_ENTITY( MAKE_STRING( szClassname ) );
+	if( FNullEnt( pent ) )
+	{
+		ALERT( at_console, "NULL Ent in UTIL_PrecacheMonster\n" );
+		return;
+	}
+
+	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
+	if( pEntity )
+	{
+		CBaseMonster *pMonster = pEntity->MyMonsterPointer();
+		if (pMonster)
+			pMonster->m_reverseRelationship = reverseRelationship;
+		pEntity->Precache();
+	}
+	REMOVE_ENTITY( pent );
+}
+
 //=========================================================
 // UTIL_LogPrintf - Prints a logged message to console.
 // Preceded by LOG: ( timestamp ) < message >

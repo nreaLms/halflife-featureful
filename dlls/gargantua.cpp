@@ -1462,6 +1462,7 @@ void SpawnExplosion( Vector center, float randomRange, float time, int magnitude
 class CBabyGargantua : public CGargantua
 {
 public:
+	const char* ReverseRelationshipModel() { return "models/babygargf.mdl"; }
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );

@@ -79,6 +79,7 @@ public:
 	void MonsterThink();
 	void Precache(void);
 	int  DefaultClassify(void);
+	const char* ReverseRelationshipModel() { return NULL; }
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	BOOL CheckRangeAttack2(float flDot, float flDist);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
@@ -560,7 +561,7 @@ void CStrooper::DropShockRoach()
 		if (pRoach)
 		{
 			CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
-			if (pNewMonster && m_iClass != 0) {
+			if (pNewMonster && (m_iClass != 0 || m_reverseRelationship)) {
 				pNewMonster->m_iClass = Classify();
 			}
 		}

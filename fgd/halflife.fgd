@@ -218,12 +218,19 @@
 		512: "Fade Corpse"	: 0
 		8192: "No yellow blobs" : 0
 	]
+	is_player_ally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 	scale(string) : "Scale (1.0 = normal size)"
 	health(string) : "Custom Health"
 	model(studio) : "Custom Model"
 	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" = 
 	[
 		0 : "Default"
+		1 : "Human (red)"
+		2 : "Alien (yellow)"
 		247 : "Human (red)"
 		195 : "Alien (yellow)"
 		-1 : "Don't bleed"
@@ -5167,6 +5174,11 @@
 		9 : "Hear Combat"
 		10: "See Player Unconditional"
 		11: "See Player, Not In Combat"
+	]
+	respawn_as_playerally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
+	[
+		0 : "No"
+		1 : "Yes"
 	]
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []

@@ -45,6 +45,9 @@
 // whether monsters get health from eating meat or enemy corpses
 #define FEATURE_EAT_FOR_HEALTH 1
 
+// enable reverse relationship models, like barnabus
+#define FEATURE_REVERSE_RELATIONSHIP_MODELS 0
+
 // New weapons
 #define FEATURE_PIPEWRENCH (1 || FEATURE_OPFOR)
 #define FEATURE_KNIFE (1 || FEATURE_OPFOR)

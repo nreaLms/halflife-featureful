@@ -181,6 +181,7 @@ Besides some opfor and sven co-op entities mentioned above there're some feature
 * 'Explosive Only' flag for breakables.
 * Some spawnobject values in breakables are compatible with Sven Co-op.
 * Wall chargers sounds and capacity can be configured in level editor.
+* 'Is Player Ally' parameter for monsters that inverts their relationship with player and sets a different model for some monsters.
 
 Note that the full compatibility with Sven Co-op maps is not a goal.
 

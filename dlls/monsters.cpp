@@ -109,6 +109,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_pCine, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CBaseMonster, m_iClass, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_gibModel, FIELD_STRING ),
+	DEFINE_FIELD( CBaseMonster, m_reverseRelationship, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseMonster, m_glowShellTime, FIELD_TIME ),
 
@@ -3054,6 +3055,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 		m_gibModel = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "is_player_ally" ) )
+	{
+		m_reverseRelationship = atoi( pkvd->szValue ) != 0;
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseToggle::KeyValue( pkvd );
@@ -3525,7 +3531,15 @@ void CBaseMonster::SetMyHealth(const float health)
 void CBaseMonster::SetMyModel(const char *model)
 {
 	if (FStringNull(pev->model)) {
-		SET_MODEL( ENT( pev ), model );
+		const char* reverseModel = NULL;
+#if FEATURE_REVERSE_RELATIONSHIP_MODELS
+		if (m_reverseRelationship)
+			reverseModel = ReverseRelationshipModel();
+#endif
+		if (reverseModel)
+			SET_MODEL( ENT( pev ), reverseModel );
+		else
+			SET_MODEL( ENT( pev ), model );
 	} else {
 		SET_MODEL( ENT( pev ), STRING(pev->model) );
 	}
@@ -3534,7 +3548,15 @@ void CBaseMonster::SetMyModel(const char *model)
 void CBaseMonster::PrecacheMyModel(const char *model)
 {
 	if (FStringNull(pev->model)) {
-		PRECACHE_MODEL( model );
+		const char* reverseModel = NULL;
+#if FEATURE_REVERSE_RELATIONSHIP_MODELS
+		if (m_reverseRelationship)
+			reverseModel = ReverseRelationshipModel();
+#endif
+		if (reverseModel)
+			PRECACHE_MODEL(reverseModel);
+		else
+			PRECACHE_MODEL( model );
 	} else {
 		PRECACHE_MODEL( STRING( pev->model ) );
 	}
@@ -3552,7 +3574,24 @@ void CBaseMonster::SetMyBloodColor(int bloodColor)
 
 int CBaseMonster::Classify()
 {
-	return m_iClass ? m_iClass : DefaultClassify();
+	if (m_iClass)
+		return m_iClass;
+	const int defaultClassify = DefaultClassify();
+	if (m_reverseRelationship)
+	{
+		switch(defaultClassify)
+		{
+		case CLASS_HUMAN_PASSIVE:
+		case CLASS_PLAYER_ALLY:
+		case CLASS_PLAYER_ALLY_MILITARY:
+			return CLASS_HUMAN_MILITARY;
+		case CLASS_NONE:
+			return CLASS_NONE;
+		default:
+			return CLASS_PLAYER_ALLY;
+		}
+	}
+	return defaultClassify;
 }
 
 int CBaseMonster::DefaultClassify()

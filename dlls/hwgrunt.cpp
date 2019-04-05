@@ -33,6 +33,7 @@ public:
 	void Precache( void );
 	void SetYawSpeed( void );
 	int DefaultClassify( void ) { return CLASS_HUMAN_MILITARY; }
+	const char* ReverseRelationshipModel() { return "models/hwgruntf.mdl"; }
 	int ISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetActivity( Activity NewActivity );

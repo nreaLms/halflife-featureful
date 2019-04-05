@@ -687,6 +687,11 @@ int CHGrunt::DefaultClassify( void )
 	return CLASS_HUMAN_MILITARY;
 }
 
+const char* CHGrunt::ReverseRelationshipModel()
+{
+	return "models/hgruntf.mdl";
+}
+
 //=========================================================
 //=========================================================
 CBaseEntity *CHGrunt::Kick( void )

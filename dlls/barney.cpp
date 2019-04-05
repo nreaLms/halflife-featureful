@@ -52,6 +52,7 @@ public:
 	void BarneyFirePistol( const char* shotSound, Bullet bullet );
 	void AlertSound( void );
 	int DefaultClassify( void );
+	const char* ReverseRelationshipModel() { return "models/barnabus.mdl"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 
 	void RunTask( Task_t *pTask );
@@ -817,7 +818,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void TalkInit( void );
-	
+	const char* ReverseRelationshipModel() { return "models/otisf.mdl"; }
 	void AlertSound( void );
 	
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);

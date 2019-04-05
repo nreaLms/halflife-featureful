@@ -110,6 +110,8 @@ public:
 	int m_iClass;
 	string_t m_gibModel;
 
+	BOOL m_reverseRelationship;
+
 	virtual int Save( CSave &save ); 
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
@@ -347,6 +349,7 @@ public:
 
 	int Classify();
 	virtual int DefaultClassify();
+	virtual const char* ReverseRelationshipModel() { return NULL; }
 
 	virtual BOOL IsInitiallyDead() {return FALSE;}
 

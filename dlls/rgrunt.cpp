@@ -28,6 +28,7 @@ public:
 	void Spawn();
 	void Precache();
 	int DefaultClassify() { return CLASS_MACHINE; }
+	const char* ReverseRelationshipModel() { return "models/rguntf.mdl"; }
 	void RunAI();
 	void StartTask( Task_t* pTask );
 	void RunTask( Task_t* pTask );

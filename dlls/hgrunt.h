@@ -58,6 +58,7 @@ public:
 	void Precache( void );
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* ReverseRelationshipModel();
 	int ISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL FCanCheckAttacks( void );

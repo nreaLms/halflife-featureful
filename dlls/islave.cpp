@@ -147,6 +147,7 @@ public:
 	void SetYawSpeed( void );
 	int ISoundMask( void );
 	int DefaultClassify( void );
+	const char* ReverseRelationshipModel() { return "models/islavef.mdl"; }
 	int IRelationship( CBaseEntity *pTarget );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL CheckRangeAttack1( float flDot, float flDist );
@@ -910,7 +911,7 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 					pNewMonster->SetConditions( bits_COND_NEW_ENEMY );
 					pNewMonster->m_MonsterState = MONSTERSTATE_COMBAT;
 					pNewMonster->m_IdealMonsterState = MONSTERSTATE_COMBAT;
-					if (m_iClass) {
+					if (m_iClass || m_reverseRelationship) {
 						pNewMonster->m_iClass = Classify();
 					}
 				}

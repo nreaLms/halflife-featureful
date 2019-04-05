@@ -204,7 +204,7 @@ void COsprey::Precache( void )
 
 void COsprey::PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs)
 {
-	UTIL_PrecacheOther( TrooperName() );
+	UTIL_PrecacheMonster( TrooperName(), m_reverseRelationship );
 
 	PrecacheMyModel( modelName );
 	PRECACHE_MODEL( "models/HVR.mdl" );
@@ -243,8 +243,9 @@ void COsprey::FindAllThink( void )
 	m_iUnits = 0;
 	while( m_iUnits < MAX_CARRY && ( pEntity = UTIL_FindEntityByClassname( pEntity, TrooperName() ) ) != NULL )
 	{
-		if( pEntity->IsAlive() )
+		if( pEntity->IsAlive() && IRelationship(pEntity) < R_DL )
 		{
+			ALERT(at_console, "Found osprey grunt\n");
 			m_hGrunt[m_iUnits] = pEntity;
 			m_vecOrigin[m_iUnits] = pEntity->pev->origin;
 			m_iUnits++;
@@ -331,9 +332,11 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 			{
 				m_hGrunt[i]->SUB_StartFadeOut();
 			}
-			pEntity = Create( TrooperName(), vecSrc, pev->angles );
+			pEntity = CreateNoSpawn( TrooperName(), vecSrc, pev->angles );
 			pGrunt = pEntity->MyMonsterPointer();
 			pGrunt->m_iClass = m_iClass;
+			pGrunt->m_reverseRelationship = m_reverseRelationship;
+			DispatchSpawn(pEntity->edict());
 			pGrunt->pev->movetype = MOVETYPE_FLY;
 			pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
 			pGrunt->SetActivity( ACT_GLIDE );
