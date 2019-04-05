@@ -138,6 +138,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * trigger_random
 * trigger_random_time
 * trigger_random_unique
+* trigger_respawn
 
 #### Others
 
@@ -149,11 +150,11 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * multi_trigger - alternative to multi_manager for which J.A.C.K. can show connections to its targets.
 * item_flashlight can be enabled to give player flashlight without giving a suit.
 
-### New flags and parameters compatible with exising addons and mods
+### New flags and parameters compatible with existing addons and mods
 
 #### Opposing Force
 
-Besides opfor entites (mentioned above) some opfor-specific parameters were added:
+Besides opfor entities (mentioned above) some opfor-specific parameters were added:
 
 * 'Suspicious' parameter for scientists and security guards that make them pre-provoked towards the player.
 

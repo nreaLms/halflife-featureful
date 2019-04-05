@@ -2740,6 +2740,37 @@ int CTriggerRandom::TargetCount()
 	return 0;
 }
 
+class CTriggerRespawn : public CBaseEntity
+{
+public:
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+};
+
+extern void respawn( entvars_t *pev, BOOL fCopyCorpse );
+
+void CTriggerRespawn::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	for( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBasePlayer* pPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
+		if (pPlayer && pPlayer->IsPlayer())
+		{
+			if (pPlayer->IsAlive())
+			{
+				g_pGameRules->GetPlayerSpawnSpot(pPlayer);
+				pPlayer->pev->health = pPlayer->pev->max_health;
+			}
+			else
+			{
+				respawn( pPlayer->pev, !( pPlayer->m_afPhysicsFlags & PFLAG_OBSERVER ) );
+			}
+		}
+	}
+}
+
+LINK_ENTITY_TO_CLASS(trigger_respawn, CTriggerRespawn)
+
 #if FEATURE_DISPLACER
 class CTriggerXenReturn : public CTriggerTeleport
 {

@@ -5685,6 +5685,9 @@
 	]
 ]
 
+// purpose: respawn all players without affecting the current player status, like health and weapons
+@PointClass base(Target, Targetname) size(-16 -16 -16,16 16 16) = trigger_respawn :"Trigger Respawn. Sven Co-op compatibility entity" []
+
 @PointClass base(Targetname, Target) = trigger_timer : "Continuously fire the same target over random delays. trigger_timer can be activated with 'On' use. trigger_timer stops firing its target if it was triggered with 'Off' use. 'Toggle' use toggles trigger_timer's state."
 [
 	spawnflags(flags) =
