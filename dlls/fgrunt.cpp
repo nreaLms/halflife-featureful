@@ -24,6 +24,7 @@
 #include	"decals.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
+#include	"gamerules.h"
 
 #if FEATURE_OPFOR_GRUNT
 //=========================================================
@@ -1164,7 +1165,7 @@ void CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const
 
 void CHFGrunt::DropMyItems(BOOL isGibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;
@@ -3031,7 +3032,7 @@ void CTorch::GibMonster()
 
 void CTorch::DropMyItems(BOOL isGibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
 	{
 		if (!isGibbed) {
 			pev->body = TORCH_GUN_NONE;
@@ -3604,7 +3605,7 @@ void CMedic::GibMonster()
 
 void CMedic::DropMyItems(BOOL isGibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
 	{
 		if (!isGibbed) {
 			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );

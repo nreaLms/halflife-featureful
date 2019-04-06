@@ -1149,6 +1149,11 @@ BOOL CHalfLifeMultiplay::FAllowMonsters( void )
 	return ( allowmonsters.value != 0 );
 }
 
+bool CHalfLifeMultiplay::FMonsterCanDropWeapons(CBaseEntity *pMonster)
+{
+	return npc_dropweapons.value != 0;
+}
+
 //=========================================================
 //======== CHalfLifeMultiplay private functions ===========
 #define INTERMISSION_TIME		6

@@ -42,6 +42,7 @@
 #include	"gamerules.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
+#include	"gamerules.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -187,7 +188,7 @@ void CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const 
 
 void CHGrunt::DropMyItems(BOOL isGibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;

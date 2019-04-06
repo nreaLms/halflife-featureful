@@ -338,3 +338,8 @@ BOOL CHalfLifeRules::FAllowMonsters( void )
 {
 	return TRUE;
 }
+
+bool CHalfLifeRules::FMonsterCanDropWeapons( CBaseEntity* pMonster )
+{
+	return true;
+}

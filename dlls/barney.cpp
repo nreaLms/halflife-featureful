@@ -28,6 +28,7 @@
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"mod_features.h"
+#include	"gamerules.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -602,7 +603,7 @@ void CBarney::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 
 void CBarney::OnDying()
 {
-	if( !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN) && pev->body < BARNEY_BODY_GUNGONE )
+	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN) && pev->body < BARNEY_BODY_GUNGONE )
 	{
 		// drop the gun!
 		Vector vecGunPos;
@@ -956,7 +957,7 @@ void COtis::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 void COtis::OnDying()
 {
-	if ( !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN) && GetBodygroup(1) != OTIS_BODY_GUNHOLSTERED )
+	if ( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN) && GetBodygroup(1) != OTIS_BODY_GUNHOLSTERED )
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;

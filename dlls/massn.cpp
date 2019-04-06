@@ -6,6 +6,7 @@
 #include	"soundent.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
+#include	"gamerules.h"
 
 #if FEATURE_MASSN
 
@@ -135,7 +136,7 @@ void CMassn::GibMonster( void )
 
 void CMassn::DropMyItems(BOOL isGibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;
