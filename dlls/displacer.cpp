@@ -339,7 +339,7 @@ void CDisplacer::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_DISPLACER;
-	SET_MODEL(ENT(pev), "models/w_displacer.mdl");
+	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iDefaultAmmo = DISPLACER_DEFAULT_GIVE;
 
@@ -352,7 +352,7 @@ void CDisplacer::Spawn()
 void CDisplacer::Precache(void)
 {
 	PRECACHE_MODEL("models/v_displacer.mdl");
-	PRECACHE_MODEL("models/w_displacer.mdl");
+	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_displacer.mdl");
 
 	PRECACHE_SOUND("items/9mmclip1.wav");

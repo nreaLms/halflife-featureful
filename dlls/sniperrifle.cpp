@@ -31,7 +31,7 @@ void CSniperrifle::Spawn( )
 	pev->classname = MAKE_STRING("weapon_sniperrifle"); // hack to allow for old names
 	Precache( );
 	m_iId = WEAPON_SNIPERRIFLE;
-	SET_MODEL(ENT(pev), "models/w_m40a1.mdl");
+	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iDefaultAmmo = SNIPERRIFLE_DEFAULT_GIVE;
 
@@ -42,7 +42,7 @@ void CSniperrifle::Spawn( )
 void CSniperrifle::Precache( void )
 {
 	PRECACHE_MODEL("models/v_m40a1.mdl");
-	PRECACHE_MODEL("models/w_m40a1.mdl");
+	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_m40a1.mdl");
 
 	PRECACHE_SOUND ("weapons/sniper_bolt1.wav");

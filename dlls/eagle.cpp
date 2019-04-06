@@ -27,7 +27,7 @@ void CEagle::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_EAGLE;
-	SET_MODEL(ENT(pev), "models/w_desert_eagle.mdl");
+	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iDefaultAmmo = EAGLE_DEFAULT_GIVE;
 	m_fEagleLaserActive = 0;
@@ -41,7 +41,7 @@ void CEagle::Precache( void )
 {
 	UTIL_PrecacheOther( "eagle_laser" );
 	PRECACHE_MODEL("models/v_desert_eagle.mdl");
-	PRECACHE_MODEL("models/w_desert_eagle.mdl");
+	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_desert_eagle.mdl");
 	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 

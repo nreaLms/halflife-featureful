@@ -65,7 +65,7 @@ void CGauss::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_GAUSS;
-	SET_MODEL( ENT( pev ), "models/w_gauss.mdl" );
+	SET_MODEL( ENT( pev ), MyWModel() );
 
 	m_iDefaultAmmo = GAUSS_DEFAULT_GIVE;
 
@@ -74,7 +74,7 @@ void CGauss::Spawn()
 
 void CGauss::Precache( void )
 {
-	PRECACHE_MODEL( "models/w_gauss.mdl" );
+	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/v_gauss.mdl" );
 	PRECACHE_MODEL( "models/p_gauss.mdl" );
 

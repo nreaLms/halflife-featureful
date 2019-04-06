@@ -56,7 +56,7 @@ void CMedkit::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_MEDKIT;
-	SET_MODEL(ENT(pev), "models/w_medkit.mdl");
+	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iDefaultAmmo = MEDKIT_DEFAULT_GIVE;
 	m_secondaryAttack = FALSE;
@@ -69,7 +69,7 @@ void CMedkit::Spawn()
 void CMedkit::Precache(void)
 {
 	PRECACHE_MODEL("models/v_tfc_medkit.mdl");
-	PRECACHE_MODEL("models/w_medkit.mdl");
+	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_medkit.mdl");
 
 	PRECACHE_SOUND("items/9mmclip1.wav");

@@ -36,7 +36,7 @@ void CKnife::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_KNIFE;
-	SET_MODEL(ENT(pev), "models/w_knife.mdl");
+	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iSwingMode = 0;
 	m_iClip = -1;
@@ -47,7 +47,7 @@ void CKnife::Spawn()
 void CKnife::Precache(void)
 {
 	PRECACHE_MODEL("models/v_knife.mdl");
-	PRECACHE_MODEL("models/w_knife.mdl");
+	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_knife.mdl");
 	PRECACHE_SOUND("weapons/knife_hit_flesh1.wav");
 	PRECACHE_SOUND("weapons/knife_hit_flesh2.wav");

@@ -359,6 +359,8 @@ public:
 
 	static	TYPEDESCRIPTION m_SaveData[];
 
+	virtual const char* MyWModel() { return 0; }
+
 	// generic weapon versions of CBasePlayerItem calls
 	virtual int AddToPlayer( CBasePlayer *pPlayer );
 	int AddToPlayerDefault( CBasePlayer *pPlayer );
@@ -531,6 +533,8 @@ public:
 	BOOL PackWeapon( CBasePlayerItem *pWeapon );
 	BOOL PackAmmo( int iszName, int iCount );
 
+	void SetWeaponModel( CBasePlayerWeapon* pItem );
+
 	CBasePlayerItem	*m_rgpPlayerItems[MAX_ITEM_TYPES];// one slot for each
 
 	string_t m_rgiszAmmo[MAX_AMMO_SLOTS];// ammo names
@@ -569,6 +573,8 @@ public:
 #endif
 	}
 
+	const char* MyWModel() { return "models/w_9mmhandgun.mdl"; }
+
 private:
 	int m_iShell;
 
@@ -605,6 +611,9 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_crowbar.mdl"; }
+
 private:
 	unsigned short m_usCrowbar;
 };
@@ -635,6 +644,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_357.mdl"; }
 
 private:
 	unsigned short m_usFirePython;
@@ -667,6 +678,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_9mmAR.mdl"; }
 
 private:
 	unsigned short m_usMP5;
@@ -701,6 +714,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_crossbow.mdl"; }
 
 private:
 	unsigned short m_usCrossbow;
@@ -739,6 +754,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_shotgun.mdl"; }
 
 private:
 	unsigned short m_usDoubleFire;
@@ -797,6 +814,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_rpg.mdl"; }
 
 private:
 	unsigned short m_usRpg;
@@ -862,6 +881,8 @@ public:
 #endif
 	}
 
+	const char* MyWModel() { return "models/w_gauss.mdl"; }
+
 private:
 	unsigned short m_usGaussFire;
 	unsigned short m_usGaussSpin;
@@ -920,6 +941,8 @@ public:
 #endif
 	}
 
+	const char* MyWModel() { return "models/w_egon.mdl"; }
+
 	unsigned short m_usEgonStop;
 
 private:
@@ -968,6 +991,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_hgun.mdl"; }
 private:
 	unsigned short m_usHornetFire;
 };
@@ -994,6 +1019,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_grenade.mdl"; }
 };
 
 class CSatchel : public CBasePlayerWeapon
@@ -1028,6 +1055,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_satchel.mdl"; }
 };
 
 class CTripmine : public CBasePlayerWeapon
@@ -1058,6 +1087,7 @@ public:
 #endif
 	}
 
+	const char* MyWModel() { return "models/v_tripmine.mdl"; }
 private:
 	unsigned short m_usTripFire;
 };
@@ -1097,6 +1127,7 @@ public:
 	virtual const char* AmmoName() const;
 	virtual const char* EventsFile() const;
 
+	const char* MyWModel() { return NestModel(); }
 private:
 	unsigned short m_usSnarkFire;
 };
@@ -1134,6 +1165,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_desert_eagle.mdl"; }
 private:
 	int m_iShell;
 
@@ -1181,6 +1214,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_pipe_wrench.mdl"; }
 private:
 
 	unsigned short m_usPWrench;
@@ -1220,6 +1255,7 @@ public:
 		return FALSE;
 #endif
 	}
+	const char* MyWModel() { return "models/w_medkit.mdl"; }
 
 	float	m_flSoundDelay;
 	float	m_flRechargeTime;
@@ -1268,6 +1304,8 @@ public:
 	{
 		return FALSE;
 	}
+
+	const char* MyWModel() { return "models/w_bgrap.mdl"; }
 
 private:
 	CBarnacleGrappleTip* m_pTip;
@@ -1327,6 +1365,8 @@ public:
 #endif
 	}
 
+	const char* MyWModel() { return "models/w_saw.mdl"; }
+
 	void UpdateTape();
 
 	BOOL m_fReloadLaunched;
@@ -1381,6 +1421,8 @@ public:
 #endif
 	}
 
+	const char* MyWModel() { return "models/w_m40a1.mdl"; }
+
 	BOOL m_fNeedAjustBolt;
 	int	 m_iBoltState;
 
@@ -1429,6 +1471,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_displacer.mdl"; }
 
 	void UseAmmo(int count);
 	BOOL CanFireDisplacer( int count ) const;
@@ -1482,6 +1526,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_shock.mdl"; }
 private:
 	unsigned short m_usShockFire;
 	CBeam* m_pBeam[4];
@@ -1528,6 +1574,8 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_knife.mdl"; }
 private:
 	unsigned short m_usKnife;
 };
@@ -1588,6 +1636,9 @@ public:
 		return FALSE;
 #endif
 	}
+
+	const char* MyWModel() { return "models/w_spore_launcher.mdl"; }
+
 	int m_iSquidSpitSprite;
 private:
 	unsigned short m_usSporeFire;

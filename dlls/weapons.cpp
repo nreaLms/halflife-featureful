@@ -1561,6 +1561,22 @@ BOOL CWeaponBox::IsEmpty( void )
 	return TRUE;
 }
 
+void CWeaponBox::SetWeaponModel(CBasePlayerWeapon *pItem)
+{
+	if (pItem && pItem->MyWModel())
+	{
+		Vector weaponAngles = pev->angles;
+		weaponAngles.y += 180 + RANDOM_LONG(-15,15);
+
+		SET_MODEL( ENT( pev ), pItem->MyWModel() );
+		pev->angles = weaponAngles;
+		if (pItem->m_iId == WEAPON_TRIPMINE) {
+			pev->body = 3;
+			pev->sequence = 8;
+		}
+	}
+}
+
 //=========================================================
 //=========================================================
 void CWeaponBox::SetObjectCollisionBox( void )

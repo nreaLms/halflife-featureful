@@ -240,7 +240,7 @@ LINK_ENTITY_TO_CLASS( weapon_grapple, CBarnacleGrapple )
 void CBarnacleGrapple::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_bgrap.mdl" );
-	PRECACHE_MODEL( "models/w_bgrap.mdl" );
+	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/p_bgrap.mdl" );
 
 	PRECACHE_SOUND( "weapons/bgrapple_release.wav" );
@@ -267,7 +267,7 @@ void CBarnacleGrapple::Spawn( void )
 	pev->classname = MAKE_STRING( "weapon_grapple" ); // hack to allow for old names
 	Precache();
 	m_iId = WEAPON_GRAPPLE;
-	SET_MODEL( ENT(pev), "models/w_bgrap.mdl" );
+	SET_MODEL( ENT(pev), MyWModel() );
 	m_pTip = NULL;
 	m_bGrappling = FALSE;
 	m_iClip = -1;

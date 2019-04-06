@@ -35,7 +35,7 @@ void CPipeWrench::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_PIPEWRENCH;
-	SET_MODEL(ENT(pev), "models/w_pipe_wrench.mdl");
+	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iSwingMode = 0;
 	m_iClip = -1;
@@ -46,7 +46,7 @@ void CPipeWrench::Spawn()
 void CPipeWrench::Precache(void)
 {
 	PRECACHE_MODEL("models/v_pipe_wrench.mdl");
-	PRECACHE_MODEL("models/w_pipe_wrench.mdl");
+	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_pipe_wrench.mdl");
 
 	PRECACHE_SOUND("weapons/pwrench_hit1.wav");

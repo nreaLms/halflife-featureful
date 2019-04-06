@@ -37,7 +37,7 @@ void CSporelauncher::Spawn()
 {
 	Precache();
 	m_iId = WEAPON_SPORELAUNCHER;
-	SET_MODEL(ENT(pev), "models/w_spore_launcher.mdl");
+	SET_MODEL(ENT(pev), MyWModel());
 
 	m_iDefaultAmmo = SPORELAUNCHER_DEFAULT_GIVE;
 
@@ -48,7 +48,7 @@ void CSporelauncher::Spawn()
 void CSporelauncher::Precache(void)
 {
 	PRECACHE_MODEL("models/v_spore_launcher.mdl");
-	PRECACHE_MODEL("models/w_spore_launcher.mdl");
+	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_spore_launcher.mdl");
 
 	PRECACHE_SOUND("weapons/splauncher_altfire.wav");
