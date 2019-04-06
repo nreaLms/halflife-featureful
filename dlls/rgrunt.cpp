@@ -29,7 +29,7 @@ public:
 	void Precache();
 	int DefaultClassify() { return CLASS_MACHINE; }
 	const char* DefaultDisplayName() { return "Robo Grunt"; }
-	const char* ReverseRelationshipModel() { return "models/rguntf.mdl"; }
+	const char* ReverseRelationshipModel() { return "models/rgruntf.mdl"; }
 	void RunAI();
 	void StartTask( Task_t* pTask );
 	void RunTask( Task_t* pTask );
