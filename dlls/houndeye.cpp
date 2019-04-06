@@ -94,6 +94,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Houndeye"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetYawSpeed( void );
 	void WarmUpSound( void );

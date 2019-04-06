@@ -127,6 +127,7 @@ public:
 	void SetYawSpeed( void );
 	int  ISoundMask( void );
 	int  DefaultClassify ( void );
+	const char* DefaultDisplayName() { return "Human Grunt"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void CheckAmmo ( void );
 	void SetActivity ( Activity NewActivity );
@@ -224,6 +225,7 @@ class CMedic : public CHFGrunt
 public:
 	void Spawn( void );
 	void Precache( void );
+	const char* DefaultDisplayName() { return "Human Medic"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
@@ -2869,6 +2871,7 @@ class CTorch : public CHFGrunt
 public:
 	void Spawn( void );
 	void Precache( void );
+	const char* DefaultDisplayName() { return "Human Torch"; }
 	void HandleAnimEvent( MonsterEvent_t* pEvent );
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	BOOL CheckRangeAttack2(float flDot, float flDist);

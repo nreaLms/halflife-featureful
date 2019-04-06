@@ -307,6 +307,7 @@ void CMonsterMaker::MakeMonster( void )
 		if (m_classify)
 			createdMonster->m_iClass = m_classify;
 		createdMonster->m_reverseRelationship = m_reverseRelationship;
+		createdMonster->m_displayName = m_displayName;
 		createdMonster->SetMyBloodColor(m_bloodColor);
 		if (!FStringNull(m_gibModel))
 			createdMonster->m_gibModel = m_gibModel;

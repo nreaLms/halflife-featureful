@@ -255,6 +255,7 @@
 		16 : "Opfor ally"
 	]
 	gibmodel(studio) : "Custom gib model"
+	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
 ]
 
 @BaseClass = TalkMonster
@@ -5185,6 +5186,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
+    displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
 @PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []

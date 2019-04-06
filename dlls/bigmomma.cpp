@@ -187,6 +187,7 @@ public:
 
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Big Momma"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void LayHeadcrab( void );
 

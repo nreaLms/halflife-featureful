@@ -16,6 +16,7 @@ class CDrillSergeant : public CTalkMonster
 public:
 	void Spawn(void);
 	void Precache(void);
+	const char* DefaultDisplayName() { return "Drill Sergeant"; }
 	void SetYawSpeed(void);
 	int ISoundMask(void);
 	int DefaultClassify(void);

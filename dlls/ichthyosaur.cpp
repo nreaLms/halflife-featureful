@@ -53,6 +53,7 @@ public:
 	void Precache( void );
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Ichthyosaur"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	CUSTOM_SCHEDULES
 

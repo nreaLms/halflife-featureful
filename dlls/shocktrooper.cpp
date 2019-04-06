@@ -80,6 +80,7 @@ public:
 	void Precache(void);
 	int  DefaultClassify(void);
 	const char* ReverseRelationshipModel() { return NULL; }
+	const char* DefaultDisplayName() { return "Shock Trooper"; }
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	BOOL CheckRangeAttack2(float flDot, float flDist);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);

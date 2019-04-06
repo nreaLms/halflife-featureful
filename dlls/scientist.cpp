@@ -88,6 +88,7 @@ public:
 
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Scientist"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
@@ -1436,6 +1437,7 @@ class CCleansuitScientist : public CScientist
 public:
 	void Spawn();
 	void Precache();
+	const char* DefaultDisplayName() { return "Cleansuit Scientist"; }
 	BOOL CanHeal();
 	bool ReadyToHeal() {return false;}
 };

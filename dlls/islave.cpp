@@ -147,6 +147,7 @@ public:
 	void SetYawSpeed( void );
 	int ISoundMask( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Alien Slave"; }
 	const char* ReverseRelationshipModel() { return "models/islavef.mdl"; }
 	int IRelationship( CBaseEntity *pTarget );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );

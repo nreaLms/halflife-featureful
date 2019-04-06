@@ -130,6 +130,7 @@ public:
 	void Precache(void);
 
 	int  DefaultClassify(void);
+	const char* DefaultDisplayName() { return "Gonome"; }
 	void SetYawSpeed();
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	int IgnoreConditions();

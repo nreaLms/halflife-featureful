@@ -188,6 +188,7 @@ public:
 	void KeyValue(KeyValueData *pkvd);
 
 	int DefaultClassify(void);
+	const char* DefaultDisplayName() { return "Pit Drone"; }
 
 	BOOL CheckMeleeAttack1(float flDot, float flDist);
 	BOOL CheckRangeAttack1(float flDot, float flDist);

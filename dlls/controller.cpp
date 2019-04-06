@@ -49,6 +49,7 @@ public:
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Alien Controller"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 
 	void RunAI( void );

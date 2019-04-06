@@ -246,6 +246,7 @@ const char* CBaseMonster::GibModel() {return 0;}
 int CBaseMonster::DefaultGibCount() {return 0;}
 int CBaseMonster::GibCount() {return 0;}
 bool CBaseMonster::IsAlienMonster() {return false;}
+const char* CBaseMonster::DisplayName() { return NULL; }
 
 int TrainSpeed( int iSpeed, int iMax ) { return 0; }
 void CBasePlayer::DeathSound( void ) { }

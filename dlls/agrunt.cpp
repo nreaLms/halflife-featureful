@@ -72,6 +72,7 @@ public:
 	void Precache( void );
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Alien Grunt"; }
 	const char* ReverseRelationshipModel() { return "models/agruntf.mdl"; }
 	int ISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );

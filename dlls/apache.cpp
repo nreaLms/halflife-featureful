@@ -37,6 +37,7 @@ class CApache : public CBaseMonster
 	void Precache( void );
 	void KeyValue(KeyValueData* pkvd);
 	int DefaultClassify( void ) { return CLASS_HUMAN_MILITARY; }
+	const char* DefaultDisplayName() { return "Apache"; }
 	const char* ReverseRelationshipModel() { return "models/apachef.mdl"; }
 	int BloodColor( void ) { return DONT_BLEED; }
 	void Killed( entvars_t *pevAttacker, int iGib );

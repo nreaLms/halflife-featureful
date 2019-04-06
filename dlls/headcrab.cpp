@@ -93,6 +93,7 @@ public:
 	void AlertSound( void );
 	void PrescheduleThink( void );
 	int  DefaultClassify ( void );
+	const char* DefaultDisplayName() { return "Headcrab"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
@@ -505,6 +506,7 @@ class CBabyCrab : public CHeadCrab
 public:
 	void Spawn( void );
 	void Precache( void );
+	const char* DefaultDisplayName() { return "Baby Headcrab"; }
 	void SetYawSpeed( void );
 	float GetDamageAmount( void ) { return gSkillData.headcrabDmgBite * 0.3; }
 	BOOL CheckRangeAttack1( float flDot, float flDist );
@@ -574,6 +576,7 @@ class CShockRoach : public CHeadCrab
 public:
 	void Spawn(void);
 	void Precache(void);
+	const char* DefaultDisplayName() { return "Shock Roach"; }
 	virtual float GetDamageAmount( void ) { return gSkillData.sroachDmgBite; }
 	void EXPORT LeapTouch(CBaseEntity *pOther);
 	void PainSound(void);

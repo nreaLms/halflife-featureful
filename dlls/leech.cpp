@@ -104,6 +104,7 @@ public:
 	void Activate( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	int DefaultClassify( void ) { return CLASS_INSECT; }
+	const char* DefaultDisplayName() { return "Leech"; }
 	int IRelationship( CBaseEntity *pTarget );
 
 	virtual int Save( CSave &save );

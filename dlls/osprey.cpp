@@ -47,6 +47,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void KeyValue(KeyValueData* pkvd);
+	const char* DefaultDisplayName() { return "Osprey"; }
 	int DefaultClassify( void ) { return CLASS_MACHINE; }
 	int BloodColor( void ) { return DONT_BLEED; }
 	void Killed( entvars_t *pevAttacker, int iGib );

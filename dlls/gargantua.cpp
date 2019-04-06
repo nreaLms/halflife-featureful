@@ -208,6 +208,7 @@ public:
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Gargantua"; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -1463,6 +1464,7 @@ class CBabyGargantua : public CGargantua
 {
 public:
 	const char* ReverseRelationshipModel() { return "models/babygargf.mdl"; }
+	const char* DefaultDisplayName() { return "Baby Gargantua"; }
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );

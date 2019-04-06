@@ -111,6 +111,7 @@ public:
 	string_t m_gibModel;
 
 	BOOL m_reverseRelationship;
+	string_t m_displayName;
 
 	virtual int Save( CSave &save ); 
 	virtual int Restore( CRestore &restore );
@@ -359,6 +360,9 @@ public:
 	int GibCount();
 
 	virtual bool IsAlienMonster();
+
+	virtual const char* DefaultDisplayName() { return NULL; }
+	const char* DisplayName();
 
 	//
 	// Glowshell effects

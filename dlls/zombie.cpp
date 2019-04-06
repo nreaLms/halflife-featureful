@@ -41,6 +41,7 @@ public:
 	void Precache( void );
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultDisplayName() { return "Zombie"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int IgnoreConditions( void );
 
@@ -354,6 +355,7 @@ class CZombieBarney : public CZombie
 {
 	void Spawn( void );
 	void Precache( void );
+	const char* DefaultDisplayName() { return "Zombie Barney"; }
 	float OneSlashDamage() { return gSkillData.zombieBarneyDmgOneSlash; }
 	float BothSlashDamage() { return gSkillData.zombieBarneyDmgBothSlash; }
 };
@@ -393,6 +395,7 @@ class CZombieSoldier : public CZombie
 {
 	void Spawn( void );
 	void Precache( void );
+	const char* DefaultDisplayName() { return "Zombie Soldier"; }
 	float OneSlashDamage() { return gSkillData.zombieSoldierDmgOneSlash; }
 	float BothSlashDamage() { return gSkillData.zombieSoldierDmgBothSlash; }
 };

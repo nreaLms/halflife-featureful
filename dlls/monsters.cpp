@@ -110,6 +110,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_iClass, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_gibModel, FIELD_STRING ),
 	DEFINE_FIELD( CBaseMonster, m_reverseRelationship, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBaseMonster, m_displayName, FIELD_STRING ),
 
 	DEFINE_FIELD( CBaseMonster, m_glowShellTime, FIELD_TIME ),
 
@@ -3060,6 +3061,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 		m_reverseRelationship = atoi( pkvd->szValue ) != 0;
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "displayname" ) )
+	{
+		m_displayName = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseToggle::KeyValue( pkvd );
@@ -3597,6 +3603,11 @@ int CBaseMonster::Classify()
 int CBaseMonster::DefaultClassify()
 {
 	return CLASS_NONE;
+}
+
+const char* CBaseMonster::DisplayName()
+{
+	return FStringNull(m_displayName) ? DefaultDisplayName() : STRING(m_displayName);
 }
 
 void CBaseMonster::GlowShellOn( Vector color, float flDuration )

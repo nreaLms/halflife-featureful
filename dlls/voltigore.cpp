@@ -319,6 +319,7 @@ public:
 	virtual void Precache(void);
 	void SetYawSpeed(void);
 	virtual int  DefaultClassify(void);
+	const char* DefaultDisplayName() { return "Voltigore"; }
 	virtual void HandleAnimEvent(MonsterEvent_t *pEvent);
 	virtual void IdleSound(void);
 	virtual void PainSound(void);
@@ -1206,6 +1207,7 @@ class CBabyVoltigore : public CVoltigore
 public:
 	void	Spawn(void);
 	void	Precache(void);
+	const char* DefaultDisplayName() { return "Baby Voltigore"; }
 	void	HandleAnimEvent(MonsterEvent_t* pEvent);
 	BOOL	CheckMeleeAttack1(float flDot, float flDist);
 	BOOL	CheckRangeAttack1(float flDot, float flDist);

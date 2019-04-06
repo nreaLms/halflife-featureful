@@ -343,6 +343,7 @@ public:
 	void SetYawSpeed(void);
 	int  ISoundMask(void);
 	virtual int  DefaultClassify(void);
+	const char* DefaultDisplayName() { return "Bullsquid"; }
 	virtual void HandleAnimEvent(MonsterEvent_t *pEvent);
 	virtual void IdleSound(void);
 	virtual void PainSound(void);

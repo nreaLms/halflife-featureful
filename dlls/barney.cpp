@@ -51,6 +51,7 @@ public:
 	int ISoundMask( void );
 	void BarneyFirePistol( const char* shotSound, Bullet bullet );
 	void AlertSound( void );
+	const char* DefaultDisplayName() { return "Barney"; }
 	int DefaultClassify( void );
 	const char* ReverseRelationshipModel() { return "models/barnabus.mdl"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -818,6 +819,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void TalkInit( void );
+	const char* DefaultDisplayName() { return "Otis"; }
 	const char* ReverseRelationshipModel() { return "models/otisf.mdl"; }
 	void AlertSound( void );
 	

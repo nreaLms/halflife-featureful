@@ -1837,7 +1837,7 @@ void CBasePlayer::UpdateStatusBar()
 
 			const bool isFriendPlayer = pEntity->IsPlayer() && g_pGameRules->PlayerRelationship(this, pEntity) == GR_TEAMMATE;
 			const bool isFriendMonster = (pMonster->IDefaultRelationship(this) == R_AL);
-			showMonsterInfo = isFriendPlayer || allowmonsterinfo.value == 1 || (allowmonsterinfo.value == 2 && isFriendMonster);
+			showMonsterInfo = isFriendPlayer || (allowmonsterinfo.value == 1 && !pMonster->IsPlayer()) || (allowmonsterinfo.value == 2 && isFriendMonster);
 			if (showMonsterInfo && (m_lastSeenEntityIndex != entityIndex || m_lastSeenHealth != health || (m_lastSeenArmor != armor && isFriendPlayer))) {
 				m_lastSeenEntityIndex = entityIndex;
 				m_lastSeenHealth = health;
@@ -1871,13 +1871,18 @@ void CBasePlayer::UpdateStatusBar()
 				if (isFriendPlayer) {
 					sprintf(buf, "%s\nHealth: %d\nArmor: %d", STRING(pEntity->pev->netname), health, armor);
 				} else {
+					const char* displayName = pMonster->DisplayName();
 					const char* className = STRING(pEntity->pev->classname);
-					const char* displayName = className;
-					if (strncmp(className, "monster_", 8) == 0) {
-						displayName = className + 8;
+					if (!displayName)
+					{
+						if (strncmp(className, "monster_", 8) == 0)
+							displayName = className + 8;
+						else
+							displayName = className;
 					}
+
 					sprintf(buf, "%s\nHealth: %d/%d", displayName, health, (int)pEntity->pev->max_health);
-					if (displayName != className) {
+					if (displayName == className + 8) {
 						buf[0] = toupper(buf[0]); //Capitalize monster name
 						char* str = buf;
 						str++;
@@ -1905,7 +1910,7 @@ void CBasePlayer::UpdateStatusBar()
 
 		if (!showMonsterInfo)
 		{
-			if( pEntity->Classify() == CLASS_PLAYER )
+			if( pEntity->IsPlayer() )
 			{
 				newSBarState[SBAR_ID_TARGETNAME] = ENTINDEX( pEntity->edict() );
 				strcpy( sbuf1, "1 %p1\n2 Health: %i2%%\n3 Armor: %i3%%" );
