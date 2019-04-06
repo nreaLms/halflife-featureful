@@ -149,7 +149,7 @@ void CMedkit::PrimaryAttack(void)
 		delay = UTIL_WeaponTimeBase() + 2;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = delay;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 5, 10);
-	m_flSoundDelay = gpGlobals->time + 0.8;
+	m_flSoundDelay = gpGlobals->time + 0.4;
 }
 
 void CMedkit::SecondaryAttack()
@@ -207,18 +207,16 @@ void CMedkit::WeaponIdle(void)
 				const int diff = (int)(healTarget->pev->max_health - healTarget->pev->health);
 				const int healResult = healTarget->TakeHealth(Q_min(maxHeal, diff), DMG_GENERIC);
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= healResult;
-				if ( healResult ) {
 #ifndef CLIENT_DLL
-					CBaseMonster* monster = healTarget->MyMonsterPointer();
-					if (monster) {
-						monster->Forget(bits_MEMORY_PROVOKED|bits_MEMORY_SUSPICIOUS);
-						if (monster->m_hEnemy.Get() && monster->m_hEnemy->IsPlayer()) {
-							monster->m_hEnemy = NULL;
-							monster->SetState(MONSTERSTATE_ALERT);
-						}
+				CBaseMonster* monster = healTarget->MyMonsterPointer();
+				if (monster) {
+					monster->Forget(bits_MEMORY_PROVOKED|bits_MEMORY_SUSPICIOUS);
+					if (monster->m_hEnemy.Get() && monster->m_hEnemy->IsPlayer()) {
+						monster->m_hEnemy = NULL;
+						monster->SetState(MONSTERSTATE_ALERT);
 					}
-#endif
 				}
+#endif
 				EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/medshot4.wav", 1.0, ATTN_NORM, 0, 100);
 			}
 		}
