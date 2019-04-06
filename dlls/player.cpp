@@ -3090,67 +3090,71 @@ Returns the entity to spawn at
 USES AND SETS GLOBAL g_pLastSpawn
 ============
 */
+CBaseEntity* SelectRandomSpawnPoint( CBaseEntity* pPlayer, const char* spawnPointName )
+{
+	edict_t *player = pPlayer->edict();
+
+	CBaseEntity *pSpot = g_pLastSpawn;
+	// Randomize the start spot
+	for( int i = RANDOM_LONG( 1, 5 ); i > 0; i-- )
+		pSpot = UTIL_FindEntityByClassname( pSpot, spawnPointName );
+	if( !SpawnPointIsOn( pSpot ) )  // skip over the null point
+		pSpot = UTIL_FindEntityByClassname( pSpot, spawnPointName );
+
+	CBaseEntity *pFirstSpot = pSpot;
+
+	do
+	{
+		if( pSpot )
+		{
+			// check if pSpot is valid
+			if( IsSpawnPointValid( pPlayer, pSpot ) )
+			{
+				if( pSpot->pev->origin == Vector( 0, 0, 0 ) )
+				{
+					pSpot = UTIL_FindEntityByClassname( pSpot, spawnPointName );
+					continue;
+				}
+
+				// if so, go to pSpot
+				return pSpot;
+			}
+		}
+		// increment pSpot
+		pSpot = UTIL_FindEntityByClassname( pSpot, spawnPointName );
+	} while( pSpot != pFirstSpot ); // loop if we're not back to the start
+
+	// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
+	if( SpawnPointIsOn( pSpot ) )
+	{
+		CBaseEntity *ent = NULL;
+		while( ( ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 ) ) != NULL )
+		{
+			// if ent is a client, kill em (unless they are ourselves)
+			if( ent->IsPlayer() && !(ent->edict() == player) )
+				ent->TakeDamage( VARS( INDEXENT( 0 ) ), VARS( INDEXENT( 0 ) ), 300, DMG_GENERIC );
+		}
+		return pSpot;
+	}
+	return NULL;
+}
+
 edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer )
 {
-	CBaseEntity *pSpot;
-	edict_t *player;
-
-	player = pPlayer->edict();
+	CBaseEntity *pSpot = NULL;
 
 	// choose a info_player_deathmatch point
 	if( g_pGameRules->IsCoOp() )
 	{
-		pSpot = UTIL_FindEntityByClassname( g_pLastSpawn, "info_player_coop" );
-		if( SpawnPointIsOn( pSpot ) )
-			goto ReturnSpot;
-		pSpot = UTIL_FindEntityByClassname( g_pLastSpawn, "info_player_start" );
-		if( SpawnPointIsOn(pSpot) )
+		pSpot = SelectRandomSpawnPoint(pPlayer, "info_player_coop");
+		if( pSpot )
 			goto ReturnSpot;
 	}
-	else if( g_pGameRules->IsDeathmatch() )
+	if( g_pGameRules->IsDeathmatch() )
 	{
-		pSpot = g_pLastSpawn;
-		// Randomize the start spot
-		for( int i = RANDOM_LONG( 1, 5 ); i > 0; i-- )
-			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
-		if( !SpawnPointIsOn( pSpot ) )  // skip over the null point
-			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
-
-		CBaseEntity *pFirstSpot = pSpot;
-
-		do 
-		{
-			if( pSpot )
-			{
-				// check if pSpot is valid
-				if( IsSpawnPointValid( pPlayer, pSpot ) )
-				{
-					if( pSpot->pev->origin == Vector( 0, 0, 0 ) )
-					{
-						pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
-						continue;
-					}
-
-					// if so, go to pSpot
-					goto ReturnSpot;
-				}
-			}
-			// increment pSpot
-			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
-		} while( pSpot != pFirstSpot ); // loop if we're not back to the start
-
-		// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
-		if( SpawnPointIsOn( pSpot ) )
-		{
-			CBaseEntity *ent = NULL;
-			while( ( ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 ) ) != NULL )
-			{
-				// if ent is a client, kill em (unless they are ourselves)
-				if( ent->IsPlayer() && !(ent->edict() == player) )
-					ent->TakeDamage( VARS( INDEXENT( 0 ) ), VARS( INDEXENT( 0 ) ), 300, DMG_GENERIC );
-			}
+		pSpot = SelectRandomSpawnPoint(pPlayer, "info_player_deathmatch");
+		if( pSpot )
 			goto ReturnSpot;
-		}
 	}
 
 	// If startspot is set, (re)spawn there.

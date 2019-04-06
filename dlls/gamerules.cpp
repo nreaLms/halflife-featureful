@@ -463,7 +463,7 @@ CGameRules *InstallGameRules( void )
 	SERVER_COMMAND( "exec game.cfg\n" );
 	SERVER_EXECUTE();
 
-	if( !gpGlobals->deathmatch )
+	if( !gpGlobals->deathmatch && !gpGlobals->coop )
 	{
 		// generic half-life
 		g_teamplay = 0;
