@@ -336,6 +336,10 @@ public:
 	char m_SbarString0[SBAR_STRING_SIZE];
 	char m_SbarString1[SBAR_STRING_SIZE];
 
+	int m_lastSeenEntityIndex;
+	int m_lastSeenHealth;
+	int m_lastSeenArmor;
+
 	float m_flNextChatTime;
 #if FEATURE_DISPLACER
 	BOOL	m_fInXen;
