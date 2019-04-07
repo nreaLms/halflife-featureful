@@ -428,7 +428,7 @@ void CBasePlayer::SelectItem( const char *pstr )
 	if( !pstr )
 		return;
 
-	CBasePlayerItem *pItem = NULL;
+	CBasePlayerWeapon *pItem = NULL;
 
 	if( !pItem )
 		return;
@@ -469,7 +469,7 @@ void CBasePlayer::SelectLastItem( void )
 	if( m_pActiveItem )
 		m_pActiveItem->Holster();
 
-	CBasePlayerItem *pTemp = m_pActiveItem;
+	CBasePlayerWeapon *pTemp = m_pActiveItem;
 	m_pActiveItem = m_pLastItem;
 	m_pLastItem = pTemp;
 	m_pActiveItem->Deploy( );

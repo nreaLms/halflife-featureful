@@ -39,7 +39,7 @@ int g_teamplay = 0;
 //=========================================================
 BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName )
 {
-	const AmmoInfo& ammoInfo = CBasePlayerItem::GetAmmoInfo(pszAmmoName);
+	const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(pszAmmoName);
 	if( ammoInfo.pszName )
 	{
 		if( pPlayer->AmmoInventory( ammoInfo.iId ) < ammoInfo.iMaxAmmo )
@@ -70,7 +70,7 @@ edict_t *CGameRules::GetPlayerSpawnSpot( CBasePlayer *pPlayer )
 
 //=========================================================
 //=========================================================
-BOOL CGameRules::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerItem *pWeapon )
+BOOL CGameRules::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
 {
 	// only living players can have items
 	if( pPlayer->pev->deadflag != DEAD_NO )
@@ -463,7 +463,7 @@ CGameRules *InstallGameRules( void )
 	SERVER_COMMAND( "exec game.cfg\n" );
 	SERVER_EXECUTE();
 
-	if( !gpGlobals->deathmatch && !gpGlobals->coop )
+	if( !gpGlobals->deathmatch && !(gpGlobals->coop && gpGlobals->maxClients > 1) )
 	{
 		// generic half-life
 		g_teamplay = 0;

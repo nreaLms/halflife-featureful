@@ -91,6 +91,8 @@ int CSporelauncher::GetItemInfo(ItemInfo *p)
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_SPORELAUNCHER;
 	p->iWeight = SPORELAUNCHER_WEIGHT;
+	p->pszAmmoEntity = NULL;
+	p->iDropAmmo = 0;
 
 	return 1;
 }

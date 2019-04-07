@@ -361,6 +361,20 @@ int CRpg::GetItemInfo( ItemInfo *p )
 	p->iId = m_iId = WEAPON_RPG;
 	p->iFlags = 0;
 	p->iWeight = RPG_WEIGHT;
+	p->pszAmmoEntity = "ammo_rpgclip";
+#ifdef CLIENT_DLL
+	if( bIsMultiplayer() )
+#else
+	if( g_pGameRules->IsMultiplayer() )
+#endif
+	{
+		// hand out more ammo per rocket in multiplayer.
+		p->iDropAmmo = AMMO_RPGCLIP_GIVE * 2;
+	}
+	else
+	{
+		p->iDropAmmo = AMMO_RPGCLIP_GIVE;
+	}
 
 	return 1;
 }

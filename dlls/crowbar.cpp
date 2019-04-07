@@ -64,6 +64,8 @@ int CCrowbar::GetItemInfo( ItemInfo *p )
 	p->iPosition = 0;
 	p->iId = WEAPON_CROWBAR;
 	p->iWeight = CROWBAR_WEIGHT;
+	p->pszAmmoEntity = NULL;
+	p->iDropAmmo = 0;
 	return 1;
 }
 

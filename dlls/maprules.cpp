@@ -959,7 +959,7 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 	else if (*ammoName == '_')
 		ammoName++;
 
-	const AmmoInfo& ammoInfo = CBasePlayerItem::GetAmmoInfo(ammoName);
+	const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(ammoName);
 	if (ammoInfo.pszName)
 	{
 		m_ammoCounts[ammoInfo.iId] = atoi(pkvd->szValue);
@@ -1091,7 +1091,7 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	int i;
 	for (i=0; i<MAX_AMMO_SLOTS; ++i)
 	{
-		const AmmoInfo& ammoInfo = CBasePlayerItem::AmmoInfoArray[i];
+		const AmmoInfo& ammoInfo = CBasePlayerWeapon::AmmoInfoArray[i];
 		if (m_ammoCounts[i] && ammoInfo.pszName)
 		{
 			player->GiveAmmo(m_ammoCounts[i], ammoInfo.pszName);
@@ -1101,7 +1101,7 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	{
 		if (pev->spawnflags & weaponFlags[i])
 		{
-			const ItemInfo& itemInfo = CBasePlayerItem::ItemInfoArray[weaponIds[i]];
+			const ItemInfo& itemInfo = CBasePlayerWeapon::ItemInfoArray[weaponIds[i]];
 			if (itemInfo.pszName)
 			{
 				player->GiveNamedItem(itemInfo.pszName);

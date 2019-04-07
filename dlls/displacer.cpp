@@ -306,6 +306,8 @@ int CDisplacer::GetItemInfo(ItemInfo *p)
 #endif
 	p->iId = m_iId = WEAPON_DISPLACER;
 	p->iWeight = DISPLACER_WEIGHT;
+	p->pszAmmoEntity = "ammo_gaussclip";
+	p->iDropAmmo = AMMO_URANIUMBOX_GIVE;
 
 	return 1;
 }

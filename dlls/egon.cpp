@@ -102,6 +102,8 @@ int CEgon::GetItemInfo( ItemInfo *p )
 	p->iId = m_iId = WEAPON_EGON;
 	p->iFlags = 0;
 	p->iWeight = EGON_WEIGHT;
+	p->pszAmmoEntity = "ammo_gaussclip";
+	p->iDropAmmo = AMMO_URANIUMBOX_GIVE;
 
 	return 1;
 }

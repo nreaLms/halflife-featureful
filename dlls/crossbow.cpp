@@ -285,6 +285,8 @@ int CCrossbow::GetItemInfo( ItemInfo *p )
 	p->iId = WEAPON_CROSSBOW;
 	p->iFlags = 0;
 	p->iWeight = CROSSBOW_WEIGHT;
+	p->pszAmmoEntity = "ammo_crossbow";
+	p->iDropAmmo = AMMO_CROSSBOWCLIP_GIVE;
 	return 1;
 }
 

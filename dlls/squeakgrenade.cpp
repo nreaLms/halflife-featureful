@@ -523,6 +523,8 @@ int CSqueak::GetItemInfo( ItemInfo *p )
 	p->iId = m_iId = WeaponId();
 	p->iWeight = SNARK_WEIGHT;
 	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
+	p->pszAmmoEntity = STRING(pev->classname);
+	p->iDropAmmo = DefaultGive();
 
 	return 1;
 }

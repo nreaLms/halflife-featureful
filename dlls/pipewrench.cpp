@@ -80,6 +80,8 @@ int CPipeWrench::GetItemInfo(ItemInfo *p)
 	p->iPosition = 1;
 	p->iId = WEAPON_PIPEWRENCH;
 	p->iWeight = PIPEWRENCH_WEIGHT;
+	p->pszAmmoEntity = NULL;
+	p->iDropAmmo = 0;
 	return 1;
 }
 

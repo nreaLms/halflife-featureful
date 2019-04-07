@@ -188,10 +188,10 @@ public:
 	int			m_iClientFOV;	// client's known FOV
 
 	// usable player items 
-	CBasePlayerItem	*m_rgpPlayerItems[MAX_ITEM_TYPES];
-	CBasePlayerItem *m_pActiveItem;
-	CBasePlayerItem *m_pClientActiveItem;  // client version of the active item
-	CBasePlayerItem *m_pLastItem;
+	CBasePlayerWeapon *m_rgpPlayerWeapons[MAX_WEAPONS];
+	CBasePlayerWeapon *m_pActiveItem;
+	CBasePlayerWeapon *m_pClientActiveItem;  // client version of the active item
+	CBasePlayerWeapon *m_pLastItem;
 
 	// shared ammo slots
 	int	m_rgAmmo[MAX_AMMO_SLOTS];
@@ -239,7 +239,7 @@ public:
 	void RenewItems(void);
 	void PackDeadPlayerItems( void );
 	void RemoveAllItems( BOOL removeSuit );
-	BOOL SwitchWeapon( CBasePlayerItem *pWeapon );
+	BOOL SwitchWeapon( CBasePlayerWeapon *pWeapon );
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
 	virtual void UpdateClientData( void );
@@ -274,14 +274,15 @@ public:
 	void AddPoints( int score, BOOL bAllowNegativeScore );
 	void AddPointsToTeam( int score, BOOL bAllowNegativeScore );
 	void AddFloatPoints( float score, BOOL bAllowNegativeScore );
-	BOOL AddPlayerItem( CBasePlayerItem *pItem );
-	BOOL RemovePlayerItem( CBasePlayerItem *pItem, bool bCallHoster );
+	BOOL AddPlayerItem( CBasePlayerWeapon *pItem );
+	BOOL RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHoster );
 	void DropPlayerItem ( char *pszItemName );
-	BOOL HasPlayerItem( CBasePlayerItem *pCheckItem );
+	void DropPlayerItemById( int iId );
+	void DropAmmo();
+	BOOL HasPlayerItem( CBasePlayerWeapon *pCheckItem );
 	BOOL HasNamedPlayerItem( const char *pszItemName );
 	BOOL HasWeapons( void );// do I have ANY weapons?
 	void SelectPrevItem( int iItem );
-	void SelectNextItem( int iItem );
 	void SelectLastItem(void);
 	void SelectItem(const char *pstr);
 	void ItemPreFrame( void );
@@ -331,6 +332,10 @@ public:
 	//Player ID
 	void InitStatusBar( void );
 	void UpdateStatusBar( void );
+
+	void InsertWeaponById( CBasePlayerWeapon* pItem );
+	CBasePlayerWeapon* WeaponById( int id );
+
 	int m_izSBarState[SBAR_END];
 	float m_flNextSBarUpdateTime;
 	float m_flStatusBarDisappearDelay;
@@ -350,6 +355,17 @@ public:
 #endif
 	friend class CDisplacer;
 	friend class CTriggerXenReturn;
+
+private:
+	enum {
+		NoAmmoDrop,
+		DropAllAmmo,
+		DropAmmoFair
+	};
+
+	void DropPlayerItemImpl(CBasePlayerWeapon* pWeapon, int dropType = DropAmmoFair, float speed = 400);
+
+public:
 #if FEATURE_MOVE_MODE
 	short m_movementState; // no need to save
 #endif

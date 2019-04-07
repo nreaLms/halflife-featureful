@@ -401,6 +401,8 @@ int CTripmine::GetItemInfo( ItemInfo *p )
 	p->iId = m_iId = WEAPON_TRIPMINE;
 	p->iWeight = TRIPMINE_WEIGHT;
 	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
+	p->pszAmmoEntity = STRING(pev->classname);
+	p->iDropAmmo = TRIPMINE_DEFAULT_GIVE;
 
 	return 1;
 }

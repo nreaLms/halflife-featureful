@@ -71,6 +71,8 @@ int CEagle::GetItemInfo(ItemInfo *p)
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_EAGLE;
 	p->iWeight = EAGLE_WEIGHT;
+	p->pszAmmoEntity = "ammo_357";
+	p->iDropAmmo = AMMO_357BOX_GIVE;
 
 	return 1;
 }

@@ -271,6 +271,8 @@ typedef struct
 	int		iId;
 	int		iFlags;
 	int		iWeight;// this value used to determine this weapon's importance in autoselection.
+	const char* pszAmmoEntity;
+	int iDropAmmo;
 } ItemInfo;
 
 typedef struct
@@ -281,19 +283,17 @@ typedef struct
 	bool isExhaustible;
 } AmmoInfo;
 
-// Items that the player has in their inventory that they can use
-class CBasePlayerItem : public CBaseAnimating
+class CBasePlayerWeapon : public CBaseAnimating
 {
 public:
 	virtual void SetObjectCollisionBox( void );
 
+#ifndef CLIENT_DLL
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
-
 	static	TYPEDESCRIPTION m_SaveData[];
-
+#endif
 	virtual int AddToPlayer( CBasePlayer *pPlayer );	// return TRUE if the item you want the item added to the player inventory
-	virtual int AddDuplicate( CBasePlayerItem *pItem ) { return FALSE; }	// return TRUE if you want your duplicate removed from world
 	void EXPORT DestroyItem( void );
 	void EXPORT DefaultTouch( CBaseEntity *pOther );	// default weapon touch
 	void EXPORT FallThink ( void );// when an item is first spawned, this think is run to determine when the object has hit the ground.
@@ -302,28 +302,22 @@ public:
 	CBaseEntity* Respawn ( void );// copy a weapon
 	void FallInit( void );
 	void CheckRespawn( void );
-	virtual int GetItemInfo(ItemInfo *p) { return 0; };	// returns 0 if struct not filled out
-	virtual BOOL CanDeploy( void ) { return TRUE; };
+	virtual int GetItemInfo(ItemInfo *p) { return 0; }	// returns 0 if struct not filled out
+	virtual BOOL CanDeploy( void );
 	virtual BOOL Deploy( )								// returns is deploy was successful
-		 { return TRUE; };
+		 { return TRUE; }
 
-	virtual BOOL CanHolster( void ) { return TRUE; };// can this weapon be put away right now?
-	virtual void Holster( int skiplocal = 0 );
-	virtual void UpdateItemInfo( void ) { return; };
+	virtual BOOL CanHolster( void ) { return TRUE; }// can this weapon be put away right now?
 
 	virtual void ItemPreFrame( void )	{ return; }		// called each frame by the player PreThink
-	virtual void ItemPostFrame( void ) { return; }		// called each frame by the player PostThink
 
 	virtual void Drop( void );
 	virtual void Kill( void );
 	virtual void AttachToPlayer ( CBasePlayer *pPlayer );
 
-	virtual int PrimaryAmmoIndex() { return -1; };
-	virtual int SecondaryAmmoIndex() { return -1; };
-
-	virtual int UpdateClientData( CBasePlayer *pPlayer ) { return 0; }
-
-	virtual CBasePlayerItem *GetWeaponPtr( void ) { return NULL; };
+	int ObjectCaps();
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void TouchOrUse( CBaseEntity* other );
 
 	static const AmmoInfo& GetAmmoInfo( const char* name );
 
@@ -331,10 +325,7 @@ public:
 	static AmmoInfo AmmoInfoArray[ MAX_AMMO_SLOTS ];
 
 	CBasePlayer	*m_pPlayer;
-	CBasePlayerItem *m_pNext;
 	int		m_iId;												// WEAPON_???
-
-	virtual int iItemSlot( void ) { return 0; }			// return 0 to MAX_ITEMS_SLOTS, used in hud
 
 	int			iItemPosition( void ) { return ItemInfoArray[ m_iId ].iPosition; }
 	const char	*pszAmmo1( void )	{ return ItemInfoArray[ m_iId ].pszAmmo1; }
@@ -345,37 +336,24 @@ public:
 	int			iMaxClip( void )	{ return ItemInfoArray[ m_iId ].iMaxClip; }
 	int			iWeight( void )		{ return ItemInfoArray[ m_iId ].iWeight; }
 	int			iFlags( void )		{ return ItemInfoArray[ m_iId ].iFlags; }
-
-	// int		m_iIdPrimary;										// Unique Id for primary ammo
-	// int		m_iIdSecondary;										// Unique Id for secondary ammo
-};
-
-// inventory items that
-class CBasePlayerWeapon : public CBasePlayerItem
-{
-public:
-	virtual int		Save( CSave &save );
-	virtual int		Restore( CRestore &restore );
-
-	static	TYPEDESCRIPTION m_SaveData[];
+	const char* pszAmmoEntity( void ) { return ItemInfoArray[ m_iId ].pszAmmoEntity; }
+	int			iDropAmmo( void )	{ return ItemInfoArray[ m_iId ].iDropAmmo; }
 
 	virtual const char* MyWModel() { return 0; }
 
-	// generic weapon versions of CBasePlayerItem calls
-	virtual int AddToPlayer( CBasePlayer *pPlayer );
 	int AddToPlayerDefault( CBasePlayer *pPlayer );
-	virtual int AddDuplicate( CBasePlayerItem *pItem );
+	virtual int AddDuplicate( CBasePlayerWeapon *pItem );
 
 	virtual int ExtractAmmo( CBasePlayerWeapon *pWeapon ); //{ return TRUE; };			// Return TRUE if you can add ammo to yourself when picked up
 	virtual int ExtractClipAmmo( CBasePlayerWeapon *pWeapon );// { return TRUE; };			// Return TRUE if you can add ammo to yourself when picked up
 
-	virtual int AddWeapon( void ) { ExtractAmmo( this ); return TRUE; };	// Return TRUE if you want to add yourself to the player
+	virtual int AddWeapon( void ) { ExtractAmmo( this ); return TRUE; }	// Return TRUE if you want to add yourself to the player
 
 	// generic "shared" ammo handlers
 	BOOL AddPrimaryAmmo(int iCount);
 	BOOL AddSecondaryAmmo(int iCount);
 
-	virtual void UpdateItemInfo( void ) {};	// updates HUD state
+	virtual void UpdateItemInfo( void ) {}	// updates HUD state
 
 	//Special stuff for grenades and satchels.
 	float m_flStartThrow;
@@ -394,7 +372,6 @@ public:
 
 	virtual void SendWeaponAnim( int iAnim, int skiplocal = 1, int body = 0 );  // skiplocal is 1 if client is predicting weapon animations
 
-	virtual BOOL CanDeploy( void );
 	virtual BOOL IsUseable( void );
 	BOOL DefaultDeploy( const char *szViewModel, const char *szWeaponModel, int iAnim, const char *szAnimExt, int skiplocal = 0, int body = 0 );
 	BOOL DefaultReload( int iClipSize, int iAnim, float fDelay, int body = 0 );
@@ -408,16 +385,16 @@ public:
 	virtual void WeaponIdle( void ) { return; }					// called when no buttons pressed
 	virtual int UpdateClientData( CBasePlayer *pPlayer );		// sends hud info to client dll, if things have changed
 	virtual void RetireWeapon( void );
-	virtual BOOL ShouldWeaponIdle( void ) {return FALSE; };
+	virtual BOOL ShouldWeaponIdle( void ) {return FALSE; }
 	virtual void Holster( int skiplocal = 0 );
-	virtual BOOL UseDecrement( void ) { return FALSE; };
+	virtual BOOL UseDecrement( void ) { return FALSE; }
 
 	int	PrimaryAmmoIndex();
 	int	SecondaryAmmoIndex();
 
 	void PrintState( void );
 
-	virtual CBasePlayerItem *GetWeaponPtr( void ) { return (CBasePlayerItem *)this; };
+	virtual CBasePlayerWeapon *MyWeaponPointer( void ) { return this; }
 	float GetNextAttackDelay( float delay );
 
 	int		m_fInSpecialReload;									// Are we in the middle of a reload for the shotguns
@@ -442,9 +419,12 @@ class CBasePlayerAmmo : public CBaseEntity
 {
 public:
 	virtual void Spawn( void );
-	virtual void Precache();
+	void Precache();
 	void EXPORT DefaultTouch( CBaseEntity *pOther ); // default weapon touch
 	virtual BOOL AddAmmo( CBaseEntity *pOther );
+	int ObjectCaps();
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void TouchOrUse( CBaseEntity* other );
 
 	CBaseEntity* Respawn( void );
 	void EXPORT Materialize( void );
@@ -516,6 +496,7 @@ extern MULTIDAMAGE gMultiDamage;
 //=========================================================
 class CWeaponBox : public CBaseEntity
 {
+public:
 	void Precache( void );
 	void Spawn( void );
 	void Touch( CBaseEntity *pOther );
@@ -523,19 +504,25 @@ class CWeaponBox : public CBaseEntity
 	BOOL IsEmpty( void );
 	void SetObjectCollisionBox( void );
 
-public:
+	int ObjectCaps();
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void TouchOrUse( CBaseEntity* other );
+
 	void EXPORT Kill ( void );
 	int		Save( CSave &save );
 	int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	BOOL HasWeapon( CBasePlayerItem *pCheckItem );
-	BOOL PackWeapon( CBasePlayerItem *pWeapon );
+	BOOL HasWeapon( CBasePlayerWeapon *pCheckItem );
+	BOOL PackWeapon( CBasePlayerWeapon *pWeapon );
 	BOOL PackAmmo( int iszName, int iCount );
 
 	void SetWeaponModel( CBasePlayerWeapon* pItem );
 
-	CBasePlayerItem	*m_rgpPlayerItems[MAX_ITEM_TYPES];// one slot for each
+	void InsertWeaponById( CBasePlayerWeapon* pItem );
+	CBasePlayerWeapon* WeaponById( int id );
+
+	CBasePlayerWeapon	*m_rgpPlayerWeapons[MAX_WEAPONS];// one slot for each
 
 	string_t m_rgiszAmmo[MAX_AMMO_SLOTS];// ammo names
 	int	m_rgAmmo[MAX_AMMO_SLOTS];// ammo quantities
@@ -553,7 +540,6 @@ class CGlock : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 2; }
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -587,7 +573,6 @@ class CCrowbar : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 1; }
 	void EXPORT SwingAgain( void );
 	void EXPORT Smack( void );
 	int GetItemInfo( ItemInfo *p );
@@ -623,7 +608,6 @@ class CPython : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 2; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
@@ -656,7 +640,6 @@ class CMP5 : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 3; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -691,7 +674,6 @@ class CCrossbow : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( ) { return 3; }
 	int GetItemInfo(ItemInfo *p);
 
 	void FireBolt( void );
@@ -732,7 +714,6 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( ) { return 3; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -787,7 +768,6 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void Reload( void );
-	int iItemSlot( void ) { return 4; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -849,7 +829,6 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 4; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 	BOOL IsUseable();
@@ -898,7 +877,6 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 4; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -966,7 +944,6 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 4; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -1002,7 +979,6 @@ class CHandGrenade : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 5; }
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
@@ -1033,12 +1009,11 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 5; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
-	int AddDuplicate( CBasePlayerItem *pOriginal );
+	int AddDuplicate(CBasePlayerWeapon *pOriginal );
 	BOOL CanDeploy( void );
 	BOOL Deploy( void );
 	BOOL IsUseable( void );
@@ -1064,7 +1039,6 @@ class CTripmine : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 5; }
 	int GetItemInfo(ItemInfo *p);
 	void SetObjectCollisionBox( void )
 	{
@@ -1097,7 +1071,6 @@ class CSqueak : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 5; }
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
@@ -1143,7 +1116,6 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 2; }
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -1186,7 +1158,6 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
-	int iItemSlot(void) { return 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1233,7 +1204,6 @@ public:
 #endif
 	void Spawn(void);
 	void Precache(void);
-	int iItemSlot(void) { return 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1287,7 +1257,6 @@ public:
 	void Spawn( void );
 	void EndAttack( void );
 
-	int iItemSlot( void ) { return 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer* pPlayer );
 	BOOL Deploy();
@@ -1336,13 +1305,6 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
-	int iItemSlot(void) {
-#if FEATURE_OPFOR
-		return 6;
-#else
-		return 3;
-#endif
-	}
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1389,14 +1351,6 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
-	int iItemSlot(void)
-	{
-#if FEATURE_OPFOR
-		return 6;
-#else
-		return 3;
-#endif
-	}
 
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1444,14 +1398,6 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void )
-	{
-#if FEATURE_OPFOR
-		return 6;
-#else
-		return 2;
-#endif
-	}
 
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -1498,14 +1444,6 @@ class CShockrifle : public CHgun
 public:
 	void Spawn(void);
 	void Precache(void);
-	int iItemSlot(void)
-	{
-#if FEATURE_OPFOR
-		return 7;
-#else
-		return 4;
-#endif
-	}
 
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1546,7 +1484,6 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
-	int iItemSlot(void) { return 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -1610,14 +1547,6 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot()
-	{
-#if FEATURE_OPFOR
-		return 7;
-#else
-		return 2;
-#endif
-	}
 
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );

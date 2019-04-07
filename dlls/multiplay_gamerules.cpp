@@ -134,19 +134,13 @@ void SavePlayerStates()
 				strncpy(state->currentWeapon, STRING(player->m_pActiveItem->pev->classname), sizeof(state->currentWeapon) - 1);
 			}
 			int k;
-			int wIndex = 0;
-			for( k = 0; k < MAX_ITEM_TYPES; k++ )
+			for( k = 0; k < MAX_WEAPONS; k++ )
 			{
-				if( player->m_rgpPlayerItems[k] )
+				CBasePlayerWeapon* pWeapon = player->m_rgpPlayerWeapons[k];
+				if (pWeapon)
 				{
-					CBasePlayerItem* pItem = player->m_rgpPlayerItems[k];
-					while( pItem )
-					{
-						strncpy( state->weapons[wIndex], STRING(pItem->pev->classname), sizeof(state->weapons[wIndex])-1);
-						state->clips[wIndex] = ((CBasePlayerWeapon*)pItem)->m_iClip;
-						pItem = pItem->m_pNext;
-						wIndex++;
-					}
+					strncpy( state->weapons[k], STRING(pWeapon->pev->classname), sizeof(state->weapons[k]) - 1);
+					state->clips[k] = pWeapon->m_iClip;
 				}
 			}
 			for( k = 0; k < MAX_AMMO_SLOTS; k++ )
@@ -180,14 +174,22 @@ bool RestorePlayerState(CBasePlayer* player)
 			{
 				if (*state->weapons[k])
 				{
-					CBasePlayerWeapon *pWeapon = (CBasePlayerWeapon*)CBaseEntity::Create(state->weapons[k], player->pev->origin, player->pev->angles );
-					if (pWeapon)
+					CBaseEntity *pCreated = CBaseEntity::Create(state->weapons[k], player->pev->origin, player->pev->angles );
+					if (pCreated)
 					{
-						pWeapon->pev->spawnflags |= SF_NORESPAWN;
-						pWeapon->m_iDefaultAmmo = 0;
-						pWeapon->m_iClip = state->clips[k];
-						if (player->AddPlayerItem(pWeapon))
-							pWeapon->AttachToPlayer(player);
+						CBasePlayerWeapon* pWeapon = pCreated->MyWeaponPointer();
+						if (pWeapon)
+						{
+							pWeapon->pev->spawnflags |= SF_NORESPAWN;
+							pWeapon->m_iDefaultAmmo = 0;
+							pWeapon->m_iClip = state->clips[k];
+							player->AddPlayerItem(pWeapon);
+						}
+						else
+						{
+							ALERT(at_console, "RestorePlayerState: expected weapon, but created entity is not a weapon\n");
+							UTIL_Remove(pCreated);
+						}
 					}
 				}
 			}
@@ -472,7 +474,7 @@ BOOL CHalfLifeMultiplay::IsCoOp( void )
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pWeapon )
+BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
 {
 	if( !pWeapon->CanDeploy() )
 	{
@@ -500,14 +502,13 @@ BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerI
 	return FALSE;
 }
 
-BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon )
+BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
 {
-	CBasePlayerItem *pCheck;
-	CBasePlayerItem *pBest;// this will be used in the event that we don't find a weapon in the same category.
+	CBasePlayerWeapon *pBest;// this will be used in the event that we don't find a weapon in the same category.
 	int iBestWeight;
 	int i;
 
-	iBestWeight = -1;// no weapon lower than -1 can be autoswitched to
+	iBestWeight = -100;
 	pBest = NULL;
 
 	if( !pCurrentWeapon->CanHolster() )
@@ -516,15 +517,15 @@ BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerIte
 		return FALSE;
 	}
 
-	for( i = 0; i < MAX_ITEM_TYPES; i++ )
+	for( i = 0; i < MAX_WEAPONS; i++ )
 	{
-		pCheck = pPlayer->m_rgpPlayerItems[i];
+		CBasePlayerWeapon *pCheck = pPlayer->m_rgpPlayerWeapons[i];
 
-		while( pCheck )
+		if ( pCheck )
 		{
-			if( pCheck->iWeight() > -1 && pCheck->iWeight() == pCurrentWeapon->iWeight() && pCheck != pCurrentWeapon )
+			if( pCheck->iWeight() == pCurrentWeapon->iWeight() && pCheck != pCurrentWeapon )
 			{
-				// this weapon is from the same category. 
+				// this weapon is from the same category.
 				if ( pCheck->CanDeploy() )
 				{
 					if ( pPlayer->SwitchWeapon( pCheck ) )
@@ -537,8 +538,8 @@ BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerIte
 			{
 				//ALERT ( at_console, "Considering %s\n", STRING( pCheck->pev->classname ) );
 				// we keep updating the 'best' weapon just in case we can't find a weapon of the same weight
-				// that the player was using. This will end up leaving the player with his heaviest-weighted 
-				// weapon. 
+				// that the player was using. This will end up leaving the player with his heaviest-weighted
+				// weapon.
 				if( pCheck->CanDeploy() )
 				{
 					// if this weapon is useable, flag it as the best
@@ -546,15 +547,13 @@ BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerIte
 					pBest = pCheck;
 				}
 			}
-
-			pCheck = pCheck->m_pNext;
 		}
 	}
 
-	// if we make it here, we've checked all the weapons and found no useable 
-	// weapon in the same catagory as the current weapon. 
-	
-	// if pBest is null, we didn't find ANYTHING. Shouldn't be possible- should always 
+	// if we make it here, we've checked all the weapons and found no useable
+	// weapon in the same catagory as the current weapon.
+
+	// if pBest is null, we didn't find ANYTHING. Shouldn't be possible- should always
 	// at least get the crowbar, but ya never know.
 	if( !pBest )
 	{
@@ -709,6 +708,15 @@ float CHalfLifeMultiplay::FlPlayerFallDamage( CBasePlayer *pPlayer )
 //=========================================================
 BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker )
 {
+	if( pAttacker && PlayerRelationship( pPlayer, pAttacker ) == GR_TEAMMATE )
+	{
+		// my teammate hit me.
+		if( ( friendlyfire.value == 0 ) && ( pAttacker != pPlayer ) )
+		{
+			// friendly fire is off, and this hit came from someone other than myself,  then don't get hurt
+			return FALSE;
+		}
+	}
 	return TRUE;
 }
 
@@ -788,7 +796,11 @@ BOOL CHalfLifeMultiplay::AllowAutoTargetCrosshair( void )
 //=========================================================
 int CHalfLifeMultiplay::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled )
 {
-	return 1;
+	if (PlayerRelationship(pAttacker, pKilled) == GR_TEAMMATE) {
+		return -10;
+	} else {
+		return 1;
+	}
 }
 
 //=========================================================
@@ -1059,7 +1071,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 // PlayerGotWeapon - player has grabbed a weapon that was
 // sitting in the world
 //=========================================================
-void CHalfLifeMultiplay::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pWeapon )
+void CHalfLifeMultiplay::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon )
 {
 }
 
@@ -1067,7 +1079,7 @@ void CHalfLifeMultiplay::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerItem 
 // FlWeaponRespawnTime - what is the time in the future
 // at which this weapon may spawn?
 //=========================================================
-float CHalfLifeMultiplay::FlWeaponRespawnTime( CBasePlayerItem *pWeapon )
+float CHalfLifeMultiplay::FlWeaponRespawnTime( CBasePlayerWeapon *pWeapon )
 {
 	if( weaponstay.value > 0 )
 	{
@@ -1090,7 +1102,7 @@ float CHalfLifeMultiplay::FlWeaponRespawnTime( CBasePlayerItem *pWeapon )
 // now,  otherwise it returns the time at which it can try
 // to spawn again.
 //=========================================================
-float CHalfLifeMultiplay::FlWeaponTryRespawn( CBasePlayerItem *pWeapon )
+float CHalfLifeMultiplay::FlWeaponTryRespawn( CBasePlayerWeapon *pWeapon )
 {
 	if( pWeapon && pWeapon->m_iId && ( pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD ) )
 	{
@@ -1108,7 +1120,7 @@ float CHalfLifeMultiplay::FlWeaponTryRespawn( CBasePlayerItem *pWeapon )
 // VecWeaponRespawnSpot - where should this weapon spawn?
 // Some game variations may choose to randomize spawn locations
 //=========================================================
-Vector CHalfLifeMultiplay::VecWeaponRespawnSpot( CBasePlayerItem *pWeapon )
+Vector CHalfLifeMultiplay::VecWeaponRespawnSpot( CBasePlayerWeapon *pWeapon )
 {
 	return pWeapon->pev->origin;
 }
@@ -1117,7 +1129,7 @@ Vector CHalfLifeMultiplay::VecWeaponRespawnSpot( CBasePlayerItem *pWeapon )
 // WeaponShouldRespawn - any conditions inhibiting the
 // respawning of this weapon?
 //=========================================================
-int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerItem *pWeapon )
+int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerWeapon *pWeapon )
 {
 	if( pWeapon->pev->spawnflags & SF_NORESPAWN )
 	{
@@ -1138,27 +1150,16 @@ int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerItem *pWeapon )
 // CanHaveWeapon - returns FALSE if the player is not allowed
 // to pick up this weapon
 //=========================================================
-BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerItem *pItem )
+BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pItem )
 {
 	if( weaponstay.value > 0 )
 	{
-		if( pItem->iFlags() & ITEM_FLAG_LIMITINWORLD )
+		if( (pItem->iFlags() & ITEM_FLAG_LIMITINWORLD) || (pItem->pev->spawnflags & SF_NORESPAWN) )
 			return CGameRules::CanHavePlayerItem( pPlayer, pItem );
 
 		// check if the player already has this weapon
-		for( int i = 0; i < MAX_ITEM_TYPES; i++ )
-		{
-			CBasePlayerItem *it = pPlayer->m_rgpPlayerItems[i];
-
-			while( it != NULL )
-			{
-				if( it->m_iId == pItem->m_iId )
-				{
-					return FALSE;
-				}
-
-				it = it->m_pNext;
-			}
+		if (pPlayer->WeaponById(pItem->m_iId)) {
+			return FALSE;
 		}
 	}
 

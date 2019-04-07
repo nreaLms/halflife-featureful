@@ -74,6 +74,8 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_SNIPERRIFLE;
 	p->iWeight = 10;
+	p->pszAmmoEntity = "ammo_762";
+	p->iDropAmmo = AMMO_762BOX_GIVE;
 
 	return 1;
 }

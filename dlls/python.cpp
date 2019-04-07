@@ -37,6 +37,8 @@ int CPython::GetItemInfo( ItemInfo *p )
 	p->iPosition = 1;
 	p->iId = m_iId = WEAPON_PYTHON;
 	p->iWeight = PYTHON_WEIGHT;
+	p->pszAmmoEntity = "ammo_357";
+	p->iDropAmmo = AMMO_357BOX_GIVE;
 
 	return 1;
 }

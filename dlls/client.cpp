@@ -531,6 +531,10 @@ void ClientCommand( edict_t *pEntity )
 		// player is dropping an item. 
 		GetClassPtr( (CBasePlayer *)pev )->DropPlayerItem( (char *)CMD_ARGV( 1 ) );
 	}
+	else if (FStrEq( pcmd, "dropammo") )
+	{
+		GetClassPtr( (CBasePlayer *)pev )->DropAmmo();
+	}
 	else if( FStrEq( pcmd, "fov" ) )
 	{
 		if( g_flWeaponCheat && CMD_ARGC() > 1 )
@@ -1634,53 +1638,47 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 	weapon_data_t *item;
 	entvars_t *pev = &player->v;
 	CBasePlayer *pl = (CBasePlayer *)CBasePlayer::Instance( pev );
-	CBasePlayerWeapon *gun;
-
 	memset( info, 0, 32 * sizeof(weapon_data_t) );
 
 	if( !pl )
 		return 1;
 
 	// go through all of the weapons and make a list of the ones to pack
-	for( i = 0; i < MAX_ITEM_TYPES; i++ )
+	for( i = 0; i < MAX_WEAPONS; i++ )
 	{
-		if( pl->m_rgpPlayerItems[i] )
+		// there's a weapon here. Should I pack it?
+		CBasePlayerWeapon *pPlayerItem = pl->m_rgpPlayerWeapons[i];
+
+		if( pPlayerItem )
 		{
-			// there's a weapon here. Should I pack it?
-			CBasePlayerItem *pPlayerItem = pl->m_rgpPlayerItems[i];
-
-			while( pPlayerItem )
+			CBasePlayerWeapon *gun = pPlayerItem;
+			if( gun && gun->UseDecrement() )
 			{
-				gun = (CBasePlayerWeapon *)pPlayerItem->GetWeaponPtr();
-				if( gun && gun->UseDecrement() )
+				ItemInfo II = {0};
+				// Get The ID.
+				gun->GetItemInfo( &II );
+
+				if( II.iId >= 0 && II.iId < 32 )
 				{
-					ItemInfo II = {0};
-					// Get The ID.
-					gun->GetItemInfo( &II );
+					item = &info[II.iId];
 
-					if( II.iId >= 0 && II.iId < 32 )
-					{
-						item = &info[II.iId];
-					 	
-						item->m_iId			= II.iId;
-						item->m_iClip			= gun->m_iClip;
+					item->m_iId			= II.iId;
+					item->m_iClip			= gun->m_iClip;
 
-						item->m_flTimeWeaponIdle	= Q_max( gun->m_flTimeWeaponIdle, -0.001 );
-						item->m_flNextPrimaryAttack	= Q_max( gun->m_flNextPrimaryAttack, -0.001 );
-						item->m_flNextSecondaryAttack	= Q_max( gun->m_flNextSecondaryAttack, -0.001 );
-						item->m_fInReload		= gun->m_fInReload;
-						item->m_fInSpecialReload	= gun->m_fInSpecialReload;
-						item->fuser1			= Q_max( gun->pev->fuser1, -0.001 );
-						item->fuser2			= gun->m_flStartThrow;
-						item->fuser3			= gun->m_flReleaseThrow;
-						item->iuser1			= gun->m_chargeReady;
-						item->iuser2			= gun->m_fInAttack;
-						item->iuser3			= gun->m_fireState;
+					item->m_flTimeWeaponIdle	= Q_max( gun->m_flTimeWeaponIdle, -0.001 );
+					item->m_flNextPrimaryAttack	= Q_max( gun->m_flNextPrimaryAttack, -0.001 );
+					item->m_flNextSecondaryAttack	= Q_max( gun->m_flNextSecondaryAttack, -0.001 );
+					item->m_fInReload		= gun->m_fInReload;
+					item->m_fInSpecialReload	= gun->m_fInSpecialReload;
+					item->fuser1			= Q_max( gun->pev->fuser1, -0.001 );
+					item->fuser2			= gun->m_flStartThrow;
+					item->fuser3			= gun->m_flReleaseThrow;
+					item->iuser1			= gun->m_chargeReady;
+					item->iuser2			= gun->m_fInAttack;
+					item->iuser3			= gun->m_fireState;
 
-						//item->m_flPumpTime		= max( gun->m_flPumpTime, -0.001 );
-					}
+					//item->m_flPumpTime		= max( gun->m_flPumpTime, -0.001 );
 				}
-				pPlayerItem = pPlayerItem->m_pNext;
 			}
 		}
 	}
@@ -1769,8 +1767,7 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 
 			if( pl->m_pActiveItem )
 			{
-				CBasePlayerWeapon *gun;
-				gun = (CBasePlayerWeapon *)pl->m_pActiveItem->GetWeaponPtr();
+				CBasePlayerWeapon *gun = pl->m_pActiveItem;
 				if( gun && gun->UseDecrement() )
 				{
 					ItemInfo II = {0};

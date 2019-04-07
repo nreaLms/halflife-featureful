@@ -68,6 +68,8 @@ int CGlock::GetItemInfo( ItemInfo *p )
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_GLOCK;
 	p->iWeight = GLOCK_WEIGHT;
+	p->pszAmmoEntity = "ammo_9mmclip";
+	p->iDropAmmo = AMMO_GLOCKCLIP_GIVE;
 
 	return 1;
 }

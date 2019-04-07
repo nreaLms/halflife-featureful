@@ -296,7 +296,6 @@ class CWeaponCycler : public CBasePlayerWeapon
 {
 public:
 	void Spawn( void );
-	int iItemSlot( void ) { return 1; }
 	int GetItemInfo(ItemInfo *p) {return 0; }
 
 	void PrimaryAttack( void );
@@ -321,7 +320,7 @@ void CWeaponCycler::Spawn()
 
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
-	SetTouch( &CBasePlayerItem::DefaultTouch );
+	SetTouch( &CBasePlayerWeapon::DefaultTouch );
 }
 
 BOOL CWeaponCycler::Deploy()

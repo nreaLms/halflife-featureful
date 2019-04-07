@@ -112,6 +112,8 @@ int CGauss::GetItemInfo( ItemInfo *p )
 	p->iId = m_iId = WEAPON_GAUSS;
 	p->iFlags = 0;
 	p->iWeight = GAUSS_WEIGHT;
+	p->pszAmmoEntity = "ammo_gaussclip";
+	p->iDropAmmo = AMMO_URANIUMBOX_GIVE;
 
 	return 1;
 }
