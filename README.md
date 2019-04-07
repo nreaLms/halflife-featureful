@@ -183,8 +183,9 @@ Besides some opfor and sven co-op entities mentioned above there're some feature
 * Wall chargers sounds and capacity can be configured in level editor.
 * 'Is Player Ally' parameter for monsters that inverts their relationship with player and sets a different model for some monsters.
 * 'Grunt Type' parameter for osprey.
-* 'In-game name' parameter and mp_allowmonsterinfo cvar to show monster's display names in multiplayer.
-* npc_dropweapons cvar to enable/disable weapon dropping by monsters in multiplayer.
+* 'In-game name' parameter and `mp_allowmonsterinfo` cvar to show monster's display names in multiplayer.
+* `npc_dropweapons` cvar to enable/disable weapon dropping by monsters in multiplayer.
+* `mp_weapon_respawndelay`, `mp_ammo_respawndelay`, `mp_item_respawndelay` cvars to control item respawn time.
 
 Note that the full compatibility with Sven Co-op maps is not a goal.
 
@@ -205,6 +206,7 @@ Note that the full compatibility with Sven Co-op maps is not a goal.
 * item_security can show message and play sound on pickup. If item_security is featured in hud.txt the sprite will be shown upon item pickup.
 * 'Fire on Animation start' property for scripted sequence - allows to sync animation start and firing a trigger (useful for retina animations).
 * Dropped weaponboxes have a model of dropped weapon.
+* `mp_healthcharger_rechargetime` and `mp_hevcharger_rechargetime` cvars to control wall chargers recharge time.
 
 ## How to build
 

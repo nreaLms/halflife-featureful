@@ -27,8 +27,16 @@ extern cvar_t timelimit;
 extern cvar_t friendlyfire;
 extern cvar_t falldamage;
 extern cvar_t weaponstay;
+
+extern cvar_t weapon_respawndelay;
+extern cvar_t ammo_respawndelay;
+extern cvar_t item_respawndelay;
+extern cvar_t healthcharger_rechargetime;
+extern cvar_t hevcharger_rechargetime;
+
 extern cvar_t selfgauss;
 extern cvar_t satchelfix;
+
 extern cvar_t forcerespawn;
 extern cvar_t flashlight;
 extern cvar_t aimcrosshair;

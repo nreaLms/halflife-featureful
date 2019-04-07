@@ -801,8 +801,10 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	pWeaponBox->pev->angles.x = 0;// don't let weaponbox tilt.
 	pWeaponBox->pev->angles.z = 0;
 
-	pWeaponBox->SetThink( &CWeaponBox::Kill );
-	pWeaponBox->pev->nextthink = gpGlobals->time + 120;
+	if (weapon_respawndelay.value != -1) {
+		pWeaponBox->SetThink( &CWeaponBox::Kill );
+		pWeaponBox->pev->nextthink = gpGlobals->time + 120;
+	}
 
 	// back these two lists up to their first elements
 	iPA = 0;
