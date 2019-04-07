@@ -1533,7 +1533,7 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 	ASSERT( !FStrEq( m_szMapName, "" ) );
 
 	// Don't work in deathmatch
-	if( g_pGameRules->IsDeathmatch() && !g_pGameRules->IsCoOp() )
+	if( g_pGameRules->IsMultiplayer() && !g_pGameRules->IsCoOp() )
 		return;
 
 	// Some people are firing these multiple times in a frame, disable
@@ -1542,8 +1542,8 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 
 	pev->dmgtime = gpGlobals->time;
 
-	CBaseEntity *pPlayer;
-	if (g_pGameRules->IsMultiplayer())
+	CBaseEntity *pPlayer = NULL;
+	if (g_pGameRules->IsMultiplayer() && pActivator->IsPlayer())
 	{
 		pPlayer = pActivator;
 	}
