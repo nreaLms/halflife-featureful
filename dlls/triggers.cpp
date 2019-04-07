@@ -1372,6 +1372,7 @@ class CChangeLevel : public CBaseTrigger
 {
 public:
 	void Spawn( void );
+	void Precache();
 	void KeyValue( KeyValueData *pkvd );
 	void EXPORT UseChangeLevel( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT TriggerChangeLevel( void );
@@ -1441,11 +1442,15 @@ void CChangeLevel::KeyValue( KeyValueData *pkvd )
 		CBaseTrigger::KeyValue( pkvd );
 }
 
+FILE_GLOBAL char st_szPrevMap[cchMapNameMost];
+
 /*QUAKED trigger_changelevel (0.5 0.5 0.5) ? NO_INTERMISSION
 When the player touches this, he gets sent to the map listed in the "map" variable.  Unless the NO_INTERMISSION flag is set, the view will go to the info_intermission spot and display stats.
 */
 void CChangeLevel::Spawn( void )
 {
+	Precache();
+	const int solid = pev->solid;
 	if( FStrEq( m_szMapName, "" ) )
 		ALERT( at_console, "a trigger_changelevel doesn't have a map" );
 
@@ -1457,9 +1462,26 @@ void CChangeLevel::Spawn( void )
 		SetUse( &CChangeLevel::UseChangeLevel );
 	}
 	InitTrigger();
-	if( !( pev->spawnflags & SF_CHANGELEVEL_USEONLY ) )
+	if (solid == SOLID_BSP)
+		pev->solid = solid;
+	if( !( pev->spawnflags & SF_CHANGELEVEL_USEONLY ) && pev->solid != SOLID_BSP )
 		SetTouch( &CChangeLevel::TouchChangeLevel );
 	//ALERT( at_console, "TRANSITION: %s (%s)\n", m_szMapName, m_szLandmarkName );
+}
+
+void CChangeLevel::Precache()
+{
+	if (!( pev->spawnflags & SF_CHANGELEVEL_USEONLY ) && g_pGameRules->IsCoOp())
+	{
+		if (*st_szPrevMap)
+		{
+			if (FStrEq(st_szPrevMap, m_szMapName))
+			{
+				ALERT(at_aiconsole, "Next map is the same as previous\n");
+				pev->solid = SOLID_BSP;
+			}
+		}
+	}
 }
 
 void CChangeLevel::ExecuteChangeLevel( void )
@@ -1511,7 +1533,7 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 	ASSERT( !FStrEq( m_szMapName, "" ) );
 
 	// Don't work in deathmatch
-	if( g_pGameRules->IsDeathmatch() )
+	if( g_pGameRules->IsDeathmatch() && !g_pGameRules->IsCoOp() )
 		return;
 
 	// Some people are firing these multiple times in a frame, disable
@@ -1520,11 +1542,23 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 
 	pev->dmgtime = gpGlobals->time;
 
-	CBaseEntity *pPlayer = CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
-	if( !InTransitionVolume( pPlayer, m_szLandmarkName ) )
+	CBaseEntity *pPlayer;
+	if (g_pGameRules->IsMultiplayer())
 	{
-		ALERT( at_aiconsole, "Player isn't in the transition volume %s, aborting\n", m_szLandmarkName );
-		return;
+		pPlayer = pActivator;
+	}
+	else
+	{
+		pPlayer = CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );;
+	}
+
+	if (!g_pGameRules->IsCoOp())
+	{
+		if( !InTransitionVolume( pPlayer, m_szLandmarkName ) )
+		{
+			ALERT( at_aiconsole, "Player isn't in the transition volume %s, aborting\n", m_szLandmarkName );
+			return;
+		}
 	}
 
 	// Create an entity to fire the changetarget
@@ -1545,6 +1579,7 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 
 	// This object will get removed in the call to CHANGE_LEVEL, copy the params into "safe" memory
 	strcpy( st_szNextMap, m_szMapName );
+	strcpy( st_szPrevMap, STRING(gpGlobals->mapname) );
 
 	m_hActivator = pActivator;
 	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
@@ -1559,7 +1594,18 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 	}
 	//ALERT( at_console, "Level touches %d levels\n", ChangeList( levels, 16 ) );
 	ALERT( at_console, "CHANGE LEVEL: %s %s\n", st_szNextMap, st_szNextSpot );
-	CHANGE_LEVEL( st_szNextMap, st_szNextSpot );
+	g_pGameRules->BeforeChangeLevel(st_szNextMap);
+	if (g_pGameRules->IsMultiplayer())
+	{
+		if (g_pGameRules->IsCoOp())
+		{
+			SERVER_COMMAND( UTIL_VarArgs( "changelevel %s\n", st_szNextMap ) );
+		}
+	}
+	else
+	{
+		CHANGE_LEVEL( st_szNextMap, st_szNextSpot );
+	}
 }
 
 //

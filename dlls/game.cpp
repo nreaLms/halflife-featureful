@@ -63,6 +63,8 @@ cvar_t tridepth = { "tridepth", "1", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
 
+cvar_t keepinventory	= { "mp_keepinventory","0", FCVAR_SERVER }; // keep inventory across level transitions in multiplayer coop
+
 // Engine Cvars
 cvar_t *g_psv_gravity = NULL;
 cvar_t *g_psv_aim = NULL;
@@ -890,6 +892,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &bhopcap );
 
 	CVAR_REGISTER( &mp_chattime );
+
+	CVAR_REGISTER( &keepinventory );
 
 // REGISTER CVARS FOR SKILL LEVEL STUFF
 	// Agrunt

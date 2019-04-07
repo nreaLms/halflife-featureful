@@ -163,6 +163,8 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
+
+	virtual void BeforeChangeLevel(const char* nextMap) {}
 };
 
 extern CGameRules *InstallGameRules( void );
@@ -356,6 +358,8 @@ public:
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) { GoToIntermission(); }
+
+	virtual void BeforeChangeLevel(const char* nextMap);
 
 protected:
 	virtual void ChangeLevel( void );

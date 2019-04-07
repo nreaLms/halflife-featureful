@@ -51,6 +51,8 @@ extern cvar_t npc_dropweapons;
 extern cvar_t dmgperscore;
 extern cvar_t allydmgpenalty;
 
+extern cvar_t keepinventory;
+
 // Engine Cvars
 extern cvar_t *g_psv_gravity;
 extern cvar_t *g_psv_aim;
