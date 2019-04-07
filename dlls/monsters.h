@@ -163,6 +163,8 @@ public:
 	float m_startFadeTime;
 };
 
+void AddScoreForDamage(entvars_t *pevAttacker, CBaseEntity* victim, const float damage);
+
 #define CUSTOM_SCHEDULES\
 		virtual Schedule_t *ScheduleFromName( const char *pName );\
 		static Schedule_t *m_scheduleList[];

@@ -1021,6 +1021,8 @@ int CBaseTurret::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	if( !m_iOn )
 		flDamage /= 10.0;
 
+	AddScoreForDamage(pevAttacker, this, flDamage);
+
 	pev->health -= flDamage;
 	if( pev->health <= 0 )
 	{
@@ -1242,6 +1244,8 @@ int CSentry::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 		SetUse( NULL );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
+
+	AddScoreForDamage(pevAttacker, this, flDamage);
 
 	pev->health -= flDamage;
 	if( pev->health <= 0 )

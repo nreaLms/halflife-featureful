@@ -311,7 +311,8 @@ BOOL CBasePlayer::SwitchWeapon( CBasePlayerItem *pWeapon )  { return FALSE; }
 Vector CBasePlayer::GetGunPosition( void ) { return g_vecZero; }
 const char *CBasePlayer::TeamID( void ) { return ""; }
 int CBasePlayer::GiveAmmo( int iCount, const char *szName ) { return 0; }
-void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { } 
+void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { }
+void CBasePlayer::AddFloatPoints(float score, BOOL bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { } 
 void CBasePlayer::SetMovementMode() {}
 

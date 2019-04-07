@@ -44,9 +44,12 @@ extern cvar_t decalfrequency;
 extern cvar_t teamlist;
 extern cvar_t teamoverride;
 extern cvar_t defaultteam;
+
 extern cvar_t allowmonsters;
 extern cvar_t allowmonsterinfo;
 extern cvar_t npc_dropweapons;
+extern cvar_t dmgperscore;
+extern cvar_t allydmgpenalty;
 
 // Engine Cvars
 extern cvar_t *g_psv_gravity;

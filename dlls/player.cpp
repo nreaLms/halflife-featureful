@@ -1723,6 +1723,11 @@ int CBasePlayer::Classify( void )
 
 void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore )
 {
+	AddFloatPoints(score, bAllowNegativeScore);
+}
+
+void CBasePlayer::AddFloatPoints( float score, BOOL bAllowNegativeScore )
+{
 	// Positive score always adds
 	if( score < 0 )
 	{

@@ -194,7 +194,7 @@ public:
 	virtual CBaseMonster *MyMonsterPointer( void ) { return NULL; }
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return NULL; }
 	virtual	int GetToggleState( void ) { return TS_AT_TOP; }
-	virtual void AddPoints( int score, BOOL bAllowNegativeScore ) {}
+	virtual void AddPoints( int score, BOOL bAllowNegativeScore ) { AddFloatPoints((float)score, bAllowNegativeScore); }
 	virtual void AddPointsToTeam( int score, BOOL bAllowNegativeScore ) {}
 	virtual BOOL AddPlayerItem( CBasePlayerItem *pItem ) { return 0; }
 	virtual BOOL RemovePlayerItem( CBasePlayerItem *pItem ) { return 0; }
@@ -353,6 +353,7 @@ public:
 	virtual	BOOL FVisible( CBaseEntity *pEntity );
 	virtual	BOOL FVisible( const Vector &vecOrigin );
 
+	virtual void AddFloatPoints( float score, BOOL bAllowNegativeScore ) {}
 	virtual int SizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
 	virtual bool IsAlienMonster() { return false; }
 };

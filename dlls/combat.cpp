@@ -23,12 +23,15 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
+#include "game.h"
 #include "monsters.h"
 #include "soundent.h"
 #include "decals.h"
 #include "animation.h"
 #include "weapons.h"
 #include "func_break.h"
+#include "player.h"
+#include "gamerules.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -882,6 +885,34 @@ int CBaseMonster::TakeHealth( float flHealth, int bitsDamageType )
 	return CBaseEntity::TakeHealth( flHealth, bitsDamageType );
 }
 
+void AddScoreForDamage(entvars_t *pevAttacker, CBaseEntity* victim, const float damage)
+{
+	if (!g_pGameRules->IsCoOp() || !dmgperscore.value) {
+		return;
+	}
+	CBaseEntity *attacker = CBaseEntity::Instance( pevAttacker );
+	if (attacker && attacker->IsPlayer()) {
+		const float dmg = damage > victim->pev->health ? victim->pev->health : damage;
+		const float score = dmg / dmgperscore.value;
+
+		if (victim->IsPlayer()) {
+			if (victim != attacker && g_pGameRules->PlayerRelationship(attacker, victim) == GR_TEAMMATE) {
+				attacker->AddFloatPoints(-score * allydmgpenalty.value, true);
+			}
+		} else {
+			CBaseMonster* monster = victim->MyMonsterPointer();
+			if (monster)
+			{
+				if (monster->IDefaultRelationship(CLASS_PLAYER) == R_AL) {
+					attacker->AddFloatPoints(-score * allydmgpenalty.value, true);
+				} else {
+					attacker->AddFloatPoints(score, true);
+				}
+			}
+		}
+	}
+}
+
 /*
 ============
 TakeDamage
@@ -955,6 +986,8 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	{
 		pev->velocity = pev->velocity + vecDir * -DamageForce( flDamage );
 	}
+
+	AddScoreForDamage(pevAttacker, this, flTake);
 
 	// do the damage
 	pev->health -= flTake;

@@ -207,6 +207,7 @@ Note that the full compatibility with Sven Co-op maps is not a goal.
 * 'Fire on Animation start' property for scripted sequence - allows to sync animation start and firing a trigger (useful for retina animations).
 * Dropped weaponboxes have a model of dropped weapon.
 * `mp_healthcharger_rechargetime` and `mp_hevcharger_rechargetime` cvars to control wall chargers recharge time.
+* `mp_dmgperscore` and `mp_allydmgpenalty` to control how many points the player gets for dealing the damage in Co-op.
 
 ## How to build
 
