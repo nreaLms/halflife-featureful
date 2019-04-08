@@ -35,8 +35,8 @@ cvar_t weaponstay	= { "mp_weaponstay","0", FCVAR_SERVER };
 cvar_t weapon_respawndelay = { "mp_weapon_respawndelay","-2",FCVAR_SERVER };
 cvar_t ammo_respawndelay = { "mp_ammo_respawndelay","-2",FCVAR_SERVER };
 cvar_t item_respawndelay = { "mp_item_respawndelay","-2",FCVAR_SERVER };
-cvar_t healthcharger_rechargetime = { "mp_healthcharger_rechargetime","-1",FCVAR_SERVER };
-cvar_t hevcharger_rechargetime = { "mp_hevcharger_rechargetime","-1",FCVAR_SERVER };
+cvar_t healthcharger_rechargetime = { "mp_healthcharger_rechargetime","-2",FCVAR_SERVER };
+cvar_t hevcharger_rechargetime = { "mp_hevcharger_rechargetime","-2",FCVAR_SERVER };
 
 cvar_t selfgauss	= { "mp_selfgauss", "1", FCVAR_SERVER };
 cvar_t satchelfix	= { "mp_satchelfix", "0", FCVAR_SERVER };

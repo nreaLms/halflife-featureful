@@ -44,6 +44,8 @@ extern int g_teamplay;
 #define ITEM_RESPAWN_TIME	30
 #define WEAPON_RESPAWN_TIME	20
 #define AMMO_RESPAWN_TIME	20
+#define HEVCHARGER_RESPAWN_TIME 30
+#define HEALTHCHARGER_RESPAWN_TIME 30
 
 float g_flIntermissionStartTime = 0;
 
@@ -1425,12 +1427,12 @@ Vector CHalfLifeMultiplay::VecAmmoRespawnSpot( CBasePlayerAmmo *pAmmo )
 //=========================================================
 float CHalfLifeMultiplay::FlHealthChargerRechargeTime( void )
 {
-	return healthcharger_rechargetime.value < 0 ? 60 : healthcharger_rechargetime.value;
+	return healthcharger_rechargetime.value == -2 ? HEALTHCHARGER_RESPAWN_TIME : healthcharger_rechargetime.value;
 }
 
 float CHalfLifeMultiplay::FlHEVChargerRechargeTime( void )
 {
-	return hevcharger_rechargetime.value < 0 ? 30 : hevcharger_rechargetime.value;
+	return hevcharger_rechargetime.value == -2 ? HEVCHARGER_RESPAWN_TIME : hevcharger_rechargetime.value;
 }
 
 //=========================================================
