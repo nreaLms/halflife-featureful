@@ -935,12 +935,31 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( !pev->takedamage )
 		return 0;
 
+	if (!IsPlayer() && g_pGameRules->IsCoOp() && IDefaultRelationship(CLASS_PLAYER) == R_AL)
+	{
+		if (npckill.value == 0)
+		{
+			return 0;
+		}
+		else if (npckill.value == 2)
+		{
+			CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker);
+			if (pAttacker)
+			{
+				if (IDefaultRelationship(pAttacker) == R_AL)
+				{
+					return 0;
+				}
+			}
+		}
+	}
+
 	if( !IsAlive() )
 	{
 		return DeadTakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 	}
 
-	if( pev->deadflag == DEAD_NO )
+	if( pev->deadflag == DEAD_NO && flDamage > 0 )
 	{
 		// no pain sound during death animation.
 		PainSound();// "Ouch!"
@@ -995,7 +1014,8 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
 	if( m_MonsterState == MONSTERSTATE_SCRIPT )
 	{
-		SetConditions( bits_COND_LIGHT_DAMAGE );
+		if (flDamage > 0)
+			SetConditions( bits_COND_LIGHT_DAMAGE );
 		return 0;
 	}
 

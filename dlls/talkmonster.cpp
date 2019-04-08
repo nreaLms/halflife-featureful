@@ -1354,7 +1354,7 @@ void CTalkMonster::SetAnswerQuestion( CTalkMonster *pSpeaker )
 int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	int ret = CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
-	if( IsAlive() )
+	if( ret && IsAlive() )
 	{
 		// if player damaged this entity, have other friends talk about it
 		if( pevAttacker && m_MonsterState != MONSTERSTATE_PRONE && FBitSet( pevAttacker->flags, FL_CLIENT ) 
