@@ -583,4 +583,7 @@ float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 float UTIL_WeaponTimeBase( void );
 void UTIL_CleanSpawnPoint( Vector origin, float dist );
 void UTIL_MuzzleLight( Vector vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay );
+
+char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize );
+
 #endif // UTIL_H
