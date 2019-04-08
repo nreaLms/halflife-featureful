@@ -1343,6 +1343,28 @@ void CBasePlayer::PlayerDeathThink( void )
 	if( pev->iuser1 )	// player is in spectator mode
 		return;
 
+	if (g_pGameRules->IsMultiplayer() && respawndelay.value)
+	{
+		if (m_fDeadTime + respawndelay.value > gpGlobals->time)
+		{
+			if (m_flNextRespawnMessageTime <= gpGlobals->time)
+			{
+				const int secondsBeforeRespawn = (int)ceil(m_fDeadTime + respawndelay.value - gpGlobals->time);
+				ClientPrint( pev, HUD_PRINTCENTER, UTIL_VarArgs( "Respawn allowed in %d seconds", secondsBeforeRespawn ));
+				m_flNextRespawnMessageTime = gpGlobals->time + 1;
+			}
+			return;
+		}
+		else
+		{
+			if (m_flNextRespawnMessageTime <= gpGlobals->time)
+			{
+				ClientPrint( pev, HUD_PRINTCENTER, "You can respawn now!" );
+				m_flNextRespawnMessageTime = gpGlobals->time + 2;
+			}
+		}
+	}
+
 	// wait for any button down,  or mp_forcerespawn is set and the respawn time is up
 	if( !fAnyButtonDown && !( g_pGameRules->IsMultiplayer() && forcerespawn.value > 0 && ( gpGlobals->time > ( m_fDeadTime + 5 ) ) ) )
 		return;
@@ -1352,6 +1374,10 @@ void CBasePlayer::PlayerDeathThink( void )
 
 	//ALERT( at_console, "Respawn\n" );
 
+	if (g_pGameRules->IsMultiplayer() && respawndelay.value)
+	{
+		ClientPrint( pev, HUD_PRINTCENTER, "" );
+	}
 	respawn( pev, !( m_afPhysicsFlags & PFLAG_OBSERVER ) );// don't copy a corpse if we're in deathcam.
 	pev->nextthink = -1;
 }

@@ -187,6 +187,7 @@ Besides some opfor and sven co-op entities mentioned above there're some feature
 * `npc_dropweapons` cvar to enable/disable weapon dropping by monsters in multiplayer.
 * `mp_weapon_respawndelay`, `mp_ammo_respawndelay`, `mp_item_respawndelay` cvars to control item respawn time.
 * `mp_npckill` cvar to control whether ally npc can get damage in co-op game.
+* `mp_respawndelay` cvar.
 
 Note that the full compatibility with Sven Co-op maps is not a goal.
 

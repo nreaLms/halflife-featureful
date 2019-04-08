@@ -347,6 +347,7 @@ public:
 	int m_lastSeenArmor;
 
 	float m_flNextChatTime;
+	float m_flNextRespawnMessageTime;
 #if FEATURE_DISPLACER
 	BOOL	m_fInXen;
 #endif

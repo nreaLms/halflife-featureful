@@ -38,6 +38,7 @@ extern cvar_t selfgauss;
 extern cvar_t satchelfix;
 
 extern cvar_t forcerespawn;
+extern cvar_t respawndelay;
 extern cvar_t flashlight;
 extern cvar_t aimcrosshair;
 extern cvar_t decalfrequency;
