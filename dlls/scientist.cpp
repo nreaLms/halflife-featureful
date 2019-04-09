@@ -227,7 +227,7 @@ Schedule_t slHeal[] =
 	},
 };
 
-Task_t tlFaceTarget[] =
+Task_t tlSciFaceTarget[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_FACE_TARGET, (float)0 },
@@ -235,17 +235,17 @@ Task_t tlFaceTarget[] =
 	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_CHASE },
 };
 
-Schedule_t slFaceTarget[] =
+Schedule_t slSciFaceTarget[] =
 {
 	{
-		tlFaceTarget,
-		ARRAYSIZE( tlFaceTarget ),
+		tlSciFaceTarget,
+		ARRAYSIZE( tlSciFaceTarget ),
 		bits_COND_CLIENT_PUSH |
 		bits_COND_NEW_ENEMY |
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_COMBAT |
 		bits_SOUND_DANGER,
-		"FaceTarget"
+		"Sci FaceTarget"
 	},
 };
 
@@ -410,8 +410,7 @@ Schedule_t	slDisarmNeedle[] =
 
 DEFINE_CUSTOM_SCHEDULES( CScientist )
 {
-	slFaceTarget,
-	slIdleSciStand,
+	slSciFaceTarget,
 	slFear,
 	slScientistCover,
 	slScientistHide,
@@ -832,20 +831,11 @@ void CScientist::SetActivity( Activity newActivity )
 
 Schedule_t *CScientist::GetScheduleOfType( int Type )
 {
-	Schedule_t *psched;
-
 	switch( Type )
 	{
 	// Hook these to make a looping schedule
 	case SCHED_TARGET_FACE:
-		// call base class default so that scientist will talk
-		// when 'used'
-		psched = CTalkMonster::GetScheduleOfType( Type );
-
-		if( psched == slIdleStand )
-			return slFaceTarget;	// override this for different target face behavior
-		else
-			return psched;
+		return slSciFaceTarget;
 	case SCHED_TARGET_CHASE:
 		if (FBitSet(pev->spawnflags, SF_SCI_DONT_STOP_FOLLOWING))
 			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
@@ -859,15 +849,6 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 		return slFollowScared;
 	case SCHED_TARGET_FACE_SCARED:
 		return slFaceTargetScared;
-	case SCHED_IDLE_STAND:
-		// call base class default so that scientist will talk
-		// when standing during idle
-		psched = CTalkMonster::GetScheduleOfType( Type );
-
-		if( psched == slIdleStand )
-			return slIdleSciStand;
-		else
-			return psched;
 	case SCHED_HIDE:
 		return slScientistHide;
 	case SCHED_STARTLE:

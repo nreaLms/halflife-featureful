@@ -243,6 +243,60 @@ Schedule_t slFollowFallible[] =
 	},
 };
 
+Task_t tlFaceTarget[] =
+{
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_FACE_TARGET, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_CHASE },
+};
+
+Schedule_t slFaceTarget[] =
+{
+	{
+		tlFaceTarget,
+		ARRAYSIZE( tlFaceTarget ),
+		bits_COND_CLIENT_PUSH |
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND |
+		bits_COND_PROVOKED,
+		bits_SOUND_DANGER,
+		"FaceTarget"
+	},
+};
+
+Task_t tlIdleTlkStand[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_WAIT, (float)2 }, // repick IDLESTAND every two seconds.
+	{ TASK_TLK_HEADRESET, (float)0 }, // reset head position
+};
+
+Schedule_t slIdleTlkStand[] =
+{
+	{
+		tlIdleTlkStand,
+		ARRAYSIZE( tlIdleTlkStand ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND |
+		bits_COND_SMELL |
+		bits_COND_PROVOKED,
+		bits_SOUND_COMBAT |// sound flags - change these, and you'll break the talking code.
+		//bits_SOUND_PLAYER |
+		//bits_SOUND_WORLD |
+		bits_SOUND_DANGER |
+		bits_SOUND_MEAT |// scents
+		bits_SOUND_CARCASS |
+		bits_SOUND_GARBAGE,
+		"IdleTlkStand"
+	},
+};
+
 Task_t tlMoveAway[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_MOVE_AWAY_FAIL },
@@ -427,6 +481,8 @@ DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 	slIdleStopShooting,
 	slFollow,
 	slFollowFallible,
+	slFaceTarget,
+	slIdleTlkStand,
 	slMoveAway,
 	slMoveAwayFollow,
 	slMoveAwayFail,
@@ -1491,12 +1547,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 	case SCHED_MOVE_AWAY_FAIL:
 		return slMoveAwayFail;
 	case SCHED_TARGET_FACE:
-		// speak during 'use'
-		if( RANDOM_LONG( 0, 99 ) < 2 )
-			//ALERT( at_console, "target chase speak\n" );
-			return slIdleSpeakWait;
-		else
-			return slIdleStand;
+		return slFaceTarget;
 	case SCHED_IDLE_STAND:
 		{	
 			// if never seen player, try to greet him
@@ -1512,7 +1563,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 				//CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 2.8, 3.2 );
 				PlaySentence( m_szGrp[TLK_WOUND], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
 				SetBits( m_bitsSaid, bit_saidWoundLight );
-				return slIdleStand;
+				return slIdleTlkStand;
 			}
 			// sustained heavy wounds?
 			else if( !FBitSet( m_bitsSaid, bit_saidWoundHeavy ) && IsHeavilyWounded() )
@@ -1521,7 +1572,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 				//CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 2.8, 3.2 );
 				PlaySentence( m_szGrp[TLK_MORTAL], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
 				SetBits( m_bitsSaid, bit_saidWoundHeavy );
-				return slIdleStand;
+				return slIdleTlkStand;
 			}
 
 			// talk about world
@@ -1556,7 +1607,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 					return slTlkIdleEyecontact;
 				else
 					// regular standing idle
-					return slIdleStand;
+					return slIdleTlkStand;
 			}
 
 			// NOTE - caller must first CTalkMonster::GetScheduleOfType, 

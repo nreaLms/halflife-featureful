@@ -376,62 +376,6 @@ int CHFGrunt::IRelationship ( CBaseEntity *pTarget )
 // AI Schedules Specific to this monster
 //=========================================================
 
-Task_t	tlFGruntFaceTarget[] =
-{
-	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
-	{ TASK_FACE_TARGET,			(float)0		},
-	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
-	{ TASK_SET_SCHEDULE,		(float)SCHED_TARGET_CHASE },
-};
-
-Schedule_t	slFGruntFaceTarget[] =
-{
-	{
-		tlFGruntFaceTarget,
-		ARRAYSIZE ( tlFGruntFaceTarget ),
-		bits_COND_CLIENT_PUSH	|
-		bits_COND_NEW_ENEMY		|
-		bits_COND_LIGHT_DAMAGE	|
-		bits_COND_HEAVY_DAMAGE	|
-		bits_COND_HEAR_SOUND |
-		bits_COND_PROVOKED,
-		bits_SOUND_DANGER,
-		"FaceTarget"
-	},
-};
-
-
-Task_t	tlFGruntIdleStand[] =
-{
-	{ TASK_STOP_MOVING,			0				},
-	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
-	{ TASK_WAIT,				(float)2		}, // repick IDLESTAND every two seconds.
-	{ TASK_TLK_HEADRESET,		(float)0		}, // reset head position
-};
-
-Schedule_t	slFGruntIdleStand[] =
-{
-	{
-		tlFGruntIdleStand,
-		ARRAYSIZE ( tlFGruntIdleStand ),
-		bits_COND_NEW_ENEMY		|
-		bits_COND_LIGHT_DAMAGE	|
-		bits_COND_HEAVY_DAMAGE	|
-		bits_COND_HEAR_SOUND	|
-		bits_COND_SMELL			|
-		bits_COND_PROVOKED,
-
-		bits_SOUND_COMBAT		|// sound flags - change these, and you'll break the talking code.
-		//bits_SOUND_PLAYER		|
-		//bits_SOUND_WORLD		|
-
-		bits_SOUND_DANGER		|
-		bits_SOUND_MEAT			|// scents
-		bits_SOUND_CARCASS		|
-		bits_SOUND_GARBAGE,
-		"IdleStand"
-	},
-};
 //=========================================================
 // FGruntFail
 //=========================================================
@@ -1046,8 +990,6 @@ Schedule_t	slFGruntRepelLand[] =
 
 DEFINE_CUSTOM_SCHEDULES( CHFGrunt )
 {
-	slFGruntFaceTarget,
-	slFGruntIdleStand,
 	slFGruntFail,
 	slFGruntCombatFail,
 	slFGruntVictoryDance,
@@ -2121,39 +2063,12 @@ int CHFGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 {
-	Schedule_t *psched;
-
 	switch( Type )
 	{
 	// Hook these to make a looping schedule
-	case SCHED_TARGET_FACE:
-		{
-			// call base class default so that barney will talk
-			// when 'used'
-			psched = CTalkMonster::GetScheduleOfType(Type);
-
-			if (psched == slIdleStand)
-				return slFGruntFaceTarget;	// override this for different target face behavior
-			else
-				return psched;
-		}
-		break;
 	case SCHED_TARGET_CHASE:
 		{
 			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
-		}
-		break;
-	case SCHED_IDLE_STAND:
-		{
-			psched = CTalkMonster::GetScheduleOfType(Type);
-
-			if (psched == slIdleStand)
-			{
-				// just look straight ahead.
-				return slFGruntIdleStand;
-			}
-			else
-				return psched;
 		}
 		break;
 	case SCHED_TAKE_COVER_FROM_ENEMY:
