@@ -350,14 +350,6 @@ BOOL CBasePlayerWeapon::AddSecondaryAmmo( int iCount ) { return TRUE; }
 BOOL CBasePlayerWeapon::IsUseable( void ) { return TRUE; }
 int CBasePlayerWeapon::PrimaryAmmoIndex( void ) { return -1; }
 int CBasePlayerWeapon::SecondaryAmmoIndex( void ) { return -1; }
-void CBasePlayerAmmo::Spawn( void ) { }
-void CBasePlayerAmmo::Precache( void ) { }
-CBaseEntity* CBasePlayerAmmo::Respawn( void ) { return this; }
-void CBasePlayerAmmo::Materialize( void ) { }
-void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther ) { }
-void CBasePlayerAmmo::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) {}
-BOOL CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther) {return FALSE;}
-int CBasePlayerAmmo::ObjectCaps() {return 0;}
 int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }
 int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }	
 void CBasePlayerWeapon::RetireWeapon( void ) { }

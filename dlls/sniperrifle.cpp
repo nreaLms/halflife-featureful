@@ -237,18 +237,4 @@ void CSniperrifle::WeaponIdle( void )
 	}
 }
 
-class CSniperrifleAmmo : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_m40a1clip.mdl";
-	}
-	int MyAmount() {
-		return AMMO_762BOX_GIVE;
-	}
-	const char* AmmoName() {
-		return "762";
-	}
-};
-LINK_ENTITY_TO_CLASS( ammo_762, CSniperrifleAmmo )
-
 #endif

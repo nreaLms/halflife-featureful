@@ -602,18 +602,3 @@ void CGauss::WeaponIdle( void )
 #endif
 	}
 }
-
-class CGaussAmmo : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_gaussammo.mdl";
-	}
-	int MyAmount() {
-		return AMMO_URANIUMBOX_GIVE;
-	}
-	const char* AmmoName() {
-		return "uranium";
-	}
-};
-
-LINK_ENTITY_TO_CLASS( ammo_gaussclip, CGaussAmmo )

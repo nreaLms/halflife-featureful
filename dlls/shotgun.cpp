@@ -345,18 +345,3 @@ void CShotgun::WeaponIdle( void )
 		}
 	}
 }
-
-class CShotgunAmmo : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_shotbox.mdl";
-	}
-	int MyAmount() {
-		return AMMO_BUCKSHOTBOX_GIVE;
-	}
-	const char* AmmoName() {
-		return "buckshot";
-	}
-};
-
-LINK_ENTITY_TO_CLASS( ammo_buckshot, CShotgunAmmo )

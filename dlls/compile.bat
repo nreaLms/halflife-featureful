@@ -11,6 +11,7 @@ set INCLUDES=-I../common -I../engine -I../pm_shared -I../game_shared -I../public
 set SOURCES=agrunt.cpp ^
 	airtank.cpp ^
 	aflock.cpp ^
+	ammunition.cpp ^
 	animating.cpp ^
 	animation.cpp ^
 	apache.cpp ^

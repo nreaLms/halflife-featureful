@@ -21,6 +21,7 @@
 #include	"cbase.h"
 #include	"player.h"
 #include	"weapons.h"
+#include	"ammunition.h"
 #include	"gamerules.h"
 #include	"mod_features.h"
  

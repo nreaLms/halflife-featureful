@@ -543,32 +543,3 @@ void CRpg::UpdateSpot( void )
 	}
 #endif
 }
-
-class CRpgAmmo : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_rpgammo.mdl";
-	}
-	int MyAmount() {
-		int iGive;
-#ifdef CLIENT_DLL
-	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
-		{
-			// hand out more ammo per rocket in multiplayer.
-			iGive = AMMO_RPGCLIP_GIVE * 2;
-		}
-		else
-		{
-			iGive = AMMO_RPGCLIP_GIVE;
-		}
-		return iGive;
-	}
-	const char* AmmoName() {
-		return "rockets";
-	}
-};
-
-LINK_ENTITY_TO_CLASS( ammo_rpgclip, CRpgAmmo )

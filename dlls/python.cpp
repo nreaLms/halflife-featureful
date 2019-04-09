@@ -262,18 +262,3 @@ void CPython::WeaponIdle( void )
 #endif
 	SendWeaponAnim( iAnim, UseDecrement() ? 1 : 0, bUseScope );
 }
-
-class CPythonAmmo : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_357ammobox.mdl";
-	}
-	int MyAmount() {
-		return AMMO_357BOX_GIVE;
-	}
-	const char* AmmoName() {
-		return "357";
-	}
-};
-
-LINK_ENTITY_TO_CLASS( ammo_357, CPythonAmmo )

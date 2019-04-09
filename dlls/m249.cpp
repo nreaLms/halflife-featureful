@@ -276,19 +276,4 @@ void CM249::UpdateTape()
 	}
 }
 
-class CM249AmmoClip : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_saw_clip.mdl";
-	}
-	int MyAmount() {
-		return AMMO_556CLIP_GIVE;
-	}
-	const char* AmmoName() {
-		return "556";
-	}
-};
-
-LINK_ENTITY_TO_CLASS(ammo_556, CM249AmmoClip)
-
 #endif

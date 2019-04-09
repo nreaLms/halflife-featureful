@@ -211,19 +211,3 @@ void CGlock::WeaponIdle( void )
 		SendWeaponAnim( iAnim, 1 );
 	}
 }
-
-class CGlockAmmo : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_9mmclip.mdl";
-	}
-	int MyAmount() {
-		return AMMO_GLOCKCLIP_GIVE;
-	}
-	const char* AmmoName() {
-		return "9mm";
-	}
-};
-
-LINK_ENTITY_TO_CLASS( ammo_glockclip, CGlockAmmo )
-LINK_ENTITY_TO_CLASS( ammo_9mmclip, CGlockAmmo )

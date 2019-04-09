@@ -493,18 +493,3 @@ void CEgon::EndAttack( void )
 
 	DestroyEffect();
 }
-
-class CEgonAmmo : public CBasePlayerAmmo
-{
-	const char* MyModel() {
-		return "models/w_chainammo.mdl";
-	}
-	int MyAmount() {
-		return AMMO_URANIUMBOX_GIVE;
-	}
-	const char* AmmoName() {
-		return "uranium";
-	}
-};
-
-LINK_ENTITY_TO_CLASS( ammo_egonclip, CEgonAmmo )
