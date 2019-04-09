@@ -2584,7 +2584,19 @@ char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int b
 	while( i < last && !stop )
 	{
 		if( pMemFile[i] == '\n' )
+		{
 			stop = 1;
+		}
+		if ( pMemFile[i] == '\r' )
+		{
+			if (i+1 < last && pMemFile[i+1] == '\n')
+			{
+				pMemFile[i] = '\n';
+				pMemFile[i+1] = '\0';
+				++i;
+			}
+			stop = 1;
+		}
 		i++;
 	}
 
