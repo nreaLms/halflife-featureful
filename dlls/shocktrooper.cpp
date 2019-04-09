@@ -93,6 +93,8 @@ public:
 	void DeathSound(void);
 	void PainSound(void);
 	void GibMonster(void);
+	void PlayUseSentence();
+	void PlayUnUseSentence();
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
@@ -409,7 +411,7 @@ void CStrooper::Spawn()
 	m_rechargeTime = gpGlobals->time + gSkillData.strooperRchgSpeed;
 	m_blinkTime = gpGlobals->time + RANDOM_FLOAT(3.0f, 7.0f);
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 void CStrooper::MonsterThink()
@@ -535,7 +537,7 @@ void CStrooper::DeathSound(void)
 //=========================================================
 void CStrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	CSquadMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+	CFollowingMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
 void CStrooper::DropShockRoach()
@@ -567,6 +569,18 @@ void CStrooper::DropShockRoach()
 			}
 		}
 	}
+}
+
+void CStrooper::PlayUseSentence()
+{
+	SENTENCEG_PlayRndSz( ENT( pev ), "ST_IDLE", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+	JustSpoke();
+}
+
+void CStrooper::PlayUnUseSentence()
+{
+	SENTENCEG_PlayRndSz( ENT( pev ), "ST_ALERT", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+	JustSpoke();
 }
 
 class CDeadStrooper : public CDeadMonster

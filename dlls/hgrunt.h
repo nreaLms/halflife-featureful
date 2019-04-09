@@ -4,14 +4,14 @@
 
 #include	"cbase.h"
 #include	"monsters.h"
-#include	"squadmonster.h"
+#include	"followingmonster.h"
 
 //=========================================================
 // monster-specific schedule types
 //=========================================================
 enum
 {
-	SCHED_GRUNT_SUPPRESS = LAST_COMMON_SCHEDULE + 1,
+	SCHED_GRUNT_SUPPRESS = LAST_FOLLOWINGMONSTER_SCHEDULE+1,
 	SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE,// move to a location to set up an attack against the enemy. (usually when a friendly is in the way).
 	SCHED_GRUNT_COVER_AND_RELOAD,
 	SCHED_GRUNT_SWEEP,
@@ -29,7 +29,7 @@ enum
 //=========================================================
 enum
 {
-	TASK_GRUNT_FACE_TOSS_DIR = LAST_COMMON_TASK + 1,
+	TASK_GRUNT_FACE_TOSS_DIR = LAST_FOLLOWINGMONSTER_TASK+1,
 	TASK_GRUNT_SPEAK_SENTENCE,
 };
 
@@ -51,7 +51,7 @@ typedef enum
 	HGRUNT_SENT_COUNT,
 } HGRUNT_SENTENCE_TYPES;
 
-class CHGrunt : public CSquadMonster
+class CHGrunt : public CFollowingMonster
 {
 public:
 	void Spawn( void );
@@ -79,6 +79,8 @@ public:
 	void PrescheduleThink( void );
 	void GibMonster( void );
 	virtual void SpeakSentence( void );
+	void PlayUseSentence();
+	void PlayUnUseSentence();
 
 	int Save( CSave &save );
 	int Restore( CRestore &restore );

@@ -36,6 +36,9 @@ public:
 	void EXPORT Spark();
 	void EXPORT Explode();
 
+	void PlayUseSentence();
+	void PlayUnUseSentence();
+
 	void DeathSound(void);
 	void PainSound(void);
 
@@ -111,7 +114,7 @@ void CRGrunt::Spawn()
 
 	CTalkMonster::g_talkWaitTime = 0;
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 void CRGrunt::Precache()
@@ -129,10 +132,25 @@ void CRGrunt::Precache()
 	PRECACHE_SOUND( "buttons/spark5.wav" );
 	PRECACHE_SOUND( "buttons/spark6.wav" );
 
+	PRECACHE_SOUND( "buttons/button2.wav" );
+	PRECACHE_SOUND( "buttons/button3.wav" );
+
 	m_voicePitch = 115;
 
 	m_iBrassShell = PRECACHE_MODEL( "models/shell.mdl" );// brass shell
 	m_iShotgunShell = PRECACHE_MODEL( "models/shotgunshell.mdl" );
+}
+
+void CRGrunt::PlayUseSentence()
+{
+	EMIT_SOUND( edict(), CHAN_VOICE, "buttons/button3.wav", SentenceVolume(), SentenceAttn() );
+	JustSpoke();
+}
+
+void CRGrunt::PlayUnUseSentence()
+{
+	EMIT_SOUND( edict(), CHAN_VOICE, "buttons/button2.wav", SentenceVolume(), SentenceAttn() );
+	JustSpoke();
 }
 
 void CRGrunt::DeathSound()

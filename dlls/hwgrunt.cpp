@@ -14,7 +14,7 @@
 
 enum
 {
-	SCHED_HWGRUNT_SHOOT = LAST_COMMON_SCHEDULE + 1,
+	SCHED_HWGRUNT_SHOOT = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,
 	SCHED_HWGRUNT_SPINDOWN,
 	SCHED_HWGRUNT_REPEL,
 	SCHED_HWGRUNT_REPEL_ATTACK,
@@ -23,10 +23,10 @@ enum
 
 enum
 {
-	TASK_HWGRUNT_PLAY_SPINDOWN = LAST_COMMON_TASK + 1,
+	TASK_HWGRUNT_PLAY_SPINDOWN = LAST_FOLLOWINGMONSTER_TASK + 1,
 };
 
-class CHWGrunt : public CSquadMonster
+class CHWGrunt : public CFollowingMonster
 {
 public:
 	void Spawn( void );
@@ -50,6 +50,10 @@ public:
 	}
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
+
+	void PlayUseSentence();
+	void PlayUnUseSentence();
+
 	void DeathSound( void );
 	void PainSound( void );
 	void Shoot();
@@ -78,7 +82,7 @@ TYPEDESCRIPTION	CHWGrunt::m_SaveData[] =
 	DEFINE_FIELD( CHGrunt, m_flNextPainTime, FIELD_TIME ),
 };
 
-IMPLEMENT_SAVERESTORE( CHWGrunt, CSquadMonster )
+IMPLEMENT_SAVERESTORE( CHWGrunt, CFollowingMonster )
 
 void CHWGrunt::Spawn()
 {
@@ -102,7 +106,7 @@ void CHWGrunt::Spawn()
 
 	m_HackedGunPos = Vector( 0, 0, 55 );
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 void CHWGrunt::Precache()
@@ -177,7 +181,7 @@ void CHWGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 	case HWGRUNT_AE_DROP_GUN:
 		break;
 	default:
-		CSquadMonster::HandleAnimEvent(pEvent);
+		CFollowingMonster::HandleAnimEvent(pEvent);
 		break;
 	}
 }
@@ -188,7 +192,7 @@ void CHWGrunt::SetActivity( Activity NewActivity )
 	{
 		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hassault/hw_spinup.wav", 1, ATTN_NORM );
 	}
-	CSquadMonster::SetActivity(NewActivity);
+	CFollowingMonster::SetActivity(NewActivity);
 }
 
 BOOL CHWGrunt::CheckRangeAttack1( float flDot, float flDist )
@@ -216,7 +220,7 @@ void CHWGrunt::StartTask( Task_t *pTask )
 	{
 	case TASK_FACE_IDEAL:
 	case TASK_FACE_ENEMY:
-		CSquadMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		if( pev->movetype == MOVETYPE_FLY )
 		{
 			m_IdealActivity = ACT_GLIDE;
@@ -239,7 +243,7 @@ void CHWGrunt::StartTask( Task_t *pTask )
 	}
 		break;
 	default:
-		CSquadMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	}
 }
@@ -264,16 +268,47 @@ void CHWGrunt::RunTask( Task_t *pTask )
 			Vector angDir = UTIL_VecToAngles( vecShootDir );
 			SetBlending( 0, angDir.x );
 		}
-		CSquadMonster::RunTask(pTask);
+		CFollowingMonster::RunTask(pTask);
 	}
 		break;
 	case TASK_RANGE_ATTACK1:
 		// The fire rate depends on Think rate which is 0.1 for monsters.
 		Shoot();
-		CSquadMonster::RunTask(pTask);
+		CFollowingMonster::RunTask(pTask);
 		break;
 	default:
-		CSquadMonster::RunTask(pTask);
+		CFollowingMonster::RunTask(pTask);
+		break;
+	}
+}
+
+#define HWGRUNT_VOLUME 0.4
+
+void CHWGrunt::PlayUseSentence()
+{
+	switch(RANDOM_LONG(0,2))
+	{
+	case 0:
+		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER0", HWGRUNT_VOLUME, ATTN_NORM );
+		break;
+	case 1:
+		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER1", HWGRUNT_VOLUME, ATTN_NORM );
+		break;
+	case 2:
+		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER2", HWGRUNT_VOLUME, ATTN_NORM );
+		break;
+	}
+}
+
+void CHWGrunt::PlayUnUseSentence()
+{
+	switch(RANDOM_LONG(0,1))
+	{
+	case 0:
+		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER5", HWGRUNT_VOLUME, ATTN_NORM );
+		break;
+	case 1:
+		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_QUEST4", HWGRUNT_VOLUME, ATTN_NORM );
 		break;
 	}
 }
@@ -482,7 +517,7 @@ DEFINE_CUSTOM_SCHEDULES( CHWGrunt )
 	slHWGruntRepelLand,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CHWGrunt, CSquadMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CHWGrunt, CFollowingMonster )
 
 Schedule_t *CHWGrunt::GetSchedule( void )
 {
@@ -500,7 +535,13 @@ Schedule_t *CHWGrunt::GetSchedule( void )
 			return GetScheduleOfType( SCHED_HWGRUNT_REPEL );
 		}
 	}
-	return CSquadMonster::GetSchedule();
+	if (m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT)
+	{
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
+	}
+	return CFollowingMonster::GetSchedule();
 }
 
 Schedule_t* CHWGrunt::GetScheduleOfType(int Type)
@@ -531,7 +572,7 @@ Schedule_t* CHWGrunt::GetScheduleOfType(int Type)
 		}
 	default:
 		{
-			return CSquadMonster::GetScheduleOfType(Type);
+			return CFollowingMonster::GetScheduleOfType(Type);
 		}
 	}
 }

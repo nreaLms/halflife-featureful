@@ -586,6 +586,8 @@ public:
 
 #define bits_CAP_FLY			( 1 << 15)// can fly, move all around
 
+#define bits_CAP_USABLE			( 1 << 16 ) // can be used by player
+
 #define bits_CAP_DOORS_GROUP    (bits_CAP_USE | bits_CAP_AUTO_DOORS | bits_CAP_OPEN_DOORS)
 
 // used by suit voice to indicate damage sustained and repaired type to player

@@ -105,7 +105,7 @@ TYPEDESCRIPTION	CHGrunt::m_SaveData[] =
 	DEFINE_FIELD( CHGrunt, m_iSentence, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CHGrunt, CSquadMonster )
+IMPLEMENT_SAVERESTORE( CHGrunt, CFollowingMonster )
 
 const char *CHGrunt::pGruntSentences[] =
 {
@@ -150,6 +150,39 @@ void CHGrunt::SpeakSentence( void )
 	}
 }
 
+void CHGrunt::PlayUseSentence()
+{
+	switch(RANDOM_LONG(0,2))
+	{
+	case 0:
+		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER0", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		break;
+	case 1:
+		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER1", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		break;
+	case 2:
+		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER2", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		break;
+	}
+
+	JustSpoke();
+}
+
+void CHGrunt::PlayUnUseSentence()
+{
+	switch(RANDOM_LONG(0,1))
+	{
+	case 0:
+		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER5", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		break;
+	case 1:
+		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_QUEST4", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		break;
+	}
+
+	JustSpoke();
+}
+
 //=========================================================
 // IRelationship - overridden because Alien Grunts are 
 // Human Grunt's nemesis.
@@ -161,7 +194,7 @@ int CHGrunt::IRelationship( CBaseEntity *pTarget )
 		return R_NM;
 	}
 
-	return CSquadMonster::IRelationship( pTarget );
+	return CFollowingMonster::IRelationship( pTarget );
 }
 
 //=========================================================
@@ -561,7 +594,7 @@ void CHGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 		// it's head shot anyways
 		ptr->iHitgroup = HITGROUP_HEAD;
 	}
-	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+	CFollowingMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
 //=========================================================
@@ -573,7 +606,7 @@ int CHGrunt::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 {
 	Forget( bits_MEMORY_INCOVER );
 
-	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return CFollowingMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 //=========================================================
@@ -900,7 +933,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 			break;
 		default:
-			CSquadMonster::HandleAnimEvent( pEvent );
+			CFollowingMonster::HandleAnimEvent( pEvent );
 			break;
 	}
 }
@@ -973,7 +1006,7 @@ void CHGrunt::Spawn()
 
 	CTalkMonster::g_talkWaitTime = 0;
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -1035,7 +1068,7 @@ void CHGrunt::StartTask( Task_t *pTask )
 	case TASK_RUN_PATH:
 		// grunt no longer assumes he is covered if he moves
 		Forget( bits_MEMORY_INCOVER );
-		CSquadMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	case TASK_RELOAD:
 		m_IdealActivity = ACT_RELOAD;
@@ -1044,14 +1077,14 @@ void CHGrunt::StartTask( Task_t *pTask )
 		break;
 	case TASK_FACE_IDEAL:
 	case TASK_FACE_ENEMY:
-		CSquadMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		if( pev->movetype == MOVETYPE_FLY )
 		{
 			m_IdealActivity = ACT_GLIDE;
 		}
 		break;
 	default: 
-		CSquadMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	}
 }
@@ -1077,7 +1110,7 @@ void CHGrunt::RunTask( Task_t *pTask )
 		}
 	default:
 		{
-			CSquadMonster::RunTask( pTask );
+			CFollowingMonster::RunTask( pTask );
 			break;
 		}
 	}
@@ -1824,7 +1857,7 @@ DEFINE_CUSTOM_SCHEDULES( CHGrunt )
 	slGruntRepelLand,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CHGrunt, CSquadMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CHGrunt, CFollowingMonster )
 
 //=========================================================
 // SetActivity 
@@ -2111,12 +2144,20 @@ Schedule_t *CHGrunt::GetSchedule( void )
 			}
 		}
 		break;
+	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_IDLE:
+	{
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
+		break;
+	}
 	default:
 		break;
 	}
 
 	// no special cases here, call the base class
-	return CSquadMonster::GetSchedule();
+	return CFollowingMonster::GetSchedule();
 }
 
 //=========================================================
@@ -2267,7 +2308,7 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 		}
 	default:
 		{
-			return CSquadMonster::GetScheduleOfType( Type );
+			return CFollowingMonster::GetScheduleOfType( Type );
 		}
 	}
 }

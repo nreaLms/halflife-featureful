@@ -59,7 +59,6 @@ public:
 
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
-	virtual int ObjectCaps( void ) { return CTalkMonster :: ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYDIRECT_USE; }
 	int DefaultToleranceLevel() { return TOLERANCE_LOW; }
 	BOOL CheckRangeAttack1( float flDot, float flDist );
 
@@ -577,8 +576,6 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 		}
 		break;
 	// Hook these to make a looping schedule
-	case SCHED_TARGET_CHASE:
-		return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
 	case SCHED_RANGE_ATTACK1:
 		return slBaRangeAttack1;
 	}
@@ -644,33 +641,12 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 			return GetScheduleOfType( SCHED_FIND_MEDIC );
 		}
 
-		if( m_hEnemy == 0 && IsFollowingPlayer() )
-		{
-			if( !FollowedPlayer()->IsAlive() )
-			{
-				// UNDONE: Comment about the recently dead player here?
-				StopFollowing( FALSE, false );
-				break;
-			}
-			else
-			{
-				if( HasConditions( bits_COND_CLIENT_PUSH ) )
-				{
-					return GetScheduleOfType( SCHED_MOVE_AWAY_FOLLOW );
-				}
-				return GetScheduleOfType( SCHED_TARGET_FACE );
-			}
-		}
-
-		if( HasConditions( bits_COND_CLIENT_PUSH ) )
-		{
-			return GetScheduleOfType( SCHED_MOVE_AWAY );
-		}
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
 
 		// try to say something about smells
 		TrySmellTalk();
-		break;
-	default:
 		break;
 	}
 

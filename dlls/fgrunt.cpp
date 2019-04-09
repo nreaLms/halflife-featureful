@@ -135,7 +135,6 @@ public:
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	void KeyValue( KeyValueData *pkvd );
-	virtual int	ObjectCaps( void ) { return CTalkMonster :: ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYDIRECT_USE; }
 	BOOL FCanCheckAttacks ( void );
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
@@ -2066,11 +2065,6 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 	switch( Type )
 	{
 	// Hook these to make a looping schedule
-	case SCHED_TARGET_CHASE:
-		{
-			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
-		}
-		break;
 	case SCHED_TAKE_COVER_FROM_ENEMY:
 		{
 			return &slFGruntTakeCover[ 0 ];
@@ -2579,28 +2573,10 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 		{
 			return GetScheduleOfType( SCHED_FIND_MEDIC );
 		}
-		if ( m_hEnemy == 0 && IsFollowingPlayer() )
-		{
-			if ( !FollowedPlayer()->IsAlive() )
-			{
-				// UNDONE: Comment about the recently dead player here?
-				StopFollowing( FALSE, false );
-				break;
-			}
-			else
-			{
-				if ( HasConditions( bits_COND_CLIENT_PUSH ) )
-				{
-					return GetScheduleOfType( SCHED_MOVE_AWAY_FOLLOW );
-				}
-				return GetScheduleOfType( SCHED_TARGET_FACE );
-			}
-		}
 
-		if ( HasConditions( bits_COND_CLIENT_PUSH ) )
-		{
-			return GetScheduleOfType( SCHED_MOVE_AWAY );
-		}
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
 
 		// try to say something about smells
 		TrySmellTalk();

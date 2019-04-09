@@ -92,7 +92,6 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
-	int ObjectCaps( void ) { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYDIRECT_USE; }
 	int DefaultToleranceLevel() { return TOLERANCE_ZERO; }
 	void SetActivity( Activity newActivity );
 	Activity GetStoppedActivity( void );

@@ -16,10 +16,7 @@
 #ifndef TALKMONSTER_H
 #define TALKMONSTER_H
 
-#ifndef MONSTERS_H
-#include "monsters.h"
-#endif
-#include "squadmonster.h"
+#include "followingmonster.h"
 
 //=========================================================
 // Talking monster base class
@@ -77,10 +74,7 @@ typedef enum
 
 enum
 {
-	SCHED_CANT_FOLLOW = LAST_COMMON_SCHEDULE + 1,
-	SCHED_MOVE_AWAY,		// Try to get out of the player's way
-	SCHED_MOVE_AWAY_FOLLOW,	// same, but follow afterward
-	SCHED_MOVE_AWAY_FAIL,	// Turn back toward player
+	SCHED_CANT_FOLLOW = LAST_FOLLOWINGMONSTER_SCHEDULE+1,
 	SCHED_FOLLOW_FALLIBLE,
 	SCHED_FIND_MEDIC,
 
@@ -89,9 +83,7 @@ enum
 
 enum
 {
-	TASK_CANT_FOLLOW = LAST_COMMON_TASK + 1,
-	TASK_MOVE_AWAY_PATH,
-	TASK_WALK_PATH_FOR_UNITS,
+	TASK_CANT_FOLLOW = LAST_FOLLOWINGMONSTER_TASK+1,
 
 	TASK_TLK_RESPOND,		// say my response
 	TASK_TLK_SPEAK,			// question or remark
@@ -103,7 +95,6 @@ enum
 	TASK_TLK_CLIENT_STARE,	// same as look at client, but says something if the player stares.
 	TASK_TLK_EYECONTACT,	// maintain eyecontact with person who I'm talking to
 	TASK_TLK_IDEALYAW,		// set ideal yaw to face who I'm talking to
-	TASK_FACE_PLAYER,		// Face the player
 	TASK_FIND_MEDIC,		// Try to find and call someone who can heal me
 
 	LAST_TALKMONSTER_TASK			// MUST be last
@@ -120,7 +111,7 @@ enum
 	TOLERANCE_ABSOLUTE_NO_ALERTS,
 };
 
-class CTalkMonster : public CSquadMonster
+class CTalkMonster : public CFollowingMonster
 {
 public:
 	void			TalkInit( void );				
@@ -132,7 +123,7 @@ public:
 	void			Precache( void );
 	int 			TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int 			TakeHealth(float flHealth, int bitsDamageType);
-	void			Touch(	CBaseEntity *pOther );
+	bool			CanBePushedByClient(CBaseEntity *pOther);
 	void			Killed( entvars_t *pevAttacker, int iGib );
 	void			OnDying();
 	void			StartMonster( void );
@@ -162,7 +153,6 @@ public:
 	int				FIdleSpeak( void );
 	int				FIdleStare( void );
 	int				FIdleHello( void );
-	void			IdleHeadTurn( Vector &vecFriend );
 	int				FOkToSpeak( void );
 	void			TrySmellTalk( void );
 	CBaseEntity		*EnumFriends( CBaseEntity *pentPrevious, int listNumber, BOOL bTrace );
@@ -172,21 +162,13 @@ public:
 	BOOL			IsTalking( void );
 	void			Talk( float flDuration );	
 
-	// For following
-	BOOL			CanFollow( void );
-	BOOL			AbleToFollow();
-	BOOL	IsFollowingPlayer( CBaseEntity* pLeader );
-	BOOL	IsFollowingPlayer( void );
-	virtual	CBaseEntity* FollowedPlayer();
-	virtual void ClearFollowedPlayer();
-	virtual void	StopFollowing(BOOL clearSchedule, bool saySentence = true );
+	// Following related
 	virtual void	StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
-	virtual void	DeclineFollowing( void ) {}
 	void			LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
-	virtual int		MaxFollowers() { return 3; }
 	virtual int		TalkFriendCategory() { return TALK_FRIEND_PERSONNEL; }
-
-	void EXPORT		FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	bool	ReadyForUse();
+	virtual void PlayUseSentence();
+	virtual void PlayUnUseSentence();
 
 	// Medic related
 	bool			WantsToCallMedic();
@@ -212,7 +194,7 @@ public:
 		bool canHeal;
 		short category;
 	};
-	
+
 	static TalkFriend m_szFriends[TLK_CFRIENDS];		// array of friend names
 	static float g_talkWaitTime;
 	
@@ -238,8 +220,6 @@ public:
 	CUSTOM_SCHEDULES
 };
 
-// Clients can push talkmonsters out of their way
-#define		bits_COND_CLIENT_PUSH		( bits_COND_SPECIAL1 )
 // Don't see a client right now.
 #define		bits_COND_CLIENT_UNSEEN		( bits_COND_SPECIAL2 )
 

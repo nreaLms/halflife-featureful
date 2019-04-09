@@ -68,6 +68,7 @@ set (SVDLL_SOURCES
 	explode.cpp
 	fgrunt.cpp
 	flyingmonster.cpp
+	followingmonster.cpp
 	func_break.cpp
 	func_tank.cpp
 	game.cpp
