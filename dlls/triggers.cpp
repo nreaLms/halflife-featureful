@@ -2786,6 +2786,8 @@ int CTriggerRandom::TargetCount()
 	return 0;
 }
 
+#define SF_TRIGGERRESPAWN_DONT_MOVE_LIVING_PLAYERS 4
+
 class CTriggerRespawn : public CBaseEntity
 {
 public:
@@ -2804,8 +2806,11 @@ void CTriggerRespawn::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		{
 			if (pPlayer->IsAlive())
 			{
-				g_pGameRules->GetPlayerSpawnSpot(pPlayer);
-				pPlayer->pev->health = pPlayer->pev->max_health;
+				if (!FBitSet(pev->spawnflags, SF_TRIGGERRESPAWN_DONT_MOVE_LIVING_PLAYERS))
+				{
+					g_pGameRules->GetPlayerSpawnSpot(pPlayer);
+					pPlayer->pev->health = pPlayer->pev->max_health;
+				}
 			}
 			else
 			{
