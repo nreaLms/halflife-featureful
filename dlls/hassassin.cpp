@@ -22,7 +22,7 @@
 #include	"cbase.h"
 #include	"monsters.h"
 #include	"schedule.h"
-#include	"squadmonster.h"
+#include	"followingmonster.h"
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"game.h"
@@ -34,7 +34,7 @@ extern DLL_GLOBAL int  g_iSkillLevel;
 //=========================================================
 enum
 {
-	SCHED_ASSASSIN_EXPOSED = LAST_COMMON_SCHEDULE + 1,// cover was blown.
+	SCHED_ASSASSIN_EXPOSED = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,// cover was blown.
 	SCHED_ASSASSIN_JUMP,	// fly through the air
 	SCHED_ASSASSIN_JUMP_ATTACK,	// fly through the air and shoot
 	SCHED_ASSASSIN_JUMP_LAND // hit and run away
@@ -46,7 +46,7 @@ enum
 
 enum
 {
-	TASK_ASSASSIN_FALL_TO_GROUND = LAST_COMMON_TASK + 1 // falling and waiting to hit ground
+	TASK_ASSASSIN_FALL_TO_GROUND = LAST_FOLLOWINGMONSTER_TASK + 1 // falling and waiting to hit ground
 };
 
 //=========================================================
@@ -58,7 +58,7 @@ enum
 
 #define bits_MEMORY_BADJUMP		( bits_MEMORY_CUSTOM1 )
 
-class CHAssassin : public CBaseMonster
+class CHAssassin : public CFollowingMonster
 {
 public:
 	void Spawn( void );
@@ -79,6 +79,8 @@ public:
 	void StartTask( Task_t *pTask );
 	void RunAI( void );
 	void RunTask( Task_t *pTask );
+	void PlayUseSentence();
+	void PlayUnUseSentence();
 	void DeathSound( void );
 	void IdleSound( void );
 	CUSTOM_SCHEDULES
@@ -124,7 +126,17 @@ TYPEDESCRIPTION	CHAssassin::m_SaveData[] =
 	DEFINE_FIELD( CHAssassin, m_iFrustration, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CHAssassin, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CHAssassin, CFollowingMonster )
+
+void CHAssassin::PlayUseSentence()
+{
+	SENTENCEG_PlayRndSz( ENT( pev ), "HA_OK", 0.6, ATTN_NORM, 0, 90 );
+}
+
+void CHAssassin::PlayUnUseSentence()
+{
+	SENTENCEG_PlayRndSz( ENT( pev ), "HA_WAIT", 0.6, ATTN_NORM, 0, 90 );
+}
 
 //=========================================================
 // DieSound
@@ -266,7 +278,7 @@ void CHAssassin::HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 		return;
 	default:
-		CBaseMonster::HandleAnimEvent( pEvent );
+		CFollowingMonster::HandleAnimEvent( pEvent );
 		break;
 	}
 }
@@ -297,7 +309,7 @@ void CHAssassin::Spawn()
 	pev->renderamt		= 20;
 	pev->rendermode		= kRenderTransTexture;
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -593,7 +605,7 @@ DEFINE_CUSTOM_SCHEDULES( CHAssassin )
 	slAssassinJumpLand,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CHAssassin, CBaseMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CHAssassin, CFollowingMonster )
 
 //=========================================================
 // CheckMeleeAttack1 - jump like crazy if the enemy gets too close. 
@@ -686,7 +698,7 @@ BOOL CHAssassin::CheckRangeAttack2( float flDot, float flDist )
 //=========================================================
 void CHAssassin::RunAI( void )
 {
-	CBaseMonster::RunAI();
+	CFollowingMonster::RunAI();
 
 	// always visible if moving
 	// always visible is not on hard
@@ -751,13 +763,13 @@ void CHAssassin::StartTask( Task_t *pTask )
 		}
 		else
 		{
-			CBaseMonster::StartTask( pTask );
+			CFollowingMonster::StartTask( pTask );
 		}
 		break;
 	case TASK_ASSASSIN_FALL_TO_GROUND:
 		break;
 	default:
-		CBaseMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	}
 }
@@ -800,7 +812,7 @@ void CHAssassin::RunTask( Task_t *pTask )
 		}
 		break;
 	default: 
-		CBaseMonster::RunTask( pTask );
+		CFollowingMonster::RunTask( pTask );
 		break;
 	}
 }
@@ -818,6 +830,10 @@ Schedule_t *CHAssassin::GetSchedule( void )
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_ALERT:
 		{
+			Schedule_t* followingSchedule = GetFollowingSchedule();
+			if (followingSchedule)
+				return followingSchedule;
+
 			if( HasConditions( bits_COND_HEAR_SOUND ) )
 			{
 				CSound *pSound;
@@ -841,7 +857,7 @@ Schedule_t *CHAssassin::GetSchedule( void )
 			if( HasConditions( bits_COND_ENEMY_DEAD ) )
 			{
 				// call base class, all code to handle dead enemies is centralized there.
-				return CBaseMonster::GetSchedule();
+				return CFollowingMonster::GetSchedule();
 			}
 
 			// flying?
@@ -937,7 +953,7 @@ Schedule_t *CHAssassin::GetSchedule( void )
 		break;
 	}
 
-	return CBaseMonster::GetSchedule();
+	return CFollowingMonster::GetSchedule();
 }
 
 //=========================================================
@@ -990,5 +1006,5 @@ Schedule_t *CHAssassin::GetScheduleOfType( int Type )
 		return slAssassinJumpLand;
 	}
 
-	return CBaseMonster::GetScheduleOfType( Type );
+	return CFollowingMonster::GetScheduleOfType( Type );
 }
