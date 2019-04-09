@@ -1349,7 +1349,7 @@ void SENTENCEG_Init()
 		}
 	}
 
-	//ALERT(at_console, "Number of sentence groups: %d\nNumber of sentences: %d\n", isentencegs, gcallsentences);
+	ALERT(at_aiconsole, "Number of sentence groups: %d/%d\nNumber of sentences: %d/%d\n", isentencegs, CSENTENCEG_MAX, gcallsentences, CVOXFILESENTENCEMAX);
 
 	g_engfuncs.pfnFreeFile( pMemFile );
 
