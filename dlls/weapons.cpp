@@ -1165,8 +1165,8 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 		return;
 	}
 
+#if 0
 	CBasePlayer* pPlayer = (CBasePlayer*)pOther;
-
 	bool hasWeaponWithThisAmmo = false;
 	for( int i = 0; !hasWeaponWithThisAmmo && i < MAX_WEAPONS; i++ )
 	{
@@ -1187,6 +1187,7 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 	if (!hasWeaponWithThisAmmo) {
 		return;
 	}
+#endif
 
 	if( AddAmmo( pOther ) )
 	{

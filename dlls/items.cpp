@@ -25,6 +25,7 @@
 #include "cbase.h"
 #include "weapons.h"
 #include "player.h"
+#include "game.h"
 #include "skill.h"
 #include "items.h"
 #include "gamerules.h"
@@ -112,6 +113,29 @@ void CItem::FallThink()
 
 void CItem::ItemTouch( CBaseEntity *pOther )
 {
+	if (!use_to_take.value) {
+		TouchOrUse(pOther);
+	}
+}
+
+int CItem::ObjectCaps()
+{
+	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
+		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
+	} else {
+		return CBaseEntity::ObjectCaps();
+	}
+}
+
+void CItem::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
+		TouchOrUse(pActivator);
+	}
+}
+
+void CItem::TouchOrUse(CBaseEntity *pOther)
+{
 	// if it's not a player, ignore
 	if( !pOther->IsPlayer() )
 	{
@@ -131,12 +155,12 @@ void CItem::ItemTouch( CBaseEntity *pOther )
 	{
 		SUB_UseTargets( pOther, USE_TOGGLE, 0 );
 		SetTouch( NULL );
-		
-		// player grabbed the item. 
+
+		// player grabbed the item.
 		g_pGameRules->PlayerGotItem( pPlayer, this );
 		if( g_pGameRules->ItemShouldRespawn( this ) == GR_ITEM_RESPAWN_YES )
 		{
-			Respawn(); 
+			Respawn();
 		}
 		else
 		{
