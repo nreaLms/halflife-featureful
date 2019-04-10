@@ -5144,11 +5144,6 @@
 		16 : "Saw"
 		18 : "Saw + HG"
 	]
-    notsolid(Choices) : "Not Solid" =
-	[
-		0 : "No"
-		1 : "Yes"
-	]
 	gag(Choices) : "Gag" =
 	[
 		0 : "No"

@@ -328,10 +328,13 @@ void CMonsterMaker::MakeMonster( void )
 
 	DispatchSpawn( ENT( pevCreate ) );
 	pevCreate->owner = edict();
+	// Disable until proper investigation
+#if 0
 	if (m_notSolid > 0)
 	{
 		pevCreate->solid = SOLID_NOT;
 	}
+#endif
 
 	if ( !FStringNull( pev->message ) && !FStringNull( pev->targetname ) )
 	{
