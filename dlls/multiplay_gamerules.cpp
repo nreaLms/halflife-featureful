@@ -905,6 +905,8 @@ void CHalfLifeMultiplay::PlayerThink( CBasePlayer *pPlayer )
 	}
 }
 
+extern int gEvilImpulse101;
+
 //=========================================================
 //=========================================================
 void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
@@ -919,6 +921,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	if (IsCoOp() && g_mapConfig.valid)
 	{
 		int i;
+		gEvilImpulse101 = TRUE;
 		for (i=0; i<g_mapConfig.weaponsCount; ++i)
 		{
 			pPlayer->GiveNamedItem(g_mapConfig.weapons[i]);
@@ -931,6 +934,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 				pPlayer->GiveNamedItem(g_mapConfig.ammo[i].entName);
 			}
 		}
+		gEvilImpulse101 = FALSE;
 		if (g_mapConfig.nosuit)
 			giveSuit = false;
 
