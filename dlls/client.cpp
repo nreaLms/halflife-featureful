@@ -908,8 +908,8 @@ void ClientPrecache( void )
 	PRECACHE_SOUND( "common/bodysplat.wav" );
 
 	// player pain sounds
-	PRECACHE_SOUND( "player/pl_pain2.wav" );
-	PRECACHE_SOUND( "player/pl_pain4.wav" );
+	//PRECACHE_SOUND( "player/pl_pain2.wav" );
+	//PRECACHE_SOUND( "player/pl_pain4.wav" );
 	PRECACHE_SOUND( "player/pl_pain5.wav" );
 	PRECACHE_SOUND( "player/pl_pain6.wav" );
 	PRECACHE_SOUND( "player/pl_pain7.wav" );
@@ -924,9 +924,9 @@ void ClientPrecache( void )
 	PRECACHE_SOUND( "common/wpn_denyselect.wav" );
 
 	// geiger sounds
-	PRECACHE_SOUND( "player/geiger6.wav" );
-	PRECACHE_SOUND( "player/geiger5.wav" );
-	PRECACHE_SOUND( "player/geiger4.wav" );
+//	PRECACHE_SOUND( "player/geiger6.wav" );
+//	PRECACHE_SOUND( "player/geiger5.wav" );
+//	PRECACHE_SOUND( "player/geiger4.wav" );
 	PRECACHE_SOUND( "player/geiger3.wav" );
 	PRECACHE_SOUND( "player/geiger2.wav" );
 	PRECACHE_SOUND( "player/geiger1.wav" );
@@ -934,8 +934,10 @@ void ClientPrecache( void )
 	if( giPrecacheGrunt )
 		UTIL_PrecacheOther( "monster_human_grunt" );
 
+#if FEATURE_DISPLACER
 	// Teleport sounds. Used by trigger_xen_return
 	PRECACHE_SOUND( "debris/beamstart7.wav" );
+#endif
 }
 
 /*
