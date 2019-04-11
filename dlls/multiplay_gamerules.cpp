@@ -219,6 +219,12 @@ struct AmmoEnt
 	short count;
 };
 
+struct WeaponEnt
+{
+	char entName[32];
+	short count;
+};
+
 struct OverrideCvar
 {
 	char name[32];
@@ -227,7 +233,7 @@ struct OverrideCvar
 
 struct MapConfig
 {
-	char weapons[MAX_WEAPONS][32];
+	WeaponEnt weapons[MAX_WEAPONS];
 	AmmoEnt ammo[MAX_AMMO_SLOTS];
 	OverrideCvar overrideCvars[32];
 	int cvarCount;
@@ -287,7 +293,11 @@ bool ReadMapConfig(const char* mapName)
 		if (strncmp(key, "weapon_", 7) == 0)
 		{
 			if (g_mapConfig.weaponsCount < MAX_WEAPONS)
-				strncpy(g_mapConfig.weapons[g_mapConfig.weaponsCount++], key, 31);
+				strncpy(g_mapConfig.weapons[g_mapConfig.weaponsCount].entName, key, 31);
+			g_mapConfig.weapons[g_mapConfig.weaponsCount].count = atoi(value);
+			if (!g_mapConfig.weapons[g_mapConfig.weaponsCount].count)
+				g_mapConfig.weapons[g_mapConfig.weaponsCount].count = 1;
+			g_mapConfig.weaponsCount++;
 		}
 		else if (strncmp(key, "ammo_", 5) == 0)
 		{
@@ -920,15 +930,17 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 
 	if (IsCoOp() && g_mapConfig.valid)
 	{
-		int i;
+		int i, j;
 		gEvilImpulse101 = TRUE;
 		for (i=0; i<g_mapConfig.weaponsCount; ++i)
 		{
-			pPlayer->GiveNamedItem(g_mapConfig.weapons[i]);
+			for (j=0; j<g_mapConfig.weapons[i].count; ++j)
+			{
+				pPlayer->GiveNamedItem(g_mapConfig.weapons[i].entName);
+			}
 		}
 		for (i=0; i<g_mapConfig.ammoCount; ++i)
 		{
-			int j;
 			for (j=0; j<g_mapConfig.ammo[i].count; ++j)
 			{
 				pPlayer->GiveNamedItem(g_mapConfig.ammo[i].entName);
