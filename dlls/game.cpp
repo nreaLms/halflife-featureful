@@ -60,6 +60,8 @@ cvar_t npckill = { "mp_npckill", "1", FCVAR_SERVER };
 cvar_t bhopcap		= { "mp_bhopcap", "1", FCVAR_SERVER };
 
 cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
+cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
+
 cvar_t use_through_walls = { "use_through_walls", "1", FCVAR_SERVER };
 cvar_t tridepth = { "tridepth", "1", FCVAR_SERVER };
 
@@ -896,6 +898,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &npckill );
 
 	CVAR_REGISTER( &bhopcap );
+	CVAR_REGISTER( &multibyte_only );
 
 	CVAR_REGISTER( &mp_chattime );
 
