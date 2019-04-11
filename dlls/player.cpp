@@ -2104,6 +2104,8 @@ void CBasePlayer::PreThink( void )
 
 	CheckSuitUpdate();
 
+	GlowShellUpdate();
+
 	// Observer Button Handling
 	if( IsObserver() )
 	{
