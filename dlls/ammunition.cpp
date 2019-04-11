@@ -326,6 +326,7 @@ LINK_ENTITY_TO_CLASS( ammo_egonclip, CEgonAmmo )
 
 LINK_ENTITY_TO_CLASS( ammo_gaussclip, CGaussAmmo )
 
+#if FEATURE_SNIPERRIFLE
 class CSniperrifleAmmo : public CBasePlayerAmmo
 {
 	const char* MyModel() {
@@ -339,7 +340,9 @@ class CSniperrifleAmmo : public CBasePlayerAmmo
 	}
 };
 LINK_ENTITY_TO_CLASS( ammo_762, CSniperrifleAmmo )
+#endif
 
+#if FEATURE_M249
 class CM249AmmoClip : public CBasePlayerAmmo
 {
 	const char* MyModel() {
@@ -354,3 +357,4 @@ class CM249AmmoClip : public CBasePlayerAmmo
 };
 
 LINK_ENTITY_TO_CLASS(ammo_556, CM249AmmoClip)
+#endif
