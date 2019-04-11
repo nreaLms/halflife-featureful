@@ -536,7 +536,8 @@ void CBasePlayerWeapon::AttemptToMaterialize( void )
 
 	if( time == 0 )
 	{
-		Materialize();
+		SetThink( &CBasePlayerWeapon::FallThink );
+		pev->nextthink = gpGlobals->time + 0.1;
 		return;
 	}
 
@@ -576,7 +577,7 @@ CBaseEntity* CBasePlayerWeapon::Respawn( void )
 		pNewWeapon->SetTouch( NULL );// no touch
 		pNewWeapon->SetThink( &CBasePlayerWeapon::AttemptToMaterialize );
 
-		DROP_TO_FLOOR( ENT( pev ) );
+		//DROP_TO_FLOOR( ENT( pev ) );
 
 		// not a typo! We want to know when the weapon the player just picked up should respawn! This new entity we created is the replacement,
 		// but when it should respawn is based on conditions belonging to the weapon that was taken.
