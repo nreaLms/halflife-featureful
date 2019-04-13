@@ -22,6 +22,7 @@
 #include	"player.h"
 #include	"weapons.h"
 #include	"ammunition.h"
+#include	"monsters.h"
 #include	"gamerules.h"
 #include	"mod_features.h"
  
@@ -1544,9 +1545,33 @@ BOOL CHalfLifeMultiplay::FAllowMonsters( void )
 	return IsCoOp() || ( allowmonsters.value != 0 );
 }
 
-bool CHalfLifeMultiplay::FMonsterCanDropWeapons(CBaseEntity *pMonster)
+bool CHalfLifeMultiplay::FMonsterCanDropWeapons(CBaseMonster *pMonster)
 {
 	return npc_dropweapons.value != 0;
+}
+
+bool CHalfLifeMultiplay::FMonsterCanTakeDamage( CBaseMonster* pMonster, CBaseEntity* pAttacker )
+{
+	if (npckill.value == 1)
+		return true;
+	if (!pMonster->IsPlayer() && IsCoOp() && pMonster->IDefaultRelationship(CLASS_PLAYER) == R_AL)
+	{
+		if (npckill.value == 0)
+		{
+			return false;
+		}
+		else if (npckill.value == 2)
+		{
+			if (pAttacker)
+			{
+				if (pMonster->IDefaultRelationship(pAttacker) == R_AL)
+				{
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 void CHalfLifeMultiplay::BeforeChangeLevel(const char *nextMap)

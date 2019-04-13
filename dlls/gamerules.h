@@ -22,6 +22,7 @@
 //#include "items.h"
 class CBasePlayerWeapon;
 class CBasePlayer;
+class CBaseMonster;
 class CItem;
 class CBasePlayerAmmo;
 
@@ -159,7 +160,8 @@ public:
 
 	// Monsters
 	virtual BOOL FAllowMonsters( void ) = 0;//are monsters allowed
-	virtual bool FMonsterCanDropWeapons( CBaseEntity* pMonster ) = 0;
+	virtual bool FMonsterCanDropWeapons( CBaseMonster* pMonster ) = 0;
+	virtual bool FMonsterCanTakeDamage( CBaseMonster* pMonster, CBaseEntity* pAttacker ) = 0;
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) {}
@@ -250,7 +252,8 @@ public:
 
 	// Monsters
 	virtual BOOL FAllowMonsters( void );
-	virtual bool FMonsterCanDropWeapons( CBaseEntity* pMonster );
+	virtual bool FMonsterCanDropWeapons( CBaseMonster* pMonster );
+	virtual bool FMonsterCanTakeDamage( CBaseMonster* pMonster, CBaseEntity* pAttacker );
 
 	// Teamplay stuff	
 	virtual const char *GetTeamID( CBaseEntity *pEntity ) {return "";};
@@ -355,7 +358,8 @@ public:
 
 	// Monsters
 	virtual BOOL FAllowMonsters( void );
-	virtual bool FMonsterCanDropWeapons( CBaseEntity* pMonster );
+	virtual bool FMonsterCanDropWeapons( CBaseMonster* pMonster );
+	virtual bool FMonsterCanTakeDamage( CBaseMonster* pMonster, CBaseEntity* pAttacker );
 
 	// Immediately end a multiplayer game
 	virtual void EndMultiplayerGame( void ) { GoToIntermission(); }

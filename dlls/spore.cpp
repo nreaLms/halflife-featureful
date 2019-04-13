@@ -441,7 +441,6 @@ int CSporeAmmo::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 {
 	if (!borntime) // rigth '!borntime'  // blast in anytime 'borntime || !borntime'
 	{
-		CBaseEntity *attacker = GetClassPtr( (CBaseEntity*)pevAttacker );
 		Vector vecSrc = pev->origin + gpGlobals->v_forward * -32;
 
 		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
@@ -469,7 +468,7 @@ int CSporeAmmo::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 		vecLaunchDir.z += RANDOM_FLOAT( -20, 20 );
 
 		UTIL_MakeVectors( vecLaunchDir );
-		CSporeGrenade::ShootTimed(attacker->pev, vecSrc, gpGlobals->v_forward * 800, false);
+		CSporeGrenade::ShootTimed(pevAttacker, vecSrc, gpGlobals->v_forward * 800, false);
 
 		pev->framerate		= 1.0;
 		pev->animtime		= gpGlobals->time + 0.1;

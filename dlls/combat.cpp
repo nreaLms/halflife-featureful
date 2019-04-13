@@ -935,24 +935,8 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( !pev->takedamage )
 		return 0;
 
-	if (!IsPlayer() && g_pGameRules->IsCoOp() && IDefaultRelationship(CLASS_PLAYER) == R_AL)
-	{
-		if (npckill.value == 0)
-		{
-			return 0;
-		}
-		else if (npckill.value == 2)
-		{
-			CBaseEntity* pAttacker = CBaseEntity::Instance(pevAttacker);
-			if (pAttacker)
-			{
-				if (IDefaultRelationship(pAttacker) == R_AL)
-				{
-					return 0;
-				}
-			}
-		}
-	}
+	if (!g_pGameRules->FMonsterCanTakeDamage(this, CBaseEntity::Instance(pevAttacker)))
+		return 0;
 
 	if( !IsAlive() )
 	{

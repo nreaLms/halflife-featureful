@@ -2937,25 +2937,29 @@ void CTorch::DropMyItems(BOOL isGibbed)
 
 void CTorch::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	TraceResult tr;
 	// check for gas tank
 	if (ptr->iHitgroup == 8)
 	{
 		if (bitsDamageType & (DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB))
 		{
-			UTIL_Ricochet( ptr->vecEndPos, 1.0 );
-			MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
-				WRITE_BYTE( TE_EXPLOSION );		// This makes a dynamic light and the explosion sprites/sound
-				WRITE_COORD( ptr->vecEndPos.x );	// Send to PAS because of the sound
-				WRITE_COORD( ptr->vecEndPos.y );
-				WRITE_COORD( ptr->vecEndPos.z );
-				WRITE_SHORT( g_sModelIndexFireball );
-				WRITE_BYTE( 15  ); // scale * 10
-				WRITE_BYTE( 15  ); // framerate
-				WRITE_BYTE( TE_EXPLFLAG_NONE );
-			MESSAGE_END();
-			RadiusDamage ( pev, pev, 50, CLASS_NONE, DMG_BLAST );
-			Create( "spark_shower", pev->origin, tr.vecPlaneNormal, NULL );
+			if (g_pGameRules->FMonsterCanTakeDamage(this, CBaseEntity::Instance(pevAttacker)))
+			{
+				bitsDamageType = (DMG_ALWAYSGIB | DMG_BLAST);
+				flDamage = pev->health + 1;
+				UTIL_Ricochet( ptr->vecEndPos, 1.0 );
+				MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
+					WRITE_BYTE( TE_EXPLOSION );		// This makes a dynamic light and the explosion sprites/sound
+					WRITE_COORD( ptr->vecEndPos.x );	// Send to PAS because of the sound
+					WRITE_COORD( ptr->vecEndPos.y );
+					WRITE_COORD( ptr->vecEndPos.z );
+					WRITE_SHORT( g_sModelIndexFireball );
+					WRITE_BYTE( 15  ); // scale * 10
+					WRITE_BYTE( 15  ); // framerate
+					WRITE_BYTE( TE_EXPLFLAG_NONE );
+				MESSAGE_END();
+				::RadiusDamage ( pev->origin, pev, pev, Q_min(pev->max_health, 75), 125, CLASS_NONE, DMG_BLAST );
+				Create( "spark_shower", pev->origin, ptr->vecPlaneNormal, NULL );
+			}
 		}
 	}
 	CHFGrunt::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
