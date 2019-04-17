@@ -29,6 +29,7 @@
 #include	"decals.h"
 #include	"explode.h"
 #include	"func_break.h"
+#include	"gamerules.h"
 #include	"mod_features.h"
 
 //=========================================================
@@ -60,7 +61,7 @@ const float GARG_ATTACKDIST = 80.0;
 
 #define STOMP_SPRITE_COUNT			10
 
-int gStompSprite = 0, gGargGibModel = 0;
+int gGargGibModel = 0;
 void SpawnExplosion( Vector center, float randomRange, float time, int magnitude );
 
 class CSmoker;
@@ -82,7 +83,7 @@ class CStomp : public CBaseEntity
 public:
 	void Spawn( void );
 	void Think( void );
-	static CStomp *StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName, const Vector& color , float damage, float scale);
+	static CStomp *StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName, const Vector& color , float damage, float scale, int sprite, edict_t* garg = NULL);
 
 private:
 // UNDONE: re-use this sprite list instead of creating new ones all the time
@@ -91,7 +92,43 @@ private:
 
 LINK_ENTITY_TO_CLASS( garg_stomp, CStomp )
 
-CStomp *CStomp::StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName, const Vector &color, float damage, float scale)
+#if 0
+class CStompShooter : public CBaseEntity
+{
+public:
+	void Spawn();
+	void Precache();
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+
+	int m_sprite;
+};
+
+LINK_ENTITY_TO_CLASS( env_stompshooter, CStompShooter )
+
+void CStompShooter::Spawn()
+{
+	Precache();
+}
+
+void CStompShooter::Precache()
+{
+	m_sprite = PRECACHE_MODEL("sprites/flare3.spr");
+}
+
+void CStompShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	TraceResult trace;
+
+	UTIL_MakeVectors( pev->angles );
+	Vector vecStart = pev->origin;
+	Vector vecEnd = (gpGlobals->v_forward * 1024) + vecStart;
+
+	UTIL_TraceLine( vecStart, vecEnd, ignore_monsters, edict(), &trace );
+	CStomp::StompCreate(vecStart, trace.vecEndPos, 0, "sprites/flare3.spr", Vector(225, 170, 80), gSkillData.babygargantuaDmgStomp, 0.5, m_sprite);
+}
+#endif
+
+CStomp *CStomp::StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName, const Vector &color, float damage, float scale, int sprite, edict_t *garg)
 {
 	CStomp *pStomp = GetClassPtr( (CStomp *)NULL );
 
@@ -104,6 +141,7 @@ CStomp *CStomp::StompCreate(const Vector &origin, const Vector &end, float speed
 	pStomp->pev->rendercolor = color;
 	pStomp->pev->dmg = damage;
 	pStomp->pev->frags = scale;
+	pStomp->pev->owner = garg;
 	pStomp->Spawn();
 
 	return pStomp;
@@ -114,6 +152,7 @@ void CStomp::Spawn( void )
 	pev->nextthink = gpGlobals->time;
 	pev->classname = MAKE_STRING( "garg_stomp" );
 	pev->dmgtime = gpGlobals->time;
+	pev->effects |= EF_NODRAW;
 
 	pev->framerate = 30;
 	pev->rendermode = kRenderTransTexture;
@@ -151,12 +190,26 @@ void CStomp::Think( void )
 	pev->speed = pev->speed + ( STOMP_FRAMETIME ) * pev->framerate;
 	pev->framerate = pev->framerate + ( STOMP_FRAMETIME ) * 1500;
 
-	// Move and spawn trails
-	while( gpGlobals->time - pev->dmgtime > STOMP_INTERVAL )
+	float stompInterval = STOMP_INTERVAL;
+	int numOfSprites = 2;
+	int maxNumOfSprites = 8;
+	float spriteScale = pev->frags;
+	if (g_pGameRules->IsMultiplayer())
 	{
-		pev->origin = pev->origin + pev->movedir * pev->speed * STOMP_INTERVAL;
-		for( int i = 0; i < 2; i++ )
+		stompInterval = STOMP_INTERVAL*2;
+		spriteScale *= 1.8;
+		maxNumOfSprites = 6;
+	}
+	const int freeEnts = NUMBER_OF_ENTITIES() - gpGlobals->maxEntities;
+	maxNumOfSprites = Q_min(maxNumOfSprites, freeEnts);
+
+	// Move and spawn trails
+	while( gpGlobals->time - pev->dmgtime > stompInterval )
+	{
+		pev->origin = pev->origin + pev->movedir * pev->speed * stompInterval;
+		for( int i = 0; i < numOfSprites && maxNumOfSprites; i++ )
 		{
+			maxNumOfSprites--;
 			CSprite *pSprite = CSprite::SpriteCreate( STRING(pev->model), pev->origin, TRUE );
 			if( pSprite )
 			{
@@ -167,13 +220,13 @@ void CStomp::Think( void )
 				pSprite->pev->nextthink = gpGlobals->time + 0.3;
 				pSprite->SetThink( &CBaseEntity::SUB_Remove );
 				pSprite->SetTransparency( kRenderTransAdd, pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z, 255, kRenderFxFadeFast );
-				pSprite->SetScale(pev->frags);
+				pSprite->SetScale(spriteScale);
 			}
 		}
-		pev->dmgtime += STOMP_INTERVAL;
+		pev->dmgtime += stompInterval;
 
 		// Scale has the "life" of this effect
-		pev->scale -= STOMP_INTERVAL * pev->speed;
+		pev->scale -= stompInterval * pev->speed;
 		if( pev->scale <= 0 )
 		{
 			// Life has run out
@@ -253,6 +306,8 @@ public:
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
 
+	int m_stompSprite;
+
 protected:
 	virtual float DefaultHealth();
 	virtual float FireAttackDamage();
@@ -272,6 +327,7 @@ protected:
 	virtual void BreatheSound();
 	virtual void AttackSound();
 	virtual float FlameTimeDivider();
+	virtual Vector StompAttackStartVec();
 
 	void HandleSlashAnim(float damage, float punch, float velocity);
 
@@ -471,11 +527,8 @@ Schedule_t slGargStomp[] =
 		tlGargStomp,
 		ARRAYSIZE( tlGargStomp ),
 		bits_COND_NEW_ENEMY |
-		bits_COND_ENEMY_DEAD |
-		bits_COND_HEAVY_DAMAGE |
-		bits_COND_ENEMY_OCCLUDED |
-		bits_COND_HEAR_SOUND,
-		bits_SOUND_DANGER,
+		bits_COND_ENEMY_DEAD,
+		0,
 		"GargStomp"
 	},
 };
@@ -517,12 +570,12 @@ void CGargantua::StompAttack( void )
 	TraceResult trace;
 
 	UTIL_MakeVectors( pev->angles );
-	Vector vecStart = pev->origin + Vector(0,0,60) + 35 * gpGlobals->v_forward;
+	Vector vecStart = StompAttackStartVec();
 	Vector vecAim = ShootAtEnemy( vecStart );
 	Vector vecEnd = (vecAim * 1024) + vecStart;
 
 	UTIL_TraceLine( vecStart, vecEnd, ignore_monsters, edict(), &trace );
-	CStomp::StompCreate( vecStart, trace.vecEndPos, 0, StompSprite(), EyeColor(), StompAttackDamage(), EyeScale() );
+	CStomp::StompCreate( vecStart, trace.vecEndPos, 0, StompSprite(), EyeColor(), StompAttackDamage(), EyeScale(), m_stompSprite, edict() );
 	StompEffect();
 
 	UTIL_TraceLine( pev->origin, pev->origin - Vector(0,0,20), ignore_monsters, edict(), &trace );
@@ -818,7 +871,7 @@ void CGargantua::Precache()
 
 	PRECACHE_MODEL( GARG_BEAM_SPRITE_NAME );
 	PRECACHE_MODEL( GARG_BEAM_SPRITE2 );
-	gStompSprite = PRECACHE_MODEL( StompSprite() );
+	m_stompSprite = PRECACHE_MODEL( StompSprite() );
 	gGargGibModel = PRECACHE_MODEL( GARG_GIB_MODEL );
 	PRECACHE_SOUND( GARG_STOMP_BUZZ_SOUND );
 
@@ -1336,6 +1389,11 @@ float CGargantua::FlameTimeDivider()
 	return 1.0;
 }
 
+Vector CGargantua::StompAttackStartVec()
+{
+	return pev->origin + Vector(0,0,60) + 35 * gpGlobals->v_forward;
+}
+
 class CSmoker : public CBaseEntity
 {
 public:
@@ -1463,6 +1521,7 @@ void SpawnExplosion( Vector center, float randomRange, float time, int magnitude
 class CBabyGargantua : public CGargantua
 {
 public:
+	void SetYawSpeed( void );
 	const char* ReverseRelationshipModel() { return "models/babygargf.mdl"; }
 	const char* DefaultDisplayName() { return "Baby Gargantua"; }
 	void StartTask( Task_t *pTask );
@@ -1505,6 +1564,7 @@ protected:
 	void BreatheSound();
 	void AttackSound();
 	float FlameTimeDivider();
+	Vector StompAttackStartVec();
 };
 
 LINK_ENTITY_TO_CLASS( monster_babygarg, CBabyGargantua )
@@ -1749,5 +1809,28 @@ void CBabyGargantua::AttackSound()
 float CBabyGargantua::FlameTimeDivider()
 {
 	return 1.5;
+}
+
+Vector CBabyGargantua::StompAttackStartVec()
+{
+	return pev->origin + Vector(0,0,30) + 35 * gpGlobals->v_forward;
+}
+
+void CBabyGargantua::SetYawSpeed( void )
+{
+	int ys;
+
+	switch( m_Activity )
+	{
+	case ACT_TURN_LEFT:
+	case ACT_TURN_RIGHT:
+		ys = 180;
+		break;
+	default:
+		ys = 100;
+		break;
+	}
+
+	pev->yaw_speed = ys;
 }
 #endif
