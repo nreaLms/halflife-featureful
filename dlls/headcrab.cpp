@@ -585,6 +585,7 @@ public:
 	void AlertSound(void);
 	void PrescheduleThink(void);
 	void StartTask(Task_t* pTask);
+	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 
 	virtual int		Save(CSave &save);
 	virtual int		Restore(CRestore &restore);
@@ -799,5 +800,11 @@ void CShockRoach::AttackSound()
 	int iSound = RANDOM_LONG(0,2);
 	if( iSound != 0 )
 		EMIT_SOUND_DYN( edict(), CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+}
+
+int CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
+{
+	// Skip headcrab's TakeDamage to avoid unwanted immunity to friendly acid.
+	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 #endif
