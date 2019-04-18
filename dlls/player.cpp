@@ -5205,7 +5205,7 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	{
 		pPlayer = (CBasePlayer *)pActivator;
 	}
-	else if( !g_pGameRules->IsDeathmatch() )
+	else if( !g_pGameRules->IsMultiplayer() )
 	{
 		pPlayer = (CBasePlayer *)CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
 	}

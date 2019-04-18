@@ -9,6 +9,7 @@
 #include "followingmonster.h"
 #include "scripted.h"
 #include "soundent.h"
+#include "gamerules.h"
 
 Task_t tlFollow[] =
 {
@@ -229,19 +230,19 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 
 void CFollowingMonster::RunTask( Task_t *pTask )
 {
-	edict_t *pPlayer;
+	CBaseEntity *pPlayer;
 	switch( pTask->iTask )
 	{
 	case TASK_FACE_PLAYER:
 		{
 			// Get edict for one player
-			pPlayer = g_engfuncs.pfnPEntityOfEntIndex( 1 );
+			pPlayer = PlayerToFace();
 
 			if( pPlayer )
 			{
-				MakeIdealYaw( pPlayer->v.origin );
+				MakeIdealYaw( pPlayer->pev->origin );
 				ChangeYaw( pev->yaw_speed );
-				IdleHeadTurn( pPlayer->v.origin );
+				IdleHeadTurn( pPlayer->pev->origin );
 				if( gpGlobals->time > m_flWaitFinished && FlYawDiff() < 10 )
 				{
 					TaskComplete();
@@ -453,3 +454,19 @@ void CFollowingMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCall
 	}
 }
 
+CBaseEntity* CFollowingMonster::PlayerToFace()
+{
+	CBaseEntity* pPlayer = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex( 1 ));
+	if (g_pGameRules->IsMultiplayer())
+	{
+		CBaseEntity* followedPlayer = FollowedPlayer();
+		if (followedPlayer && followedPlayer->IsPlayer() && followedPlayer->IsAlive())
+		{
+			pPlayer = followedPlayer;
+		}
+	}
+
+	if (pPlayer && pPlayer->IsPlayer())
+		return pPlayer;
+	return 0;
+}

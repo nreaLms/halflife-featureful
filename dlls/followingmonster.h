@@ -62,6 +62,8 @@ public:
 	virtual void PlayUseSentence() {}
 	virtual void PlayUnUseSentence() {}
 
+	CBaseEntity* PlayerToFace();
+
 	CUSTOM_SCHEDULES
 };
 
