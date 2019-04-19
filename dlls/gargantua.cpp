@@ -29,6 +29,7 @@
 #include	"decals.h"
 #include	"explode.h"
 #include	"func_break.h"
+#include	"squadmonster.h"
 #include	"gamerules.h"
 #include	"mod_features.h"
 
@@ -253,7 +254,7 @@ void StreakSplash( const Vector &origin, const Vector &direction, int color, int
 	MESSAGE_END();
 }
 
-class CGargantua : public CBaseMonster
+class CGargantua : public CSquadMonster
 {
 public:
 	void Spawn( void );
@@ -372,7 +373,7 @@ TYPEDESCRIPTION	CGargantua::m_SaveData[] =
 	DEFINE_FIELD( CGargantua, m_flameY, FIELD_FLOAT ),
 };
 
-IMPLEMENT_SAVERESTORE( CGargantua, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CGargantua, CSquadMonster )
 
 const char *CGargantua::pAttackHitSounds[] =
 {
@@ -540,7 +541,7 @@ DEFINE_CUSTOM_SCHEDULES( CGargantua )
 	slGargStomp,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CGargantua, CBaseMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CGargantua, CSquadMonster )
 
 void CGargantua::EyeOn( int level )
 {
@@ -895,7 +896,7 @@ void CGargantua::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 {
 	if( !IsAlive() )
 	{
-		CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+		CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 		return;
 	}
 
@@ -923,7 +924,7 @@ void CGargantua::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 		flDamage = 0;
 	}
 
-	CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
 int CGargantua::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
@@ -936,7 +937,7 @@ int CGargantua::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			SetConditions( bits_COND_LIGHT_DAMAGE );
 	}
 
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 void CGargantua::DeathEffect( void )
@@ -965,7 +966,7 @@ void CGargantua::DeathEffect( void )
 
 void CGargantua::Killed( entvars_t *pevAttacker, int iGib )
 {
-	CBaseMonster::Killed( pevAttacker, GIB_NEVER );
+	CSquadMonster::Killed( pevAttacker, GIB_NEVER );
 }
 
 void CGargantua::OnDying()
@@ -973,7 +974,7 @@ void CGargantua::OnDying()
 	EyeOff();
 	UTIL_Remove( m_pEyeGlow );
 	m_pEyeGlow = NULL;
-	CBaseMonster::OnDying();
+	CSquadMonster::OnDying();
 }
 
 //=========================================================
@@ -1053,7 +1054,7 @@ void CGargantua::HandleAnimEvent( MonsterEvent_t *pEvent )
 		BreatheSound();
 		break;
 	default:
-		CBaseMonster::HandleAnimEvent( pEvent );
+		CSquadMonster::HandleAnimEvent( pEvent );
 		break;
 	}
 }
@@ -1136,7 +1137,7 @@ Schedule_t *CGargantua::GetScheduleOfType( int Type )
 			break;
 	}
 
-	return CBaseMonster::GetScheduleOfType( Type );
+	return CSquadMonster::GetScheduleOfType( Type );
 }
 
 void CGargantua::StartTask( Task_t *pTask )
@@ -1160,7 +1161,7 @@ void CGargantua::StartTask( Task_t *pTask )
 		DeathEffect();
 		// FALL THROUGH
 	default: 
-		CBaseMonster::StartTask( pTask );
+		CSquadMonster::StartTask( pTask );
 		break;
 	}
 }
@@ -1240,7 +1241,7 @@ void CGargantua::RunTask( Task_t *pTask )
 			return;
 		}
 		else
-			CBaseMonster::RunTask( pTask );
+			CSquadMonster::RunTask( pTask );
 		break;
 	case TASK_FLAME_SWEEP:
 		if( gpGlobals->time > m_flWaitFinished )
@@ -1283,7 +1284,7 @@ void CGargantua::RunTask( Task_t *pTask )
 		}
 		break;
 	default:
-		CBaseMonster::RunTask( pTask );
+		CSquadMonster::RunTask( pTask );
 		break;
 	}
 }
@@ -1336,7 +1337,7 @@ int CGargantua::MaxEyeBrightness()
 void CGargantua::FootEffect()
 {
 	UTIL_ScreenShake( pev->origin, 4.0, 3.0, 1.0, 750 );
-	EMIT_SOUND_DYN( edict(), CHAN_BODY, pFootSounds[RANDOM_LONG( 0, ARRAYSIZE( pFootSounds ) - 1 )], 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
+	EMIT_SOUND_DYN( edict(), CHAN_BODY, RANDOM_SOUND_ARRAY(pFootSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
 }
 
 void CGargantua::StompEffect()
@@ -1648,7 +1649,7 @@ void CBabyGargantua::StartTask(Task_t *pTask)
 {
 	switch (pTask->iTask) {
 	case TASK_DIE:
-		CBaseMonster::StartTask(pTask);
+		CSquadMonster::StartTask(pTask);
 		break;
 	default:
 		CGargantua::StartTask(pTask);
@@ -1660,7 +1661,7 @@ void CBabyGargantua::RunTask(Task_t *pTask)
 {
 	switch (pTask->iTask) {
 	case TASK_DIE:
-		CBaseMonster::RunTask(pTask);
+		CSquadMonster::RunTask(pTask);
 		break;
 	default:
 		CGargantua::RunTask(pTask);
@@ -1749,14 +1750,14 @@ int CBabyGargantua::MaxEyeBrightness()
 
 int CBabyGargantua::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
-	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CSquadMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 void CBabyGargantua::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	if( !IsAlive() || pev->health <= 0.0 )
 	{
-		CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+		CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 		return;
 	}
 
@@ -1766,7 +1767,7 @@ void CBabyGargantua::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector 
 		m_painSoundTime = gpGlobals->time + RANDOM_FLOAT( 2.5, 4 );
 	}
 
-	CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
 void CBabyGargantua::FootEffect()
