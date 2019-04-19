@@ -434,7 +434,7 @@ void CFollowingMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCall
 		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...
 		if (IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster))
 		{
-			DeclineFollowing();
+			DeclineFollowing(pCaller);
 		}
 		else if( CanFollow() )
 		{

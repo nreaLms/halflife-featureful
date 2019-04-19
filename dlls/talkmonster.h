@@ -169,6 +169,7 @@ public:
 	bool	ReadyForUse();
 	virtual void PlayUseSentence();
 	virtual void PlayUnUseSentence();
+	virtual void DeclineFollowing(CBaseEntity* pCaller);
 
 	// Medic related
 	bool			WantsToCallMedic();

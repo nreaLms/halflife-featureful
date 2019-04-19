@@ -51,7 +51,7 @@ public:
 	virtual void ClearFollowedPlayer();
 	virtual void StopFollowing(BOOL clearSchedule, bool saySentence = true );
 	virtual void StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
-	virtual void DeclineFollowing( void ) {}
+	virtual void DeclineFollowing( CBaseEntity* pCaller ) {}
 	virtual void LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
 	virtual int MaxFollowers() { return 3; }
 

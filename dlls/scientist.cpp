@@ -96,7 +96,7 @@ public:
 	void SetActivity( Activity newActivity );
 	Activity GetStoppedActivity( void );
 	int ISoundMask( void );
-	void DeclineFollowing( void );
+	void DeclineFollowing( CBaseEntity* pCaller );
 
 	float CoverRadius( void ) { return 1200; }		// Need more room for cover because scientists want to get far away!
 	BOOL DisregardEnemy( CBaseEntity *pEnemy ) { return !pEnemy->IsAlive() || ( gpGlobals->time - m_fearTime ) > 15; }
@@ -424,11 +424,10 @@ DEFINE_CUSTOM_SCHEDULES( CScientist )
 
 IMPLEMENT_CUSTOM_SCHEDULES( CScientist, CTalkMonster )
 
-void CScientist::DeclineFollowing( void )
+void CScientist::DeclineFollowing(CBaseEntity *pCaller )
 {
 	Talk( 10 );
-	m_hTalkTarget = m_hEnemy;
-	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
+	CTalkMonster::DeclineFollowing(pCaller);
 }
 
 void CScientist::Scream( void )

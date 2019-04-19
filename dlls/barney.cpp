@@ -62,8 +62,6 @@ public:
 	int DefaultToleranceLevel() { return TOLERANCE_LOW; }
 	BOOL CheckRangeAttack1( float flDot, float flDist );
 
-	void DeclineFollowing( void );
-
 	// Override these to set behavior
 	Schedule_t *GetScheduleOfType( int Type );
 	Schedule_t *GetSchedule( void );
@@ -661,11 +659,6 @@ Schedule_t *CBarney :: GetSchedule ( void )
 MONSTERSTATE CBarney::GetIdealState( void )
 {
 	return CTalkMonster::GetIdealState();
-}
-
-void CBarney::DeclineFollowing( void )
-{
-	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
 }
 
 //=========================================================

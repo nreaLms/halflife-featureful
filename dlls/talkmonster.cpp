@@ -803,6 +803,12 @@ void CTalkMonster::PlayUnUseSentence()
 	m_hTalkTarget = FollowedPlayer();
 }
 
+void CTalkMonster::DeclineFollowing(CBaseEntity *pCaller)
+{
+	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
+	m_hTalkTarget = pCaller;
+}
+
 float CTalkMonster::TargetDistance( void )
 {
 	// If we lose the player, or he dies, return a really large distance

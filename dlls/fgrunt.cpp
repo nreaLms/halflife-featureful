@@ -141,7 +141,6 @@ public:
 	BOOL CheckMeleeAttack1 ( float flDot, float flDist );
 	void IdleRespond();
 	void AskQuestion();
-	void DeclineFollowing( void );
 	int MaxFollowers() { return -1; }
 	int TalkFriendCategory() { return TALK_FRIEND_SOLDIER; }
 	void PlayCallForMedic();
@@ -2590,10 +2589,6 @@ MONSTERSTATE CHFGrunt :: GetIdealState ( void )
 	return CTalkMonster::GetIdealState();
 }
 
-void CHFGrunt::DeclineFollowing( void )
-{
-	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
-}
 //=========================================================
 // CHFGruntRepel - when triggered, spawns a
 // repelling down a line.
