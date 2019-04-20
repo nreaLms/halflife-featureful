@@ -20,12 +20,14 @@
 #include	"util.h"
 #include	"cbase.h"
 #include	"monsters.h"
-#include	"squadmonster.h"
+#include	"followingmonster.h"
 #include	"schedule.h"
 #include	"effects.h"
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"mod_features.h"
+
+#define bits_MEMORY_ISLAVE_PROVOKED bits_MEMORY_CUSTOM1
 
 // whether vortigaunts can spawn familiars (snarks and headcrabs)
 #define FEATURE_ISLAVE_FAMILIAR 1
@@ -54,7 +56,7 @@
 //=========================================================
 enum
 {
-	SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR = LAST_COMMON_SCHEDULE + 1,
+	SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,
 	SCHED_ISLAVE_SUMMON_FAMILIAR,
 	SCHED_ISLAVE_HEAL_OR_REVIVE
 };
@@ -64,7 +66,7 @@ enum
 //=========================================================
 enum 
 {
-	TASK_ISLAVE_SUMMON_FAMILIAR = LAST_COMMON_TASK + 1,
+	TASK_ISLAVE_SUMMON_FAMILIAR = LAST_FOLLOWINGMONSTER_TASK + 1,
 	TASK_ISLAVE_HEAL_OR_REVIVE_ATTACK
 };
 
@@ -138,7 +140,7 @@ static bool CanSpawnAtPosition(const Vector& position, int hullType, edict_t* pe
 	return !tr.fStartSolid && !tr.fAllSolid;
 }
 
-class CISlave : public CSquadMonster
+class CISlave : public CFollowingMonster
 {
 public:
 	void Spawn( void );
@@ -163,6 +165,8 @@ public:
 	void PainSound( void );
 	void AlertSound( void );
 	void IdleSound( void );
+	void PlayUseSentence();
+	void PlayUnUseSentence();
 
 	void OnDying();
 	void DeathNotice( entvars_t* pevChild )
@@ -317,7 +321,7 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 	DEFINE_FIELD( CISlave, m_clawStrikeNum, FIELD_SHORT )
 };
 
-IMPLEMENT_SAVERESTORE( CISlave, CSquadMonster )
+IMPLEMENT_SAVERESTORE( CISlave, CFollowingMonster )
 
 const char *CISlave::pAttackHitSounds[] =
 {
@@ -362,7 +366,7 @@ int CISlave::DefaultClassify( void )
 int CISlave::IRelationship( CBaseEntity *pTarget )
 {
 	if( ( pTarget->IsPlayer() ) )
-		if( ( pev->spawnflags & SF_MONSTER_WAIT_UNTIL_PROVOKED ) && ! ( m_afMemory & bits_MEMORY_PROVOKED ) )
+		if( ( pev->spawnflags & SF_MONSTER_WAIT_UNTIL_PROVOKED ) && ! ( m_afMemory & bits_MEMORY_ISLAVE_PROVOKED ) )
 			return R_NO;
 	return CBaseMonster::IRelationship( pTarget );
 }
@@ -385,7 +389,7 @@ void CISlave::CallForHelp( const char *szClassname, float flDist, EHANDLE hEnemy
 			CBaseMonster *pMonster = pEntity->MyMonsterPointer();
 			if( pMonster )
 			{
-				pMonster->m_afMemory |= bits_MEMORY_PROVOKED;
+				pMonster->m_afMemory |= bits_MEMORY_ISLAVE_PROVOKED;
 				pMonster->PushEnemy( hEnemy, vecLocation );
 			}
 		}
@@ -465,7 +469,7 @@ void CISlave::OnDying()
 	m_handGlow1 = NULL;
 	UTIL_Remove(m_handGlow2);
 	m_handGlow2 = NULL;
-	CSquadMonster::OnDying();
+	CFollowingMonster::OnDying();
 }
 
 //=========================================================
@@ -713,7 +717,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 			break;
 		default:
-			CSquadMonster::HandleAnimEvent( pEvent );
+			CFollowingMonster::HandleAnimEvent( pEvent );
 			break;
 	}
 }
@@ -735,7 +739,7 @@ BOOL CISlave::CheckRangeAttack1( float flDot, float flDist )
 	}
 #endif
 
-	return CSquadMonster::CheckRangeAttack1( flDot, flDist );
+	return CFollowingMonster::CheckRangeAttack1( flDot, flDist );
 }
 
 //=========================================================
@@ -845,7 +849,7 @@ void CISlave::StartTask( Task_t *pTask )
 		break;
 	}
 	default:
-		CSquadMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	}
 }
@@ -871,14 +875,14 @@ void CISlave::RunTask(Task_t *pTask)
 		}
 		break;
 	default:
-		CSquadMonster::RunTask( pTask );
+		CFollowingMonster::RunTask( pTask );
 		break;
 	}
 }
 
 void CISlave::PrescheduleThink()
 {
-	CSquadMonster::PrescheduleThink();
+	CFollowingMonster::PrescheduleThink();
 	if (m_Activity == ACT_MELEE_ATTACK1 && m_clawStrikeNum == 0) {
 		if ( m_handGlow1 && (m_handGlow1->pev->effects & EF_NODRAW) && CanUseGlowArms() ) {
 			StartMeleeAttackGlow(ISLAVE_RIGHT_ARM);
@@ -967,7 +971,7 @@ void CISlave::Spawn()
 	}
 #endif
 
-	MonsterInit();
+	FollowingMonsterInit();
 
 #if FEATURE_ISLAVE_ENERGY
 	// leader starts with some energy pool
@@ -1026,8 +1030,8 @@ int CISlave::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 	if( ( bitsDamageType & DMG_SLASH ) && pevAttacker && IRelationship( Instance( pevAttacker ) ) == R_AL )
 		return 0;
 
-	m_afMemory |= bits_MEMORY_PROVOKED;
-	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	m_afMemory |= bits_MEMORY_ISLAVE_PROVOKED;
+	return CFollowingMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 void CISlave::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
@@ -1035,7 +1039,7 @@ void CISlave::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	if( (bitsDamageType & DMG_SHOCK) && (!pevAttacker || IRelationship(Instance(pevAttacker)) == R_AL) )
 		return;
 
-	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+	CFollowingMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
 //=========================================================
@@ -1136,7 +1140,7 @@ DEFINE_CUSTOM_SCHEDULES( CISlave )
 	slSlaveSummon
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CISlave, CSquadMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CISlave, CFollowingMonster )
 
 //=========================================================
 //=========================================================
@@ -1161,7 +1165,7 @@ Schedule_t *CISlave::GetSchedule( void )
 		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
 			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 		if( pSound->m_iType & bits_SOUND_COMBAT )
-			m_afMemory |= bits_MEMORY_PROVOKED;
+			m_afMemory |= bits_MEMORY_ISLAVE_PROVOKED;
 	}
 
 	switch( m_MonsterState )
@@ -1205,6 +1209,7 @@ Schedule_t *CISlave::GetSchedule( void )
 		break;
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
+	{
 		if( !HasConditions( bits_COND_NEW_ENEMY | bits_COND_SEE_ENEMY ) ) // ensure there's no enemy
 		{
 			if ( HasFreeEnergy() && CheckHealOrReviveTargets()) {
@@ -1215,11 +1220,15 @@ Schedule_t *CISlave::GetSchedule( void )
 				}
 			}
 		}
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
 		break;
+	}
 	default:
 		break;
 	}
-	return CSquadMonster::GetSchedule();
+	return CFollowingMonster::GetSchedule();
 }
 
 Schedule_t *CISlave::GetScheduleOfType( int Type ) 
@@ -1229,7 +1238,7 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 	case SCHED_FAIL:
 		if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 		{
-			return CSquadMonster::GetScheduleOfType( SCHED_MELEE_ATTACK1 );
+			return CFollowingMonster::GetScheduleOfType( SCHED_MELEE_ATTACK1 );
 		}
 	case SCHED_CHASE_ENEMY_FAILED:
 		if ( HasFreeEnergy() && CheckHealOrReviveTargets() )
@@ -1261,7 +1270,7 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 		return slSlaveHealOrReviveAttack;
 	}
 	
-	return CSquadMonster::GetScheduleOfType( Type );
+	return CFollowingMonster::GetScheduleOfType( Type );
 }
 
 //=========================================================
@@ -1731,6 +1740,16 @@ Vector CISlave::GetArmBeamColor(int &brightness)
 #endif
 	brightness = 64;
 	return Vector(ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE);
+}
+
+void CISlave::PlayUseSentence()
+{
+	SENTENCEG_PlayRndSz( ENT( pev ), "SLV_IDLE", 0.85, ATTN_NORM, 0, m_voicePitch );
+}
+
+void CISlave::PlayUnUseSentence()
+{
+	SENTENCEG_PlayRndSz( ENT( pev ), "SLV_ALERT", 0.85, ATTN_NORM, 0, m_voicePitch );
 }
 
 #if FEATURE_ISLAVE_DEAD

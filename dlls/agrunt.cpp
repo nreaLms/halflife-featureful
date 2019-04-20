@@ -21,7 +21,7 @@
 #include	"cbase.h"
 #include	"monsters.h"
 #include	"schedule.h"
-#include	"squadmonster.h"
+#include	"followingmonster.h"
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"hornet.h"
@@ -31,7 +31,7 @@
 //=========================================================
 enum
 {
-	SCHED_AGRUNT_SUPPRESS = LAST_COMMON_SCHEDULE + 1,
+	SCHED_AGRUNT_SUPPRESS = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,
 	SCHED_AGRUNT_THREAT_DISPLAY
 };
 
@@ -40,7 +40,7 @@ enum
 //=========================================================
 enum
 {
-	TASK_AGRUNT_SETUP_HIDE_ATTACK = LAST_COMMON_TASK + 1,
+	TASK_AGRUNT_SETUP_HIDE_ATTACK = LAST_FOLLOWINGMONSTER_TASK + 1,
 };
 
 int iAgruntMuzzleFlash;
@@ -65,7 +65,7 @@ int iAgruntMuzzleFlash;
 
 #define		AGRUNT_MELEE_DIST	100
 
-class CAGrunt : public CSquadMonster
+class CAGrunt : public CFollowingMonster
 {
 public:
 	void Spawn( void );
@@ -97,6 +97,8 @@ public:
 	int IRelationship( CBaseEntity *pTarget );
 	void StopTalking( void );
 	BOOL ShouldSpeak( void );
+	void PlayUseSentence();
+	void PlayUnUseSentence();
 	CUSTOM_SCHEDULES
 
 	virtual int Save( CSave &save );
@@ -136,7 +138,7 @@ TYPEDESCRIPTION	CAGrunt::m_SaveData[] =
 	DEFINE_FIELD( CAGrunt, m_iLastWord, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CAGrunt, CSquadMonster )
+IMPLEMENT_SAVERESTORE( CAGrunt, CFollowingMonster )
 
 const char *CAGrunt::pAttackHitSounds[] =
 {
@@ -201,7 +203,7 @@ int CAGrunt::IRelationship( CBaseEntity *pTarget )
 		return R_NM;
 	}
 
-	return CSquadMonster::IRelationship( pTarget );
+	return CFollowingMonster::IRelationship( pTarget );
 }
 
 //=========================================================
@@ -579,7 +581,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 		break;
 	default:
-		CSquadMonster::HandleAnimEvent( pEvent );
+		CFollowingMonster::HandleAnimEvent( pEvent );
 		break;
 	}
 }
@@ -608,7 +610,7 @@ void CAGrunt::Spawn()
 
 	m_flNextSpeakTime = m_flNextWordTime = gpGlobals->time + 10 + RANDOM_LONG( 0, 10 );
 
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -899,7 +901,7 @@ DEFINE_CUSTOM_SCHEDULES( CAGrunt )
 	slAGruntThreatDisplay,
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES( CAGrunt, CSquadMonster )
+IMPLEMENT_CUSTOM_SCHEDULES( CAGrunt, CFollowingMonster )
 
 //=========================================================
 // FCanCheckAttacks - this is overridden for alien grunts
@@ -1049,7 +1051,7 @@ void CAGrunt::StartTask( Task_t *pTask )
 		}
 		break;
 	default:
-		CSquadMonster::StartTask( pTask );
+		CFollowingMonster::StartTask( pTask );
 		break;
 	}
 }
@@ -1117,11 +1119,19 @@ Schedule_t *CAGrunt::GetSchedule( void )
 			return GetScheduleOfType( SCHED_STANDOFF );
 		}
 		break;
+	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_IDLE:
+	{
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
+		break;
+	}
 	default:
 		break;
 	}
 
-	return CSquadMonster::GetSchedule();
+	return CFollowingMonster::GetSchedule();
 }
 
 //=========================================================
@@ -1175,7 +1185,19 @@ Schedule_t *CAGrunt::GetScheduleOfType( int Type )
 		break;
 	}
 
-	return CSquadMonster::GetScheduleOfType( Type );
+	return CFollowingMonster::GetScheduleOfType( Type );
+}
+
+void CAGrunt::PlayUseSentence()
+{
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
+	StopTalking();
+}
+
+void CAGrunt::PlayUnUseSentence()
+{
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
+	StopTalking();
 }
 
 class CDeadAgrunt : public CDeadMonster

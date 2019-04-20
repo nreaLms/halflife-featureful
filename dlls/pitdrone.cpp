@@ -24,7 +24,7 @@
 #include	"soundent.h"
 #include	"game.h"
 #include	"weapons.h"
-#include	"squadmonster.h"
+#include	"followingmonster.h"
 #include	"mod_features.h"
 
 #if FEATURE_PITDRONE
@@ -150,7 +150,7 @@ void CPitDroneSpit::Touch(CBaseEntity *pOther)
 //=========================================================
 enum
 {
-	SCHED_PDRONE_HURTHOP = LAST_COMMON_SCHEDULE + 1,
+	SCHED_PDRONE_HURTHOP = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,
 	SCHED_PDRONE_SMELLFOOD,
 	SCHED_PDRONE_EAT,
 	SCHED_PDRONE_SNIFF_AND_EAT,
@@ -162,7 +162,7 @@ enum
 //=========================================================
 enum
 {
-	TASK_PDRONE_HOPTURN = LAST_COMMON_SCHEDULE + 1
+	TASK_PDRONE_HOPTURN = LAST_FOLLOWINGMONSTER_TASK + 1
 };
 
 //=========================================================
@@ -177,7 +177,7 @@ enum
 #define PIT_DRONE_AE_THROW			( 6 )
 #define PIT_DRONE_AE_RELOAD			( 7 )
 
-class CPitDrone : public CSquadMonster
+class CPitDrone : public CFollowingMonster
 {
 public:
 	void Spawn(void);
@@ -196,6 +196,8 @@ public:
 	void PainSound(void);
 	void AlertSound(void);
 	void DeathSound(void);
+	void PlayUseSentence();
+	void PlayUnUseSentence();
 	void BodyChange(float spikes);
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int IgnoreConditions(void);
@@ -242,7 +244,7 @@ TYPEDESCRIPTION	CPitDrone::m_SaveData[] =
 	DEFINE_FIELD(CPitDrone, m_flNextSpitTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CPitDrone, CSquadMonster)
+IMPLEMENT_SAVERESTORE(CPitDrone, CFollowingMonster)
 
 void CPitDrone::KeyValue(KeyValueData *pkvd)
 {
@@ -253,7 +255,7 @@ void CPitDrone::KeyValue(KeyValueData *pkvd)
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CSquadMonster::KeyValue(pkvd);
+		CFollowingMonster::KeyValue(pkvd);
 }
 
 //=========================================================
@@ -261,7 +263,7 @@ void CPitDrone::KeyValue(KeyValueData *pkvd)
 //=========================================================
 int CPitDrone::IgnoreConditions(void)
 {
-	int iIgnore = CSquadMonster::IgnoreConditions();
+	int iIgnore = CFollowingMonster::IgnoreConditions();
 
 	if ((m_Activity == ACT_MELEE_ATTACK1) || (m_Activity == ACT_MELEE_ATTACK2))
 	{
@@ -341,7 +343,7 @@ int CPitDrone::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float
 		}
 	}
 
-	return CSquadMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+	return CFollowingMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 //=========================================================
@@ -351,7 +353,7 @@ BOOL CPitDrone::CheckMeleeAttack1(float flDot, float flDist)
 {
 	// Give a better chance for MeleeAttack2
 	if (RANDOM_LONG(0,2) == 0) {
-		return CSquadMonster::CheckMeleeAttack1(flDot, flDist);
+		return CFollowingMonster::CheckMeleeAttack1(flDot, flDist);
 	}
 	return FALSE;
 }
@@ -552,7 +554,7 @@ void CPitDrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 
 	default:
-		CSquadMonster::HandleAnimEvent(pEvent);
+		CFollowingMonster::HandleAnimEvent(pEvent);
 	}
 }
 
@@ -627,7 +629,7 @@ void CPitDrone::Spawn()
 		canReloadSpikes = TRUE;
 	}
 #endif
-	MonsterInit();
+	FollowingMonsterInit();
 }
 
 //=========================================================
@@ -681,7 +683,7 @@ void CPitDrone::Precache()
 #define PITDRONE_ATTN_IDLE	(float)1.5
 void CPitDrone::IdleSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, pIdleSounds[RANDOM_LONG(0, ARRAYSIZE(pIdleSounds)-1)], 1, PITDRONE_ATTN_IDLE);
+	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, PITDRONE_ATTN_IDLE);
 }
 
 //=========================================================
@@ -690,7 +692,7 @@ void CPitDrone::IdleSound(void)
 void CPitDrone::PainSound(void)
 {
 	int iPitch = RANDOM_LONG(85, 120);
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, pPainSounds[RANDOM_LONG(0, ARRAYSIZE(pPainSounds)-1)], 1, ATTN_NORM, 0, iPitch);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
 }
 
 //=========================================================
@@ -699,20 +701,20 @@ void CPitDrone::PainSound(void)
 void CPitDrone::AlertSound(void)
 {
 	int iPitch = RANDOM_LONG(140, 160);
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, pAlertSounds[RANDOM_LONG(0, ARRAYSIZE(pAlertSounds)-1)], 1, ATTN_NORM, 0, iPitch);
+	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, iPitch);
 }
 //=========================================================
 // DeathSound
 //=========================================================
 void CPitDrone::DeathSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, pDieSounds[RANDOM_LONG(0, ARRAYSIZE(pDieSounds)-1)], 1, ATTN_NORM);
+	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM);
 }
 
 void CPitDrone::RunAI(void)
 {
 	// first, do base class stuff
-	CSquadMonster::RunAI();
+	CFollowingMonster::RunAI();
 
 	if (m_hEnemy != 0 && m_Activity == ACT_RUN)
 	{
@@ -859,8 +861,11 @@ Task_t tlPDroneSniffAndEat[] =
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.25f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_EAT },
+	{ TASK_GET_HEALTH_FROM_FOOD, 0.5f },
 	{ TASK_EAT, (float)50 },
 	{ TASK_GET_PATH_TO_LASTPOSITION, (float)0 },
 	{ TASK_WALK_PATH, (float)0 },
@@ -919,7 +924,7 @@ DEFINE_CUSTOM_SCHEDULES(CPitDrone)
 	slPDroneHideReload
 };
 
-IMPLEMENT_CUSTOM_SCHEDULES(CPitDrone, CSquadMonster)
+IMPLEMENT_CUSTOM_SCHEDULES(CPitDrone, CFollowingMonster)
 
 //=========================================================
 // GetSchedule 
@@ -928,6 +933,13 @@ Schedule_t *CPitDrone::GetSchedule(void)
 {
 	switch (m_MonsterState)
 	{
+	case MONSTERSTATE_IDLE:
+	{
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
+		break;
+	}
 	case MONSTERSTATE_ALERT:
 	{
 		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
@@ -951,6 +963,10 @@ Schedule_t *CPitDrone::GetSchedule(void)
 			return GetScheduleOfType(SCHED_PDRONE_EAT);
 		}
 
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
+
 		break;
 	}
 	case MONSTERSTATE_COMBAT:
@@ -959,7 +975,7 @@ Schedule_t *CPitDrone::GetSchedule(void)
 		if (HasConditions(bits_COND_ENEMY_DEAD))
 		{
 			// call base class, all code to handle dead enemies is centralized there.
-			return CSquadMonster::GetSchedule();
+			return CFollowingMonster::GetSchedule();
 		}
 
 		if (HasConditions(bits_COND_NEW_ENEMY))
@@ -1009,7 +1025,7 @@ Schedule_t *CPitDrone::GetSchedule(void)
 	}
 	}
 
-	return CSquadMonster::GetSchedule();
+	return CFollowingMonster::GetSchedule();
 }
 
 //=========================================================
@@ -1039,7 +1055,7 @@ Schedule_t* CPitDrone::GetScheduleOfType(int Type)
 		break;
 	}
 
-	return CSquadMonster::GetScheduleOfType(Type);
+	return CFollowingMonster::GetScheduleOfType(Type);
 }
 
 //=========================================================
@@ -1076,7 +1092,7 @@ void CPitDrone::StartTask(Task_t *pTask)
 	}
 	default:
 	{
-		CSquadMonster::StartTask(pTask);
+		CFollowingMonster::StartTask(pTask);
 		break;
 	}
 	}
@@ -1102,10 +1118,20 @@ void CPitDrone::RunTask(Task_t *pTask)
 		}
 	default:
 		{
-			CSquadMonster::RunTask( pTask );
+			CFollowingMonster::RunTask( pTask );
 			break;
 		}
 	}
+}
+
+void CPitDrone::PlayUseSentence()
+{
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
+}
+
+void CPitDrone::PlayUnUseSentence()
+{
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
 }
 
 class CDeadPitdrone : public CDeadMonster
