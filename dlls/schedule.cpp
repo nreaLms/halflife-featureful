@@ -217,7 +217,7 @@ void CBaseMonster::MaintainSchedule( void )
 	{
 		if( m_pSchedule != NULL && TaskIsComplete() )
 		{
-			NextScheduledTask();                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+			NextScheduledTask();
 		}
 
 		// validate existing schedule 
