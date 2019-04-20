@@ -501,12 +501,16 @@ void CTalkMonster::StartTask( Task_t *pTask )
 			if ( InSquad() )
 			{
 				CSquadMonster *pSquadLeader = MySquadLeader( );
-				if ( pSquadLeader ) for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
+				if ( pSquadLeader )
 				{
-					CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
-					if (TryCallForMedic(pMember))
+					for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
 					{
-						TaskComplete();
+						CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
+						if (TryCallForMedic(pMember))
+						{
+							TaskComplete();
+							break;
+						}
 					}
 				}
 			}
