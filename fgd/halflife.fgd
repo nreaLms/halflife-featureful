@@ -217,6 +217,7 @@
 		256: "Pre-Disaster" 	: 0
 		512: "Fade Corpse"	: 0
 		8192: "No yellow blobs" : 0
+		65536: "Non-solid corpse" : 0
 	]
 	is_player_ally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
 	[

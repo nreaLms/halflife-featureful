@@ -456,7 +456,12 @@ void CBaseMonster::RunTask( Task_t *pTask )
 				SetThink( NULL );
 				StopAnimation();
 
-				if( !BBoxFlat() )
+				if (FBitSet(pev->spawnflags, SF_MONSTER_NONSOLID_CORPSE))
+				{
+					pev->solid = SOLID_NOT;
+					UTIL_SetSize(pev, Vector(0,0,0), Vector(0,0,0));
+				}
+				else if( !BBoxFlat() )
 				{
 					// a bit of a hack. If a corpses' bbox is positioned such that being left solid so that it can be attacked will
 					// block the player on a slope or stairs, the corpse is made nonsolid. 

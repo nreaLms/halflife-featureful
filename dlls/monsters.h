@@ -54,6 +54,7 @@
 #define SF_MONSTER_FADECORPSE			512 // Fade out corpse after death
 #define SF_MONSTER_DONT_DROP_GRUN		1024
 #define SF_MONSTER_NO_YELLOW_BLOBS		8192
+#define SF_MONSTER_NONSOLID_CORPSE		65536
 #define SF_MONSTER_FALL_TO_GROUND		0x80000000
 
 // specialty spawnflags
