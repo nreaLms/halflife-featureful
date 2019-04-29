@@ -813,6 +813,7 @@ private:
 	float m_flVolume;
 	BOOL m_active;
 	string_t m_iszListener; // name of entity to look at while talking
+	short m_requiredState;
 };
 
 #define SF_SENTENCE_ONCE	0x0001
@@ -831,6 +832,7 @@ TYPEDESCRIPTION	CScriptedSentence::m_SaveData[] =
 	DEFINE_FIELD( CScriptedSentence, m_flVolume, FIELD_FLOAT ),
 	DEFINE_FIELD( CScriptedSentence, m_active, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CScriptedSentence, m_iszListener, FIELD_STRING ),
+	DEFINE_FIELD( CScriptedSentence, m_requiredState, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CScriptedSentence, CBaseToggle )
@@ -877,6 +879,11 @@ void CScriptedSentence::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "listener" ) )
 	{
 		m_iszListener = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "required_state" ) )
+	{
+		m_requiredState = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -959,10 +966,39 @@ void CScriptedSentence::DelayThink( void )
 	SetThink( &CScriptedSentence::FindThink );
 }
 
+enum
+{
+	REQUIRED_STATE_ANY = 0,
+	REQUIRED_STATE_IDLE,
+	REQUIRED_STATE_COMBAT,
+	REQUIRED_STATE_ALERT,
+	REQUIRED_STATE_IDLE_OR_ALERT,
+};
+
 BOOL CScriptedSentence::AcceptableSpeaker( CBaseMonster *pMonster )
 {
 	if( pMonster )
 	{
+		switch (m_requiredState) {
+		case REQUIRED_STATE_IDLE:
+			if (pMonster->m_MonsterState != MONSTERSTATE_IDLE)
+				return FALSE;
+			break;
+		case REQUIRED_STATE_COMBAT:
+			if (pMonster->m_MonsterState != MONSTERSTATE_COMBAT)
+				return FALSE;
+			break;
+		case REQUIRED_STATE_ALERT:
+			if (pMonster->m_MonsterState != MONSTERSTATE_ALERT)
+				return FALSE;
+			break;
+		case REQUIRED_STATE_IDLE_OR_ALERT:
+			if (pMonster->m_MonsterState != MONSTERSTATE_IDLE && pMonster->m_MonsterState != MONSTERSTATE_ALERT)
+				return FALSE;
+			break;
+		default:
+			break;
+		}
 		if( pev->spawnflags & SF_SENTENCE_FOLLOWERS )
 		{
 			if( pMonster->m_hTargetEnt == 0 || !FClassnameIs( pMonster->m_hTargetEnt->pev, "player" ) )

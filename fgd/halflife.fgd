@@ -5318,6 +5318,14 @@
 		2 : "Large  Radius"
 		3 : "Play Everywhere"
 	]
+	required_state(choices) : "Required MonsterState" =
+	[
+		0 : "Any"
+		1 : "Idle"
+		2 : "Combat"
+		3 : "Alert"
+		4 : "Idle or Alert"
+	]
 ]
 
 @PointClass base(Targetname, Targetx, Angles) flags(Angle) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sequence : "Scripted Sequence"
