@@ -747,8 +747,8 @@ Schedule_t	slFGruntTakeCoverFromBestSound[] =
 //=========================================================
 Task_t	tlFGruntHideReload[] =
 {
-	{ TASK_STOP_MOVING,				(float)0					},
 	{ TASK_SET_FAIL_SCHEDULE,		(float)SCHED_RELOAD			},
+	{ TASK_STOP_MOVING,				(float)0					},
 	{ TASK_FIND_COVER_FROM_ENEMY,	(float)0					},
 	{ TASK_RUN_PATH,				(float)0					},
 	{ TASK_WAIT_FOR_MOVEMENT,		(float)0					},
@@ -763,6 +763,7 @@ Schedule_t slFGruntHideReload[] =
 		tlFGruntHideReload,
 		ARRAYSIZE ( tlFGruntHideReload ),
 		bits_COND_HEAVY_DAMAGE	|
+		bits_COND_ENEMY_DEAD	| // stop running away if enemy is already dead
 		bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
