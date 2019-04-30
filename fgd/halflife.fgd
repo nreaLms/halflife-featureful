@@ -2091,7 +2091,10 @@
 //
 
 @PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
+[
+	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
+]
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_battery.mdl") = item_battery : "HEV battery" []
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_flashlight.mdl") = item_flashlight : "Flashlight" []
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit" []

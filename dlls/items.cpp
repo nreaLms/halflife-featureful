@@ -331,6 +331,8 @@ class CItemAntidote : public CItem
 	void Precache( void )
 	{
 		PrecacheMyModel( "models/w_antidote.mdl" );
+		if (!FStringNull(pev->noise))
+			PRECACHE_SOUND( STRING(pev->noise) );
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
@@ -341,6 +343,13 @@ class CItemAntidote : public CItem
 		pPlayer->SetSuitUpdate( "!HEV_DET4", FALSE, SUIT_NEXT_IN_1MIN );
 
 		pPlayer->m_rgItems[ITEM_ANTIDOTE] += 1;
+
+		if (!FStringNull(pev->noise))
+			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
+		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
+			WRITE_STRING( STRING( pev->classname ) );
+		MESSAGE_END();
+
 		return TRUE;
 	}
 };
