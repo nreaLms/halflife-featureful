@@ -1083,6 +1083,7 @@ Schedule_t	slSlaveHealOrReviveAttack[] =
 		ARRAYSIZE ( tlSlaveHealOrReviveAttack ), 
 		bits_COND_CAN_MELEE_ATTACK1 |
 		bits_COND_HEAR_SOUND |
+		bits_COND_NEW_ENEMY |
 		bits_COND_HEAVY_DAMAGE, 
 
 		bits_SOUND_DANGER,
