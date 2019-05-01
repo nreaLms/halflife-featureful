@@ -2713,7 +2713,7 @@ void CTriggerRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	} else {
 		const int chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
-			FireTargets(STRING(chosenTarget), pActivator, pCaller, useType, value);
+			FireTargets(STRING(chosenTarget), pActivator, this, useType, value);
 		}
 	}
 }
