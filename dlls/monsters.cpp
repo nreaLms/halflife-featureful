@@ -2492,41 +2492,35 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 //=========================================================
 CBaseEntity *CBaseMonster::BestVisibleEnemy( void )
 {
-	CBaseEntity	*pReturn;
-	CBaseEntity	*pNextEnt;
-	int		iNearest;
-	int		iDist;
-	int		iBestRelationship;
-
-	iNearest = 8192;// so first visible entity will become the closest.
-	pNextEnt = m_pLink;
-	pReturn = NULL;
-	iBestRelationship = R_NO;
+	CBaseEntity	*pReturn = NULL;
+	CBaseEntity	*pNextEnt = m_pLink;
+	int		iNearest = 8192;// so first visible entity will become the closest.
+	int		iBestRelationship = R_NO;
 
 	while( pNextEnt != NULL )
 	{
 		if( pNextEnt->IsAlive() )
 		{
-			if( IRelationship( pNextEnt) > iBestRelationship )
+			const int relationship = IRelationship( pNextEnt);
+			if( relationship > iBestRelationship )
 			{
 				// this entity is disliked MORE than the entity that we 
 				// currently think is the best visible enemy. No need to do 
 				// a distance check, just get mad at this one for now.
-				iBestRelationship = IRelationship ( pNextEnt );
+				iBestRelationship = relationship;
 				iNearest = ( pNextEnt->pev->origin - pev->origin ).Length();
 				pReturn = pNextEnt;
 			}
-			else if( IRelationship( pNextEnt) == iBestRelationship )
+			else if( relationship == iBestRelationship )
 			{
 				// this entity is disliked just as much as the entity that
 				// we currently think is the best visible enemy, so we only
 				// get mad at it if it is closer.
-				iDist = ( pNextEnt->pev->origin - pev->origin ).Length();
+				const int iDist = ( pNextEnt->pev->origin - pev->origin ).Length();
 				
 				if( iDist <= iNearest )
 				{
 					iNearest = iDist;
-					iBestRelationship = IRelationship( pNextEnt );
 					pReturn = pNextEnt;
 				}
 			}
