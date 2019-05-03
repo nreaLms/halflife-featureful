@@ -686,9 +686,10 @@ BOOL CBaseMonster::FRefreshRoute( void )
 			returnCode = BuildRoute( m_vecMoveGoal, bits_MF_TO_LOCATION, NULL );
 			break;
 		case MOVEGOAL_TARGETENT:
+		case MOVEGOAL_TARGETENT_NEAREST:
 			if( m_hTargetEnt != 0 )
 			{
-				returnCode = BuildRoute( m_hTargetEnt->pev->origin, bits_MF_TO_TARGETENT, m_hTargetEnt );
+				returnCode = BuildRoute( m_hTargetEnt->pev->origin, m_movementGoal, m_hTargetEnt );
 			}
 			break;
 		case MOVEGOAL_NODE:
@@ -720,12 +721,12 @@ BOOL CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const V
 	return FRefreshRoute();
 }
 
-BOOL CBaseMonster::MoveToTarget( Activity movementAct, float waitTime )
+BOOL CBaseMonster::MoveToTarget( Activity movementAct, float waitTime, bool closest )
 {
 	m_movementActivity = movementAct;
 	m_moveWaitTime = waitTime;
 
-	m_movementGoal = MOVEGOAL_TARGETENT;
+	m_movementGoal = closest ? MOVEGOAL_TARGETENT_NEAREST : MOVEGOAL_TARGETENT;
 	return FRefreshRoute();
 }
 
@@ -1508,7 +1509,11 @@ int CBaseMonster::RouteClassify( int iMoveFlag )
 	movementGoal = MOVEGOAL_NONE;
 
 	if( iMoveFlag & bits_MF_TO_TARGETENT )
+	{
 		movementGoal = MOVEGOAL_TARGETENT;
+		if( iMoveFlag & bits_MF_NEAREST_PATH )
+			movementGoal = MOVEGOAL_TARGETENT_NEAREST;
+	}
 	else if( iMoveFlag & bits_MF_TO_ENEMY )
 		movementGoal = MOVEGOAL_ENEMY;
 	else if( iMoveFlag & bits_MF_TO_PATHCORNER )
@@ -1537,7 +1542,9 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 		tridepth = ARRAYSIZE(vecApexes);
 
 	RouteNew();
+	const bool nearest = FBitSet(iMoveFlag, bits_MF_NEAREST_PATH);
 	m_movementGoal = RouteClassify( iMoveFlag );
+	ClearBits(iMoveFlag, bits_MF_NEAREST_PATH);
 
 	// so we don't end up with no moveflags
 	m_Route[0].vecLocation = vecGoal;
@@ -1580,6 +1587,46 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 		m_vecMoveGoal = vecGoal;
 		RouteSimplify( pTarget );
 		return TRUE;
+	}
+
+	if (nearest)
+	{
+		const int npc_nearest = (int)CVAR_GET_FLOAT("npc_nearest");
+		if (npc_nearest)
+		{
+			SetBits(iMoveFlag, bits_MF_NEAREST_PATH);
+
+			const Vector localMoveNearest = pev->origin + (vecGoal - pev->origin).Normalize() * flDist;
+
+			m_Route[0].vecLocation = localMoveNearest;
+			m_Route[0].iType = iMoveFlag | bits_MF_IS_GOAL;
+
+			m_vecMoveGoal = localMoveNearest;
+
+			Vector apex;
+			const Vector triangulatedNearest = FTriangulateToNearest(pev->origin, vecGoal, flDist, pTarget, apex);
+
+			if ((vecGoal - triangulatedNearest).Length2D() < (vecGoal - localMoveNearest).Length2D())
+			{
+				if ((apex - triangulatedNearest).Length2D() < 1)
+				{
+					m_Route[0].vecLocation = triangulatedNearest;
+					m_Route[0].iType = iMoveFlag | bits_MF_IS_GOAL;
+				}
+				else
+				{
+					m_Route[0].vecLocation = apex;
+					m_Route[0].iType = (iMoveFlag | bits_MF_TO_DETOUR);
+
+					m_Route[1].vecLocation = triangulatedNearest;
+					m_Route[1].iType = iMoveFlag | bits_MF_IS_GOAL;
+
+					RouteSimplify( pTarget );
+				}
+				m_vecMoveGoal = triangulatedNearest;
+			}
+			return TRUE;
+		}
 	}
 
 	// b0rk
@@ -1825,6 +1872,147 @@ int CBaseMonster::FTriangulate( const Vector &vecStart, const Vector &vecEnd, fl
 	return 0;
 }
 
+Vector CBaseMonster::FTriangulateToNearest(const Vector &vecStart , const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector& apex)
+{
+	Vector		vecDir;
+	Vector		vecForward;
+	Vector		vecLeft;// the spot we'll try to triangulate to on the left
+	Vector		vecRight;// the spot we'll try to triangulate to on the right
+	Vector		vecTop;// the spot we'll try to triangulate to on the top
+	Vector		vecBottom;// the spot we'll try to triangulate to on the bottom
+	Vector		vecFarSide;// the spot that we'll move to after hitting the triangulated point, before moving on to our normal goal.
+	int		i;
+	float		sizeX, sizeZ;
+
+	// If the hull width is less than 24, use 24 because CheckLocalMove uses a min of
+	// 24.
+	sizeX = pev->size.x;
+	if( sizeX < 24.0 )
+		sizeX = 24.0;
+	else if( sizeX > 48.0 )
+		sizeX = 48.0;
+	sizeZ = pev->size.z;
+	//if( sizeZ < 24.0 )
+	//	sizeZ = 24.0;
+
+	vecForward = ( vecEnd - vecStart ).Normalize();
+
+	Vector vecDirUp( 0, 0, 1 );
+	vecDir = CrossProduct( vecForward, vecDirUp );
+
+	// start checking right about where the object is, picking two equidistant starting points, one on
+	// the left, one on the right. As we progress through the loop, we'll push these away from the obstacle,
+	// hoping to find a way around on either side. pev->size.x is added to the ApexDist in order to help select
+	// an apex point that insures that the monster is sufficiently past the obstacle before trying to turn back
+	// onto its original course.
+
+	vecLeft = vecStart + ( vecForward * ( flDist ) ) - vecDir * ( sizeX * 2 );
+	vecRight = vecStart + ( vecForward * ( flDist ) ) + vecDir * ( sizeX * 2 );
+	if( pev->movetype == MOVETYPE_FLY )
+	{
+		vecTop = vecStart + ( vecForward * flDist ) + ( vecDirUp * sizeZ * 3 );
+		vecBottom = vecStart + ( vecForward * flDist ) - ( vecDirUp *  sizeZ * 3 );
+	}
+
+	vecFarSide = vecEnd;
+
+	vecDir = vecDir * sizeX * 2;
+	if( pev->movetype == MOVETYPE_FLY )
+		vecDirUp = vecDirUp * sizeZ * 2;
+
+	const int tries = 8;
+	Vector vecNearest = vecStart;
+	Vector vecTest;
+	Vector vecBestApex = vecStart;
+	float localMoveDist;
+	for( i = 0; i < tries; i++ )
+	{
+		if( CheckLocalMove( vecStart, vecRight, pTargetEnt, &localMoveDist ) == LOCALMOVE_VALID )
+		{
+			if( CheckLocalMove( vecRight, vecFarSide, pTargetEnt, &localMoveDist ) == LOCALMOVE_VALID )
+			{
+				apex = vecRight;
+				return vecFarSide;
+			}
+			else
+			{
+				vecTest = vecRight + (vecFarSide - vecRight).Normalize() * localMoveDist;
+				if ((vecTest - vecFarSide).Length2D() < (vecNearest - vecFarSide).Length2D())
+				{
+					vecNearest = vecTest;
+					vecBestApex = vecRight;
+				}
+			}
+		}
+		else
+		{
+			vecTest = vecStart + (vecRight - vecStart).Normalize() * localMoveDist;
+			if ((vecTest - vecFarSide).Length2D() < (vecNearest - vecFarSide).Length2D())
+			{
+				vecNearest = vecTest;
+				vecBestApex = vecNearest;
+			}
+		}
+		if( CheckLocalMove( vecStart, vecLeft, pTargetEnt, &localMoveDist ) == LOCALMOVE_VALID )
+		{
+			if( CheckLocalMove( vecLeft, vecFarSide, pTargetEnt, &localMoveDist ) == LOCALMOVE_VALID )
+			{
+				apex = vecLeft;
+				return vecFarSide;
+			}
+			else
+			{
+				vecTest = vecLeft + (vecFarSide - vecLeft).Normalize() * localMoveDist;
+				if ((vecTest - vecFarSide).Length2D() < (vecNearest - vecFarSide).Length2D())
+				{
+					vecNearest = vecTest;
+					vecBestApex = vecLeft;
+				}
+			}
+		}
+		else
+		{
+			vecTest = vecStart + (vecLeft - vecStart).Normalize() * localMoveDist;
+			if ((vecTest - vecFarSide).Length2D() < (vecNearest - vecFarSide).Length2D())
+			{
+				vecNearest = vecTest;
+				vecBestApex = vecNearest;
+			}
+		}
+
+		if( pev->movetype == MOVETYPE_FLY )
+		{
+			if( CheckLocalMove( vecStart, vecTop, pTargetEnt, NULL ) == LOCALMOVE_VALID)
+			{
+				if( CheckLocalMove ( vecTop, vecFarSide, pTargetEnt, NULL ) == LOCALMOVE_VALID )
+				{
+					apex = vecTop;
+					return vecFarSide;
+				}
+			}
+			if( CheckLocalMove( vecStart, vecBottom, pTargetEnt, NULL ) == LOCALMOVE_VALID )
+			{
+				if( CheckLocalMove( vecBottom, vecFarSide, pTargetEnt, NULL ) == LOCALMOVE_VALID )
+				{
+					apex = vecBottom;
+					return vecFarSide;
+				}
+			}
+		}
+
+		vecRight = vecRight + vecDir;
+		vecLeft = vecLeft - vecDir;
+		if( pev->movetype == MOVETYPE_FLY )
+		{
+			vecTop = vecTop + vecDirUp;
+			vecBottom = vecBottom - vecDirUp;
+		}
+	}
+
+	apex = vecBestApex;
+	return vecNearest;
+}
+
 //=========================================================
 // Move - take a single step towards the next ROUTE location
 //=========================================================
@@ -1896,7 +2084,7 @@ void CBaseMonster::Move( float flInterval )
 		// only on a PURE move to enemy ( i.e., ONLY MF_TO_ENEMY set, not MF_TO_ENEMY and DETOUR )
 		pTargetEnt = m_hEnemy;
 	}
-	else if( ( m_Route[m_iRouteIndex].iType & ~bits_MF_NOT_TO_MASK ) == bits_MF_TO_TARGETENT )
+	else if( ( m_Route[m_iRouteIndex].iType & ~bits_MF_NOT_TO_MASK ) & bits_MF_TO_TARGETENT )
 	{
 		pTargetEnt = m_hTargetEnt;
 	}

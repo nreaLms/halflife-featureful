@@ -13,7 +13,7 @@
 
 Task_t tlFollow[] =
 {
-	{ TASK_MOVE_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
+	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
 	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_FACE },
 };
 
@@ -317,7 +317,7 @@ void CFollowingMonster::StopFollowing(BOOL clearSchedule , bool saySentence)
 			PlayUnUseSentence();
 		}
 
-		if( m_movementGoal == MOVEGOAL_TARGETENT && m_hTargetEnt == FollowedPlayer() )
+		if( (m_movementGoal & MOVEGOAL_TARGETENT) && m_hTargetEnt == FollowedPlayer() )
 			RouteClear(); // Stop him from walking toward the player
 		ClearFollowedPlayer();
 		if( clearSchedule )

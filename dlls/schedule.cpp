@@ -407,6 +407,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 			break;
 		}
 	case TASK_MOVE_TO_TARGET_RANGE:
+	case TASK_MOVE_NEAREST_TO_TARGET_RANGE:
 		{
 			float distance;
 
@@ -414,19 +415,27 @@ void CBaseMonster::RunTask( Task_t *pTask )
 				TaskFail();
 			else
 			{
-				distance = ( m_vecMoveGoal - pev->origin ).Length2D();
-
-				// Re-evaluate when you think your finished, or the target has moved too far
-				if( ( distance < pTask->flData ) || ( m_vecMoveGoal - m_hTargetEnt->pev->origin ).Length() > pTask->flData * 0.5 )
+				float checkDistance = pTask->flData;
+				if ((m_Route[m_iRouteIndex].iType & bits_MF_NEAREST_PATH))
 				{
-					m_vecMoveGoal = m_hTargetEnt->pev->origin;
 					distance = ( m_vecMoveGoal - pev->origin ).Length2D();
-					FRefreshRoute();
+					checkDistance = checkDistance/2;
+				}
+				else
+				{
+					distance = ( m_vecMoveGoal - pev->origin ).Length2D();
+					// Re-evaluate when you think your finished, or the target has moved too far
+					if( ( distance < checkDistance ) || ( m_vecMoveGoal - m_hTargetEnt->pev->origin ).Length() > pTask->flData * 0.5 )
+					{
+						m_vecMoveGoal = m_hTargetEnt->pev->origin;
+						distance = ( m_vecMoveGoal - pev->origin ).Length2D();
+						FRefreshRoute();
+					}
 				}
 
 				// Set the appropriate activity based on an overlapping range
 				// overlap the range to prevent oscillation
-				if( distance < pTask->flData )
+				if( distance < checkDistance )
 				{
 					TaskComplete();
 					RouteClear();		// Stop moving
@@ -882,6 +891,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			break;
 		}
 	case TASK_MOVE_TO_TARGET_RANGE:
+	case TASK_MOVE_NEAREST_TO_TARGET_RANGE:
 		{
 			if ( m_hTargetEnt == 0 )
 				TaskFail();
@@ -890,7 +900,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				m_vecMoveGoal = m_hTargetEnt->pev->origin;
-				if( !MoveToTarget( ACT_WALK, 2 ) )
+				if( !MoveToTarget( ACT_WALK, 2, pTask->iTask == TASK_MOVE_NEAREST_TO_TARGET_RANGE ) )
 					TaskFail();
 			}
 			break;

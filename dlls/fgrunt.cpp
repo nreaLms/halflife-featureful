@@ -3573,7 +3573,7 @@ void CMedic::StopHealing()
 	m_fHealing = FALSE;
 	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM );
 	if (m_hTargetEnt != 0 && !m_hTargetEnt->IsPlayer()) {
-		if( m_movementGoal == MOVEGOAL_TARGETENT )
+		if(m_movementGoal & MOVEGOAL_TARGETENT)
 			RouteClear(); // Stop him from walking toward the player
 		m_hTargetEnt = 0;
 		if( m_hEnemy != 0 )

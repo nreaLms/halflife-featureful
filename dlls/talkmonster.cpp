@@ -203,7 +203,7 @@ Schedule_t slIdleStopShooting[] =
 Task_t	tlFollowFallible[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_CANT_FOLLOW },	// If you fail, bail out of follow
-	{ TASK_MOVE_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
+	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
 	//{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_FACE },
 };
 

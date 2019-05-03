@@ -232,6 +232,7 @@ public:
 	void RouteSimplify( CBaseEntity *pTargetEnt );
 	void AdvanceRoute( float distance );
 	int FTriangulate(const Vector &vecStart , const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector *pApexes, int n = 1, int tries = 8, bool recursive = false);
+	Vector FTriangulateToNearest(const Vector &vecStart , const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector& apex);
 	void MakeIdealYaw( Vector vecTarget );
 	virtual void SetYawSpeed( void ) { return; };// allows different yaw_speeds for each activity
 	BOOL BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget );
@@ -260,7 +261,7 @@ public:
 	float FLSoundVolume( CSound *pSound );
 
 	BOOL MoveToNode( Activity movementAct, float waitTime, const Vector &goal );
-	BOOL MoveToTarget( Activity movementAct, float waitTime );
+	BOOL MoveToTarget( Activity movementAct, float waitTime, bool closest = false );
 	BOOL MoveToLocation( Activity movementAct, float waitTime, const Vector &goal );
 	BOOL MoveToEnemy( Activity movementAct, float waitTime );
 
