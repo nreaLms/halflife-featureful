@@ -202,7 +202,6 @@ Note that the full compatibility with Sven Co-op maps is not a goal.
 * monstermaker can set custom health, body, skin, blood color, relationship class, gibs and model for spawned monsters.
 * New flag for monstermaker - No ground check. The hack to remove the check for space under the monstermaker. Useful for spawning flying monsters or monsters that should fall.
 * func_plat, func_train and func_door sound attenuation can be configured in level editor.
-* Added use_through_walls cvar to prevent using things through walls (experimental, will be made into compile-time feature).
 * func_tank can be configured to have a limited number of ammo.
 * func_breakable can contain new items (e.g. Opposing Force weapons and ammo).
 * Amount of health provided by soda may be configured via skill.cfg
@@ -213,6 +212,15 @@ Note that the full compatibility with Sven Co-op maps is not a goal.
 * `mp_dmgperscore` and `mp_allydmgpenalty` to control how many points the player gets for dealing the damage in Co-op.
 * `mp_keepinventory` to keep player inventory across changelevels in co-op.
 * Map .cfg files for co-op games featuring starting weapons and ammo, similar to Sven Co-op.
+
+### Experimental features
+
+These should be used with care as they change some fundamental behavior.
+
+* `use_through_walls` cvar to prevent using things through walls without the need for setting 'Direct Only' flag for entites (probably will be made into compile-time feature).
+* `use_to_take` cvar to make the player 'use' items and weapons in order to obtain them.
+* `tridepth` cvar for controlling the depth of path triangulations (by default 1, like in Half-Life. Maximum is 3).
+* `npc_nearest` cvar for following monsters to let them find the nearest path to the player even if they can't build the path right to the player.
 
 ## How to build
 
