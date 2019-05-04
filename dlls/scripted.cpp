@@ -738,6 +738,12 @@ BOOL CBaseMonster::CineCleanup()
 			pev->origin.y = new_origin.y;
 			pev->origin.z += 1;
 
+			if (FBitSet(pOldCine->pev->spawnflags, SF_SCRIPT_APPLYNEWANGLES))
+			{
+				pev->angles = new_angle;
+				pev->ideal_yaw = UTIL_AngleMod( pev->angles.y );
+			}
+
 			pev->flags |= FL_ONGROUND;
 			int drop = DROP_TO_FLOOR( ENT( pev ) );
 

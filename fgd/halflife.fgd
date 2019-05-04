@@ -5360,6 +5360,7 @@
 		64: "Override AI"	: 0
 		128: "No Script Movement" : 0
 		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
+		512: "Apply new angles" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
 	]
 ]
 

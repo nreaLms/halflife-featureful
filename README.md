@@ -207,6 +207,8 @@ Note that the full compatibility with Sven Co-op maps is not a goal.
 * Amount of health provided by soda may be configured via skill.cfg
 * item_security can show message and play sound on pickup. If item_security is featured in hud.txt the sprite will be shown upon item pickup.
 * 'Fire on Animation start' property for scripted sequence - allows to sync animation start and firing a trigger (useful for retina animations).
+* 'Continuous animation' flag for scripted_sequence - smooth transition between animations that are meant to play one after another.
+* 'Apply new angles' flag for scripted_sequence - if animation turns monster, set new angles after sequence finished (example: houndeye's jumpwindow animation).
 * Dropped weaponboxes have a model of dropped weapon.
 * `mp_healthcharger_rechargetime` and `mp_hevcharger_rechargetime` cvars to control wall chargers recharge time.
 * `mp_dmgperscore` and `mp_allydmgpenalty` to control how many points the player gets for dealing the damage in Co-op.
@@ -217,7 +219,7 @@ Note that the full compatibility with Sven Co-op maps is not a goal.
 
 These should be used with care as they change some fundamental behavior.
 
-* `use_through_walls` cvar to prevent using things through walls without the need for setting 'Direct Only' flag for entites (probably will be made into compile-time feature).
+* `use_through_walls` cvar to enable/disable using things through walls without the need for setting 'Direct Only' flag for entites (probably will be made into compile-time feature).
 * `use_to_take` cvar to make the player 'use' items and weapons in order to obtain them.
 * `tridepth` cvar for controlling the depth of path triangulations (by default 1, like in Half-Life. Maximum is 3).
 * `npc_nearest` cvar for following monsters to let them find the nearest path to the player even if they can't build the path right to the player.
