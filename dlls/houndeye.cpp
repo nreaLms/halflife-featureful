@@ -1252,6 +1252,11 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 			return &slHoundWakeLazy[0];
 		}
 	}
+	if ( m_iBlink == HOUNDEYE_HALF_BLINK )
+	{
+		pev->skin = HOUNDEYE_EYE_OPEN;
+		m_iBlink = HOUNDEYE_BLINK;
+	}
 	switch( Type )
 	{
 	case SCHED_IDLE_STAND:
@@ -1300,11 +1305,6 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 		}
 	case SCHED_FAIL:
 		{
-			if ( m_iBlink == HOUNDEYE_HALF_BLINK )
-			{
-				pev->skin = HOUNDEYE_EYE_OPEN;
-				m_iBlink = HOUNDEYE_BLINK;
-			}
 			if( m_MonsterState == MONSTERSTATE_COMBAT )
 			{
 				if( !FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
