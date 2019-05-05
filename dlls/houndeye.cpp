@@ -1042,8 +1042,8 @@ Task_t	tlHoundWakeUrgent[] =
 {
 	{ TASK_HOUND_OPEN_EYE,		(float)0			},
 	{ TASK_PLAY_SEQUENCE,		(float)ACT_HOP		},
-	{ TASK_FACE_IDEAL,			(float)0			},
 	{ TASK_HOUND_WAKE_UP,		(float)0			},
+	{ TASK_FACE_IDEAL,			(float)0			},
 };
 
 Schedule_t	slHoundWakeUrgent[] =
@@ -1242,6 +1242,7 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 		}
 		else if( HasConditions( bits_COND_NEW_ENEMY ) )
 		{
+			MakeIdealYaw( m_vecEnemyLKP );
 			// get up fast, to fight.
 			return &slHoundWakeUrgent[0];
 		}
