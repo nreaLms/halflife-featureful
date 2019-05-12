@@ -204,7 +204,7 @@ void CMedkit::WeaponIdle(void)
 			CBaseEntity* healTarget = FindHealTarget();
 	
 			if (healTarget) {
-				const int diff = (int)(healTarget->pev->max_health - healTarget->pev->health);
+				const int diff = (int)ceil(healTarget->pev->max_health - healTarget->pev->health);
 				const int healResult = healTarget->TakeHealth(Q_min(maxHeal, diff), DMG_GENERIC);
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= healResult;
 #ifndef CLIENT_DLL
