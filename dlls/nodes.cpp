@@ -269,6 +269,10 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 			}
 			if( ( afCapMask & bits_CAP_OPEN_DOORS ) )
 			{
+				if (!FStringNull(pevLinkEnt->targetname))
+				{
+					return FALSE;
+				}
 				if( !( pevLinkEnt->spawnflags & SF_DOOR_NOMONSTERS ) || queryType == NODEGRAPH_STATIC )
 					return TRUE;
 			}
