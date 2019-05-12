@@ -280,6 +280,10 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	spawnflags(Flags) =
+	[
+		131072 : "Don't greet player" : 0 : "Don't say hello to player upon seeing him"
+	]
 ]
 
 @BaseClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = gibshooterbase

@@ -30,6 +30,8 @@
 //=========================================================
 float CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: used so that two NPCs don't talk at once
 
+#define SF_TALKMONSTER_DONTGREET_PLAYER (1 << 17)
+
 #define CALL_MEDIC_DELAY				5 // Wait before calling for medic again.
 
 // NOTE: m_voicePitch & m_szGrp should be fixed up by precache each save/restore
@@ -853,6 +855,9 @@ void CTalkMonster::TalkInit( void )
 	CTalkMonster::g_talkWaitTime = 0;
 
 	m_voicePitch = 100;
+
+	if (FBitSet(pev->spawnflags, SF_TALKMONSTER_DONTGREET_PLAYER))
+		SetBits(m_bitsSaid, bit_saidHelloPlayer);
 }	
 //=========================================================
 // FindNearestFriend

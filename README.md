@@ -81,6 +81,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Ally monsters can have a configurable tolerance level to player hits.
 * Monsters can have an alternative trigger condition to fire their trigger target.
 * 'Non-solid corpse' flag that makes monster's model non-solid upon dying (useful if you want to prevent blocking doors or pushables by dead bodies).
+* 'Don't greet player' flag that prevents a monster saying hello to the player.
 
 ### Alien slave features
 
