@@ -37,10 +37,9 @@ class CSqueakGrenade : public CGrenade
 public:
 	void Spawn( void );
 	void Precache( void );
-	int Classify( void );
+	int DefaultClassify( void );
 	void EXPORT SuperBounceTouch( CBaseEntity *pOther );
 	void EXPORT HuntThink( void );
-	int BloodColor( void ) { return BLOOD_COLOR_YELLOW; }
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
 
@@ -88,30 +87,9 @@ IMPLEMENT_SAVERESTORE( CSqueakGrenade, CGrenade )
 
 #define SQUEEK_DETONATE_DELAY	15.0
 
-int CSqueakGrenade::Classify( void )
+int CSqueakGrenade::DefaultClassify( void )
 {
-	if (m_iClass != 0)
-		return m_iClass; // if class is customized, return it
-	if( m_iMyClass != 0 )
-		return m_iMyClass; // protect against recursion
-
-	if( m_hEnemy != 0 )
-	{
-		m_iMyClass = CLASS_INSECT; // no one cares about it
-		switch( m_hEnemy->Classify() )
-		{
-			case CLASS_PLAYER:
-			case CLASS_HUMAN_PASSIVE:
-			case CLASS_HUMAN_MILITARY:
-			case CLASS_PLAYER_ALLY:
-			case CLASS_PLAYER_ALLY_MILITARY:
-				m_iMyClass = 0;
-				return CLASS_ALIEN_MILITARY; // barney's get mad, grunts get mad at it
-		}
-		m_iMyClass = 0;
-	}
-
-	return CLASS_ALIEN_BIOWEAPON;
+	return CLASS_SNARK;
 }
 
 void CSqueakGrenade::Spawn()
@@ -125,6 +103,7 @@ void CSqueakGrenade::SpawnImpl(const char* modelName , float damage)
 	// motor
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
+	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 
 	SET_MODEL( ENT( pev ), modelName );
 	UTIL_SetSize( pev, Vector( -4, -4, 0 ), Vector( 4, 4, 8 ) );

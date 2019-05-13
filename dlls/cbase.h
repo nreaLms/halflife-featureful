@@ -111,6 +111,7 @@ enum
 	CLASS_RACEX_SHOCK,
 	CLASS_PLAYER_ALLY_MILITARY,
 	CLASS_HUMAN_BLACKOPS,
+	CLASS_SNARK,
 	CLASS_NUMBER_OF_CLASSES,
 	CLASS_BARNACLE = 99 // special because no one pays attention to it, and it eats a wide cross-section of creatures.
 };
