@@ -939,7 +939,7 @@ Schedule_t *CScientist::GetSchedule( void )
 				relationship = IRelationship( pEnemy );
 
 			// UNDONE: Model fear properly, fix R_FR and add multiple levels of fear
-			if( relationship != R_DL && relationship != R_HT )
+			if( relationship == R_NO )
 			{
 				// If I'm already close enough to my target
 				if( TargetDistance() <= 128 )
@@ -1000,7 +1000,7 @@ MONSTERSTATE CScientist::GetIdealState( void )
 			if( IsFollowingPlayer() )
 			{
 				int relationship = IRelationship( m_hEnemy );
-				if( relationship != R_FR || ( relationship != R_HT && !HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) ) )
+				if( relationship != R_FR || ( relationship < R_HT && !HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) ) )
 				{
 					// Don't go to combat if you're following the player
 					m_IdealMonsterState = MONSTERSTATE_ALERT;

@@ -692,7 +692,8 @@ CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, const char* pszF
 			// don't talk to self or dead people
 			continue;
 		// has friend classname, but not friend really
-		if ( IRelationship(pFriend) >= R_DL || IRelationship(pFriend) == R_FR )
+		const int rel = IRelationship(pFriend);
+		if ( rel >= R_DL || rel == R_FR )
 			continue;
 		if( bTrace )
 		{
@@ -913,7 +914,8 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 				continue;
 			
 			// has friend classname, but not friend really
-			if ( IRelationship(pMonster) >= R_DL || IRelationship(pMonster) == R_FR ) {
+			const int rel = IRelationship(pMonster);
+			if ( rel >= R_DL || rel == R_FR ) {
 				continue;
 			}
 

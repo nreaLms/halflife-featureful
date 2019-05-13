@@ -420,7 +420,7 @@ int CBullsquid::IgnoreConditions( void )
 //=========================================================
 int CBullsquid::IRelationship( CBaseEntity *pTarget )
 {
-	if( gpGlobals->time - m_flLastHurtTime < 5 && FClassnameIs( pTarget->pev, "monster_headcrab" ) )
+	if( gpGlobals->time - m_flLastHurtTime < 5 && IDefaultRelationship(pTarget) >= R_DL && FClassnameIs( pTarget->pev, "monster_headcrab" ) )
 	{
 		// if squid has been hurt in the last 5 seconds, and is getting relationship for a headcrab, 
 		// tell squid to disregard crab. 
