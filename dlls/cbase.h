@@ -41,7 +41,8 @@ CBaseEntity
 #define		FCAP_DIRECTIONAL_USE			0x00000040		// Player sends +/- 1 when using (currently only tracktrains)
 #define		FCAP_MASTER				0x00000080		// Can be used to "master" other entities (like multisource)
 
-#define		FCAP_ONLYDIRECT_USE			0x00000100 // Don't allow using through walls, from sohl
+#define		FCAP_ONLYDIRECT_USE			0x00000100 // Only direct use, from sohl
+#define		FCAP_ONLYVISIBLE_USE		0x00000200 // Don't use through walls
 
 // UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 #define		FCAP_FORCE_TRANSITION		0x00000080		// ALWAYS goes across transitions

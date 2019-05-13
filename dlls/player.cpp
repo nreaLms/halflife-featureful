@@ -1581,13 +1581,13 @@ void CBasePlayer::PlayerUse( void )
 		}
 	}
 
-	if (!pObject && use_through_walls.value)
+	if (!pObject)
 	{
 		while( ( pObject = UTIL_FindEntityInSphere( pObject, pev->origin, PLAYER_SEARCH_RADIUS ) ) != NULL )
 		{
 			caps = pObject->ObjectCaps();
 			if( caps & ( FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE ) &&
-					(!(caps & FCAP_ONLYDIRECT_USE) || pObject->pev->solid == SOLID_NOT ))
+					!(caps & FCAP_ONLYDIRECT_USE) )
 			{
 				// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
 				// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
@@ -1597,6 +1597,15 @@ void CBasePlayer::PlayerUse( void )
 				// This essentially moves the origin of the target to the corner nearest the player to test to see
 				// if it's "hull" is in the view cone
 				vecLOS = UTIL_ClampVectorToBox( vecLOS, pObject->pev->size * 0.5 );
+
+				if (!use_through_walls.value || (caps & FCAP_ONLYVISIBLE_USE) )
+				{
+					UTIL_TraceLine(pev->origin + pev->view_ofs, pObject->Center(), dont_ignore_monsters, edict(), &tr);
+					if (tr.flFraction < 1.0f && tr.pHit != pObject->edict())
+					{
+						continue;
+					}
+				}
 
 				flDot = DotProduct( vecLOS , gpGlobals->v_forward );
 				if( flDot > flMaxDot )
@@ -1609,6 +1618,7 @@ void CBasePlayer::PlayerUse( void )
 				//ALERT( at_console, "%s : %f\n", STRING( pObject->pev->classname ), flDot );
 			}
 		}
+
 		pObject = pClosest;
 	}
 

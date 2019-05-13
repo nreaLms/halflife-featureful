@@ -162,7 +162,7 @@ int CFollowingMonster::ObjectCaps()
 	int caps = CSquadMonster::ObjectCaps();
 	if (m_afCapability & bits_CAP_USABLE)
 	{
-		caps |= FCAP_IMPULSE_USE | FCAP_ONLYDIRECT_USE;
+		caps |= FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	}
 	return caps;
 }
