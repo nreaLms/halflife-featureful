@@ -2748,6 +2748,14 @@
 		23 : "squidfall"
 	]
 ]
+@PointClass base(DeadMonster) studio("models/bullsquid.mdl") = monster_bullchicken_dead : "Dead BullChicken"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 17 =
+	[
+		17 : "die1"
+	]
+]
+
 @PointClass base(Monster, Sequence) size(-3 -3 0, 3 3 3) studio("models/roach.mdl") = monster_cockroach : "Cockroach"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -4233,10 +4241,6 @@
 
 @PointClass base(DeadMonster) studio("models/pit_drone.mdl") = monster_pitdrone_dead : "Dead Pitdrone"
 [
-	pose(Choices) : "Pose" : 0 =
-	[
-		0 : "Dead"
-	]
 	sequence(Choices) : "Animation Sequence (editor)" : 17 =
 	[
 		17 : "die2"

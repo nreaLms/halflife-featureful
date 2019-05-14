@@ -1495,3 +1495,26 @@ MONSTERSTATE CBullsquid::GetIdealState( void )
 
 	return m_IdealMonsterState;
 }
+
+class CDeadBullsquid : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MONSTER; }
+
+	const char* getPos(int pos) const;
+};
+
+const char* CDeadBullsquid::getPos(int pos) const
+{
+	return "die1";
+}
+
+LINK_ENTITY_TO_CLASS( monster_bullchicken_dead, CDeadBullsquid )
+
+void CDeadBullsquid :: Spawn( )
+{
+	SpawnHelper("models/bullsquid.mdl", BLOOD_COLOR_YELLOW, gSkillData.bullsquidHealth/2);
+	MonsterInitDead();
+	pev->frame = 255;
+}
