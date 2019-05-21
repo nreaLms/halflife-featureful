@@ -1698,8 +1698,8 @@ int CBaseMonster::FTriangulate( const Vector &vecStart, const Vector &vecEnd, fl
 	// an apex point that insures that the monster is sufficiently past the obstacle before trying to turn back
 	// onto its original course.
 
-	vecLeft = vecStart + ( vecForward * ( flDist + ( recursive ? 0 : sizeX ) ) ) - vecDir * ( sizeX );
-	vecRight = vecStart + ( vecForward * ( flDist + ( recursive ? 0 : sizeX ) ) ) + vecDir * ( sizeX );
+	vecLeft = vecStart + ( vecForward * ( flDist + ( recursive ? 0 : sizeX ) ) ) - vecDir * ( sizeX * 3 );
+	vecRight = vecStart + ( vecForward * ( flDist + ( recursive ? 0 : sizeX ) ) ) + vecDir * ( sizeX * 3 );
 	if( pev->movetype == MOVETYPE_FLY )
 	{
 		vecTop = vecStart + ( vecForward * flDist ) + ( vecDirUp * sizeZ * 3 );
