@@ -24,7 +24,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * monster_shocktrooper
 * monster_shockroach
 * monster_pitworm (works a bit different from original, might be buggy)
-* monster_geneworm (buggy)
+* monster_geneworm
 * monster_human_grunt_ally
 * monster_human_medic_ally (healing works a bit different from original)
 * monster_human_torch_ally

@@ -449,7 +449,7 @@ void CPitWorm::Precache()
 //=========================================================
 int CPitWorm::DefaultClassify(void)
 {
-        return CLASS_ALIEN_MONSTER;
+        return CLASS_RACEX_SHOCK;
 }
 
 //=========================================================
