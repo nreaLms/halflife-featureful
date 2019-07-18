@@ -106,13 +106,14 @@ enum
 	CLASS_ALIEN_PREDATOR,
 	CLASS_INSECT,
 	CLASS_PLAYER_ALLY,
-	CLASS_PLAYER_BIOWEAPON, // hornets and snarks.launched by players
-	CLASS_ALIEN_BIOWEAPON, // hornets and snarks.launched by the alien menace
+	CLASS_PLAYER_BIOWEAPON, // hornets launched by players
+	CLASS_ALIEN_BIOWEAPON, // hornets launched by the alien menace
 	CLASS_RACEX_PREDATOR,
 	CLASS_RACEX_SHOCK,
 	CLASS_PLAYER_ALLY_MILITARY,
 	CLASS_HUMAN_BLACKOPS,
 	CLASS_SNARK,
+	CLASS_GARGANTUA,
 	CLASS_NUMBER_OF_CLASSES,
 	CLASS_BARNACLE = 99 // special because no one pays attention to it, and it eats a wide cross-section of creatures.
 };

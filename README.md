@@ -82,6 +82,8 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Monsters can have an alternative trigger condition to fire their trigger target.
 * 'Non-solid corpse' flag that makes monster's model non-solid upon dying (useful if you want to prevent blocking doors or pushables by dead bodies).
 * 'Don't greet player' flag that prevents a monster saying hello to the player.
+* New relationship class for black ops can be enabled at compile time (assassins will be enemies to human grunts and turrets).
+* New relationship classes for snarks and gargs that makes it easier to figure out relationship between snarks, gargs and race x.
 
 ### Alien slave features
 

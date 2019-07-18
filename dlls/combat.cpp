@@ -277,6 +277,7 @@ int GibType(CBaseMonster* monster)
 	case CLASS_ALIEN_PREY:
 	case CLASS_RACEX_PREDATOR:
 	case CLASS_RACEX_SHOCK:
+	case CLASS_GARGANTUA:
 	{
 		int bloodColor = monster->BloodColor();
 		if (bloodColor == BLOOD_COLOR_RED)
@@ -338,6 +339,7 @@ bool CBaseMonster::IsAlienMonster()
 	case CLASS_ALIEN_PREDATOR:
 	case CLASS_RACEX_PREDATOR:
 	case CLASS_RACEX_SHOCK:
+	case CLASS_GARGANTUA:
 		return true;
 	default:
 		return false;

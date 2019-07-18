@@ -800,7 +800,7 @@ void CGargantua::PrescheduleThink( void )
 //=========================================================
 int CGargantua::DefaultClassify( void )
 {
-	return CLASS_ALIEN_MONSTER;
+	return CLASS_GARGANTUA;
 }
 
 //=========================================================
