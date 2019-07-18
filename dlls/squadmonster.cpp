@@ -348,7 +348,7 @@ int CSquadMonster::SquadRecruit( int searchRadius, int maxMembers )
 			{
 				// Can we recruit this guy?
 				if( !pRecruit->InSquad() && pRecruit->Classify() == iMyClass &&
-				   ( ( iMyClass != CLASS_ALIEN_MONSTER ) || FStrEq( STRING( pev->classname ), STRING( pRecruit->pev->classname ) ) ) &&
+				   ( ( DefaultClassify() != CLASS_ALIEN_MONSTER ) || FStrEq( STRING( pev->classname ), STRING( pRecruit->pev->classname ) ) ) &&
 				    FStringNull( pRecruit->pev->netname ) )
 				{
 					TraceResult tr;
