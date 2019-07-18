@@ -157,7 +157,7 @@ public:
 	BOOL CheckRangeAttack2( float flDot, float flDist );
 	BOOL CheckHealOrReviveTargets( float flDist = 784, bool mustSee = false );
 	bool IsValidHealTarget( CBaseEntity* pEntity );
-	void CallForHelp( const char *szClassname, float flDist, EHANDLE hEnemy, Vector &vecLocation );
+	void CallForHelp( float flDist, EHANDLE hEnemy, Vector &vecLocation );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType );
 
@@ -371,7 +371,7 @@ int CISlave::IRelationship( CBaseEntity *pTarget )
 	return CBaseMonster::IRelationship( pTarget );
 }
 
-void CISlave::CallForHelp( const char *szClassname, float flDist, EHANDLE hEnemy, Vector &vecLocation )
+void CISlave::CallForHelp(float flDist, EHANDLE hEnemy, Vector &vecLocation )
 {
 	// ALERT( at_aiconsole, "help " );
 
@@ -386,6 +386,8 @@ void CISlave::CallForHelp( const char *szClassname, float flDist, EHANDLE hEnemy
 		float d = ( pev->origin - pEntity->pev->origin ).Length();
 		if( d < flDist )
 		{
+			if (!FClassnameIs(pEntity->pev, STRING(pev->classname)))
+				continue;
 			CBaseMonster *pMonster = pEntity->MyMonsterPointer();
 			if( pMonster )
 			{
@@ -405,7 +407,7 @@ void CISlave::AlertSound( void )
 	{
 		SENTENCEG_PlayRndSz( ENT( pev ), "SLV_ALERT", 0.85, ATTN_NORM, 0, m_voicePitch );
 
-		CallForHelp( "monster_alien_slave", 512, m_hEnemy, m_vecEnemyLKP );
+		CallForHelp( 512, m_hEnemy, m_vecEnemyLKP );
 	}
 }
 
