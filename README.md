@@ -84,6 +84,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * 'Don't greet player' flag that prevents a monster saying hello to the player.
 * New relationship class for black ops can be enabled at compile time (assassins will be enemies to human grunts and turrets).
 * New relationship classes for snarks and gargs that makes it easier to figure out relationship between snarks, gargs and race x.
+* Many monsters besides scientists and security guards can be used to follow the player if they're ally to the player.
 
 ### Alien slave features
 
