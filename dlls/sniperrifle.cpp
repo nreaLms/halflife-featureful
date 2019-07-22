@@ -27,8 +27,6 @@ LINK_ENTITY_TO_CLASS( weapon_sniperrifle, CSniperrifle )
 
 void CSniperrifle::Spawn( )
 {
-
-	pev->classname = MAKE_STRING("weapon_sniperrifle"); // hack to allow for old names
 	Precache( );
 	m_iId = WEAPON_SNIPERRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());

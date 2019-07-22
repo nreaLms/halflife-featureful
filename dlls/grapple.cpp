@@ -264,7 +264,6 @@ void CBarnacleGrapple::Precache( void )
 
 void CBarnacleGrapple::Spawn( void )
 {
-	pev->classname = MAKE_STRING( "weapon_grapple" ); // hack to allow for old names
 	Precache();
 	m_iId = WEAPON_GRAPPLE;
 	SET_MODEL( ENT(pev), MyWModel() );
