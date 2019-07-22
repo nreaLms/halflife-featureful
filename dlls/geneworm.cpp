@@ -260,9 +260,7 @@ public:
     static TYPEDESCRIPTION m_SaveData[];
     float m_flBirthTime;
     int m_maxFrame;
-    int m_iBeams;
     BOOL m_bTrooperDropped;
-    CBeam *m_pBeam[8];
 };
 
 LINK_ENTITY_TO_CLASS(env_genewormspawn, CGeneWormSpawn)
@@ -271,6 +269,7 @@ TYPEDESCRIPTION CGeneWormSpawn::m_SaveData[] =
 {
     DEFINE_FIELD(CGeneWormSpawn, m_flBirthTime, FIELD_TIME),
     DEFINE_FIELD(CGeneWormSpawn, m_bTrooperDropped, FIELD_BOOLEAN),
+    DEFINE_FIELD(CGeneWormSpawn, m_maxFrame, FIELD_INTEGER),
 };
 
 IMPLEMENT_SAVERESTORE(CGeneWormSpawn, CBaseEntity)
@@ -284,6 +283,7 @@ void CGeneWormSpawn::Precache()
 void CGeneWormSpawn::Spawn()
 {
     Precache();
+    pev->classname = MAKE_STRING("env_genewormspawn");
 
     pev->solid = SOLID_BBOX;
     pev->movetype = MOVETYPE_NOCLIP;
@@ -306,7 +306,6 @@ void CGeneWormSpawn::Spawn()
 
     m_bTrooperDropped = FALSE;
     m_flBirthTime = gpGlobals->time;
-    m_iBeams = 0;
 
     SetTouch(&CGeneWormSpawn::SpawnTouch);
     SetThink(&CGeneWormSpawn::SpawnThink);
