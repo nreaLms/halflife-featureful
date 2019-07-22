@@ -328,9 +328,27 @@ void CGeneWormSpawn::SpawnThink()
         {
             if(!m_bTrooperDropped)
             {
-                EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "debris/beamstart2.wav", 1, 0.4, 0, 100);
-                CBaseEntity *strooper = Create("monster_shocktrooper", pev->origin, pev->angles, ENT(pev));
-                m_bTrooperDropped = TRUE;
+				EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "debris/beamstart2.wav", 1, 0.4, 0, 100);
+				CBaseEntity *pEntity = CreateNoSpawn("monster_shocktrooper", pev->origin, pev->angles, ENT(pev));
+				if (pEntity)
+				{
+					CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
+					if (pev->owner != 0 && pOwner)
+					{
+						CBaseMonster* geneworm = pOwner->MyMonsterPointer();
+						if (geneworm)
+						{
+							CBaseMonster* strooper = pEntity->MyMonsterPointer();
+							if (strooper)
+							{
+								strooper->m_iClass = geneworm->m_iClass;
+								strooper->m_reverseRelationship = geneworm->m_reverseRelationship;
+							}
+						}
+					}
+					DispatchSpawn(pEntity->edict());
+				}
+				m_bTrooperDropped = TRUE;
             }
             else
                 pev->scale -= 0.25;
