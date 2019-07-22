@@ -1530,17 +1530,19 @@ int CBaseMonster::RouteClassify( int iMoveFlag )
 //=========================================================
 // BuildRoute
 //=========================================================
+extern cvar_t tridepth;
+
 BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget )
 {
 	float flDist;
 	Vector vecApexes[3];
 	int iLocalMove;
 
-	int tridepth = (int)CVAR_GET_FLOAT("tridepth");
-	if (tridepth < 1)
-		tridepth = 1;
-	if (tridepth > ARRAYSIZE(vecApexes))
-		tridepth = ARRAYSIZE(vecApexes);
+	int triangDepth = (int)tridepth.value;
+	if (triangDepth < 1)
+		triangDepth = 1;
+	if (triangDepth > ARRAYSIZE(vecApexes))
+		triangDepth = ARRAYSIZE(vecApexes);
 
 	RouteNew();
 	const bool nearest = FBitSet(iMoveFlag, bits_MF_NEAREST_PATH);
@@ -1563,7 +1565,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 	// try to triangulate around any obstacles.
 	else if( iLocalMove != LOCALMOVE_INVALID_DONT_TRIANGULATE )
 	{
-		int result = FTriangulate( pev->origin, vecGoal, flDist, pTarget, vecApexes, tridepth );
+		int result = FTriangulate( pev->origin, vecGoal, flDist, pTarget, vecApexes, triangDepth );
 		if (result)
 		{
 			//ALERT(at_aiconsole, "Triangulated %d times\n", result);
