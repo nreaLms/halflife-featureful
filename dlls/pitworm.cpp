@@ -314,43 +314,6 @@ const char* CPitWorm::pDeathSounds[] =
     "pitworm/pit_worm_death.wav",
 };
 
-static const char* g_pszPitwormAnims[] =
-{
-    "idle",
-    "idle2",
-    "attack",
-    "scream",
-    "attacklow",
-    "doorclaw1",
-    "doorclaw2",
-    "doorclaw3",
-    "eyeblast",
-    "platclaw1",
-    "platclaw2",
-    "flinch1",
-    "flinch2",
-    "death",
-};
-
-typedef enum
-{
-    PITWORM_ANIM_IDLE,
-    PITWORM_ANIM_IDLE2,
-    PITWORM_ANIM_ATTACK,
-    PITWORM_ANIM_SCREAM,
-    PITWORM_ANIM_ATTACKLOW,
-    PITWORM_ANIM_DOORCLAW1,
-    PITWORM_ANIM_DOORCLAR2,
-    PITWORM_ANIM_DOORCLAR3,
-    PITWORM_ANIM_EYEBLAST,
-    PITWORM_ANIM_PLATCLAW1,
-    PITWORM_ANIM_PLATCLAW2,
-    PITWORM_ANIM_FLINCH1,
-    PITWORM_ANIM_FLINCH2,
-    PITWORM_ANIM_DEATH,
-
-} PITWORM_ANIM;
-
 //=========================================================
 // Spawn
 //=========================================================
@@ -1286,7 +1249,6 @@ void CPitWorm::UpdateBodyControllers(void)
         Vector angles = UTIL_VecToAngles(target);
         float yaw = UTIL_VecToYaw(target);
         float pitch = angles.x;
-        float initialYaw = m_flInitialYaw;
         float targetYaw = yaw - m_flInitialYaw;
 
 
@@ -1296,7 +1258,6 @@ void CPitWorm::UpdateBodyControllers(void)
         if (pitch > 180)
                 pitch -= 360;
 
-        float bodyPitch = 0;
         float bodyYaw = clamp(targetYaw, PITWORM_BODY_YAW_MIN, PITWORM_BODY_YAW_MAX);
 
 

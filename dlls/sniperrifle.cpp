@@ -219,7 +219,6 @@ void CSniperrifle::WeaponIdle( void )
 			m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
 
 			int iAnim;
-			float flRand = UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.0, 1.0 );
 			if (m_iClip <= 0)
 			{
 				iAnim = SNIPER_SLOWIDLE2;

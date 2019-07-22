@@ -352,8 +352,6 @@ void COp4Mortar::UpdatePosition(float direction, int controller)
 void COp4Mortar::MortarThink()
 {
     Vector pos, angle, vecTarget;
-    CMortarShell *shell;
-    TraceResult tr;
 
     if(m_fSequenceFinished)
     {
