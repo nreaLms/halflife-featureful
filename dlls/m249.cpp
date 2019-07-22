@@ -38,7 +38,7 @@ void CM249::Spawn()
 
 	m_iDefaultAmmo = M249_DEFAULT_GIVE;
 
-	m_fReloadLaunched = FALSE;
+	m_fInSpecialReload = FALSE;
 
 	FallInit();// get ready to fall down.
 }
@@ -98,14 +98,14 @@ int CM249::AddToPlayer(CBasePlayer *pPlayer)
 
 BOOL CM249::Deploy()
 {
-	m_fReloadLaunched = FALSE;
+	m_fInSpecialReload = FALSE;
 	UpdateTape();
 	return DefaultDeploy("models/v_saw.mdl", "models/p_saw.mdl", M249_DEPLOY, "mp5", UseDecrement(), pev->body);
 }
 
 void CM249::Holster()
 {
-	m_fReloadLaunched = FALSE;
+	m_fInSpecialReload = FALSE;
 	CBasePlayerWeapon::Holster();
 }
 
@@ -224,7 +224,7 @@ void CM249::Reload(void)
 		return;
 
 	if (DefaultReload(M249_MAX_CLIP, M249_LAUNCH, 1.33, pev->body)) {
-		m_fReloadLaunched = TRUE;
+		m_fInSpecialReload = TRUE;
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 3.78;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.78;
 	}
@@ -232,12 +232,12 @@ void CM249::Reload(void)
 
 void CM249::WeaponTick()
 {
-	if ( m_fReloadLaunched )
+	if ( m_fInSpecialReload )
 	{
 		if (m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
 		{
 			UpdateTape();
-			m_fReloadLaunched = FALSE;
+			m_fInSpecialReload = FALSE;
 			SendWeaponAnim( M249_RELOAD1, UseDecrement(), pev->body );
 			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 2.4;
 		}

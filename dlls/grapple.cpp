@@ -307,7 +307,7 @@ void CBarnacleGrapple::Holster( int skiplocal /* = 0 */ )
 {
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
 
-	if( m_FireState != OFF )
+	if( m_fireState != OFF )
 		EndAttack();
 
 	SendWeaponAnim( BGRAPPLE_DOWN );
@@ -320,7 +320,7 @@ void CBarnacleGrapple::WeaponIdle( void )
 	if( m_flTimeWeaponIdle > gpGlobals->time )
 		return;
 
-	if( m_FireState != OFF )
+	if( m_fireState != OFF )
 	{
 		EndAttack();
 		return;
@@ -462,7 +462,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 		}
 	}
 #endif
-	if( m_FireState != OFF )
+	if( m_fireState != OFF )
 	{
 		m_pPlayer->m_iWeaponVolume = 450;
 
@@ -501,7 +501,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 		}
 #endif
 		EMIT_SOUND_DYN( ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/bgrapple_fire.wav", 0.98, ATTN_NORM, 0, 125 );
-		m_FireState = CHARGE;
+		m_fireState = CHARGE;
 	}
 
 	if( !m_pTip )
@@ -648,7 +648,7 @@ void CBarnacleGrapple::Fire( Vector vecOrigin, Vector vecDir )
 
 void CBarnacleGrapple::EndAttack( void )
 {
-	m_FireState = OFF;
+	m_fireState = OFF;
 	SendWeaponAnim( BGRAPPLE_FIRERELEASE );
 
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/bgrapple_release.wav", 1, ATTN_NORM);

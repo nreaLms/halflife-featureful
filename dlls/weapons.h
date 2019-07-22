@@ -1265,8 +1265,6 @@ private:
 	float m_flShootTime;
 	float m_flDamageTime;
 
-	FireState m_FireState;
-
 	bool m_bGrappling;
 	bool m_bMissed;
 	bool m_bMomentaryStuck;
@@ -1311,8 +1309,6 @@ public:
 	const char* MyWModel() { return "models/w_saw.mdl"; }
 
 	void UpdateTape();
-
-	BOOL m_fReloadLaunched;
 
 private:
 	unsigned short m_usM249;
