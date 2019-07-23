@@ -1636,7 +1636,7 @@ IMPLEMENT_SAVERESTORE( CKnife, CBasePlayerWeapon )
 #if FEATURE_M249
 TYPEDESCRIPTION	CM249::m_SaveData[] =
 {
-	DEFINE_FIELD( CM249, m_fInSpecialReload, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CM249, m_fInSpecialReload, FIELD_INTEGER ),
 };
 IMPLEMENT_SAVERESTORE( CM249, CBasePlayerWeapon )
 #endif
@@ -1666,6 +1666,7 @@ TYPEDESCRIPTION	CBarnacleGrapple::m_SaveData[] =
 {
 	DEFINE_FIELD( CBarnacleGrapple, m_pBeam, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CBarnacleGrapple, m_flShootTime, FIELD_TIME ),
+	DEFINE_FIELD( CBarnacleGrapple, m_fireState, FIELD_INTEGER ),
 };
 IMPLEMENT_SAVERESTORE( CBarnacleGrapple, CBasePlayerWeapon )
 #endif
