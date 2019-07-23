@@ -1252,7 +1252,11 @@ public:
 	void DestroyEffect( void );
 	virtual BOOL UseDecrement(void)
 	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
 		return FALSE;
+#endif
 	}
 
 	const char* MyWModel() { return "models/w_bgrap.mdl"; }

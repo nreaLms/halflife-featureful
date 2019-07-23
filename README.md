@@ -98,7 +98,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 
 * weapon_pipewrench
 * weapon_knife (also has an alternative attack)
-* weapon_grapple (no prediction, not tested in multiplayer)
+* weapon_grapple (not tested in multiplayer)
 * weapon_eagle
 * weapon_penguin
 * weapon_m249

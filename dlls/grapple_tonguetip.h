@@ -30,10 +30,10 @@ public:
 	void Precache();
 	void Spawn();
 
-	void FlyThink();
-	void OffsetThink();
+	void EXPORT FlyThink();
+	void EXPORT OffsetThink();
 
-	void TongueTouch( CBaseEntity* pOther );
+	void EXPORT TongueTouch( CBaseEntity* pOther );
 
 	int CheckTarget( CBaseEntity* pTarget );
 

@@ -257,9 +257,6 @@ void CBarnacleGrapple::Precache( void )
 	PRECACHE_MODEL( "sprites/tongue.spr" );
 
 	UTIL_PrecacheOther( "grapple_tip" );
-	m_flNextPrimaryAttack = 0;
-	m_flNextSecondaryAttack = 0;
-	m_flTimeWeaponIdle = 0;
 }
 
 void CBarnacleGrapple::Spawn( void )
@@ -299,7 +296,7 @@ int CBarnacleGrapple::AddToPlayer( CBasePlayer* pPlayer )
 BOOL CBarnacleGrapple::Deploy()
 {
 	int r = DefaultDeploy("models/v_bgrap.mdl", "models/p_bgrap.mdl", BGRAPPLE_UP, "gauss" );
-	m_flTimeWeaponIdle = gpGlobals->time + 1.1;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.1;
 	return r;
 }
 
@@ -317,7 +314,7 @@ void CBarnacleGrapple::WeaponIdle( void )
 {
 	ResetEmptySound();
 
-	if( m_flTimeWeaponIdle > gpGlobals->time )
+	if( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
 		return;
 
 	if( m_fireState != OFF )
@@ -335,19 +332,19 @@ void CBarnacleGrapple::WeaponIdle( void )
 	if( flNextIdle <= 0.5 )
 	{
 		iAnim = BGRAPPLE_LONGIDLE;
-		m_flTimeWeaponIdle = gpGlobals->time + 10.0;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 10.0;
 	}
 	else if( flNextIdle > 0.95 )
 	{
 		EMIT_SOUND_DYN( ENT(m_pPlayer->pev), CHAN_STATIC, "weapons/bgrapple_cough.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM );
 
 		iAnim = BGRAPPLE_COUGH;
-		m_flTimeWeaponIdle = gpGlobals->time + 4.6;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 4.6;
 	}
 	else
 	{
 		iAnim = BGRAPPLE_BREATHE;
-		m_flTimeWeaponIdle = gpGlobals->time + 2.566;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.566;
 	}
 
 	SendWeaponAnim( iAnim );
@@ -357,7 +354,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 {
 	if( m_bMissed )
 	{
-		m_flTimeWeaponIdle = gpGlobals->time + 0.1;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.1;
 		return;
 	}
 
@@ -489,7 +486,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 
 		m_pPlayer->m_iWeaponVolume = 450;
 
-		m_flTimeWeaponIdle = gpGlobals->time + 0.1;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.1;
 #ifndef CLIENT_DLL
 		if( g_pGameRules->IsMultiplayer() )
 		{
@@ -506,7 +503,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 
 	if( !m_pTip )
 	{
-		m_flNextPrimaryAttack = gpGlobals->time + 0.01;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.01;
 		return;
 	}
 
@@ -614,7 +611,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 	else
 	*/
 	{
-		m_flNextPrimaryAttack = gpGlobals->time + 0.01;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.01;
 	}
 }
 
@@ -655,9 +652,9 @@ void CBarnacleGrapple::EndAttack( void )
 
 	EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/bgrapple_pull.wav", 0.0, ATTN_NONE, SND_STOP, 100 );
 
-	m_flTimeWeaponIdle = gpGlobals->time + 0.9;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.9;
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.01;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.01;
 
 	DestroyEffect();
 
