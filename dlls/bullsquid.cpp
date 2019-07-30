@@ -552,7 +552,7 @@ BOOL CBullsquid::FValidateHintType( short sHint )
 		}
 	}
 
-	ALERT( at_aiconsole, "Couldn't validate hint type" );
+	ALERT( at_aiconsole, "Couldn't validate hint type\n" );
 	return FALSE;
 }
 
