@@ -492,7 +492,7 @@ void CSporeAmmo :: BornThink ( void )
 	if ( m_flTimeSporeIdle > gpGlobals->time )
 		return;
 
-	pev->sequence = 3;
+	pev->sequence = SPOREAMMO_SPAWNDOWN;
 	pev->framerate		= 1.0;
 	pev->animtime		= gpGlobals->time + 0.1;
 	pev->body = 1;
