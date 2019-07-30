@@ -18,7 +18,6 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "player.h"
-#include "grapple_tonguetip.h"
 #include "skill.h"
 #include "nodes.h"
 #include "soundent.h"
@@ -28,6 +27,7 @@
 #if FEATURE_GRAPPLE
 
 #ifndef CLIENT_DLL
+#include "grapple_tonguetip.h"
 
 LINK_ENTITY_TO_CLASS( grapple_tip, CBarnacleGrappleTip );
 
@@ -510,6 +510,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 		return;
 	}
 
+#ifndef CLIENT_DLL
 	if( m_pTip->GetGrappleType() != GRAPPLE_FIXED && m_pTip->IsStuck() )
 	{
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle );
@@ -524,9 +525,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 
 		if( tr.flFraction >= 1.0 )
 		{
-#ifndef CLIENT_DLL
 			UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, head_hull, m_pPlayer->edict(), &tr );
-#endif
 			if( tr.flFraction < 1.0 )
 			{
 				CBaseEntity* pHit = Instance( tr.pHit );
@@ -604,6 +603,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 			}
 		}
 	}
+#endif
 
 	//TODO: CTF support - Solokiller
 	/*
@@ -726,11 +726,13 @@ void CBarnacleGrapple::DestroyEffect( void )
 		m_pBeam = NULL;
 	}
 
+#ifndef CLIENT_DLL
 	if( m_pTip )
 	{
 		m_pTip->Killed( NULL, GIB_NEVER );
 		m_pTip = NULL;
 	}
+#endif
 }
 
 #endif
