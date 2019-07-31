@@ -139,8 +139,6 @@ public:
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
 	BOOL CheckMeleeAttack1 ( float flDot, float flDist );
-	void IdleRespond();
-	void AskQuestion();
 	int MaxFollowers() { return -1; }
 	int TalkFriendCategory() { return TALK_FRIEND_SOLDIER; }
 	void PlayCallForMedic();
@@ -158,6 +156,7 @@ public:
 	void AlertSound( void );
 	void DeathSound( void );
 	void PainSound( void );
+	void IdleSound( void );
 
 	static const char *pPainSounds[];
 	static const char *pDeathSounds[];
@@ -1951,34 +1950,6 @@ void CHFGrunt :: TalkInit()
 	m_szGrp[TLK_MAD] = "FG_MAD";
 }
 
-void CHFGrunt::IdleRespond()
-{
-	if (g_fGruntAllyQuestion == 1)
-	{
-		// Answer to FG_CHECK
-		PlaySentence( "FG_CLEAR", RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
-	}
-	else
-	{
-		CTalkMonster::IdleRespond();
-	}
-	g_fGruntAllyQuestion = 0;
-}
-
-void CHFGrunt::AskQuestion()
-{
-	if (FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) || RANDOM_LONG(0,2))
-	{
-		CTalkMonster::AskQuestion();
-		g_fGruntAllyQuestion = 2;
-	}
-	else
-	{
-		PlaySentence( "FG_CHECK", RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
-		g_fGruntAllyQuestion = 1;
-	}
-}
-
 //=========================================================
 // PainSound
 //=========================================================
@@ -2006,6 +1977,47 @@ void CHFGrunt :: DeathSound ( void )
 {
 	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM, 0, GetVoicePitch());
 }
+
+void CHFGrunt::IdleSound()
+{
+	if (FOkToSpeak() && (g_fGruntAllyQuestion || RANDOM_LONG(0,1)))
+	{
+		if (g_fGruntAllyQuestion)
+		{
+			switch (g_fGruntAllyQuestion) {
+			case 1:
+				PlaySentence( "FG_CLEAR", RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				break;
+			case 2:
+				PlaySentence( m_szGrp[TLK_ANSWER], RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				break;
+			default:
+				break;
+			}
+			g_fGruntAllyQuestion = 0;
+		}
+		else
+		{
+			switch (RANDOM_LONG(0,2)) {
+			case 0:
+				PlaySentence( "FG_CHECK", RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				g_fGruntAllyQuestion = 1;
+				break;
+			case 1:
+				PlaySentence( m_szGrp[TLK_QUESTION], RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				g_fGruntAllyQuestion = 2;
+				break;
+			case 2:
+				PlaySentence( m_szGrp[TLK_IDLE], RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				break;
+			default:
+				break;
+			}
+		}
+		m_iSentence = FGRUNT_SENT_NONE;
+	}
+}
+
 //=========================================================
 // TraceAttack - make sure we're not taking it in the helmet
 //=========================================================
