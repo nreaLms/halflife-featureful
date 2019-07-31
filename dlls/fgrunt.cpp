@@ -181,7 +181,6 @@ public:
 	// not every server frame.
 	float m_flNextGrenadeCheck;
 	float m_flNextPainTime;
-	float m_flMedicWaitTime;
 
 	bool	m_flLinkToggle;
 
