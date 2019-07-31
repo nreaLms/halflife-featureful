@@ -1838,8 +1838,6 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 	m_fFirstEncounter	= TRUE;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector ( 0, 0, 55 );
-	m_flLastHitByPlayer = gpGlobals->time;
-	m_iPlayerHits = 0;
 }
 
 //=========================================================
