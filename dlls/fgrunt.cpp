@@ -158,6 +158,10 @@ public:
 	void AlertSound( void );
 	void DeathSound( void );
 	void PainSound( void );
+
+	static const char *pPainSounds[];
+	static const char *pDeathSounds[];
+
 	void GibMonster( void );
 	void SpeakSentence( void );
 	void TalkInit( void );
@@ -217,6 +221,26 @@ protected:
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
 
 int CHFGrunt::g_fGruntAllyQuestion = 0;
+
+const char* CHFGrunt::pPainSounds[] =
+{
+	"fgrunt/gr_pain1.wav",
+	"fgrunt/gr_pain2.wav",
+	"fgrunt/gr_pain3.wav",
+	"fgrunt/gr_pain4.wav",
+	"fgrunt/gr_pain5.wav",
+	"fgrunt/gr_pain6.wav",
+};
+
+const char* CHFGrunt::pDeathSounds[] =
+{
+	"fgrunt/death1.wav",
+	"fgrunt/death2.wav",
+	"fgrunt/death3.wav",
+	"fgrunt/death4.wav",
+	"fgrunt/death5.wav",
+	"fgrunt/death6.wav",
+};
 
 class CMedic : public CHFGrunt
 {
@@ -1886,19 +1910,8 @@ void CHFGrunt :: Precache()
 
 void CHFGrunt::PrecacheHelper()
 {
-	PRECACHE_SOUND("fgrunt/gr_pain1.wav");
-	PRECACHE_SOUND("fgrunt/gr_pain2.wav");
-	PRECACHE_SOUND("fgrunt/gr_pain3.wav");
-	PRECACHE_SOUND("fgrunt/gr_pain4.wav");
-	PRECACHE_SOUND("fgrunt/gr_pain5.wav");
-	PRECACHE_SOUND("fgrunt/gr_pain6.wav");
-
-	PRECACHE_SOUND("fgrunt/death1.wav");
-	PRECACHE_SOUND("fgrunt/death2.wav");
-	PRECACHE_SOUND("fgrunt/death3.wav");
-	PRECACHE_SOUND("fgrunt/death4.wav");
-	PRECACHE_SOUND("fgrunt/death5.wav");
-	PRECACHE_SOUND("fgrunt/death6.wav");
+	PRECACHE_SOUND_ARRAY(pPainSounds);
+	PRECACHE_SOUND_ARRAY(pDeathSounds);
 
 	PRECACHE_SOUND("fgrunt/medic.wav");
 
@@ -1973,15 +1986,7 @@ void CHFGrunt :: PainSound ( void )
 {
 	if ( gpGlobals->time > m_flNextPainTime )
 	{
-		switch ( RANDOM_LONG(0,5) )
-		{
-			case 0: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/gr_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-			case 1: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/gr_pain2.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-			case 2: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/gr_pain3.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-			case 3: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/gr_pain4.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-			case 4: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/gr_pain5.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-			case 5: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/gr_pain6.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-		}
+		EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, GetVoicePitch());
 		m_flNextPainTime = gpGlobals->time + 1;
 	}
 }
@@ -1999,15 +2004,7 @@ void CHFGrunt::AlertSound()
 //=========================================================
 void CHFGrunt :: DeathSound ( void )
 {
-	switch (RANDOM_LONG(0,5))
-	{
-	case 0: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/death1.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-	case 1: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/death2.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-	case 2: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/death3.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-	case 3: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/death4.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-	case 4: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/death5.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-	case 5: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/death6.wav", 1, ATTN_NORM, 0, GetVoicePitch()); break;
-	}
+	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM, 0, GetVoicePitch());
 }
 //=========================================================
 // TraceAttack - make sure we're not taking it in the helmet
