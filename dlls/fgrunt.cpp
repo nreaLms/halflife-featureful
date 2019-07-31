@@ -1955,7 +1955,7 @@ void CHFGrunt::IdleRespond()
 
 void CHFGrunt::AskQuestion()
 {
-	if (RANDOM_LONG(0,50))
+	if (FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) || RANDOM_LONG(0,2))
 	{
 		CTalkMonster::AskQuestion();
 		g_fGruntAllyQuestion = 2;
