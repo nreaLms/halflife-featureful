@@ -30,13 +30,12 @@
 #include	"mod_features.h"
 
 #if FEATURE_GONOME
-#define		GONOME_SPRINT_DIST	256 // how close the squid has to get before starting to sprint and refusing to swerve
 
-#define		GONOME_TOLERANCE_MELEE1_RANGE	85
-#define		GONOME_TOLERANCE_MELEE2_RANGE	65
-
-#define		GONOME_TOLERANCE_MELEE1_DOT		0.7
-#define		GONOME_TOLERANCE_MELEE2_DOT		0.7
+/* Whether gonome locks the player during the bite attack.
+ * This may have undesired side-effects, e.g. in combination with trigger_playerfreeze or trigger_camera,
+ * since both gonome and the trigger use the same technique to lock the player.
+ */
+#define FEATURE_GONOME_LOCK_PLAYER 0
 
 #define		GONOME_MELEE_ATTACK_RADIUS		70
 
@@ -46,12 +45,15 @@
 
 #define GONOME_AE_SLASH_RIGHT	( 1 )
 #define GONOME_AE_SLASH_LEFT	( 2 )
+#define GONOME_AE_SPIT			( 3 )
 #define GONOME_AE_THROW			( 4 )
 
 #define GONOME_AE_BITE1			( 19 )
 #define GONOME_AE_BITE2			( 20 )
 #define GONOME_AE_BITE3			( 21 )
 #define GONOME_AE_BITE4			( 22 )
+
+#define GONOME_SCRIPT_EVENT_SOUND ( 1011 )
 
 //=========================================================
 // Gonome's guts projectile
@@ -60,7 +62,6 @@ class CGonomeGuts : public CSquidSpit
 {
 public:
 	void Spawn(void);
-	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
 	void Touch(CBaseEntity *pOther);
 };
 
@@ -68,19 +69,6 @@ void CGonomeGuts::Spawn()
 {
 	SpawnHelper("sprites/bigspit.spr", "gonomeguts");
 	pev->rendercolor.x = 255;
-}
-
-void CGonomeGuts::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity )
-{
-	CGonomeGuts *pSpit = GetClassPtr( (CGonomeGuts *)NULL );
-	pSpit->Spawn();
-
-	UTIL_SetOrigin( pSpit->pev, vecStart );
-	pSpit->pev->velocity = vecVelocity;
-	pSpit->pev->owner = ENT( pevOwner );
-
-	pSpit->SetThink( &CSquidSpit::Animate );
-	pSpit->pev->nextthink = gpGlobals->time + 0.1;
 }
 
 void CGonomeGuts::Touch( CBaseEntity *pOther )
@@ -125,7 +113,6 @@ void CGonomeGuts::Touch( CBaseEntity *pOther )
 class CGonome : public CBaseMonster
 {
 public:
-
 	void Spawn(void);
 	void Precache(void);
 
@@ -138,19 +125,21 @@ public:
 	void PainSound(void);
 	void DeathSound(void);
 	void AlertSound(void);
-	void StartTask(Task_t *pTask);
 
-	BOOL CheckMeleeAttack1(float flDot, float flDist);
 	BOOL CheckMeleeAttack2(float flDot, float flDist);
 	BOOL CheckRangeAttack1(float flDot, float flDist);
-	void RunAI(void);
+	void SetActivity( Activity NewActivity );
+
 	Schedule_t *GetSchedule();
 	Schedule_t *GetScheduleOfType( int Type );
 
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	
-	void SetActivity( Activity NewActivity );
-	
+	void OnDying();
+
+	void UnlockPlayer();
+	CGonomeGuts* GetGonomeGuts(const Vector& pos);
+	void ClearGuts();
+
 	int	Save(CSave &save);
 	int Restore(CRestore &restore);
 	
@@ -160,13 +149,18 @@ public:
 	static const char* pPainSounds[];
 	static const char* pIdleSounds[];
 	static const char* pDeathSounds[];
+	static const char *pAttackHitSounds[];
+	static const char *pAttackMissSounds[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
 protected:
-	int GonomeLookupActivity( void *pmodel, int activity );
 	float m_flNextFlinch;
-	float m_flNextSpitTime;// last time the gonome used the spit attack.
-	bool gonnaAttack1;
+	float m_flNextThrowTime;// last time the gonome used the guts attack.
+	CGonomeGuts* m_pGonomeGuts;
+#if FEATURE_GONOME_LOCK_PLAYER
+	BOOL m_fPlayerLocked;
+	EHANDLE m_lockedPlayer;
+#endif
 };
 
 LINK_ENTITY_TO_CLASS(monster_gonome, CGonome)
@@ -190,80 +184,146 @@ const char* CGonome::pDeathSounds[] = {
 	"gonome/gonome_death4.wav"
 };
 
+const char* CGonome::pAttackHitSounds[] =
+{
+	"zombie/claw_strike1.wav",
+	"zombie/claw_strike2.wav",
+	"zombie/claw_strike3.wav",
+};
+
+const char* CGonome::pAttackMissSounds[] =
+{
+	"zombie/claw_miss1.wav",
+	"zombie/claw_miss2.wav",
+};
+
 TYPEDESCRIPTION	CGonome::m_SaveData[] =
 {
 	DEFINE_FIELD( CGonome, m_flNextFlinch, FIELD_TIME ),
-	DEFINE_FIELD( CGonome, m_flNextSpitTime, FIELD_TIME ),
+	DEFINE_FIELD( CGonome, m_flNextThrowTime, FIELD_TIME ),
+#if FEATURE_GONOME_LOCK_PLAYER
+	DEFINE_FIELD( CGonome, m_fPlayerLocked, FIELD_BOOLEAN ),
+#endif
 };
 
 IMPLEMENT_SAVERESTORE( CGonome, CBaseMonster )
 
-/*
- * Hack to ignore activity weights when choosing melee attack animation
- */
-int CGonome::GonomeLookupActivity( void *pmodel, int activity )
+void CGonome::OnDying()
 {
-	studiohdr_t *pstudiohdr;
+	ClearGuts();
+	UnlockPlayer();
+	CBaseMonster::OnDying();
+}
 
-	pstudiohdr = (studiohdr_t *)pmodel;
-	if( !pstudiohdr )
-		return 0;
-
-	mstudioseqdesc_t *pseqdesc;
-
-	pseqdesc = (mstudioseqdesc_t *)( (byte *)pstudiohdr + pstudiohdr->seqindex );
-
-	int sameActivityNum = 0;
-	for( int i = 0; i < pstudiohdr->numseq && sameActivityNum < 2; i++ )
+void CGonome::UnlockPlayer()
+{
+#if FEATURE_GONOME_LOCK_PLAYER
+	if (m_fPlayerLocked)
 	{
-		if( pseqdesc[i].activity == activity )
-		{
-			sameActivityNum++;
-			if (sameActivityNum == 1 && gonnaAttack1) {
-				return i;
-			} else if (sameActivityNum == 2) {
-				return i;
-			}
-		}
-	}
+		CBasePlayer* player = 0;
+		if (m_lockedPlayer != 0 && m_lockedPlayer->IsPlayer())
+			player = (CBasePlayer*)((CBaseEntity*)m_lockedPlayer);
+		else // if ehandle is empty for some reason just unlock the first player
+			player = (CBasePlayer*)UTIL_FindEntityByClassname(0, "player");
 
-	return ACTIVITY_NOT_AVAILABLE;
+		if (player && player->IsAlive())
+			player->EnableControl(TRUE);
+
+		m_lockedPlayer = 0;
+		m_fPlayerLocked = FALSE;
+	}
+#endif
+}
+
+CGonomeGuts* CGonome::GetGonomeGuts(const Vector &pos)
+{
+	if (m_pGonomeGuts)
+		return m_pGonomeGuts;
+	CGonomeGuts *pGuts = GetClassPtr( (CGonomeGuts *)NULL );
+	pGuts->Spawn();
+
+	UTIL_SetOrigin( pGuts->pev, pos );
+
+	m_pGonomeGuts = pGuts;
+	return m_pGonomeGuts;
+}
+
+void CGonome::ClearGuts()
+{
+	if (m_pGonomeGuts)
+	{
+		UTIL_Remove(m_pGonomeGuts);
+		m_pGonomeGuts = 0;
+	}
 }
 
 void CGonome::SetActivity( Activity NewActivity )
 {
-	if (NewActivity != ACT_MELEE_ATTACK1) {
-		CBaseMonster::SetActivity(NewActivity);
-	} else {
-		ASSERT( NewActivity != 0 );
-		void *pmodel = GET_MODEL_PTR( ENT( pev ) );
-		int iSequence = GonomeLookupActivity( pmodel, NewActivity );
-	
-		// Set to the desired anim, or default anim if the desired is not present
-		if( iSequence > ACTIVITY_NOT_AVAILABLE )
+	Activity OldActivity = m_Activity;
+	int iSequence = ACTIVITY_NOT_AVAILABLE;
+
+	if (NewActivity != ACT_RANGE_ATTACK1)
+	{
+		ClearGuts();
+	}
+	if (NewActivity == ACT_MELEE_ATTACK1 && m_hEnemy != 0)
+	{
+		// special melee animations
+		if ((pev->origin - m_hEnemy->pev->origin).Length2D() >= 48 )
 		{
-			if( pev->sequence != iSequence || !m_fSequenceLoops )
-			{
-				// don't reset frame between walk and run
-				if( !( m_Activity == ACT_WALK || m_Activity == ACT_RUN ) || !( NewActivity == ACT_WALK || NewActivity == ACT_RUN ) )
-					pev->frame = 0;
-			}
-	
-			pev->sequence = iSequence;	// Set to the reset anim (if it's there)
-			ResetSequenceInfo();
-			SetYawSpeed();
+			iSequence = LookupSequence("attack1");
 		}
 		else
 		{
-			// Not available try to get default anim
-			ALERT( at_aiconsole, "%s has no sequence for act:%d\n", STRING( pev->classname ), NewActivity );
-			pev->sequence = 0;	// Set to the reset anim (if it's there)
+			iSequence = LookupSequence("attack2");
 		}
-	
-		m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-	
-		// In case someone calls this with something other than the ideal activity
-		m_IdealActivity = m_Activity;
+	}
+	else
+	{
+		UnlockPlayer();
+
+		if (NewActivity == ACT_RUN && m_hEnemy != 0)
+		{
+			// special run animations
+			if ((pev->origin - m_hEnemy->pev->origin).Length2D() <= 512 )
+			{
+				iSequence = LookupSequence("runshort");
+			}
+			else
+			{
+				iSequence = LookupSequence("runlong");
+			}
+		}
+		else
+		{
+			iSequence = LookupActivity(NewActivity);
+		}
+	}
+
+	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
+
+	// In case someone calls this with something other than the ideal activity
+	m_IdealActivity = m_Activity;
+
+	// Set to the desired anim, or default anim if the desired is not present
+	if( iSequence > ACTIVITY_NOT_AVAILABLE )
+	{
+		if( pev->sequence != iSequence || !m_fSequenceLoops )
+		{
+			// don't reset frame between walk and run
+			if( !( OldActivity == ACT_WALK || OldActivity == ACT_RUN ) || !( NewActivity == ACT_WALK || NewActivity == ACT_RUN ) )
+				pev->frame = 0;
+		}
+
+		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
+		ResetSequenceInfo();
+		SetYawSpeed();
+	}
+	else
+	{
+		// Not available try to get default anim
+		ALERT( at_aiconsole, "%s has no sequence for act:%d\n", STRING( pev->classname ), NewActivity );
+		pev->sequence = 0;	// Set to the reset anim (if it's there)
 	}
 }
 
@@ -305,13 +365,17 @@ int CGonome::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 //=========================================================
 BOOL CGonome::CheckRangeAttack1(float flDot, float flDist)
 {
+	// gonome won't try to shoot in short range
+	if (flDist < 256)
+		return FALSE;
+
 	if (IsMoving() && flDist >= 512)
 	{
-		// squid will far too far behind if he stops running to spit at this distance from the enemy.
+		// gonome will far too far behind if he stops running to spit at this distance from the enemy.
 		return FALSE;
 	}
 
-	if (flDist > 64 && flDist <= 784 && flDot >= 0.5 && gpGlobals->time >= m_flNextSpitTime)
+	if (flDist > 64 && flDist <= 784 && flDot >= 0.5 && gpGlobals->time >= m_flNextThrowTime)
 	{
 		if (m_hEnemy != 0)
 		{
@@ -325,35 +389,17 @@ BOOL CGonome::CheckRangeAttack1(float flDot, float flDist)
 		if (IsMoving())
 		{
 			// don't spit again for a long time, resume chasing enemy.
-			m_flNextSpitTime = gpGlobals->time + 5;
+			m_flNextThrowTime = gpGlobals->time + 5;
 		}
 		else
 		{
 			// not moving, so spit again pretty soon.
-			m_flNextSpitTime = gpGlobals->time + 3;
+			m_flNextThrowTime = gpGlobals->time + 0.5;
 		}
 
 		return TRUE;
 	}
 
-	return FALSE;
-}
-
-//=========================================================
-// CheckMeleeAttack1 - gonome is a big guy, so has a longer
-// melee range than most monsters.
-//=========================================================
-BOOL CGonome::CheckMeleeAttack1(float flDot, float flDist)
-{
-	if (flDist <= GONOME_TOLERANCE_MELEE2_RANGE && flDot >= GONOME_TOLERANCE_MELEE2_DOT && RANDOM_LONG(0,1) == 0) {
-		gonnaAttack1 = false;
-		return TRUE;
-	}
-	else if (flDist <= GONOME_TOLERANCE_MELEE1_RANGE && flDot  >= GONOME_TOLERANCE_MELEE1_DOT)
-	{
-		gonnaAttack1 = true;
-		return TRUE;
-	}
 	return FALSE;
 }
 
@@ -409,32 +455,57 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 {
 	switch (pEvent->event)
 	{
-	case 1011:
-		// This may play sound twice
-		//EMIT_SOUND(ENT(pev), CHAN_VOICE, pEvent->options, 1, ATTN_NORM);
+	case GONOME_SCRIPT_EVENT_SOUND:
+		EMIT_SOUND(ENT(pev), CHAN_BODY, pEvent->options, 1, ATTN_NORM);
 		break;
+	case GONOME_AE_SPIT:
+	{
+		Vector vecArmPos, vecArmAng;
+		GetAttachment(0, vecArmPos, vecArmAng);
+
+		if (GetGonomeGuts(vecArmPos))
+		{
+			m_pGonomeGuts->pev->body = 1;
+			m_pGonomeGuts->pev->aiment = ENT(pev);
+			m_pGonomeGuts->pev->movetype = MOVETYPE_FOLLOW;
+		}
+		UTIL_BloodDrips( vecArmPos, UTIL_RandomBloodVector(), BLOOD_COLOR_RED, 35 );
+	}
+	break;
 	case GONOME_AE_THROW:
 	{
-		Vector	vecSpitOffset;
-		Vector	vecSpitDir;
-
 		UTIL_MakeVectors(pev->angles);
 		Vector vecArmPos, vecArmAng;
 		GetAttachment(0, vecArmPos, vecArmAng);
 
-		vecSpitOffset = vecArmPos;
-		Vector vecEnemyPosition;
-		if (m_hEnemy != 0)
-			vecEnemyPosition = (m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs);
-		else
-			vecEnemyPosition = m_vecEnemyLKP;
-		vecSpitDir = (vecEnemyPosition - vecSpitOffset).Normalize();
+		if (GetGonomeGuts(vecArmPos))
+		{
+			Vector	vecSpitDir;
 
-		vecSpitDir.x += RANDOM_FLOAT(-0.05, 0.05);
-		vecSpitDir.y += RANDOM_FLOAT(-0.05, 0.05);
-		vecSpitDir.z += RANDOM_FLOAT(-0.05, 0);
+			Vector vecEnemyPosition;
+			if (m_hEnemy != 0)
+				vecEnemyPosition = (m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs);
+			else
+				vecEnemyPosition = m_vecEnemyLKP;
+			vecSpitDir = (vecEnemyPosition - vecArmPos).Normalize();
 
-		CGonomeGuts::Shoot(pev, vecSpitOffset, vecSpitDir * 900);
+			vecSpitDir.x += RANDOM_FLOAT(-0.05, 0.05);
+			vecSpitDir.y += RANDOM_FLOAT(-0.05, 0.05);
+			vecSpitDir.z += RANDOM_FLOAT(-0.05, 0);
+
+			m_pGonomeGuts->pev->body = 0;
+			m_pGonomeGuts->pev->skin = 0;
+			m_pGonomeGuts->pev->owner = ENT( pev );
+			m_pGonomeGuts->pev->aiment = 0;
+			m_pGonomeGuts->pev->movetype = MOVETYPE_FLY;
+			m_pGonomeGuts->pev->velocity = vecSpitDir * 900;
+			m_pGonomeGuts->SetThink( &CGonomeGuts::Animate );
+			m_pGonomeGuts->pev->nextthink = gpGlobals->time + 0.1;
+			UTIL_SetOrigin(m_pGonomeGuts->pev, vecArmPos);
+
+			m_pGonomeGuts = 0;
+		}
+		UTIL_BloodDrips( vecArmPos, UTIL_RandomBloodVector(), BLOOD_COLOR_RED, 35 );
 	}
 	break;
 
@@ -443,10 +514,17 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 		CBaseEntity *pHurt = CheckTraceHullAttack(GONOME_MELEE_ATTACK_RADIUS, gSkillData.gonomeDmgOneSlash, DMG_SLASH);
 		if (pHurt)
 		{
-			pHurt->pev->punchangle.z = 20;
-			pHurt->pev->punchangle.x = 20;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 200;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+			{
+				pHurt->pev->punchangle.z = 9;
+				pHurt->pev->punchangle.x = 5;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 25;
+			}
+			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+		}
+		else
+		{
+			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
 		}
 	}
 	break;
@@ -456,10 +534,17 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 		CBaseEntity *pHurt = CheckTraceHullAttack(GONOME_MELEE_ATTACK_RADIUS, gSkillData.gonomeDmgOneSlash, DMG_SLASH);
 		if (pHurt)
 		{
-			pHurt->pev->punchangle.z = -20;
-			pHurt->pev->punchangle.x = 20;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -200;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+			{
+				pHurt->pev->punchangle.z = -9;
+				pHurt->pev->punchangle.x = 5;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -25;
+			}
+			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+		}
+		else
+		{
+			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
 		}
 	}
 	break;
@@ -470,7 +555,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case GONOME_AE_BITE4:
 		{
 			int iPitch;
-			CBaseEntity *pHurt = CheckTraceHullAttack(GONOME_TOLERANCE_MELEE2_RANGE, gSkillData.gonomeDmgOneBite, DMG_SLASH);
+			CBaseEntity *pHurt = CheckTraceHullAttack(GONOME_MELEE_ATTACK_RADIUS, gSkillData.gonomeDmgOneBite, DMG_SLASH);
 
 			if (pHurt)
 			{
@@ -486,10 +571,35 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 					break;
 				}
 
-				pHurt->pev->punchangle.z = RANDOM_LONG(-10, 10);
-				pHurt->pev->punchangle.x = RANDOM_LONG(-35, -45);
-				pHurt->pev->velocity = pHurt->pev->velocity - gpGlobals->v_forward * 50;
-				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 50;
+				if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+				{
+					if (pEvent->event == GONOME_AE_BITE4)
+					{
+						pHurt->pev->punchangle.x = 15;
+						pHurt->pev->velocity = pHurt->pev->velocity - gpGlobals->v_forward * 75;
+					}
+					else
+					{
+						pHurt->pev->punchangle.x = 9;
+						pHurt->pev->velocity = pHurt->pev->velocity - gpGlobals->v_forward * 25;
+					}
+				}
+#if FEATURE_GONOME_LOCK_PLAYER
+				if (pEvent->event == GONOME_AE_BITE4)
+				{
+					UnlockPlayer();
+				}
+				else if (pHurt->IsPlayer() && pHurt->IsAlive())
+				{
+					if (!m_fPlayerLocked)
+					{
+						CBasePlayer* player = (CBasePlayer*)pHurt;
+						player->EnableControl(FALSE);
+						m_lockedPlayer = player;
+						m_fPlayerLocked = TRUE;
+					}
+				}
+#endif
 			}
 		}
 		break;
@@ -540,7 +650,7 @@ void CGonome::Spawn()
 	m_flFieldOfView = 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
-	m_flNextSpitTime = gpGlobals->time;
+	m_flNextThrowTime = gpGlobals->time;
 
 	MonsterInit();
 }
@@ -564,6 +674,8 @@ void CGonome::Precache()
 	PRECACHE_SOUND_ARRAY(pIdleSounds);
 	PRECACHE_SOUND_ARRAY(pPainSounds);
 	PRECACHE_SOUND_ARRAY(pDeathSounds);
+	PRECACHE_SOUND_ARRAY(pAttackHitSounds);
+	PRECACHE_SOUND_ARRAY(pAttackMissSounds);
 
 	PRECACHE_SOUND("gonome/gonome_run.wav");
 
@@ -582,25 +694,6 @@ void CGonome::Precache()
 void CGonome::DeathSound(void)
 {
 	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM);
-}
-
-//========================================================
-// RunAI - overridden for gonome because there are things
-// that need to be checked every think.
-//========================================================
-void CGonome::RunAI(void)
-{
-	// first, do base class stuff
-	CBaseMonster::RunAI();
-
-	if (m_hEnemy != 0 && m_Activity == ACT_RUN)
-	{
-		// chasing enemy. Sprint for last bit
-		if ((pev->origin - m_hEnemy->pev->origin).Length2D() < GONOME_SPRINT_DIST)
-		{
-			pev->framerate = 1.25;
-		}
-	}
 }
 
 //=========================================================
@@ -755,32 +848,6 @@ Schedule_t* CGonome::GetScheduleOfType(int Type)
 		break;
 	}
 	return CBaseMonster::GetScheduleOfType(Type);
-}
-
-//=========================================================
-// Start task - selects the correct activity and performs
-// any necessary calculations to start the next task on the
-// schedule.
-//=========================================================
-void CGonome::StartTask(Task_t *pTask)
-{
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
-	switch (pTask->iTask)
-	{
-	case TASK_MELEE_ATTACK1:
-		{
-			if (gonnaAttack1)
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_melee1.wav", 1, ATTN_NORM);
-			else
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "gonome/gonome_melee2.wav", 1, ATTN_NORM);
-			CBaseMonster::StartTask(pTask);
-		}
-		break;
-	default:
-		CBaseMonster::StartTask(pTask);
-		break;
-	}
 }
 
 //=========================================================
