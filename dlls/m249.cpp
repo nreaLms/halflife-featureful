@@ -103,10 +103,10 @@ BOOL CM249::Deploy()
 	return DefaultDeploy("models/v_saw.mdl", "models/p_saw.mdl", M249_DEPLOY, "mp5", UseDecrement(), pev->body);
 }
 
-void CM249::Holster()
+void CM249::Holster(int skiplocal)
 {
 	m_fInSpecialReload = FALSE;
-	CBasePlayerWeapon::Holster();
+	CBasePlayerWeapon::Holster(skiplocal);
 }
 
 void CM249::PrimaryAttack()

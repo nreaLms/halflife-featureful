@@ -1289,7 +1289,7 @@ public:
 
 	void PrimaryAttack(void);
 	BOOL Deploy(void);
-	void Holster();
+	void Holster(int skiplocal = 0);
 	void Reload(void);
 	void WeaponTick();
 	void WeaponIdle(void);
