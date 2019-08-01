@@ -1354,11 +1354,6 @@ public:
 
 	const char* MyWModel() { return "models/w_m40a1.mdl"; }
 
-	BOOL m_fNeedAjustBolt;
-	int	 m_iBoltState;
-
-	enum SNIPER_BOLTSTATE { BOLTSTATE_FINE = 0, BOLTSTATE_ADJUST, BOLTSTATE_ADJUSTING, };
-
 private:
 	unsigned short m_usSniper;
 };

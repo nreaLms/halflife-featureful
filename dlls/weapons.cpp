@@ -1644,8 +1644,6 @@ IMPLEMENT_SAVERESTORE( CM249, CBasePlayerWeapon )
 #if FEATURE_SNIPERRIFLE
 TYPEDESCRIPTION	CSniperrifle::m_SaveData[] =
 {
-	DEFINE_FIELD( CSniperrifle, m_fNeedAjustBolt, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CSniperrifle, m_iBoltState, FIELD_INTEGER ),
 	DEFINE_FIELD( CSniperrifle, m_fInSpecialReload, FIELD_INTEGER ),
 };
 
