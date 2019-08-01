@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -16,7 +16,7 @@
 
 ===== triggers.cpp ========================================================
 
-  spawn and use functions for editor-placed triggers              
+  spawn and use functions for editor-placed triggers
 
 */
 
@@ -245,7 +245,7 @@ void CTriggerRelay::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 }
 
 //**********************************************************
-// The Multimanager Entity - when fired, will fire up to 16 targets 
+// The Multimanager Entity - when fired, will fire up to 16 targets
 // at specified times.
 // FLAG:		THREAD (create clones when triggered)
 // FLAG:		CLONE (this is a clone for a threaded execution)
@@ -265,7 +265,7 @@ public:
 	void EXPORT ManagerReport( void );
 #endif
 	BOOL HasTarget( string_t targetname );
-	
+
 	int ObjectCaps( void ) { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 	virtual int Save( CSave &save );
@@ -281,11 +281,11 @@ public:
 private:
 	inline BOOL IsClone( void ) { return ( pev->spawnflags & SF_MULTIMAN_CLONE ) ? TRUE : FALSE; }
 	inline BOOL ShouldClone( void )
-	{ 
+	{
 		if( IsClone() )
 			return FALSE;
 
-		return ( pev->spawnflags & SF_MULTIMAN_THREAD ) ? TRUE : FALSE; 
+		return ( pev->spawnflags & SF_MULTIMAN_THREAD ) ? TRUE : FALSE;
 	}
 
 	CMultiManager *Clone( void );
@@ -364,7 +364,7 @@ void CMultiManager::Spawn( void )
 }
 
 BOOL CMultiManager::HasTarget( string_t targetname )
-{ 
+{
 	for( int i = 0; i < m_cTargets; i++ )
 		if( FStrEq( STRING( targetname ), STRING( m_iTargetName[i] ) ) )
 			return TRUE;
@@ -372,7 +372,7 @@ BOOL CMultiManager::HasTarget( string_t targetname )
 	return FALSE;
 }
 
-// Designers were using this to fire targets that may or may not exist -- 
+// Designers were using this to fire targets that may or may not exist --
 // so I changed it to use the standard target fire code, made it a little simpler.
 void CMultiManager::ManagerThink( void )
 {
@@ -393,7 +393,7 @@ void CMultiManager::ManagerThink( void )
 			UTIL_Remove( this );
 			return;
 		}
-		SetUse( &CMultiManager::ManagerUse );// allow manager re-use 
+		SetUse( &CMultiManager::ManagerUse );// allow manager re-use
 	}
 	else
 		pev->nextthink = m_startTime + m_flTargetDelay[m_index];
@@ -676,7 +676,7 @@ void CTriggerMonsterJump::Touch( CBaseEntity *pOther )
 {
 	entvars_t *pevOther = pOther->pev;
 
-	if( !FBitSet( pevOther->flags, FL_MONSTER ) ) 
+	if( !FBitSet( pevOther->flags, FL_MONSTER ) )
 	{
 		// touched by a non-monster.
 		return;
@@ -684,7 +684,7 @@ void CTriggerMonsterJump::Touch( CBaseEntity *pOther )
 
 	pevOther->origin.z += 1;
 
-	if( FBitSet( pevOther->flags, FL_ONGROUND ) ) 
+	if( FBitSet( pevOther->flags, FL_ONGROUND ) )
 	{
 		// clear the onground so physics don't bitch
 		pevOther->flags &= ~FL_ONGROUND;
@@ -741,7 +741,7 @@ void PlayCDTrack( int iTrack )
 {
 	edict_t *pClient;
 
-	// manually find the single player. 
+	// manually find the single player.
 	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
 
 	// Can't play if the client is not connected!
@@ -820,7 +820,7 @@ void CTargetCDAudio::Think( void )
 {
 	edict_t *pClient;
 
-	// manually find the single player. 
+	// manually find the single player.
 	pClient = g_engfuncs.pfnPEntityOfEntIndex( 1 );
 
 	// Can't play if the client is not connected!
@@ -833,7 +833,7 @@ void CTargetCDAudio::Think( void )
 		Play();
 }
 
-void CTargetCDAudio::Play( void ) 
+void CTargetCDAudio::Play( void )
 {
 	PlayCDTrack( (int)pev->health );
 	UTIL_Remove( this );
@@ -887,7 +887,7 @@ void CTriggerHurt::RadiationThink( void )
 	Vector view_ofs;
 
 	// check to see if a player is in pvs
-	// if not, continue	
+	// if not, continue
 
 	// set origin to center of trigger so that this check works
 	origin = pev->origin;
@@ -917,7 +917,7 @@ void CTriggerHurt::RadiationThink( void )
 
 		// if player's current geiger counter range is larger
 		// than range to this trigger hurt, reset player's
-		// geiger counter range 
+		// geiger counter range
 
 		if( pPlayer->m_flgeigerRange >= flRange )
 			pPlayer->m_flgeigerRange = flRange;
@@ -1015,7 +1015,7 @@ void CBaseTrigger::HurtTouch( CBaseEntity *pOther )
 		}
 	}
 
-	// If this is time_based damage (poison, radiation), override the pev->dmg with a 
+	// If this is time_based damage (poison, radiation), override the pev->dmg with a
 	// default for the given damage type.  Monsters only take time-based damage
 	// while touching the trigger.  Player continues taking damage for a while after
 	// leaving the trigger
@@ -1064,7 +1064,7 @@ void CBaseTrigger::HurtTouch( CBaseEntity *pOther )
 
 	if( pev->target )
 	{
-		// trigger has a target it wants to fire. 
+		// trigger has a target it wants to fire.
 		if( pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYFIRE )
 		{
 			// if the toucher isn't a client, don't fire the target!
@@ -1516,7 +1516,7 @@ edict_t *CChangeLevel::FindLandmark( const char *pLandmarkName )
 }
 
 //=========================================================
-// CChangeLevel :: Use - allows level transitions to be 
+// CChangeLevel :: Use - allows level transitions to be
 // triggered by buttons, etc.
 //
 //=========================================================
@@ -1619,7 +1619,7 @@ void CChangeLevel::TouchChangeLevel( CBaseEntity *pOther )
 	ChangeLevelNow( pOther );
 }
 
-// Add a transition to the list, but ignore duplicates 
+// Add a transition to the list, but ignore duplicates
 // (a designer may have placed multiple trigger_changelevels with the same landmark)
 int CChangeLevel::AddTransitionToList( LEVELLIST *pLevelList, int listCount, const char *pMapName, const char *pLandmarkName, edict_t *pentLandmark )
 {
@@ -1962,7 +1962,7 @@ void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
 
 	if( !UTIL_IsMasterTriggered( m_sMaster, pOther ) )
 		return;
- 	
+
 	if( !( pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS ) )
 	{
 		// no monsters allowed!
@@ -1983,7 +1983,7 @@ void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
 
 	pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( pev->target ) );
 	if( FNullEnt( pentTarget ) )
-	   return;	
+	   return;
 
 	Vector tmp = VARS( pentTarget )->origin;
 
@@ -2013,7 +2013,6 @@ class CTriggerTeleport : public CBaseTrigger
 {
 public:
 	void Spawn( void );
-	void EXPORT TeleportUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 };
 
 LINK_ENTITY_TO_CLASS( trigger_teleport, CTriggerTeleport )
@@ -2021,72 +2020,7 @@ LINK_ENTITY_TO_CLASS( trigger_teleport, CTriggerTeleport )
 void CTriggerTeleport::Spawn( void )
 {
 	InitTrigger();
-	SetUse( &CTriggerTeleport::TeleportUse );
 	SetTouch( &CBaseTrigger::TeleportTouch );
-}
-
-void CTriggerTeleport::TeleportUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-{
-	CBaseEntity *teleport;
-
-	// it used on of6a5 map only
-    	if((teleport = UTIL_FindEntityByTargetname(0, "GeneWormTeleport")) == NULL)
-       	    return;
-
-    	entvars_t *pevToucher = pActivator->pev;
-	edict_t	*pentTarget = NULL;
-
-	// Only teleport monsters or clients
-	if( !FBitSet( pevToucher->flags, FL_CLIENT | FL_MONSTER ) )
-		return;
-
-	if( !UTIL_IsMasterTriggered( m_sMaster, pActivator ) )
-		return;
-
-	if( !( pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS ) )
-	{
-		// no monsters allowed!
-		if( FBitSet( pevToucher->flags, FL_MONSTER ) )
-		{
-			return;
-		}
-	}
-
-	if( ( pev->spawnflags & SF_TRIGGER_NOCLIENTS ) )
-	{
-		// no clients allowed
-		if( pActivator->IsPlayer() )
-		{
-			return;
-		}
-	}
-
-	pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( pev->target ) );
-	if( FNullEnt( pentTarget ) )
-	   return;
-
-	Vector tmp = VARS( pentTarget )->origin;
-
-	if( pActivator->IsPlayer() )
-	{
-		tmp.z -= pActivator->pev->mins.z;// make origin adjustments in case the teleportee is a player. (origin in center, not at feet)
-	}
-
-	tmp.z++;
-
-	pevToucher->flags &= ~FL_ONGROUND;
-
-	UTIL_SetOrigin( pevToucher, tmp );
-
-	pevToucher->angles = pentTarget->v.angles;
-
-	if( pActivator->IsPlayer() )
-	{
-		pevToucher->v_angle = pentTarget->v.angles;
-	}
-
-	pevToucher->fixangle = TRUE;
-	pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
 }
 
 LINK_ENTITY_TO_CLASS( info_teleport_destination, CPointEntity )
@@ -2432,7 +2366,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	{
 		if( m_pentPath->pev->speed != 0 )
 			m_targetSpeed = m_pentPath->pev->speed;
-		
+
 		m_flStopTime += m_pentPath->GetDelay();
 	}
 
@@ -2496,10 +2430,10 @@ void CTriggerCamera::FollowTarget()
 		dx += 360;
 	if( dx > 180 )
 		dx = dx - 360;
-	
-	if( dy < -180 ) 
+
+	if( dy < -180 )
 		dy += 360;
-	if( dy > 180 ) 
+	if( dy > 180 )
 		dy = dy - 360;
 
 	pev->avelocity.x = dx * 40 * gpGlobals->frametime;
@@ -2545,7 +2479,7 @@ void CTriggerCamera::Move()
 		{
 			pev->velocity = g_vecZero;
 		}
-		else 
+		else
 		{
 			if( m_pentPath->pev->speed != 0 )
 				m_targetSpeed = m_pentPath->pev->speed;
@@ -3159,144 +3093,155 @@ void CTriggerTimer::SetActive(BOOL active)
 class CTriggerGenewormHit : public CBaseTrigger
 {
 public:
-    void Precache();
-    void Spawn();
-    void EXPORT GeneWormTouch(CBaseEntity *pOther);
+	void Spawn();
+	void Precache();
+	void EXPORT GeneWormTouch(CBaseEntity *pOther);
 
-    static TYPEDESCRIPTION m_SaveData[];
+	static const char* pAttackSounds[];
 
-    virtual int Save( CSave &save );
-    virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
 
-    float m_flLastDamageTime;
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	float m_flLastDamageTime;
 };
 
 TYPEDESCRIPTION CTriggerGenewormHit::m_SaveData[] =
 {
-    DEFINE_FIELD(CTriggerGenewormHit, m_flLastDamageTime, FIELD_TIME),
+	DEFINE_FIELD(CTriggerGenewormHit, m_flLastDamageTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CTriggerGenewormHit,CBaseTrigger)
+IMPLEMENT_SAVERESTORE(CTriggerGenewormHit, CBaseTrigger)
 
-void CTriggerGenewormHit::Precache()
+const char *CTriggerGenewormHit::pAttackSounds[] =
 {
-
-}
-
+	"zombie/claw_strike1.wav",
+	"zombie/claw_strike2.wav",
+	"zombie/claw_strike3.wav"
+};
 
 void CTriggerGenewormHit::Spawn()
 {
-    Precache();
-    InitTrigger();
+	Precache();
+	InitTrigger();
 
-    SetTouch(&CTriggerGenewormHit::GeneWormTouch);
+	SetTouch(&CTriggerGenewormHit::GeneWormTouch);
 
-    if(pev->targetname)
-        SetUse(&CBaseTrigger::ToggleUse);
+	if(pev->targetname)
+		SetUse(&CBaseTrigger::ToggleUse);
 
 
-    if(pev->spawnflags & SF_TRIGGER_PUSH_START_OFF)
-        pev->solid = SOLID_NOT;
+	if(pev->spawnflags & SF_TRIGGER_HURT_START_OFF)
+		pev->solid = SOLID_NOT;
 
-    UTIL_SetOrigin(pev, pev->origin);
-    pev->dmg = gSkillData.gwormDmgHit;
-    m_flLastDamageTime = gpGlobals->time;
+	UTIL_SetOrigin(pev, pev->origin);
+	pev->dmg = gSkillData.gwormDmgHit;
+	m_flLastDamageTime = gpGlobals->time;
+}
+
+void CTriggerGenewormHit::Precache()
+{
+	PRECACHE_SOUND_ARRAY(pAttackSounds);
 }
 
 void CTriggerGenewormHit::GeneWormTouch(CBaseEntity *pOther)
 {
-    if( !pOther->pev->takedamage )
-        return;
+	if( gpGlobals->time - m_flLastDamageTime < 2 || !pOther->pev->takedamage )
+		return;
 
-    if( ( pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYTOUCH ) && !pOther->IsPlayer() )
-    {
-        // this trigger is only allowed to touch clients, and this ain't a client.
-        return;
-    }
+	if( ( pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYTOUCH ) && !pOther->IsPlayer() )
+	{
+		// this trigger is only allowed to touch clients, and this ain't a client.
+		return;
+	}
 
-    if( ( pev->spawnflags & SF_TRIGGER_HURT_NO_CLIENTS ) && pOther->IsPlayer() )
-        return;
+	if( ( pev->spawnflags & SF_TRIGGER_HURT_NO_CLIENTS ) && pOther->IsPlayer() )
+		return;
 
-    // HACKHACK -- In multiplayer, players touch this based on packet receipt.
-    // So the players who send packets later aren't always hurt.  Keep track of
-    // how much time has passed and whether or not you've touched that player
-    if( g_pGameRules->IsMultiplayer() )
-    {
-        if( pev->dmgtime > gpGlobals->time )
-        {
-            if( gpGlobals->time != pev->pain_finished )
-            {
-                // too early to hurt again, and not same frame with a different entity
-                if( pOther->IsPlayer() )
-                {
-                    int playerMask = 1 << ( pOther->entindex() - 1 );
+	// HACKHACK -- In multiplayer, players touch this based on packet receipt.
+	// So the players who send packets later aren't always hurt.  Keep track of
+	// how much time has passed and whether or not you've touched that player
+	if( g_pGameRules->IsMultiplayer() )
+	{
+		if( pev->dmgtime > gpGlobals->time )
+		{
+			if( gpGlobals->time != pev->pain_finished )
+			{
+				// too early to hurt again, and not same frame with a different entity
+				if( pOther->IsPlayer() )
+				{
+					int playerMask = 1 << ( pOther->entindex() - 1 );
 
-                    // If I've already touched this player (this time), then bail out
-                    if( pev->impulse & playerMask )
-                        return;
+					// If I've already touched this player (this time), then bail out
+					if( pev->impulse & playerMask )
+						return;
 
-                    // Mark this player as touched
-                    // BUGBUG - There can be only 32 players!
-                    pev->impulse |= playerMask;
-                }
-                else
-                {
-                    return;
-                }
-            }
-        }
-        else
-        {
-            // New clock, "un-touch" all players
-            pev->impulse = 0;
-            if( pOther->IsPlayer() )
-            {
-                int playerMask = 1 << ( pOther->entindex() - 1 );
+					// Mark this player as touched
+					// BUGBUG - There can be only 32 players!
+					pev->impulse |= playerMask;
+				}
+				else
+				{
+					return;
+				}
+			}
+		}
+		else
+		{
+			// New clock, "un-touch" all players
+			pev->impulse = 0;
+			if( pOther->IsPlayer() )
+			{
+				int playerMask = 1 << ( pOther->entindex() - 1 );
 
-                // Mark this player as touched
-                // BUGBUG - There can be only 32 players!
-                pev->impulse |= playerMask;
-            }
-        }
-    }
-    else	// Original code -- single player
-    {
-        if( pev->dmgtime > gpGlobals->time && gpGlobals->time != pev->pain_finished )
-        {
-            // too early to hurt again, and not same frame with a different entity
-            return;
-        }
-    }
+				// Mark this player as touched
+				// BUGBUG - There can be only 32 players!
+				pev->impulse |= playerMask;
+			}
+		}
+	}
+	else	// Original code -- single player
+	{
+		if( pev->dmgtime > gpGlobals->time && gpGlobals->time != pev->pain_finished )
+		{
+			// too early to hurt again, and not same frame with a different entity
+			return;
+		}
+	}
 
-    // If this is time_based damage (poison, radiation), override the pev->dmg with a
-    // default for the given damage type.  Monsters only take time-based damage
-    // while touching the trigger.  Player continues taking damage for a while after
-    // leaving the trigger
+	// If this is time_based damage (poison, radiation), override the pev->dmg with a
+	// default for the given damage type.  Monsters only take time-based damage
+	// while touching the trigger.  Player continues taking damage for a while after
+	// leaving the trigger
 
-    pOther->TakeDamage( pev, pev, gSkillData.gwormDmgHit, m_bitsDamageInflict );
+	pOther->TakeDamage( pev, pev, gSkillData.gwormDmgHit, m_bitsDamageInflict );
 
-    // Store pain time so we can get all of the other entities on this frame
-    pev->pain_finished = gpGlobals->time;
+	// Store pain time so we can get all of the other entities on this frame
+	pev->pain_finished = gpGlobals->time;
 
-    // Apply damage every half second
-    pev->dmgtime = gpGlobals->time + 0.5;// half second delay until this trigger can hurt toucher again
+	// Apply damage every half second
+	pev->dmgtime = gpGlobals->time + 0.5;// half second delay until this trigger can hurt toucher again
 
-    if( pev->target )
-    {
-        // trigger has a target it wants to fire.
-        if( pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYFIRE )
-        {
-            // if the toucher isn't a client, don't fire the target!
-            if( !pOther->IsPlayer() )
-            {
-                return;
-            }
-        }
+	EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, RANDOM_SOUND_ARRAY(pAttackSounds), VOL_NORM, 0.1, 0, 100 + RANDOM_FLOAT(-5,5));
+	m_flLastDamageTime = gpGlobals->time;
 
-        SUB_UseTargets( pOther, USE_TOGGLE, 0 );
-        if( pev->spawnflags & SF_TRIGGER_HURT_TARGETONCE )
-            pev->target = 0;
-    }
+	if( pev->target )
+	{
+		// trigger has a target it wants to fire.
+		if( pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYFIRE )
+		{
+			// if the toucher isn't a client, don't fire the target!
+			if( !pOther->IsPlayer() )
+			{
+				return;
+			}
+		}
+
+		SUB_UseTargets( pOther, USE_TOGGLE, 0 );
+		if( pev->spawnflags & SF_TRIGGER_HURT_TARGETONCE )
+			pev->target = 0;
+	}
 }
 
 LINK_ENTITY_TO_CLASS(trigger_geneworm_hit, CTriggerGenewormHit)
