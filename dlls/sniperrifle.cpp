@@ -105,17 +105,16 @@ void CSniperrifle::SecondaryAttack()
 	if ( m_pPlayer->pev->fov != 0 )
 	{
 		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
-		m_fInZoom = 0;
+		m_fInZoom = FALSE;
 	}
 	else if ( m_pPlayer->pev->fov != 15 )
 	{
 		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 15;
-		m_fInZoom = 1;
+		m_fInZoom = TRUE;
 	}
 
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/sniper_zoom.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 
-	pev->nextthink = UTIL_WeaponTimeBase() + 0.1;
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
 }
 void CSniperrifle::PrimaryAttack()
@@ -193,44 +192,46 @@ void CSniperrifle::Reload( void )
 
 	if (m_iClip == 0)
 	{
-		iResult = DefaultReload( 5, SNIPER_RELOAD1, 80 / 34 );
+		iResult = DefaultReload( 5, SNIPER_RELOAD1, 80.0 / 34 );
 		m_fInSpecialReload = 1;
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 2.25;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.25;
 	}
 	else
 	{
-		iResult = DefaultReload( 5, SNIPER_RELOAD3, 2.25 );
+		iResult = DefaultReload( SNIPERRIFLE_MAX_CLIP, SNIPER_RELOAD3, 2.25 );
 	}
 }
 void CSniperrifle::WeaponIdle( void )
 {
-	if (m_flTimeWeaponIdle <  UTIL_WeaponTimeBase() )
+	ResetEmptySound( );
+
+	m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
+
+	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
+		return;
+
+	if ( m_fInSpecialReload )
 	{
-		if ( m_fInSpecialReload )
+		m_fInSpecialReload = 0;
+		SendWeaponAnim( SNIPER_RELOAD2 );
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 49.0 / 27.0;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 49.0 / 27.0;
+	}
+	else
+	{
+		int iAnim;
+		if (m_iClip <= 0)
 		{
-			m_fInSpecialReload = 0;
-			SendWeaponAnim( SNIPER_RELOAD2 );
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 49.0 / 27.0;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 49.0 / 27.0;
+			iAnim = SNIPER_SLOWIDLE2;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 80.0 / 16.0;
 		}
 		else
 		{
-			m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
-
-			int iAnim;
-			if (m_iClip <= 0)
-			{
-				iAnim = SNIPER_SLOWIDLE2;
-				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 80.0 / 16.0;
-			}
-			else
-			{
-				iAnim = SNIPER_SLOWIDLE1;
-				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 67.5 / 16;
-			}
-			SendWeaponAnim( iAnim, 1 );
+			iAnim = SNIPER_SLOWIDLE1;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 67.5 / 16;
 		}
+		SendWeaponAnim( iAnim, 1 );
 	}
 }
 
