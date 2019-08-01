@@ -266,11 +266,15 @@
 	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
 ]
 
-@BaseClass = TalkMonster
+@BaseClass = CustomSentences
 [
 	UseSentence(String) : "Use Sentence"
 	UnUseSentence(String) : "Un-Use Sentence"
 	RefusalSentence(String) : "Refusal Sentence"
+]
+
+@BaseClass base(CustomSentences) = TalkMonster
+[
 	master(string) : "Master" : : "Decline following if locked by master"
 	tolerance(choices) : "Tolerance level" : : "Tolerance to player's hits" =
 	[
@@ -3325,7 +3329,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_grunt_ally_repel : "Human Grunt Ally (Repel)"
+@PointClass base(Monster, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_grunt_ally_repel : "Human Grunt Ally (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 49 =
 	[
@@ -3551,7 +3555,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_medic_ally_repel : "Medic (Repel)"
+@PointClass base(Monster, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_medic_ally_repel : "Medic (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 41 =
 	[
@@ -3723,7 +3727,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_torch_ally_repel : "Torch"
+@PointClass base(Monster, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_torch_ally_repel : "Torch (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 39 =
 	[

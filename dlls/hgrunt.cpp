@@ -2368,10 +2368,14 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		UTIL_Remove( this );
 		return;
 	}
-	if (FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
-	{
-		SetBits(pEntity->pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN);
-	}
+
+	const int knownFlags =
+			SF_MONSTER_GAG | SF_MONSTER_HITMONSTERCLIP | SF_MONSTER_PRISONER |
+			SF_MONSTER_DONT_DROP_GRUN | SF_SQUADMONSTER_LEADER;
+	const int flagsToSet = knownFlags & pev->spawnflags;
+	SetBits(pEntity->pev->spawnflags, flagsToSet);
+
+	pEntity->pev->netname = pev->netname;
 	pEntity->pev->weapons = pev->weapons;
 	pEntity->pev->health = pev->health;
 	pEntity->pev->model = pev->model;

@@ -2601,7 +2601,65 @@ MONSTERSTATE CHFGrunt :: GetIdealState ( void )
 // repelling down a line.
 //=========================================================
 
-class CHFGruntRepel : public CHGruntRepel
+class CTalkMonsterRepel : public CHGruntRepel
+{
+public:
+	void KeyValue(KeyValueData* pkvd);
+	void PrepareBeforeSpawn(CBaseEntity* pEntity);
+
+	int Save( CSave &save );
+	int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszUse;
+	string_t m_iszUnUse;
+	string_t m_iszDecline;
+};
+
+TYPEDESCRIPTION	CTalkMonsterRepel::m_SaveData[] =
+{
+	DEFINE_FIELD( CTalkMonsterRepel, m_iszUse, FIELD_STRING ),
+	DEFINE_FIELD( CTalkMonsterRepel, m_iszUnUse, FIELD_STRING ),
+	DEFINE_FIELD( CTalkMonsterRepel, m_iszDecline, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CTalkMonsterRepel, CHGruntRepel )
+
+void CTalkMonsterRepel::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq( pkvd->szKeyName, "UseSentence" ) )
+	{
+		m_iszUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "UnUseSentence" ) )
+	{
+		m_iszUnUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq( pkvd->szKeyName, "RefusalSentence" ))
+	{
+		m_iszDecline = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CHGruntRepel::KeyValue( pkvd );
+}
+
+void CTalkMonsterRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
+{
+	if (FBitSet(pev->spawnflags, SF_MONSTER_PREDISASTER))
+	{
+		SetBits(pEntity->pev->spawnflags, SF_MONSTER_PREDISASTER);
+	}
+
+	CTalkMonster* monster = (CTalkMonster*)pEntity;
+	monster->m_iszUse = m_iszUse;
+	monster->m_iszUnUse = m_iszUnUse;
+	monster->m_iszDecline = m_iszDecline;
+}
+
+class CHFGruntRepel : public CTalkMonsterRepel
 {
 public:
 	void KeyValue(KeyValueData* pkvd);
@@ -2614,33 +2672,34 @@ public:
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	int head;
+	int m_iGruntHead;
 };
 
 LINK_ENTITY_TO_CLASS( monster_grunt_ally_repel, CHFGruntRepel )
 
 TYPEDESCRIPTION	CHFGruntRepel::m_SaveData[] =
 {
-	DEFINE_FIELD( CHFGruntRepel, head, FIELD_INTEGER ),
+	DEFINE_FIELD( CHFGruntRepel, m_iGruntHead, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CHFGruntRepel, CHGruntRepel )
+IMPLEMENT_SAVERESTORE( CHFGruntRepel, CTalkMonsterRepel )
 
 void CHFGruntRepel::KeyValue(KeyValueData *pkvd)
 {
 	if( FStrEq(pkvd->szKeyName, "head" ) )
 	{
-		head = atoi( pkvd->szValue );
+		m_iGruntHead = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CHGruntRepel::KeyValue( pkvd );
+		CTalkMonsterRepel::KeyValue( pkvd );
 }
 
 void CHFGruntRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 {
 	CHFGrunt* grunt = (CHFGrunt*)pEntity;
-	grunt->m_iHead = head;
+	grunt->m_iHead = m_iGruntHead;
+	CTalkMonsterRepel::PrepareBeforeSpawn(pEntity);
 }
 
 class CMedicRepel : public CHFGruntRepel
@@ -2653,7 +2712,7 @@ public:
 
 LINK_ENTITY_TO_CLASS( monster_medic_ally_repel, CMedicRepel )
 
-class CTorchRepel : public CHGruntRepel
+class CTorchRepel : public CTalkMonsterRepel
 {
 public:
 	const char* TrooperName() {

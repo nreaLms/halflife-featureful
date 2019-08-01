@@ -1560,4 +1560,5 @@ void CTalkMonster::Precache( void )
 		m_szGrp[TLK_UNUSE] = STRING( m_iszUnUse );
 	if ( m_iszDecline )
 		m_szGrp[TLK_DECLINE] = STRING( m_iszDecline );
+	CFollowingMonster::Precache();
 }
