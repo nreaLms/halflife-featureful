@@ -192,7 +192,7 @@ TYPEDESCRIPTION	CPitWorm::m_SaveData[] =
 	DEFINE_FIELD(CPitWorm, m_posBeam, FIELD_POSITION_VECTOR),
 	DEFINE_FIELD(CPitWorm, m_vecBeam, FIELD_POSITION_VECTOR),
 	DEFINE_FIELD(CPitWorm, m_angleBeam, FIELD_POSITION_VECTOR),
-	DEFINE_FIELD(CPitWorm, m_flBeamExpireTime, FIELD_FLOAT), // FLOAT?
+	DEFINE_FIELD(CPitWorm, m_flBeamExpireTime, FIELD_TIME),
 	DEFINE_FIELD(CPitWorm, m_flBeamDir, FIELD_FLOAT),
 
 	DEFINE_ARRAY(CPitWorm, m_flLevels, FIELD_FLOAT, NUM_PITWORM_LEVELS),
@@ -221,7 +221,7 @@ TYPEDESCRIPTION	CPitWorm::m_SaveData[] =
 	DEFINE_FIELD(CPitWorm, m_fFirstSighting, FIELD_BOOLEAN),
 	DEFINE_FIELD(CPitWorm, m_fTopLevelLocked, FIELD_BOOLEAN),
 
-	DEFINE_FIELD(CPitWorm, m_flLastBlinkTime, FIELD_FLOAT), // FLOAT??
+	DEFINE_FIELD(CPitWorm, m_flLastBlinkTime, FIELD_TIME),
 	DEFINE_FIELD(CPitWorm, m_flLastBlinkInterval, FIELD_FLOAT),
 	DEFINE_FIELD(CPitWorm, m_flLastEventTime, FIELD_FLOAT),
 };
