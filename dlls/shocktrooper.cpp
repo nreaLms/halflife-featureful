@@ -563,6 +563,8 @@ void CStrooper::DropShockRoach()
 		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecPos, vecDropAngles );
 		if (pRoach)
 		{
+			if (ShouldFadeOnDeath())
+				pRoach->pev->spawnflags |= SF_MONSTER_FADECORPSE;
 			CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
 			if (pNewMonster && (m_iClass != 0 || m_reverseRelationship)) {
 				pNewMonster->m_iClass = Classify();
