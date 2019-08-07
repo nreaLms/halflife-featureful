@@ -589,7 +589,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 				{
 					UnlockPlayer();
 				}
-				else if (pHurt->IsPlayer() && pHurt->IsAlive())
+				else if (pHurt->IsPlayer())
 				{
 					if (!m_fPlayerLocked)
 					{
