@@ -801,9 +801,7 @@ void CShockRoach::StartTask(Task_t *pTask)
 
 void CShockRoach::AttackSound()
 {
-	int iSound = RANDOM_LONG(0,2);
-	if( iSound != 0 )
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 int CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
