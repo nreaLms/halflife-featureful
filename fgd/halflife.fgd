@@ -2090,6 +2090,8 @@
 
 @PointClass base(Targetname) = info_null : "info_null (spotlight target)" []
 
+@PointClass base(Targetname, Target) = info_pitworm_steam_lock : "Pitworm Steam Lock" []
+
 @PointClass base(PlayerClass) sequence(2) studio("models/player.mdl") = info_player_coop : "Player cooperative start" []
 @PointClass base(PlayerClass) sequence(2) studio("models/player.mdl") = info_player_deathmatch : "Player deathmatch start"
 [
