@@ -4256,6 +4256,8 @@
 	]
 ]
 
+@PointClass base(gibshooterbase) = pitworm_gibshooter : "Pitworm Gib Shooter" []
+
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 32) studio("models/pit_worm_up.mdl") = monster_pitworm : "Pit Worm"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
