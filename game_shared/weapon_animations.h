@@ -103,6 +103,19 @@ enum rpg_e
 	RPG_FIDGET_UL	// unloaded fidget
 };
 
+enum gauss_e
+{
+	GAUSS_IDLE = 0,
+	GAUSS_IDLE2,
+	GAUSS_FIDGET,
+	GAUSS_SPINUP,
+	GAUSS_SPIN,
+	GAUSS_FIRE,
+	GAUSS_FIRE2,
+	GAUSS_HOLSTER,
+	GAUSS_DRAW
+};
+
 enum egon_e
 {
 	EGON_IDLE1 = 0,
