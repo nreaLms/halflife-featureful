@@ -109,6 +109,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 
 #### Other new weapons
 
+* weapon_uzi - uzi from Sven Co-op (not enabled by default). No akimbo version implemented yet.
 * weapon_medkit - TFC-like medkit that allows to heal allies (not enabled by default)
 
 ### Other new entities

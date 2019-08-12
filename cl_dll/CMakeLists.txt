@@ -71,6 +71,7 @@ set (CLDLL_SOURCES
 	../dlls/shockrifle.cpp
 	../dlls/sporelauncher.cpp
 	../dlls/medkit.cpp
+	../dlls/uzi.cpp
 	ev_hldm.cpp
 	hl/hl_baseentity.cpp
 	hl/hl_events.cpp

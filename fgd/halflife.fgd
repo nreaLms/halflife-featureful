@@ -399,7 +399,7 @@
 		30: "Sporelauncher"
 		31: "Displacer"
 		32: "9mm Box"
-		//33: "Uzi"
+		33: "Uzi"
 		//34: "Uzi akimbo"
 		35: "Desert Eagle"
 		36: "Barnacle Grapple"
@@ -5786,6 +5786,7 @@
 @PointClass base(Weapon, Targetx) studio("models/w_displacer.mdl") = weapon_displacer : "Displacer" []
 @PointClass base(Weapon, Targetx) studio("models/w_spore_launcher.mdl") = weapon_sporelauncher : "Spore Launcher" []
 @PointClass base(Weapon, Targetx) studio("models/w_medkit.mdl") = weapon_medkit : "Medkit" []
+@PointClass base(Weapon, Targetx) studio("models/w_uzi.mdl") = weapon_uzi : "Single UZI" []
 
 @PointClass base(Weapon, Targetx) = world_items : "World Items" 
 [

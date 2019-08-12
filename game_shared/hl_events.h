@@ -55,6 +55,9 @@ void EV_SporeFire( struct event_args_s *args );
 #if FEATURE_MEDKIT
 void EV_MedkitFire( struct event_args_s *args );
 #endif
+#if FEATURE_UZI
+void EV_FireUzi( struct event_args_s *args );
+#endif
 }
 
 #endif

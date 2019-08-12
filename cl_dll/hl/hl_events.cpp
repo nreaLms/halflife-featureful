@@ -83,4 +83,7 @@ void Game_HookEvents( void )
 #if FEATURE_MEDKIT
 	gEngfuncs.pfnHookEvent( "events/medkit.sc", EV_MedkitFire );
 #endif
+#if FEATURE_UZI
+	gEngfuncs.pfnHookEvent( "events/uzi.sc", EV_FireUzi );
+#endif
 }

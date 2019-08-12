@@ -301,8 +301,8 @@ int CDisplacer::GetItemInfo(ItemInfo *p)
 	p->iSlot = 5;
 	p->iPosition = 1;
 #else
-	p->iSlot = 1;
-	p->iPosition = 3;
+	p->iSlot = 3;
+	p->iPosition = 6;
 #endif
 	p->iId = m_iId = WEAPON_DISPLACER;
 	p->iWeight = DISPLACER_WEIGHT;

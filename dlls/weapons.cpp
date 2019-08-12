@@ -157,6 +157,7 @@ void DecalGunshot( TraceResult *pTrace, int iBulletType )
 		case BULLET_MONSTER_556:
 		case BULLET_PLAYER_762:
 		case BULLET_MONSTER_762:
+		case BULLET_PLAYER_UZI:
 		default:
 			// smoke and decal
 			UTIL_GunshotDecalTrace( pTrace, DamageDecal( pEntity, DMG_BULLET ) );
@@ -397,6 +398,9 @@ void W_Precache( void )
 #endif
 #if FEATURE_SPORELAUNCHER
 	UTIL_PrecacheOtherWeapon( "weapon_sporelauncher" );
+#endif
+#if FEATURE_UZI
+	UTIL_PrecacheOtherWeapon( "weapon_uzi" );
 #endif
 	g_sModelIndexFireball = PRECACHE_MODEL( "sprites/zerogxplode.spr" );// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL( "sprites/WXplo1.spr" );// underwater fireball

@@ -765,6 +765,12 @@ cvar_t	sk_plr_displacer_radius2 = { "sk_plr_displacer_radius2", "0" };
 cvar_t	sk_plr_displacer_radius3 = { "sk_plr_displacer_radius3", "0" };
 #endif
 
+#if FEATURE_UZI
+cvar_t	sk_plr_uzi1 = {"sk_plr_uzi1","6"};
+cvar_t	sk_plr_uzi2 = {"sk_plr_uzi2","6"};
+cvar_t	sk_plr_uzi3 = {"sk_plr_uzi3","6"};
+#endif
+
 // HORNET
 cvar_t	sk_hornet_dmg1 = {"sk_hornet_dmg1","0"};
 cvar_t	sk_hornet_dmg2 = {"sk_hornet_dmg2","0"};
@@ -1555,6 +1561,13 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_displacer_radius1 );
 	CVAR_REGISTER( &sk_plr_displacer_radius2 );
 	CVAR_REGISTER( &sk_plr_displacer_radius3 );
+#endif
+
+#if FEATURE_UZI
+	// Glock Round
+	CVAR_REGISTER( &sk_plr_uzi1 );// {"sk_plr_uzi1","0"};
+	CVAR_REGISTER( &sk_plr_uzi2 );// {"sk_plr_uzi2","0"};
+	CVAR_REGISTER( &sk_plr_uzi3 );// {"sk_plr_uzi3","0"};
 #endif
 
 	// WORLD WEAPONS

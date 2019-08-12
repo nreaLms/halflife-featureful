@@ -116,6 +116,9 @@ public:
 #if FEATURE_PENGUIN
 #define	WEAPON_PENGUIN			26
 #endif
+#if FEATURE_UZI
+#define WEAPON_UZI				27
+#endif
 
 #if FEATURE_FLASHLIGHT_ITEM
 #define WEAPON_ALLWEAPONS		(~((1<<WEAPON_SUIT)|(1<<WEAPON_FLASHLIGHT)))
@@ -157,6 +160,7 @@ public:
 #define KNIFE_WEIGHT			0
 #define GRAPPLE_WEIGHT			21
 #define MEDKIT_WEIGHT		-1
+#define UZI_WEIGHT			15
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		100
@@ -201,6 +205,7 @@ public:
 #define SNIPERRIFLE_MAX_CLIP	5
 #define SHOCKRIFLE_MAX_CLIP		10
 #define SPORELAUNCHER_MAX_CLIP		5
+#define UZI_MAX_CLIP			32
 
 // the default amount of ammo that comes with each gun when it spawns
 #define GLOCK_DEFAULT_GIVE			17
@@ -230,6 +235,7 @@ public:
 #define SHOCKRIFLE_DEFAULT_GIVE		10
 #define SPORELAUNCHER_DEFAULT_GIVE	5
 #define MEDKIT_DEFAULT_GIVE			50
+#define UZI_DEFAULT_GIVE			UZI_MAX_CLIP
 
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	20
@@ -1548,6 +1554,39 @@ public:
 private:
 	unsigned short m_usSporeFire;
 };
+#endif
+
+#if FEATURE_UZI
+
+class CUzi : public CBasePlayerWeapon
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer( CBasePlayer *pPlayer );
+
+	void PrimaryAttack( void );
+	BOOL Deploy( void );
+	void Reload( void );
+	void WeaponIdle( void );
+	int m_iShell;
+
+	virtual BOOL UseDecrement( void )
+	{
+#if defined( CLIENT_WEAPONS )
+		return TRUE;
+#else
+		return FALSE;
+#endif
+	}
+
+	const char* MyWModel() { return "models/w_uzi.mdl"; }
+
+private:
+	unsigned short m_usUzi;
+};
+
 #endif
 
 #endif // WEAPONS_H

@@ -101,6 +101,9 @@ CBarnacleGrapple g_Grapple;
 #if FEATURE_MEDKIT
 CMedkit g_Medkit;
 #endif
+#if FEATURE_UZI
+CUzi g_Uzi;
+#endif
 
 /*
 ======================
@@ -683,6 +686,9 @@ void HUD_InitClientWeapons( void )
 #if FEATURE_MEDKIT
 	HUD_PrepEntity( &g_Medkit, &player );
 #endif
+#if FEATURE_UZI
+	HUD_PrepEntity( &g_Uzi, &player );
+#endif
 }
 
 /*
@@ -841,6 +847,11 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 #if FEATURE_MEDKIT
 		case WEAPON_MEDKIT:
 			pWeapon = &g_Medkit;
+			break;
+#endif
+#if FEATURE_UZI
+		case WEAPON_UZI:
+			pWeapon = &g_Uzi;
 			break;
 #endif
 	}

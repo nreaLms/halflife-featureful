@@ -69,8 +69,8 @@ const char *CBreakable::pSpawnObjects[] =
 	"weapon_sporelauncher",	// 30
 	"weapon_displacer",		// 31
 	"ammo_9mmbox",	// 32
-	NULL,		// 33
-	NULL,		// 34
+	"weapon_uzi",		// 33
+	"weapon_uziakimbo",		// 34
 	"weapon_eagle",		// 35
 	"weapon_grapple",		// 36
 	"weapon_medkit",		// 37

@@ -14,6 +14,7 @@ typedef	enum
 	BULLET_PLAYER_556, // m249
 	BULLET_PLAYER_762, // sniperrifle
 	BULLET_PLAYER_EAGLE, // desert eagle
+	BULLET_PLAYER_UZI, // uzi
 
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,

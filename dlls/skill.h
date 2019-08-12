@@ -247,6 +247,9 @@ struct skilldata_t
 	float plrDmgMedkit;
 	float plrMedkitTime;
 #endif
+#if FEATURE_UZI
+	float plrDmgUzi;
+#endif
 
 	// weapons shared by monsters
 	float monDmg9MM;

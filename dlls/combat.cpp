@@ -1478,6 +1478,10 @@ static float DamageByBulletType(int bulletType, float defaultDamge)
 	case BULLET_PLAYER_EAGLE:
 		return gSkillData.plrDmgEagle;
 #endif
+#if FEATURE_UZI
+	case BULLET_PLAYER_UZI:
+		return gSkillData.plrDmgUzi;
+#endif
 	case BULLET_MONSTER_9MM:
 		return gSkillData.monDmg9MM;
 	case BULLET_MONSTER_MP5:

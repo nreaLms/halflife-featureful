@@ -270,4 +270,13 @@ enum medkit_e {
 	MEDKIT_DRAW,
 };
 
+enum uzi_e {
+	UZI_IDLE1 = 0,
+	UZI_IDLE2,
+	UZI_IDLE3,
+	UZI_RELOAD,
+	UZI_DEPLOY,
+	UZI_SHOOT,
+};
+
 #endif

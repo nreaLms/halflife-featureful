@@ -160,6 +160,7 @@ set (SVDLL_SOURCES
 	triggers.cpp
 	tripmine.cpp
 	turret.cpp
+	uzi.cpp
 	util.cpp
 	voltigore.cpp
 	weapons.cpp
