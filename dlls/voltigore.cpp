@@ -645,7 +645,16 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		vecSpitOffset = (pev->origin + vecSpitOffset);
 		Vector vecEnemyPosition;
 		if (m_hEnemy != 0)
-			vecEnemyPosition = (m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs);
+		{
+			if (HasConditions(bits_COND_ENEMY_OCCLUDED))
+			{
+				vecEnemyPosition = m_vecEnemyLKP + (m_hEnemy->BodyTarget(pev->origin) - m_hEnemy->pev->origin);
+			}
+			else
+			{
+				vecEnemyPosition = m_hEnemy->BodyTarget(pev->origin);
+			}
+		}
 		else
 			vecEnemyPosition = m_vecEnemyLKP;
 		vecSpitDir = (vecEnemyPosition - vecSpitOffset).Normalize();
@@ -825,7 +834,6 @@ Schedule_t	slVoltigoreRangeAttack1[] =
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
 		bits_COND_HEAVY_DAMAGE |
-		bits_COND_ENEMY_OCCLUDED |
 		bits_COND_NO_AMMO_LOADED,
 		0,
 		"Voltigore Range Attack1"
