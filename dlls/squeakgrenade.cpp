@@ -40,6 +40,7 @@ public:
 	int DefaultClassify( void );
 	void EXPORT SuperBounceTouch( CBaseEntity *pOther );
 	void EXPORT HuntThink( void );
+	int	BloodColor( void ) { return CBaseMonster::BloodColor(); }
 	void Killed( entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
 
