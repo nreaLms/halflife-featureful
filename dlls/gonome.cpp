@@ -135,6 +135,7 @@ public:
 
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	void OnDying();
+	void UpdateOnRemove();
 
 	void UnlockPlayer();
 	CGonomeGuts* GetGonomeGuts(const Vector& pos);
@@ -215,6 +216,13 @@ void CGonome::OnDying()
 	CBaseMonster::OnDying();
 }
 
+void CGonome::UpdateOnRemove()
+{
+	ClearGuts();
+	UnlockPlayer();
+	CBaseMonster::UpdateOnRemove();
+}
+
 void CGonome::UnlockPlayer()
 {
 #if FEATURE_GONOME_LOCK_PLAYER
@@ -226,7 +234,7 @@ void CGonome::UnlockPlayer()
 		else // if ehandle is empty for some reason just unlock the first player
 			player = (CBasePlayer*)UTIL_FindEntityByClassname(0, "player");
 
-		if (player && player->IsAlive())
+		if (player)
 			player->EnableControl(TRUE);
 
 		m_lockedPlayer = 0;
@@ -253,7 +261,7 @@ void CGonome::ClearGuts()
 	if (m_pGonomeGuts)
 	{
 		UTIL_Remove(m_pGonomeGuts);
-		m_pGonomeGuts = 0;
+		m_pGonomeGuts = NULL;
 	}
 }
 
@@ -589,7 +597,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 				{
 					UnlockPlayer();
 				}
-				else if (pHurt->IsPlayer())
+				else if (pHurt->IsPlayer() && pHurt->IsAlive())
 				{
 					if (!m_fPlayerLocked)
 					{
