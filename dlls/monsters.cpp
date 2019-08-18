@@ -2436,7 +2436,7 @@ int CBaseMonster::IDefaultRelationship(int classify)
 
 #if FEATURE_RACEX_AND_AMIL_ENEMIES
 #define R_XA R_HT
-#define R_PA R_DL
+#define R_PA R_HT
 #else
 #define R_XA R_NO
 #define R_PA R_NO
