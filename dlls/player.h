@@ -322,8 +322,6 @@ public:
 
 	void SetMovementMode();
 
-	Vector m_vecLastViewAngles;
-
 	float m_flStartCharge;
 	float m_flAmmoStartCharge;
 	float m_flPlayAftershock;
@@ -347,6 +345,7 @@ public:
 	int m_lastSeenArmor;
 
 	float m_flNextChatTime;
+	Vector m_vecLastViewAngles;
 	float m_flNextRespawnMessageTime;
 #if FEATURE_DISPLACER
 	BOOL	m_fInXen;
@@ -370,6 +369,7 @@ public:
 #if FEATURE_MOVE_MODE
 	short m_movementState; // no need to save
 #endif
+
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
 
 #if FEATURE_ROPE
