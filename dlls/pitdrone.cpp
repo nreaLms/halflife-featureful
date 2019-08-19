@@ -502,8 +502,11 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 			// screeshake transforms the viewmodel as well as the viewangle. No problems with seeing the ends of the viewmodels.
 			UTIL_ScreenShake( pHurt->pev->origin, 25.0, 1.5, 0.7, 2 );
 
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 200;
+			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+			{
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 200;
+			}
 		}
 		else
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, pAttackMissSounds[RANDOM_LONG(0, ARRAYSIZE(pAttackMissSounds) - 1)], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));

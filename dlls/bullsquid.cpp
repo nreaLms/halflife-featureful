@@ -749,10 +749,13 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				if( pHurt )
 				{
-					//pHurt->pev->punchangle.z = -15;
-					//pHurt->pev->punchangle.x = -45;
-					pHurt->pev->velocity = pHurt->pev->velocity - gpGlobals->v_forward * 100;
-					pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+					if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+					{
+						//pHurt->pev->punchangle.z = -15;
+						//pHurt->pev->punchangle.x = -45;
+						pHurt->pev->velocity = pHurt->pev->velocity - gpGlobals->v_forward * 100;
+						pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+					}
 				}
 			}
 			break;
@@ -762,10 +765,13 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				if( pHurt ) 
 				{
-					pHurt->pev->punchangle.z = -20;
-					pHurt->pev->punchangle.x = 20;
-					pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 200;
-					pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+					if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+					{
+						pHurt->pev->punchangle.z = -20;
+						pHurt->pev->punchangle.x = 20;
+						pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 200;
+						pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+					}
 				}
 			}
 			break;

@@ -685,10 +685,13 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		CBaseEntity *pHurt = CheckTraceHullAttack(120, gSkillData.voltigoreDmgPunch, DMG_CLUB);
 		if (pHurt)
 		{
-			pHurt->pev->punchangle.z = -15;
-			pHurt->pev->punchangle.x = 15;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -150;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+			{
+				pHurt->pev->punchangle.z = -15;
+				pHurt->pev->punchangle.x = 15;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -150;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+			}
 
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pMeleeHitSounds), RANDOM_FLOAT(0.8, 0.9), ATTN_NORM);
 		}
@@ -705,9 +708,12 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		CBaseEntity *pHurt = CheckTraceHullAttack(120, gSkillData.voltigoreDmgPunch, DMG_CLUB);
 		if (pHurt)
 		{
-			pHurt->pev->punchangle.x = 20;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 150;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+			{
+				pHurt->pev->punchangle.x = 20;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 150;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100;
+			}
 
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pMeleeHitSounds), RANDOM_FLOAT(0.8, 0.9), ATTN_NORM);
 		}
@@ -1277,10 +1283,13 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 		CBaseEntity *pHurt = CheckTraceHullAttack(70, gSkillData.babyVoltigoreDmgPunch, DMG_CLUB | DMG_ALWAYSGIB);
 		if (pHurt)
 		{
-			pHurt->pev->punchangle.z = -10;
-			pHurt->pev->punchangle.x = 10;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -100;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 50;
+			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+			{
+				pHurt->pev->punchangle.z = -10;
+				pHurt->pev->punchangle.x = 10;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -100;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 50;
+			}
 
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pMeleeHitSounds), RANDOM_FLOAT(0.8, 0.9), ATTN_NORM);
 		}
@@ -1296,9 +1305,12 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 		CBaseEntity *pHurt = CheckTraceHullAttack(70, gSkillData.babyVoltigoreDmgPunch, DMG_CLUB | DMG_ALWAYSGIB);
 		if (pHurt)
 		{
-			pHurt->pev->punchangle.x = 15;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100;
-			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 50;
+			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
+			{
+				pHurt->pev->punchangle.x = 15;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100;
+				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 50;
+			}
 
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pMeleeHitSounds), RANDOM_FLOAT(0.8, 0.9), ATTN_NORM);
 		}
