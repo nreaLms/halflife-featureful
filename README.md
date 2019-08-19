@@ -77,6 +77,7 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * Security guards now check for friendly fire too.
 * Security guards can be spawned with gun drawn.
 * Scientists can heal other allies beside the player (e.g. security guards and other scientists)
+* Scientists play a medshot sound upong healing.
 * The delay before scientist can heal again can be configured via skill.cfg (1 minute by default)
 * Ally monsters can have a configurable tolerance level to player hits.
 * Monsters can have an alternative trigger condition to fire their trigger target.

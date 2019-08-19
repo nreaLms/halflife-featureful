@@ -693,6 +693,7 @@ void CScientist::Precache( void )
 {
 	PrecacheMyModel( "models/scientist.mdl" );
 	PrecacheSounds();
+	PRECACHE_SOUND( "items/medshot4.wav" );
 
 	// every new scientist must call this, otherwise
 	// when a level is loaded, nobody will talk (time is reset to 0)
@@ -1090,6 +1091,8 @@ void CScientist::Heal( void )
 		return;
 
 	m_hTargetEnt->TakeHealth( gSkillData.scientistHeal, DMG_GENERIC );
+	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "items/medshot4.wav", 0.75, ATTN_NORM );
+
 	// Don't heal again for 1 minute
 	m_healTime = gpGlobals->time + gSkillData.scientistHealTime;
 }
