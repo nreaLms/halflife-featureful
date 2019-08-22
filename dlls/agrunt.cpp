@@ -494,6 +494,8 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			if( pHornetMonster )
 			{
 				pHornetMonster->m_hEnemy = m_hEnemy;
+				pHornetMonster->m_iClass = m_iClass;
+				pHornetMonster->m_reverseRelationship = m_reverseRelationship;
 			}
 		}
 		break;

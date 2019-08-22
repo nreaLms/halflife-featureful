@@ -143,6 +143,13 @@ int CHornet::IRelationship( CBaseEntity *pTarget )
 		return R_NO;
 	}
 
+	// When hornets have a custom class, they perceieve other monsters from the point of view of this class
+	if (m_iClass || m_reverseRelationship)
+	{
+		const int classify = CBaseMonster::Classify();
+		return CBaseMonster::IDefaultRelationship(classify, pTarget->Classify());
+	}
+
 	return CBaseMonster::IRelationship( pTarget );
 }
 
@@ -157,6 +164,12 @@ int CHornet::DefaultClassify( void )
 	}
 
 	return	CLASS_ALIEN_BIOWEAPON;
+}
+
+// Other monsters always perceieve hornets as bioweapon
+int CHornet::Classify()
+{
+	return DefaultClassify();
 }
 
 //=========================================================

@@ -38,6 +38,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int DefaultClassify( void );
+	int Classify( void );
 	int IRelationship( CBaseEntity *pTarget );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
