@@ -68,7 +68,7 @@ public:
 	virtual float OneSlashDamage() { return gSkillData.zombieDmgOneSlash; }
 	virtual float BothSlashDamage() { return gSkillData.zombieDmgBothSlash; }
 protected:
-	void HandleAnimEventHelper( MonsterEvent_t *pEvent, float dmg, vec3_t velocityAdd, float punchz );
+	void SlashAttack( float dmg, float rightScalar, float forwardScalar, float punchz );
 	void ZombieSpawnHelper(const char* modelName, float health);
 	void PrecacheSounds();
 };
@@ -194,7 +194,7 @@ void CZombie::AttackSound( void )
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
-void CZombie::HandleAnimEventHelper( MonsterEvent_t *pEvent, float dmg, vec3_t velocityAdd, float punchz )
+void CZombie::SlashAttack(float dmg, float rightScalar, float forwardScalar, float punchz )
 {
 	CBaseEntity *pHurt = CheckTraceHullAttack( 70, dmg, DMG_SLASH );
 	if ( pHurt )
@@ -205,13 +205,13 @@ void CZombie::HandleAnimEventHelper( MonsterEvent_t *pEvent, float dmg, vec3_t v
 				pHurt->pev->punchangle.z = punchz;
 			}
 			pHurt->pev->punchangle.x = 5;
-			pHurt->pev->velocity = pHurt->pev->velocity + velocityAdd;
+			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * rightScalar + gpGlobals->v_forward * forwardScalar;
 		}
 		// Play a random attack hit sound
-		EMIT_SOUND_DYN ( ENT(pev), CHAN_WEAPON, pAttackHitSounds[ RANDOM_LONG(0,ARRAYSIZE(pAttackHitSounds)-1) ], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5) );
+		EMIT_SOUND_DYN ( ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5) );
 	}
 	else // Play a random attack miss sound
-		EMIT_SOUND_DYN ( ENT(pev), CHAN_WEAPON, pAttackMissSounds[ RANDOM_LONG(0,ARRAYSIZE(pAttackMissSounds)-1) ], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5) );
+		EMIT_SOUND_DYN ( ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5) );
 
 	if (RANDOM_LONG(0,1))
 		AttackSound();
@@ -222,15 +222,15 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 	switch( pEvent->event )
 	{
 		case ZOMBIE_AE_ATTACK_RIGHT:
-			HandleAnimEventHelper(pEvent, OneSlashDamage(), -gpGlobals->v_right * 100, -18 );
+			SlashAttack(OneSlashDamage(), -100, 0, -18 );
 		break;
 
 		case ZOMBIE_AE_ATTACK_LEFT:
-			HandleAnimEventHelper(pEvent, OneSlashDamage(), gpGlobals->v_right * 100, 18 );
+			SlashAttack(OneSlashDamage(), 100, 0, 18 );
 		break;
 
 		case ZOMBIE_AE_ATTACK_BOTH:
-			HandleAnimEventHelper(pEvent, BothSlashDamage(), gpGlobals->v_forward * -100, 0 );
+			SlashAttack(BothSlashDamage(), 0, -100, 0 );
 		break;
 
 		default:
