@@ -797,6 +797,7 @@ void CGargantua::PrescheduleThink( void )
 		EyeOn( MaxEyeBrightness() );
 
 	EyeUpdate();
+	CFollowingMonster::PrescheduleThink();
 }
 
 //=========================================================

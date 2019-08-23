@@ -336,6 +336,7 @@ void CAGrunt::PrescheduleThink( void )
 			}
 		}
 	}
+	CFollowingMonster::PrescheduleThink();
 }
 
 //=========================================================
