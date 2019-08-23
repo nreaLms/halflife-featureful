@@ -1389,6 +1389,7 @@ void CGargantua::PrecacheSounds()
 {
 	PRECACHE_SOUND_ARRAY( pAttackHitSounds );
 	PRECACHE_SOUND_ARRAY( pBeamAttackSounds );
+	PRECACHE_SOUND_ARRAY( pAttackMissSounds );
 	PRECACHE_SOUND_ARRAY( pRicSounds );
 	PRECACHE_SOUND_ARRAY( pFootSounds );
 	PRECACHE_SOUND_ARRAY( pIdleSounds );
@@ -1674,6 +1675,7 @@ void CBabyGargantua::PrecacheSounds()
 {
 	PRECACHE_SOUND_ARRAY( pAttackHitSounds );
 	PRECACHE_SOUND_ARRAY( pBeamAttackSounds );
+	PRECACHE_SOUND_ARRAY( pAttackMissSounds );
 	PRECACHE_SOUND_ARRAY( pFootSounds );
 	PRECACHE_SOUND_ARRAY( pIdleSounds );
 	PRECACHE_SOUND_ARRAY( pAlertSounds );
