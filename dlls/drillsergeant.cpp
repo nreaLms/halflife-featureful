@@ -192,9 +192,25 @@ Schedule_t* CDrillSergeant::GetSchedule()
 	switch (m_MonsterState) {
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_ALERT:
+	{
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)
 			return followingSchedule;
+	}
+		break;
+	case MONSTERSTATE_COMBAT:
+	{
+		if( HasConditions( bits_COND_ENEMY_DEAD ) )
+		{
+			// call base class, all code to handle dead enemies is centralized there.
+			return CBaseMonster::GetSchedule();
+		}
+		if( HasConditions( bits_COND_NEW_ENEMY ) && HasConditions( bits_COND_LIGHT_DAMAGE ) )
+			return GetScheduleOfType( SCHED_SMALL_FLINCH );
+		if( HasConditions( bits_COND_HEAR_SOUND ) )
+			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );	// Cower and panic from the scary sound!
+		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );			// Run & Cower
+	}
 		break;
 	}
 	return CTalkMonster::GetSchedule();
