@@ -19,13 +19,16 @@ public:
 	void SetYawSpeed(void);
 	int ISoundMask(void);
 	int DefaultClassify(void);
-	virtual int ObjectCaps( void ) { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; }
 	void DeathSound( void );
 	void PainSound( void );
+
+	Schedule_t *GetSchedule( void );
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
+
+	void TalkInit();
 
 	float m_painTime;
 };
@@ -69,7 +72,7 @@ void CRecruit::Spawn()
 
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
-	MonsterInit();
+	TalkMonsterInit();
 }
 
 void CRecruit::SetYawSpeed( void )
@@ -148,6 +151,52 @@ void CRecruit::DeathSound( void )
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	}
+}
+
+void CRecruit::TalkInit()
+{
+	CTalkMonster::TalkInit();
+
+	m_szGrp[TLK_ANSWER] = "RC_ANSWER";
+	m_szGrp[TLK_QUESTION] = "RC_QUESTION";
+	m_szGrp[TLK_IDLE] = "RC_IDLE";
+	m_szGrp[TLK_STARE] = "RC_STARE";
+	m_szGrp[TLK_USE] = "RC_OK";
+	m_szGrp[TLK_UNUSE] = "RC_WAIT";
+	m_szGrp[TLK_DECLINE] = "RC_POK";
+	m_szGrp[TLK_STOP] = "RC_STOP";
+
+	m_szGrp[TLK_NOSHOOT] = "RC_SCARED";
+	m_szGrp[TLK_HELLO] = "RC_HELLO";
+
+	m_szGrp[TLK_PLHURT1] = "!RC_CUREA";
+	m_szGrp[TLK_PLHURT2] = "!RC_CUREB";
+	m_szGrp[TLK_PLHURT3] = "!RC_CUREC";
+
+	m_szGrp[TLK_PHELLO] = NULL;// UNDONE
+	m_szGrp[TLK_PIDLE] = NULL;// UNDONE
+	m_szGrp[TLK_PQUESTION] = "RC_PQUEST";		// UNDONE
+
+	m_szGrp[TLK_SMELL] = "RC_SMELL";
+
+	m_szGrp[TLK_WOUND] = "RC_WOUND";
+	m_szGrp[TLK_MORTAL] = "RC_MORTAL";
+
+	m_szGrp[TLK_SHOT] = "RC_SHOT";
+	m_szGrp[TLK_MAD] = "RC_MAD";
+}
+
+Schedule_t* CRecruit::GetSchedule()
+{
+	switch (m_MonsterState) {
+	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_ALERT:
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
+		break;
+	}
+	return CTalkMonster::GetSchedule();
 }
 
 #endif

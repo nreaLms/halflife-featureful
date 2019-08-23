@@ -2779,6 +2779,38 @@
 		1 : "run"
 	]
 ]
+@PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/drill.mdl") = monster_drillsergeant : "Drill Sergeant"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle1"
+		1 : "idle2"
+		2 : "idle3"
+		3 : "walk"
+		4 : "run"
+		5 : "turnleft"
+		6 : "turnright"
+		7 : "smlflinch"
+		8 : "diesimple"
+		9 : "diebackward"
+		10 : "dieforward"
+		11 : "dead_on_side"
+		12 : "dead_on_stomach"
+		13 : "hands_on_hips"
+		14 : "pointL_yell"
+		15 : "pointF_bark"
+		16 : "bark_loop"
+		17 : "mega_yell"
+		18 : "mega_bark"
+		19 : "blow_whistle"
+		20 : "bino_look"
+	]
+	skin(Choices) : "Skin" : 0 =
+	[
+		0 : "White"
+		1 : "Black"
+	]
+]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 16) studio("models/aflock.mdl") = monster_flyer_flock : "Flock of Flyers"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -4403,6 +4435,21 @@
 		5 : "jump"
 		6 : "eat"
 		7 : "die1"
+	]
+]
+
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/recruit.mdl") = monster_recruit : "Recruit"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle1"
+		1 : "walk"
+		2 : "run"
+		3 : "turnleft"
+		4 : "turnright"
+		5 : "pushups"
+		6 : "jumping_jacks"
+		7 : "salute"
 	]
 ]
 

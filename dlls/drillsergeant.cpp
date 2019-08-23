@@ -20,16 +20,16 @@ public:
 	void SetYawSpeed(void);
 	int ISoundMask(void);
 	int DefaultClassify(void);
-	virtual int ObjectCaps( void ) { return CTalkMonster::ObjectCaps() | FCAP_IMPULSE_USE; }
 	void DeathSound( void );
 	void PainSound( void );
 
-	void DeclineFollowing();
-	void EXPORT DrillUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	Schedule_t *GetSchedule( void );
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
+
+	void TalkInit();
 
 	float m_painTime;
 };
@@ -74,19 +74,6 @@ void CDrillSergeant::Spawn()
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
 	TalkMonsterInit();
-}
-
-void CDrillSergeant::DrillUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
-{
-	if( m_useTime > gpGlobals->time )
-		return;
-	if( pCaller != NULL && pCaller->IsPlayer() && IRelationship(pCaller) < R_DL && IRelationship(pCaller) != R_FR )
-		DeclineFollowing();
-}
-
-void CDrillSergeant::DeclineFollowing()
-{
-	PlaySentence( "DR_POK", 2, VOL_NORM, ATTN_NORM );
 }
 
 void CDrillSergeant::SetYawSpeed( void )
@@ -165,6 +152,52 @@ void CDrillSergeant::DeathSound( void )
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	}
+}
+
+void CDrillSergeant::TalkInit()
+{
+	CTalkMonster::TalkInit();
+
+	m_szGrp[TLK_ANSWER] = "DR_ANSWER";
+	m_szGrp[TLK_QUESTION] = "DR_QUESTION";
+	m_szGrp[TLK_IDLE] = "DR_IDLE";
+	m_szGrp[TLK_STARE] = "DR_STARE";
+	m_szGrp[TLK_USE] = "DR_OK";
+	m_szGrp[TLK_UNUSE] = "DR_WAIT";
+	m_szGrp[TLK_DECLINE] = "DR_POK";
+	m_szGrp[TLK_STOP] = "DR_STOP";
+
+	m_szGrp[TLK_NOSHOOT] = "DR_SCARED";
+	m_szGrp[TLK_HELLO] = "DR_HELLO";
+
+	m_szGrp[TLK_PLHURT1] = "!DR_CUREA";
+	m_szGrp[TLK_PLHURT2] = "!DR_CUREB";
+	m_szGrp[TLK_PLHURT3] = "!DR_CUREC";
+
+	m_szGrp[TLK_PHELLO] = NULL;// UNDONE
+	m_szGrp[TLK_PIDLE] = NULL;// UNDONE
+	m_szGrp[TLK_PQUESTION] = "DR_PQUEST";		// UNDONE
+
+	m_szGrp[TLK_SMELL] = "DR_SMELL";
+
+	m_szGrp[TLK_WOUND] = "DR_WOUND";
+	m_szGrp[TLK_MORTAL] = "DR_MORTAL";
+
+	m_szGrp[TLK_SHOT] = "DR_SHOT";
+	m_szGrp[TLK_MAD] = "DR_MAD";
+}
+
+Schedule_t* CDrillSergeant::GetSchedule()
+{
+	switch (m_MonsterState) {
+	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_ALERT:
+		Schedule_t* followingSchedule = GetFollowingSchedule();
+		if (followingSchedule)
+			return followingSchedule;
+		break;
+	}
+	return CTalkMonster::GetSchedule();
 }
 
 #endif
