@@ -56,7 +56,9 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * monster_male_assassin_dead (was not in Opposing Force)
 * monster_human_medic_ally_dead (was not in Opposing Force)
 * monster_human_torch_ally_dead (was not in Opposing Force)
+* monster_drillsergeant_dead
 * monster_alien_grunt_dead
+* monster_bullchicken_dead
 * monster_pitdrone_dead
 * monster_shocktrooper_dead (Opposing Force had monster_ShockTrooper_dead, but it was bugged)
 * monster_zombie_dead

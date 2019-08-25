@@ -2812,6 +2812,24 @@
 		1 : "Black"
 	]
 ]
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/drill.mdl") = monster_drillsergeant_dead : "Dead Drill Sergeant"
+[
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On side"
+		1 : "On stomach"
+	]
+	sequence(Choices) : "Animation Sequence (editor)" : 11 =
+	[
+		11 : "dead_on_side"
+		12 : "dead_on_stomach"
+	]
+	skin(Choices) : "Skin" : 0 =
+	[
+		0 : "White"
+		1 : "Black"
+	]
+]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 16) studio("models/aflock.mdl") = monster_flyer_flock : "Flock of Flyers"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =

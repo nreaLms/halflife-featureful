@@ -216,4 +216,29 @@ Schedule_t* CDrillSergeant::GetSchedule()
 	return CTalkMonster::GetSchedule();
 }
 
+class CDeadDrillSergeant : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
+
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[2];
+};
+
+const char *CDeadDrillSergeant::m_szPoses[] = { "dead_on_side", "dead_on_stomach" };
+
+const char* CDeadDrillSergeant::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_drillsergeant_dead, CDeadDrillSergeant )
+
+void CDeadDrillSergeant :: Spawn( )
+{
+	SpawnHelper("models/drill.mdl");
+	MonsterInitDead();
+}
+
 #endif

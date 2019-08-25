@@ -2730,7 +2730,7 @@ class CDeadFGrunt : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY; }
+	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
 	void KeyValue( KeyValueData *pkvd );
 	const char* getPos(int pos) const;
@@ -3149,7 +3149,7 @@ class CDeadTorch : public CDeadMonster
 {
 public:
 	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY; }
+	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
