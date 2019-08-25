@@ -2124,6 +2124,7 @@
 [
 	message(string) : "Message" : : "Message from titles.txt to show on pickup"
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
+	hudname(string) : "Hud name" : : "Custom name from hud.txt to show on pickup. The default is item_security"
 ]
 @PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_suit.mdl") = item_suit : "HEV Suit"
 [
