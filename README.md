@@ -129,6 +129,11 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * op4mortar
 * trigger_playerfreeze
 
+### Blue Shift entities
+
+* item_armorvest
+* item_helmet
+
 #### Decay entities
 
 * item_eyescanner (works a bit different, may be not compatible with Decay PC maps)

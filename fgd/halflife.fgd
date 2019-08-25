@@ -2117,6 +2117,25 @@
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
 ]
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_battery.mdl") = item_battery : "HEV battery" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/barney_vest.mdl") = item_armorvest : "Armor vest"
+[
+	sequence(choices) : "Placement" : 0 =
+	[
+		0 : "Standing"
+		1 : "Lying"
+		2 : "Lying upside-down"
+		3 : "Reclining"
+	]
+]
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/barney_helmet.mdl") = item_helmet : "Helmet"
+[
+	sequence(choices) : "Placement" : 0 =
+	[
+		0 : "Hanging"
+		1 : "Lying"
+		2 : "Lying upside-down"
+	]
+]
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_flashlight.mdl") = item_flashlight : "Flashlight" []
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit" []
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []

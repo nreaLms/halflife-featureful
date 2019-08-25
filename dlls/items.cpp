@@ -225,6 +225,7 @@ void CItem::PrecacheMyModel(const char *model)
 
 class CItemSuit : public CItem
 {
+public:
 	void Spawn( void )
 	{
 		Precache();
@@ -268,15 +269,16 @@ LINK_ENTITY_TO_CLASS( item_suit, CItemSuit )
 
 class CItemBattery : public CItem
 {
+public:
 	void Spawn( void )
 	{
 		Precache();
-		SetMyModel( "models/w_battery.mdl" );
+		SetMyModel( DefaultModel() );
 		CItem::Spawn();
 	}
 	void Precache( void )
 	{
-		PrecacheMyModel( "models/w_battery.mdl" );
+		PrecacheMyModel( DefaultModel() );
 		PRECACHE_SOUND( "items/gunpickup2.wav" );
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
@@ -289,10 +291,7 @@ class CItemBattery : public CItem
 		if( ( pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY ) &&
 			( pPlayer->pev->weapons & ( 1 << WEAPON_SUIT ) ) )
 		{
-			int pct;
-			char szcharge[64];
-
-			pPlayer->pev->armorvalue += gSkillData.batteryCapacity;
+			pPlayer->pev->armorvalue += DefaultCapacity();
 			pPlayer->pev->armorvalue = Q_min( pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY );
 
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
@@ -301,24 +300,54 @@ class CItemBattery : public CItem
 				WRITE_STRING( STRING( pev->classname ) );
 			MESSAGE_END();
 
-			// Suit reports new power level
-			// For some reason this wasn't working in release build -- round it.
-			pct = (int)( (float)( pPlayer->pev->armorvalue * 100.0 ) * ( 1.0 / MAX_NORMAL_BATTERY ) + 0.5 );
-			pct = ( pct / 5 );
-			if( pct > 0 )
-				pct--;
+			if (ShouldSetSuitUpdate())
+			{
+				int pct;
+				char szcharge[64];
+				// Suit reports new power level
+				// For some reason this wasn't working in release build -- round it.
+				pct = (int)( (float)( pPlayer->pev->armorvalue * 100.0 ) * ( 1.0 / MAX_NORMAL_BATTERY ) + 0.5 );
+				pct = ( pct / 5 );
+				if( pct > 0 )
+					pct--;
 
-			sprintf( szcharge,"!HEV_%1dP", pct );
+				sprintf( szcharge,"!HEV_%1dP", pct );
 
-			//EMIT_SOUND_SUIT( ENT( pev ), szcharge );
-			pPlayer->SetSuitUpdate( szcharge, FALSE, SUIT_NEXT_IN_30SEC);
+				//EMIT_SOUND_SUIT( ENT( pev ), szcharge );
+				pPlayer->SetSuitUpdate( szcharge, FALSE, SUIT_NEXT_IN_30SEC);
+			}
+
 			return TRUE;
 		}
 		return FALSE;
 	}
+protected:
+	virtual const char* DefaultModel() { return "models/w_battery.mdl"; }
+	virtual bool ShouldSetSuitUpdate() { return true; }
+	virtual int DefaultCapacity() { return gSkillData.batteryCapacity; }
 };
 
 LINK_ENTITY_TO_CLASS( item_battery, CItemBattery )
+
+class CItemArmorVest : public CItemBattery
+{
+protected:
+	const char* DefaultModel() { return "models/barney_vest.mdl"; }
+	bool ShouldSetSuitUpdate() { return false; }
+	int DefaultCapacity() { return 60; }
+};
+
+LINK_ENTITY_TO_CLASS( item_armorvest, CItemArmorVest )
+
+class CItemHelmet : public CItemBattery
+{
+protected:
+	const char* DefaultModel() { return "models/barney_helmet.mdl"; }
+	bool ShouldSetSuitUpdate() { return false; }
+	int DefaultCapacity() { return 40; }
+};
+
+LINK_ENTITY_TO_CLASS( item_helmet, CItemHelmet )
 
 class CItemAntidote : public CItem
 {
