@@ -35,6 +35,10 @@ In case you enable new monsters or weapons don't forget to add their skill value
 * monster_zombie_soldier
 * monster_op4loader
 
+#### Blue Shift monsters
+
+* monster_rosenberg
+
 #### Sven Co-op monsters
 
 * monster_babygarg - smaller version of Gargantua monster

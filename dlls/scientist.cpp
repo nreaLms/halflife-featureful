@@ -126,8 +126,12 @@ public:
 protected:
 	void SciSpawnHelper(const char* modelName, float health);
 	void PrecacheSounds();
-	
-private:	
+
+	virtual const char* HealSentence() { return "SC_HEAL"; }
+	virtual const char* ScreamSentence() { return "SC_SCREAM"; }
+	virtual const char* FearSentence() { return "SC_FEAR"; }
+	virtual const char* PlayerFearSentence() { return "SC_PLFEAR"; }
+
 	float m_painTime;
 	float m_healTime;
 	float m_fearTime;
@@ -436,7 +440,7 @@ void CScientist::Scream( void )
 	{
 		Talk( 10 );
 		m_hTalkTarget = m_hEnemy;
-		PlaySentence( "SC_SCREAM", RANDOM_FLOAT( 3, 6 ), VOL_NORM, ATTN_NORM );
+		PlaySentence( ScreamSentence(), RANDOM_FLOAT( 3, 6 ), VOL_NORM, ATTN_NORM );
 	}
 }
 
@@ -455,7 +459,7 @@ void CScientist::StartTask( Task_t *pTask )
 		//if( FOkToSpeak() )
 		Talk( 2 );
 		m_hTalkTarget = m_hTargetEnt;
-		PlaySentence( "SC_HEAL", 2, VOL_NORM, ATTN_IDLE );
+		PlaySentence( HealSentence(), 2, VOL_NORM, ATTN_IDLE );
 		TaskComplete();
 		break;
 	case TASK_SCREAM:
@@ -476,9 +480,9 @@ void CScientist::StartTask( Task_t *pTask )
 			//The enemy can be null here. - Solokiller
 			//Discovered while testing the barnacle grapple on headcrabs with scientists in view.
 			if( m_hEnemy != 0 && m_hEnemy->IsPlayer() )
-				PlaySentence( "SC_PLFEAR", 5, VOL_NORM, ATTN_NORM );
+				PlaySentence( PlayerFearSentence(), 5, VOL_NORM, ATTN_NORM );
 			else
-				PlaySentence( "SC_FEAR", 5, VOL_NORM, ATTN_NORM );
+				PlaySentence( FearSentence(), 5, VOL_NORM, ATTN_NORM );
 		}
 		TaskComplete();
 		break;
@@ -1485,6 +1489,140 @@ void CSittingCleansuitScientist::Spawn()
 }
 
 LINK_ENTITY_TO_CLASS( monster_sitting_cleansuit_scientist, CSittingCleansuitScientist )
+#endif
+
+#if FEATURE_ROSENBERG
+
+#define FEATURE_ROSENBERG_DECAY 0
+
+class CRosenberg : public CScientist
+{
+public:
+	void Spawn();
+	void Precache();
+	const char* DefaultDisplayName() { return "Dr. Rosenberg"; }
+	void TalkInit();
+	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
+	const char* HealSentence() { return "RO_HEAL"; }
+	const char* ScreamSentence() { return "RO_SCREAM"; }
+	const char* FearSentence() { return "RO_FEAR"; }
+	const char* PlayerFearSentence() { return "RO_PLFEAR"; }
+	void PainSound();
+
+#if FEATURE_ROSENBERG_DECAY
+	BOOL CanHeal() { return false; }
+	bool ReadyToHeal() {return false; }
+#endif
+};
+
+LINK_ENTITY_TO_CLASS( monster_rosenberg, CRosenberg )
+
+void CRosenberg::Spawn()
+{
+	Precache( );
+#if FEATURE_ROSENBERG_DECAY
+	SciSpawnHelper("models/scientist_rosenberg.mdl", gSkillData.scientistHealth * 2);
+#else
+	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth * 2);
+	pev->body = 3;
+#endif
+	TalkMonsterInit();
+}
+
+void CRosenberg::Precache()
+{
+#if FEATURE_ROSENBERG_DECAY
+	PrecacheMyModel("models/scientist_rosenberg.mdl");
+#else
+	PrecacheMyModel("models/scientist.mdl");
+#endif
+	PRECACHE_SOUND( "rosenberg/ro_pain0.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain1.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain2.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain3.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain4.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain5.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain6.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain7.wav" );
+	PRECACHE_SOUND( "rosenberg/ro_pain8.wav" );
+	TalkInit();
+	CTalkMonster::Precache();
+}
+
+void CRosenberg::TalkInit()
+{
+	CTalkMonster::TalkInit();
+
+	m_szGrp[TLK_ANSWER] = "RO_ANSWER";
+	m_szGrp[TLK_QUESTION] = "RO_QUESTION";
+	m_szGrp[TLK_IDLE] = "RO_IDLE";
+	m_szGrp[TLK_STARE] = "RO_STARE";
+	m_szGrp[TLK_USE] = "RO_OK";
+	m_szGrp[TLK_UNUSE] = "RO_WAIT";
+	m_szGrp[TLK_DECLINE] = "RO_POK";
+	m_szGrp[TLK_STOP] = "RO_STOP";
+	m_szGrp[TLK_NOSHOOT] = "RO_SCARED";
+	m_szGrp[TLK_HELLO] = "RO_HELLO";
+
+	m_szGrp[TLK_PLHURT1] = "!RO_CUREA";
+	m_szGrp[TLK_PLHURT2] = "!RO_CUREB";
+	m_szGrp[TLK_PLHURT3] = "!RO_CUREC";
+
+	m_szGrp[TLK_PHELLO] = "RO_PHELLO";
+	m_szGrp[TLK_PIDLE] = "RO_PIDLE";
+	m_szGrp[TLK_PQUESTION] = "RO_PQUEST";
+	m_szGrp[TLK_SMELL] = "RO_SMELL";
+
+	m_szGrp[TLK_WOUND] = "RO_WOUND";
+	m_szGrp[TLK_MORTAL] = "RO_MORTAL";
+
+	m_szGrp[TLK_SHOT] = NULL;
+	m_szGrp[TLK_MAD] = NULL;
+
+	m_voicePitch = 100;
+}
+
+void CRosenberg::PainSound()
+{
+	if( gpGlobals->time < m_painTime )
+		return;
+
+	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
+
+	const char* painSound = NULL;
+	switch( RANDOM_LONG( 0, 8 ) )
+	{
+	case 0:
+		painSound ="rosenberg/ro_pain0.wav";
+		break;
+	case 1:
+		painSound ="rosenberg/ro_pain1.wav";
+		break;
+	case 2:
+		painSound ="rosenberg/ro_pain2.wav";
+		break;
+	case 3:
+		painSound ="rosenberg/ro_pain3.wav";
+		break;
+	case 4:
+		painSound ="rosenberg/ro_pain4.wav";
+		break;
+	case 5:
+		painSound ="rosenberg/ro_pain5.wav";
+		break;
+	case 6:
+		painSound ="rosenberg/ro_pain6.wav";
+		break;
+	case 7:
+		painSound ="rosenberg/ro_pain7.wav";
+		break;
+	case 8:
+		painSound ="rosenberg/ro_pain8.wav";
+		break;
+	}
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, painSound, 1, ATTN_NORM, 0, GetVoicePitch() );
+}
+
 #endif
 
 //=========================================================
