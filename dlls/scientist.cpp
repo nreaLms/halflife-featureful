@@ -1377,15 +1377,8 @@ void CSittingScientist::SetAnswerQuestion( CTalkMonster *pSpeaker )
 int CSittingScientist::FIdleSpeak( void )
 { 
 	// try to start a conversation, or make statement
-	int pitch;
-
 	if( !FOkToSpeak() )
 		return FALSE;
-
-	// set global min delay for next conversation
-	CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 4.8, 5.2 );
-
-	pitch = GetVoicePitch();
 
 	// if there is a friend nearby to speak to, play sentence, set friend's response time, return
 
@@ -1394,22 +1387,20 @@ int CSittingScientist::FIdleSpeak( void )
 
 	if( pentFriend && RANDOM_LONG( 0, 1 ) )
 	{
+		PlaySentence( m_szGrp[TLK_PQUESTION], RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
+
 		CTalkMonster *pTalkMonster = GetClassPtr( (CTalkMonster *)pentFriend->pev );
 		pTalkMonster->SetAnswerQuestion( this );
+		pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
 
 		IdleHeadTurn( pentFriend->pev->origin );
-		SENTENCEG_PlayRndSz( ENT( pev ), m_szGrp[TLK_PQUESTION], 1.0, ATTN_IDLE, 0, pitch );
-		// set global min delay for next conversation
-		CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 4.8, 5.2 );
 		return TRUE;
 	}
 
 	// otherwise, play an idle statement
 	if( RANDOM_LONG( 0, 1 ) )
 	{
-		SENTENCEG_PlayRndSz( ENT( pev ), m_szGrp[TLK_PIDLE], 1.0, ATTN_IDLE, 0, pitch );
-		// set global min delay for next conversation
-		CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 4.8, 5.2 );
+		PlaySentence( m_szGrp[TLK_PIDLE], RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
 		return TRUE;
 	}
 
