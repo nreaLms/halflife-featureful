@@ -23,7 +23,7 @@
 
 #define MAX_WEAPONS		32		// ???
 
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 #define MAX_WEAPON_SLOTS		7
 #define MAX_ITEM_TYPES			8
 #else

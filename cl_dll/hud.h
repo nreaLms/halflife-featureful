@@ -24,7 +24,7 @@
 #define HUD_H
 #include "mod_features.h"
 
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 #define RGB_YELLOWISH 0x0000A000
 #else
 #define RGB_YELLOWISH 0x00FFA000 //255,160,0
@@ -557,7 +557,7 @@ private:
 
 	int m_HUD_title_life;
 	int m_HUD_title_half;
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 	int m_HUD_title_opposing;
 	int m_HUD_title_force;
 #endif

@@ -210,7 +210,7 @@ public:
 // the default amount of ammo that comes with each gun when it spawns
 #define GLOCK_DEFAULT_GIVE			17
 #define PYTHON_DEFAULT_GIVE			6
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 #define MP5_DEFAULT_GIVE			50
 #else
 #define MP5_DEFAULT_GIVE			25

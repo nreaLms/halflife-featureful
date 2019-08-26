@@ -75,7 +75,7 @@ int CM249::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = M249_MAX_CLIP;
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 	p->iSlot = 5;
 	p->iPosition = 0;
 #else

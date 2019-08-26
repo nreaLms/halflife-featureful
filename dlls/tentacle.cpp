@@ -338,7 +338,7 @@ void CTentacle::KeyValue( KeyValueData *pkvd )
 
 int CTentacle::Level( float dz )
 {
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 	if( dz < 96 )
 		return 0;
 	if( dz < 150 )
@@ -360,7 +360,7 @@ float CTentacle::MyHeight()
 {
 	switch( MyLevel() )
 	{
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 	case 1:
 		return 136;
 	case 2:

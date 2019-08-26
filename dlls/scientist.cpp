@@ -31,7 +31,7 @@
 #define		NUM_SCIENTIST_HEADS		4 // four heads available for scientist model, used when randoming a scientist head
 
 // used for body change when scientist uses the needle
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 #define		NUM_SCIENTIST_BODIES		6
 #else
 #define		NUM_SCIENTIST_BODIES 4

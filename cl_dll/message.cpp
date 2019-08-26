@@ -48,7 +48,7 @@ int CHudMessage::VidInit( void )
 {
 	m_HUD_title_half = gHUD.GetSpriteIndex( "title_half" );
 	m_HUD_title_life = gHUD.GetSpriteIndex( "title_life" );
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 	m_HUD_title_opposing = gHUD.GetSpriteIndex( "title_opposing" );
 	m_HUD_title_force = gHUD.GetSpriteIndex( "title_force" );
 #endif
@@ -345,7 +345,7 @@ int CHudMessage::Draw( float fTime )
 			SPR_Set( gHUD.GetSprite( m_HUD_title_life ), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1 );
 			SPR_DrawAdditive( 0, x + halfWidth, y, &gHUD.GetSpriteRect( m_HUD_title_life ) );
 
-#if FEATURE_OPFOR
+#if FEATURE_OPFOR_SPECIFIC
 			y += fullHeight;
 
 			halfWidth = gHUD.GetSpriteRect( m_HUD_title_opposing ).right - gHUD.GetSpriteRect( m_HUD_title_opposing ).left;
