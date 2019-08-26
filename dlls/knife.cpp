@@ -288,7 +288,7 @@ int CKnife::Swing(int fFirst)
 		SetThink(&CKnife::Smack);
 		pev->nextthink = UTIL_WeaponTimeBase() + 0.2;
 #endif
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.25);
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25;
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25;
 	}
 
