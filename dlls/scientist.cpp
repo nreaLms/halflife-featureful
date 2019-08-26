@@ -749,7 +749,7 @@ void CScientist::TalkInit()
 	m_szGrp[TLK_MAD] = NULL;
 
 	// get voice for head
-	switch( pev->body % 3 )
+	switch( pev->body % NUM_SCIENTIST_BODIES )
 	{
 	default:
 	case HEAD_GLASSES:
