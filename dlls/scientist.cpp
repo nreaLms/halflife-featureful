@@ -652,6 +652,13 @@ void CScientist::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 void CScientist::SciSpawnHelper(const char* modelName, float health)
 {
+	// We need to set it before precache so the right voice will be chosen
+	if( pev->body == -1 )
+	{
+		// -1 chooses a random head
+		pev->body = RANDOM_LONG( 0, NUM_SCIENTIST_HEADS - 1 );// pick a head, any head
+	}
+
 	Precache();
 
 	SetMyModel( modelName );
@@ -668,25 +675,19 @@ void CScientist::SciSpawnHelper(const char* modelName, float health)
 	//m_flDistTooFar = 256.0;
 
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_OPEN_DOORS | bits_CAP_AUTO_DOORS | bits_CAP_USE;
-
-	// White hands
-	pev->skin = 0;
-
-	if( pev->body == -1 )
-	{
-		// -1 chooses a random head
-		pev->body = RANDOM_LONG( 0, NUM_SCIENTIST_HEADS - 1 );// pick a head, any head
-	}
-
-	// Luther is black, make his hands black
-	if( pev->body == HEAD_LUTHER )
-		pev->skin = 1;
 }
 
 void CScientist::Spawn()
 {
-	Precache( );
 	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
+
+	// White hands
+	pev->skin = 0;
+
+	// Luther is black, make his hands black
+	if( pev->body == HEAD_LUTHER )
+		pev->skin = 1;
+
 	TalkMonsterInit();
 }
 
@@ -1432,7 +1433,6 @@ LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist, CCleansuitScientist )
 
 void CCleansuitScientist::Spawn()
 {
-	Precache( );
 	SciSpawnHelper("models/cleansuit_scientist.mdl", gSkillData.cleansuitScientistHealth);
 	TalkMonsterInit();
 }
@@ -1519,7 +1519,6 @@ LINK_ENTITY_TO_CLASS( monster_rosenberg, CRosenberg )
 
 void CRosenberg::Spawn()
 {
-	Precache( );
 #if FEATURE_ROSENBERG_DECAY
 	SciSpawnHelper("models/scientist_rosenberg.mdl", gSkillData.scientistHealth * 2);
 #else
@@ -1545,6 +1544,9 @@ void CRosenberg::Precache()
 	PRECACHE_SOUND( "rosenberg/ro_pain6.wav" );
 	PRECACHE_SOUND( "rosenberg/ro_pain7.wav" );
 	PRECACHE_SOUND( "rosenberg/ro_pain8.wav" );
+
+	PRECACHE_SOUND( "items/medshot4.wav" );
+
 	TalkInit();
 	CTalkMonster::Precache();
 }
