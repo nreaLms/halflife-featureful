@@ -1980,7 +1980,7 @@ void CHFGrunt :: DeathSound ( void )
 
 void CHFGrunt::IdleSound()
 {
-	if (FOkToSpeak() && (g_fGruntAllyQuestion || RANDOM_LONG(0,1)))
+	if (FOkToSpeak() && InSquad() && (g_fGruntAllyQuestion || RANDOM_LONG(0,1)))
 	{
 		if (g_fGruntAllyQuestion)
 		{
