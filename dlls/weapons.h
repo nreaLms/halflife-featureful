@@ -66,6 +66,8 @@ public:
 #define ITEM_SECURITY		3
 #define ITEM_BATTERY		4
 
+#define SF_ITEM_NOFALL (1<<9)
+
 #define WEAPON_NONE				0
 #define WEAPON_CROWBAR			1
 #define	WEAPON_GLOCK			2

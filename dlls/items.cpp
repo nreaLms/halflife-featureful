@@ -92,22 +92,23 @@ extern int gEvilImpulse101;
 
 void CItem::Spawn( void )
 {
-	pev->movetype = MOVETYPE_TOSS;
+	if (FBitSet(pev->spawnflags, SF_ITEM_NOFALL))
+		pev->movetype = MOVETYPE_NONE;
+	else
+		pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
 	SetTouch( &CItem::ItemTouch );
-	SetThink( &CItem::FallThink );
-	pev->nextthink = gpGlobals->time+0.1;
-}
 
-void CItem::FallThink()
-{
-	if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
+	if (pev->movetype != MOVETYPE_NONE)
 	{
-		ALERT(at_error, "Item %s fell out of level at %f,%f,%f\n", STRING( pev->classname ), pev->origin.x, pev->origin.y, pev->origin.z);
-		UTIL_Remove( this );
-		return;
+		if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
+		{
+			ALERT(at_error, "Item %s fell out of level at %f,%f,%f\n", STRING( pev->classname ), pev->origin.x, pev->origin.y, pev->origin.z);
+			UTIL_Remove( this );
+			return;
+		}
 	}
 }
 

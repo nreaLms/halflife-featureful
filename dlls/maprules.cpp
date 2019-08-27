@@ -992,7 +992,7 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_SUIT)
 	{
-		player->GiveNamedItem("item_suit", m_suitLogon ? (1 << (m_suitLogon-1)) : m_suitLogon);
+		player->GiveNamedItem("item_suit", (m_suitLogon ? (1 << (m_suitLogon-1)) : m_suitLogon) | SF_ITEM_NOFALL);
 		if (pev->spawnflags & SF_PLAYER_SETTINGS_LONGJUMP)
 		{
 			player->GiveNamedItem("item_longjump");

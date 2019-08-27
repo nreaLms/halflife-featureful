@@ -3881,11 +3881,11 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		break;
 	case 101:
 		gEvilImpulse101 = TRUE;
-		GiveNamedItem( "item_suit" );
+		GiveNamedItem( "item_suit", SF_ITEM_NOFALL );
 #if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
 		GiveNamedItem( "item_flashlight" );
 #endif
-		GiveNamedItem( "item_battery" );
+		GiveNamedItem( "item_battery", SF_ITEM_NOFALL );
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_9mmhandgun" );
 		GiveNamedItem( "ammo_9mmclip" );
