@@ -98,7 +98,7 @@ void CItem::Spawn( void )
 		pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetOrigin( pev, pev->origin );
-	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
+	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	SetTouch( &CItem::ItemTouch );
 
 	if (pev->movetype != MOVETYPE_NONE)
@@ -119,6 +119,17 @@ void CItem::ItemTouch( CBaseEntity *pOther )
 	}
 }
 
+void CItem::FallThink()
+{
+	pev->nextthink = gpGlobals->time + 0.1;
+	if( pev->flags & FL_ONGROUND )
+	{
+		pev->solid = SOLID_TRIGGER;
+		UTIL_SetOrigin( pev, pev->origin );
+		ResetThink();
+	}
+}
+
 int CItem::ObjectCaps()
 {
 	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
@@ -126,6 +137,12 @@ int CItem::ObjectCaps()
 	} else {
 		return CBaseEntity::ObjectCaps();
 	}
+}
+
+void CItem::SetObjectCollisionBox()
+{
+	pev->absmin = pev->origin + Vector( -16, -16, 0 );
+	pev->absmax = pev->origin + Vector( 16, 16, 16 );
 }
 
 void CItem::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )

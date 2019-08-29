@@ -23,11 +23,13 @@ public:
 	CBaseEntity *Respawn( void );
 	void EXPORT ItemTouch( CBaseEntity *pOther );
 	void EXPORT Materialize( void );
+	void EXPORT FallThink( void );
 	virtual BOOL MyTouch( CBasePlayer *pPlayer )
 	{
 		return FALSE;
 	}
 	int ObjectCaps();
+	void SetObjectCollisionBox();
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void TouchOrUse( CBaseEntity* pOther );
 	void SetMyModel( const char* model );
