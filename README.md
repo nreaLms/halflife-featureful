@@ -147,6 +147,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 #### Spirit entities
 
 * env_model
+* env_shockwave
 * env_state
 
 #### Sven Co-op entities

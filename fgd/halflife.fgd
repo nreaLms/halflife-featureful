@@ -1192,6 +1192,33 @@
 	frequency(string) : "0.1 = jerk, 255.0 = rumble" : "2.5"
 ]
 
+@PointClass base(Targetname) = env_shockwave : "Shockwave Effect"
+[
+	spawnflags(flags) =
+	[
+		1: "Centered" : 0
+		2: "Repeatable" : 0
+	]
+	m_iszPosition(string) : "Position (blank = here) [LP]"
+	netname(sprite) : "Spritename" : "sprites/shockwave.spr"
+	rendercolor(color255): "Color": "188 220 255"
+	renderamt(integer) : "Opacity (0-255)": 255
+	m_iTime(integer) : "Duration" : 2
+	m_iRadius(integer) : "Final radius" : 1000
+	m_iHeight(integer) : "Wave height" : 32
+	m_iScrollRate(integer) : "Scroll rate" : 0
+	m_iNoise(integer) : "Distortion ('noise')" : 0
+	m_iFrameRate(integer) : "Frame Rate" : 0
+	m_iStartFrame(integer) : "Starting Frame" : 0
+	m_cType(Choices) : "Type" =
+	[
+		0 : "Default (Cylinder)"
+		19 : "Torus"
+		20 : "Disk"
+		21 : "Cylinder"
+	]
+]
+
 @PointClass base(gibshooterbase, RenderFields) size(-16 -16 -16, 16 16 16) = env_shooter : "Model Shooter"
 [
 	shootmodel(studio) : "Model or Sprite name" : ""

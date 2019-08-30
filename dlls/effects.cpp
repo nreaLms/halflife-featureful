@@ -3266,3 +3266,161 @@ void CBlowerCannon::BlowerCannonThink( void )
 }
 
 #endif
+
+//==================================================================
+//LRC- Shockwave effect, like when a Houndeye attacks.
+//==================================================================
+#define SF_SHOCKWAVE_CENTERED 1
+#define SF_SHOCKWAVE_REPEATABLE 2
+
+class CEnvShockwave : public CPointEntity
+{
+public:
+	void	Precache( void );
+	void	Spawn( void ) { Precache(); }
+	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void	KeyValue( KeyValueData *pkvd );
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	void DoEffect( Vector vecPos );
+
+	int m_iTime;
+	int m_iRadius;
+	int	m_iHeight;
+	int m_iScrollRate;
+	int m_iNoise;
+	int m_iFrameRate;
+	int m_iStartFrame;
+	int m_iSpriteTexture;
+	char m_cType;
+	int m_iszPosition;
+};
+
+LINK_ENTITY_TO_CLASS( env_shockwave, CEnvShockwave )
+
+TYPEDESCRIPTION	CEnvShockwave::m_SaveData[] =
+{
+	DEFINE_FIELD( CEnvShockwave, m_iHeight, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_iTime, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_iRadius, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_iScrollRate, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_iNoise, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_iFrameRate, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_iStartFrame, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_iSpriteTexture, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvShockwave, m_cType, FIELD_CHARACTER ),
+	DEFINE_FIELD( CEnvShockwave, m_iszPosition, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CEnvShockwave, CBaseEntity )
+
+void CEnvShockwave::Precache( void )
+{
+	m_iSpriteTexture = PRECACHE_MODEL( (char *)STRING(pev->netname) );
+}
+
+void CEnvShockwave::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "m_iTime"))
+	{
+		m_iTime = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iRadius"))
+	{
+		m_iRadius = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iHeight"))
+	{
+		m_iHeight = atoi(pkvd->szValue)/2; //LRC- the actual height is doubled when drawn
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iScrollRate"))
+	{
+		m_iScrollRate = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iNoise"))
+	{
+		m_iNoise = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iFrameRate"))
+	{
+		m_iFrameRate = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iStartFrame"))
+	{
+		m_iStartFrame = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszPosition"))
+	{
+		m_iszPosition = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_cType"))
+	{
+		m_cType = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue( pkvd );
+}
+
+void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	Vector vecPos = pev->origin;
+	if (m_iszPosition)
+	{
+		CBaseEntity* posEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszPosition));
+		if (posEnt)
+			vecPos = posEnt->pev->origin;
+	}
+
+	if (!(pev->spawnflags & SF_SHOCKWAVE_CENTERED))
+		vecPos.z += m_iHeight;
+
+	int type = m_cType;
+	switch (type) {
+	case TE_BEAMTORUS:
+	case TE_BEAMDISK:
+	case TE_BEAMCYLINDER:
+		break;
+	default:
+		type = TE_BEAMCYLINDER;
+		break;
+	}
+
+	// blast circle
+	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
+		WRITE_BYTE( type );
+		WRITE_COORD( vecPos.x );// coord coord coord (center position)
+		WRITE_COORD( vecPos.y );
+		WRITE_COORD( vecPos.z );
+		WRITE_COORD( vecPos.x );// coord coord coord (axis and radius)
+		WRITE_COORD( vecPos.y );
+		WRITE_COORD( vecPos.z + m_iRadius );
+		WRITE_SHORT( m_iSpriteTexture ); // short (sprite index)
+		WRITE_BYTE( m_iStartFrame ); // byte (starting frame)
+		WRITE_BYTE( m_iFrameRate ); // byte (frame rate in 0.1's)
+		WRITE_BYTE( m_iTime ); // byte (life in 0.1's)
+		WRITE_BYTE( m_iHeight );  // byte (line width in 0.1's)
+		WRITE_BYTE( m_iNoise );   // byte (noise amplitude in 0.01's)
+		WRITE_BYTE( pev->rendercolor.x );   // byte,byte,byte (color)
+		WRITE_BYTE( pev->rendercolor.y );
+		WRITE_BYTE( pev->rendercolor.z );
+		WRITE_BYTE( pev->renderamt );  // byte (brightness)
+		WRITE_BYTE( m_iScrollRate );	// byte (scroll speed in 0.1's)
+	MESSAGE_END();
+
+	if (!(pev->spawnflags & SF_SHOCKWAVE_REPEATABLE))
+	{
+		SetThink(&CEnvShockwave:: SUB_Remove );
+		pev->nextthink = gpGlobals->time;
+	}
+}
