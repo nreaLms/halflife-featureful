@@ -5629,7 +5629,7 @@
 
 @SolidClass = trigger_changelevel : "Trigger: Change level"
 [
-	targetname(string) : "Name"
+	targetname(target_source) : "Name"
 	map(string) : "New map name"
 	landmark(string) : "Landmark name"
 	changetarget(target_destination) : "Change Target"
