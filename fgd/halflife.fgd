@@ -5450,6 +5450,12 @@
 		3 : "Alert"
 		4 : "Idle or Alert"
 	]
+	follow_action(choices) : "Follow action" : : "Start or stop following a player upon sentence start" =
+	[
+		0 : "No"
+		1 : "Start following"
+		2 : "Stop following"
+	]
 ]
 
 @PointClass base(Targetname, Targetx, Angles) flags(Angle) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sequence : "Scripted Sequence"

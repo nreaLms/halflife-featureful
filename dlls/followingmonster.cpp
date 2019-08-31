@@ -429,12 +429,18 @@ void CFollowingMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCall
 	if( !ReadyForUse() )
 		return;
 
+	DoFollowerUse(pCaller, true);
+}
+
+void CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence)
+{
 	if( pCaller != NULL && pCaller->IsPlayer() && IRelationship(pCaller) < R_DL && IRelationship(pCaller) != R_FR )
 	{
 		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...
 		if (IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster))
 		{
-			DeclineFollowing(pCaller);
+			if (saySentence)
+				DeclineFollowing(pCaller);
 		}
 		else if( CanFollow() )
 		{
@@ -444,12 +450,12 @@ void CFollowingMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCall
 				ALERT( at_console, "I'm not following you, you evil person!\n" );
 			else
 			{
-				StartFollowing( pCaller );
+				StartFollowing( pCaller, saySentence );
 			}
 		}
 		else
 		{
-			StopFollowing( TRUE );
+			StopFollowing( TRUE, saySentence );
 		}
 	}
 }

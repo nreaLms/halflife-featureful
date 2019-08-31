@@ -55,9 +55,11 @@ public:
 	virtual void LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
 	virtual int MaxFollowers() { return 3; }
 
+	CFollowingMonster* MyFollowingMonsterPointer() { return this; }
 	virtual bool ReadyForUse();
 	Schedule_t* GetFollowingSchedule();
 	void EXPORT FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void DoFollowerUse(CBaseEntity* pCaller, bool saySentence);
 
 	virtual void PlayUseSentence() {}
 	virtual void PlayUnUseSentence() {}

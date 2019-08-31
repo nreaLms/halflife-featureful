@@ -35,6 +35,7 @@
 #include "schedule.h"
 #include "scripted.h"
 #include "defaultai.h"
+#include "followingmonster.h"
 
 /*
 classname "scripted_sequence"
@@ -820,12 +821,20 @@ private:
 	BOOL m_active;
 	string_t m_iszListener; // name of entity to look at while talking
 	short m_requiredState;
+	short m_followAction;
 };
 
 #define SF_SENTENCE_ONCE	0x0001
 #define SF_SENTENCE_FOLLOWERS	0x0002	// only say if following player
 #define SF_SENTENCE_INTERRUPT	0x0004	// force talking except when dead
 #define SF_SENTENCE_CONCURRENT	0x0008	// allow other people to keep talking
+
+enum
+{
+	FOLLOW_NO = 0,
+	FOLLOW_START,
+	FOLLOW_STOP,
+};
 
 TYPEDESCRIPTION	CScriptedSentence::m_SaveData[] =
 {
@@ -839,6 +848,7 @@ TYPEDESCRIPTION	CScriptedSentence::m_SaveData[] =
 	DEFINE_FIELD( CScriptedSentence, m_active, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CScriptedSentence, m_iszListener, FIELD_STRING ),
 	DEFINE_FIELD( CScriptedSentence, m_requiredState, FIELD_SHORT ),
+	DEFINE_FIELD( CScriptedSentence, m_followAction, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CScriptedSentence, CBaseToggle )
@@ -890,6 +900,11 @@ void CScriptedSentence::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "required_state" ) )
 	{
 		m_requiredState = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "follow_action" ) )
+	{
+		m_followAction = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1082,6 +1097,22 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 	}
 
 	pTarget->PlayScriptedSentence( STRING( m_iszSentence ), m_flDuration,  m_flVolume, m_flAttenuation, bConcurrent, pListener );
+	if (m_followAction)
+	{
+		CFollowingMonster* followingMonster = pTarget->MyFollowingMonsterPointer();
+		if (followingMonster)
+		{
+			CBaseEntity* pPlayer = UTIL_FindEntityByClassname(NULL, "player");
+			if (m_followAction == FOLLOW_START && !followingMonster->IsFollowingPlayer())
+			{
+				followingMonster->DoFollowerUse(pPlayer, false);
+			}
+			else if (m_followAction == FOLLOW_STOP && followingMonster->IsFollowingPlayer())
+			{
+				followingMonster->DoFollowerUse(pPlayer, false);
+			}
+		}
+	}
 	ALERT( at_aiconsole, "Playing sentence %s (%.1f)\n", STRING( m_iszSentence ), m_flDuration );
 	SUB_UseTargets( NULL, USE_TOGGLE, 0 );
 	return TRUE;

@@ -16,6 +16,8 @@
 #ifndef BASEMONSTER_H
 #define BASEMONSTER_H
 
+class CFollowingMonster;
+
 //
 // generic Monster
 //
@@ -127,6 +129,7 @@ public:
 	virtual int BloodColor( void ) { return m_bloodColor; }
 
 	virtual CBaseMonster *MyMonsterPointer( void ) { return this; }
+	virtual CFollowingMonster* MyFollowingMonsterPointer() { return NULL; }
 	virtual void Look( int iDistance );// basic sight function for monsters
 	virtual void RunAI( void );// core ai function!	
 	void Listen( void );
