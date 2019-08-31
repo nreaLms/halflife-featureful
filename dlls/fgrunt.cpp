@@ -2339,6 +2339,25 @@ void CHFGrunt :: SetActivity ( Activity NewActivity )
 //=========================================================
 Schedule_t *CHFGrunt :: GetSchedule ( void )
 {
+	// flying? If PRONE, barnacle has me. IF not, it's assumed I am rapelling.
+	if ( pev->movetype == MOVETYPE_FLY && m_MonsterState != MONSTERSTATE_PRONE )
+	{
+		if (pev->flags & FL_ONGROUND)
+		{
+			// just landed
+			pev->movetype = MOVETYPE_STEP;
+			return GetScheduleOfType ( SCHED_HGRUNT_ALLY_REPEL_LAND );
+		}
+		else
+		{
+			// repel down a rope,
+			if ( m_MonsterState == MONSTERSTATE_COMBAT )
+				return GetScheduleOfType ( SCHED_HGRUNT_ALLY_REPEL_ATTACK );
+			else
+				return GetScheduleOfType ( SCHED_HGRUNT_ALLY_REPEL );
+		}
+	}
+
 	// grunts place HIGH priority on running away from danger sounds.
 	if ( HasConditions(bits_COND_HEAR_SOUND) )
 	{
@@ -2367,24 +2386,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 			}
 		}
 	}
-	// flying? If PRONE, barnacle has me. IF not, it's assumed I am rapelling.
-	if ( pev->movetype == MOVETYPE_FLY && m_MonsterState != MONSTERSTATE_PRONE )
-	{
-		if (pev->flags & FL_ONGROUND)
-		{
-			// just landed
-			pev->movetype = MOVETYPE_STEP;
-			return GetScheduleOfType ( SCHED_HGRUNT_ALLY_REPEL_LAND );
-		}
-		else
-		{
-			// repel down a rope,
-			if ( m_MonsterState == MONSTERSTATE_COMBAT )
-				return GetScheduleOfType ( SCHED_HGRUNT_ALLY_REPEL_ATTACK );
-			else
-				return GetScheduleOfType ( SCHED_HGRUNT_ALLY_REPEL );
-		}
-	}
+
 	if ( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak() )
 	{
 		PlaySentence( "FG_KILL", 4, VOL_NORM, ATTN_NORM );
@@ -3350,6 +3352,10 @@ void CMedic::RunTask(Task_t *pTask)
 
 Schedule_t *CMedic::GetSchedule()
 {
+	if ( pev->movetype == MOVETYPE_FLY && m_MonsterState != MONSTERSTATE_PRONE )
+	{
+		return CHFGrunt::GetSchedule();
+	}
 	if (m_fHealing) {
 		StopHealing();
 	}
