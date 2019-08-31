@@ -946,6 +946,12 @@ void CScriptedSentence::Spawn( void )
 		//EVERYWHERE
 		m_flAttenuation = ATTN_NONE;
 		break;
+	case 4:
+		m_flAttenuation = 0.5;
+		break;
+	case 5:
+		m_flAttenuation = 0.25;
+		break;
 	default:
 	case 0:
 		// Small radius

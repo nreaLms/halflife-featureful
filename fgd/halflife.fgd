@@ -5441,6 +5441,8 @@
 		1 : "Medium Radius"
 		2 : "Large  Radius"
 		3 : "Play Everywhere"
+		4 : "Huge Radius"
+		5 : "Enormous Radius"
 	]
 	required_state(choices) : "Required MonsterState" =
 	[
