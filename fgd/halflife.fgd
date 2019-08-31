@@ -5849,6 +5849,24 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-8 -8 -8,8 8 8) = trigger_sound : "Insert world sound or smell (affects some monsters)"
+[
+	spawnflags(flags) =
+	[
+		1: "Remove On fire" : 0
+	]
+	radius(string) : "Sound Radius" : "384"
+	duration(string) : "Sound Duration" : "0.3"
+	position(string) : "Position entity (blank = here)"
+	type(choices) : "Sound Type" : 32 =
+	[
+		1 : "Combat"
+		8 : "Carcass"
+		16 : "Meat"
+		32 : "Danger"
+	]
+]
+
 @PointClass base(Targetname, Target) = trigger_timer : "Continuously fire the same target over random delays. trigger_timer can be activated with 'On' use. trigger_timer stops firing its target if it was triggered with 'Off' use. 'Toggle' use toggles trigger_timer's state."
 [
 	spawnflags(flags) =

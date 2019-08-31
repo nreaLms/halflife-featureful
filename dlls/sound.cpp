@@ -24,6 +24,7 @@
 #include "talkmonster.h"
 #include "gamerules.h"
 #include "tex_materials.h"
+#include "soundent.h"
 
 // ==================== GENERIC AMBIENT SOUND ======================================
 
@@ -1765,4 +1766,71 @@ void CSpeaker::KeyValue( KeyValueData *pkvd )
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
+}
+
+#define SF_TRIGGERSOUND_FIREONCE 1
+
+class CTriggerSound : public CBaseEntity
+{
+public:
+	void Spawn();
+	void KeyValue(KeyValueData *pkvd);
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+
+	int GetType() const { return pev->oldbuttons ? pev->oldbuttons : bits_SOUND_DANGER; }
+	int GetRadius() const { return pev->button > 0 ? pev->button : 384; }
+	float GetDuration() const { return pev->frags > 0 ? pev->frags : 0.3; }
+};
+
+LINK_ENTITY_TO_CLASS( trigger_sound, CTriggerSound )
+
+void CTriggerSound::Spawn()
+{
+	pev->effects |= EF_NODRAW;
+}
+
+void CTriggerSound::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq( pkvd->szKeyName, "type" ) )
+	{
+		pev->oldbuttons = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "radius" ) )
+	{
+		pev->button = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "duration" ) )
+	{
+		pev->frags = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "position" ) )
+	{
+		pev->message = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+}
+
+void CTriggerSound::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	Vector vecPos = pev->origin;
+	if (pev->message)
+	{
+		CBaseEntity* posEnt = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
+		if (posEnt)
+		{
+			vecPos = posEnt->pev->origin;
+		}
+		else
+		{
+			return;
+		}
+	}
+	CSoundEnt::InsertSound ( GetType(), vecPos, GetRadius(), GetDuration() );
+	if (FBitSet(pev->spawnflags, SF_TRIGGERSOUND_FIREONCE))
+	{
+		UTIL_Remove(this);
+	}
 }
