@@ -2648,11 +2648,6 @@ void CTalkMonsterRepel::KeyValue(KeyValueData *pkvd)
 
 void CTalkMonsterRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 {
-	if (FBitSet(pev->spawnflags, SF_MONSTER_PREDISASTER))
-	{
-		SetBits(pEntity->pev->spawnflags, SF_MONSTER_PREDISASTER);
-	}
-
 	CTalkMonster* monster = (CTalkMonster*)pEntity;
 	monster->m_iszUse = m_iszUse;
 	monster->m_iszUnUse = m_iszUnUse;

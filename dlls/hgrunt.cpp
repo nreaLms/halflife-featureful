@@ -2371,7 +2371,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 
 	const int knownFlags =
 			SF_MONSTER_GAG | SF_MONSTER_HITMONSTERCLIP | SF_MONSTER_PRISONER |
-			SF_MONSTER_DONT_DROP_GRUN | SF_SQUADMONSTER_LEADER;
+			SF_MONSTER_DONT_DROP_GRUN | SF_SQUADMONSTER_LEADER | SF_MONSTER_PREDISASTER;
 	const int flagsToSet = knownFlags & pev->spawnflags;
 	SetBits(pEntity->pev->spawnflags, flagsToSet);
 
