@@ -814,17 +814,41 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			}
 			*/
 
-			if( pBestSound && FindCover( pBestSound->m_vecOrigin, g_vecZero, pBestSound->m_iVolume, CoverRadius() ) )
+			if( pBestSound )
 			{
-				// then try for plain ole cover
-				m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
-				TaskComplete();
+				if (FindCover( pBestSound->m_vecOrigin, g_vecZero, pBestSound->m_iVolume, CoverRadius() ))
+				{
+					// then try for plain ole cover
+					m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
+					TaskComplete();
+				}
+				// The point is to just run away from danger. Try to find a node without actual cover.
+				else if (FindRunAway( pBestSound->m_vecOrigin, pBestSound->m_iVolume, CoverRadius() ))
+				{
+					ALERT(at_console, "Using run away\n");
+					m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
+					TaskComplete();
+				}
+				// The last resort, just run straight away
+				else
+				{
+					Vector dir = pev->origin - pBestSound->m_vecOrigin;
+					float distance = dir.Length();
+					distance = Q_max(pBestSound->m_iVolume - distance, 384);
+					dir.z = 0;
+					Vector targetLocation = pev->origin + dir.Normalize() * distance;
+
+					if( MoveToLocation( ACT_RUN, 2, targetLocation ) )
+					{
+						ALERT(at_console, "Using the last resort to run away\n");
+						TaskComplete();
+					}
+				}
+
 			}
-			else
-			{
-				// no coverwhatsoever. or no sound in list
+			// no coverwhatsoever. or no sound in list
+			if (!TaskIsComplete())
 				TaskFail();
-			}
 			break;
 		}
 	case TASK_FACE_HINTNODE:

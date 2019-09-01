@@ -245,6 +245,7 @@ public:
 
 	BOOL FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset );
 	virtual BOOL FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist );
+	virtual BOOL FindRunAway( Vector vecThreat, float flMinDist, float flMaxDist );
 	virtual BOOL FValidateCover( const Vector &vecCoverLocation ) { return TRUE; };
 	virtual float CoverRadius( void ) { return 784; } // Default cover radius
 

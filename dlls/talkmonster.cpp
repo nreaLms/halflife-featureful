@@ -96,9 +96,10 @@ Schedule_t slIdleResponse[] =
 		tlIdleResponse,
 		ARRAYSIZE( tlIdleResponse ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_HEAR_SOUND |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
-		0,
+		bits_SOUND_DANGER,
 		"Idle Response"
 	},
 };
@@ -177,7 +178,8 @@ Schedule_t slIdleHello[] =
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND |
 		bits_COND_PROVOKED,
-		bits_SOUND_COMBAT,
+		bits_SOUND_COMBAT |
+		bits_SOUND_DANGER,
 		"Idle Hello"
 	},
 };

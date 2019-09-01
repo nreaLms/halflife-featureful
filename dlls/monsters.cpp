@@ -2596,6 +2596,78 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 	return FALSE;
 }
 
+BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDist )
+{
+	int i;
+	int iMyHullIndex;
+	int iMyNode;
+	int iThreatNode;
+	float flDist;
+
+	if( !flMaxDist )
+	{
+		// user didn't supply a MaxDist, so work up a crazy one.
+		flMaxDist = 784;
+	}
+
+	if( flMinDist > 0.5 * flMaxDist )
+	{
+#if _DEBUG
+		ALERT( at_console, "FindRunAway MinDist (%.0f) too close to MaxDist (%.0f)\n", flMinDist, flMaxDist );
+#endif
+		flMinDist = 0.5 * flMaxDist;
+	}
+
+	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
+	{
+		ALERT( at_aiconsole, "Graph not ready for findcover!\n" );
+		return FALSE;
+	}
+
+	iMyNode = WorldGraph.FindNearestNode( pev->origin, this );
+	iThreatNode = WorldGraph.FindNearestNode ( vecThreat, this );
+	iMyHullIndex = WorldGraph.HullIndex( this );
+
+	if( iMyNode == NO_NODE )
+	{
+		ALERT( at_aiconsole, "FindRunAway() - %s has no nearest node!\n", STRING( pev->classname ) );
+		return FALSE;
+	}
+	if( iThreatNode == NO_NODE )
+	{
+		// ALERT( at_aiconsole, "FindRunAway() - Threat has no nearest node!\n" );
+		iThreatNode = iMyNode;
+		// return FALSE;
+	}
+
+	// we'll do a rough sample to find nodes that are relatively nearby
+	for( i = 0; i < WorldGraph.m_cNodes; i++ )
+	{
+		int nodeNumber = ( i + WorldGraph.m_iLastCoverSearch ) % WorldGraph.m_cNodes;
+
+		CNode &node = WorldGraph.Node( nodeNumber );
+		WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
+
+		// could use an optimization here!!
+		flDist = ( pev->origin - node.m_vecOrigin ).Length();
+
+		// DON'T do the trace check on a node that is farther away than a node that we've already found to
+		// provide cover! Also make sure the node is within the mins/maxs of the search.
+		if( flDist >= flMinDist && flDist < flMaxDist )
+		{
+			// node is closer to me than the threat, or the same distance from myself and the threat the node is good.
+			if( ( iMyNode == iThreatNode ) || WorldGraph.PathLength( iMyNode, nodeNumber, iMyHullIndex, m_afCapability ) <= WorldGraph.PathLength( iThreatNode, nodeNumber, iMyHullIndex, m_afCapability ) )
+			{
+				if( FValidateCover( node.m_vecOrigin ) && MoveToLocation( ACT_RUN, 0, node.m_vecOrigin ) )
+				{
+					return TRUE;
+				}
+			}
+		}
+	}
+	return FALSE;
+}
+
 //=========================================================
 // BuildNearestRoute - tries to build a route as close to the target
 // as possible, even if there isn't a path to the final point.
