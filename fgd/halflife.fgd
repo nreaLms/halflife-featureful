@@ -1964,7 +1964,7 @@
 [
 	spawnflags(flags) =
 	[
-		1: "Use Only" : 0
+		1: "Give Medkit" : 0
 		2: "Give Suit" : 0
 		4: "Give Crowbar" : 0
 		8: "Give Glock": 0
@@ -1985,7 +1985,6 @@
 		262144: "Give Displacer": 0
 		524288: "Give Shock rifle": 0
 		1048576: "Give Spore launcher": 0
-		2097152: "Give Medkit": 0
 		8388608: "Give Long Jump": 0
 	]
 	_9mm(integer) : "9mm bullets"

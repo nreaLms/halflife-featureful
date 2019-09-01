@@ -878,7 +878,7 @@ void CGamePlayerTeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 /*
  * Starting player settings, like initial health, armor, weapons and items
  */
-#define SF_PLAYER_SETTING_USEONLY (1 << 0)
+#define SF_PLAYER_SETTINGS_MEDKIT (1 << 0)
 #define SF_PLAYER_SETTINGS_SUIT (1 << 1)
 #define SF_PLAYER_SETTINGS_CROWBAR (1 << 2)
 #define SF_PLAYER_SETTINGS_GLOCK (1 << 3)
@@ -899,7 +899,6 @@ void CGamePlayerTeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 #define SF_PLAYER_SETTINGS_DISPACER (1 << 18)
 #define SF_PLAYER_SETTINGS_SHOCKRIFLE (1 << 19)
 #define SF_PLAYER_SETTINGS_SPORELAUNCHER (1 << 20)
-#define SF_PLAYER_SETTINGS_MEDKIT (1 << 21)
 #define SF_PLAYER_SETTINGS_FLASHLIGHT (1 << 22)
 #define SF_PLAYER_SETTINGS_LONGJUMP (1 << 23)
 
@@ -909,14 +908,15 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 	{
+		if (!pActivator || !pActivator->IsPlayer())
+		{
+			if (!g_pGameRules->IsMultiplayer())
+				pActivator = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex( 1 ));
+		}
 		EquipPlayer(pActivator);
 	}
-	inline BOOL	UseOnly( void ) { return (pev->spawnflags & SF_PLAYER_SETTING_USEONLY) ? TRUE : FALSE; }
 	void Touch( CBaseEntity *pOther )
 	{
-		if( UseOnly() )
-			return;
-
 		EquipPlayer( pOther );
 	}
 

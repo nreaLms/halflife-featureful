@@ -142,10 +142,15 @@ void CHalfLifeRules::PlayerThink( CBasePlayer *pPlayer )
 {
 	if ( !pPlayer->m_fInitHUD && !pPlayer->m_settingsLoaded)
 	{
-		CBaseEntity* pSettingEntity = UTIL_FindEntityByClassname( NULL, "game_player_settings" );
-		if ( pSettingEntity )
+		CBaseEntity* pSettingEntity = NULL;
+		while ( (pSettingEntity = UTIL_FindEntityByClassname( pSettingEntity, "game_player_settings" )) != NULL )
 		{
-			pSettingEntity->Touch( pPlayer );
+			// If game_player_settings has a name, it means to be called by trigger, not run automatically.
+			if (FStringNull(pSettingEntity->pev->targetname))
+			{
+				pSettingEntity->Touch( pPlayer );
+				break;
+			}
 		}
 		pPlayer->m_settingsLoaded = true;
 	}
