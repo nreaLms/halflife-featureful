@@ -785,7 +785,7 @@ void CFuncTrain::Wait( void )
 			STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noiseMovement ) );
 		if( pev->noiseStopMoving )
 			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noiseStopMoving ), m_volume, SoundAttenuation() );
-		SetThink( &CFuncTrain::Next );
+		SetThink( &CFuncTrain::ThinkNext );
 	}
 	else
 	{
