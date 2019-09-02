@@ -504,6 +504,7 @@ LINK_ENTITY_TO_CLASS(item_flashlight, CItemFlashlight)
 // Generic item
 //=========================================================
 #define SF_ITEM_GENERIC_DROP_TO_FLOOR 1
+#define SF_ITEM_GENERIC_DONT_TRANSIT 2
 
 class CItemGeneric : public CBaseAnimating
 {
@@ -516,6 +517,7 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	void KeyValue(KeyValueData* pkvd);
+	int	ObjectCaps(void);
 
 	void EXPORT StartupThink(void);
 	void EXPORT SequenceThink(void);
@@ -580,6 +582,14 @@ void CItemGeneric::KeyValue(KeyValueData* pkvd)
 	}
 	else
 		CBaseAnimating::KeyValue(pkvd);
+}
+
+int CItemGeneric::ObjectCaps()
+{
+	if (FBitSet(pev->spawnflags, SF_ITEM_GENERIC_DONT_TRANSIT))
+		return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION;
+	else
+		return CBaseEntity::ObjectCaps();
 }
 
 void CItemGeneric::StartupThink(void)
