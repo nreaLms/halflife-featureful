@@ -2186,6 +2186,10 @@
 	skin(integer) : "Skin" : 0
 	body(integer) : "Body" : 0
 	scale(string) : "Scale (1.0 = normal size)"
+	spawnflags(Flags) =
+	[
+		1 : "Drop to floor" : 0
+	]
 ]
 
 @PointClass size(-12 -16 0, 12 16 36) base(Angles) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit"

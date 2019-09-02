@@ -503,6 +503,8 @@ LINK_ENTITY_TO_CLASS(item_flashlight, CItemFlashlight)
 //=========================================================
 // Generic item
 //=========================================================
+#define SF_ITEM_GENERIC_DROP_TO_FLOOR 1
+
 class CItemGeneric : public CBaseAnimating
 {
 public:
@@ -546,11 +548,21 @@ void CItemGeneric::Spawn(void)
 
 	pev->takedamage	 = DAMAGE_NO;
 	pev->solid		 = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
 	pev->sequence	 = -1;
 
 	// Call startup sequence to look for a sequence to play.
 	SetThink(&CItemGeneric::StartupThink);
 	pev->nextthink = gpGlobals->time + 0.1f;
+
+	if (FBitSet(pev->spawnflags, SF_ITEM_GENERIC_DROP_TO_FLOOR))
+	{
+		if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
+		{
+			ALERT(at_error, "Item %s fell out of level at %f,%f,%f\n", STRING( pev->classname ), pev->origin.x, pev->origin.y, pev->origin.z);
+			UTIL_Remove( this );
+		}
+	}
 }
 
 void CItemGeneric::Precache(void)
