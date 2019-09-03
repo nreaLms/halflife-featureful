@@ -83,6 +83,39 @@ Schedule_t slIdleStand[] =
 	},
 };
 
+Task_t tlIdleTurning[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_WAIT_TURNING, (float)5 },
+};
+
+Schedule_t slIdleTurning[] =
+{
+	{
+		tlIdleTurning,
+		ARRAYSIZE( tlIdleTurning ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SEE_FEAR |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND |
+		bits_COND_SMELL_FOOD |
+		bits_COND_SMELL |
+		bits_COND_PROVOKED,
+
+		bits_SOUND_COMBAT |// sound flags
+		bits_SOUND_WORLD |
+		bits_SOUND_PLAYER |
+		bits_SOUND_DANGER |
+
+		bits_SOUND_MEAT	|// scents
+		bits_SOUND_CARCASS |
+		bits_SOUND_GARBAGE,
+		"IdleTurning"
+	},
+};
+
 Schedule_t slIdleTrigger[] =
 {
 	{
@@ -120,6 +153,34 @@ Schedule_t slIdleWalk[] =
 		bits_SOUND_CARCASS |
 		bits_SOUND_GARBAGE,
 		"Idle Walk"
+	},
+};
+
+Task_t tlIdleRun[] =
+{
+	{ TASK_RUN_PATH, (float)9999 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+};
+
+Schedule_t slIdleRun[] =
+{
+	{
+		tlIdleRun,
+		ARRAYSIZE( tlIdleRun ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND |
+		bits_COND_SMELL_FOOD |
+		bits_COND_SMELL |
+		bits_COND_PROVOKED,
+
+		bits_SOUND_COMBAT |// sound flags
+
+		bits_SOUND_MEAT |// scents
+		bits_SOUND_CARCASS |
+		bits_SOUND_GARBAGE,
+		"Idle Run"
 	},
 };
 
@@ -965,8 +1026,10 @@ Schedule_t slTakeCoverFromEnemy[] =
 Schedule_t *CBaseMonster::m_scheduleList[] =
 {
 	slIdleStand,
+	slIdleTurning,
 	slIdleTrigger,
 	slIdleWalk,
+	slIdleRun,
 	slAmbush,
 	slActiveIdle,
 	slWakeAngry,
@@ -1077,9 +1140,17 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 
 			return &slIdleStand[0];
 		}
+	case SCHED_IDLE_TURNING:
+		{
+			return slIdleTurning;
+		}
 	case SCHED_IDLE_WALK:
 		{
 			return &slIdleWalk[0];
+		}
+	case SCHED_IDLE_RUN:
+		{
+			return &slIdleRun[0];
 		}
 	case SCHED_WAIT_TRIGGER:
 		{

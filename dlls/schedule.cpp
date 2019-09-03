@@ -388,7 +388,12 @@ void CBaseMonster::RunTask( Task_t *pTask )
 		}
 	case TASK_WAIT:
 	case TASK_WAIT_RANDOM:
+	case TASK_WAIT_TURNING:
 		{
+			if (pTask->iTask == TASK_WAIT_TURNING)
+			{
+				ChangeYaw( pev->yaw_speed );
+			}
 			if( gpGlobals->time >= m_flWaitFinished )
 			{
 				TaskComplete();
@@ -903,6 +908,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_WAIT:
 	case TASK_WAIT_FACE_ENEMY:
+	case TASK_WAIT_TURNING:
 		{
 			// set a future time that tells us when the wait is over.
 			m_flWaitFinished = gpGlobals->time + pTask->flData;	
@@ -1413,6 +1419,19 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 			}
 			else if( FRouteClear() )
 			{
+				if (m_pGoalEnt != 0 )
+				{
+					if (m_nextPatrolPathCheck <= gpGlobals->time)
+					{
+						Schedule_t* patrolSchedule = StartPatrol(m_pGoalEnt);
+						if (patrolSchedule)
+							return patrolSchedule;
+					}
+					else
+					{
+						return GetScheduleOfType( SCHED_IDLE_TURNING );
+					}
+				}
 				// no valid route!
 				return GetScheduleOfType( SCHED_IDLE_STAND );
 			}

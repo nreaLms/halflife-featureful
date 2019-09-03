@@ -120,6 +120,8 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_prevRenderAmt, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_prevRenderColor, FIELD_VECTOR ),
 	DEFINE_FIELD( CBaseMonster, m_prevRenderFx, FIELD_INTEGER ),
+
+	DEFINE_FIELD( CBaseMonster, m_nextPatrolPathCheck, FIELD_TIME ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
@@ -646,6 +648,8 @@ BOOL CBaseMonster::FRouteClear( void )
 // target, this function copies as many waypoints as possible
 // from that path to the monster's Route array
 //=========================================================
+extern cvar_t npc_patrol;
+
 BOOL CBaseMonster::FRefreshRoute( void )
 {
 	CBaseEntity	*pPathCorner;
@@ -662,22 +666,32 @@ BOOL CBaseMonster::FRefreshRoute( void )
 			{
 				// monster is on a path_corner loop
 				pPathCorner = m_pGoalEnt;
-				i = 0;
 
-				while( pPathCorner && i < ROUTE_SIZE )
+				if (npc_patrol.value)
 				{
-					m_Route[i].iType = bits_MF_TO_PATHCORNER;
-					m_Route[i].vecLocation = pPathCorner->pev->origin;
+					if (pPathCorner)
+					{
+						returnCode = BuildRoute( pPathCorner->pev->origin, bits_MF_TO_PATHCORNER, NULL );
+					}
+				}
+				else
+				{
+					i = 0;
+					while( pPathCorner && i < ROUTE_SIZE )
+					{
+						m_Route[i].iType = bits_MF_TO_PATHCORNER;
+						m_Route[i].vecLocation = pPathCorner->pev->origin;
 
-					pPathCorner = pPathCorner->GetNextTarget();
+						pPathCorner = pPathCorner->GetNextTarget();
 
-					// Last path_corner in list?
-					if( !pPathCorner )
-						m_Route[i].iType |= bits_MF_IS_GOAL;
-					i++;
+						// Last path_corner in list?
+						if( !pPathCorner )
+							m_Route[i].iType |= bits_MF_IS_GOAL;
+						i++;
+					}
+					returnCode = TRUE;
 				}
 			}
-			returnCode = TRUE;
 			break;
 		case MOVEGOAL_ENEMY:
 			returnCode = BuildRoute( m_vecEnemyLKP, bits_MF_TO_ENEMY, m_hEnemy );
@@ -1497,6 +1511,12 @@ void CBaseMonster::AdvanceRoute( float distance )
 		{
 			if( distance < m_flGroundSpeed * 0.2 /* FIX */ )
 			{
+				if (m_pGoalEnt != 0 && m_Route[m_iRouteIndex].iType & bits_MF_TO_PATHCORNER)
+				{
+					m_nextPatrolPathCheck = gpGlobals->time + m_pGoalEnt->GetDelay();
+					pev->ideal_yaw = m_pGoalEnt->pev->angles.y;
+					m_pGoalEnt = m_pGoalEnt->GetNextTarget();
+				}
 				MovementComplete();
 			}
 		}
@@ -1531,6 +1551,7 @@ int CBaseMonster::RouteClassify( int iMoveFlag )
 // BuildRoute
 //=========================================================
 extern cvar_t tridepth;
+extern cvar_t npc_nearest;
 
 BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget )
 {
@@ -1594,8 +1615,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 
 	if (nearest)
 	{
-		const int npc_nearest = (int)CVAR_GET_FLOAT("npc_nearest");
-		if (npc_nearest)
+		if (npc_nearest.value)
 		{
 			SetBits(iMoveFlag, bits_MF_NEAREST_PATH);
 
@@ -2282,6 +2302,54 @@ void CBaseMonster::MonsterInitThink( void )
 	StartMonster();
 }
 
+Schedule_t* CBaseMonster::StartPatrol(CBaseEntity *path)
+{
+	if (path)
+	{
+		// JAY: How important is this error message?  Big Momma doesn't obey this rule, so I took it out.
+#if 0
+			// At this point, we expect only a path_corner as initial goal
+			if( !FClassnameIs( m_pGoalEnt->pev, "path_corner" ) )
+			{
+				ALERT( at_warning, "ReadyMonster--monster's initial goal '%s' is not a path_corner", STRING( pev->target ) );
+			}
+#endif
+		m_pGoalEnt = path;
+
+		// Monster will start turning towards his destination
+		MakeIdealYaw( m_pGoalEnt->pev->origin );
+
+		// set the monster up to walk a path corner path.
+		// !!!BUGBUG - this is a minor bit of a hack.
+		// JAYJAY
+		m_movementGoal = MOVEGOAL_PATHCORNER;
+
+		if( pev->movetype == MOVETYPE_FLY )
+			m_movementActivity = ACT_FLY;
+		else if (m_pGoalEnt->pev->speed < 200)
+			m_movementActivity = ACT_WALK;
+		else
+			m_movementActivity = ACT_RUN;
+
+		if( FRefreshRoute() )
+		{
+			if (m_movementActivity == ACT_RUN)
+				return GetScheduleOfType( SCHED_IDLE_RUN );
+			else
+				return GetScheduleOfType( SCHED_IDLE_WALK );
+		}
+		else
+		{
+			ALERT( at_aiconsole, "Couldn't create route. Can't patrol\n" );
+		}
+	}
+	else
+	{
+		ALERT( at_error, "ReadyMonster()--%s couldn't find target %s", STRING( pev->classname ), STRING( pev->target ) );
+	}
+	return NULL;
+}
+
 //=========================================================
 // StartMonster - final bit of initization before a monster 
 // is turned over to the AI. 
@@ -2330,41 +2398,13 @@ void CBaseMonster::StartMonster( void )
 	if( !FStringNull( pev->target ) )// this monster has a target
 	{
 		// Find the monster's initial target entity, stash it
-		m_pGoalEnt = CBaseEntity::Instance( FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) ) );
+		CBaseEntity* path = CBaseEntity::Instance( FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) ) );
 
-		if( !m_pGoalEnt )
+		Schedule_t* patrolSchedule = StartPatrol(path);
+		if (patrolSchedule)
 		{
-			ALERT( at_error, "ReadyMonster()--%s couldn't find target %s", STRING( pev->classname ), STRING( pev->target ) );
-		}
-		else
-		{
-			// Monster will start turning towards his destination
-			MakeIdealYaw( m_pGoalEnt->pev->origin );
-
-			// JAY: How important is this error message?  Big Momma doesn't obey this rule, so I took it out.
-#if 0
-			// At this point, we expect only a path_corner as initial goal
-			if( !FClassnameIs( m_pGoalEnt->pev, "path_corner" ) )
-			{
-				ALERT( at_warning, "ReadyMonster--monster's initial goal '%s' is not a path_corner", STRING( pev->target ) );
-			}
-#endif
-			// set the monster up to walk a path corner path. 
-			// !!!BUGBUG - this is a minor bit of a hack.
-			// JAYJAY
-			m_movementGoal = MOVEGOAL_PATHCORNER;
-
-			if( pev->movetype == MOVETYPE_FLY )
-				m_movementActivity = ACT_FLY;
-			else
-				m_movementActivity = ACT_WALK;
-
-			if( !FRefreshRoute() )
-			{
-				ALERT( at_aiconsole, "Can't Create Route!\n" );
-			}
 			SetState( MONSTERSTATE_IDLE );
-			ChangeSchedule( GetScheduleOfType( SCHED_IDLE_WALK ) );
+			ChangeSchedule( patrolSchedule );
 		}
 	}
 

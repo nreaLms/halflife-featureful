@@ -346,6 +346,7 @@ public:
 	BOOL ExitScriptedSequence();
 	BOOL CineCleanup();
 
+	Schedule_t* StartPatrol( CBaseEntity* path );
 	CBaseEntity* DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 	
 	void SetMyHealth( const float health );
@@ -384,6 +385,8 @@ public:
 	Vector m_prevRenderColor;
 	int m_prevRenderFx;
 	int m_prevRenderAmt;
+
+	float m_nextPatrolPathCheck;
 };
 
 class CDeadMonster : public CBaseMonster
