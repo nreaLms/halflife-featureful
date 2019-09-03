@@ -49,6 +49,7 @@ extern void CopyToBodyQue( entvars_t* pev );
 extern int giPrecacheGrunt;
 extern int gmsgSayText;
 extern int gmsgBhopcap;
+extern int gmsgHUDColor;
 
 extern cvar_t allow_spectators;
 extern cvar_t multibyte_only;
@@ -616,6 +617,22 @@ void ClientCommand( edict_t *pEntity )
 	{
 		// clear 'Unknown command: VModEnable' in singleplayer
 		return;
+	}
+	else if ( FStrEq(pcmd, "hud_color") )
+	{
+		if (CMD_ARGC() == 4)
+		{
+			int color = (atoi(CMD_ARGV(1)) & 0xFF) << 16;
+			color += (atoi(CMD_ARGV(2)) & 0xFF) << 8;
+			color += (atoi(CMD_ARGV(3)) & 0xFF);
+			MESSAGE_BEGIN( MSG_ONE, gmsgHUDColor, NULL, &pEntity->v );
+				WRITE_LONG(color);
+			MESSAGE_END();
+		}
+		else
+		{
+			ALERT(at_console, "Syntax: hud_color RRR GGG BBB\n");
+		}
 	}
 	else
 	{

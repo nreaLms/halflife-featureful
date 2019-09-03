@@ -672,6 +672,8 @@ public:
 	int DrawHudStringLen( const char *szIt );
 	void DrawDarkRectangle( int x, int y, int wide, int tall );
 
+	int m_iHUDColor;
+
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()
@@ -733,6 +735,8 @@ public:
 	void _cdecl MsgFunc_ViewMode( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_SetFOV( const char *pszName,  int iSize, void *pbuf );
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
+
+	int _cdecl MsgFunc_HUDColor( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
