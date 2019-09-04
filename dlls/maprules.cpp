@@ -1097,6 +1097,9 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 			player->GiveAmmo(m_ammoCounts[i], ammoInfo.pszName);
 		}
 	}
+
+	const bool hadWeapons = player->m_pActiveItem != NULL;
+
 	for (i=0; i<sizeof(weaponFlags)/sizeof(int); ++i)
 	{
 		if (pev->spawnflags & weaponFlags[i])
@@ -1108,4 +1111,7 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 			}
 		}
 	}
+
+	if (!hadWeapons)
+		player->SwitchToBestWeapon();
 }

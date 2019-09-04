@@ -311,6 +311,7 @@ void CBasePlayer::DropPlayerItemById( int iId ) { }
 void CBasePlayer::DropAmmo( ) { }
 BOOL CBasePlayer::HasPlayerItem( CBasePlayerWeapon *pCheckItem ) { return FALSE; }
 BOOL CBasePlayer::SwitchWeapon( CBasePlayerWeapon *pWeapon )  { return FALSE; }
+BOOL CBasePlayer::SwitchToBestWeapon( )  { return FALSE; }
 Vector CBasePlayer::GetGunPosition( void ) { return g_vecZero; }
 const char *CBasePlayer::TeamID( void ) { return ""; }
 int CBasePlayer::GiveAmmo( int iCount, const char *szName ) { return 0; }

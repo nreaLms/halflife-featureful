@@ -276,7 +276,6 @@ public:
 	virtual BOOL FAllowFlashlight( void );
 
 	virtual BOOL FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon );
-	BOOL GetBestWeapon( CBasePlayer *pPlayer );
 	virtual BOOL GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon );
 
 	// Functions to verify the single/multiplayer status of a game

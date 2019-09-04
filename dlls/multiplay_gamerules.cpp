@@ -649,38 +649,6 @@ BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerW
 	return FALSE;
 }
 
-BOOL CHalfLifeMultiplay::GetBestWeapon(CBasePlayer *pPlayer)
-{
-	CBasePlayerWeapon *pBest = pPlayer->m_pActiveItem;
-	int i;
-
-	if (!pBest)
-		return FALSE;
-
-	for( i = 0; i < MAX_WEAPONS; i++ )
-	{
-		CBasePlayerWeapon *pCheck = pPlayer->m_rgpPlayerWeapons[i];
-
-		if ( pCheck )
-		{
-			if( pCheck->iWeight() > pBest->iWeight() && pCheck != pBest )
-			{
-				if( pCheck->CanDeploy() )
-				{
-					pBest = pCheck;
-				}
-			}
-		}
-	}
-
-	if (pBest)
-	{
-		pPlayer->SwitchWeapon(pBest);
-		return TRUE;
-	}
-	return FALSE;
-}
-
 BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
 {
 	CBasePlayerWeapon *pBest;// this will be used in the event that we don't find a weapon in the same category.
@@ -968,7 +936,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 			g_engfuncs.pfnSetPhysicsKeyValue( pPlayer->edict(), "slj", "1" );
 		}
 
-		GetBestWeapon(pPlayer);
+		pPlayer->SwitchToBestWeapon();
 
 		addDefault = FALSE;
 	}

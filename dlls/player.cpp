@@ -5148,6 +5148,39 @@ BOOL CBasePlayer::SwitchWeapon(CBasePlayerWeapon *pWeapon )
 	return TRUE;
 }
 
+BOOL CBasePlayer::SwitchToBestWeapon()
+{
+	CBasePlayerWeapon *pBest = m_pActiveItem;
+	int i;
+
+	if (!pBest)
+		return FALSE;
+
+	for( i = 0; i < MAX_WEAPONS; i++ )
+	{
+		CBasePlayerWeapon *pCheck = m_rgpPlayerWeapons[i];
+
+		if ( pCheck )
+		{
+			if( pCheck->iWeight() > pBest->iWeight() && pCheck != pBest )
+			{
+				if( pCheck->CanDeploy() )
+				{
+					pBest = pCheck;
+				}
+			}
+		}
+	}
+
+	if (pBest)
+	{
+		if (pBest != m_pActiveItem)
+			SwitchWeapon(pBest);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 void CBasePlayer::InsertWeaponById(CBasePlayerWeapon *pItem)
 {
 	if (pItem && pItem->m_iId && pItem->m_iId <= MAX_WEAPONS) {
