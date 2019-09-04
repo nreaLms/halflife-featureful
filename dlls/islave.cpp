@@ -201,6 +201,7 @@ public:
 	void HandsGlowOff();
 	void CreateSummonBeams();
 	void RemoveSummonBeams();
+	void RemoveHandGlows();
 	void CoilBeam();
 	void MakeDynamicLight(const Vector& vecSrc, int radius, int t);
 
@@ -289,9 +290,10 @@ public:
 	float m_flSpawnFamiliarTime;
 	float m_freeEnergy;
 	short m_clawStrikeNum;
-	bool m_lastAttackWasCoil;
+	BOOL m_lastAttackWasCoil;
+	BOOL m_childIsAlive;
 	float m_nextHealTargetCheck;
-	bool m_childIsAlive;
+	float m_originalMaxHealth;
 
 	static const char *pAttackHitSounds[];
 	static const char *pAttackMissSounds[];
@@ -318,7 +320,14 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 	DEFINE_FIELD( CISlave, m_hWounded2, FIELD_EHANDLE ),
 	DEFINE_FIELD( CISlave, m_flSpawnFamiliarTime, FIELD_FLOAT ),
 	DEFINE_FIELD( CISlave, m_freeEnergy, FIELD_FLOAT ),
-	DEFINE_FIELD( CISlave, m_clawStrikeNum, FIELD_SHORT )
+	DEFINE_FIELD( CISlave, m_clawStrikeNum, FIELD_SHORT ),
+	DEFINE_FIELD( CISlave, m_lastAttackWasCoil, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CISlave, m_childIsAlive, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CISlave, m_nextHealTargetCheck, FIELD_TIME ),
+	DEFINE_FIELD( CISlave, m_originalMaxHealth, FIELD_FLOAT ),
+
+	DEFINE_FIELD( CISlave, m_handGlow1, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CISlave, m_handGlow2, FIELD_CLASSPTR ),
 };
 
 IMPLEMENT_SAVERESTORE( CISlave, CFollowingMonster )
@@ -467,10 +476,7 @@ int CISlave::ISoundMask( void )
 void CISlave::OnDying()
 {
 	ClearBeams();
-	UTIL_Remove(m_handGlow1);
-	m_handGlow1 = NULL;
-	UTIL_Remove(m_handGlow2);
-	m_handGlow2 = NULL;
+	RemoveHandGlows();
 	CFollowingMonster::OnDying();
 }
 
@@ -607,33 +613,34 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				{
 					m_lastAttackWasCoil = false;
 
-					CBaseEntity *revivedVort = m_hDead;
-					if (revivedVort) {
-						// TODO: should restore the actual values that the vort had before he died
-						revivedVort->pev->health = 0;
-						revivedVort->pev->rendermode = kRenderNormal;
-						revivedVort->pev->renderamt = 255;
-						revivedVort->Spawn();
-
-						CBaseMonster* monster = revivedVort->MyMonsterPointer();
+					CBaseEntity *revived = m_hDead;
+					if (revived) {
+						CBaseMonster* monster = revived->MyMonsterPointer();
 						if (monster)
 						{
+							CISlave* revivedVort = (CISlave*)monster;
+
+							revivedVort->pev->health = revivedVort->m_originalMaxHealth;
+							// TODO: should restore the actual values that the vort had before he died
+							revivedVort->pev->rendermode = kRenderNormal;
+							revivedVort->pev->renderamt = 255;
+							revivedVort->Spawn();
+
 							if (m_hEnemy)
 							{
-								monster->m_hEnemy = m_hEnemy;
-								monster->m_vecEnemyLKP = m_vecEnemyLKP;
-								monster->SetConditions( bits_COND_NEW_ENEMY );
-								monster->m_MonsterState = MONSTERSTATE_COMBAT;
-								monster->m_IdealMonsterState = MONSTERSTATE_COMBAT;
+								revivedVort->m_hEnemy = m_hEnemy;
+								revivedVort->m_vecEnemyLKP = m_vecEnemyLKP;
+								revivedVort->SetConditions( bits_COND_NEW_ENEMY );
+								revivedVort->m_MonsterState = MONSTERSTATE_COMBAT;
+								revivedVort->m_IdealMonsterState = MONSTERSTATE_COMBAT;
 							}
 
-							CISlave* islave = (CISlave*)monster;
 							// revived vort starts with zero energy
-							islave->m_freeEnergy = 0;
+							revivedVort->m_freeEnergy = 0;
 						}
 
-						WackBeam( ISLAVE_LEFT_ARM, revivedVort );
-						WackBeam( ISLAVE_RIGHT_ARM, revivedVort );
+						WackBeam( ISLAVE_LEFT_ARM, revived );
+						WackBeam( ISLAVE_RIGHT_ARM, revived );
 						m_hDead = NULL;
 						EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "hassault/hw_shoot1.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 130, 160 ) );
 
@@ -975,6 +982,8 @@ void CISlave::Spawn()
 
 	FollowingMonsterInit();
 
+	m_originalMaxHealth = pev->max_health;
+
 #if FEATURE_ISLAVE_ENERGY
 	// leader starts with some energy pool
 	if (pev->spawnflags & SF_SQUADMONSTER_LEADER)
@@ -1020,6 +1029,7 @@ void CISlave::UpdateOnRemove()
 	CBaseEntity::UpdateOnRemove();
 
 	ClearBeams();
+	RemoveHandGlows();
 }
 
 //=========================================================
@@ -1670,6 +1680,14 @@ void CISlave::RemoveSummonBeams()
 	m_handsBeam1 = NULL;
 	UTIL_Remove(m_handsBeam2);
 	m_handsBeam2 = NULL;
+}
+
+void CISlave::RemoveHandGlows()
+{
+	UTIL_Remove(m_handGlow1);
+	m_handGlow1 = NULL;
+	UTIL_Remove(m_handGlow2);
+	m_handGlow2 = NULL;
 }
 
 float CISlave::HealPower()
