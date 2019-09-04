@@ -3318,7 +3318,7 @@ IMPLEMENT_SAVERESTORE( CEnvShockwave, CBaseEntity )
 
 void CEnvShockwave::Precache( void )
 {
-	m_iSpriteTexture = PRECACHE_MODEL( (char *)STRING(pev->netname) );
+	m_iSpriteTexture = PRECACHE_MODEL( STRING(pev->netname) );
 }
 
 void CEnvShockwave::KeyValue( KeyValueData *pkvd )
@@ -3379,7 +3379,14 @@ void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	{
 		CBaseEntity* posEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszPosition));
 		if (posEnt)
+		{
 			vecPos = posEnt->pev->origin;
+		}
+		else
+		{
+			ALERT(at_aiconsole, "Couldn't find position entity %s for %s\n", STRING(m_iszPosition), STRING(pev->classname));
+			return;
+		}
 	}
 
 	if (!(pev->spawnflags & SF_SHOCKWAVE_CENTERED))
