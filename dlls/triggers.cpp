@@ -3317,3 +3317,25 @@ void CTriggerSetPatrol::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		}
 	}
 }
+
+//=====================================================
+// trigger_command: activate a console command
+//=====================================================
+class CTriggerCommand : public CBaseEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual int	ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+};
+LINK_ENTITY_TO_CLASS( trigger_command, CTriggerCommand )
+
+void CTriggerCommand::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	char szCommand[256];
+
+	if (pev->netname)
+	{
+		sprintf( szCommand, "%s\n", STRING(pev->netname) );
+		SERVER_COMMAND( szCommand );
+	}
+}

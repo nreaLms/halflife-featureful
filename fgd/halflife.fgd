@@ -5658,6 +5658,11 @@
 	m_iszNewTarget(string) : "New Target"
 ]
 
+@PointClass base(Targetname) = trigger_command : "Console Command"
+[
+	netname(string) : "Command String"
+]
+
 @SolidClass base(Trigger, Targetname) = trigger_counter : "Trigger counter"
 [
 	spawnflags(flags) =

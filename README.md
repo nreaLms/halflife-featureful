@@ -149,6 +149,7 @@ All Opposing Force weapons and corresponding ammo entities are implemented, but 
 * env_model
 * env_shockwave
 * env_state
+* trigger_command
 * trigger_startpatrol
 
 #### Sven Co-op entities
