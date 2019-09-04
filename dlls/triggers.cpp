@@ -29,6 +29,7 @@
 #include "gamerules.h"
 #include "skill.h"
 #include "monsters.h"
+#include "followingmonster.h"
 
 #define SF_TRIGGER_PUSH_ONCE		1
 #define SF_TRIGGER_PUSH_START_OFF	2//spawnflag that makes trigger_push spawn turned OFF
@@ -3246,3 +3247,73 @@ void CTriggerGenewormHit::GeneWormTouch(CBaseEntity *pOther)
 
 LINK_ENTITY_TO_CLASS(trigger_geneworm_hit, CTriggerGenewormHit)
 #endif
+
+//===========================================================
+//LRC- trigger_startpatrol
+//===========================================================
+class CTriggerSetPatrol : public CBaseDelay
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Spawn( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	int ObjectCaps( void ) { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+
+	static	TYPEDESCRIPTION m_SaveData[];
+
+private:
+	int		m_iszPath;
+};
+LINK_ENTITY_TO_CLASS( trigger_startpatrol, CTriggerSetPatrol )
+
+TYPEDESCRIPTION	CTriggerSetPatrol::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerSetPatrol, m_iszPath, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE(CTriggerSetPatrol, CBaseDelay)
+
+void CTriggerSetPatrol::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "m_iszPath"))
+	{
+		m_iszPath = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseDelay::KeyValue( pkvd );
+}
+
+void CTriggerSetPatrol::Spawn( void )
+{
+	pev->effects |= EF_NODRAW;
+}
+
+
+void CTriggerSetPatrol::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	CBaseEntity *pTarget = UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
+	CBaseEntity *pPath = UTIL_FindEntityByTargetname( NULL, STRING( m_iszPath ) );
+
+	if (pTarget && pPath)
+	{
+		CBaseMonster *pMonster = pTarget->MyMonsterPointer();
+		if (pMonster)
+		{
+			Schedule_t* patrolSchedule = pMonster->StartPatrol(pPath);
+			if (patrolSchedule)
+			{
+				CFollowingMonster* followingMonster = pMonster->MyFollowingMonsterPointer();
+				if (followingMonster->IsFollowingPlayer())
+				{
+					followingMonster->StopFollowing(TRUE, false);
+				}
+				pMonster->SetState( MONSTERSTATE_IDLE );
+				pMonster->ChangeSchedule( patrolSchedule );
+			}
+		}
+	}
+}

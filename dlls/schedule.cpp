@@ -388,9 +388,9 @@ void CBaseMonster::RunTask( Task_t *pTask )
 		}
 	case TASK_WAIT:
 	case TASK_WAIT_RANDOM:
-	case TASK_WAIT_TURNING:
+	case TASK_WAIT_PATROL_TURNING:
 		{
-			if (pTask->iTask == TASK_WAIT_TURNING)
+			if (pTask->iTask == TASK_WAIT_PATROL_TURNING)
 			{
 				ChangeYaw( pev->yaw_speed );
 			}
@@ -908,10 +908,14 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_WAIT:
 	case TASK_WAIT_FACE_ENEMY:
-	case TASK_WAIT_TURNING:
 		{
 			// set a future time that tells us when the wait is over.
 			m_flWaitFinished = gpGlobals->time + pTask->flData;	
+			break;
+		}
+	case TASK_WAIT_PATROL_TURNING:
+		{
+			m_flWaitFinished = m_nextPatrolPathCheck;
 			break;
 		}
 	case TASK_WAIT_RANDOM:
@@ -1429,7 +1433,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 					}
 					else
 					{
-						return GetScheduleOfType( SCHED_IDLE_TURNING );
+						return GetScheduleOfType( SCHED_IDLE_PATROL_TURNING );
 					}
 				}
 				// no valid route!

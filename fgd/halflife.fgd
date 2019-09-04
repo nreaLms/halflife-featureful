@@ -5871,6 +5871,12 @@
 	]
 ]
 
+@PointClass base(Targetname) = trigger_startpatrol : "Trigger Start Patrol"
+[
+	target(target_destination) : "Target monster"
+	m_iszPath(target_destination) : "Patrol path start"
+]
+
 @PointClass base(Targetname, Target) = trigger_timer : "Continuously fire the same target over random delays. trigger_timer can be activated with 'On' use. trigger_timer stops firing its target if it was triggered with 'Off' use. 'Toggle' use toggles trigger_timer's state."
 [
 	spawnflags(flags) =

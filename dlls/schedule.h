@@ -32,7 +32,7 @@ typedef enum
 {
 		SCHED_NONE = 0,
 		SCHED_IDLE_STAND,
-		SCHED_IDLE_TURNING,
+		SCHED_IDLE_PATROL_TURNING,
 		SCHED_IDLE_WALK,
 		SCHED_IDLE_RUN,
 		SCHED_WAKE_ANGRY,
@@ -168,7 +168,7 @@ typedef enum
 		TASK_FACE_SCRIPT,
 		TASK_WAIT_RANDOM,
 		TASK_WAIT_INDEFINITE,
-		TASK_WAIT_TURNING, // wait while turning to ideal yaw
+		TASK_WAIT_PATROL_TURNING, // wait while turning to ideal yaw during the patrol
 		TASK_STOP_MOVING,
 		TASK_TURN_LEFT,
 		TASK_TURN_RIGHT,

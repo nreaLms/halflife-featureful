@@ -83,18 +83,18 @@ Schedule_t slIdleStand[] =
 	},
 };
 
-Task_t tlIdleTurning[] =
+Task_t tlIdlePatrolTurning[] =
 {
 	{ TASK_STOP_MOVING, 0 },
 	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
-	{ TASK_WAIT_TURNING, (float)5 },
+	{ TASK_WAIT_PATROL_TURNING, (float)0 },
 };
 
-Schedule_t slIdleTurning[] =
+Schedule_t slIdlePatrolTurning[] =
 {
 	{
-		tlIdleTurning,
-		ARRAYSIZE( tlIdleTurning ),
+		tlIdlePatrolTurning,
+		ARRAYSIZE( tlIdlePatrolTurning ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_SEE_FEAR |
 		bits_COND_LIGHT_DAMAGE |
@@ -1026,7 +1026,7 @@ Schedule_t slTakeCoverFromEnemy[] =
 Schedule_t *CBaseMonster::m_scheduleList[] =
 {
 	slIdleStand,
-	slIdleTurning,
+	slIdlePatrolTurning,
 	slIdleTrigger,
 	slIdleWalk,
 	slIdleRun,
@@ -1140,9 +1140,9 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 
 			return &slIdleStand[0];
 		}
-	case SCHED_IDLE_TURNING:
+	case SCHED_IDLE_PATROL_TURNING:
 		{
-			return slIdleTurning;
+			return slIdlePatrolTurning;
 		}
 	case SCHED_IDLE_WALK:
 		{
