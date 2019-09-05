@@ -49,7 +49,9 @@
 // whether vortigaunts can revive other vortigaunts using a free energy
 #define FEATURE_ISLAVE_REVIVE (1 && FEATURE_ISLAVE_ENERGY)
 // whether vortigaunts have damage boost on melee attacks when energy level is positive
-#define FEATURE_ISLAVE_ARMBOOST (1 && FEATURE_ISLAVE_ENERGY)
+#define FEATURE_ISLAVE_ARMBOOST (1 && FEATURE_ISLAVE_ENERGY && FEATURE_ISLAVE_HANDGLOW)
+// wheter vortigaunt can charge ally player's suit
+#define FEATURE_ISLAVE_CHARGE_TOKEN (0 && FEATURE_ISLAVE_ENERGY)
 
 //=========================================================
 // monster-specific schedule types
@@ -58,7 +60,8 @@ enum
 {
 	SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR = LAST_FOLLOWINGMONSTER_SCHEDULE + 1,
 	SCHED_ISLAVE_SUMMON_FAMILIAR,
-	SCHED_ISLAVE_HEAL_OR_REVIVE
+	SCHED_ISLAVE_HEAL_OR_REVIVE,
+	SCHED_ISLAVE_GIVE_CHARGE,
 };
 
 //=========================================================
@@ -67,7 +70,9 @@ enum
 enum 
 {
 	TASK_ISLAVE_SUMMON_FAMILIAR = LAST_FOLLOWINGMONSTER_TASK + 1,
-	TASK_ISLAVE_HEAL_OR_REVIVE_ATTACK
+	TASK_ISLAVE_HEAL_OR_REVIVE_ATTACK,
+	TASK_ISLAVE_MAKE_CHARGE_TOKEN,
+	TASK_ISLAVE_SEND_CHARGE_TOKEN,
 };
 
 //=========================================================
@@ -140,6 +145,206 @@ static bool CanSpawnAtPosition(const Vector& position, int hullType, edict_t* pe
 	return !tr.fStartSolid && !tr.fAllSolid;
 }
 
+#define VTOKEN_MAX_SPEED 320
+#define VTOKEN_ACCEL_SPEED 160
+#define VTOKEN_LIFESPAN 8.0f
+
+class CChargeToken : public CBaseEntity
+{
+public:
+	void Spawn();
+	void Precache();
+	void EXPORT ArmorPieceTouch(CBaseEntity* pOther);
+	void EXPORT AnimateThink();
+	void EXPORT HuntThink();
+	void EXPORT AnimateAndFade();
+	void Animate();
+	void MovetoTarget( Vector vecTarget );
+	void Launch(CBaseEntity *pTarget, const Vector &pos);
+	void MakeEntLight(int timeDs = 2);
+	inline void SetAttachment( edict_t *pEntity, int attachment )
+	{
+		if( pEntity )
+		{
+			pev->skin = ENTINDEX( pEntity );
+			pev->body = attachment;
+			pev->aiment = pEntity;
+			pev->movetype = MOVETYPE_FOLLOW;
+		}
+	}
+
+	virtual int		Save(CSave &save);
+	virtual int		Restore(CRestore &restore);
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	float m_flLastThink;
+	EHANDLE m_hTarget;
+};
+
+LINK_ENTITY_TO_CLASS( charge_token, CChargeToken )
+
+TYPEDESCRIPTION	CChargeToken::m_SaveData[] =
+{
+	DEFINE_FIELD( CChargeToken, m_flLastThink, FIELD_TIME ),
+	DEFINE_FIELD( CChargeToken, m_hTarget, FIELD_EHANDLE ),
+};
+
+IMPLEMENT_SAVERESTORE( CChargeToken, CBaseEntity )
+
+void CChargeToken::Spawn()
+{
+	pev->classname = MAKE_STRING("charge_token");
+	Precache();
+	SET_MODEL( ENT(pev), "sprites/xspark1.spr" );
+	pev->rendermode = kRenderTransAdd;
+	pev->renderamt = 225;
+
+	pev->movetype = MOVETYPE_NONE;
+	pev->solid = SOLID_NOT;
+
+	UTIL_SetOrigin( pev, pev->origin );
+
+	pev->health = gSkillData.batteryCapacity;
+
+	pev->frags = MODEL_FRAMES( pev->modelindex ) - 1;
+
+	pev->nextthink = gpGlobals->time;
+	SetThink(&CChargeToken::AnimateThink);
+}
+
+void CChargeToken::Precache()
+{
+	PRECACHE_MODEL("sprites/xspark1.spr");
+}
+
+void CChargeToken::ArmorPieceTouch(CBaseEntity *pOther)
+{
+	if (pOther->IsPlayer() && ( pOther->pev->weapons & ( 1 << WEAPON_SUIT ) ))
+	{
+		pOther->pev->armorvalue += pev->health;
+		pOther->pev->armorvalue = Q_min(pOther->pev->armorvalue, MAX_NORMAL_BATTERY);
+		EMIT_SOUND_DYN( ENT( pOther->pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
+		ResetTouch();
+		SetThink(&CBaseEntity::SUB_Remove);
+		pev->nextthink = gpGlobals->time;
+	}
+	else if (pOther == m_hTarget)
+	{
+		ResetTouch();
+		SetThink(&CBaseEntity::SUB_Remove);
+		pev->nextthink = gpGlobals->time;
+	}
+}
+
+void CChargeToken::AnimateThink()
+{
+	Animate();
+	pev->nextthink = gpGlobals->time + 0.1;
+}
+
+void CChargeToken::Animate()
+{
+	if( pev->frame++ )
+	{
+		if( pev->frame > pev->frags )
+		{
+			pev->frame = 0;
+		}
+	}
+}
+
+void CChargeToken::HuntThink()
+{
+	pev->nextthink = gpGlobals->time + 0.1;
+	Animate();
+
+	MakeEntLight();
+
+	if( gpGlobals->time - pev->dmgtime > VTOKEN_LIFESPAN || m_hTarget == 0 || !IsInWorld())
+	{
+		SetTouch( NULL );
+		SetThink( &CChargeToken::AnimateAndFade );
+		pev->velocity = g_vecZero;
+		pev->solid = SOLID_NOT;
+		pev->movetype = MOVETYPE_NONE;
+		return;
+	}
+
+	MovetoTarget( m_hTarget->Center() );
+	m_flLastThink = gpGlobals->time;
+}
+
+void CChargeToken::AnimateAndFade()
+{
+	Animate();
+	if( pev->renderamt > 25 )
+	{
+		pev->renderamt -= 25;
+		pev->nextthink = gpGlobals->time + 0.1;
+	}
+	else
+	{
+		pev->renderamt = 0;
+		pev->nextthink = gpGlobals->time + 0.1;
+		SetThink( &CBaseEntity::SUB_Remove );
+	}
+}
+
+void CChargeToken::MovetoTarget(Vector vecTarget)
+{
+	// accelerate
+	float flSpeed = pev->velocity.Length();
+	float flDelta = gpGlobals->time - m_flLastThink;
+
+	if ( flSpeed < VTOKEN_MAX_SPEED )
+	{
+		flSpeed += ( VTOKEN_ACCEL_SPEED * flDelta );
+		if ( flSpeed > VTOKEN_MAX_SPEED )
+		{
+			flSpeed = VTOKEN_MAX_SPEED;
+		}
+	}
+
+	Vector vecDir = ( vecTarget - pev->origin ).Normalize();
+	pev->velocity = vecDir * flSpeed;
+}
+
+void CChargeToken::Launch(CBaseEntity* pTarget, const Vector& pos)
+{
+	pev->skin = 0;
+	pev->body = 0;
+	pev->aiment = 0;
+	pev->movetype = MOVETYPE_FLY;
+	pev->solid = SOLID_TRIGGER;
+	UTIL_SetSize(pev, Vector( -8, -8, 8 ), Vector( 8, 8, 8 ) );
+	UTIL_SetOrigin( pev, pos );
+	m_hTarget = pTarget;
+
+	SetTouch(&CChargeToken::ArmorPieceTouch);
+	SetThink(&CChargeToken::HuntThink);
+
+	pev->nextthink = gpGlobals->time + 0.1;
+	m_flLastThink = gpGlobals->time;
+	pev->dmgtime = gpGlobals->time;
+}
+
+void CChargeToken::MakeEntLight(int timeDs)
+{
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_ELIGHT );
+		WRITE_SHORT( entindex() );		// entity, attachment
+		WRITE_COORD( pev->origin.x );		// origin
+		WRITE_COORD( pev->origin.y );
+		WRITE_COORD( pev->origin.z );
+		WRITE_COORD( pev->renderamt / 8 );	// radius
+		WRITE_BYTE( 0 );	// R
+		WRITE_BYTE( 255 );	// G
+		WRITE_BYTE( 255 );	// B
+		WRITE_BYTE( timeDs );	// life * 10
+		WRITE_COORD( 0 ); // decay
+	MESSAGE_END();
+}
+
 class CISlave : public CFollowingMonster
 {
 public:
@@ -177,6 +382,7 @@ public:
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
 	void PrescheduleThink();
+	int LookupActivity(int activity);
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
 	void SpawnFamiliar(const char *entityName, const Vector& origin, int hullType);
 	Schedule_t *GetSchedule( void );
@@ -202,13 +408,14 @@ public:
 	void CreateSummonBeams();
 	void RemoveSummonBeams();
 	void RemoveHandGlows();
+	void RemoveChargeToken();
 	void CoilBeam();
 	void MakeDynamicLight(const Vector& vecSrc, int radius, int t);
 
 	Vector HandPosition(int side);
 
 	CSprite* CreateHandGlow(int attachment);
-	CBeam* CreateSummonBeam(const Vector& vecEnd, int attachment);
+	CBeam* CreateSummonBeam(const Vector& vecEnd, int t);
 
 	float HealPower();
 	void SpendEnergy(float energy);
@@ -275,25 +482,29 @@ public:
 
 	int m_voicePitch;
 
+	float m_freeEnergy;
+
 	EHANDLE m_hDead;
 	EHANDLE m_hWounded;
 	EHANDLE m_hWounded2;
+	float m_nextHealTargetCheck;
+	float m_originalMaxHealth;
+
+	short m_clawStrikeNum;
+	BOOL m_lastAttackWasCoil;
 	
-	int m_iLightningTexture;
-	int m_iTrailTexture;
+	BOOL m_childIsAlive;
+	float m_flSpawnFamiliarTime;
 
 	CSprite	*m_handGlow1;
 	CSprite	*m_handGlow2;
 	CBeam *m_handsBeam1;
 	CBeam *m_handsBeam2;
-	
-	float m_flSpawnFamiliarTime;
-	float m_freeEnergy;
-	short m_clawStrikeNum;
-	BOOL m_lastAttackWasCoil;
-	BOOL m_childIsAlive;
-	float m_nextHealTargetCheck;
-	float m_originalMaxHealth;
+
+	CChargeToken* m_chargeToken;
+
+	int m_iLightningTexture;
+	int m_iTrailTexture;
 
 	static const char *pAttackHitSounds[];
 	static const char *pAttackMissSounds[];
@@ -314,20 +525,31 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 	DEFINE_FIELD( CISlave, m_flNextAttack, FIELD_TIME ),
 
 	DEFINE_FIELD( CISlave, m_voicePitch, FIELD_INTEGER ),
-
+#if FEATURE_ISLAVE_ENERGY
+	DEFINE_FIELD( CISlave, m_freeEnergy, FIELD_FLOAT ),
+#endif
+#if FEATURE_ISLAVE_HEAL || FEATURE_ISLAVE_REVIVE
 	DEFINE_FIELD( CISlave, m_hDead, FIELD_EHANDLE ),
 	DEFINE_FIELD( CISlave, m_hWounded, FIELD_EHANDLE ),
 	DEFINE_FIELD( CISlave, m_hWounded2, FIELD_EHANDLE ),
-	DEFINE_FIELD( CISlave, m_flSpawnFamiliarTime, FIELD_FLOAT ),
-	DEFINE_FIELD( CISlave, m_freeEnergy, FIELD_FLOAT ),
-	DEFINE_FIELD( CISlave, m_clawStrikeNum, FIELD_SHORT ),
-	DEFINE_FIELD( CISlave, m_lastAttackWasCoil, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CISlave, m_childIsAlive, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CISlave, m_nextHealTargetCheck, FIELD_TIME ),
 	DEFINE_FIELD( CISlave, m_originalMaxHealth, FIELD_FLOAT ),
-
+#endif
+	DEFINE_FIELD( CISlave, m_clawStrikeNum, FIELD_SHORT ),
+#if FEATURE_ISLAVE_COIL
+	DEFINE_FIELD( CISlave, m_lastAttackWasCoil, FIELD_BOOLEAN ),
+#endif
+#if FEATURE_ISLAVE_FAMILIAR
+	DEFINE_FIELD( CISlave, m_childIsAlive, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CISlave, m_flSpawnFamiliarTime, FIELD_FLOAT ),
+#endif
+#if FEATURE_ISLAVE_HANDGLOW
 	DEFINE_FIELD( CISlave, m_handGlow1, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CISlave, m_handGlow2, FIELD_CLASSPTR ),
+#endif
+#if FEATURE_ISLAVE_CHARGE_TOKEN
+	DEFINE_FIELD( CISlave, m_chargeToken, FIELD_CLASSPTR ),
+#endif
 };
 
 IMPLEMENT_SAVERESTORE( CISlave, CFollowingMonster )
@@ -477,6 +699,7 @@ void CISlave::OnDying()
 {
 	ClearBeams();
 	RemoveHandGlows();
+	RemoveChargeToken();
 	CFollowingMonster::OnDying();
 }
 
@@ -857,6 +1080,46 @@ void CISlave::StartTask( Task_t *pTask )
 		m_IdealActivity = ACT_RANGE_ATTACK1;
 		break;
 	}
+
+	case TASK_ISLAVE_MAKE_CHARGE_TOKEN:
+	{
+		m_chargeToken = GetClassPtr( (CChargeToken *)NULL );
+		if (m_chargeToken)
+		{
+			m_chargeToken->Spawn();
+			m_chargeToken->SetAttachment(edict(), 1);
+			UTIL_SetOrigin(m_chargeToken->pev, pev->origin);
+			m_chargeToken->MakeEntLight(6);
+			TaskComplete();
+		}
+		else
+			TaskFail();
+		break;
+	}
+	case TASK_ISLAVE_SEND_CHARGE_TOKEN:
+	{
+		if (m_chargeToken)
+		{
+			CBaseEntity* pTarget = FollowedPlayer();
+			if (pTarget)
+			{
+				Vector vecPos, vecAng;
+				GetAttachment(0, vecPos, vecAng);
+				SpendEnergy(m_chargeToken->pev->health);
+				m_chargeToken->Launch(pTarget, vecPos);
+				m_chargeToken = NULL;
+				TaskComplete();
+			}
+			else
+			{
+				TaskFail();
+			}
+		}
+		else
+		{
+			TaskFail();
+		}
+	}
 	default:
 		CFollowingMonster::StartTask( pTask );
 		break;
@@ -898,6 +1161,15 @@ void CISlave::PrescheduleThink()
 			EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, RANDOM_SOUND_ARRAY(pGlowArmSounds), RANDOM_FLOAT(0.6, 0.8), ATTN_NORM, 0, RANDOM_LONG(70,90));
 		}
 	}
+}
+
+int CISlave::LookupActivity(int activity)
+{
+	if (activity == ACT_ARM && IDefaultRelationship(CLASS_PLAYER) == R_AL)
+	{
+		return LookupSequence("updown");
+	}
+	return CFollowingMonster::LookupActivity(activity);
 }
 
 void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hullType)
@@ -970,9 +1242,9 @@ void CISlave::Spawn()
 #if FEATURE_ISLAVE_HANDGLOW
 	m_handGlow1 = CreateHandGlow(1);
 	m_handGlow2 = CreateHandGlow(2);
+	HandsGlowOff();
 #endif
 
-	HandsGlowOff();
 
 #if FEATURE_ISLAVE_FAMILIAR
 	if (!pev->weapons) {
@@ -998,8 +1270,7 @@ void CISlave::Precache()
 {
 	m_iLightningTexture = PRECACHE_MODEL( "sprites/lgtning.spr" );
 	m_iTrailTexture = PRECACHE_MODEL( "sprites/plasma.spr" );
-	PRECACHE_MODEL( ISLAVE_HAND_SPRITE_NAME );
-	PRECACHE_MODEL( "sprites/bexplo.spr" );
+
 	PrecacheMyModel( "models/islave.mdl" );
 	PRECACHE_SOUND( "debris/zap1.wav" );
 	PRECACHE_SOUND( "debris/zap4.wav" );
@@ -1018,10 +1289,22 @@ void CISlave::Precache()
 	PRECACHE_SOUND_ARRAY(pPainSounds);
 	PRECACHE_SOUND_ARRAY(pDeathSounds);
 
-	PRECACHE_SOUND_ARRAY(pGlowArmSounds);
 	UTIL_PrecacheOther( "test_effect" );
+
+#if FEATURE_ISLAVE_HANDGLOW
+	PRECACHE_MODEL( ISLAVE_HAND_SPRITE_NAME );
+#endif
+#if FEATURE_ISLAVE_ARMBOOST
+	PRECACHE_SOUND_ARRAY(pGlowArmSounds);
+#endif
+#if FEATURE_ISLAVE_FAMILIAR
+	PRECACHE_MODEL( "sprites/bexplo.spr" );
 	UTIL_PrecacheOther( "monster_snark" );
 	UTIL_PrecacheOther( "monster_headcrab" );
+#endif
+#if FEATURE_ISLAVE_CHARGE_TOKEN
+	UTIL_PrecacheOther( "charge_token" );
+#endif
 }
 
 void CISlave::UpdateOnRemove()
@@ -1030,6 +1313,7 @@ void CISlave::UpdateOnRemove()
 
 	ClearBeams();
 	RemoveHandGlows();
+	RemoveChargeToken();
 }
 
 //=========================================================
@@ -1145,12 +1429,38 @@ Schedule_t slSlaveSummon[] =
 	}
 };
 
+Task_t tlSlaveGiveArmor[] =
+{
+	{ TASK_MOVE_TO_TARGET_RANGE, (float)100 },
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_TARGET_CHASE },
+	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_ARM },
+	{ TASK_WAIT, 0.5f },
+	{ TASK_ISLAVE_MAKE_CHARGE_TOKEN, (float)0 },
+	{ TASK_WAIT, 0.6f },
+	{ TASK_ISLAVE_SEND_CHARGE_TOKEN, (float)0 },
+	{ TASK_SET_SCHEDULE, (float)SCHED_IDLE_STAND }
+};
+
+Schedule_t slSlaveGiveArmor[] =
+{
+	{
+		tlSlaveGiveArmor,
+		ARRAYSIZE( tlSlaveGiveArmor ),
+		bits_COND_NEW_ENEMY|
+		bits_COND_HEAVY_DAMAGE,
+		0,
+		"Slave Give Armor"
+	}
+};
+
 DEFINE_CUSTOM_SCHEDULES( CISlave )
 {
 	slSlaveAttack1,
 	slSlaveHealOrReviveAttack,
 	slSlaveCoverAndSummon,
-	slSlaveSummon
+	slSlaveSummon,
+	slSlaveGiveArmor
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CISlave, CFollowingMonster )
@@ -1160,6 +1470,7 @@ IMPLEMENT_CUSTOM_SCHEDULES( CISlave, CFollowingMonster )
 Schedule_t *CISlave::GetSchedule( void )
 {
 	ClearBeams();
+	RemoveChargeToken();
 	m_clawStrikeNum = 0;
 /*
 	if( pev->spawnflags )
@@ -1233,6 +1544,17 @@ Schedule_t *CISlave::GetSchedule( void )
 				}
 			}
 		}
+#if FEATURE_ISLAVE_CHARGE_TOKEN
+		if (HasFreeEnergy())
+		{
+			CBaseEntity* pPlayer = FollowedPlayer();
+			if (pPlayer && (pPlayer->pev->weapons & (1 << WEAPON_SUIT)) && pPlayer->IsAlive() && pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY/4 &&
+					FVisible(pPlayer) && (pPlayer->pev->origin - pev->origin).Length() < 128)
+			{
+				return GetScheduleOfType(SCHED_ISLAVE_GIVE_CHARGE);
+			}
+		}
+#endif
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)
 			return followingSchedule;
@@ -1281,6 +1603,8 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 		return slSlaveSummon;
 	case SCHED_ISLAVE_HEAL_OR_REVIVE:
 		return slSlaveHealOrReviveAttack;
+	case SCHED_ISLAVE_GIVE_CHARGE:
+		return slSlaveGiveArmor;
 	}
 	
 	return CFollowingMonster::GetScheduleOfType( Type );
@@ -1688,6 +2012,12 @@ void CISlave::RemoveHandGlows()
 	m_handGlow1 = NULL;
 	UTIL_Remove(m_handGlow2);
 	m_handGlow2 = NULL;
+}
+
+void CISlave::RemoveChargeToken()
+{
+	UTIL_Remove(m_chargeToken);
+	m_chargeToken = NULL;
 }
 
 float CISlave::HealPower()
