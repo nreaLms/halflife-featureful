@@ -131,7 +131,7 @@ public:
 	const char* DefaultDisplayName() { return "Human Grunt"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void CheckAmmo ( void );
-	void SetActivity ( Activity NewActivity );
+	int LookupActivity(int activity);
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	void KeyValue( KeyValueData *pkvd );
@@ -2214,12 +2214,9 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 //=========================================================
 // SetActivity
 //=========================================================
-void CHFGrunt :: SetActivity ( Activity NewActivity )
+int CHFGrunt::LookupActivity(int activity)
 {
-	int	iSequence = ACTIVITY_NOT_AVAILABLE;
-	void *pmodel = GET_MODEL_PTR( ENT(pev) );
-
-	switch ( NewActivity)
+	switch ( activity)
 	{
 	case ACT_RANGE_ATTACK1:
 		// grunt is either shooting standing or shooting crouched
@@ -2228,12 +2225,12 @@ void CHFGrunt :: SetActivity ( Activity NewActivity )
 			if ( m_fStanding )
 			{
 				// get aimable sequence
-				iSequence = LookupSequence( "standing_shotgun" );
+				return LookupSequence( "standing_shotgun" );
 			}
 			else
 			{
 				// get crouching shoot
-				iSequence = LookupSequence( "crouching_shotgun" );
+				return LookupSequence( "crouching_shotgun" );
 			}
 		}
 		else if (FBitSet( pev->weapons, FGRUNT_M249 ))
@@ -2241,12 +2238,12 @@ void CHFGrunt :: SetActivity ( Activity NewActivity )
 			if ( m_fStanding )
 			{
 				// get aimable sequence
-				iSequence = LookupSequence( "standing_saw" );
+				return LookupSequence( "standing_saw" );
 			}
 			else
 			{
 				// get crouching shoot
-				iSequence = LookupSequence( "crouching_saw" );
+				return LookupSequence( "crouching_saw" );
 			}
 		}
 		else
@@ -2254,84 +2251,58 @@ void CHFGrunt :: SetActivity ( Activity NewActivity )
 			if ( m_fStanding )
 			{
 				// get aimable sequence
-				iSequence = LookupSequence( "standing_mp5" );
+				return LookupSequence( "standing_mp5" );
 			}
 			else
 			{
 				// get crouching shoot
-				iSequence = LookupSequence( "crouching_mp5" );
+				return LookupSequence( "crouching_mp5" );
 			}
 		}
-		break;
 	case ACT_RANGE_ATTACK2:
 		// grunt is going to a secondary long range attack. This may be a thrown
 		// grenade or fired grenade, we must determine which and pick proper sequence
 		if ( pev->weapons & FGRUNT_HANDGRENADE )
 		{
 			// get toss anim
-			iSequence = LookupSequence( "throwgrenade" );
+			return LookupSequence( "throwgrenade" );
 		}
 		else if ( pev->weapons & FGRUNT_GRENADELAUNCHER )
 		{
 			// get launch anim
-			iSequence = LookupSequence( "launchgrenade" );
+			return LookupSequence( "launchgrenade" );
 		}
-		break;
 	case ACT_RUN:
 		if ( pev->health <= FGRUNT_LIMP_HEALTH )
 		{
 			// limp!
-			iSequence = LookupActivity ( ACT_RUN_HURT );
+			return CTalkMonster::LookupActivity ( ACT_RUN_HURT );
 		}
 		else
 		{
-			iSequence = LookupActivity ( NewActivity );
+			return CTalkMonster::LookupActivity ( activity );
 		}
-		break;
 	case ACT_WALK:
 		if ( pev->health <= FGRUNT_LIMP_HEALTH )
 		{
 			// limp!
-			iSequence = LookupActivity ( ACT_WALK_HURT );
+			return CTalkMonster::LookupActivity ( ACT_WALK_HURT );
 		}
 		else
 		{
-			iSequence = LookupActivity ( NewActivity );
+			return CTalkMonster::LookupActivity ( activity );
 		}
-		break;
 	case ACT_IDLE:
 		if ( m_MonsterState == MONSTERSTATE_COMBAT )
 		{
-			NewActivity = ACT_IDLE_ANGRY;
+			return CTalkMonster::LookupActivity( ACT_IDLE_ANGRY );
 		}
-		iSequence = LookupActivity ( NewActivity );
-		break;
+		// pass through
 	default:
-		iSequence = LookupActivity ( NewActivity );
-		break;
-	}
-
-	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-
-	// Set to the desired anim, or default anim if the desired is not present
-	if ( iSequence > ACTIVITY_NOT_AVAILABLE )
-	{
-		if ( pev->sequence != iSequence || !m_fSequenceLoops )
-		{
-			pev->frame = 0;
-		}
-
-		pev->sequence		= iSequence;	// Set to the reset anim (if it's there)
-		ResetSequenceInfo( );
-		SetYawSpeed();
-	}
-	else
-	{
-		// Not available try to get default anim
-		ALERT ( at_console, "%s has no sequence for act:%d\n", STRING(pev->classname), NewActivity );
-		pev->sequence		= 0;	// Set to the reset anim (if it's there)
+		return CTalkMonster::LookupActivity ( activity );
 	}
 }
+
 //=========================================================
 // GetSchedule - Decides which type of schedule best suits
 // the monster's current state and conditions. Then calls

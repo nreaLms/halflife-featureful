@@ -1862,72 +1862,42 @@ IMPLEMENT_CUSTOM_SCHEDULES( CHGrunt, CFollowingMonster )
 //=========================================================
 // SetActivity 
 //=========================================================
-void CHGrunt::SetActivity( Activity NewActivity )
+int CHGrunt::LookupActivity(int activity)
 {
-	int iSequence = ACTIVITY_NOT_AVAILABLE;
-	//void *pmodel = GET_MODEL_PTR( ENT( pev ) );
-
-	switch( NewActivity )
+	switch( activity )
 	{
 	case ACT_RANGE_ATTACK1:
-		iSequence = GetRangeAttack1Sequence();
-		break;
+		return GetRangeAttack1Sequence();
 	case ACT_RANGE_ATTACK2:
-		iSequence = GetRangeAttack2Sequence();
-		break;
+		return GetRangeAttack2Sequence();
 	case ACT_RUN:
 		if( pev->health <= LimpHealth() )
 		{
 			// limp!
-			iSequence = LookupActivity( ACT_RUN_HURT );
+			return CFollowingMonster::LookupActivity( ACT_RUN_HURT );
 		}
 		else
 		{
-			iSequence = LookupActivity( NewActivity );
+			return CFollowingMonster::LookupActivity( activity );
 		}
-		break;
 	case ACT_WALK:
 		if( pev->health <= LimpHealth() )
 		{
 			// limp!
-			iSequence = LookupActivity( ACT_WALK_HURT );
+			return CFollowingMonster::LookupActivity( ACT_WALK_HURT );
 		}
 		else
 		{
-			iSequence = LookupActivity( NewActivity );
+			return CFollowingMonster::LookupActivity( activity );
 		}
-		break;
 	case ACT_IDLE:
 		if ( m_MonsterState == MONSTERSTATE_COMBAT )
 		{
-			NewActivity = ACT_IDLE_ANGRY;
+			return CFollowingMonster::LookupActivity( ACT_IDLE_ANGRY );
 		}
-		iSequence = LookupActivity( NewActivity );
-		break;
+		// pass through
 	default:
-		iSequence = LookupActivity( NewActivity );
-		break;
-	}
-
-	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-
-	// Set to the desired anim, or default anim if the desired is not present
-	if( iSequence > ACTIVITY_NOT_AVAILABLE )
-	{
-		if( pev->sequence != iSequence || !m_fSequenceLoops )
-		{
-			pev->frame = 0;
-		}
-
-		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
-		ResetSequenceInfo();
-		SetYawSpeed();
-	}
-	else
-	{
-		// Not available try to get default anim
-		ALERT( at_console, "%s has no sequence for act:%d\n", STRING( pev->classname ), NewActivity );
-		pev->sequence = 0;	// Set to the reset anim (if it's there)
+		return CFollowingMonster::LookupActivity( activity );
 	}
 }
 

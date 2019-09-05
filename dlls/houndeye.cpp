@@ -107,6 +107,7 @@ public:
 	void RunTask( Task_t *pTask );
 	void SonicAttack( void );
 	void PrescheduleThink( void );
+	int LookupActivity(int activity);
 	void SetActivity( Activity NewActivity );
 	void WriteBeamColor( void );
 	BOOL CheckRangeAttack1( float flDot, float flDist );
@@ -252,36 +253,22 @@ void CHoundeye::SetYawSpeed( void )
 //=========================================================
 // SetActivity 
 //=========================================================
+int CHoundeye::LookupActivity(int activity)
+{
+	if( m_MonsterState == MONSTERSTATE_COMBAT && activity == ACT_IDLE && RANDOM_LONG( 0, 1 ) )
+	{
+		// play pissed idle.
+		return LookupSequence( "madidle" );
+	}
+	return CSquadMonster::LookupActivity(activity);
+}
+
 void CHoundeye::SetActivity( Activity NewActivity )
 {
-	int iSequence;
-
 	if( NewActivity == m_Activity )
 		return;
 
-	if( m_MonsterState == MONSTERSTATE_COMBAT && NewActivity == ACT_IDLE && RANDOM_LONG( 0, 1 ) )
-	{
-		// play pissed idle.
-		iSequence = LookupSequence( "madidle" );
-
-		m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-	
-		// In case someone calls this with something other than the ideal activity
-		m_IdealActivity = m_Activity;
-
-		// Set to the desired anim, or default anim if the desired is not present
-		if( iSequence > ACTIVITY_NOT_AVAILABLE )
-		{
-			pev->sequence = iSequence;	// Set to the reset anim (if it's there)
-			pev->frame = 0;		// FIX: frame counter shouldn't be reset when its the same activity as before
-			ResetSequenceInfo();
-			SetYawSpeed();
-		}
-	}
-	else
-	{
-		CSquadMonster::SetActivity( NewActivity );
-	}
+	CSquadMonster::SetActivity( NewActivity );
 }
 
 //=========================================================

@@ -67,7 +67,7 @@ public:
 	BOOL CheckRangeAttack1( float flDot, float flDist );
 	BOOL CheckRangeAttack2( float flDot, float flDist );
 	void CheckAmmo( void );
-	void SetActivity( Activity NewActivity );
+	int LookupActivity(int activity);
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
 	void DeathSound( void );

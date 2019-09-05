@@ -1235,9 +1235,7 @@ BOOL CBaseMonster::PopEnemy()
 //=========================================================
 void CBaseMonster::SetActivity( Activity NewActivity )
 {
-	int iSequence;
-
-	iSequence = LookupActivity( NewActivity );
+	int iSequence = LookupActivity( NewActivity );
 
 	Activity OldActivity = m_Activity;
 	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present

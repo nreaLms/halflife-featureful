@@ -128,6 +128,7 @@ public:
 
 	BOOL CheckMeleeAttack2(float flDot, float flDist);
 	BOOL CheckRangeAttack1(float flDot, float flDist);
+	int LookupActivity(int activity);
 	void SetActivity( Activity NewActivity );
 
 	Schedule_t *GetSchedule();
@@ -265,74 +266,52 @@ void CGonome::ClearGuts()
 	}
 }
 
-void CGonome::SetActivity( Activity NewActivity )
+int CGonome::LookupActivity(int activity)
 {
-	Activity OldActivity = m_Activity;
-	int iSequence = ACTIVITY_NOT_AVAILABLE;
-
-	if (NewActivity != ACT_RANGE_ATTACK1)
-	{
-		ClearGuts();
-	}
-	if (NewActivity == ACT_MELEE_ATTACK1 && m_hEnemy != 0)
+	if (activity == ACT_MELEE_ATTACK1 && m_hEnemy != 0)
 	{
 		// special melee animations
 		if ((pev->origin - m_hEnemy->pev->origin).Length2D() >= 48 )
 		{
-			iSequence = LookupSequence("attack1");
+			return LookupSequence("attack1");
 		}
 		else
 		{
-			iSequence = LookupSequence("attack2");
+			return LookupSequence("attack2");
 		}
 	}
 	else
 	{
-		UnlockPlayer();
-
-		if (NewActivity == ACT_RUN && m_hEnemy != 0)
+		if (activity == ACT_RUN && m_hEnemy != 0)
 		{
 			// special run animations
 			if ((pev->origin - m_hEnemy->pev->origin).Length2D() <= 512 )
 			{
-				iSequence = LookupSequence("runshort");
+				return LookupSequence("runshort");
 			}
 			else
 			{
-				iSequence = LookupSequence("runlong");
+				return LookupSequence("runlong");
 			}
 		}
 		else
 		{
-			iSequence = LookupActivity(NewActivity);
+			return CBaseMonster::LookupActivity(activity);
 		}
 	}
+}
 
-	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
-
-	// In case someone calls this with something other than the ideal activity
-	m_IdealActivity = m_Activity;
-
-	// Set to the desired anim, or default anim if the desired is not present
-	if( iSequence > ACTIVITY_NOT_AVAILABLE )
+void CGonome::SetActivity( Activity NewActivity )
+{
+	if (NewActivity != ACT_RANGE_ATTACK1)
 	{
-		if( pev->sequence != iSequence || !m_fSequenceLoops )
-		{
-			// don't reset frame between walk and run
-			if( !( OldActivity == ACT_WALK || OldActivity == ACT_RUN ) || !( NewActivity == ACT_WALK || NewActivity == ACT_RUN ) )
-				pev->frame = 0;
-		}
-
-		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
-		ResetSequenceInfo();
-		SetYawSpeed();
+		ClearGuts();
 	}
-	else
+	if (NewActivity != ACT_MELEE_ATTACK1 || m_hEnemy == 0)
 	{
-		// Not available try to get default anim
-		ALERT( at_aiconsole, "%s has no sequence for act:%d\n", STRING( pev->classname ), NewActivity );
-		pev->sequence = 0;	// Set to the reset anim (if it's there)
+		UnlockPlayer();
 	}
+	CBaseMonster::SetActivity(NewActivity);
 }
 
 //=========================================================
