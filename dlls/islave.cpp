@@ -350,6 +350,7 @@ class CISlave : public CFollowingMonster
 public:
 	void Spawn( void );
 	void Precache( void );
+	void KeyValue(KeyValueData* pkvd);
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
 	int ISoundMask( void );
@@ -1258,7 +1259,7 @@ void CISlave::Spawn()
 
 #if FEATURE_ISLAVE_ENERGY
 	// leader starts with some energy pool
-	if (pev->spawnflags & SF_SQUADMONSTER_LEADER)
+	if (!m_freeEnergy && pev->spawnflags & SF_SQUADMONSTER_LEADER)
 		m_freeEnergy = pev->max_health;
 #endif
 }
@@ -1305,6 +1306,17 @@ void CISlave::Precache()
 #if FEATURE_ISLAVE_CHARGE_TOKEN
 	UTIL_PrecacheOther( "charge_token" );
 #endif
+}
+
+void CISlave::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "energy"))
+	{
+		m_freeEnergy = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CFollowingMonster::KeyValue(pkvd);
 }
 
 void CISlave::UpdateOnRemove()
