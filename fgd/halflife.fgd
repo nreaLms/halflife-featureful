@@ -2193,6 +2193,7 @@
 	[
 		1 : "Drop to floor" : 0
 		2 : "No map transition" : 0 : "Don't go across map transitions"
+		4 : "Apply gravity" : 0 : "Make item fall if the floor under it got broken"
 	]
 ]
 

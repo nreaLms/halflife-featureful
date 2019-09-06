@@ -505,6 +505,7 @@ LINK_ENTITY_TO_CLASS(item_flashlight, CItemFlashlight)
 //=========================================================
 #define SF_ITEM_GENERIC_DROP_TO_FLOOR 1
 #define SF_ITEM_GENERIC_DONT_TRANSIT 2
+#define SF_ITEM_GENERIC_APPLY_GRAVITY 4
 
 class CItemGeneric : public CBaseAnimating
 {
@@ -518,6 +519,8 @@ public:
 	void Precache(void);
 	void KeyValue(KeyValueData* pkvd);
 	int	ObjectCaps(void);
+
+	void SetObjectCollisionBox( void );
 
 	void EXPORT StartupThink(void);
 	void EXPORT SequenceThink(void);
@@ -545,16 +548,26 @@ void CItemGeneric::Spawn(void)
 		SET_MODEL(ENT(pev), STRING(pev->model));
 	}
 
+	if (FBitSet(pev->spawnflags, SF_ITEM_GENERIC_APPLY_GRAVITY))
+	{
+		pev->solid = SOLID_BBOX;
+		pev->movetype = MOVETYPE_TOSS;
+	}
+	else
+	{
+		pev->solid = SOLID_NOT;
+		pev->movetype = MOVETYPE_NONE;
+	}
+
 	UTIL_SetOrigin(pev, pev->origin);
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 32));
+	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 
 	pev->takedamage	 = DAMAGE_NO;
-	pev->solid		 = SOLID_NOT;
-	pev->movetype = MOVETYPE_NONE;
-	pev->sequence	 = -1;
+	pev->sequence	 = 0;
 
 	// Call startup sequence to look for a sequence to play.
 	SetThink(&CItemGeneric::StartupThink);
+
 	pev->nextthink = gpGlobals->time + 0.1f;
 
 	if (FBitSet(pev->spawnflags, SF_ITEM_GENERIC_DROP_TO_FLOOR))
@@ -592,11 +605,23 @@ int CItemGeneric::ObjectCaps()
 		return CBaseEntity::ObjectCaps();
 }
 
+void CItemGeneric::SetObjectCollisionBox()
+{
+	if (FBitSet(pev->spawnflags, SF_ITEM_GENERIC_APPLY_GRAVITY))
+	{
+		pev->absmin = pev->origin + Vector( -16, -16, 0 );
+		pev->absmax = pev->origin + Vector( 16, 16, 16 );
+	}
+	else
+	{
+		CBaseAnimating::SetObjectCollisionBox();
+	}
+}
+
 void CItemGeneric::StartupThink(void)
 {
 	// Try to look for a sequence to play.
-	int iSequence = -1;
-	iSequence = LookupSequence(STRING(m_iszSequenceName));
+	int iSequence = LookupSequence(STRING(m_iszSequenceName));
 
 	// Validate sequence.
 	if (iSequence != -1)
