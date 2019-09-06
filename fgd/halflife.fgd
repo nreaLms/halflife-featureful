@@ -2142,7 +2142,10 @@
 [
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_battery.mdl") = item_battery : "HEV battery" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_battery.mdl") = item_battery : "HEV battery"
+[
+	health(integer) : "Charge Supplied"
+]
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/barney_vest.mdl") = item_armorvest : "Armor vest"
 [
 	sequence(choices) : "Placement" : 0 =
