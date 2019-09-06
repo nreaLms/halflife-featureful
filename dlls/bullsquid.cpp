@@ -161,7 +161,9 @@ void CSquidSpit::Touch( CBaseEntity *pOther )
 	}
 	else
 	{
-		pOther->TakeDamage( pev, pev, gSkillData.bullsquidDmgSpit, DMG_GENERIC );
+		CBaseMonster* owner = GetMonsterPointer( pev->owner );
+		entvars_t* pevAttacker = owner ? owner->pev : pev;
+		pOther->TakeDamage( pev, pevAttacker, gSkillData.bullsquidDmgSpit, DMG_GENERIC );
 	}
 
 	SetThink( &CBaseEntity::SUB_Remove );
@@ -456,7 +458,7 @@ int CBullsquid::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		}
 	}
 
-	if( !FClassnameIs( pevAttacker, "monster_headcrab" ) )
+	if( pevAttacker && !FClassnameIs( pevAttacker, "monster_headcrab" ) )
 	{
 		// don't forget about headcrabs if it was a headcrab that hurt the squid.
 		m_flLastHurtTime = gpGlobals->time;
