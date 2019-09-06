@@ -523,8 +523,8 @@ void CBasePlayerWeapon::Materialize( void )
 
 	pev->solid = SOLID_TRIGGER;
 
-	const int itemSize = 24;
-	UTIL_SetSize( pev, Vector( -itemSize, -itemSize, 0 ), Vector( itemSize, itemSize, itemSize ) );
+	//const int itemSize = 24;
+	//UTIL_SetSize( pev, Vector( -itemSize, -itemSize, 0 ), Vector( itemSize, itemSize, itemSize ) );
 	UTIL_SetOrigin( pev, pev->origin );// link into world.
 	SetTouch( &CBasePlayerWeapon::DefaultTouch );
 	SetThink( NULL );
