@@ -118,4 +118,7 @@
 
 #define FEATURE_ROPE (1 || FEATURE_OPFOR_SPECIFIC)
 
+// whether items drop instantly when spawned, e.g. from func_breakable (this is default behavior)
+#define FEATURE_ITEM_INSTANT_DROP 1
+
 #endif

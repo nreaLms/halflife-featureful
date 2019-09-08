@@ -103,12 +103,14 @@ void CItem::Spawn( void )
 
 	if (pev->movetype != MOVETYPE_NONE)
 	{
+#if FEATURE_ITEM_INSTANT_DROP
 		if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
 		{
 			ALERT(at_error, "Item %s fell out of level at %f,%f,%f\n", STRING( pev->classname ), (double)pev->origin.x, (double)pev->origin.y, (double)pev->origin.z);
 			UTIL_Remove( this );
 			return;
 		}
+#endif
 	}
 }
 
