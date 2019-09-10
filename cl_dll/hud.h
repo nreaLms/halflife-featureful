@@ -24,6 +24,8 @@
 #define HUD_H
 #include "mod_features.h"
 
+#define FOG_LIMIT 30000
+
 #if FEATURE_OPFOR_SPECIFIC
 #define RGB_YELLOWISH 0x0000A000
 #else
@@ -633,6 +635,17 @@ private:
 };
 #endif
 
+struct FogProperties
+{
+	short r,g,b;
+
+	float startDist;
+	float endDist;
+	float finalEndDist;
+	float fadeDuration;
+	bool affectSkybox;
+};
+
 //
 //-----------------------------------------------------
 //
@@ -737,6 +750,7 @@ public:
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
 
 	int _cdecl MsgFunc_HUDColor( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
@@ -753,6 +767,9 @@ public:
 	void AddHudElem( CHudBase *p );
 
 	float GetSensitivity();
+
+	bool m_iHardwareMode;
+	FogProperties fog;
 };
 
 extern CHud gHUD;

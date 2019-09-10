@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include "netadr.h"
 #include "parsemsg.h"
+#include "gl_dynamic.h"
 
 #if defined(GOLDSOURCE_SUPPORT) && (defined(_WIN32) || defined(__linux__) || defined(__APPLE__)) && (defined(__i386) || defined(_M_IX86))
 #define USE_VGUI_FOR_GOLDSOURCE_SUPPORT
@@ -35,6 +36,70 @@ extern "C"
 }
 
 #include <string.h>
+
+#ifdef CLDLL_FOG
+#include "r_studioint.h"
+extern engine_studio_api_t IEngineStudio;
+
+GLAPI_glEnable GL_glEnable = NULL;
+GLAPI_glDisable GL_glDisable = NULL;
+GLAPI_glFogi GL_glFogi = NULL;
+GLAPI_glFogf GL_glFogf = NULL;
+GLAPI_glFogfv GL_glFogfv = NULL;
+GLAPI_glHint GL_glHint = NULL;
+GLAPI_glGetIntegerv GL_glGetIntegerv = NULL;
+
+#ifdef _WIN32
+#include <windows.h>
+HMODULE libOpenGL = NULL;
+
+HMODULE LoadOpenGL()
+{
+	return GetModuleHandle("opengl32.dll");
+}
+
+void UnloadOpenGL()
+{
+	//  Don't actually unload library on windows as it was loaded via GetModuleHandle
+	libOpenGL = NULL;
+
+	GL_glFogi = NULL;
+}
+
+FARPROC LoadLibFunc(HMODULE lib, const char *name)
+{
+	return GetProcAddress(lib, name);
+}
+#else
+#include <dlfcn.h>
+void* libOpenGL = NULL;
+
+void* LoadOpenGL()
+{
+#ifdef __APPLE__
+	return dlopen("libGL.dylib", RTLD_LAZY);
+#else
+	return dlopen("libGL.so.1", RTLD_LAZY);
+#endif
+}
+
+void UnloadOpenGL()
+{
+	if (libOpenGL)
+	{
+		dlclose(libOpenGL);
+		libOpenGL = NULL;
+	}
+	GL_glFogi = NULL;
+}
+
+void* LoadLibFunc(void* lib, const char *name)
+{
+	return dlsym(lib, name);
+}
+#endif
+
+#endif
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
@@ -69,6 +134,7 @@ void	DLLEXPORT HUD_Init( void );
 int		DLLEXPORT HUD_Redraw( float flTime, int intermission );
 int		DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
 void	DLLEXPORT HUD_Reset ( void );
+void	DLLEXPORT HUD_Shutdown( void );
 void	DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
 void	DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
 char	DLLEXPORT HUD_PlayerMoveTexture( char *name );
@@ -257,6 +323,41 @@ int DLLEXPORT HUD_VidInit( void )
 		gEngfuncs.Con_Printf( "Root VGUI panel does not exist\n" );
 	}
 #endif
+
+#ifdef CLDLL_FOG
+	gHUD.m_iHardwareMode = IEngineStudio.IsHardware();
+	gEngfuncs.Con_DPrintf("Hardware Mode: %d\n", gHUD.m_iHardwareMode);
+	if (gHUD.m_iHardwareMode == 1)
+	{
+		if (!GL_glFogi)
+		{
+			libOpenGL = LoadOpenGL();
+#ifdef _WIN32
+			if (libOpenGL)
+#else
+			if (!libOpenGL)
+				gEngfuncs.Con_DPrintf("Failed to load OpenGL: %s. Trying to use OpenGL from engine anyway\n", dlerror());
+#endif
+			{
+				GL_glFogi = (GLAPI_glFogi)LoadLibFunc(libOpenGL, "glFogi");
+			}
+
+			if (GL_glFogi)
+			{
+				gEngfuncs.Con_DPrintf("OpenGL functions loaded\n");
+			}
+			else
+			{
+#ifdef _WIN32
+				gEngfuncs.Con_Printf("Failed to load OpenGL functions!\n");
+#else
+				gEngfuncs.Con_Printf("Failed to load OpenGL functions! %s\n", dlerror());
+#endif
+			}
+		}
+	}
+#endif
+
 	return 1;
 }
 
@@ -391,6 +492,14 @@ bool HUD_MessageBox( const char *msg )
 	// TODO: Load SDL2 and call ShowSimpleMessageBox
 
 	return false;
+}
+
+void DLLEXPORT HUD_Shutdown( void )
+{
+	ShutdownInput();
+#ifdef CLDLL_FOG
+	UnloadOpenGL();
+#endif
 }
 
 bool IsXashFWGS()

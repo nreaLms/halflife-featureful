@@ -52,6 +52,12 @@ int __MsgFunc_HUDColor(const char *pszName, int iSize, void *pbuf)
 	return gHUD.MsgFunc_HUDColor(pszName, iSize, pbuf );
 }
 
+//LRC
+int __MsgFunc_SetFog(const char *pszName, int iSize, void *pbuf)
+{
+	return gHUD.MsgFunc_SetFog( pszName, iSize, pbuf );
+}
+
 //DECLARE_MESSAGE( m_Logo, Logo )
 int __MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 {
@@ -169,6 +175,7 @@ void CHud::Init( void )
 	HOOK_MESSAGE( SetFOV );
 	HOOK_MESSAGE( Concuss );
 	HOOK_MESSAGE( HUDColor );
+	HOOK_MESSAGE( SetFog );
 
 	// TFFree CommandMenu
 	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );
@@ -432,6 +439,8 @@ void CHud::VidInit( void )
 	m_Nightvision.VidInit();
 	m_Scoreboard.VidInit();
 	m_MOTD.VidInit();
+
+	memset(&fog, 0, sizeof(fog));
 }
 
 int CHud::MsgFunc_Logo( const char *pszName,  int iSize, void *pbuf )
