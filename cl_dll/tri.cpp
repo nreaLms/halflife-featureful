@@ -101,7 +101,7 @@ static void RenderFogImpl(short r, short g, short b, float startDist, float endD
 
 	if (useTriApi)
 	{
-		float fogColor[] = {r,g,b};
+		float fogColor[] = {(float)r, (float)g, (float)b};
 		gEngfuncs.pTriAPI->Fog ( fogColor, startDist, endDist, 1 );
 	}
 
@@ -129,7 +129,7 @@ void RenderFog ( void )
 	}
 	else
 	{
-		float fogColor[] = {fog.r,fog.g,fog.b};
+		float fogColor[] = {(float)fog.r, (float)fog.g, (float)fog.b};
 		gEngfuncs.pTriAPI->Fog ( fogColor, fog.startDist, fog.endDist, 0 );
 	}
 }

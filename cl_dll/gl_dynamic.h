@@ -8,7 +8,7 @@
 
 #if defined (_WIN32)
 
-#include <windows.h>
+#include "in_defs.h"
 
 #else // _WIN32
 
