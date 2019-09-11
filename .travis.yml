@@ -5,10 +5,19 @@ compiler:
 os:
   - linux
   - osx
-sudo: true
-before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install gcc-multilib g++-multilib; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" && "$CC" == "gcc" ]]; then sudo apt-get install mingw-w64-i686-dev binutils-mingw-w64-i686 gcc-mingw-w64-i686 g++-mingw-w64-i686; fi
+sudo: false
+addons:
+  apt:
+    packages:
+      - cmake
+      - mingw-w64-i686-dev
+      - binutils-mingw-w64-i686
+      - gcc-mingw-w64-i686
+      - g++-mingw-w64-i686
+      - gcc-multilib
+      - g++-multilib
+      - libstdc++6:i386
+      - libgl1-mesa-dev
 script:
   - mkdir -p build && cd build
   - cmake ../ -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DUSE_VOICEMGR=0 && make -j3 && rm -rf *
