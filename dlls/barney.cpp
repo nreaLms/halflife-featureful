@@ -628,6 +628,7 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 		break;
 	case MONSTERSTATE_ALERT:	
 	case MONSTERSTATE_IDLE:
+	{
 		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{
 			// flinch if hurt
@@ -645,6 +646,9 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 
 		// try to say something about smells
 		TrySmellTalk();
+	}
+		break;
+	default:
 		break;
 	}
 

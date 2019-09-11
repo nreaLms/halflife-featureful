@@ -385,8 +385,8 @@ void COp4Mortar::MortarThink()
 			GetAttachment(0, pos, angle);
 
 			m_vIdealGunVector = VecCheckThrow(pev, pos, vecTarget, 700, 1);
-			m_vIdealGunVector.x =- m_vIdealGunVector.x;
-			m_vIdealGunVector.y =- m_vIdealGunVector.y;
+			m_vIdealGunVector.x = -m_vIdealGunVector.x;
+			m_vIdealGunVector.y = -m_vIdealGunVector.y;
 
 			m_vIdealGunAngle = UTIL_VecToAngles(m_vIdealGunVector);
 

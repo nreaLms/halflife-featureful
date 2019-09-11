@@ -2553,6 +2553,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 		break;
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
+	{
 		if ( HasConditions ( bits_COND_NO_AMMO_LOADED ) )
 		{
 			return GetScheduleOfType ( SCHED_RELOAD );
@@ -2568,6 +2569,9 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 
 		// try to say something about smells
 		TrySmellTalk();
+	}
+		break;
+	default:
 		break;
 	}
 
@@ -3364,6 +3368,8 @@ Schedule_t *CMedic::GetSchedule()
 				return GetScheduleOfType(SCHED_MEDIC_HEAL);
 			}
 		}
+	default:
+		break;
 	}
 	return CHFGrunt::GetSchedule();
 }

@@ -1071,6 +1071,8 @@ Schedule_t *CPitdrone::GetSchedule(void)
 
 		break;
 	}
+	default:
+		break;
 	}
 
 	return CFollowingMonster::GetSchedule();

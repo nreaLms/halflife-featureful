@@ -555,7 +555,7 @@ void CPitWorm::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDi
 	{
 		if (pev->dmgtime != gpGlobals->time || RANDOM_LONG(0, 10) >= 0 )
 		{
-			UTIL_Ricochet(ptr->vecEndPos, RANDOM_LONG(0.5, 1.5));
+			UTIL_Ricochet(ptr->vecEndPos, RANDOM_FLOAT(0.5, 1.5));
 			pev->dmgtime = gpGlobals->time;
 		}
 	}

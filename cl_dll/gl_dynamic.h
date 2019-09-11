@@ -16,7 +16,11 @@
 
 #endif // _WIN32
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#else
 #include <GL/gl.h>
+#endif
 
 typedef void (APIENTRY *GLAPI_glEnable)(GLenum cap);
 typedef void (APIENTRY *GLAPI_glDisable)(GLenum cap);

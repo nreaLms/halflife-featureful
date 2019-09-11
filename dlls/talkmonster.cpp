@@ -528,7 +528,7 @@ void CTalkMonster::StartTask( Task_t *pTask )
 					if (!talkFriend.canHeal)
 						continue;
 					CBaseEntity *pFriend = NULL;
-					while (pFriend = EnumFriends( pFriend, talkFriend.name, TRUE ))
+					while ((pFriend = EnumFriends( pFriend, talkFriend.name, TRUE )) != NULL)
 					{
 						if (TryCallForMedic(pFriend))
 						{

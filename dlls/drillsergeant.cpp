@@ -212,6 +212,8 @@ Schedule_t* CDrillSergeant::GetSchedule()
 		return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );			// Run & Cower
 	}
 		break;
+	default:
+		break;
 	}
 	return CTalkMonster::GetSchedule();
 }

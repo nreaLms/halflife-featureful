@@ -745,7 +745,7 @@ void CGeneWorm::DyingThink(void)
 			m_pBall = NULL;
 		}
 		CBaseEntity* entity = NULL;
-		while(entity = UTIL_FindEntityByClassname(entity, "monster_shocktrooper"))
+		while((entity = UTIL_FindEntityByClassname(entity, "monster_shocktrooper")) != NULL)
 			entity->SUB_StartFadeOut();
 	}
 }
