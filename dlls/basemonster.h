@@ -17,6 +17,7 @@
 #define BASEMONSTER_H
 
 class CFollowingMonster;
+class CDeadMonster;
 
 //
 // generic Monster
@@ -358,7 +359,7 @@ public:
 	virtual int DefaultClassify();
 	virtual const char* ReverseRelationshipModel() { return NULL; }
 
-	virtual BOOL IsInitiallyDead() {return FALSE;}
+	virtual CDeadMonster* MyDeadMonsterPointer() {return NULL;}
 
 	virtual const char* DefaultGibModel();
 	const char* GibModel();
@@ -396,7 +397,7 @@ public:
 	void SpawnHelper(const char* modelName, int bloodColor = BLOOD_COLOR_RED, int health = 8);
 	void KeyValue( KeyValueData *pkvd );
  
-	BOOL IsInitiallyDead() {return TRUE;}
+	CDeadMonster* MyDeadMonsterPointer() {return this;}
 	virtual const char* getPos(int pose) const = 0;
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
 };

@@ -319,9 +319,9 @@ void CMonsterMaker::MakeMonster( void )
 			createdMonster->m_iTriggerAltCondition = m_iTriggerAltCondition;
 		}
 
-		if (createdMonster->IsInitiallyDead())
+		CDeadMonster* deadMonster = createdMonster->MyDeadMonsterPointer();
+		if (deadMonster)
 		{
-			CDeadMonster* deadMonster = (CDeadMonster*)createdMonster;
 			deadMonster->m_iPose = m_iPose;
 		}
 	}
