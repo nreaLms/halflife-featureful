@@ -266,6 +266,11 @@
 	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
 ]
 
+@BaseClass base(Monster) = Repel
+[
+	gruntname(string) : "Grunt's name" : : "The target name of spawned grunt"
+]
+
 @BaseClass = CustomSentences
 [
 	UseSentence(String) : "Use Sentence"
@@ -2699,7 +2704,7 @@
 	netname(string) : "First node" : ""
 ]
 
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_assassin_repel : "Male Assassin (Repel)"
+@PointClass base(Repel, Sequence) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_assassin_repel : "Male Assassin (Repel)"
 [
 	head(Choices) : "Heads" : 0 =
 	[
@@ -2992,7 +2997,7 @@
 		13 : "lookdown2"
 	]
 ]
-@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_grunt_repel : "Human Grunt (Repel)"
+@PointClass base(Repel, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_grunt_repel : "Human Grunt (Repel)"
 [
 	weapons(Choices) : "Weapons" : 1 =
 	[
@@ -3455,7 +3460,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_grunt_ally_repel : "Human Grunt Ally (Repel)"
+@PointClass base(Repel, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_grunt_ally_repel : "Human Grunt Ally (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 49 =
 	[
@@ -3681,7 +3686,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_medic_ally_repel : "Medic (Repel)"
+@PointClass base(Repel, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_medic.mdl") = monster_medic_ally_repel : "Medic (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 41 =
 	[
@@ -3853,7 +3858,7 @@
 	]
 ]
 
-@PointClass base(Monster, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_torch_ally_repel : "Torch (Repel)"
+@PointClass base(Repel, Sequence, CustomSentences) size(-16 -16 0, 16 16 72) studio("models/hgrunt_torch.mdl") = monster_torch_ally_repel : "Torch (Repel)"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 39 =
 	[
@@ -3972,7 +3977,7 @@
 		15 : "repel_land"
 	]
 ]
-@PointClass base(Monster) size(-16 -16 0, 16 16 72) studio("models/hwgrunt.mdl") = monster_hwgrunt_repel : "Heavy Weapons Grunt (Repel)"
+@PointClass base(Repel) size(-16 -16 0, 16 16 72) studio("models/hwgrunt.mdl") = monster_hwgrunt_repel : "Heavy Weapons Grunt (Repel)"
 [
 	netname(string) : "Squad Name"
 
@@ -4559,7 +4564,7 @@
 	]
 ]
 
-@PointClass base(Monster) size(-16 -16 0, 16 16 72) = monster_robogrunt_repel : "Robot Grunt"
+@PointClass base(Repel) size(-16 -16 0, 16 16 72) = monster_robogrunt_repel : "Robot Grunt"
 [
 	weapons(Choices) : "Weapons" : 1 =
 	[

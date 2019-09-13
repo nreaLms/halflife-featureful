@@ -148,6 +148,7 @@ class CHGruntRepel : public CBaseMonster
 public:
 	void Spawn( void );
 	void Precache( void );
+	void KeyValue(KeyValueData* pkvd);
 	void EXPORT RepelUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int m_iSpriteTexture;	// Don't save, precache
 	virtual const char* TrooperName();

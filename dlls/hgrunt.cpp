@@ -2314,6 +2314,17 @@ void CHGruntRepel::Precache( void )
 		PRECACHE_MODEL(STRING(m_gibModel));
 }
 
+void CHGruntRepel::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "gruntname" ) )
+	{
+		pev->message = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseMonster::KeyValue( pkvd );
+}
+
 void CHGruntRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 {
 
@@ -2345,6 +2356,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	const int flagsToSet = knownFlags & pev->spawnflags;
 	SetBits(pEntity->pev->spawnflags, flagsToSet);
 
+	pEntity->pev->targetname = pev->message;
 	pEntity->pev->netname = pev->netname;
 	pEntity->pev->weapons = pev->weapons;
 	pEntity->pev->health = pev->health;
@@ -2353,6 +2365,10 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pGrunt->m_reverseRelationship = m_reverseRelationship;
 	pGrunt->SetMyBloodColor(m_bloodColor);
 	pGrunt->m_gibModel = m_gibModel;
+	pGrunt->m_iszTriggerTarget = m_iszTriggerTarget;
+	pGrunt->m_iTriggerCondition = m_iTriggerCondition;
+	pGrunt->m_iTriggerAltCondition = m_iTriggerAltCondition;
+	pGrunt->m_displayName = m_displayName;
 	PrepareBeforeSpawn(pEntity);
 	DispatchSpawn(pEntity->edict());
 	pGrunt->pev->movetype = MOVETYPE_FLY;
