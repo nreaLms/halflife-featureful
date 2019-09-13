@@ -725,8 +725,10 @@ public:
 	
 	void KeyValue( KeyValueData *pkvd );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
+
+	void SetHead(int head);
 	
-	int head;
+	int m_iHead;
 };
 
 LINK_ENTITY_TO_CLASS( monster_otis, COtis )
@@ -735,10 +737,10 @@ void COtis::Spawn()
 {
 	Precache( );
 	SpawnImpl("models/otis.mdl", gSkillData.otisHealth);
-	if ( head == -1 )
+	if ( m_iHead == -1 )
 		SetBodygroup(2, RANDOM_LONG(0, 1));
 	else
-		SetBodygroup(2, head);
+		SetBodygroup(2, m_iHead);
 	if (bodystate == -1) {
 		bodystate = RANDOM_LONG(0,1);
 	}
@@ -817,7 +819,7 @@ void COtis::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "head"))
 	{
-		head = atoi(pkvd->szValue);
+		m_iHead = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -863,6 +865,11 @@ void COtis::OnDying()
 		DropItem( DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles );
 	}
 	CTalkMonster::OnDying();
+}
+
+void COtis::SetHead(int head)
+{
+	m_iHead = head;
 }
 
 class CDeadOtis : public CDeadBarney

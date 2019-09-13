@@ -177,6 +177,8 @@ public:
 	int DefaultToleranceLevel() { return TOLERANCE_HIGH; }
 	int IRelationship ( CBaseEntity *pTarget );
 
+	void SetHead(int head);
+
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
@@ -391,6 +393,11 @@ int CHFGrunt::IRelationship ( CBaseEntity *pTarget )
 	}
 
 	return CTalkMonster::IRelationship( pTarget );
+}
+
+void CHFGrunt::SetHead(int head)
+{
+	m_iHead = head;
 }
 
 //=========================================================

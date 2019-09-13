@@ -371,6 +371,9 @@ public:
 	virtual const char* DefaultDisplayName() { return NULL; }
 	const char* DisplayName();
 
+	// Allows to set a head via monstermaker before spawn
+	virtual void SetHead(int head) {}
+
 	//
 	// Glowshell effects
 	//

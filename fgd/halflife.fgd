@@ -5302,6 +5302,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	head(integer) : "Head" : : "Settable head. Available only for monsters which have a separate body group for heads. The number must match the numbers used in specific monster"
 	trigger_target(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	trigger_condition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
 	[

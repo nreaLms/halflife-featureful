@@ -67,6 +67,7 @@ public:
 	int m_iPose;
 	BOOL m_notSolid;
 	BOOL m_gag;
+	int m_iHead;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -86,6 +87,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iPose, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_notSolid, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_gag, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CMonsterMaker, m_iHead, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -135,6 +137,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "gag" ) )
 	{
 		m_gag = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "head" ) )
+	{
+		m_iHead = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "trigger_target" ) )
@@ -318,6 +325,8 @@ void CMonsterMaker::MakeMonster( void )
 			createdMonster->m_iTriggerCondition = m_iTriggerCondition;
 			createdMonster->m_iTriggerAltCondition = m_iTriggerAltCondition;
 		}
+
+		createdMonster->SetHead(m_iHead);
 
 		CDeadMonster* deadMonster = createdMonster->MyDeadMonsterPointer();
 		if (deadMonster)

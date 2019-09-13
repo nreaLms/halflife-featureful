@@ -82,9 +82,11 @@ public:
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
+	void SetHead(int head);
+
 	void DropMyItems(BOOL isGibbed);
 
-	int head;
+	int m_iHead;
 };
 
 LINK_ENTITY_TO_CLASS(monster_male_assassin, CMassn)
@@ -183,7 +185,7 @@ void CMassn::KeyValue(KeyValueData *pkvd)
 {
 	if( FStrEq(pkvd->szKeyName, "head" ) )
 	{
-		head = atoi( pkvd->szValue );
+		m_iHead = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -274,10 +276,10 @@ void CMassn::Spawn()
 	}
 	m_cAmmoLoaded = m_cClipSize;
 
-	if (head == -1 || head >= MASSN_HEAD_COUNT) {
-		head = RANDOM_LONG(MASSN_HEAD_WHITE, MASSN_HEAD_BLACK); // never random night googles
+	if (m_iHead == -1 || m_iHead >= MASSN_HEAD_COUNT) {
+		m_iHead = RANDOM_LONG(MASSN_HEAD_WHITE, MASSN_HEAD_BLACK); // never random night googles
 	}
-	SetBodygroup(MASSN_HEAD_GROUP, head);
+	SetBodygroup(MASSN_HEAD_GROUP, m_iHead);
 
 	FollowingMonsterInit();
 }
@@ -314,6 +316,11 @@ void CMassn::DeathSound(void)
 void CMassn::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	CFollowingMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+}
+
+void CMassn::SetHead(int head)
+{
+	m_iHead = head;
 }
 
 //=========================================================
@@ -360,7 +367,7 @@ void CAssassinRepel::KeyValue(KeyValueData *pkvd)
 void CAssassinRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 {
 	CMassn* massn = (CMassn*)pEntity;
-	massn->head = head;
+	massn->m_iHead = head;
 }
 
 class CDeadMassn : public CDeadMonster
