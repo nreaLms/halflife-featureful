@@ -38,6 +38,7 @@
 #endif
 
 #define SF_SCI_DONT_STOP_FOLLOWING (1 << 15)
+#define SF_SCI_SITTING_DONT_DROP (1 << 15) // Don't drop to the floor. We can re-use the same value as sitting scientists can't follow
 
 enum
 {
@@ -1206,7 +1207,10 @@ void CSittingScientist::SciSpawnHelper(const char* modelName)
 	UTIL_SetSize( pev, Vector( -14, -14, 0 ), Vector( 14, 14, 36 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
-	pev->movetype = MOVETYPE_STEP;
+	if (FBitSet(pev->spawnflags, SF_SCI_SITTING_DONT_DROP))
+		pev->movetype = MOVETYPE_FLY;
+	else
+		pev->movetype = MOVETYPE_STEP;
 	pev->effects = 0;
 	SetMyHealth( 50 );
 	
@@ -1234,7 +1238,8 @@ void CSittingScientist::SciSpawnHelper(const char* modelName)
 	SetThink( &CSittingScientist::SittingThink );
 	pev->nextthink = gpGlobals->time + 0.1;
 
-	DROP_TO_FLOOR( ENT( pev ) );
+	if (!FBitSet(pev->spawnflags, SF_SCI_SITTING_DONT_DROP))
+		DROP_TO_FLOOR( ENT( pev ) );
 }
 
 void CSittingScientist::Spawn( )
