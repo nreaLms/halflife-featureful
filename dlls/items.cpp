@@ -583,7 +583,10 @@ void CItemGeneric::Spawn(void)
 	pev->sequence	 = 0;
 
 	// Call startup sequence to look for a sequence to play.
-	SetThink(&CItemGeneric::StartupThink);
+	if (!FStringNull(m_iszSequenceName))
+	{
+		SetThink(&CItemGeneric::StartupThink);
+	}
 
 	pev->nextthink = gpGlobals->time + 0.1f;
 

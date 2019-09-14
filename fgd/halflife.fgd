@@ -462,9 +462,9 @@
 		1 : "Starts Open" : 0
 		4 : "Don't link" : 0
 		8: "Passable" : 0
-	    	32: "Toggle" : 0
+		32: "Toggle" : 0
 		256:"Use Only" : 0
-		512: "Monsters Can't" : 0
+		512: "Monsters Can't" : 1
 	]
 	// NOTE: must be duplicated in BUTTON
 	locked_sound(choices) : "Locked Sound" : 0 =
@@ -636,10 +636,6 @@
 	killtarget(target_destination) : "Kill target"
 	netname(target_destination) : "Target Path"
 	master(string) : "Master"
-	sounds(choices) : "Sound style" : 0 =
-	[
-		0 : "No Sound"
-	]
 	delay(string) : "Delay before trigger" : "0"
 	message(string) : "Message (set sound too!)"
 	spawnflags(flags) =
@@ -701,7 +697,7 @@
 [
 	message(sound) : "WAV Name"
 	health(integer) : "Volume (10 = loudest)" : 10
-	preset(choices) :"Dynamic Presets" : 0 =
+	preset(choices) :"Dynamic Presets" =
 	[
 		0: "None"
 		1: "Huge Machine"
@@ -732,18 +728,18 @@
 		26: "Planet X"
 		27: "Haunted"
 	]
-	volstart(integer) : "Start Volume" : 0
-	fadein(integer) : "Fade in time (0-100)" : 0
-	fadeout(integer) : "Fade out time (0-100)" : 0
+	volstart(integer) : "Start Volume"
+	fadein(integer) : "Fade in time (0-100)"
+	fadeout(integer) : "Fade out time (0-100)"
 	pitch(integer) : "Pitch (> 100 = higher)" : 100
 	pitchstart(integer) : "Start Pitch" : 100
-	spinup(integer) : "Spin up time (0-100)" : 0
-	spindown(integer) : "Spin down time (0-100)" : 0
-	lfotype(integer) : "LFO type 0)off 1)sqr 2)tri 3)rnd" : 0
-	lforate(integer) : "LFO rate (0-1000)" : 0
-	lfomodpitch(integer) : "LFO mod pitch (0-100)" : 0
-	lfomodvol(integer) : "LFO mod vol (0-100)" : 0
-	cspinup(integer) : "Incremental spinup count" : 0
+	spinup(integer) : "Spin up time (0-100)"
+	spindown(integer) : "Spin down time (0-100)"
+	lfotype(integer) : "LFO type 0)off 1)sqr 2)tri 3)rnd"
+	lforate(integer) : "LFO rate (0-1000)"
+	lfomodpitch(integer) : "LFO mod pitch (0-100)"
+	lfomodvol(integer) : "LFO mod vol (0-100)"
+	cspinup(integer) : "Incremental spinup count"
 	spawnflags(flags) =
 	[
 		1 : "Play Everywhere" : 0
@@ -1436,7 +1432,7 @@
 		1 : "Only Trigger" : 0
 		2 : "Touch"	   : 0
 		4 : "Pressure"     : 0
-		256: "Instant Crowbar" : 1
+		256: "Instant Crowbar" : 0
 		512: "Explosives only": 0
 		1024: "Op4Mortar only" : 0
 	]
@@ -2201,18 +2197,18 @@
 		2 : "No logon" : 0
 	]
 ]
-@PointClass base(Weapon, Targetx) studio() = item_generic : "Generic scenery item"
+@PointClass base(Weapon, Targetx, RenderFields) studio() = item_generic : "Generic scenery item"
 [
 	model(studio) : "Model" : "models/w_security.mdl"
-	sequencename(string) : "Sequence Name" : "idle"
-	skin(integer) : "Skin" : 0
-	body(integer) : "Body" : 0
+	sequencename(string) : "Sequence Name"
+	skin(integer) : "Skin"
+	body(integer) : "Body"
 	scale(string) : "Scale (1.0 = normal size)"
 	spawnflags(Flags) =
 	[
 		1 : "Drop to floor" : 0
 		2 : "No map transition" : 0 : "Don't go across map transitions"
-		4 : "Apply gravity" : 0 : "Make item fall if the floor under it got broken"
+		4 : "Apply gravity" : 0 : "Make item fall when the floor under it gets broken"
 	]
 ]
 
