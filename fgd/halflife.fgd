@@ -515,7 +515,7 @@
 		7: "Gen. Containment"
 		8: "Maintenance area"
 	]
-	soundradius(choices) : "Sound radius" : 0 =
+	soundradius(choices) : "Sound radius" =
 	[
 		0: "Default"
 		1: "Huge"
@@ -601,7 +601,7 @@
 		8: "quick stop"
 	]
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundradius(choices) : "Sound radius" : 0 =
+	soundradius(choices) : "Sound radius" =
 	[
 		0: "Default (large)"
 		1: "Huge"
@@ -1331,7 +1331,7 @@
 	scale(string) : "Model Scale"
 	noise(sound) : "Move Sound"
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundradius(choices) : "Sound radius" : 0 =
+	soundradius(choices) : "Sound radius" =
 	[
 		0: "Default (large)"
 		1: "Huge"
@@ -1387,7 +1387,7 @@
 	]
 	noise1(sound) : "Custom sound 1"
 	noise2(sound) : "Custom sound 2"
-	soundradius(choices) : "Sound radius" : 0 =
+	soundradius(choices) : "Sound radius" =
 	[
 		0: "Default (large)"
 		1: "Huge"
@@ -1465,13 +1465,13 @@
 	delay(string) : "Delay before trigger" : "0"
 	spawnflags(flags) =
 	[
-		1: "Don't move" : 0
+		1: "Don't move" : 1
 		16: "Direct use only": 0
 		32: "Toggle" : 0
 		64: "Sparks" : 0
 		256:"Touch Activates": 0
 	]
-	locked_sound(choices) : "Locked Sound" : 0 =
+	locked_sound(choices) : "Locked Sound" =
 	[
 		0: "None"
 		2: "Access Denied"
@@ -1480,7 +1480,7 @@
 		11: "Buzz Off"
 		12: "Latch Locked"
 	]
-	unlocked_sound(choices) : "Unlocked Sound" : 0 =
+	unlocked_sound(choices) : "Unlocked Sound" =
 	[
 		0: "None"
 		1: "Big zap & Warmup"
@@ -1495,7 +1495,7 @@
 		13: "Latch Unlocked"
 		14: "Lightswitch"
 	]
-	locked_sentence(choices) : "Locked Sentence" : 0 =
+	locked_sentence(choices) : "Locked Sentence" =
 	[
 		0: "None"
 		1: "Gen. Access Denied"
@@ -1508,7 +1508,7 @@
 		8: "Maintenance Door"
 		9: "Broken Shut Door"
 	]
-	unlocked_sentence(choices) : "Unlocked Sentence" : 0 =
+	unlocked_sentence(choices) : "Unlocked Sentence" =
 	[
 		0: "None"
 		1: "Gen. Access Granted"
@@ -1537,7 +1537,7 @@
 
 @SolidClass base(Door, ZHLT) = func_door : "Basic door"
 [
-	directuse(choices) : "Direct use only" : 0 =
+	directuse(choices) : "Direct use only" =
 	[
 		0 : "No"
 		1 : "Yes"
@@ -1546,7 +1546,7 @@
 
 @SolidClass base(Door, ZHLT) = func_door_rotating : "Rotating door"
 [
-	directuse(choices) : "Direct use only" : 0 =
+	directuse(choices) : "Direct use only" =
 	[
 		0 : "No"
 		1 : "Yes"
@@ -1852,9 +1852,9 @@
 	speed(integer) : "Speed (units per second)" : 64
 	avelocity(string) : "Angular Veocity (y z x)"
 	dmg(integer) : "Damage on crush" : 0
-	skin(integer) : "Contents" : 0
+	skin(integer) : "Contents"
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundradius(choices) : "Sound radius" : 0 =
+	soundradius(choices) : "Sound radius" =
 	[
 		0: "Default (large)"
 		1: "Huge"
