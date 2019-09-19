@@ -990,7 +990,12 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	// if this is a player, move him around!
 	if( ( !FNullEnt( pevInflictor ) ) && ( pev->movetype == MOVETYPE_WALK ) && ( !pevAttacker || pevAttacker->solid != SOLID_TRIGGER ) )
 	{
-		pev->velocity = pev->velocity + vecDir * -DamageForce( flDamage );
+		Vector velocityAdd = vecDir * -DamageForce( flDamage );
+		if (!grenade_jump.value)
+		{
+			velocityAdd.z = 0;
+		}
+		pev->velocity = pev->velocity + velocityAdd;
 	}
 
 	AddScoreForDamage(pevAttacker, this, flTake);

@@ -70,6 +70,7 @@ cvar_t npc_patrol = { "npc_patrol", "1", FCVAR_SERVER };
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
 
 cvar_t use_to_take = { "use_to_take","0", FCVAR_SERVER };
+cvar_t grenade_jump = { "grenade_jump","1", FCVAR_SERVER };
 
 cvar_t keepinventory	= { "mp_keepinventory","0", FCVAR_SERVER }; // keep inventory across level transitions in multiplayer coop
 
@@ -913,6 +914,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &mp_chattime );
 
 	CVAR_REGISTER( &use_to_take );
+	CVAR_REGISTER( &grenade_jump );
 
 	CVAR_REGISTER( &keepinventory );
 
