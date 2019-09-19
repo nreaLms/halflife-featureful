@@ -286,6 +286,8 @@ void CRope::Precache()
 	UTIL_PrecacheOther( "rope_segment" );
 	UTIL_PrecacheOther( "rope_sample" );
 
+	PRECACHE_MODEL(STRING(GetBodyModel()));
+	PRECACHE_MODEL(STRING(GetEndingModel()));
 	PRECACHE_SOUND_ARRAY( g_pszCreakSounds );
 }
 
@@ -1490,6 +1492,7 @@ class CElectrifiedWire : public CRope
 {
 public:
 	CElectrifiedWire();
+	void EXPORT StartElectrifiedThink();
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
@@ -1500,7 +1503,7 @@ public:
 
 	void Spawn();
 
-	void Think();
+	void EXPORT ElectrifiedRopeThink();
 
 	void Use( CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float flValue );
 
@@ -1635,6 +1638,13 @@ void CElectrifiedWire::Spawn()
 	CRope::Spawn();
 	pev->classname = MAKE_STRING( "env_electrified_wire" );
 
+	SetThink(&CElectrifiedWire::StartElectrifiedThink);
+}
+
+void CElectrifiedWire::StartElectrifiedThink()
+{
+	StartThink();
+
 	m_uiNumUninsulatedSegments = 0;
 	m_bIsActive = true;
 
@@ -1667,9 +1677,12 @@ void CElectrifiedWire::Spawn()
 	m_flLastSparkTime = gpGlobals->time;
 
 	SetSoundAllowed( false );
+
+	pev->nextthink = gpGlobals->time + 0.01;
+	SetThink(&CElectrifiedWire::ElectrifiedRopeThink);
 }
 
-void CElectrifiedWire::Think()
+void CElectrifiedWire::ElectrifiedRopeThink()
 {
 	if( gpGlobals->time - m_flLastSparkTime > 0.1 )
 	{
@@ -1695,7 +1708,7 @@ void CElectrifiedWire::Think()
 			DoLightning();
 	}
 
-	CRope::Think();
+	CRope::RopeThink();
 }
 
 void CElectrifiedWire::Use( CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float flValue )
