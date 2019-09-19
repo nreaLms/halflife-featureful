@@ -37,6 +37,11 @@
  */
 #define FEATURE_GONOME_LOCK_PLAYER 0
 
+/* Gonome's model references step sounds but there're none in files.
+ * If your mod has suitable sounds for gonome's foot steps, enable this feature to precache step sounds.
+ */
+#define FEATURE_GONOME_STEP_SOUNDS 0
+
 #define		GONOME_MELEE_ATTACK_RADIUS		70
 
 //=========================================================
@@ -664,6 +669,10 @@ void CGonome::Precache()
 	PRECACHE_SOUND("gonome/gonome_jumpattack.wav");
 	PRECACHE_SOUND("gonome/gonome_melee1.wav");
 	PRECACHE_SOUND("gonome/gonome_melee2.wav");
+#if FEATURE_GONOME_STEP_SOUNDS
+	PRECACHE_SOUND("gonome/gonome_step1.wav");
+	PRECACHE_SOUND("gonome/gonome_step2.wav");
+#endif
 
 	PRECACHE_SOUND_ARRAY(pIdleSounds);
 	PRECACHE_SOUND_ARRAY(pPainSounds);
