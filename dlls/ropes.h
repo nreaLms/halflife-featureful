@@ -40,7 +40,8 @@ public:
 
 	virtual void Spawn();
 
-	void Think();
+	void EXPORT StartThink();
+	void EXPORT RopeThink();
 
 	void Touch( CBaseEntity* pOther );
 

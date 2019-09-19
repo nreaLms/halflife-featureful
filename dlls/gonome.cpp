@@ -452,8 +452,9 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 		if (GetGonomeGuts(vecArmPos))
 		{
+			m_pGonomeGuts->pev->skin = entindex();
 			m_pGonomeGuts->pev->body = 1;
-			m_pGonomeGuts->pev->aiment = ENT(pev);
+			m_pGonomeGuts->pev->aiment = edict();
 			m_pGonomeGuts->pev->movetype = MOVETYPE_FOLLOW;
 		}
 		UTIL_BloodDrips( vecArmPos, UTIL_RandomBloodVector(), BLOOD_COLOR_RED, 35 );

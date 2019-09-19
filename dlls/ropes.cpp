@@ -30,7 +30,7 @@
 #include "ropes.h"
 
 
-#define SetAbsOrigin(x) pev->origin = x;
+//#define SetAbsOrigin(x) pev->origin = x;
 #define SetAbsAngles(x) pev->angles = x;
 #define SetAbsVelociy(x) pev->velocity = x;
 #define SetNextThink(x) pev->nextthink = x;
@@ -110,6 +110,11 @@ public:
 	void Think();
 
 	void Touch( CBaseEntity* pOther );
+
+	void SetAbsOrigin(const Vector& pos)
+	{
+		pev->origin = pos;
+	}
 
 	static CRopeSegment* CreateSegment( CRopeSample* pSample, string_t iszModelName );
 
@@ -299,12 +304,21 @@ void CRope::Spawn()
 
 	mObjectAttached = false;
 
-	AddFlags( FL_ALWAYSTHINK );
+
 	m_NumSamples = m_iSegments + 1;
+
+	SetThink(&CRope::StartThink);
+	pev->nextthink = gpGlobals->time + 0.01;
+}
+
+void CRope::StartThink()
+{
+	AddFlags( FL_ALWAYSTHINK );
 
 	for( size_t uiSample = 0; uiSample < m_NumSamples; ++uiSample )
 	{
 		m_CurrentSys[ uiSample ] = CRopeSample::CreateSample();
+		UTIL_SetOrigin(m_CurrentSys[ uiSample ]->pev, pev->origin);
 
 		m_CurrentSys[ uiSample ]->SetMasterRope( this );
 	}
@@ -383,10 +397,11 @@ void CRope::Spawn()
 
 	InitializeRopeSim();
 
+	SetThink(&CRope::RopeThink);
 	SetNextThink( gpGlobals->time + 0.01 );
 }
 
-void CRope::Think()
+void CRope::RopeThink()
 {
 	if( !mSpringsInitialized )
 	{
@@ -1376,7 +1391,7 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 			{
 				RopeSampleData *data = m_Sample->GetData();
 
-				pOther->SetAbsOrigin( data->mPosition );
+				pOther->pev->origin = data->mPosition;
 
 				pPlayer->SetOnRopeState( true );
 				pPlayer->SetRope( m_Sample->GetMasterRope() );
