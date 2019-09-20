@@ -374,15 +374,10 @@ void CBarney::Spawn()
 	if (bodystate == -1) {
 		bodystate = RANDOM_LONG(0,1);
 	}
-	if (bodystate == 1)
-	{
+	SetBodygroup(1, bodystate);
+	m_fGunDrawn = FALSE;
+	if (bodystate == BARNEY_BODY_GUNDRAWN) {
 		m_fGunDrawn = TRUE;
-		pev->body = BARNEY_BODY_GUNDRAWN;
-	}
-	else
-	{
-		pev->body = BARNEY_BODY_GUNHOLSTERED;
-		m_fGunDrawn = FALSE;
 	}
 }
 
@@ -746,9 +741,9 @@ void COtis::Spawn()
 	}
 	SetBodygroup(1, bodystate);
 	m_fGunDrawn = FALSE;
- 	if (bodystate == OTIS_BODY_GUNDRAWN) {
- 		m_fGunDrawn = TRUE;	
- 	}
+	if (bodystate == OTIS_BODY_GUNDRAWN) {
+		m_fGunDrawn = TRUE;
+	}
 }
 
 void COtis::Precache()
