@@ -125,7 +125,7 @@ public:
 	CUSTOM_SCHEDULES
 
 protected:
-	void SciSpawnHelper(const char* modelName, float health);
+	void SciSpawnHelper(const char* modelName, float health, int headCount = NUM_SCIENTIST_HEADS);
 	void PrecacheSounds();
 
 	virtual const char* HealSentence() { return "SC_HEAL"; }
@@ -651,13 +651,13 @@ void CScientist::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CScientist::SciSpawnHelper(const char* modelName, float health)
+void CScientist::SciSpawnHelper(const char* modelName, float health, int headCount)
 {
 	// We need to set it before precache so the right voice will be chosen
 	if( pev->body == -1 )
 	{
 		// -1 chooses a random head
-		pev->body = RANDOM_LONG( 0, NUM_SCIENTIST_HEADS - 1 );// pick a head, any head
+		pev->body = RANDOM_LONG( 0, headCount - 1 );// pick a head, any head
 	}
 
 	Precache();
@@ -1623,6 +1623,42 @@ void CRosenberg::PainSound()
 
 #endif
 
+#if FEATURE_GUS
+class CGus : public CScientist
+{
+public:
+	void Spawn();
+	void Precache();
+	const char* DefaultDisplayName() { return "Construction Worker"; }
+	BOOL CanHeal();
+	bool ReadyToHeal() {return false;}
+};
+
+LINK_ENTITY_TO_CLASS( monster_gus, CGus )
+
+void CGus::Spawn()
+{
+	SciSpawnHelper("models/gus.mdl", gSkillData.scientistHealth, 2);
+	TalkMonsterInit();
+}
+
+void CGus::Precache()
+{
+	PrecacheMyModel("models/gus.mdl");
+	PrecacheSounds();
+	TalkInit();
+	if (pev->body)
+		m_voicePitch = 95;
+	else
+		m_voicePitch = 100;
+	CTalkMonster::Precache();
+}
+
+BOOL CGus::CanHeal()
+{
+	return FALSE;
+}
+
 //=========================================================
 // Dead Worker PROP
 //=========================================================
@@ -1666,3 +1702,4 @@ void CDeadGus :: Spawn( )
 	}
 	MonsterInitDead();
 }
+#endif

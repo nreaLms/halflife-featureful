@@ -70,6 +70,7 @@ CTalkMonster::TalkFriend CTalkMonster::m_szFriends[TLK_CFRIENDS] =
 	{"monster_cleansuit_scientist",			true,	false,	TALK_FRIEND_PERSONNEL},
 	{"monster_sitting_scientist",			false,	false,	TALK_FRIEND_PERSONNEL},
 	{"monster_sitting_cleansuit_scientist", false,	false,	TALK_FRIEND_PERSONNEL},
+	{"monster_gus",							true,	false,	TALK_FRIEND_PERSONNEL},
 	{"monster_human_grunt_ally",			true,	false,	TALK_FRIEND_SOLDIER},
 	{"monster_human_torch_ally",			true,	false,	TALK_FRIEND_SOLDIER},
 	{"monster_human_medic_ally",			true,	true,	TALK_FRIEND_SOLDIER}
