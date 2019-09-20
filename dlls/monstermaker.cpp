@@ -88,6 +88,8 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_notSolid, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_gag, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_iHead, FIELD_INTEGER ),
+	DEFINE_FIELD( CMonsterMaker, m_minHullSize, FIELD_VECTOR ),
+	DEFINE_FIELD( CMonsterMaker, m_maxHullSize, FIELD_VECTOR ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -325,6 +327,9 @@ void CMonsterMaker::MakeMonster( void )
 			createdMonster->m_iTriggerCondition = m_iTriggerCondition;
 			createdMonster->m_iTriggerAltCondition = m_iTriggerAltCondition;
 		}
+
+		createdMonster->m_minHullSize = m_minHullSize;
+		createdMonster->m_maxHullSize = m_maxHullSize;
 
 		createdMonster->SetHead(m_iHead);
 

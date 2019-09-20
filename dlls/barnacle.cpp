@@ -119,7 +119,7 @@ void CBarnacle::Spawn()
 	Precache();
 
 	SetMyModel( "models/barnacle.mdl" );
-	UTIL_SetSize( pev, Vector( -16, -16, -32 ), Vector( 16, 16, 0 ) );
+	SetMySize( Vector( -16, -16, -32 ), Vector( 16, 16, 0 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_NONE;

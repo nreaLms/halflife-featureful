@@ -747,7 +747,7 @@ void CVoltigore::Spawn()
 	Precache();
 
 	SetMyModel("models/voltigore.mdl");
-	UTIL_SetSize(pev, Vector(-80, -80, 0), Vector(80, 80, 90));
+	SetMySize(Vector(-80, -80, 0), Vector(80, 80, 90));
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
@@ -1259,7 +1259,7 @@ void CBabyVoltigore::Spawn()
 	Precache();
 
 	SetMyModel("models/baby_voltigore.mdl");
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 32));
+	SetMySize(Vector(-16, -16, 0), Vector(16, 16, 32));
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

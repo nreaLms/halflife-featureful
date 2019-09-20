@@ -1850,7 +1850,7 @@ void CHFGrunt :: Spawn()
 void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 {
 	SetMyModel(defaultModel);
-	UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
+	SetMySize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

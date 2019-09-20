@@ -304,7 +304,7 @@ void CHeadCrab::Spawn()
 void CHeadCrab::SpawnHelper(const char *modelName, float health)
 {
 	SetMyModel( modelName );
-	UTIL_SetSize( pev, Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
+	SetMySize( Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
@@ -526,7 +526,7 @@ void CBabyCrab::Spawn( void )
 	SpawnHelper("models/baby_headcrab.mdl", gSkillData.headcrabHealth * 0.25); // less health than full grown
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 192;
-	UTIL_SetSize( pev, Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
+	SetMySize( Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
 	MonsterInit();
 }
 
@@ -736,7 +736,7 @@ void CShockRoach::PrescheduleThink(void)
 {
 	if (!m_fRoachSolid && m_flBirthTime + 0.2 >= gpGlobals->time) {
 		m_fRoachSolid = TRUE;
-		UTIL_SetSize(pev, Vector(-12, -12, 0), Vector(12, 12, 24));
+		SetMySize(Vector(-12, -12, 0), Vector(12, 12, 24));
 	}
 	// explode when ready
 	if (gpGlobals->time >= m_flBirthTime + gSkillData.sroachLifespan)

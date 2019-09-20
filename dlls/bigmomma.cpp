@@ -639,7 +639,7 @@ void CBigMomma::Spawn()
 	Precache();
 
 	SetMyModel( "models/big_mom.mdl" );
-	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
+	SetMySize( Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;

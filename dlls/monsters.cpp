@@ -3371,10 +3371,25 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 		m_displayName = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "minhullsize" ) )
+	{
+		UTIL_StringToVector((float*)m_minHullSize, pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "maxhullsize" ) )
+	{
+		UTIL_StringToVector((float*)m_maxHullSize, pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseToggle::KeyValue( pkvd );
 	}
+}
+
+void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax)
+{
+	UTIL_SetSize(pev, m_minHullSize == g_vecZero ? vecMin : m_minHullSize, m_maxHullSize == g_vecZero ? vecMax : m_maxHullSize);
 }
 
 //=========================================================

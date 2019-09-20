@@ -548,6 +548,10 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 	DEFINE_FIELD( CISlave, m_handGlow1, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CISlave, m_handGlow2, FIELD_CLASSPTR ),
 #endif
+#if FEATURE_ISLAVE_REVIVE
+	DEFINE_FIELD( CISlave, m_minHullSize, FIELD_VECTOR ),
+	DEFINE_FIELD( CISlave, m_maxHullSize, FIELD_VECTOR ),
+#endif
 #if FEATURE_ISLAVE_CHARGE_TOKEN
 	DEFINE_FIELD( CISlave, m_chargeToken, FIELD_CLASSPTR ),
 #endif
@@ -1226,7 +1230,7 @@ void CISlave::Spawn()
 	Precache();
 
 	SetMyModel( "models/islave.mdl" );
-	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

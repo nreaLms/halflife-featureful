@@ -393,7 +393,7 @@ void CStrooper::Spawn()
 	Precache();
 
 	SpawnHelper("models/strooper.mdl", gSkillData.strooperHealth * 2.5, BLOOD_COLOR_GREEN);
-	UTIL_SetSize( pev, Vector(-24, -24, 0), Vector(24, 24, 72) );
+	SetMySize( Vector(-24, -24, 0), Vector(24, 24, 72) );
 
 	if (pev->weapons == 0)
 	{

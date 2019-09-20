@@ -469,7 +469,7 @@ void CIchthyosaur::Spawn()
 	Precache();
 
 	SetMyModel( "models/icky.mdl" );
-	UTIL_SetSize( pev, Vector( -32, -32, -32 ), Vector( 32, 32, 32 ) );
+	SetMySize( Vector( -32, -32, -32 ), Vector( 32, 32, 32 ) );
 
 	pev->solid		= SOLID_BBOX;
 	pev->movetype		= MOVETYPE_FLY;

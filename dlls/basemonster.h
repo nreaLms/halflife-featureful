@@ -121,6 +121,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	void KeyValue( KeyValueData *pkvd );
+	void SetMySize(const Vector& vecMin, const Vector& vecMax);
 
 	// monster use function
 	void EXPORT MonsterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -391,6 +392,10 @@ public:
 	int m_prevRenderAmt;
 
 	float m_nextPatrolPathCheck;
+
+	// Custom hull sizes
+	Vector m_minHullSize;
+	Vector m_maxHullSize;
 };
 
 class CDeadMonster : public CBaseMonster

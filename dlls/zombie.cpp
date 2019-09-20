@@ -245,7 +245,7 @@ void CZombie::HandleAnimEvent( MonsterEvent_t *pEvent )
 void CZombie::ZombieSpawnHelper(const char* modelName, float health)
 {
 	SetMyModel( modelName );
-	UTIL_SetSize( pev, VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

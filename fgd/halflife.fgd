@@ -253,6 +253,8 @@
 	scale(string) : "Scale (1.0 = normal size)"
 	health(string) : "Custom Health"
 	model(studio) : "Custom Model"
+	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
+	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
 	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" = 
 	[
 		0 : "Default"
@@ -5278,6 +5280,8 @@
 	m_imaxlivechildren(integer) : "Max live children" : 5
 	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
 	new_model(studio) : "Custom model"
+	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
+	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
 	scale(string) : "Scale (1.0 = normal size)"
 	health(integer) : "Custom health"
 	body(integer) : "Body"
