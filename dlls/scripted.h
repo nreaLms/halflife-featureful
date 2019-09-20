@@ -97,6 +97,7 @@ public:
 	//Vector m_vecOrigOrigin;
 	BOOL m_interruptable;
 	string_t m_iszFireOnAnimStart;
+	bool m_cantFindReported; // no need to save
 };
 
 class CCineAI : public CCineMonster

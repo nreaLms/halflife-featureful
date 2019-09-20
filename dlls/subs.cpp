@@ -144,7 +144,8 @@ void CBaseEntity::SUB_Remove( void )
 	{
 		// this situation can screw up monsters who can't tell their entity pointers are invalid.
 		pev->health = 0;
-		ALERT( at_aiconsole, "SUB_Remove called on entity with health > 0\n" );
+		// This message is useless as it's fine to remove entity with positive amount of health.
+		//ALERT( at_aiconsole, "SUB_Remove called on entity with health > 0\n" );
 	}
 
 	REMOVE_ENTITY( ENT( pev ) );

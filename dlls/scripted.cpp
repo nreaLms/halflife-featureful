@@ -195,6 +195,7 @@ void CCineMonster::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	else
 	{
 		// if not, try finding them
+		m_cantFindReported = false;
 		SetThink( &CCineMonster::CineThink );
 		pev->nextthink = gpGlobals->time;
 	}
@@ -390,7 +391,11 @@ void CCineMonster::CineThink( void )
 	else
 	{
 		CancelScript();
-		ALERT( at_aiconsole, "script \"%s\" can't find monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+		if (!m_cantFindReported && pev->targetname)
+		{
+			ALERT( at_aiconsole, "script \"%s\" can't find monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+			m_cantFindReported = true;
+		}
 		pev->nextthink = gpGlobals->time + 1.0;
 	}
 }
@@ -573,7 +578,7 @@ void ScriptEntityCancel( edict_t *pentCine )
 // find all the cinematic entities with my targetname and stop them from playing
 void CCineMonster::CancelScript( void )
 {
-	ALERT( at_aiconsole, "Cancelling script: %s\n", STRING( m_iszPlay ) );
+	//ALERT( at_aiconsole, "Cancelling script: %s\n", STRING( m_iszPlay ) );
 
 	if( !pev->targetname )
 	{
