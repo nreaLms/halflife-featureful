@@ -262,7 +262,7 @@ public:
 	CBaseEntity* FollowedPlayer();
 	void StopFollowing( BOOL clearSchedule, bool saySentence = true );
 	void ClearFollowedPlayer();
-	void SetAnswerQuestion(CTalkMonster *pSpeaker);
+	bool SetAnswerQuestion(CTalkMonster *pSpeaker);
 
 	void DropMyItems(BOOL isGibbed);
 
@@ -3416,11 +3416,12 @@ void CMedic::ClearFollowedPlayer()
 		CHFGrunt::ClearFollowedPlayer();
 }
 
-void CMedic::SetAnswerQuestion(CTalkMonster *pSpeaker)
+bool CMedic::SetAnswerQuestion(CTalkMonster *pSpeaker)
 {
-	if (!m_fHealing) {
-		CTalkMonster::SetAnswerQuestion(pSpeaker);
+	if (m_fHealing) {
+		return false;
 	}
+	return CTalkMonster::SetAnswerQuestion(pSpeaker);
 }
 
 void CMedic::Spawn()

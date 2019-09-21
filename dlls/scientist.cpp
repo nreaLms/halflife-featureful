@@ -1160,7 +1160,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual void SetAnswerQuestion( CTalkMonster *pSpeaker );
+	virtual bool SetAnswerQuestion( CTalkMonster *pSpeaker );
 
 	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
 
@@ -1369,10 +1369,11 @@ void CSittingScientist::SittingThink( void )
 }
 
 // prepare sitting scientist to answer a question
-void CSittingScientist::SetAnswerQuestion( CTalkMonster *pSpeaker )
+bool CSittingScientist::SetAnswerQuestion( CTalkMonster *pSpeaker )
 {
 	m_flResponseDelay = gpGlobals->time + RANDOM_FLOAT( 3, 4 );
 	m_hTalkTarget = (CBaseMonster *)pSpeaker;
+	return true;
 }
 
 //=========================================================

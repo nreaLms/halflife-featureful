@@ -982,7 +982,7 @@ void CTalkMonster::IdleRespond( void )
 	PlaySentence( m_szGrp[TLK_ANSWER], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
 }
 
-void CTalkMonster::AskQuestion()
+void CTalkMonster::AskQuestion(float duration)
 {
 	const char *szQuestionGroup;
 
@@ -991,7 +991,7 @@ void CTalkMonster::AskQuestion()
 	else
 		szQuestionGroup = m_szGrp[TLK_QUESTION];
 
-	PlaySentence( szQuestionGroup, RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+	PlaySentence( szQuestionGroup, duration, VOL_NORM, ATTN_IDLE );
 }
 
 void CTalkMonster::MakeIdleStatement()
@@ -1166,16 +1166,20 @@ int CTalkMonster::FIdleSpeak( void )
 
 	if( pFriend && !( pFriend->IsMoving() ) && ( RANDOM_LONG( 0, 99 ) < 75 ) )
 	{
-		AskQuestion();
-
+		float duration = RandomSentenceDuraion();
 		// force friend to answer
 		CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
-		m_hTalkTarget = pFriend;
-		pTalkMonster->SetAnswerQuestion( this ); // UNDONE: This is EVIL!!!
-		pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
+		if (pTalkMonster->m_flStopTalkTime <= gpGlobals->time + duration &&
+				pTalkMonster->SetAnswerQuestion( this )) // UNDONE: This is EVIL!!!
+		{
+			AskQuestion(duration);
 
-		m_nSpeak++;
-		return TRUE;
+			m_hTalkTarget = pFriend;
+			pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
+
+			m_nSpeak++;
+			return TRUE;
+		}
 	}
 
 	// otherwise, play an idle statement, try to face client when making a statement.
@@ -1246,11 +1250,15 @@ void CTalkMonster::Talk( float flDuration )
 }
 
 // Prepare this talking monster to answer question
-void CTalkMonster::SetAnswerQuestion( CTalkMonster *pSpeaker )
+bool CTalkMonster::SetAnswerQuestion( CTalkMonster *pSpeaker )
 {
 	if( !m_pCine )
+	{
 		ChangeSchedule( slIdleResponse );
-	m_hTalkTarget = (CBaseMonster *)pSpeaker;
+		m_hTalkTarget = (CBaseMonster *)pSpeaker;
+		return true;
+	}
+	return false;
 }
 
 int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )

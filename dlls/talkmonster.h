@@ -147,7 +147,7 @@ public:
 	// Conversations / communication
 	int				GetVoicePitch( void );
 	virtual void	IdleRespond( void );
-	virtual void	AskQuestion( void );
+	virtual void	AskQuestion( float duration );
 	virtual void	MakeIdleStatement( void );
 	float			RandomSentenceDuraion( void );
 	int				FIdleSpeak( void );
@@ -178,7 +178,7 @@ public:
 	bool			IsWounded();
 	bool			IsHeavilyWounded();
 	
-	virtual void	SetAnswerQuestion( CTalkMonster *pSpeaker );
+	virtual bool	SetAnswerQuestion( CTalkMonster *pSpeaker );
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
