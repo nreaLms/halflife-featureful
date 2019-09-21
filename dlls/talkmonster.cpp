@@ -409,7 +409,10 @@ bool CTalkMonster::TryCallForMedic(CBaseEntity* pOther)
 
 		if ( medic != 0 && medic->ReadyToHeal() )
 		{
-			PlayCallForMedic();
+			// Don't break sentence if already talking
+			if (!IsTalking())
+				PlayCallForMedic();
+
 			ALERT( at_aiconsole, "Injured %s called for %s\n", STRING(pev->classname), STRING(medic->pev->classname) );
 			medic->StartFollowingHealTarget(this);
 			return true;
@@ -420,10 +423,15 @@ bool CTalkMonster::TryCallForMedic(CBaseEntity* pOther)
 
 void CTalkMonster::PlayCallForMedic()
 {
-	if (!FBitSet( m_bitsSaid, bit_saidWoundLight | bit_saidWoundHeavy ))
+	if (IsHeavilyWounded() && !FBitSet( m_bitsSaid, bit_saidWoundHeavy ))
+	{
+		PlaySentence( m_szGrp[TLK_MORTAL], 2, VOL_NORM, ATTN_NORM );
+		SetBits( m_bitsSaid, bit_saidWoundHeavy );
+	}
+	else if (!FBitSet( m_bitsSaid, bit_saidWoundLight ))
 	{
 		PlaySentence( m_szGrp[TLK_WOUND], 2, VOL_NORM, ATTN_NORM );
-		SetBits( m_bitsSaid, bit_saidWoundLight | bit_saidWoundHeavy );
+		SetBits( m_bitsSaid, bit_saidWoundLight );
 	}
 }
 
@@ -1028,9 +1036,6 @@ int CTalkMonster::FOkToSpeak( void )
 	if( pev->spawnflags & SF_MONSTER_GAG )
 		return FALSE;
 
-	if( m_MonsterState == MONSTERSTATE_PRONE )
-		return FALSE;
-
 	// if player is not in pvs, don't speak
 	if( !IsAlive() || FNullEnt(FIND_CLIENT_IN_PVS( edict() ) ) )
 		return FALSE;
@@ -1393,20 +1398,22 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			// sustained light wounds?
 			if( !FBitSet( m_bitsSaid, bit_saidWoundLight ) && IsWounded() )
 			{
-				//SENTENCEG_PlayRndSz( ENT( pev ), m_szGrp[TLK_WOUND], 1.0, ATTN_IDLE, 0, GetVoicePitch() );
-				//CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 2.8, 3.2 );
-				PlaySentence( m_szGrp[TLK_WOUND], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-				SetBits( m_bitsSaid, bit_saidWoundLight );
-				return slIdleTlkStand;
+				if (!IsTalking())
+				{
+					PlaySentence( m_szGrp[TLK_WOUND], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
+					SetBits( m_bitsSaid, bit_saidWoundLight );
+					return slIdleTlkStand;
+				}
 			}
 			// sustained heavy wounds?
 			else if( !FBitSet( m_bitsSaid, bit_saidWoundHeavy ) && IsHeavilyWounded() )
 			{
-				//SENTENCEG_PlayRndSz( ENT( pev ), m_szGrp[TLK_MORTAL], 1.0, ATTN_IDLE, 0, GetVoicePitch() );
-				//CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT( 2.8, 3.2 );
-				PlaySentence( m_szGrp[TLK_MORTAL], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-				SetBits( m_bitsSaid, bit_saidWoundHeavy );
-				return slIdleTlkStand;
+				if (!IsTalking())
+				{
+					PlaySentence( m_szGrp[TLK_MORTAL], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
+					SetBits( m_bitsSaid, bit_saidWoundHeavy );
+					return slIdleTlkStand;
+				}
 			}
 
 			// talk about world
