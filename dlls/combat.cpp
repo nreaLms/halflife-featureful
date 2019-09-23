@@ -640,8 +640,9 @@ void CBaseMonster::CallGibMonster( void )
 		pev->health = 0;
 	}
 
-	if( ShouldFadeOnDeath() && !fade )
-		UTIL_Remove( this );
+	// No need for this. Entity will be removed either by GibMonster or upon fading
+	//if( ShouldFadeOnDeath() && !fade )
+	//	UTIL_Remove( this );
 }
 
 /*
@@ -700,6 +701,21 @@ void CBaseMonster::OnDying()
 	{
 		pOwner->DeathNotice( pev );
 	}
+}
+
+void CBaseMonster::UpdateOnRemove()
+{
+	if (!HasMemory(bits_MEMORY_KILLED))
+	{
+		// Only notice if did not die before removing.
+		// If monster died they already reported their death.
+		CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );
+		if( pOwner )
+		{
+			pOwner->DeathNotice( pev );
+		}
+	}
+	CBaseToggle::UpdateOnRemove();
 }
 
 //

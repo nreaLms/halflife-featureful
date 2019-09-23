@@ -2416,7 +2416,8 @@ void CBaseMonster::StartMonster( void )
 
 	// Vit_amiN: fixed -- now it doesn't touch any scripted_sequence target
 	if( !FStringNull( pev->targetname ) && !m_pCine // wait until triggered
-			&& m_Activity != ACT_GLIDE ) // Don't affect repel grunts
+			&& m_Activity != ACT_GLIDE /* Don't affect repel grunts */
+			&& pev->owner == 0 ) // Don't affect monsters coming from monstermaker
 	{
 		SetState( MONSTERSTATE_IDLE );
 		// UNDONE: Some scripted sequence monsters don't have an idle?

@@ -311,6 +311,7 @@ public:
 	virtual void Killed( entvars_t *pevAttacker, int iGib );
 	virtual void OnDying();
 	virtual void GibMonster( void );
+	virtual void UpdateOnRemove( void );
 	BOOL ShouldGibMonster( int iGib );
 	void CallGibMonster( void );
 	virtual BOOL HasHumanGibs( void );

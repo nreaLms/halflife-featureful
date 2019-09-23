@@ -238,6 +238,7 @@ void CBaseMonster::BecomeDead( void ) {}
 void CBaseMonster::RunAI( void ) {}
 void CBaseMonster::Killed( entvars_t *pevAttacker, int iGib ) {}
 void CBaseMonster::OnDying() {}
+void CBaseMonster::UpdateOnRemove() {}
 int CBaseMonster::TakeHealth(float flHealth, int bitsDamageType) { return 0; }
 int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; }
 int CBaseMonster::Restore( class CRestore & ) { return 1; }
