@@ -5444,7 +5444,7 @@
 	netname(string) : "Childrens' Name"
 	spawnflags(Flags) =
 	[
-		1 : "Start ON" 	: 0
+		1 : "Start ON (Not working)" 	: 0
 	// 	2 : "PVS On/Off" : 0  // not implemented
 		4 : "Cyclic" : 0
 		8 : "MonsterClip" : 0
@@ -5688,9 +5688,9 @@
 @PointClass base(Targetname, Targetx, Angles) flags(Angle) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sequence : "Scripted Sequence"
 [
 	m_iszEntity(string) : "Target Monster"
-	m_iszPlay(string) : "Action Animation" : ""
-	m_iszIdle(string) : "Idle Animation" : ""
-	m_iszFireOnAnimStart : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
+	m_iszPlay(string) : "Action Animation"
+	m_iszIdle(string) : "Idle Animation"
+	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_flRadius(integer) : "Search Radius" : 512
 	m_flRepeat(integer) : "Repeat Rate ms" : 0
 	m_fMoveTo(choices) : "Move to Position" : 0 =
@@ -5701,7 +5701,7 @@
 		4 : "Instantaneous"
 		5 : "No - Turn to Face"
 	]
-	m_iFinishSchedule(Choices) : "AI Schedule when done" : 0 =
+	m_iFinishSchedule(Choices) : "AI Schedule when done" =
 	[
 		0 : "Default AI"
 		1 : "Ambush"
