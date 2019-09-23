@@ -353,7 +353,7 @@ public:
 	void KeyValue(KeyValueData* pkvd);
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 	int DefaultClassify( void );
 	const char* DefaultDisplayName() { return "Alien Slave"; }
 	const char* ReverseRelationshipModel() { return "models/islavef.mdl"; }
@@ -692,7 +692,7 @@ void CISlave::DeathSound( void )
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards. 
 //=========================================================
-int CISlave::ISoundMask( void )
+int CISlave::DefaultISoundMask( void )
 {
 	return bits_SOUND_WORLD |
 		bits_SOUND_COMBAT |

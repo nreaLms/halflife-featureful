@@ -35,7 +35,7 @@ public:
 	int DefaultClassify( void ) { return CLASS_HUMAN_MILITARY; }
 	const char* DefaultDisplayName() { return "Heavy Weapons Grunt"; }
 	const char* ReverseRelationshipModel() { return "models/hwgruntf.mdl"; }
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetActivity( Activity NewActivity );
 	BOOL CheckMeleeAttack1( float flDot, float flDist ) {
@@ -166,7 +166,7 @@ void CHWGrunt::SetYawSpeed( void )
 	pev->yaw_speed = ys;
 }
 
-int CHWGrunt::ISoundMask( void )
+int CHWGrunt::DefaultISoundMask( void )
 {
 	return	bits_SOUND_WORLD |
 			bits_SOUND_COMBAT |

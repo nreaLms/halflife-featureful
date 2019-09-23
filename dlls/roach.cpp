@@ -50,7 +50,7 @@ public:
 	float m_flNextSmellTime;
 	int DefaultClassify( void );
 	void Look( int iDistance );
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 
 	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
 
@@ -67,7 +67,7 @@ LINK_ENTITY_TO_CLASS( monster_cockroach, CRoach )
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
-int CRoach::ISoundMask( void )
+int CRoach::DefaultISoundMask( void )
 {
 	return bits_SOUND_CARCASS | bits_SOUND_MEAT;
 }

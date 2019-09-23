@@ -219,7 +219,7 @@ public:
 	void Precache(void);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	void SetYawSpeed(void);
-	int ISoundMask();
+	int DefaultISoundMask();
 	void KeyValue(KeyValueData *pkvd);
 
 	int DefaultClassify(void);
@@ -466,7 +466,7 @@ void CPitdrone::SetYawSpeed(void)
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
-int CPitdrone::ISoundMask( void )
+int CPitdrone::DefaultISoundMask( void )
 {
 	return	bits_SOUND_WORLD |
 		bits_SOUND_COMBAT |

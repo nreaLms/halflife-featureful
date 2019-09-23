@@ -34,7 +34,7 @@ public:
 	void SetYawSpeed( void );
 	int DefaultClassify ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	int ISoundMask ( void );
+	int DefaultISoundMask ( void );
 
 	int Save( CSave &save ); 
 	int Restore( CRestore &restore );
@@ -107,7 +107,7 @@ void CGMan::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // ISoundMask - generic monster can't hear.
 //=========================================================
-int CGMan::ISoundMask( void )
+int CGMan::DefaultISoundMask( void )
 {
 	return 0;
 }

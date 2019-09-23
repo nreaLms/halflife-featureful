@@ -32,6 +32,7 @@
 #define bits_SOUND_DANGER	( 1 << 5 )// pending danger. Grenade that is about to explode, explosive barrel that is damaged, falling crate
 #define bits_SOUND_GARBAGE	( 1 << 6 )// trash cans, banana peels, old fast food bags.
 
+#define bits_SOUND_REMOVE_FROM_DEFAULT ( 1 << 10 )
 #define bits_ALL_SOUNDS 0xFFFFFFFF
 
 #define SOUNDLIST_EMPTY	-1

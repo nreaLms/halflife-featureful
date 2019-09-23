@@ -49,7 +49,7 @@ public:
 	void Precache( void );
 	void KeyValue(KeyValueData* pkvd);
 	void SetYawSpeed( void );
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 	void BarneyFirePistol( const char* shotSound, Bullet bullet );
 	void AlertSound( void );
 	const char* DefaultDisplayName() { return "Barney"; }
@@ -192,7 +192,7 @@ void CBarney::RunTask( Task_t *pTask )
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards. 
 //=========================================================
-int CBarney::ISoundMask( void) 
+int CBarney::DefaultISoundMask( void) 
 {
 	return bits_SOUND_WORLD |
 			bits_SOUND_COMBAT |

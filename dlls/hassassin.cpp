@@ -67,7 +67,7 @@ public:
 	int DefaultClassify( void );
 	const char* DefaultDisplayName() { return "Female Assassin"; }
 	const char* ReverseRelationshipModel() { return "models/hassassinf.mdl"; }
-	int ISoundMask( void);
+	int DefaultISoundMask( void);
 	void Shoot( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	Schedule_t *GetSchedule( void );
@@ -156,7 +156,7 @@ void CHAssassin::IdleSound( void )
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards. 
 //=========================================================
-int CHAssassin::ISoundMask( void ) 
+int CHAssassin::DefaultISoundMask( void ) 
 {
 	return	bits_SOUND_WORLD |
 		bits_SOUND_COMBAT |

@@ -126,7 +126,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
-	int  ISoundMask( void );
+	int  DefaultISoundMask( void );
 	int  DefaultClassify ( void );
 	const char* DefaultDisplayName() { return "Human Grunt"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -1185,7 +1185,7 @@ void CHFGrunt::SpeakSentence( void )
 // ISoundMask - returns a bit mask indicating which types
 // of sounds this monster regards.
 //=========================================================
-int CHFGrunt :: ISoundMask ( void)
+int CHFGrunt :: DefaultISoundMask ( void)
 {
 	return	bits_SOUND_WORLD	|
 			bits_SOUND_COMBAT	|

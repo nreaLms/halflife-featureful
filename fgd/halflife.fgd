@@ -266,6 +266,16 @@
 	]
 	gibmodel(studio) : "Custom gib model"
 	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
+	soundmask(choices) : "Custom Sound Mask" : : "Types of sound the monster regards" =
+	[
+		-1 : "No sounds (Deaf)"
+		0 : "Default for monster"
+		32 : "Only Danger"
+		33 : "Only Combat and Danger"
+		37 : "Combat, Danger and Player"
+		127 : "Every sound and scent"
+		1028 : "Default, except Player"
+	]
 ]
 
 @BaseClass base(Monster) = Repel

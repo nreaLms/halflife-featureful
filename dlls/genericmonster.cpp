@@ -37,7 +37,7 @@ public:
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 	void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
 	void IdleHeadTurn( Vector &vecFriend );
 	void MonsterThink();
@@ -112,7 +112,7 @@ void CGenericMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // ISoundMask - generic monster can't hear.
 //=========================================================
-int CGenericMonster::ISoundMask( void )
+int CGenericMonster::DefaultISoundMask( void )
 {
 	return 0;
 }

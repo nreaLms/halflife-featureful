@@ -96,7 +96,7 @@ public:
 	int DefaultToleranceLevel() { return TOLERANCE_ZERO; }
 	void SetActivity( Activity newActivity );
 	Activity GetStoppedActivity( void );
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 	void DeclineFollowing( CBaseEntity* pCaller );
 
 	float CoverRadius( void ) { return 1200; }		// Need more room for cover because scientists want to get far away!
@@ -776,7 +776,7 @@ void CScientist::TalkInit()
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
-int CScientist::ISoundMask( void )
+int CScientist::DefaultISoundMask( void )
 {
 	return bits_SOUND_WORLD |
 			bits_SOUND_COMBAT |

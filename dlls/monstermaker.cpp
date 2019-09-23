@@ -331,6 +331,8 @@ void CMonsterMaker::MakeMonster( void )
 		createdMonster->m_minHullSize = m_minHullSize;
 		createdMonster->m_maxHullSize = m_maxHullSize;
 
+		createdMonster->m_customSoundMask = m_customSoundMask;
+
 		createdMonster->SetHead(m_iHead);
 
 		CDeadMonster* deadMonster = createdMonster->MyDeadMonsterPointer();

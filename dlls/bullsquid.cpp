@@ -343,7 +343,7 @@ public:
 	virtual void Spawn(void);
 	virtual void Precache(void);
 	void SetYawSpeed(void);
-	int  ISoundMask(void);
+	int  DefaultISoundMask(void);
 	virtual int  DefaultClassify(void);
 	const char* DefaultDisplayName() { return "Bullsquid"; }
 	virtual void HandleAnimEvent(MonsterEvent_t *pEvent);
@@ -563,7 +563,7 @@ BOOL CBullsquid::FValidateHintType( short sHint )
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
-int CBullsquid::ISoundMask( void )
+int CBullsquid::DefaultISoundMask( void )
 {
 	return	bits_SOUND_WORLD |
 		bits_SOUND_COMBAT |

@@ -60,7 +60,7 @@ public:
 	int DefaultClassify( void );
 	const char* DefaultDisplayName() { return "Human Grunt"; }
 	const char* ReverseRelationshipModel();
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL FCanCheckAttacks( void );
 	BOOL CheckMeleeAttack1( float flDot, float flDist );

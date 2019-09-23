@@ -274,7 +274,8 @@ public:
 	// Returns the time when the door will be open
 	float OpenDoorAndWait( entvars_t *pevDoor );
 
-	virtual int ISoundMask( void );
+	int ISoundMask();
+	virtual int DefaultISoundMask( void );
 	virtual CSound* PBestSound( void );
 	virtual CSound* PBestScent( void );
 	virtual float HearingSensitivity( void ) { return 1.0; };
@@ -397,6 +398,8 @@ public:
 	// Custom hull sizes
 	Vector m_minHullSize;
 	Vector m_maxHullSize;
+
+	int m_customSoundMask;
 };
 
 class CDeadMonster : public CBaseMonster

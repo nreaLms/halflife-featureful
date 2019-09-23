@@ -122,6 +122,8 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_prevRenderFx, FIELD_INTEGER ),
 
 	DEFINE_FIELD( CBaseMonster, m_nextPatrolPathCheck, FIELD_TIME ),
+
+	DEFINE_FIELD( CBaseMonster, m_customSoundMask, FIELD_INTEGER ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
@@ -414,11 +416,25 @@ void CBaseMonster::Look( int iDistance )
 // of sounds this monster regards. In the base class implementation,
 // monsters care about all sounds, but no scents.
 //=========================================================
-int CBaseMonster::ISoundMask( void )
+int CBaseMonster::DefaultISoundMask( void )
 {
 	return	bits_SOUND_WORLD |
 		bits_SOUND_COMBAT |
 		bits_SOUND_PLAYER;
+}
+
+int CBaseMonster::ISoundMask()
+{
+	if (m_customSoundMask == 0)
+		return DefaultISoundMask();
+	if (m_customSoundMask == -1)
+		return 0;
+	if (FBitSet(m_customSoundMask, bits_SOUND_REMOVE_FROM_DEFAULT))
+	{
+		int defaultMask = DefaultISoundMask();
+		return defaultMask & ~m_customSoundMask;
+	}
+	return m_customSoundMask;
 }
 
 //=========================================================
@@ -3380,6 +3396,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "maxhullsize" ) )
 	{
 		UTIL_StringToVector((float*)m_maxHullSize, pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "soundmask" ) )
+	{
+		m_customSoundMask = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

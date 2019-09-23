@@ -116,7 +116,7 @@ public:
 	Schedule_t *GetScheduleOfType( int Type );
 	Schedule_t *GetSchedule( void );
 	int IgnoreConditions();
-	int ISoundMask();
+	int DefaultISoundMask();
 
 	int Save( CSave &save );
 	int Restore( CRestore &restore );
@@ -1401,7 +1401,7 @@ int CHoundeye::IgnoreConditions()
 	return iIgnore;
 }
 
-int CHoundeye::ISoundMask( void )
+int CHoundeye::DefaultISoundMask( void )
 {
 	return	bits_SOUND_WORLD |
 		bits_SOUND_COMBAT |

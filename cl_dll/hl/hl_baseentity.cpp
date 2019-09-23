@@ -119,7 +119,7 @@ void CBaseMonster::Listen( void ) { }
 float CBaseMonster::FLSoundVolume( CSound *pSound ) { return 0.0; }
 BOOL CBaseMonster::FValidateHintType( short sHint ) { return FALSE; }
 void CBaseMonster::Look( int iDistance ) { }
-int CBaseMonster::ISoundMask( void ) { return 0; }
+int CBaseMonster::DefaultISoundMask( void ) { return 0; }
 CSound *CBaseMonster::PBestSound( void ) { return NULL; }
 CSound *CBaseMonster::PBestScent( void ) { return NULL; } 
 float CBaseAnimating::StudioFrameAdvance( float flInterval ) { return 0.0; }

@@ -18,7 +18,7 @@ public:
 	void Precache(void);
 	const char* DefaultDisplayName() { return "Drill Sergeant"; }
 	void SetYawSpeed(void);
-	int ISoundMask(void);
+	int DefaultISoundMask(void);
 	int DefaultClassify(void);
 	void DeathSound( void );
 	void PainSound( void );
@@ -98,7 +98,7 @@ void CDrillSergeant::SetYawSpeed( void )
 	pev->yaw_speed = ys;
 }
 
-int CDrillSergeant::ISoundMask( void)
+int CDrillSergeant::DefaultISoundMask( void)
 {
 	return bits_SOUND_WORLD |
 			bits_SOUND_COMBAT |

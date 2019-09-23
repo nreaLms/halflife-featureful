@@ -30,7 +30,7 @@ public:
 	void SetYawSpeed( void );
 	int Classify( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 };
 
 LINK_ENTITY_TO_CLASS( monster_player, CPlayerMonster )
@@ -80,7 +80,7 @@ void CPlayerMonster :: HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // ISoundMask - player monster can't hear.
 //=========================================================
-int CPlayerMonster::ISoundMask( void )
+int CPlayerMonster::DefaultISoundMask( void )
 {
 	return 0;
 }

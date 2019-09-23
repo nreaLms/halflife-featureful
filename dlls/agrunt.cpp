@@ -74,7 +74,7 @@ public:
 	int DefaultClassify( void );
 	const char* DefaultDisplayName() { return "Alien Grunt"; }
 	const char* ReverseRelationshipModel() { return "models/agruntf.mdl"; }
-	int ISoundMask( void );
+	int DefaultISoundMask( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void SetObjectCollisionBox( void )
 	{
@@ -209,7 +209,7 @@ int CAGrunt::IRelationship( CBaseEntity *pTarget )
 //=========================================================
 // ISoundMask
 //=========================================================
-int CAGrunt::ISoundMask( void )
+int CAGrunt::DefaultISoundMask( void )
 {
 	return ( bits_SOUND_WORLD | bits_SOUND_COMBAT | bits_SOUND_PLAYER | bits_SOUND_DANGER );
 }

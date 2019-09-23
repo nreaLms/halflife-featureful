@@ -17,7 +17,7 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	void SetYawSpeed(void);
-	int ISoundMask(void);
+	int DefaultISoundMask(void);
 	int DefaultClassify(void);
 	void DeathSound( void );
 	void PainSound( void );
@@ -97,7 +97,7 @@ void CRecruit::SetYawSpeed( void )
 	pev->yaw_speed = ys;
 }
 
-int CRecruit::ISoundMask( void)
+int CRecruit::DefaultISoundMask( void)
 {
 	return bits_SOUND_WORLD |
 			bits_SOUND_COMBAT |
