@@ -288,13 +288,12 @@ void CBaseTurret::Precache()
 
 void CBaseTurret::UpdateOnRemove()
 {
-	CBaseEntity::UpdateOnRemove();
-
 	if( m_pEyeGlow )
 	{
 		UTIL_Remove( m_pEyeGlow );
 		m_pEyeGlow = 0;
 	}
+	CBaseMonster::UpdateOnRemove();
 }
 
 #define TURRET_GLOW_SPRITE "sprites/flare3.spr"

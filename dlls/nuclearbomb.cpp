@@ -253,7 +253,6 @@ void CNuclearBomb::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 
 void CNuclearBomb::UpdateOnRemove()
 {
-	CBaseToggle::UpdateOnRemove();
 	if (m_pTimer)
 	{
 		UTIL_Remove(m_pTimer);
@@ -264,4 +263,5 @@ void CNuclearBomb::UpdateOnRemove()
 		UTIL_Remove(m_pButton);
 		m_pButton = NULL;
 	}
+	CBaseToggle::UpdateOnRemove();
 }

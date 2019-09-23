@@ -887,8 +887,6 @@ void CGargantua::Precache()
 
 void CGargantua::UpdateOnRemove()
 {
-	CBaseEntity::UpdateOnRemove();
-
 	if( m_pEyeGlow )
 	{
 		UTIL_Remove( m_pEyeGlow );
@@ -896,6 +894,7 @@ void CGargantua::UpdateOnRemove()
 	}
 
 	FlameDestroy();
+	CFollowingMonster::UpdateOnRemove();
 }
 
 void CGargantua::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )

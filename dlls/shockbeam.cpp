@@ -238,8 +238,8 @@ void CShock::ClearEffects()
 
 void CShock::UpdateOnRemove()
 {
-	CBaseAnimating::UpdateOnRemove();
 	ClearEffects();
+	CBaseAnimating::UpdateOnRemove();
 }
 
 #endif

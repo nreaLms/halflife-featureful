@@ -386,8 +386,6 @@ void CController::Precache()
 
 void CController::UpdateOnRemove()
 {
-	CBaseEntity::UpdateOnRemove();
-
 	if( m_pBall[0] )
 	{
 		UTIL_Remove( m_pBall[0] );
@@ -399,6 +397,7 @@ void CController::UpdateOnRemove()
 		UTIL_Remove( m_pBall[1] );
 		m_pBall[1] = 0;
 	}
+	CSquadMonster::UpdateOnRemove();
 }
 
 //=========================================================

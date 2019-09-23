@@ -532,9 +532,9 @@ void CRechargeDecay::CreateBeam()
 
 void CRechargeDecay::UpdateOnRemove()
 {
-	CBaseAnimating::UpdateOnRemove();
 	UTIL_Remove(m_beam);
 	UTIL_Remove(m_glass);
 	m_beam = NULL;
 	m_glass = NULL;
+	CBaseAnimating::UpdateOnRemove();
 }

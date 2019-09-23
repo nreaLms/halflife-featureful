@@ -1325,11 +1325,11 @@ void CISlave::KeyValue(KeyValueData *pkvd)
 
 void CISlave::UpdateOnRemove()
 {
-	CBaseEntity::UpdateOnRemove();
-
 	ClearBeams();
 	RemoveHandGlows();
 	RemoveChargeToken();
+
+	CFollowingMonster::UpdateOnRemove();
 }
 
 //=========================================================

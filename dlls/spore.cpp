@@ -338,12 +338,12 @@ void CSporeGrenade::SpawnExplosionParticles(const Vector& origin, const Vector& 
 
 void CSporeGrenade::UpdateOnRemove()
 {
-	CBaseMonster::UpdateOnRemove();
 	if (m_pSporeGlow)
 	{
 		UTIL_Remove(m_pSporeGlow);
 		m_pSporeGlow = NULL;
 	}
+	CBaseMonster::UpdateOnRemove();
 }
 
 //=========================================================
