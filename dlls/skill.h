@@ -218,6 +218,10 @@ struct skilldata_t
 	float gonomeDmgGuts;
 	float gonomeDmgOneBite;
 #endif
+
+	float floaterHealth;
+	float floaterExplode;
+
 	float turretHealth;
 	float miniturretHealth;
 	float sentryHealth;

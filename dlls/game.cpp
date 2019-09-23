@@ -1005,6 +1005,9 @@ DECLARE_SKILL_VALUE(sk_gonome_dmg_guts, "0")
 DECLARE_SKILL_VALUE(sk_gonome_dmg_one_bite, "0")
 #endif
 
+DECLARE_SKILL_VALUE(sk_floater_health, "0")
+DECLARE_SKILL_VALUE(sk_floater_explode, "0")
+
 //Turret
 DECLARE_SKILL_VALUE(sk_turret_health, "0")
 
@@ -1791,6 +1794,9 @@ void GameDLLInit( void )
 		REGISTER_SKILL_CVARS(sk_gonome_dmg_one_bite);
 	}
 #endif
+
+	REGISTER_SKILL_CVARS(sk_floater_health);
+	REGISTER_SKILL_CVARS(sk_floater_explode);
 
 	//Turret
 	REGISTER_SKILL_CVARS(sk_turret_health);

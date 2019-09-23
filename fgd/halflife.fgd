@@ -4589,6 +4589,18 @@
 		0 : "idle1"
 	]
 ]
+@PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/floater.mdl") = monster_floater : "Floater"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 0 =
+	[
+		0 : "idle1"
+	]
+	netname(string) : "Squad Name"
+	spawnflags(Flags) =
+	[
+		64 : "IgnorePlayer" : 0 : "Ignore player presence unless provoked by damage or sound"
+	]
+]
 @PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/bullsquid.mdl") = monster_bullchicken : "BullChicken"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 7 =

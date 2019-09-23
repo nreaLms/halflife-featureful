@@ -401,6 +401,10 @@ void CGameRules::RefreshSkillData ( void )
 		gSkillData.gonomeDmgOneBite = GetSkillCvar( "sk_gonome_dmg_one_bite" );
 	}
 #endif
+	// Floater
+	gSkillData.floaterHealth = GetSkillCvar( "sk_floater_health" );
+	gSkillData.floaterExplode = GetSkillCvar( "sk_floater_explode" );
+
 	//Turret
 	gSkillData.turretHealth = GetSkillCvar( "sk_turret_health" );
 
