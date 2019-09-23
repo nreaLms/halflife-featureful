@@ -28,6 +28,9 @@
 #include	"mod_features.h"
 
 #define bits_MEMORY_ISLAVE_PROVOKED bits_MEMORY_CUSTOM1
+#define bits_MEMORY_ISLAVE_REVIVED bits_MEMORY_CUSTOM2
+#define bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL bits_MEMORY_CUSTOM3
+#define bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE bits_MEMORY_CUSTOM4
 
 // whether vortigaunts can spawn familiars (snarks and headcrabs)
 #define FEATURE_ISLAVE_FAMILIAR 1
@@ -129,6 +132,13 @@ static bool IsVortWounded(CBaseEntity* pEntity)
 static bool CanBeRevived(CBaseEntity* pEntity)
 {
 	if ( pEntity != NULL && pEntity->pev->deadflag == DEAD_DEAD && !FBitSet(pEntity->pev->flags, FL_KILLME) ) {
+		CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+		if (!pMonster || pMonster->HasMemory(bits_MEMORY_ISLAVE_REVIVED))
+		{
+			// Wrong target or was already revived once
+			return false;
+		}
+
 		const Vector vecDest = pEntity->pev->origin + Vector( 0, 0, 38 );
 		TraceResult tr;
 		UTIL_TraceHull( vecDest, vecDest - Vector(0,0,2), dont_ignore_monsters, human_hull, pEntity->edict(), &tr );
@@ -377,7 +387,7 @@ public:
 	void OnDying();
 	void DeathNotice( entvars_t* pevChild )
 	{
-		m_childIsAlive = false;
+		Forget(bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE);
 	}
 
 	void StartTask( Task_t *pTask );
@@ -492,9 +502,7 @@ public:
 	float m_originalMaxHealth;
 
 	short m_clawStrikeNum;
-	BOOL m_lastAttackWasCoil;
-	
-	BOOL m_childIsAlive;
+
 	float m_flSpawnFamiliarTime;
 
 	CSprite	*m_handGlow1;
@@ -537,11 +545,7 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 	DEFINE_FIELD( CISlave, m_originalMaxHealth, FIELD_FLOAT ),
 #endif
 	DEFINE_FIELD( CISlave, m_clawStrikeNum, FIELD_SHORT ),
-#if FEATURE_ISLAVE_COIL
-	DEFINE_FIELD( CISlave, m_lastAttackWasCoil, FIELD_BOOLEAN ),
-#endif
 #if FEATURE_ISLAVE_FAMILIAR
-	DEFINE_FIELD( CISlave, m_childIsAlive, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CISlave, m_flSpawnFamiliarTime, FIELD_FLOAT ),
 #endif
 #if FEATURE_ISLAVE_HANDGLOW
@@ -839,7 +843,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 			{
 				if( CanBeRevived(m_hDead) )
 				{
-					m_lastAttackWasCoil = false;
+					Forget(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL);
 
 					CBaseEntity *revived = m_hDead;
 					if (revived) {
@@ -853,6 +857,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 							revivedVort->pev->rendermode = kRenderNormal;
 							revivedVort->pev->renderamt = 255;
 							revivedVort->Spawn();
+							revivedVort->Remember(bits_MEMORY_ISLAVE_REVIVED);
 
 							if (m_hEnemy)
 							{
@@ -899,14 +904,14 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				coilAttack = true;
 				ALERT(at_aiconsole, "Vort makes coil attack to heal friends\n");
-			} else if ( m_hEnemy != 0 && (pev->origin - m_hEnemy->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS && !m_lastAttackWasCoil ) {
+			} else if ( m_hEnemy != 0 && (pev->origin - m_hEnemy->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS && !HasMemory(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL) ) {
 				coilAttack = true;
 			}
 #endif
 
 			if (coilAttack) {
 				CoilBeam();
-				m_lastAttackWasCoil = true;
+				Remember(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL);
 
 				float flAdjustedDamage = gSkillData.slaveDmgZap*3;
 				CBaseEntity *pEntity = NULL;
@@ -934,7 +939,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				}
 				UTIL_EmitAmbientSound( ENT( pev ), pev->origin, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
 			} else {
-				m_lastAttackWasCoil = false;
+				Forget(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL);
 				UTIL_MakeAimVectors( pev->angles );
 
 				ZapBeam( ISLAVE_LEFT_ARM );
@@ -1188,7 +1193,7 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 		CBaseMonster *pNewMonster = pNew->MyMonsterPointer( );
 
 		if(pNew) {
-			m_childIsAlive = true;
+			Remember(bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE);
 			CSprite *pSpr = CSprite::SpriteCreate( "sprites/bexplo.spr", origin, TRUE );
 			pSpr->AnimateAndDie( 20 );
 			pSpr->SetTransparency( kRenderTransAdd,  ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE,  255, kRenderFxNoDissipation );
@@ -2079,7 +2084,7 @@ bool CISlave::CanSpawnFamiliar()
 {
 #if FEATURE_ISLAVE_FAMILIAR
 	if ((pev->weapons & (ISLAVE_SNARKS | ISLAVE_HEADCRABS)) != 0) {
-		if (!m_childIsAlive && m_flSpawnFamiliarTime < gpGlobals->time) {
+		if (!HasMemory(bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE) && m_flSpawnFamiliarTime < gpGlobals->time) {
 			return true;
 		}
 	}
