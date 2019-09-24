@@ -316,6 +316,7 @@
 	[
 		131072 : "Don't greet player" : 0 : "Don't say hello to player upon seeing him"
 		262144 : "Don't idle talk to player" : 0 : "Don't forward idle statements to player, still talk to other allies and answer to player's usage"
+		524288 : "Ignore player pushing" : 0 : "Don't move away when player tries to push me"
 	]
 ]
 
