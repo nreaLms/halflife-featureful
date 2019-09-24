@@ -31,6 +31,7 @@
 float CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: used so that two NPCs don't talk at once
 
 #define SF_TALKMONSTER_DONTGREET_PLAYER (1 << 17)
+#define SF_TALKMONSTER_DONT_TALK_TO_PLAYER (1 << 18)
 
 #define CALL_MEDIC_DELAY				5 // Wait before calling for medic again.
 
@@ -818,19 +819,22 @@ bool CTalkMonster::ReadyForUse()
 void CTalkMonster::PlayUseSentence()
 {
 	PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-	m_hTalkTarget = FollowedPlayer();
+	if (m_szGrp[TLK_USE])
+		m_hTalkTarget = FollowedPlayer();
 }
 
 void CTalkMonster::PlayUnUseSentence()
 {
 	PlaySentence( m_szGrp[TLK_UNUSE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-	m_hTalkTarget = FollowedPlayer();
+	if (m_szGrp[TLK_UNUSE])
+		m_hTalkTarget = FollowedPlayer();
 }
 
 void CTalkMonster::DeclineFollowing(CBaseEntity *pCaller)
 {
 	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
-	m_hTalkTarget = pCaller;
+	if (m_szGrp[TLK_DECLINE])
+		m_hTalkTarget = pCaller;
 }
 
 float CTalkMonster::TargetDistance( void )
@@ -1062,6 +1066,9 @@ int CTalkMonster::FIdleStare( void )
 	if( !FOkToSpeak() )
 		return FALSE;
 
+	if (FBitSet(pev->spawnflags, SF_TALKMONSTER_DONT_TALK_TO_PLAYER))
+		return FALSE;
+
 	PlaySentence( m_szGrp[TLK_STARE], RANDOM_FLOAT(5, 7.5), VOL_NORM, ATTN_IDLE );
 
 	m_hTalkTarget = FindNearestFriend( TRUE );
@@ -1183,7 +1190,7 @@ int CTalkMonster::FIdleSpeak( void )
 	}
 
 	// otherwise, play an idle statement, try to face client when making a statement.
-	if( RANDOM_LONG( 0, 1 ) )
+	if( !FBitSet(pev->spawnflags, SF_TALKMONSTER_DONT_TALK_TO_PLAYER) && RANDOM_LONG( 0, 1 ) )
 	{
 		//SENTENCEG_PlayRndSz( ENT( pev ), szIdleGroup, 1.0, ATTN_IDLE, 0, pitch );
 		pFriend = FindNearestFriend( TRUE );
@@ -1576,13 +1583,21 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 		CFollowingMonster::KeyValue( pkvd );
 }
 
+const char* CTalkMonster::GetRedefinedSentence(string_t sentence)
+{
+	if (FStrEq(STRING(sentence), "null"))
+		return NULL;
+	else
+		return STRING(sentence);
+}
+
 void CTalkMonster::Precache( void )
 {
 	if( m_iszUse )
-		m_szGrp[TLK_USE] = STRING( m_iszUse );
+		m_szGrp[TLK_USE] = GetRedefinedSentence(m_iszUse);
 	if( m_iszUnUse )
-		m_szGrp[TLK_UNUSE] = STRING( m_iszUnUse );
+		m_szGrp[TLK_UNUSE] = GetRedefinedSentence(m_iszUnUse);
 	if ( m_iszDecline )
-		m_szGrp[TLK_DECLINE] = STRING( m_iszDecline );
+		m_szGrp[TLK_DECLINE] = GetRedefinedSentence(m_iszDecline);
 	CFollowingMonster::Precache();
 }

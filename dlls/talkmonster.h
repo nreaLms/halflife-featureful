@@ -187,6 +187,7 @@ public:
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
 	virtual int DefaultToleranceLevel() { return TOLERANCE_LOW; }
 	int MyToleranceLevel() { return m_iTolerance ? m_iTolerance : DefaultToleranceLevel(); }
+	static const char* GetRedefinedSentence(string_t sentence);
 
 	struct TalkFriend
 	{

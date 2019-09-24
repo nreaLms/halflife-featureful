@@ -285,9 +285,9 @@
 
 @BaseClass = CustomSentences
 [
-	UseSentence(String) : "Use Sentence"
-	UnUseSentence(String) : "Un-Use Sentence"
-	RefusalSentence(String) : "Refusal Sentence"
+	UseSentence(String) : "Use Sentence" : : "Special case: 'null' means no sentense"
+	UnUseSentence(String) : "Un-Use Sentence" : : "Special case: 'null' means no sentense"
+	RefusalSentence(String) : "Refusal Sentence" : : "Special case: 'null' means no sentense"
 ]
 
 @BaseClass base() = FollowingMonster
@@ -315,6 +315,7 @@
 	spawnflags(Flags) =
 	[
 		131072 : "Don't greet player" : 0 : "Don't say hello to player upon seeing him"
+		262144 : "Don't idle talk to player" : 0 : "Don't forward idle statements to player, still talk to other allies and answer to player's usage"
 	]
 ]
 
