@@ -674,6 +674,7 @@ public:
 	void EXPORT ButtonReturn( void );
 	void EXPORT ButtonBackHome( void );
 	void EXPORT ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void EXPORT ButtonUse_IgnorePlayer( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );

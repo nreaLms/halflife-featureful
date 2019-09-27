@@ -32,6 +32,7 @@
 #define	SF_BUTTON_TOGGLE		32	// button stays pushed until reactivated
 #define	SF_BUTTON_SPARK_IF_OFF		64	// button sparks in OFF state
 #define SF_BUTTON_TOUCH_ONLY		256	// button only fires as a result of USE key.
+#define SF_BUTTON_PLAYER_CANT_USE	512 // Player can't impulse use this button
 
 #define SF_GLOBAL_SET			1	// Set global state to initial state on spawn
 
@@ -487,7 +488,7 @@ void CMultiSource::Register( void )
 int CBaseButton::ObjectCaps( void )
 {
 	return (CBaseToggle:: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) |
-			(pev->takedamage?0:FCAP_IMPULSE_USE) |
+			((pev->takedamage || FBitSet(pev->spawnflags,SF_BUTTON_PLAYER_CANT_USE))?0:FCAP_IMPULSE_USE) |
 			(FBitSet(pev->spawnflags, SF_BUTTON_ONLYDIRECT)?FCAP_ONLYDIRECT_USE:0);
 }
 
@@ -760,7 +761,10 @@ void CBaseButton::Spawn()
 	else 
 	{
 		SetTouch( NULL );
-		SetUse( &CBaseButton::ButtonUse );
+		if (FBitSet(pev->spawnflags, SF_BUTTON_PLAYER_CANT_USE))
+			SetUse( &CBaseButton::ButtonUse_IgnorePlayer );
+		else
+			SetUse( &CBaseButton::ButtonUse );
 	}
 }
 
@@ -907,6 +911,12 @@ void CBaseButton::ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	}
 	else
 		ButtonActivate();
+}
+
+void CBaseButton::ButtonUse_IgnorePlayer( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if ( !pCaller || !pCaller->IsPlayer() )
+		ButtonUse( pActivator, pCaller, useType, value );
 }
 
 CBaseButton::BUTTON_CODE CBaseButton::ButtonResponseToTouch( void )
@@ -1173,7 +1183,10 @@ void CRotButton::Spawn( void )
 	if( !FBitSet( pev->spawnflags, SF_BUTTON_TOUCH_ONLY ) )
 	{
 		SetTouch( NULL );
-		SetUse( &CBaseButton::ButtonUse );
+		if (FBitSet(pev->spawnflags, SF_BUTTON_PLAYER_CANT_USE))
+			SetUse( &CBaseButton::ButtonUse_IgnorePlayer );
+		else
+			SetUse( &CBaseButton::ButtonUse );
 	}
 	else // touchable button
 		SetTouch( &CBaseButton::ButtonTouch );
