@@ -380,6 +380,8 @@ protected:
 	void GibBeamDamage();
 	void PrecacheImpl(const char* modelName);
 	int m_beamTexture;
+
+	bool m_chaseFailed;
 };
 
 LINK_ENTITY_TO_CLASS(monster_alien_voltigore, CVoltigore)
@@ -524,7 +526,7 @@ BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 		else
 		{
 			// not moving, so spit again pretty soon.
-			m_flNextZapTime = gpGlobals->time + 2;
+			m_flNextZapTime = gpGlobals->time + 3;
 		}
 
 		return TRUE;
@@ -852,7 +854,7 @@ Schedule_t	slVoltigoreRangeAttack1[] =
 // Chase enemy schedule
 Task_t tlVoltigoreChaseEnemy1[] =
 {
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RANGE_ATTACK1 },// !!!OEM - this will stop nasty voltigore oscillation.
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_CHASE_ENEMY_FAILED },
 	{ TASK_GET_PATH_TO_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
@@ -981,6 +983,19 @@ Schedule_t* CVoltigore::GetScheduleOfType(int Type)
 		break;
 	case SCHED_VICTORY_DANCE:
 		return &slVoltigoreVictoryDance[0];
+		break;
+	case SCHED_CHASE_ENEMY_FAILED:
+		// After couldn't chase enemy, try to shoot beams first, and then cover
+		if (m_chaseFailed)
+		{
+			m_chaseFailed = false;
+			return CSquadMonster::GetScheduleOfType(Type);
+		}
+		else
+		{
+			m_chaseFailed = true;
+			return &slVoltigoreRangeAttack1[0];
+		}
 		break;
 	}
 
