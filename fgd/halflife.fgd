@@ -1021,6 +1021,28 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_decal : "Decal sprayer"
+[
+	target(string) : "Position (blank = here) [LP]"
+	netname(string) : "Spray direction (blank = angle) [LV]"
+	impulse(choices) : "Decal group" : 0 =
+	[
+		1 : "Gunshot"
+		2 : "Blood"
+		3 : "Alien blood"
+		4 : "Glass cracks"
+		5 : "Big gunshot"
+		6 : "Scorch marks"
+		7 : "Bullsquid splat"
+		8 : "Small scorch marks"
+		9 : "Spore splat (opfor)"
+		10 : "Shock scorch (opfor)"
+		11 : "Small shock scorch (opfor)"
+		0 : "Custom (see below)"
+	]
+	noise(decal) : "Custom decal texture"
+]
+
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_explosion : "Explosion"
 [
 	iMagnitude(Integer) : "Magnitude" : 100

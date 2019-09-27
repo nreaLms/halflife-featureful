@@ -3433,6 +3433,123 @@ void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 }
 
 //=========================================================
+// LRC - Decal effect
+//=========================================================
+class CEnvDecal : public CPointEntity
+{
+public:
+	void	Spawn( void );
+	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+LINK_ENTITY_TO_CLASS( env_decal, CEnvDecal )
+
+void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	int iTexture = 0;
+
+	switch(pev->impulse)
+	{
+		case 1: iTexture = DECAL_GUNSHOT1	+	RANDOM_LONG(0,4); break;
+		case 2: iTexture = DECAL_BLOOD1		+	RANDOM_LONG(0,5); break;
+		case 3: iTexture = DECAL_YBLOOD1	+	RANDOM_LONG(0,5); break;
+		case 4: iTexture = DECAL_GLASSBREAK1+	RANDOM_LONG(0,2); break;
+		case 5: iTexture = DECAL_BIGSHOT1	+	RANDOM_LONG(0,4); break;
+		case 6: iTexture = DECAL_SCORCH1	+	RANDOM_LONG(0,1); break;
+		case 7: iTexture = DECAL_SPIT1		+	RANDOM_LONG(0,1); break;
+		case 8: iTexture = DECAL_SMALLSCORCH1 +	RANDOM_LONG(0,2); break;
+#if FEATURE_OPFOR_DECALS
+		case 9: iTexture = DECAL_SPR_SPLT1 +	RANDOM_LONG(0,2); break;
+		case 10: iTexture = DECAL_OPFOR_SCORCH1 +	RANDOM_LONG(0,2); break;
+		case 11: iTexture = DECAL_OPFOR_SMALLSCORCH1 +	RANDOM_LONG(0,2); break;
+#else
+		case 9: iTexture = DECAL_YBLOOD5 +	RANDOM_LONG(0,1); break;
+		case 10: iTexture = DECAL_SCORCH1 +	RANDOM_LONG(0,1); break;
+		case 11: iTexture = DECAL_SMALLSCORCH1 +	RANDOM_LONG(0,2); break;
+#endif
+	}
+
+	if (pev->impulse)
+		iTexture = gDecals[ iTexture ].index;
+	else
+		iTexture = pev->skin; // custom texture
+
+	Vector vecPos;
+	if (!FStringNull(pev->target))
+	{
+		CBaseEntity* posEnt = UTIL_FindEntityByTargetname( NULL, STRING(pev->target) );
+		if (posEnt)
+		{
+			vecPos = posEnt->pev->origin;
+		}
+		else
+		{
+			ALERT(at_aiconsole, "Couldn't find position entity %s for %s\n", STRING(pev->target), STRING(pev->classname));
+			return;
+		}
+	}
+	else
+	{
+		vecPos = pev->origin;
+	}
+
+	Vector vecOffs;
+
+	if (!FStringNull(pev->netname))
+	{
+		CBaseEntity* velEnt = UTIL_FindEntityByTargetname( NULL, STRING(pev->netname) );
+		if (velEnt)
+		{
+			vecOffs = velEnt->pev->velocity;
+		}
+		else
+		{
+			ALERT(at_aiconsole, "Couldn't find velocity entity %s for %s\n", STRING(pev->netname), STRING(pev->classname));
+			return;
+		}
+	}
+	else
+	{
+		UTIL_MakeVectors(pev->angles);
+		vecOffs = gpGlobals->v_forward;
+	}
+
+	vecOffs = vecOffs.Normalize() * 4000;
+
+	TraceResult trace;
+	int			entityIndex;
+
+	UTIL_TraceLine( vecPos, vecPos+vecOffs, ignore_monsters, NULL, &trace );
+
+	if (trace.flFraction == 1.0)
+		return; // didn't hit anything, oh well
+
+	entityIndex = (short)ENTINDEX(trace.pHit);
+
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY);
+		WRITE_BYTE( TE_BSPDECAL );
+		WRITE_COORD( trace.vecEndPos.x );
+		WRITE_COORD( trace.vecEndPos.y );
+		WRITE_COORD( trace.vecEndPos.z );
+		WRITE_SHORT( iTexture );
+		WRITE_SHORT( entityIndex );
+		if ( entityIndex )
+			WRITE_SHORT( (int)VARS(trace.pHit)->modelindex );
+	MESSAGE_END();
+}
+
+void CEnvDecal::Spawn( void )
+{
+	if (pev->impulse == 0)
+	{
+		pev->skin = DECAL_INDEX( STRING(pev->noise) );
+
+		if ( pev->skin == 0 )
+			ALERT( at_console, "%s \"%s\" can't find decal \"%s\"\n", STRING(pev->classname), STRING(pev->noise) );
+	}
+}
+
+//=========================================================
 // LRC - env_fog, extended a bit from the DMC version
 //=========================================================
 #define SF_FOG_ACTIVE 1
