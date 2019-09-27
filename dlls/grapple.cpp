@@ -383,11 +383,11 @@ void CBarnacleGrapple::PrimaryAttack( void )
 			{
 				SendWeaponAnim( BGRAPPLE_FIRETRAVEL );
 
-				EMIT_SOUND_DYN( ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/bgrapple_impact.wav", 0.98, ATTN_NORM, 0, 125 );
+				EMIT_SOUND_DYN( ENT(m_pPlayer->pev), CHAN_STATIC, "weapons/bgrapple_impact.wav", 0.98, ATTN_NORM, 0, 125 );
 
 				if( pTarget->IsPlayer() )
 				{
-					EMIT_SOUND_DYN( ENT(pTarget->pev), CHAN_WEAPON,"weapons/bgrapple_impact.wav", 0.98, ATTN_NORM, 0, 125 );
+					EMIT_SOUND_DYN( ENT(pTarget->pev), CHAN_STATIC,"weapons/bgrapple_impact.wav", 0.98, ATTN_NORM, 0, 125 );
 				}
 
 				m_bMomentaryStuck = FALSE;
@@ -611,7 +611,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 	else
 	*/
 	{
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.01;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
 	}
 }
 
@@ -648,9 +648,9 @@ void CBarnacleGrapple::EndAttack( void )
 	m_fireState = OFF;
 	SendWeaponAnim( BGRAPPLE_FIRERELEASE );
 
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/bgrapple_release.wav", 1, ATTN_NORM);
-
 	EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/bgrapple_pull.wav", 0.0, ATTN_NONE, SND_STOP, 100 );
+
+	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/bgrapple_release.wav", 1, ATTN_NORM);
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.9;
 
