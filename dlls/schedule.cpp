@@ -830,7 +830,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 				// The point is to just run away from danger. Try to find a node without actual cover.
 				else if (FindRunAway( pBestSound->m_vecOrigin, pBestSound->m_iVolume, CoverRadius() ))
 				{
-					ALERT(at_console, "Using run away\n");
+					//ALERT(at_aiconsole, "Using run away\n");
 					m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
 					TaskComplete();
 				}
@@ -845,7 +845,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 
 					if( MoveToLocation( ACT_RUN, 2, targetLocation ) )
 					{
-						ALERT(at_console, "Using the last resort to run away\n");
+						//ALERT(at_aiconsole, "Using the last resort to run away\n");
 						TaskComplete();
 					}
 				}
