@@ -2,7 +2,7 @@
 #ifndef AMMUNITION_H
 #define AMMUNITION_H
 
-class CBasePlayerAmmo : public CBaseEntity
+class CBasePlayerAmmo : public CBaseDelay
 {
 public:
 	virtual void Spawn( void );

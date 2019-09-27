@@ -16,7 +16,7 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
-class CItem : public CBaseEntity
+class CItem : public CBaseDelay
 {
 public:
 	void Spawn( void );
