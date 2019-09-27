@@ -550,17 +550,11 @@ void CStrooper::DropShockRoach()
 		GetAttachment(0, vecGunPos, vecGunAngles);
 		SetBodygroup(STROOPER_GUN_GROUP, STROOPER_GUN_NONE);
 
-		Vector vecDropAngles = vecGunAngles;
-
-		// Remove any pitch.
-		vecDropAngles.x = 0;
-		vecDropAngles.z = 0;
-
 		Vector vecPos = pev->origin;
 		vecPos.z += 32;
 
 		// now spawn a shockroach.
-		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecPos, vecDropAngles );
+		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecPos, pev->angles );
 		if (pRoach)
 		{
 			if (ShouldFadeOnDeath())
