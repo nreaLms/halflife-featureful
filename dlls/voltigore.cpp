@@ -1183,6 +1183,7 @@ void CVoltigore::CreateGlow()
 	m_pBeamGlow = CSprite::SpriteCreate(VOLTIGORE_GLOW_SPRITE, pev->origin, FALSE);
 	m_pBeamGlow->SetTransparency(kRenderTransAdd, 255, 255, 255, 0, kRenderFxNoDissipation);
 	m_pBeamGlow->SetScale(VOLTIGORE_GLOW_SCALE);
+	m_pBeamGlow->SetAttachment(edict(), 4);
 }
 
 void CVoltigore::DestroyGlow()
@@ -1203,9 +1204,7 @@ void CVoltigore::GlowUpdate()
 			m_pBeamGlow->pev->effects |= EF_NODRAW;
 		else
 			m_pBeamGlow->pev->effects &= ~EF_NODRAW;
-		Vector vecOrigin, vecAngles;
-		GetAttachment(3, vecOrigin, vecAngles);
-		UTIL_SetOrigin(m_pBeamGlow->pev, vecOrigin);
+		UTIL_SetOrigin(m_pBeamGlow->pev, pev->origin);
 	}
 }
 
