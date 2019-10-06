@@ -204,7 +204,21 @@
 	]
 ]
 
-@BaseClass base(Target, Targetname, RenderFields, Angles, Classification) flags(Angle) color(0 200 200) = Monster
+@BaseClass = MonsterSoundMask
+[
+	soundmask(choices) : "Custom Sound Mask" : : "Types of sound the monster regards" =
+	[
+		-1 : "No sounds (Deaf)"
+		0 : "Default for monster"
+		32 : "Only Danger"
+		33 : "Only Combat and Danger"
+		37 : "Combat, Danger and Player"
+		127 : "Every sound and scent"
+		1028 : "Default, except Player"
+	]
+]
+
+@BaseClass base(Target, Targetname, RenderFields, Angles, Classification, MonsterSoundMask) flags(Angle) color(0 200 200) = Monster
 [
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	TriggerCondition(Choices) : "Trigger Condition" : 0 : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
@@ -242,8 +256,8 @@
 		128: "WaitForScript" 	: 0
 		256: "Pre-Disaster" 	: 0
 		512: "Fade Corpse"	: 0
-		8192: "No yellow blobs" : 0
-		65536: "Non-solid corpse" : 0
+		8192: "No yellow blobs" : 0 : "When engine thinks that monster is stuck, don't draw yellow particles around it"
+		65536: "Non-solid corpse" : 0 : "Become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
 	]
 	is_player_ally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
 	[
@@ -266,16 +280,6 @@
 	]
 	gibmodel(studio) : "Custom gib model"
 	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
-	soundmask(choices) : "Custom Sound Mask" : : "Types of sound the monster regards" =
-	[
-		-1 : "No sounds (Deaf)"
-		0 : "Default for monster"
-		32 : "Only Danger"
-		33 : "Only Combat and Danger"
-		37 : "Combat, Danger and Player"
-		127 : "Every sound and scent"
-		1028 : "Default, except Player"
-	]
 ]
 
 @BaseClass base(Monster) = Repel
@@ -317,6 +321,14 @@
 		131072 : "Don't greet player" : 0 : "Don't say hello to player upon seeing him"
 		262144 : "Don't idle talk to player" : 0 : "Don't forward idle statements to player, still talk to other allies and answer to player's usage"
 		524288 : "Ignore player pushing" : 0 : "Don't move away when player tries to push me"
+	]
+]
+
+@BaseClass base(TalkMonster) = ScaredGuy
+[
+	spawnflags(Flags) =
+	[
+		32768 : "Don't stop following" : 0 : "By default scientists stop following when they run into an obstacle they can't bypass. This flag prevents such behavior making scientists continue trying to follow the player"
 	]
 ]
 
@@ -4491,7 +4503,7 @@
 	]
 ]
 
-@PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/gus.mdl") = monster_gus : "Construction Worker"
+@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/gus.mdl") = monster_gus : "Construction Worker"
 [
 	body(Choices) : "Body" : -1 =
 	[
@@ -4632,10 +4644,6 @@
 		128 : "dudedu"
 		129 : "cower_chat"
 		130 : "cower_chat_die"
-	]
-	spawnflags(Flags) =
-	[
-		32768 : "Don't stop following" : 0
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/gus.mdl") = monster_gus_dead : "Dead Construction Worker"
@@ -4790,7 +4798,7 @@
 	]
 ]
 
-@PointClass base(Monster, TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist : "Cleansuit Scientist" 
+@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist : "Cleansuit Scientist"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 13 =
 	[
@@ -4877,10 +4885,6 @@
 		2 : "Luther"
 		3 : "Slick"
 	]
-	spawnflags(Flags) =
-	[
-		32768 : "Don't stop following" : 0
-	]
 ]
 
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist_dead : "Dead Cleansuit Scientist"
@@ -4931,7 +4935,7 @@
 	]
 ]
 
-@PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist : "Scared Scientist" 
+@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist : "Scared Scientist"
 [
 	body(Choices) : "Body" : -1 =
 	[
@@ -5072,10 +5076,6 @@
 		126 : "crouch"
 		127 : "kneel"
 	]
-	spawnflags(Flags) =
-	[
-		32768 : "Don't stop following" : 0
-	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist_dead : "Dead Scientist"
 [
@@ -5131,7 +5131,7 @@
 		32768 : "Don't drop to the floor" : 0
 	]
 ]
-@PointClass base(Monster, TalkMonster) size(-16 -16 0, 16 16 72) studio("models/scientist_rosenberg.mdl") = monster_rosenberg : "Dr. Rosenberg" []
+@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/scientist_rosenberg.mdl") = monster_rosenberg : "Dr. Rosenberg" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/sentry.mdl") = monster_sentry : "Sentry Turret Gun"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -5476,7 +5476,7 @@
 		8 : "MonsterClip" : 0
 		16 : "Prisoner" : 0
 		1024: "Don't Drop Gun" : 0
-		2048 : "No ground check" : 0
+		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
 		8192 : "Warp at monster center" : 0 : "When using warpball template, make it play at the center of monster's body, not origin of monstermaker"
 	]
 
@@ -5560,8 +5560,8 @@
 	]
     displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
 ]
-@PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
-@PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []
+@PointClass base(MonsterMaker,MonsterSoundMask) = monstermaker : "Monster Maker" []
+@PointClass base(MonsterMaker,MonsterSoundMask) = squadmaker : "Squad Maker" []
 
 @PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager"
 [
@@ -5901,7 +5901,7 @@
 	]
 ]
 
-@PointClass base(Targetx, Targetname) iconsprite("sprites/trigger_changetarget.spr") = trigger_changetarget : "Trigger Change Target"
+@PointClass base(Target, Targetname) iconsprite("sprites/trigger_changetarget.spr") = trigger_changetarget : "Trigger Change Target"
 [
 	m_iszNewTarget(string) : "New Target"
 ]
