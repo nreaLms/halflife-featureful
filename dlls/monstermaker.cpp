@@ -371,7 +371,8 @@ void CMonsterMaker::MakeMonster( void )
 	}
 
 	m_cLiveChildren++;// count this monster
-	m_cNumMonsters--;
+	if (m_cNumMonsters > 0)
+		m_cNumMonsters--;
 
 	if( m_cNumMonsters == 0 )
 	{
@@ -433,5 +434,11 @@ void CMonsterMaker::DeathNotice( entvars_t *pevChild )
 	if( !m_fFadeChildren )
 	{
 		pevChild->owner = NULL;
+	}
+
+	if (m_cNumMonsters == 0)
+	{
+		SetThink(&CMonsterMaker::SUB_Remove);
+		pev->nextthink = gpGlobals->time;
 	}
 }
