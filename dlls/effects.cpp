@@ -2690,7 +2690,14 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	if (pev->dmg_inflictor && (pEntity = CBaseEntity::Instance(pev->dmg_inflictor)) != NULL)
 	{
-		vecOrigin = pEntity->pev->origin;
+		if (useType == USE_SET)
+		{
+			vecOrigin = pActivator->Center();
+		}
+		else
+		{
+			vecOrigin = pEntity->pev->origin;
+		}
 		pos = pEntity->edict();
 	}
 	else if( !FStringNull( pev->message ) && (pEntity = UTIL_FindEntityByTargetname( NULL, STRING( pev->message ) )) != NULL )//target found ?

@@ -5477,6 +5477,7 @@
 		16 : "Prisoner" : 0
 		1024: "Don't Drop Gun" : 0
 		2048 : "No ground check" : 0
+		8192 : "Warp at monster center" : 0 : "When using warpball template, make it play at the center of monster's body, not origin of monstermaker"
 	]
 
 	// how many monsters the monstermaker can create (-1 = unlimited)

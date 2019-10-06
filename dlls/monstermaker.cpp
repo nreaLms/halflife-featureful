@@ -31,6 +31,8 @@
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
+#define SF_MONSTERMAKER_WARP_AT_MONSTER_CENTER 8192 // When using warpball template, make it play at the center of monster's body, not origin
+
 //=========================================================
 // MonsterMaker - this ent creates monsters during the game.
 //=========================================================
@@ -358,8 +360,10 @@ void CMonsterMaker::MakeMonster( void )
 		if ( foundEntity && (FClassnameIs(foundEntity->pev, "env_warpball")
 							 || FClassnameIs(foundEntity->pev, "env_xenmaker")))
 		{
+			const bool warpAtCenter = FBitSet(pev->spawnflags, SF_MONSTERMAKER_WARP_AT_MONSTER_CENTER);
+
 			foundEntity->pev->dmg_inflictor = edict();
-			foundEntity->Use(this, this, USE_TOGGLE, 0.0f);
+			foundEntity->Use(warpAtCenter ? Instance(pent) : this, this, warpAtCenter ? USE_SET : USE_TOGGLE, 0.0f);
 			foundEntity->pev->dmg_inflictor = NULL;
 		}
 	}
