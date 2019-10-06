@@ -102,6 +102,8 @@ public:
 	void RemoveBullet();
 	void OnEmptyGun();
 
+	void UpdateOnRemove();
+
 protected:
 	CBasePlayer* m_pController;
 	float		m_flNextAttack;
@@ -411,6 +413,12 @@ void CFuncTank::StopControl()
 
 	if( IsActive() )
 		pev->nextthink = pev->ltime + 1.0;
+}
+
+void CFuncTank::UpdateOnRemove()
+{
+	StopControl();
+	CBaseEntity::UpdateOnRemove();
 }
 
 // Called each frame by the player's ItemPostFrame
@@ -1049,7 +1057,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	CFuncTank *m_pTank;
+	EHANDLE m_pTank;
 };
 
 LINK_ENTITY_TO_CLASS( func_tankcontrols, CFuncTankControls )
@@ -1057,7 +1065,7 @@ LINK_ENTITY_TO_CLASS( func_tankcontrols_of, CFuncTankControls )
 
 TYPEDESCRIPTION	CFuncTankControls::m_SaveData[] =
 {
-	DEFINE_FIELD( CFuncTankControls, m_pTank, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CFuncTankControls, m_pTank, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTankControls, CBaseEntity )
@@ -1070,10 +1078,12 @@ int CFuncTankControls::ObjectCaps( void )
 void CFuncTankControls::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	// pass the Use command onto the controls
-	if( m_pTank )
+	if( m_pTank != 0 )
 		m_pTank->Use( pActivator, pCaller, useType, value );
+	else
+		UTIL_Remove(this);
 
-	ASSERT( m_pTank != NULL );	// if this fails,  most likely means save/restore hasn't worked properly
+	//ASSERT( m_pTank != NULL );	// if this fails,  most likely means save/restore hasn't worked properly
 }
 
 void CFuncTankControls::Think( void )
