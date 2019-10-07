@@ -153,8 +153,9 @@ public:
 	virtual int ObjectCaps( void ) { return ( CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_DONT_SAVE; }
 	static void SpawnHeadGib( entvars_t *pevVictim );
 	static void SpawnHumanGibs(entvars_t *pevVictim, int cGibs = 4 );
-	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibNum = 0 );
+	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibIndex = 0 );
 	static void SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs );
+	static void SpawnRandomClientGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibIndex = 0 );
 
 	int m_bloodColor;
 	int m_cBloodDecals;

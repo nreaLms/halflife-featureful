@@ -186,7 +186,7 @@ void CGib::SpawnHumanGibs(entvars_t *pevVictim, int cGibs)
 	SpawnRandomGibs( pevVictim, cGibs, "models/hgibs.mdl", HUMAN_GIB_COUNT, 1 ); // start at one to avoid throwing random amounts of skulls (0th gib)
 }
 
-void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum , int startGibNum)
+void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum , int startGibIndex)
 {
 	int cSplat;
 
@@ -197,18 +197,19 @@ void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel
 		if( g_Language == LANGUAGE_GERMAN )
 		{
 			pGib->Spawn( "models/germangibs.mdl" );
-			pGib->pev->body = RANDOM_LONG( startGibNum, GERMAN_GIB_COUNT - 1 );
+			pGib->pev->body = RANDOM_LONG( startGibIndex, GERMAN_GIB_COUNT - 1 );
 		}
 		else
 		{
 			pGib->Spawn( gibModel );
 			if (gibBodiesNum <= 0)
 			{
-				gibBodiesNum = GetBodyNumber(GET_MODEL_PTR(ENT(pGib->pev)));
+				gibBodiesNum = MODEL_FRAMES(pGib->pev->modelindex);
 				if (gibBodiesNum == 0)
-					gibBodiesNum = 1;
+					gibBodiesNum = startGibIndex + 1;
+				startGibIndex = startGibIndex > gibBodiesNum - 1 ? gibBodiesNum - 1 : startGibIndex;
 			}
-			pGib->pev->body = RANDOM_LONG( startGibNum, gibBodiesNum - 1 );
+			pGib->pev->body = RANDOM_LONG( startGibIndex, gibBodiesNum - 1 );
 		}
 
 		if( pevVictim )
@@ -251,6 +252,91 @@ void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel
 			UTIL_SetSize( pGib->pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 		}
 		pGib->LimitVelocity();
+	}
+}
+
+extern int gmsgRandomGibs;
+
+void CGib::SpawnRandomClientGibs(entvars_t *pevVictim, int cGibs, const char *gibModel, int gibBodiesNum, int startGibIndex)
+{
+	if (!pevVictim)
+		return;
+
+	Vector direction = g_vecAttackDir * -1;
+	int modelIndex = MODEL_INDEX(gibModel);
+
+	byte bloodType;
+
+	CBaseEntity* pEntity = CBaseEntity::Instance(pevVictim);
+	int bloodColor = pEntity->BloodColor();
+	switch (bloodColor) {
+	case BLOOD_COLOR_RED:
+		bloodType = 1;
+		break;
+	case BLOOD_COLOR_YELLOW:
+		bloodType = 2;
+		break;
+	default:
+		bloodType = 0;
+		break;
+	}
+
+	int velocityMultiplier = 10;
+	if( pevVictim->health > -50 )
+	{
+		velocityMultiplier = 7;
+	}
+	else if( pevVictim->health > -200 )
+	{
+		velocityMultiplier = 20;
+	}
+	else
+	{
+		velocityMultiplier = 40;
+	}
+
+	if (gmsgRandomGibs)
+	{
+		MESSAGE_BEGIN( MSG_PVS, gmsgRandomGibs, NULL );
+			// position
+			WRITE_COORD( pevVictim->absmin.x );
+			WRITE_COORD( pevVictim->absmin.y );
+			WRITE_COORD( pevVictim->absmin.z );
+
+			// size
+			WRITE_COORD( pevVictim->size.x );
+			WRITE_COORD( pevVictim->size.y );
+			WRITE_COORD( pevVictim->size.z );
+
+			// velocity
+			WRITE_COORD( direction.x );
+			WRITE_COORD( direction.y );
+			WRITE_COORD( direction.z );
+
+			// randomization
+			WRITE_BYTE( 25 );
+
+			// Model
+			WRITE_SHORT( modelIndex );
+
+			// # of gibs
+			WRITE_BYTE( cGibs );
+
+			// lifetime
+			WRITE_BYTE( 25 );
+
+			// blood type
+			WRITE_BYTE( bloodType );
+
+			WRITE_BYTE( gibBodiesNum );
+			WRITE_BYTE( startGibIndex );
+
+			WRITE_BYTE( velocityMultiplier );
+		MESSAGE_END();
+	}
+	else
+	{
+		ALERT(at_warning, "gmsgRandomGibs is not registered\n");
 	}
 }
 

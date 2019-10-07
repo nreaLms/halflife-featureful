@@ -200,6 +200,8 @@ int gmsgHUDColor = 0;
 int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
 
+int gmsgRandomGibs = 0;
+
 #if FEATURE_NIGHTVISION
 int gmsgNightvision = 0;
 #endif
@@ -207,6 +209,7 @@ int gmsgNightvision = 0;
 #if FEATURE_MOVE_MODE
 int gmsgMovementState = 0;
 #endif
+
 
 void LinkUserMessages( void )
 {
@@ -258,12 +261,16 @@ void LinkUserMessages( void )
 
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
 	gmsgStatusValue = REG_USER_MSG( "StatusValue", 3 );
+
+	gmsgRandomGibs = REG_USER_MSG( "RandomGibs", 27 );
+
 #if FEATURE_NIGHTVISION
 	gmsgNightvision = REG_USER_MSG( "Nightvision", 1 );
 #endif
 #if FEATURE_MOVE_MODE
 	gmsgMovementState = REG_USER_MSG( "MoveMode", 2 );
 #endif
+
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer )

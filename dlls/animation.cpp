@@ -511,12 +511,3 @@ int GetBodygroup( void *pmodel, entvars_t *pev, int iGroup )
 
 	return iCurrent;
 }
-
-int GetBodyNumber( void* pmodel )
-{
-	studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
-	if( !pstudiohdr )
-		return 0;
-	mstudiobodyparts_t *pbodypart = (mstudiobodyparts_t *)( (byte *)pstudiohdr + pstudiohdr->bodypartindex );
-	return pbodypart->nummodels;
-}
