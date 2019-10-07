@@ -23,12 +23,15 @@
 #include "monsters.h"
 #include "saverestore.h"
 
+#define MONSTERMAKER_START_ON_FIX 1
+
 // Monstermaker spawnflags
 #define	SF_MONSTERMAKER_START_ON	1 // start active ( if has targetname )
 #define	SF_MONSTERMAKER_CYCLIC		4 // drop one monster every time fired.
 #define SF_MONSTERMAKER_MONSTERCLIP	8 // Children are blocked by monsterclip
 #define SF_MONSTERMAKER_PRISONER	16
 #define SF_MONSTERMAKER_CYCLIC_BACKLOG 64
+#define SF_MONSTERMAKER_PREDISASTER 256
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
@@ -204,6 +207,9 @@ void CMonsterMaker::Spawn()
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_START_ON ) )
 		{
 			// start making monsters as soon as monstermaker spawns
+#if MONSTERMAKER_START_ON_FIX
+			pev->nextthink = gpGlobals->time + m_flDelay;
+#endif
 			m_fActive = TRUE;
 			SetThink( &CMonsterMaker::MakerThink );
 		}
@@ -325,6 +331,8 @@ int CMonsterMaker::MakeMonster( void )
 
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PRISONER ))
 			SetBits( pevCreate->spawnflags, SF_MONSTER_PRISONER );
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PREDISASTER ))
+			SetBits( pevCreate->spawnflags, SF_MONSTER_PREDISASTER );
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_DONT_DROP_GUN))
 			SetBits(pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GRUN);
 		if (m_gag > 0)

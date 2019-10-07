@@ -257,6 +257,7 @@
 		256: "Pre-Disaster" 	: 0
 		512: "Fade Corpse"	: 0
 		8192: "No yellow blobs" : 0 : "When engine thinks that monster is stuck, don't draw yellow particles around it"
+		16384 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'No Dyn collision' flag"
 		65536: "Non-solid corpse" : 0 : "Become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
 	]
 	is_player_ally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
@@ -5470,12 +5471,14 @@
 	netname(string) : "Childrens' Name"
 	spawnflags(Flags) =
 	[
-		1 : "Start ON (Not working)" 	: 0
+		1 : "Start ON" 	: 0
 	// 	2 : "PVS On/Off" : 0  // not implemented
 		4 : "Cyclic" : 0
 		8 : "MonsterClip" : 0
 		16 : "Prisoner" : 0
+		32 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Auto size BBox' flag"
 		64: "Cyclic backlog" : 0 : "Keep track of number of monsters who could not be spawned because of blocking. Try to spawn them later"
+		256 : "Pre-Disaster" : 0
 		1024: "Don't Drop Gun" : 0
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
 		8192 : "Warp at monster center" : 0 : "When using warpball template, make it play at the center of monster's body, not origin of monstermaker"
