@@ -5475,6 +5475,7 @@
 		4 : "Cyclic" : 0
 		8 : "MonsterClip" : 0
 		16 : "Prisoner" : 0
+		64: "Cyclic backlog" : 0 : "Keep track of number of monsters who could not be spawned because of blocking. Try to spawn them later"
 		1024: "Don't Drop Gun" : 0
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
 		8192 : "Warp at monster center" : 0 : "When using warpball template, make it play at the center of monster's body, not origin of monstermaker"

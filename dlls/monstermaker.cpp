@@ -28,10 +28,19 @@
 #define	SF_MONSTERMAKER_CYCLIC		4 // drop one monster every time fired.
 #define SF_MONSTERMAKER_MONSTERCLIP	8 // Children are blocked by monsterclip
 #define SF_MONSTERMAKER_PRISONER	16
+#define SF_MONSTERMAKER_CYCLIC_BACKLOG 64
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
 #define SF_MONSTERMAKER_WARP_AT_MONSTER_CENTER 8192 // When using warpball template, make it play at the center of monster's body, not origin
+
+enum
+{
+	MONSTERMAKER_LIMIT = 0,
+	MONSTERMAKER_BLOCKED,
+	MONSTERMAKER_NULLENTITY,
+	MONSTERMAKER_SPAWNED,
+};
 
 //=========================================================
 // MonsterMaker - this ent creates monsters during the game.
@@ -45,8 +54,9 @@ public:
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT CyclicUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT MakerThink( void );
+	void EXPORT CyclicBacklogThink( void );
 	void DeathNotice( entvars_t *pevChild );// monster maker children use this to tell the monster maker that they have died.
-	void MakeMonster( void );
+	int MakeMonster( void );
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -70,6 +80,7 @@ public:
 	BOOL m_notSolid;
 	BOOL m_gag;
 	int m_iHead;
+	int m_cyclicBacklogSize;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -92,6 +103,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iHead, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_minHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_maxHullSize, FIELD_VECTOR ),
+	DEFINE_FIELD( CMonsterMaker, m_cyclicBacklogSize, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -195,6 +207,10 @@ void CMonsterMaker::Spawn()
 			m_fActive = TRUE;
 			SetThink( &CMonsterMaker::MakerThink );
 		}
+		else if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_CYCLIC ) && FBitSet( pev->spawnflags, SF_MONSTERMAKER_CYCLIC_BACKLOG ) )
+		{
+			SetThink( &CMonsterMaker::CyclicBacklogThink );
+		}
 		else
 		{
 			// wait to be activated.
@@ -237,7 +253,7 @@ void CMonsterMaker::Precache( void )
 //=========================================================
 // MakeMonster-  this is the code that drops the monster
 //=========================================================
-void CMonsterMaker::MakeMonster( void )
+int CMonsterMaker::MakeMonster( void )
 {
 	edict_t	*pent;
 	entvars_t *pevCreate;
@@ -245,7 +261,7 @@ void CMonsterMaker::MakeMonster( void )
 	if( m_iMaxLiveChildren > 0 && m_cLiveChildren >= m_iMaxLiveChildren )
 	{
 		// not allowed to make a new one yet. Too many live ones out right now.
-		return;
+		return MONSTERMAKER_LIMIT;
 	}
 
 	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
@@ -271,7 +287,7 @@ void CMonsterMaker::MakeMonster( void )
 	if( count )
 	{
 		// don't build a stack of monsters!
-		return;
+		return MONSTERMAKER_BLOCKED;
 	}
 
 	pent = CREATE_NAMED_ENTITY( m_iszMonsterClassname );
@@ -279,7 +295,7 @@ void CMonsterMaker::MakeMonster( void )
 	if( FNullEnt( pent ) )
 	{
 		ALERT ( at_console, "NULL Ent in MonsterMaker!\n" );
-		return;
+		return MONSTERMAKER_NULLENTITY;
 	}
 
 	// If I have a target, fire!
@@ -384,6 +400,7 @@ void CMonsterMaker::MakeMonster( void )
 		SetThink( NULL );
 		SetUse( NULL );
 	}
+	return MONSTERMAKER_SPAWNED;
 }
 
 //=========================================================
@@ -392,7 +409,14 @@ void CMonsterMaker::MakeMonster( void )
 //=========================================================
 void CMonsterMaker::CyclicUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	MakeMonster();
+	if (MakeMonster() == MONSTERMAKER_BLOCKED)
+	{
+		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_CYCLIC_BACKLOG))
+		{
+			m_cyclicBacklogSize++;
+			pev->nextthink = gpGlobals->time + m_flDelay;
+		}
+	}
 }
 
 //=========================================================
@@ -425,6 +449,16 @@ void CMonsterMaker::MakerThink( void )
 	pev->nextthink = gpGlobals->time + m_flDelay;
 
 	MakeMonster();
+}
+
+void CMonsterMaker::CyclicBacklogThink()
+{
+	if (MakeMonster() == MONSTERMAKER_SPAWNED)
+	{
+		m_cyclicBacklogSize--;
+	}
+	if (m_cyclicBacklogSize > 0)
+		pev->nextthink = gpGlobals->time + m_flDelay;
 }
 
 //=========================================================
