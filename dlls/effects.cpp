@@ -24,6 +24,7 @@
 #include "func_break.h"
 #include "shake.h"
 #include "soundradius.h"
+#include "locus.h"
 #include "mod_features.h"
 
 #define	SF_GIBSHOOTER_REPEATABLE		1 // allows a gibshooter to be refired
@@ -1509,6 +1510,11 @@ public:
 	float m_flGibVelocity;
 	float m_flVariance;
 	float m_flGibLife;
+	string_t m_iszPosition;
+	string_t m_iszVelocity;
+	string_t m_iszVelFactor;
+	string_t m_iszSpawnTarget;
+	EHANDLE m_hActivator;
 };
 
 TYPEDESCRIPTION CGibShooter::m_SaveData[] =
@@ -1517,9 +1523,14 @@ TYPEDESCRIPTION CGibShooter::m_SaveData[] =
 	DEFINE_FIELD( CGibShooter, m_iGibCapacity, FIELD_INTEGER ),
 	DEFINE_FIELD( CGibShooter, m_iGibMaterial, FIELD_INTEGER ),
 	DEFINE_FIELD( CGibShooter, m_iGibModelIndex, FIELD_INTEGER ),
-	DEFINE_FIELD( CGibShooter, m_flGibVelocity, FIELD_FLOAT ),
+	//DEFINE_FIELD( CGibShooter, m_flGibVelocity, FIELD_FLOAT ),
 	DEFINE_FIELD( CGibShooter, m_flVariance, FIELD_FLOAT ),
 	DEFINE_FIELD( CGibShooter, m_flGibLife, FIELD_FLOAT ),
+	DEFINE_FIELD( CGibShooter, m_iszPosition, FIELD_STRING),
+	DEFINE_FIELD( CGibShooter, m_iszVelocity, FIELD_STRING),
+	DEFINE_FIELD( CGibShooter, m_iszVelFactor, FIELD_STRING),
+	DEFINE_FIELD( CGibShooter, m_iszSpawnTarget, FIELD_STRING),
+	DEFINE_FIELD( CGibShooter, m_hActivator, FIELD_EHANDLE),
 };
 
 IMPLEMENT_SAVERESTORE( CGibShooter, CBaseDelay )
@@ -1546,7 +1557,7 @@ void CGibShooter::KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "m_flVelocity" ) )
 	{
-		m_flGibVelocity = atof( pkvd->szValue );
+		m_iszVelFactor = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "m_flVariance" ) )
@@ -1559,6 +1570,26 @@ void CGibShooter::KeyValue( KeyValueData *pkvd )
 		m_flGibLife = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszPosition"))
+	{
+		m_iszPosition = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszVelocity"))
+	{
+		m_iszVelocity = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszVelFactor"))
+	{
+		m_iszVelFactor = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszSpawnTarget"))
+	{
+		m_iszSpawnTarget = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseDelay::KeyValue( pkvd );
@@ -1567,6 +1598,7 @@ void CGibShooter::KeyValue( KeyValueData *pkvd )
 
 void CGibShooter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	m_hActivator = pActivator;
 	SetThink( &CGibShooter::ShootThink );
 	pev->nextthink = gpGlobals->time;
 }
@@ -1613,38 +1645,87 @@ CGib *CGibShooter::CreateGib( void )
 
 void CGibShooter::ShootThink( void )
 {
-	pev->nextthink = gpGlobals->time + m_flDelay;
-
-	Vector vecShootDir;
-
-	vecShootDir = pev->movedir;
-
-	vecShootDir = vecShootDir + gpGlobals->v_right * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
-	vecShootDir = vecShootDir + gpGlobals->v_forward * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
-	vecShootDir = vecShootDir + gpGlobals->v_up * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
-
-	vecShootDir = vecShootDir.Normalize();
-	CGib *pGib = CreateGib();
-	
-	if( pGib )
+	int i;
+	if (m_flDelay == 0) // LRC - delay is 0, fire them all at once.
 	{
-		pGib->pev->origin = pev->origin;
-		pGib->pev->velocity = vecShootDir * m_flGibVelocity;
-
-		pGib->pev->avelocity.x = RANDOM_FLOAT( 100, 200 );
-		pGib->pev->avelocity.y = RANDOM_FLOAT( 100, 300 );
-
-		float thinkTime = pGib->pev->nextthink - gpGlobals->time;
-
-		pGib->m_lifeTime = ( m_flGibLife * RANDOM_FLOAT( 0.95, 1.05 ) );	// +/- 5%
-		if( pGib->m_lifeTime < thinkTime )
-		{
-			pGib->pev->nextthink = gpGlobals->time + pGib->m_lifeTime;
-			pGib->m_lifeTime = 0;
-		}
+		i = m_iGibs;
+	}
+	else
+	{
+		i = 1;
+		pev->nextthink = gpGlobals->time + m_flDelay;
 	}
 
-	if( --m_iGibs <= 0 )
+	while (i > 0)
+	{
+		Vector vecShootDir;
+		Vector vecPos;
+		float flGibVelocity;
+		bool evaluated;
+
+		if (!FStringNull(m_iszVelFactor))
+		{
+			flGibVelocity = CalcLocus_Ratio(m_hActivator, STRING(m_iszVelFactor), &evaluated);
+			if (!evaluated)
+				return;
+		}
+		else
+			flGibVelocity = 1;
+
+		if (!FStringNull(m_iszVelocity))
+		{
+			vecShootDir = CalcLocus_Velocity(this, m_hActivator, STRING(m_iszVelocity), &evaluated);
+			if (!evaluated)
+				return;
+			flGibVelocity = flGibVelocity * vecShootDir.Length();
+			vecShootDir = vecShootDir.Normalize();
+		}
+		else
+			vecShootDir = pev->movedir;
+
+		vecShootDir = vecShootDir + gpGlobals->v_right * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
+		vecShootDir = vecShootDir + gpGlobals->v_forward * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
+		vecShootDir = vecShootDir + gpGlobals->v_up * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
+
+		vecShootDir = vecShootDir.Normalize();
+
+		if (!FStringNull(m_iszPosition))
+		{
+			vecPos = CalcLocus_Position(this, m_hActivator, STRING(m_iszPosition), &evaluated);
+			if (!evaluated)
+				return;
+		}
+		else
+			vecPos = pev->origin;
+
+		CGib *pGib = CreateGib();
+
+		if( pGib )
+		{
+			pGib->pev->origin = vecPos;
+			pGib->pev->velocity = vecShootDir * flGibVelocity;
+
+			pGib->pev->avelocity.x = RANDOM_FLOAT( 100, 200 );
+			pGib->pev->avelocity.y = RANDOM_FLOAT( 100, 300 );
+
+			float thinkTime = pGib->pev->nextthink - gpGlobals->time;
+
+			pGib->m_lifeTime = ( m_flGibLife * RANDOM_FLOAT( 0.95, 1.05 ) );	// +/- 5%
+			if( pGib->m_lifeTime < thinkTime )
+			{
+				pGib->pev->nextthink = gpGlobals->time + pGib->m_lifeTime;
+				pGib->m_lifeTime = 0;
+			}
+
+			if (m_iszSpawnTarget)
+				FireTargets( STRING(m_iszSpawnTarget), pGib, this, USE_TOGGLE, 0 );
+		}
+
+		i--;
+		m_iGibs--;
+	}
+
+	if( m_iGibs <= 0 )
 	{
 		if( pev->spawnflags & SF_GIBSHOOTER_REPEATABLE )
 		{
@@ -1890,7 +1971,7 @@ public:
 		pev->dmg = amount;
 	}
 	
-	Vector Direction( void );
+	Vector Direction(CBaseEntity *pActivator );
 	Vector BloodPosition( CBaseEntity *pActivator );
 private:
 };
@@ -1937,12 +2018,14 @@ void CBlood::KeyValue( KeyValueData *pkvd )
 		CPointEntity::KeyValue( pkvd );
 }
 
-Vector CBlood::Direction( void )
+Vector CBlood::Direction( CBaseEntity *pActivator )
 {
 	if( pev->spawnflags & SF_BLOOD_RANDOM )
 		return UTIL_RandomBloodVector();
-
-	return pev->movedir;
+	else if (pev->netname)
+		return CalcLocus_Velocity(this, pActivator, STRING(pev->netname));
+	else
+		return pev->movedir;
 }
 
 Vector CBlood::BloodPosition( CBaseEntity *pActivator )
@@ -1960,6 +2043,10 @@ Vector CBlood::BloodPosition( CBaseEntity *pActivator )
 		if( pPlayer )
 			return( pPlayer->v.origin + pPlayer->v.view_ofs ) + Vector( RANDOM_FLOAT( -10, 10 ), RANDOM_FLOAT( -10, 10 ), RANDOM_FLOAT( -10, 10 ) );
 	}
+	else if (pev->target)
+	{
+		return CalcLocus_Position(this, pActivator, STRING(pev->target));
+	}
 
 	return pev->origin;
 }
@@ -1967,13 +2054,13 @@ Vector CBlood::BloodPosition( CBaseEntity *pActivator )
 void CBlood::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	if( pev->spawnflags & SF_BLOOD_STREAM )
-		UTIL_BloodStream( BloodPosition( pActivator ), Direction(), ( Color() == BLOOD_COLOR_RED ) ? 70 : Color(), (int)BloodAmount() );
+		UTIL_BloodStream( BloodPosition( pActivator ), Direction( pActivator ), ( Color() == BLOOD_COLOR_RED ) ? 70 : Color(), (int)BloodAmount() );
 	else
-		UTIL_BloodDrips( BloodPosition( pActivator ), Direction(), Color(), (int)BloodAmount() );
+		UTIL_BloodDrips( BloodPosition( pActivator ), Direction( pActivator ), Color(), (int)BloodAmount() );
 
 	if( pev->spawnflags & SF_BLOOD_DECAL )
 	{
-		Vector forward = Direction();
+		Vector forward = Direction( pActivator );
 		Vector start = BloodPosition( pActivator );
 		TraceResult tr;
 
@@ -2310,11 +2397,22 @@ LINK_ENTITY_TO_CLASS( env_funnel, CEnvFunnel )
 
 void CEnvFunnel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	Vector vecPos;
+	if (pev->message)
+	{
+		bool evaluated;
+		vecPos = CalcLocus_Position( this, pActivator, STRING(pev->message), &evaluated );
+		if (!evaluated)
+			return;
+	}
+	else
+		vecPos = pev->origin;
+
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_LARGEFUNNEL );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
+		WRITE_COORD( vecPos.x );
+		WRITE_COORD( vecPos.y );
+		WRITE_COORD( vecPos.z );
 		WRITE_SHORT( m_iSprite );
 
 		if( pev->spawnflags & SF_FUNNEL_REVERSE )// funnel flows in reverse?
@@ -2368,7 +2466,18 @@ void CEnvBeverage::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		return;
 	}
 
-	CBaseEntity *pCan = CBaseEntity::Create( "item_sodacan", pev->origin, pev->angles, edict() );	
+	Vector vecPos;
+	if (pev->target)
+	{
+		bool evaluated;
+		vecPos = CalcLocus_Position( this, pActivator, STRING(pev->target), &evaluated );
+		if (!evaluated)
+			return;
+	}
+	else
+		vecPos = pev->origin;
+
+	CBaseEntity *pCan = CBaseEntity::Create( "item_sodacan", vecPos, pev->angles, edict() );
 
 	if( pev->skin == 6 )
 	{
@@ -3381,19 +3490,17 @@ void CEnvShockwave::KeyValue( KeyValueData *pkvd )
 
 void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	Vector vecPos = pev->origin;
-	if (m_iszPosition)
+	Vector vecPos;
+	if (!FStringNull(m_iszPosition))
 	{
-		CBaseEntity* posEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszPosition));
-		if (posEnt)
-		{
-			vecPos = posEnt->pev->origin;
-		}
-		else
-		{
-			ALERT(at_aiconsole, "Couldn't find position entity %s for %s\n", STRING(m_iszPosition), STRING(pev->classname));
+		bool evaluated;
+		vecPos = CalcLocus_Position( this, pActivator, STRING(m_iszPosition), &evaluated );
+		if (!evaluated)
 			return;
-		}
+	}
+	else
+	{
+		vecPos = pev->origin;
 	}
 
 	if (!(pev->spawnflags & SF_SHOCKWAVE_CENTERED))
@@ -3481,19 +3588,13 @@ void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	else
 		iTexture = pev->skin; // custom texture
 
+	bool evaluated;
 	Vector vecPos;
 	if (!FStringNull(pev->target))
 	{
-		CBaseEntity* posEnt = UTIL_FindEntityByTargetname( NULL, STRING(pev->target) );
-		if (posEnt)
-		{
-			vecPos = posEnt->pev->origin;
-		}
-		else
-		{
-			ALERT(at_aiconsole, "Couldn't find position entity %s for %s\n", STRING(pev->target), STRING(pev->classname));
+		vecPos = CalcLocus_Position( this, pActivator, STRING(pev->target), &evaluated );
+		if (!evaluated)
 			return;
-		}
 	}
 	else
 	{
@@ -3501,19 +3602,12 @@ void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	}
 
 	Vector vecOffs;
-
 	if (!FStringNull(pev->netname))
 	{
-		CBaseEntity* velEnt = UTIL_FindEntityByTargetname( NULL, STRING(pev->netname) );
-		if (velEnt)
-		{
-			vecOffs = velEnt->pev->velocity;
-		}
-		else
-		{
-			ALERT(at_aiconsole, "Couldn't find velocity entity %s for %s\n", STRING(pev->netname), STRING(pev->classname));
+
+		vecOffs = CalcLocus_Velocity( this, pActivator, STRING(pev->netname), &evaluated );
+		if (!evaluated)
 			return;
-		}
 	}
 	else
 	{

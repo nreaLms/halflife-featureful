@@ -553,6 +553,19 @@ CBaseEntity *UTIL_FindEntityByTargetname( CBaseEntity *pStartEntity, const char 
 	return UTIL_FindEntityByString( pStartEntity, "targetname", szName );
 }
 
+CBaseEntity *UTIL_FindEntityByTargetname( CBaseEntity *pStartEntity, const char *szName, CBaseEntity *pActivator )
+{
+	if (FStrEq(szName, "*locus"))
+	{
+		if (pActivator && (pStartEntity == NULL || pActivator->eoffset() > pStartEntity->eoffset()))
+			return pActivator;
+		else
+			return NULL;
+	}
+	else
+		return UTIL_FindEntityByTargetname( pStartEntity, szName );
+}
+
 CBaseEntity *UTIL_FindEntityGeneric( const char *szWhatever, Vector &vecSrc, float flRadius )
 {
 	CBaseEntity *pEntity = NULL;
@@ -1402,6 +1415,49 @@ void UTIL_StringToVector( float *pVector, const char *pString )
 		*/
 		for( j = j + 1;j < 3; j++ )
 			pVector[j] = 0;
+	}
+}
+
+//LRC - randomized vectors of the form "0 0 0 .. 1 0 0"
+void UTIL_StringToRandomVector( float *pVector, const char *pString )
+{
+	char *pstr, *pfront, tempString[128];
+	int	j;
+	float pAltVec[3];
+
+	strcpy( tempString, pString );
+	pstr = pfront = tempString;
+
+	for ( j = 0; j < 3; j++ )			// lifted from pr_edict.c
+	{
+		pVector[j] = atof( pfront );
+
+		while ( *pstr && *pstr != ' ' ) pstr++;
+		if (!*pstr) break;
+		pstr++;
+		pfront = pstr;
+	}
+	if (j < 2)
+	{
+		/*
+		ALERT( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
+			pkvd->szClassName, pkvd->szKeyName, pkvd->szValue );
+		*/
+		for (j = j+1;j < 3; j++)
+			pVector[j] = 0;
+	}
+	else if (*pstr == '.')
+	{
+		pstr++;
+		if (*pstr != '.') return;
+		pstr++;
+		if (*pstr != ' ') return;
+
+		UTIL_StringToVector(pAltVec, pstr);
+
+		pVector[0] = RANDOM_FLOAT( pVector[0], pAltVec[0] );
+		pVector[1] = RANDOM_FLOAT( pVector[1], pAltVec[1] );
+		pVector[2] = RANDOM_FLOAT( pVector[2], pAltVec[2] );
 	}
 }
 

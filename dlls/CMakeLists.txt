@@ -103,6 +103,7 @@ set (SVDLL_SOURCES
 	knife.cpp
 	leech.cpp
 	lights.cpp
+	locus.cpp
 	m249.cpp
 	maprules.cpp
 	massn.cpp

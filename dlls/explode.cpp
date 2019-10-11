@@ -24,6 +24,7 @@
 #include "cbase.h"
 #include "decals.h"
 #include "explode.h"
+#include "locus.h"
 
 // Spark Shower
 class CShower : public CBaseEntity
@@ -155,9 +156,20 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 	Vector vecSpot;// trace starts here!
 
-	vecSpot = pev->origin + Vector( 0, 0, 8 );
+	//LRC
+	if (FStringNull(pev->target))
+	{
+		vecSpot = pev->origin;
+	}
+	else
+	{
+		bool evaluated;
+		vecSpot = CalcLocus_Position(this, pActivator, STRING(pev->target),&evaluated);
+		if (!evaluated)
+			return;
+	}
 
-	UTIL_TraceLine( vecSpot, vecSpot + Vector( 0, 0, -40 ),  ignore_monsters, ENT( pev ), &tr );
+	UTIL_TraceLine( vecSpot + Vector( 0, 0, 8 ), vecSpot + Vector( 0, 0, -32 ),  ignore_monsters, ENT( pev ), &tr );
 
 	// Pull out of the wall a bit
 	if( tr.flFraction != 1.0 )
@@ -166,7 +178,7 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 	else
 	{
-		pev->origin = pev->origin;
+		pev->origin = vecSpot;
 	}
 
 	// draw decal

@@ -341,6 +341,10 @@
 	// delay (in seconds) between shots. If 0, all gibs shoot at once.
 	delay(string) : "Delay between shots" : "0"
 
+	m_iszPosition(string) : "At position (blank = here) [LP]"
+	m_iszVelocity(string) : "At velocity (blank = angle) [LV]"
+	m_flVelocity(string) : "Gib Speed Factor [LR]" : "200"
+
 	// how fast the gibs are fired
 	m_flVelocity(integer) : "Gib Velocity" : 200
 
@@ -349,6 +353,8 @@
 
 	// Time in seconds for gibs to live +/- 5%
 	m_flGibLife(string) : "Gib Life" : "4"
+
+	m_iszSpawnTarget(target_destination) : "Fire on spawn (locus = shot)"
 
 	spawnflags(Flags) =
 	[
@@ -837,6 +843,105 @@
 	rendercolor(color255) : "FX Color (R G B)" : "0 0 0"
 ]
 
+// calc entities
+
+@PointClass color(128 200 64) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_position : "Calculate position"
+[
+	netname(string) : "Entity to use [LE]" : "*locus"
+	impulse(choices) : "Position to calculate" : 1 =
+	[
+		0 : "Origin"
+		1 : "Eyes"
+		2 : "Top"
+		3 : "Centre"
+		4 : "Bottom"
+		5 : "Attachment point 0"
+		6 : "Attachment point 1"
+		7 : "Attachment point 2"
+		8 : "Attachment point 3"
+		9 : "Random"
+	]
+	message(string) : "Add offset [LV]" : "0 0 0"
+]
+@PointClass base(Targetname) color(170 221 85) size(-12 -12 -12, 12 12 12) = calc_ratio : "Ratio adjustment"
+[
+	target(string) : "Based on ratio [LR]" : "*locus"
+	impulse(choices) : "Transformation" : 0 =
+	[
+		0 : "None"
+		1 : "Reversed (1-X)"
+		2 : "Negative (-X)"
+		3 : "Reciprocal (1/X)"
+	]
+	netname(string) : "Offset by [LR]" : "0"
+	noise(string) : "Min (blank = none) [LR]"
+	noise1(string) : "Max (blank = none) [LR]"
+	frags(choices) : "If outside range" : 0 =
+	[
+		0 : "Pick nearest value"
+		1 : "Wrap around"
+		2 : "Bounce back"
+	]
+]
+@PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_subvelocity : "Calculate velocity based on entity properties"
+[
+	netname(string) : "Entity to use [LE]" : "*locus"
+	impulse(choices) : "Value to calculate from" : 0 =
+	[
+		0 : "Movement Velocity"
+		1 : "Angle"
+		2 : "View Angle"
+		5 : "Attachment point 0"
+		6 : "Attachment point 1"
+		7 : "Attachment point 2"
+		8 : "Attachment point 3"
+	]
+	noise(string) : "Scale factor [LR]" : "1.0"
+	message(string) : "Add offset [LV]" : "0 0 0"
+	spawnflags(flags) =
+	[
+		1 : "Normalize" : 0
+		2 : "Flip Vertical" : 0
+	]
+]
+@PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_velocity_path : "Calculate velocity for travelling"
+[
+	target(string) : "Start position [LP]" : "*locus"
+	netname(string) : "Destination"
+	armorvalue(choices) : "Destination is" : 0 =
+	[
+		0 : "Position [LP]"
+		1 : "Offset [LV]"
+	]
+	health(choices) : "Length Calculation" : 0 =
+	[
+		4 : "Square (X = X*X)"
+		0 : "None (X = X)"
+		1 : "Normalise (X = 1)"
+		2 : "Reciprocal (X = 1/X)"
+		3 : "Inverse Square (X = 1/X*X)"
+	]
+	noise(string) : "Length factor [LR]" : "1.0"
+	frags(choices) : "Line is blocked by" : 0 =
+	[
+		0 : "Nothing"
+		1 : "Walls"
+		2 : "Walls & Glass"
+		3 : "Walls & Monsters"
+		4 : "Walls, Monsters & Glass"
+	]
+]
+@PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_velocity_polar : "Calculate velocity"
+[
+	netname(string) : "Based on velocity [LV]"
+	angles(string) : "Rotated by angle (Y Z X)" : "0 0 0"
+	noise(string) : "Length factor [LR]" : "1.0"
+	message(string) : "Add offset [LV]" : "0 0 0"
+	spawnflags(flags) =
+	[
+		1 : "Normalize" : 0
+	]
+]
 
 //
 // cyclers
@@ -974,6 +1079,7 @@
 
 @PointClass base(Targetname, Angles) size(-4 -4 -4, 4 4 4) = env_beverage : "Beverage Dispenser"
 [
+	target(string) : "Initial position (blank = here) [LP]"
 	health(integer) : "Capacity" : 10
 	skin(choices) : "Beverage Type" : 0 =
 	[
@@ -989,6 +1095,8 @@
 
 @PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) color(255 0 0) = env_blood : "Blood Effects"
 [
+	target(string) : "Initial position (blank = here) [LP]"
+	netname(string) : "Direction (blank = angles) [LV]"
 	color(choices) : "Blood Color" : 0 =
 	[
 		0 : "Red (Human)"
@@ -1058,6 +1166,7 @@
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_explosion : "Explosion"
 [
+	target(string) : "Initial position (blank = here) [LP]"
 	iMagnitude(Integer) : "Magnitude" : 100
 	spawnflags(flags) =
 	[
@@ -1129,6 +1238,7 @@
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_funnel : "Large Portal Funnel"
 [
+	message(string) : "Position (blank = here) [LP]"
 	spawnflags(flags) =
 	[
 		1: "Reverse" : 0
@@ -2329,6 +2439,65 @@
 [
 	pitch(integer) : "Pitch" : 0 : "A negative number will give downward pitch (which is normally what you want)."
 	_light(color255) : "Brightness" : "255 255 128 200" : "First three integer numbers are the color (RGB). The fourth number is the brightness."
+]
+
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = locus_beam : "Locus System - Beam effect"
+[
+	m_iszStart(string) : "Start at (blank = here)" : ""
+	m_iszEnd(string) : "End at (blank = here)" : "*locus"
+	impulse(choices) : "Start & End are" : 0 =
+	[
+		0: "Entity & Entity [LE LE]"
+		1: "Entity & Position [LE LP]"
+		2: "Position & Position [LP LP]"
+		3: "Position & Direction [LP LV]"
+	]
+	m_iszSprite(sprite) : "Sprite Name" : "sprites/laserbeam.spr"
+	renderamt(integer) : "Brightness (1 - 255)" : 255
+	rendercolor(color255) : "Color (R G B)" : "255 255 255"
+	m_iWidth(integer) : "Width" : 10
+	m_iDistortion(integer) : "Distortion ('noise')" : 0
+	m_fFrame(integer) : "Start frame" : 0
+	m_iScrollRate(integer) : "Scroll rate" : 0
+	m_fDuration(string) : "Duration (0 = unlimited)" : 0
+	m_fDamage(string) : "Damage amount" : 0
+	m_iDamageType(choices) : "Damage type" : 0 =
+	[
+		0	 : "Energy Beam"
+		1	 : "Fracture"
+		2	 : "Blood Loss"
+		4	 : "Lacerations"
+		8	 : "Burning"
+		16	 : "Freezing"
+		512	 : "Internal bleeding"
+		16384	 : "Drowning"
+		65536  : "Biohazard"
+		131072 : "Poison (duration)"
+		262144 : "Radiation"
+		1048576: "Hazardous chemical"
+	]
+	m_iszTargetName(target_source) : "Name of children"
+	target(target_destination) : "Fire on spawn (locus = child)"
+	spawnflags(flags) =
+	[
+		8 : "Ring"			: 0
+		16: "StartSparks"		: 0
+		32: "EndSparks"		: 0
+		64: "Decal End"		: 0
+		128: "Fade Start"		: 0
+		256: "Fade End"		: 0
+		512: "Draw Solid"		: 0
+		1024: "Draw Sine"		: 0
+	]
+]
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = locus_variable : "Locus System - Variable for storing data"
+[
+	m_iszPosition(string) : "Position to record  [LP]" : "*locus"
+	m_iszVelocity(string) : "Velocity to record [LV]" : "*locus"
+	m_iszRatio(string) : "Ratio to record [LR]" : "*locus"
+	m_iszTargetname(string) : "Child's name (blank = no child)"
+	m_iszFireOnSpawn(string) : "Fire on spawn (locus = child)"
+	m_fDuration(string) : "Removed after time (secs)"
 ]
 
 @SolidClass base(Door, ZHLT) = momentary_door : "Momentary/Continuous door"
@@ -5998,6 +6167,42 @@
 	height(integer) : "Jump Height" : 128
 ]
 
+@PointClass base(Targetname) iconsprite("sprites/trigger.spr") = trigger_motion : "Set the position and movement of an entity"
+[
+	target(target_destination) : "Target to affect [LE]"
+	m_iszPosition(string) : "Position (blank = no change)"
+	m_iPosMode(choices) : "Meaning of Position" : 0 =
+	[
+		0 : "Set new position [LP]"
+		1 : "Add offset [LV]"
+	]
+	m_iszAngles(string) : "Angles (blank = no change)"
+	m_iAngMode(choices) : "Meaning of Angles" : 0 =
+	[
+		0 : "Set new angle [LV]"
+		1 : "Rotate by [LV]"
+		2 : "Rotate by (Y Z X)"
+	]
+	m_iszVelocity(string) : "Velocity (blank = no change)"
+	m_iVelMode(choices) : "Meaning of Velocity" : 0 =
+	[
+		0 : "Set new velocity [LV]"
+		1 : "Add to velocity [LV]"
+		2 : "Rotate velocity by [LV]"
+		3 : "Rotate velocity (Y Z X)"
+	]
+	m_iszAVelocity(string) : "AVelocity (blank = no change)"
+	m_iAVelMode(choices) : "Meaning of AVelocity" : 0 =
+	[
+		0 : "Set new avelocity (Y Z X)"
+		1 : "Add to avelocity (Y Z X)"
+	]
+	spawnflags(flags) =
+	[
+		1: "Debug" : 0
+	]
+]
+
 @SolidClass base(Trigger) = trigger_multiple : "Trigger: Activate multiple"
 [
 	wait(integer) : "Delay before reset" : 10
@@ -6031,6 +6236,8 @@
 		16: "No monsters": 0
 	]
 	speed(integer) : "Speed of push" : 40
+	m_iszPushSpeed(string) : "Push speed multiplier [LR]"
+	m_iszPushVel(string) : "Push direction (blank = angle) [LV]"
 ]
 
 @BaseClass = Random

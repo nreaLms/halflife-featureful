@@ -175,6 +175,10 @@ public:
 	CBaseEntity *m_pGoalEnt;// path corner we are heading towards
 	CBaseEntity *m_pLink;// used for temporary link-list operations. 
 
+	virtual Vector	CalcPosition( CBaseEntity *pLocus )	{ return pev->origin; }
+	virtual Vector	CalcVelocity( CBaseEntity *pLocus )	{ return pev->velocity; }
+	virtual float	CalcRatio( CBaseEntity *pLocus )	{ return 0; }
+
 	// initialization functions
 	virtual void Spawn( void ) { return; }
 	virtual void Precache( void ) { return; }

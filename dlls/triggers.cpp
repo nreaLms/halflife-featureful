@@ -30,6 +30,7 @@
 #include "skill.h"
 #include "monsters.h"
 #include "followingmonster.h"
+#include "locus.h"
 
 #define SF_TRIGGER_PUSH_ONCE		1
 #define SF_TRIGGER_PUSH_START_OFF	2//spawnflag that makes trigger_push spawn turned OFF
@@ -1870,13 +1871,39 @@ public:
 	void Spawn( void );
 	void KeyValue( KeyValueData *pkvd );
 	void Touch( CBaseEntity *pOther );
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszPushVel;
+	string_t m_iszPushSpeed;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_push, CTriggerPush )
 
+TYPEDESCRIPTION	CTriggerPush::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerPush, m_iszPushVel, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerPush, m_iszPushSpeed, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE(CTriggerPush,CBaseTrigger)
+
 void CTriggerPush::KeyValue( KeyValueData *pkvd )
 {
-	CBaseTrigger::KeyValue( pkvd );
+	if (FStrEq(pkvd->szKeyName, "m_iszPushSpeed"))
+	{
+		m_iszPushSpeed = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszPushVel"))
+	{
+		m_iszPushVel = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseTrigger::KeyValue( pkvd );
 }
 
 /*QUAKED trigger_push (.5 .5 .5) ? TRIG_PUSH_ONCE
@@ -1923,12 +1950,36 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 	if ( FBitSet( pev->spawnflags, SF_TRIGGER_PUSH_NO_MONSTERS ) && FBitSet(pOther->pev->flags, FL_MONSTER) )
 		return;
 
+	Vector vecPush;
+	if (!FStringNull(m_iszPushVel))
+	{
+		bool evaluated;
+		vecPush = CalcLocus_Velocity( this, pOther, STRING(m_iszPushVel), &evaluated);
+		if (!evaluated)
+			return;
+	}
+	else
+		vecPush = pev->movedir;
+
+	if (!FStringNull(m_iszPushSpeed))
+	{
+		bool evaluated;
+		float multiplier = CalcLocus_Ratio( pOther, STRING(m_iszPushSpeed), &evaluated );
+		if (evaluated)
+			vecPush = vecPush * multiplier;
+	}
+
+	if (pev->speed)
+		vecPush = vecPush * pev->speed;
+	else
+		vecPush = vecPush * 100;
+
 	if( pevToucher->solid != SOLID_NOT && pevToucher->solid != SOLID_BSP )
 	{
 		// Instant trigger, just transfer velocity and remove
 		if( FBitSet( pev->spawnflags, SF_TRIGGER_PUSH_ONCE ) )
 		{
-			pevToucher->velocity = pevToucher->velocity + ( pev->speed * pev->movedir );
+			pevToucher->velocity = pevToucher->velocity + vecPush;
 			if( pevToucher->velocity.z > 0 )
 				pevToucher->flags &= ~FL_ONGROUND;
 			UTIL_Remove( this );
@@ -1936,7 +1987,6 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 		else
 		{
 			// Push field, transfer to base velocity
-			Vector vecPush = pev->speed * pev->movedir;
 			if( pevToucher->flags & FL_BASEVELOCITY )
 				vecPush = vecPush + pevToucher->basevelocity;
 
@@ -3315,6 +3365,220 @@ void CTriggerSetPatrol::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 				pMonster->ChangeSchedule( patrolSchedule );
 			}
 		}
+	}
+}
+
+//===========================================================
+//LRC- trigger_motion
+//===========================================================
+#define SF_MOTION_DEBUG 1
+class CTriggerMotion : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	void	KeyValue( KeyValueData *pkvd );
+
+	int m_iszPosition;
+	int m_iPosMode;
+	int m_iszAngles;
+	int m_iAngMode;
+	int m_iszVelocity;
+	int m_iVelMode;
+	int m_iszAVelocity;
+	int m_iAVelMode;
+};
+LINK_ENTITY_TO_CLASS( trigger_motion, CTriggerMotion )
+
+TYPEDESCRIPTION	CTriggerMotion::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerMotion, m_iszPosition, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerMotion, m_iPosMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerMotion, m_iszAngles, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerMotion, m_iAngMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerMotion, m_iszVelocity, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerMotion, m_iVelMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerMotion, m_iszAVelocity, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerMotion, m_iAVelMode, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE(CTriggerMotion, CPointEntity)
+
+void CTriggerMotion::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "m_iszPosition"))
+	{
+		m_iszPosition = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iPosMode"))
+	{
+		m_iPosMode = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszAngles"))
+	{
+		m_iszAngles = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iAngMode"))
+	{
+		m_iAngMode = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszVelocity"))
+	{
+		m_iszVelocity = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iVelMode"))
+	{
+		m_iVelMode = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszAVelocity"))
+	{
+		m_iszAVelocity = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iAVelMode"))
+	{
+		m_iAVelMode = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CTriggerMotion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	CBaseEntity *pTarget = UTIL_FindEntityByTargetname( NULL, STRING(pev->target), pActivator );
+	if (pTarget == NULL || pActivator == NULL) return;
+
+	if (pev->spawnflags & SF_MOTION_DEBUG)
+		ALERT(at_console, "DEBUG: trigger_motion affects %s \"%s\":\n", STRING(pTarget->pev->classname), STRING(pTarget->pev->targetname));
+
+	if (m_iszPosition)
+	{
+		switch (m_iPosMode)
+		{
+		case 0:
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set origin from %f %f %f ", pTarget->pev->origin.x, pTarget->pev->origin.y, pTarget->pev->origin.z);
+			pTarget->pev->origin = CalcLocus_Position( this, pActivator, STRING(m_iszPosition) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->origin.x, pTarget->pev->origin.y, pTarget->pev->origin.z);
+			pTarget->pev->flags &= ~FL_ONGROUND;
+			break;
+		case 1:
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set origin from %f %f %f ", pTarget->pev->origin.x, pTarget->pev->origin.y, pTarget->pev->origin.z);
+			pTarget->pev->origin = pTarget->pev->origin + CalcLocus_Velocity( this, pActivator, STRING(m_iszPosition) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->origin.x, pTarget->pev->origin.y, pTarget->pev->origin.z);
+			pTarget->pev->flags &= ~FL_ONGROUND;
+			break;
+		}
+	}
+
+	Vector vecTemp;
+	Vector vecVelAngles;
+	if (m_iszAngles)
+	{
+		switch (m_iAngMode)
+		{
+		case 0:
+			vecTemp = CalcLocus_Velocity( this, pActivator, STRING(m_iszAngles) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set angles from %f %f %f ", pTarget->pev->angles.x, pTarget->pev->angles.y, pTarget->pev->angles.z);
+			pTarget->pev->angles = UTIL_VecToAngles( vecTemp );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->angles.x, pTarget->pev->angles.y, pTarget->pev->angles.z);
+			break;
+		case 1:
+			vecTemp = CalcLocus_Velocity( this, pActivator, STRING(m_iszVelocity) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Rotate angles from %f %f %f ", pTarget->pev->angles.x, pTarget->pev->angles.y, pTarget->pev->angles.z);
+			pTarget->pev->angles = pTarget->pev->angles + UTIL_VecToAngles( vecTemp );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->angles.x, pTarget->pev->angles.y, pTarget->pev->angles.z);
+			break;
+		case 2:
+			UTIL_StringToRandomVector( vecTemp, STRING(m_iszAngles) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Rotate angles from %f %f %f ", pTarget->pev->angles.x, pTarget->pev->angles.y, pTarget->pev->angles.z);
+			pTarget->pev->angles = pTarget->pev->angles + vecTemp;
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->angles.x, pTarget->pev->angles.y, pTarget->pev->angles.z);
+			break;
+		}
+	}
+
+	if (m_iszVelocity)
+	{
+		switch (m_iVelMode)
+		{
+		case 0:
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set velocity from %f %f %f ", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			pTarget->pev->velocity = CalcLocus_Velocity( this, pActivator, STRING(m_iszVelocity) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			break;
+		case 1:
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set velocity from %f %f %f ", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			pTarget->pev->velocity = pTarget->pev->velocity + CalcLocus_Velocity( this, pActivator, STRING(m_iszVelocity) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			break;
+		case 2:
+			vecTemp = CalcLocus_Velocity( this, pActivator, STRING(m_iszVelocity) );
+			vecVelAngles = UTIL_VecToAngles( vecTemp ) + UTIL_VecToAngles( pTarget->pev->velocity );
+			UTIL_MakeVectors( vecVelAngles );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Rotate velocity from %f %f %f ", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			pTarget->pev->velocity = pTarget->pev->velocity.Length() * gpGlobals->v_forward;
+			pTarget->pev->velocity.z = -pTarget->pev->velocity.z; //vecToAngles reverses the z angle
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			break;
+		case 3:
+			UTIL_StringToRandomVector( vecTemp, STRING(m_iszVelocity) );
+			vecVelAngles = vecTemp + UTIL_VecToAngles( pTarget->pev->velocity );
+			UTIL_MakeVectors( vecVelAngles );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Rotate velocity from %f %f %f ", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			pTarget->pev->velocity = pTarget->pev->velocity.Length() * gpGlobals->v_forward;
+			pTarget->pev->velocity.z = -pTarget->pev->velocity.z; //vecToAngles reverses the z angle
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", pTarget->pev->velocity.x, pTarget->pev->velocity.y, pTarget->pev->velocity.z);
+			break;
+		}
+	}
+
+	switch (m_iAVelMode)
+	{
+	case 0:
+		UTIL_StringToRandomVector( vecTemp, STRING(m_iszAVelocity) );
+		if (pev->spawnflags & SF_MOTION_DEBUG)
+			ALERT(at_console, "DEBUG: Set avelocity from %f %f %f ", pTarget->pev->avelocity.x, pTarget->pev->avelocity.y, pTarget->pev->avelocity.z);
+		pTarget->pev->avelocity = vecTemp;
+		if (pev->spawnflags & SF_MOTION_DEBUG)
+			ALERT(at_console, "to %f %f %f\n", pTarget->pev->avelocity.x, pTarget->pev->avelocity.y, pTarget->pev->avelocity.z);
+		break;
+	case 1:
+		UTIL_StringToRandomVector( vecTemp, STRING(m_iszAVelocity) );
+		if (pev->spawnflags & SF_MOTION_DEBUG)
+			ALERT(at_console, "DEBUG: Set avelocity from %f %f %f ", pTarget->pev->avelocity.x, pTarget->pev->avelocity.y, pTarget->pev->avelocity.z);
+		pTarget->pev->avelocity = pTarget->pev->avelocity + vecTemp;
+		if (pev->spawnflags & SF_MOTION_DEBUG)
+			ALERT(at_console, "to %f %f %f\n", pTarget->pev->avelocity.x, pTarget->pev->avelocity.y, pTarget->pev->avelocity.z);
+		break;
 	}
 }
 
