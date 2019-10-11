@@ -1239,9 +1239,11 @@
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_funnel : "Large Portal Funnel"
 [
 	message(string) : "Position (blank = here) [LP]"
+	netname(sprite) : "Particle sprite"
 	spawnflags(flags) =
 	[
 		1: "Reverse" : 0
+		2: "Repeatable" : 0
 	]
 ]
 
