@@ -350,7 +350,7 @@ public:
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
 
-	float m_flNextZapTime; // last time the voltigore used the spit attack.
+	float m_flNextZapTime; // next time the voltigore can use the spit attack.
 	BOOL m_fShouldUpdateBeam;
 	CBeam* m_pBeam[3];
 	CSprite* m_pBeamGlow;
@@ -380,8 +380,6 @@ protected:
 	void GibBeamDamage();
 	void PrecacheImpl(const char* modelName);
 	int m_beamTexture;
-
-	bool m_chaseFailed;
 };
 
 LINK_ENTITY_TO_CLASS(monster_alien_voltigore, CVoltigore)
@@ -636,14 +634,12 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case VOLTIGORE_AE_THROW:
 	{
 		// SOUND HERE!
-		Vector	vecSpitDir;
+		Vector	vecShootDir;
 
 		UTIL_MakeVectors(pev->angles);
 
-		// !!!HACKHACK - the spot at which the spit originates (in front of the mouth) was measured in 3ds and hardcoded here.
-		// we should be able to read the position of bones at runtime for this info.
-		Vector vecSpitOrigin, vecAngles;
-		GetAttachment(3, vecSpitOrigin, vecAngles);
+		Vector vecBoltOrigin, vecAngles;
+		GetAttachment(3, vecBoltOrigin, vecAngles);
 
 		Vector vecEnemyPosition;
 		if (m_hEnemy != 0)
@@ -659,12 +655,12 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		}
 		else
 			vecEnemyPosition = m_vecEnemyLKP;
-		vecSpitDir = (vecEnemyPosition - vecSpitOrigin).Normalize();
+		vecShootDir = (vecEnemyPosition - vecBoltOrigin).Normalize();
 
 		// do stuff for this event.
 		//AttackSound();
 
-		CVoltigoreEnergyBall::Shoot(pev, vecSpitOrigin, vecSpitDir * 1000);
+		CVoltigoreEnergyBall::Shoot(pev, vecBoltOrigin, vecShootDir * 1000);
 
 		// turn the beam glow off.
 		DestroyBeams();
@@ -946,6 +942,10 @@ Schedule_t *CVoltigore::GetSchedule(void)
 			return GetScheduleOfType(SCHED_WAKE_ANGRY);
 		}
 
+		if( HasConditions( bits_COND_ENEMY_OCCLUDED ) )
+		{
+			return GetScheduleOfType(SCHED_CHASE_ENEMY);
+		}
 
 		if (HasConditions(bits_COND_CAN_RANGE_ATTACK1))
 		{
@@ -983,19 +983,6 @@ Schedule_t* CVoltigore::GetScheduleOfType(int Type)
 		break;
 	case SCHED_VICTORY_DANCE:
 		return &slVoltigoreVictoryDance[0];
-		break;
-	case SCHED_CHASE_ENEMY_FAILED:
-		// After couldn't chase enemy, try to shoot beams first, and then cover
-		if (m_chaseFailed)
-		{
-			m_chaseFailed = false;
-			return CSquadMonster::GetScheduleOfType(Type);
-		}
-		else
-		{
-			m_chaseFailed = true;
-			return &slVoltigoreRangeAttack1[0];
-		}
 		break;
 	}
 
