@@ -785,11 +785,6 @@ Vector CHGrunt::GetGunPosition()
 //=========================================================
 void CHGrunt::Shoot( void )
 {
-	if( m_hEnemy == 0 )
-	{
-		return;
-	}
-
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
@@ -812,11 +807,6 @@ void CHGrunt::Shoot( void )
 //=========================================================
 void CHGrunt::Shotgun( void )
 {
-	if( m_hEnemy == 0 )
-	{
-		return;
-	}
-
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
@@ -906,7 +896,6 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			else
 			{
 				Shotgun();
-
 				EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "weapons/sbarrel1.wav", 1, ATTN_NORM );
 			}
 

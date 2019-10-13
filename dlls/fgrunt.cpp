@@ -1562,11 +1562,6 @@ Vector CHFGrunt :: GetGunPosition( )
 //=========================================================
 void CHFGrunt :: Shoot ( void )
 {
-	if (m_hEnemy == 0 )
-	{
-		return;
-	}
-
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
@@ -1591,11 +1586,6 @@ void CHFGrunt :: Shoot ( void )
 //=========================================================
 void CHFGrunt :: Shotgun ( void )
 {
-	if (m_hEnemy == 0)
-	{
-		return;
-	}
-
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
@@ -1619,11 +1609,6 @@ void CHFGrunt :: Shotgun ( void )
 //=========================================================
 void CHFGrunt :: M249 ( void )
 {
-	if (m_hEnemy == 0 )
-	{
-		return;
-	}
-
 	switch ( RANDOM_LONG(0,2) )
 	{
 		case 0: EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/saw_fire1.wav", 1, ATTN_NORM ); break;

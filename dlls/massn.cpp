@@ -75,6 +75,7 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
+	void MonsterInit();
 
 	void DeathSound(void);
 	void PainSound(void);
@@ -123,11 +124,6 @@ void CMassn::IdleSound(void)
 //=========================================================
 void CMassn::Sniperrifle(void)
 {
-	if (m_hEnemy == 0)
-	{
-		return;
-	}
-
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy(vecShootOrigin);
 
@@ -213,14 +209,33 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 		{
 			Shoot();
 			PlayFirstBurstSounds();
+			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
 		}
 		else if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
 		{
 			Sniperrifle();
-			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sniper_fire.wav", 1, ATTN_NORM);
+			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sniper_fire.wav", 1, 0.6);
+			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 512, 0.3);
+
+			Vector vecGunPos;
+			Vector vecGunAngles;
+			GetAttachment( 0, vecGunPos, vecGunAngles );
+
+			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY );
+				WRITE_BYTE( TE_ELIGHT );
+				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
+				WRITE_COORD( vecGunPos.x );		// origin
+				WRITE_COORD( vecGunPos.y );
+				WRITE_COORD( vecGunPos.z );
+				WRITE_COORD( 24 );	// radius
+				WRITE_BYTE( 255 );	// R
+				WRITE_BYTE( 255 );	// G
+				WRITE_BYTE( 192 );	// B
+				WRITE_BYTE( 3 );	// life * 10
+				WRITE_COORD( 0 ); // decay
+			MESSAGE_END();
 		}
 
-		CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
 	}
 	break;
 
@@ -282,6 +297,15 @@ void CMassn::Spawn()
 	SetBodygroup(MASSN_HEAD_GROUP, m_iHead);
 
 	FollowingMonsterInit();
+}
+
+void CMassn::MonsterInit()
+{
+	CHGrunt::MonsterInit();
+	if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
+	{
+		m_flDistTooFar = m_flDistTooFar * 1.5;
+	}
 }
 
 //=========================================================
