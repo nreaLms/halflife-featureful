@@ -3582,6 +3582,303 @@ void CTriggerMotion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	}
 }
 
+//===========================================================
+//LRC- motion_manager
+//===========================================================
+class CMotionThread : public CPointEntity
+{
+public:
+	void Spawn();
+	void EXPORT MotionThink( void );
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszPosition;
+	int m_iPosMode;
+	string_t m_iszFacing;
+	int m_iFaceMode;
+	EHANDLE m_hLocus;
+	EHANDLE m_hTarget;
+};
+LINK_ENTITY_TO_CLASS( motion_thread, CMotionThread )
+
+TYPEDESCRIPTION	CMotionThread::m_SaveData[] =
+{
+	DEFINE_FIELD( CMotionThread, m_iszPosition, FIELD_STRING ),
+	DEFINE_FIELD( CMotionThread, m_iPosMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CMotionThread, m_iszFacing, FIELD_STRING ),
+	DEFINE_FIELD( CMotionThread, m_iFaceMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CMotionThread, m_hLocus, FIELD_EHANDLE ),
+	DEFINE_FIELD( CMotionThread, m_hTarget, FIELD_EHANDLE ),
+};
+
+IMPLEMENT_SAVERESTORE(CMotionThread, CPointEntity)
+
+void CMotionThread::Spawn()
+{
+	SetThink( &CMotionThread::MotionThink );
+	pev->classname = MAKE_STRING("motion_thread");
+}
+
+void CMotionThread::MotionThink( void )
+{
+	if( m_hLocus == 0 || m_hTarget == 0 )
+	{
+		if (pev->spawnflags & SF_MOTION_DEBUG)
+			ALERT(at_console, "motion_thread expires\n");
+		SetThink(&CMotionThread:: SUB_Remove );
+		pev->nextthink = gpGlobals->time + 0.1;
+		return;
+	}
+	else
+	{
+		pev->nextthink = gpGlobals->time; // think every frame
+	}
+
+	if (pev->spawnflags & SF_MOTION_DEBUG)
+		ALERT(at_console, "motion_thread affects %s \"%s\":\n", STRING(m_hTarget->pev->classname), STRING(m_hTarget->pev->targetname));
+
+	Vector vecTemp;
+
+	if (m_iszPosition)
+	{
+		switch (m_iPosMode)
+		{
+		case 0: // set position
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set origin from %f %f %f ", m_hTarget->pev->origin.x, m_hTarget->pev->origin.y, m_hTarget->pev->origin.z);
+			UTIL_AssignOrigin(m_hTarget, CalcLocus_Position( this, m_hLocus, STRING(m_iszPosition) ));
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->origin.x, m_hTarget->pev->origin.y, m_hTarget->pev->origin.z);
+			m_hTarget->pev->flags &= ~FL_ONGROUND;
+			break;
+		case 1: // offset position (= fake velocity)
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Offset origin from %f %f %f ", m_hTarget->pev->origin.x, m_hTarget->pev->origin.y, m_hTarget->pev->origin.z);
+			UTIL_AssignOrigin(m_hTarget, m_hTarget->pev->origin + gpGlobals->frametime * CalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition) ));
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->origin.x, m_hTarget->pev->origin.y, m_hTarget->pev->origin.z);
+			m_hTarget->pev->flags &= ~FL_ONGROUND;
+			break;
+		case 2: // set velocity
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set velocity from %f %f %f ", m_hTarget->pev->velocity.x, m_hTarget->pev->velocity.y, m_hTarget->pev->velocity.z);
+			UTIL_SetVelocity(m_hTarget, CalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition) ));
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->velocity.x, m_hTarget->pev->velocity.y, m_hTarget->pev->velocity.z);
+			break;
+		case 3: // accelerate
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Accelerate from %f %f %f ", m_hTarget->pev->velocity.x, m_hTarget->pev->velocity.y, m_hTarget->pev->velocity.z);
+			UTIL_SetVelocity(m_hTarget, m_hTarget->pev->velocity + gpGlobals->frametime * CalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition) ));
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->velocity.x, m_hTarget->pev->velocity.y, m_hTarget->pev->velocity.z);
+			break;
+		case 4: // follow position
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set velocity (path) from %f %f %f ", m_hTarget->pev->velocity.x, m_hTarget->pev->velocity.y, m_hTarget->pev->velocity.z);
+			UTIL_SetVelocity(m_hTarget, CalcLocus_Position( this, m_hLocus, STRING(m_iszPosition) ) - m_hTarget->pev->origin);
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->velocity.x, m_hTarget->pev->velocity.y, m_hTarget->pev->velocity.z);
+			break;
+		}
+	}
+
+	Vector vecVelAngles;
+
+	if (m_iszFacing)
+	{
+		switch (m_iFaceMode)
+		{
+		case 0: // set angles
+			vecTemp = CalcLocus_Velocity( this, m_hLocus, STRING(m_iszFacing) );
+			if (vecTemp != g_vecZero) // if the vector is 0 0 0, don't use it
+			{
+				if (pev->spawnflags & SF_MOTION_DEBUG)
+					ALERT(at_console, "DEBUG: Set angles from %f %f %f ", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+				UTIL_SetAngles(m_hTarget, UTIL_VecToAngles( vecTemp ));
+				if (pev->spawnflags & SF_MOTION_DEBUG)
+					ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+			}
+			else if (pev->spawnflags & SF_MOTION_DEBUG)
+			{
+				ALERT(at_console, "Zero velocity, don't change angles\n");
+			}
+			break;
+		case 1: // offset angles (= fake avelocity)
+			vecTemp = CalcLocus_Velocity( this, m_hLocus, STRING(m_iszFacing) );
+			if (vecTemp != g_vecZero) // if the vector is 0 0 0, don't use it
+			{
+				if (pev->spawnflags & SF_MOTION_DEBUG)
+					ALERT(at_console, "DEBUG: Offset angles from %f %f %f ", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+				UTIL_SetAngles(m_hTarget, m_hTarget->pev->angles + gpGlobals->frametime * UTIL_VecToAngles( vecTemp ));
+				if (pev->spawnflags & SF_MOTION_DEBUG)
+					ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+			}
+			else if (pev->spawnflags & SF_MOTION_DEBUG)
+			{
+				ALERT(at_console, "Zero velocity, don't change angles\n");
+			}
+			break;
+		case 2: // offset angles (= fake avelocity)
+			UTIL_StringToRandomVector( vecVelAngles, STRING(m_iszFacing) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Rotate angles from %f %f %f ", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+			UTIL_SetAngles(m_hTarget, m_hTarget->pev->angles + gpGlobals->frametime * vecVelAngles);
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+			break;
+		case 3: // set avelocity
+			UTIL_StringToRandomVector( vecTemp, STRING(m_iszFacing) );
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "DEBUG: Set avelocity from %f %f %f ", m_hTarget->pev->avelocity.x, m_hTarget->pev->avelocity.y, m_hTarget->pev->avelocity.z);
+			UTIL_SetAvelocity(m_hTarget, vecTemp);
+			if (pev->spawnflags & SF_MOTION_DEBUG)
+				ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->avelocity.x, m_hTarget->pev->avelocity.y, m_hTarget->pev->avelocity.z);
+			break;
+		}
+	}
+}
+
+
+class CMotionManager : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void KeyValue( KeyValueData *pkvd );
+	void Affect(CBaseEntity *pTarget, CBaseEntity *pActivator );
+	void Activate( void ); // TODO: change to PostSpawn
+	void UpdateOnRemove();
+	void RemoveThreads();
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszPosition;
+	int m_iPosMode;
+	string_t m_iszFacing;
+	int m_iFaceMode;
+	BOOL m_activated;
+};
+LINK_ENTITY_TO_CLASS( motion_manager, CMotionManager )
+
+TYPEDESCRIPTION	CMotionManager::m_SaveData[] =
+{
+	DEFINE_FIELD( CMotionManager, m_iszPosition, FIELD_STRING ),
+	DEFINE_FIELD( CMotionManager, m_iPosMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CMotionManager, m_iszFacing, FIELD_STRING ),
+	DEFINE_FIELD( CMotionManager, m_iFaceMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CMotionManager, m_activated, FIELD_BOOLEAN ),
+};
+
+IMPLEMENT_SAVERESTORE(CMotionManager,CPointEntity)
+
+void CMotionManager::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "m_iszPosition"))
+	{
+		m_iszPosition = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iPosMode"))
+	{
+		m_iPosMode = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszFacing"))
+	{
+		m_iszFacing = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iFaceMode"))
+	{
+		m_iFaceMode = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CMotionManager::Activate( void )
+{
+	if (m_activated)
+		return;
+	if (FStringNull(pev->targetname))
+		Use( this, this, USE_ON, 0 );
+	m_activated = TRUE;
+}
+
+void CMotionManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	CBaseEntity *pTarget = NULL;
+	if (useType == USE_OFF || useType == USE_TOGGLE)
+	{
+		RemoveThreads();
+	}
+	if (useType == USE_ON || useType == USE_TOGGLE)
+	{
+		if (pev->target)
+		{
+			pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target), pActivator);
+			if (pTarget == NULL)
+				ALERT(at_error, "motion_manager \"%s\" can't find entity \"%s\" to affect\n", STRING(pev->targetname), STRING(pev->target));
+			else
+			{
+				do
+				{
+					Affect( pTarget, pActivator );
+					pTarget = UTIL_FindEntityByTargetname(pTarget, STRING(pev->target), pActivator);
+				} while ( pTarget );
+			}
+		}
+	}
+}
+
+void CMotionManager::Affect( CBaseEntity *pTarget, CBaseEntity *pActivator )
+{
+	if (pev->spawnflags & SF_MOTION_DEBUG)
+		ALERT(at_console, "DEBUG: Creating MotionThread for %s \"%s\"\n", STRING(pTarget->pev->classname), STRING(pTarget->pev->targetname));
+
+	CMotionThread *pThread = GetClassPtr( (CMotionThread*)NULL );
+	if (pThread == NULL) return; //error?
+	pThread->Spawn();
+	pThread->pev->targetname = pev->targetname;
+	pThread->m_hLocus = pActivator;
+	pThread->m_hTarget = pTarget;
+	pThread->m_iszPosition = m_iszPosition;
+	pThread->m_iPosMode = m_iPosMode;
+	pThread->m_iszFacing = m_iszFacing;
+	pThread->m_iFaceMode = m_iFaceMode;
+	pThread->pev->spawnflags = pev->spawnflags;
+	pThread->pev->nextthink = gpGlobals->time;
+}
+
+void CMotionManager::UpdateOnRemove()
+{
+	RemoveThreads();
+	CPointEntity::UpdateOnRemove();
+}
+
+void CMotionManager::RemoveThreads()
+{
+	CBaseEntity* pEntity = NULL;
+	if (!FStringNull(pev->targetname))
+	{
+		while ((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->targetname))) != NULL)
+		{
+			if (FClassnameIs(pEntity->pev, "motion_thread"))
+			{
+				CMotionThread* motionThread = (CMotionThread*)pEntity;
+				motionThread->m_hTarget = 0;
+				motionThread->m_hLocus = 0;
+			}
+		}
+	}
+}
+
 //=====================================================
 // trigger_command: activate a console command
 //=====================================================

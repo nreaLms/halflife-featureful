@@ -2676,3 +2676,184 @@ char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int b
 	// No data read, bail
 	return NULL;
 }
+
+
+// LRC- change the origin to the given position, and bring any movewiths along too.
+void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin )
+{
+	UTIL_AssignOrigin( pEntity, vecOrigin, TRUE);
+}
+
+// LRC- bInitiator is true if this is being called directly, rather than because pEntity is moving with something else.
+void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin, BOOL bInitiator)
+{
+//	ALERT(at_console, "AssignOrigin before %f, after %f\n", pEntity->pev->origin.x, vecOrigin.x);
+#if 0
+	Vector vecDiff = vecOrigin - pEntity->pev->origin;
+	if (vecDiff.Length() > 0.01 && CVAR_GET_FLOAT("sohl_mwdebug"))
+		ALERT(at_console,"AssignOrigin %s %s: (%f %f %f) goes to (%f %f %f)\n",STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname), pEntity->pev->origin.x, pEntity->pev->origin.y, pEntity->pev->origin.z, vecOrigin.x, vecOrigin.y, vecOrigin.z);
+#endif
+
+//	UTIL_SetDesiredPos(pEntity, vecOrigin);
+//	pEntity->pev->origin = vecOrigin;
+	UTIL_SetOrigin(pEntity->pev, vecOrigin);
+
+//	if (pEntity->m_vecDesiredVel != g_vecZero)
+//	{
+//		pEntity->pev->velocity = pEntity->m_vecDesiredVel;
+//	}
+#if 0
+	if (bInitiator && pEntity->m_pMoveWith)
+	{
+//		UTIL_DesiredMWOffset( pEntity );
+//		if (pEntity->m_vecMoveWithOffset != (pEntity->pev->origin - pEntity->m_pMoveWith->pev->origin))
+//			ALERT(at_console, "Changing MWOffset for %s \"%s\"\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname));
+		pEntity->m_vecMoveWithOffset = pEntity->pev->origin - pEntity->m_pMoveWith->pev->origin;
+//		ALERT(at_console,"set m_vecMoveWithOffset = %f %f %f\n",pEntity->m_vecMoveWithOffset.x,pEntity->m_vecMoveWithOffset.y,pEntity->m_vecMoveWithOffset.z);
+	}
+	if (pEntity->m_pChildMoveWith) // now I've moved pEntity, does anything else have to move with it?
+	{
+		CBaseEntity* pChild = pEntity->m_pChildMoveWith;
+//		if (vecDiff != g_vecZero)
+//		{
+			Vector vecTemp;
+			while (pChild)
+			{
+				//ALERT(at_console,"  pre: parent origin is (%f %f %f), child origin is (%f %f %f)\n",
+				//	pEntity->pev->origin.x,pEntity->pev->origin.y,pEntity->pev->origin.z,
+				//	pChild->pev->origin.x,pChild->pev->origin.y,pChild->pev->origin.z
+				//);
+				if (pChild->pev->movetype != MOVETYPE_PUSH || pChild->pev->velocity == pEntity->pev->velocity) // if the child isn't moving under its own power
+				{
+					UTIL_AssignOrigin( pChild, vecOrigin + pChild->m_vecMoveWithOffset, FALSE );
+//					ALERT(at_console,"used m_vecMoveWithOffset based on %f %f %f to set %f %f %f\n",pEntity->pev->origin.x,pEntity->pev->origin.y,pEntity->pev->origin.z,pChild->pev->origin.x,pChild->pev->origin.y,pChild->pev->origin.z);
+				}
+				else
+				{
+					vecTemp = vecDiff + pChild->pev->origin;
+					UTIL_AssignOrigin( pChild, vecTemp, FALSE );
+				}
+				//ALERT(at_console,"  child origin becomes (%f %f %f)\n",pChild->pev->origin.x,pChild->pev->origin.y,pChild->pev->origin.z);
+				//ALERT(at_console,"ent %p has sibling %p\n",pChild,pChild->m_pSiblingMoveWith);
+				pChild = pChild->m_pSiblingMoveWith;
+			}
+//		}
+	}
+#endif
+}
+
+void UTIL_SetAngles( CBaseEntity *pEntity, const Vector vecAngles )
+{
+	UTIL_SetAngles( pEntity, vecAngles, TRUE );
+}
+
+void UTIL_SetAngles( CBaseEntity *pEntity, const Vector vecAngles, BOOL bInitiator)
+{
+	Vector vecDiff = vecAngles - pEntity->pev->angles;
+#if 0
+	if (vecDiff.Length() > 0.01 && CVAR_GET_FLOAT("sohl_mwdebug"))
+		ALERT(at_console,"SetAngles %s %s: (%f %f %f) goes to (%f %f %f)\n",STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname), pEntity->pev->angles.x, pEntity->pev->angles.y, pEntity->pev->angles.z, vecAngles.x, vecAngles.y, vecAngles.z);
+#endif
+
+//	UTIL_SetDesiredAngles(pEntity, vecAngles);
+	pEntity->pev->angles = vecAngles;
+#if 0
+	if (bInitiator && pEntity->m_pMoveWith)
+	{
+		pEntity->m_vecRotWithOffset = vecAngles - pEntity->m_pMoveWith->pev->angles;
+	}
+	if (pEntity->m_pChildMoveWith) // now I've moved pEntity, does anything else have to move with it?
+	{
+		CBaseEntity* pChild = pEntity->m_pChildMoveWith;
+		Vector vecTemp;
+		while (pChild)
+		{
+			if (pChild->pev->avelocity == pEntity->pev->avelocity) // if the child isn't turning under its own power
+			{
+				UTIL_SetAngles( pChild, vecAngles + pChild->m_vecRotWithOffset, FALSE );
+			}
+			else
+			{
+				vecTemp = vecDiff + pChild->pev->angles;
+				UTIL_SetAngles( pChild, vecTemp, FALSE );
+			}
+			//ALERT(at_console,"  child origin becomes (%f %f %f)\n",pChild->pev->origin.x,pChild->pev->origin.y,pChild->pev->origin.z);
+			//ALERT(at_console,"ent %p has sibling %p\n",pChild,pChild->m_pSiblingMoveWith);
+			pChild = pChild->m_pSiblingMoveWith;
+		}
+	}
+#endif
+}
+
+//LRC- an arbitrary limit. If this number is exceeded we assume there's an infinite loop, and abort.
+#define MAX_MOVEWITH_DEPTH 100
+
+//LRC
+void UTIL_SetVelocity ( CBaseEntity *pEnt, const Vector vecSet )
+{
+	Vector vecNew;
+#if 0
+	if (pEnt->m_pMoveWith)
+		vecNew = vecSet + pEnt->m_pMoveWith->pev->velocity;
+	else
+#endif
+		vecNew = vecSet;
+
+//	ALERT(at_console,"SetV: %s is sent (%f,%f,%f) - goes from (%f,%f,%f) to (%f,%f,%f)\n",
+//	    STRING(pEnt->pev->targetname), vecSet.x, vecSet.y, vecSet.z,
+//		pEnt->pev->velocity.x, pEnt->pev->velocity.y, pEnt->pev->velocity.z,
+//		vecNew.x, vecNew.y, vecNew.z
+//	);
+#if 0
+	if ( pEnt->m_pChildMoveWith )
+	{
+		CBaseEntity *pMoving = pEnt->m_pChildMoveWith;
+		int sloopbreaker = MAX_MOVEWITH_DEPTH; // LRC - to save us from infinite loops
+		while (pMoving)
+		{
+			UTIL_SetMoveWithVelocity(pMoving, vecNew, MAX_MOVEWITH_DEPTH );
+			pMoving = pMoving->m_pSiblingMoveWith;
+			sloopbreaker--;
+			if (sloopbreaker <= 0)
+			{
+				ALERT(at_error, "SetVelocity: Infinite sibling list for MoveWith!\n");
+				break;
+			}
+		}
+	}
+#endif
+	pEnt->pev->velocity = vecNew;
+}
+
+void UTIL_SetAvelocity ( CBaseEntity *pEnt, const Vector vecSet )
+{
+	Vector vecNew;
+#if 0
+	if (pEnt->m_pMoveWith)
+		vecNew = vecSet + pEnt->m_pMoveWith->pev->avelocity;
+	else
+#endif
+		vecNew = vecSet;
+
+//	ALERT(at_console, "Setting AVelocity %f %f %f\n", vecNew.x, vecNew.y, vecNew.z);
+#if 0
+	if ( pEnt->m_pChildMoveWith )
+	{
+		CBaseEntity *pMoving = pEnt->m_pChildMoveWith;
+		int sloopbreaker = MAX_MOVEWITH_DEPTH; // LRC - to save us from infinite loops
+		while (pMoving)
+		{
+			UTIL_SetMoveWithAvelocity(pMoving, vecNew, MAX_MOVEWITH_DEPTH );
+			pMoving = pMoving->m_pSiblingMoveWith;
+			sloopbreaker--;
+			if (sloopbreaker <= 0)
+			{
+				ALERT(at_error, "SetAvelocity: Infinite sibling list for MoveWith!\n");
+				break;
+			}
+		}
+	}
+#endif
+	//UTIL_SetDesiredAvelocity(pEnt, vecNew);
+	pEnt->pev->avelocity = vecNew;
+}

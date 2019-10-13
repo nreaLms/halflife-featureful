@@ -592,4 +592,12 @@ void UTIL_MuzzleLight( Vector vecSrc, float flRadius, byte r, byte g, byte b, fl
 
 char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize );
 
+//TODO: move this to movewith.h later
+extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin );
+extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin, BOOL bInitiator );
+extern void			UTIL_SetVelocity		( CBaseEntity *pEnt,	const Vector vecSet );
+extern void			UTIL_SetAngles			( CBaseEntity* pEntity, const Vector vecAngles );
+extern void			UTIL_SetAngles			( CBaseEntity* pEntity, const Vector vecAngles, BOOL bInitiator );
+extern void			UTIL_SetAvelocity		( CBaseEntity *pEnt, const Vector vecSet );
+
 #endif // UTIL_H

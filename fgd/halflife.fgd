@@ -5738,6 +5738,32 @@
 @PointClass base(MonsterMaker,MonsterSoundMask) = monstermaker : "Monster Maker" []
 @PointClass base(MonsterMaker,MonsterSoundMask) = squadmaker : "Squad Maker" []
 
+@PointClass base(Targetname) = motion_manager : "Control the movement and direction of an entity"
+[
+	target(target_destination) : "Target to affect [LE]" : "*locus"
+	m_iszPosition(string) : "Position (blank = no change)"
+	m_iPosMode(choices) : "Meaning of Position" : 0 =
+	[
+		0 : "Set position [LP]"
+		1 : "Offset position [LV]"
+		2 : "Set velocity [LV]"
+		3 : "Accelerate by [LV]"
+		4 : "Follow position [LV]"
+	]
+	m_iszFacing(string) : "Facing (blank = no change)"
+	m_iFaceMode(choices) : "Meaning of Facing" : 0 =
+	[
+		0 : "Face direction [LV]"
+		1 : "Rotate by [LV]"
+		2 : "Rotate by (Y Z X)"
+		3 : "Set avelocity (Y Z X)"
+	]
+	spawnflags(flags) =
+	[
+		1: "Debug" : 0
+	]
+]
+
 @PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager"
 [
 	spawnflags(Flags) =
