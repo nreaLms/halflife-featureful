@@ -1477,6 +1477,15 @@
 	framerate(string) : "Framerate" : "10.0"
 	model(sprite) : "Sprite Name" : "sprites/glow01.spr"
 	scale(string) : "Scale"
+	message(target_destination) : "Attached to entity..."
+	frags(choices) : "...at attachment point" =
+	[
+		0 : "0 (origin)"
+		1 : "1"
+		2 : "2"
+		3 : "3"
+		4 : "4"
+	]
 	spawnflags(flags) =
 	[
 		1: "Start on" : 0

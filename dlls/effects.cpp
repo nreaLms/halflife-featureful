@@ -1177,6 +1177,16 @@ void CSprite::Precache( void )
 	}
 }
 
+void CSprite::Activate()
+{
+	if (pev->message)
+	{
+		CBaseEntity *pTemp = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
+		if (pTemp)
+			SetAttachment(pTemp->edict(), (int)pev->frags);
+	}
+}
+
 void CSprite::SpriteInit( const char *pSpriteName, const Vector &origin )
 {
 	pev->model = MAKE_STRING( pSpriteName );

@@ -36,6 +36,7 @@ class CSprite : public CPointEntity
 public:
 	void Spawn( void );
 	void Precache( void );
+	void Activate();
 
 	int ObjectCaps( void )
 	{ 
