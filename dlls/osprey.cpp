@@ -24,6 +24,8 @@
 #include "customentity.h"
 #include "mod_features.h"
 
+#define SF_OSPREY_DONT_DEPLOY (1 << 15)
+
 typedef struct 
 {
 	int isValid;
@@ -247,23 +249,27 @@ void COsprey::FindAllThink( void )
 {
 	CBaseEntity *pEntity = NULL;
 
-	m_iUnits = 0;
-	while( m_iUnits < MAX_CARRY && ( pEntity = UTIL_FindEntityByClassname( pEntity, TrooperName() ) ) != NULL )
+	if (!FBitSet(pev->spawnflags, SF_OSPREY_DONT_DEPLOY))
 	{
-		if( pEntity->IsAlive() && IRelationship(pEntity) < R_DL )
+		m_iUnits = 0;
+		while( m_iUnits < MAX_CARRY && ( pEntity = UTIL_FindEntityByClassname( pEntity, TrooperName() ) ) != NULL )
 		{
-			m_hGrunt[m_iUnits] = pEntity;
-			m_vecOrigin[m_iUnits] = pEntity->pev->origin;
-			m_iUnits++;
+			if( pEntity->IsAlive() && IRelationship(pEntity) < R_DL )
+			{
+				m_hGrunt[m_iUnits] = pEntity;
+				m_vecOrigin[m_iUnits] = pEntity->pev->origin;
+				m_iUnits++;
+			}
+		}
+
+		if( m_iUnits == 0 )
+		{
+			ALERT( at_console, "osprey error: no grunts to resupply\n" );
+			UTIL_Remove( this );
+			return;
 		}
 	}
 
-	if( m_iUnits == 0 )
-	{
-		ALERT( at_console, "osprey error: no grunts to resupply\n" );
-		UTIL_Remove( this );
-		return;
-	}
 	SetThink( &COsprey::FlyThink );
 	pev->nextthink = gpGlobals->time + 0.1;
 	m_startTime = gpGlobals->time;
@@ -465,9 +471,16 @@ void COsprey::FlyThink( void )
 		{
 			SetThink( &COsprey::DeployThink );
 		}
-		do{
+		if (FBitSet(pev->spawnflags, SF_OSPREY_DONT_DEPLOY))
+		{
 			m_pGoalEnt = CBaseEntity::Instance( FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_pGoalEnt->pev->target ) ) );
-		} while( m_pGoalEnt->pev->speed < 400 && !HasDead() );
+		}
+		else
+		{
+			do {
+				m_pGoalEnt = CBaseEntity::Instance( FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_pGoalEnt->pev->target ) ) );
+			} while( m_pGoalEnt->pev->speed < 400 && !HasDead() );
+		}
 		UpdateGoal();
 	}
 

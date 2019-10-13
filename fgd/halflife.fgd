@@ -3024,6 +3024,7 @@
 	spawnflags(Flags) = 
 	[
 		64 : "Start Inactive" : 0
+		32768 : "No deploy, just fly" : 0
 	]
 	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
 ]
@@ -4466,6 +4467,7 @@
 	spawnflags(Flags) =
 	[
 		64 : "Start Inactive" : 0
+		32768 : "No deploy, just fly" : 0
 	]
 	grunttype(Choices) : "Grunt Type" : : "Note: you need to set an appropriate relationship for osprey to spawn ally grunts" =
 	[
