@@ -1964,9 +1964,9 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 	if (!FStringNull(m_iszPushSpeed))
 	{
 		bool evaluated;
-		float multiplier = CalcLocus_Ratio( pOther, STRING(m_iszPushSpeed), &evaluated );
+		float factor = CalcLocus_Ratio( pOther, STRING(m_iszPushSpeed), &evaluated );
 		if (evaluated)
-			vecPush = vecPush * multiplier;
+			vecPush = vecPush * factor;
 	}
 
 	if (pev->speed)

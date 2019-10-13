@@ -1657,47 +1657,49 @@ void CGibShooter::ShootThink( void )
 		pev->nextthink = gpGlobals->time + m_flDelay;
 	}
 
+	bool evaluated;
+	float flGibVelocity;
+	Vector baseShootDir;
+
+	if (!FStringNull(m_iszVelFactor))
+	{
+		flGibVelocity = CalcLocus_Ratio(m_hActivator, STRING(m_iszVelFactor), &evaluated);
+		if (!evaluated)
+			return;
+	}
+	else
+		flGibVelocity = 1;
+
+	if (!FStringNull(m_iszVelocity))
+	{
+		baseShootDir = CalcLocus_Velocity(this, m_hActivator, STRING(m_iszVelocity), &evaluated);
+		if (!evaluated)
+			return;
+		flGibVelocity = flGibVelocity * baseShootDir.Length();
+		baseShootDir = baseShootDir.Normalize();
+	}
+	else
+		baseShootDir = pev->movedir;
+
+	Vector vecPos;
+	if (!FStringNull(m_iszPosition))
+	{
+		vecPos = CalcLocus_Position(this, m_hActivator, STRING(m_iszPosition), &evaluated);
+		if (!evaluated)
+			return;
+	}
+	else
+		vecPos = pev->origin;
+
 	while (i > 0)
 	{
-		Vector vecShootDir;
-		Vector vecPos;
-		float flGibVelocity;
-		bool evaluated;
-
-		if (!FStringNull(m_iszVelFactor))
-		{
-			flGibVelocity = CalcLocus_Ratio(m_hActivator, STRING(m_iszVelFactor), &evaluated);
-			if (!evaluated)
-				return;
-		}
-		else
-			flGibVelocity = 1;
-
-		if (!FStringNull(m_iszVelocity))
-		{
-			vecShootDir = CalcLocus_Velocity(this, m_hActivator, STRING(m_iszVelocity), &evaluated);
-			if (!evaluated)
-				return;
-			flGibVelocity = flGibVelocity * vecShootDir.Length();
-			vecShootDir = vecShootDir.Normalize();
-		}
-		else
-			vecShootDir = pev->movedir;
+		Vector vecShootDir = baseShootDir;
 
 		vecShootDir = vecShootDir + gpGlobals->v_right * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
 		vecShootDir = vecShootDir + gpGlobals->v_forward * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
 		vecShootDir = vecShootDir + gpGlobals->v_up * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
 
 		vecShootDir = vecShootDir.Normalize();
-
-		if (!FStringNull(m_iszPosition))
-		{
-			vecPos = CalcLocus_Position(this, m_hActivator, STRING(m_iszPosition), &evaluated);
-			if (!evaluated)
-				return;
-		}
-		else
-			vecPos = pev->origin;
 
 		CGib *pGib = CreateGib();
 

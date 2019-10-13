@@ -373,7 +373,10 @@ Vector CCalcPosition::CalcPosition( CBaseEntity *pLocus )
 {
 	CBaseEntity *pSubject = UTIL_FindEntityByTargetname(NULL, STRING(pev->netname), pLocus);
 
-	Vector vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message));
+	Vector vecOffset = g_vecZero;
+
+	if (pev->message)
+		vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message));
 
 	Vector vecPosition;
 	Vector vecJunk;
@@ -435,9 +438,33 @@ class CCalcRatio : public CPointEntity
 {
 public:
 	float CalcRatio( CBaseEntity *pLocus );
+
+	void Spawn();
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszMin;
+	string_t m_iszMax;
 };
 
 LINK_ENTITY_TO_CLASS( calc_ratio, CCalcRatio )
+
+TYPEDESCRIPTION	CCalcRatio::m_SaveData[] =
+{
+	DEFINE_FIELD( CCalcRatio, m_iszMin, FIELD_STRING ),
+	DEFINE_FIELD( CCalcRatio, m_iszMax, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CCalcRatio, CPointEntity )
+
+void CCalcRatio::Spawn()
+{
+	m_iszMin = pev->noise;
+	pev->noise = iStringNull;
+	m_iszMax = pev->noise1;
+	pev->noise1 = iStringNull;
+}
 
 float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
 {
@@ -450,16 +477,17 @@ float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
 	case 3:		fBasis = 1/fBasis; break; //reciprocal
 	}
 
-	fBasis += CalcLocus_Ratio( pLocus, STRING(pev->netname));
-	fBasis = fBasis * CalcLocus_Ratio( pLocus, STRING(pev->message));
+	if (!FStringNull(pev->netname))
+		fBasis += CalcLocus_Ratio( pLocus, STRING(pev->netname));
+	//fBasis = fBasis * CalcLocus_Ratio( pLocus, STRING(pev->message));
 
-	if (!FStringNull(pev->noise))
+	if (!FStringNull(m_iszMin))
 	{
-		float fMin = CalcLocus_Ratio( pLocus, STRING(pev->noise));
+		float fMin = CalcLocus_Ratio( pLocus, STRING(m_iszMin));
 
-		if (!FStringNull(pev->noise1))
+		if (!FStringNull(m_iszMax))
 		{
-			float fMax = CalcLocus_Ratio( pLocus, STRING(pev->noise1));
+			float fMax = CalcLocus_Ratio( pLocus, STRING(m_iszMax));
 			
 			if (fBasis >= fMin && fBasis <= fMax)
 				return fBasis;
@@ -493,9 +521,9 @@ float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
 		else
 			return fMin; // crop to nearest value
 	}
-	else if (!FStringNull(pev->noise1))
+	else if (!FStringNull(m_iszMax))
 	{
-		float fMax = CalcLocus_Ratio( pLocus, STRING(pev->noise1));
+		float fMax = CalcLocus_Ratio( pLocus, STRING(m_iszMax));
 
 		if (fBasis < fMax)
 			return fBasis;
@@ -516,9 +544,29 @@ class CCalcSubVelocity : public CPointEntity
 	Vector ConvertAngles( CBaseEntity *pLocus, Vector vecAngles );
 public:
 	Vector CalcVelocity( CBaseEntity *pLocus );
+
+	void Spawn();
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszFactor;
 };
 
 LINK_ENTITY_TO_CLASS( calc_subvelocity, CCalcSubVelocity )
+
+TYPEDESCRIPTION	CCalcSubVelocity::m_SaveData[] =
+{
+	DEFINE_FIELD( CCalcSubVelocity, m_iszFactor, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CCalcSubVelocity, CPointEntity )
+
+void CCalcSubVelocity::Spawn()
+{
+	m_iszFactor = pev->noise;
+	pev->noise = iStringNull;
+}
 
 Vector CCalcSubVelocity::CalcVelocity( CBaseEntity *pLocus )
 {
@@ -557,8 +605,13 @@ Vector CCalcSubVelocity::Convert( CBaseEntity *pLocus, Vector vecDir )
 	if (pev->spawnflags & SF_CALCVELOCITY_NORMALIZE)
 		vecDir = vecDir.Normalize();
 	
-	float fRatio = CalcLocus_Ratio( pLocus, STRING(pev->noise) );
-	Vector vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message));
+	float fRatio = 1;
+	if (m_iszFactor)
+		CalcLocus_Ratio( pLocus, STRING(m_iszFactor) );
+	Vector vecOffset = g_vecZero;
+
+	if (pev->message)
+		vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message));
 
 	Vector vecResult = vecOffset + (vecDir*fRatio);
 
@@ -581,16 +634,38 @@ class CCalcVelocityPath : public CPointEntity
 {
 public:
 	Vector CalcVelocity( CBaseEntity *pLocus );
+
+	void Spawn();
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszFactor;
 };
 
 LINK_ENTITY_TO_CLASS( calc_velocity_path, CCalcVelocityPath )
+
+TYPEDESCRIPTION	CCalcVelocityPath::m_SaveData[] =
+{
+	DEFINE_FIELD( CCalcVelocityPath, m_iszFactor, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CCalcVelocityPath, CPointEntity )
+
+void CCalcVelocityPath::Spawn()
+{
+	m_iszFactor = pev->noise;
+	pev->noise = iStringNull;
+}
 
 Vector CCalcVelocityPath::CalcVelocity( CBaseEntity *pLocus )
 {
 	Vector vecStart = CalcLocus_Position( this, pLocus, STRING(pev->target) );
 //	ALERT(at_console, "vecStart %f %f %f\n", vecStart.x, vecStart.y, vecStart.z);
 	Vector vecOffs;
-	float fFactor = CalcLocus_Ratio( pLocus, STRING(pev->noise) );
+	float fFactor = 1;
+	if (m_iszFactor)
+		fFactor = CalcLocus_Ratio( pLocus, STRING(m_iszFactor) );
 
 	switch ((int)pev->armorvalue)
 	{
@@ -658,17 +733,41 @@ class CCalcVelocityPolar : public CPointEntity
 {
 public:
 	Vector CalcVelocity( CBaseEntity *pLocus );
+
+	void Spawn();
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_iszFactor;
 };
 
 LINK_ENTITY_TO_CLASS( calc_velocity_polar, CCalcVelocityPolar )
+
+TYPEDESCRIPTION	CCalcVelocityPolar::m_SaveData[] =
+{
+	DEFINE_FIELD( CCalcVelocityPolar, m_iszFactor, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CCalcVelocityPolar, CPointEntity )
+
+void CCalcVelocityPolar::Spawn()
+{
+	m_iszFactor = pev->noise;
+	pev->noise = iStringNull;
+}
 
 Vector CCalcVelocityPolar::CalcVelocity( CBaseEntity *pLocus )
 {
 	Vector vecBasis = CalcLocus_Velocity( this, pLocus, STRING(pev->netname) );
 	Vector vecAngles = UTIL_VecToAngles( vecBasis ) + pev->angles;
-	Vector vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message) );
+	Vector vecOffset = g_vecZero;
+	if (pev->message)
+		vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message) );
 
-	float fFactor = CalcLocus_Ratio( pLocus, STRING(pev->noise) );
+	float fFactor = 1;
+	if (m_iszFactor)
+		fFactor = CalcLocus_Ratio( pLocus, STRING(m_iszFactor) );
 
 	if (!(pev->spawnflags & SF_CALCVELOCITY_NORMALIZE))
 		fFactor = fFactor * vecBasis.Length();
