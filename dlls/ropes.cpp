@@ -29,6 +29,9 @@
 #if FEATURE_ROPE
 #include "ropes.h"
 
+#define HOOK_CONSTANT	2500.0f
+#define SPRING_DAMPING	0.1f
+#define ROPE_IGNORE_SAMPLES	4		// integrator may be hanging if less than
 
 //#define SetAbsOrigin(x) pev->origin = x;
 #define SetAbsAngles(x) pev->angles = x;
@@ -41,18 +44,6 @@
 #define AddEffectsFlags(x) pev->effects |= x;
 
 /**
-*	Represents a spring that keeps samples a given distance apart.
-*/
-struct Spring
-{
-	size_t p1;
-	size_t p2;
-	float restLength;
-	float hookConstant;
-	float springDampning;
-};
-
-/**
 *	Data for a single rope joint.
 */
 struct RopeSampleData
@@ -63,9 +54,12 @@ struct RopeSampleData
 	Vector mExternalForce;
 
 	bool mApplyExternalForce;
-
 	float mMassReciprocal;
+	float restLength;
 };
+
+#define MAX_LIST_SEGMENTS	5
+RopeSampleData g_pTempList[MAX_LIST_SEGMENTS][MAX_SEGMENTS];
 
 /**
 *	Represents a single joint in a rope. There are numSegments + 1 samples in a rope.
@@ -107,8 +101,6 @@ public:
 
 	void Spawn();
 
-	void Think();
-
 	void Touch( CBaseEntity* pOther );
 
 	void SetAbsOrigin(const Vector& pos)
@@ -125,23 +117,6 @@ public:
 	*	@param vecForce Force.
 	*/
 	void ApplyExternalForce( const Vector& vecForce );
-
-	/**
-	*	Resets the mass to the default value.
-	*/
-	void SetMassToDefault();
-
-	/**
-	*	Sets the default mass.
-	*	@param flDefaultMass Mass.
-	*/
-	void SetDefaultMass( const float flDefaultMass );
-
-	/**
-	*	Sets the mass.
-	*	@param flMass Mass.
-	*/
-	void SetMass( const float flMass );
 
 	/**
 	*	Sets whether the segment should cause damage on touch.
@@ -182,10 +157,7 @@ TYPEDESCRIPTION	CRope::m_SaveData[] =
 	DEFINE_FIELD( CRope, mLastTime, FIELD_TIME ),
 	DEFINE_FIELD( CRope, m_LastEndPos, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( CRope, m_Gravity, FIELD_VECTOR ),
-	DEFINE_FIELD( CRope, m_HookConstant, FIELD_FLOAT ),
-	DEFINE_FIELD( CRope, m_SpringDampning, FIELD_FLOAT ),
 	DEFINE_FIELD( CRope, m_NumSamples, FIELD_INTEGER ),
-	DEFINE_FIELD( CRope, m_SpringCnt, FIELD_INTEGER ),
 	DEFINE_FIELD( CRope, mObjectAttached, FIELD_CHARACTER ),
 	DEFINE_FIELD( CRope, mAttachedObjectsSegment, FIELD_INTEGER ),
 	DEFINE_FIELD( CRope, detachTime, FIELD_TIME ),
@@ -212,32 +184,13 @@ int CRope::Restore( CRestore &restore )
 	if( !CBaseDelay::Restore( restore ) )
 		return 0;
 	int status = restore.ReadFields( "CBaseDelay", this, m_SaveData, ARRAYSIZE( m_SaveData ) );
-
-	for( size_t uiIndex = 0; uiIndex < MAX_TEMP_SAMPLES; ++uiIndex )
-	{
-		delete[] m_TempSys[ uiIndex ];
-		m_TempSys[ uiIndex ] = new RopeSampleData[ m_NumSamples ];
-
-		memset( m_TempSys[ uiIndex ], 0, sizeof( RopeSampleData ) * m_NumSamples );
-	}
 	m_InitialDeltaTime = 0;
-	m_Spring = NULL;
 
 	return status;
 }
 
 
 LINK_ENTITY_TO_CLASS( env_rope, CRope )
-
-/* leak
-CRope::~CRope()
-{
-	for( size_t uiIndex = 0; uiIndex < MAX_TEMP_SAMPLES; ++uiIndex )
-	{
-		delete[] m_TempSys[ uiIndex ];
-		m_TempSys[ uiIndex ] = NULL;
-	}
-}*/
 
 void CRope::KeyValue( KeyValueData* pkvd )
 {
@@ -299,8 +252,6 @@ void CRope::Spawn()
 
 	Precache();
 
-	mSpringsInitialized = false;
-
 	m_Gravity.x = m_Gravity.y = 0;
 	m_Gravity.z = -50;
 
@@ -317,7 +268,7 @@ void CRope::StartThink()
 {
 	AddFlags( FL_ALWAYSTHINK );
 
-	for( size_t uiSample = 0; uiSample < m_NumSamples; ++uiSample )
+	for( int uiSample = 0; uiSample < m_NumSamples; ++uiSample )
 	{
 		m_CurrentSys[ uiSample ] = CRopeSample::CreateSample();
 		UTIL_SetOrigin(m_CurrentSys[ uiSample ]->pev, pev->origin);
@@ -346,7 +297,7 @@ void CRope::StartThink()
 	{
 		CRopeSample** ppCurrentSys = m_CurrentSys;
 
-		for( size_t uiSeg = 1; uiSeg < m_iSegments - 1; ++uiSeg )
+		for( int uiSeg = 1; uiSeg < m_iSegments - 1; ++uiSeg )
 		{
 			CRopeSample* pSegSample = m_CurrentSys[ uiSeg ];
 			seg[ uiSeg ] = CRopeSegment::CreateSegment( pSegSample, GetBodyModel() );
@@ -389,13 +340,7 @@ void CRope::StartThink()
 	memset( seg + m_iSegments, 0, sizeof( CRopeSegment* ) * ( MAX_SEGMENTS - m_iSegments ) );
 	memset( altseg + m_iSegments, 0, sizeof( CRopeSegment* ) * ( MAX_SEGMENTS - m_iSegments ) );
 
-	memset( m_TempSys, 0, sizeof( m_TempSys ) );
-
-	m_SpringCnt = 0;
-
 	m_InitialDeltaTime = true;
-	m_HookConstant = 2500;
-	m_SpringDampning = 0.1;
 
 	InitializeRopeSim();
 
@@ -405,11 +350,6 @@ void CRope::StartThink()
 
 void CRope::RopeThink()
 {
-	if( !mSpringsInitialized )
-	{
-		InitializeSprings( m_iSegments );
-	}
-
 	m_bToggle = !m_bToggle;
 
 	RunSimOnSamples();
@@ -438,21 +378,11 @@ void CRope::RopeThink()
 	SetNextThink( gpGlobals->time + 0.001 );
 }
 
-void CRope::Touch( CBaseEntity* pOther )
-{
-	//Nothing.
-}
-
 void CRope::InitializeRopeSim()
 {
-	size_t uiIndex;
-	for( uiIndex = 0; uiIndex < MAX_TEMP_SAMPLES; ++uiIndex )
-	{
-		delete[] m_TempSys[ uiIndex ];
-		m_TempSys[ uiIndex ] = NULL;
-	}
+	int uiIndex;
 
-	for( size_t uiSample = 0; uiSample < m_NumSamples; ++uiSample )
+	for( int uiSample = 0; uiSample < m_NumSamples; ++uiSample )
 	{
 		m_TargetSys[ uiSample ] = CRopeSample::CreateSample();
 
@@ -461,14 +391,7 @@ void CRope::InitializeRopeSim()
 
 	memset( m_TargetSys + m_NumSamples, 0, sizeof( CRopeSample* ) * ( MAX_SAMPLES - m_NumSamples ) );
 
-	for( uiIndex = 0; uiIndex < MAX_TEMP_SAMPLES; ++uiIndex )
-	{
-		m_TempSys[ uiIndex ] = new RopeSampleData[ m_NumSamples ];
-
-		memset( m_TempSys[ uiIndex ], 0, sizeof( RopeSampleData ) * m_NumSamples );
-	}
-
-	for( size_t uiSeg = 0; uiSeg < m_iSegments; ++uiSeg )
+	for( int uiSeg = 0; uiSeg < m_iSegments; ++uiSeg )
 	{
 		CRopeSegment* pSegment = seg[ uiSeg ];
 		CRopeSample* pSample = pSegment->GetSample();
@@ -483,7 +406,9 @@ void CRope::InitializeRopeSim()
 		data->mApplyExternalForce	= false;
 		data->mExternalForce			= g_vecZero;
 
-		pSegment->SetDefaultMass( data->mMassReciprocal );
+		Vector vecOrigin, vecAngles;
+		pSegment->GetAttachment( 0, vecOrigin, vecAngles );
+		data->restLength = ( pSegment->pev->origin - vecOrigin ).Length();
 	}
 
 	{
@@ -523,9 +448,9 @@ void CRope::InitializeRopeSim()
 
 	data->mApplyExternalForce = false;
 
-	size_t uiNumSegs = 4;
+	int uiNumSegs = ROPE_IGNORE_SAMPLES;
 
-	if( m_iSegments <= 4 )
+	if( m_iSegments <= ROPE_IGNORE_SAMPLES )
 		uiNumSegs = m_iSegments;
 
 	for( uiIndex = 0; uiIndex < uiNumSegs; ++uiIndex )
@@ -533,42 +458,6 @@ void CRope::InitializeRopeSim()
 		seg[ uiIndex ]->SetCanBeGrabbed( false );
 		altseg[ uiIndex ]->SetCanBeGrabbed( false );
 	}
-}
-
-void CRope::InitializeSprings( const size_t uiNumSprings )
-{
-	m_SpringCnt = uiNumSprings;
-
-	m_Spring = new Spring[ uiNumSprings ];
-
-	if( uiNumSprings > 0 )
-	{
-		Vector vecOrigin, vecAngles;
-
-		for( size_t uiIndex = 0; uiIndex < m_SpringCnt; ++uiIndex )
-		{
-			Spring& spring = m_Spring[ uiIndex ];
-
-			spring.p1 = uiIndex;
-			spring.p2 = uiIndex + 1;
-
-			if( uiIndex < m_iSegments )
-			{
-				CRopeSegment* pSegment = seg[ uiIndex ];
-
-				pSegment->GetAttachment( 0, vecOrigin, vecAngles );
-
-				spring.restLength = ( pSegment->pev->origin - vecOrigin ).Length();
-			}
-			else
-				spring.restLength = 0;
-
-			spring.hookConstant = m_HookConstant;
-			spring.springDampning = m_SpringDampning;
-		}
-	}
-
-	mSpringsInitialized = true;
 }
 
 void CRope::RunSimOnSamples()
@@ -582,7 +471,7 @@ void CRope::RunSimOnSamples()
 		flDeltaTime = 0;
 	}
 
-	size_t uiIndex = 0;
+	int uiIndex = 0;
 
 	CRopeSample** ppSampleSource = m_CurrentSys;
 	CRopeSample** ppSampleTarget = m_TargetSys;
@@ -614,33 +503,29 @@ void CRope::RunSimOnSamples()
 
 void CRope::ComputeForces( RopeSampleData* pSystem )
 {
-	size_t uiIndex;
+	int uiIndex;
 	for( uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex )
 	{
 		ComputeSampleForce( pSystem[ uiIndex ] );
 	}
 
-	Spring* pSpring = m_Spring;
-
-	for( uiIndex = 0; uiIndex < m_SpringCnt; ++uiIndex, ++pSpring )
+	for( uiIndex = 0; uiIndex < m_iSegments; ++uiIndex )
 	{
-		ComputeSpringForce( pSystem[ pSpring->p1 ], pSystem[ pSpring->p2 ], *pSpring );
+		ComputeSpringForce( pSystem[ uiIndex ], pSystem[ uiIndex+1 ] );
 	}
 }
 
 void CRope::ComputeForces( CRopeSample** ppSystem )
 {
-	size_t uiIndex;
+	int uiIndex;
 	for( uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex )
 	{
 		ComputeSampleForce( *ppSystem[ uiIndex ]->GetData() );
 	}
 
-	Spring* pSpring = m_Spring;
-
-	for( uiIndex = 0; uiIndex < m_SpringCnt; ++uiIndex, ++pSpring )
+	for( uiIndex = 0; uiIndex < m_iSegments; ++uiIndex )
 	{
-		ComputeSpringForce( *ppSystem[ pSpring->p1 ]->GetData(), *ppSystem[ pSpring->p2 ]->GetData(), *pSpring );
+		ComputeSpringForce( *ppSystem[ uiIndex ]->GetData(), *ppSystem[ uiIndex+1 ]->GetData() );
 	}
 }
 
@@ -671,15 +556,15 @@ void CRope::ComputeSampleForce( RopeSampleData& data )
 	}
 }
 
-void CRope::ComputeSpringForce( RopeSampleData& first, RopeSampleData& second, const Spring& spring )
+void CRope::ComputeSpringForce( RopeSampleData& first, RopeSampleData& second )
 {
 	Vector vecDist = first.mPosition - second.mPosition;
 
 	const double flDistance = vecDist.Length();
 
-	const double flForce = ( flDistance - spring.restLength ) * spring.hookConstant;
+	const double flForce = ( flDistance - first.restLength ) * HOOK_CONSTANT;
 
-	const double flNewRelativeDist = DotProduct( first.mVelocity - second.mVelocity, vecDist ) * spring.springDampning;
+	const double flNewRelativeDist = DotProduct( first.mVelocity - second.mVelocity, vecDist ) * SPRING_DAMPING;
 
 	vecDist = vecDist.Normalize();
 
@@ -694,7 +579,7 @@ void CRope::ComputeSpringForce( RopeSampleData& first, RopeSampleData& second, c
 
 void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource, CRopeSample** ppSampleTarget )
 {
-	const float flDeltas[ MAX_TEMP_SAMPLES - 1 ] =
+	const float flDeltas[ MAX_LIST_SEGMENTS - 1 ] =
 	{
 		flDeltaTime * 0.5f,
 		flDeltaTime * 0.5f,
@@ -703,51 +588,53 @@ void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource,
 	};
 
 	{
-		RopeSampleData* pTemp1 = m_TempSys[ 0 ];
-		RopeSampleData* pTemp2 = m_TempSys[ 1 ];
+		RopeSampleData* pTemp1 = g_pTempList[ 0 ];
+		RopeSampleData* pTemp2 = g_pTempList[ 1 ];
 
-		for( size_t uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
+		for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
 		{
 			RopeSampleData *data = ppSampleSource[ uiIndex ]->GetData();
 
 			pTemp2->mForce = data->mMassReciprocal * data->mForce * flDeltas[ 0 ];
-
 			pTemp2->mVelocity = data->mVelocity * flDeltas[ 0 ];
+			pTemp2->restLength = data->restLength;
 
 			pTemp1->mMassReciprocal = data->mMassReciprocal;
 			pTemp1->mVelocity = data->mVelocity + pTemp2->mForce;
 			pTemp1->mPosition = data->mPosition + pTemp2->mVelocity;
+			pTemp1->restLength = data->restLength;
 		}
 
-		ComputeForces( m_TempSys[ 0 ] );
+		ComputeForces( g_pTempList[ 0 ] );
 	}
 
-	for( size_t uiStep = 2; uiStep < MAX_TEMP_SAMPLES - 1; ++uiStep )
+	for( int uiStep = 2; uiStep < MAX_LIST_SEGMENTS - 1; ++uiStep )
 	{
-		RopeSampleData* pTemp1 = m_TempSys[ 0 ];
-		RopeSampleData* pTemp2 = m_TempSys[ uiStep ];
+		RopeSampleData* pTemp1 = g_pTempList[ 0 ];
+		RopeSampleData* pTemp2 = g_pTempList[ uiStep ];
 
-		for( size_t uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
+		for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
 		{
 			RopeSampleData *data = ppSampleSource[ uiIndex ]->GetData();
 
 			pTemp2->mForce = data->mMassReciprocal * pTemp1->mForce * flDeltas[ uiStep - 1 ];
-
 			pTemp2->mVelocity = pTemp1->mVelocity * flDeltas[ uiStep - 1 ];
+			pTemp2->restLength = data->restLength;
 
 			pTemp1->mMassReciprocal = data->mMassReciprocal;
 			pTemp1->mVelocity = data->mVelocity + pTemp2->mForce;
 			pTemp1->mPosition = data->mPosition + pTemp2->mVelocity;
+			pTemp1->restLength = data->restLength;
 		}
 
-		ComputeForces( m_TempSys[ 0 ] );
+		ComputeForces( g_pTempList[ 0 ] );
 	}
 
 	{
-		RopeSampleData* pTemp1 = m_TempSys[ 0 ];
-		RopeSampleData* pTemp2 = m_TempSys[ 4 ];
+		RopeSampleData* pTemp1 = g_pTempList[ 0 ];
+		RopeSampleData* pTemp2 = g_pTempList[ 4 ];
 
-		for( size_t uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
+		for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
 		{
 			RopeSampleData *data = ppSampleSource[ uiIndex ]->GetData();
 
@@ -757,12 +644,12 @@ void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource,
 		}
 	}
 
-	RopeSampleData* pTemp1 = m_TempSys[ 1 ];
-	RopeSampleData* pTemp2 = m_TempSys[ 2 ];
-	RopeSampleData* pTemp3 = m_TempSys[ 3 ];
-	RopeSampleData* pTemp4 = m_TempSys[ 4 ];
+	RopeSampleData* pTemp1 = g_pTempList[ 1 ];
+	RopeSampleData* pTemp2 = g_pTempList[ 2 ];
+	RopeSampleData* pTemp3 = g_pTempList[ 3 ];
+	RopeSampleData* pTemp4 = g_pTempList[ 4 ];
 
-	for( size_t uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2, ++pTemp3, ++pTemp4 )
+	for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2, ++pTemp3, ++pTemp4 )
 	{
 		CRopeSample *pSource = ppSampleSource[ uiIndex ];
 		CRopeSample *pTarget = ppSampleTarget[ uiIndex ];
@@ -827,7 +714,7 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 
 	if( mObjectAttached )
 	{
-		for( size_t uiSeg = 1; uiSeg < m_iSegments; ++uiSeg )
+		for( int uiSeg = 1; uiSeg < m_iSegments; ++uiSeg )
 		{
 			CRopeSample* pSample = m_CurrentSys[ uiSeg ];
 
@@ -878,7 +765,7 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 	}
 	else
 	{
-		for( size_t uiSeg = 1; uiSeg < m_iSegments; ++uiSeg )
+		for( int uiSeg = 1; uiSeg < m_iSegments; ++uiSeg )
 		{
 			UTIL_TraceLine(
 				ppHiddenSegs[ uiSeg ]->pev->origin,
@@ -913,7 +800,7 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 
 	Vector vecAngles;
 
-	for( size_t uiSeg = 1; uiSeg < m_iSegments; ++uiSeg )
+	for( int uiSeg = 1; uiSeg < m_iSegments; ++uiSeg )
 	{
 		CRopeSegment *pSegment = ppPrimarySegs[ uiSeg - 1 ];
 		CRopeSegment *pSegment2 = ppPrimarySegs[ uiSeg ];
@@ -952,7 +839,7 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 	}
 }
 
-void CRope::SetRopeSegments( const size_t uiNumSegments,
+void CRope::SetRopeSegments( const int uiNumSegments,
 							 CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSegs )
 {
 	if( uiNumSegments > 0 )
@@ -965,7 +852,7 @@ void CRope::SetRopeSegments( const size_t uiNumSegments,
 		ppHiddenSegs[ 0 ]->SetSolidType( SOLID_NOT );
 		ppHiddenSegs[ 0 ]->SetEffects( EF_NODRAW );
 
-		for( size_t uiIndex = 1; uiIndex < uiNumSegments; ++uiIndex )
+		for( int uiIndex = 1; uiIndex < uiNumSegments; ++uiIndex )
 		{
 			CRopeSegment* pPrim = ppPrimarySegs[ uiIndex ];
 			CRopeSegment* pHidden = ppHiddenSegs[ uiIndex ];
@@ -1122,7 +1009,7 @@ void CRope::ApplyForceFromPlayer( const Vector& vecForce )
 	ApplyForceToSegment( vecScaledForce, mAttachedObjectsSegment );
 }
 
-void CRope::ApplyForceToSegment( const Vector& vecForce, const size_t uiSegment )
+void CRope::ApplyForceToSegment( const Vector& vecForce, const int uiSegment )
 {
 	if( uiSegment < m_iSegments )
 	{
@@ -1187,7 +1074,7 @@ void CRope::Creak()
 				VOL_NORM, ATTN_NORM );
 }
 
-float CRope::GetSegmentLength( size_t uiSegmentIndex ) const
+float CRope::GetSegmentLength( int uiSegmentIndex ) const
 {
 	if( uiSegmentIndex < m_iSegments )
 	{
@@ -1209,7 +1096,7 @@ float CRope::GetRopeLength() const
 
 	Vector vecOrigin, vecAngles;
 
-	for( size_t uiIndex = 0; uiIndex < m_iSegments; ++uiIndex )
+	for( int uiIndex = 0; uiIndex < m_iSegments; ++uiIndex )
 	{
 		CRopeSegment *pSegment = seg[ uiIndex ];
 
@@ -1226,12 +1113,12 @@ Vector CRope::GetRopeOrigin() const
 	return m_CurrentSys[ 0 ]->GetData()->mPosition;
 }
 
-bool CRope::IsValidSegmentIndex( const size_t uiSegment ) const
+bool CRope::IsValidSegmentIndex( const int uiSegment ) const
 {
 	return uiSegment < m_iSegments;
 }
 
-Vector CRope::GetSegmentOrigin( const size_t uiSegment ) const
+Vector CRope::GetSegmentOrigin( const int uiSegment ) const
 {
 	if( !IsValidSegmentIndex( uiSegment ) )
 		return g_vecZero;
@@ -1239,7 +1126,7 @@ Vector CRope::GetSegmentOrigin( const size_t uiSegment ) const
 	return m_CurrentSys[ uiSegment ]->GetData()->mPosition;
 }
 
-Vector CRope::GetSegmentAttachmentPoint( const size_t uiSegment ) const
+Vector CRope::GetSegmentAttachmentPoint( const int uiSegment ) const
 {
 	if( !IsValidSegmentIndex( uiSegment ) )
 		return g_vecZero;
@@ -1255,7 +1142,7 @@ Vector CRope::GetSegmentAttachmentPoint( const size_t uiSegment ) const
 
 void CRope::SetAttachedObjectsSegment( CRopeSegment* pSegment )
 {
-	for( size_t uiIndex = 0; uiIndex < m_iSegments; ++uiIndex )
+	for( int uiIndex = 0; uiIndex < m_iSegments; ++uiIndex )
 	{
 		if( seg[ uiIndex ] == pSegment || altseg[ uiIndex ] == pSegment )
 		{
@@ -1265,7 +1152,7 @@ void CRope::SetAttachedObjectsSegment( CRopeSegment* pSegment )
 	}
 }
 
-Vector CRope::GetSegmentDirFromOrigin( const size_t uiSegmentIndex ) const
+Vector CRope::GetSegmentDirFromOrigin( const int uiSegmentIndex ) const
 {
 	if( uiSegmentIndex >= m_iSegments )
 		return g_vecZero;
@@ -1305,6 +1192,7 @@ TYPEDESCRIPTION	CRopeSample::m_SaveData[] =
 	DEFINE_FIELD( CRopeSample, data.mExternalForce, FIELD_VECTOR ),
 	DEFINE_FIELD( CRopeSample, data.mApplyExternalForce, FIELD_CHARACTER ),
 	DEFINE_FIELD( CRopeSample, data.mMassReciprocal, FIELD_FLOAT ),
+	DEFINE_FIELD( CRopeSample, data.restLength, FIELD_FLOAT ),
 	DEFINE_FIELD( CRopeSample, mMasterRope, FIELD_CLASSPTR ),
 };
 
@@ -1347,7 +1235,7 @@ void CRopeSegment::Precache()
 	if( !mModelName )
 		mModelName = MAKE_STRING( "models/rope16.mdl" );
 
-	PRECACHE_MODEL( (char*)STRING( mModelName ) );
+	PRECACHE_MODEL( STRING( mModelName ) );
 	PRECACHE_SOUND( "items/grab_rope.wav" );
 }
 
@@ -1361,18 +1249,12 @@ void CRopeSegment::Spawn()
 
 	SetMoveType( MOVETYPE_NOCLIP );
 	SetSolidType( SOLID_TRIGGER );
-	AddFlags( FL_ALWAYSTHINK );
 	SetEffects( EF_NODRAW );
 	SetAbsOrigin( pev->origin );
 
 	UTIL_SetSize( pev, Vector( -30, -30, -30 ), Vector( 30, 30, 30 ) );
 
 	SetNextThink( gpGlobals->time + 0.5 );
-}
-
-void CRopeSegment::Think()
-{
-	//Do nothing.
 }
 
 void CRopeSegment::Touch( CBaseEntity* pOther )
@@ -1462,21 +1344,6 @@ void CRopeSegment::ApplyExternalForce( const Vector& vecForce )
 	m_Sample->GetData()->mExternalForce = m_Sample->GetData()->mExternalForce + vecForce;
 }
 
-void CRopeSegment::SetMassToDefault()
-{
-	m_Sample->GetData()->mMassReciprocal = mDefaultMass;
-}
-
-void CRopeSegment::SetDefaultMass( const float flDefaultMass )
-{
-	mDefaultMass = flDefaultMass;
-}
-
-void CRopeSegment::SetMass( const float flMass )
-{
-	m_Sample->GetData()->mMassReciprocal = flMass;
-}
-
 void CRopeSegment::SetCauseDamageOnTouch( const bool bCauseDamage )
 {
 	mCauseDamage = bCauseDamage;
@@ -1521,7 +1388,7 @@ public:
 	/**
 	*	Do spark effects.
 	*/
-	void DoSpark( const size_t uiSegment, const bool bExertForce );
+	void DoSpark( const int uiSegment, const bool bExertForce );
 
 	/**
 	*	Do lightning effects.
@@ -1539,8 +1406,8 @@ private:
 	int m_iYJoltForce;
 	int m_iZJoltForce;
 
-	size_t m_uiNumUninsulatedSegments;
-	size_t m_uiUninsulatedSegments[ MAX_SEGMENTS ];
+	int m_uiNumUninsulatedSegments;
+	int m_uiUninsulatedSegments[ MAX_SEGMENTS ];
 
 	int m_iLightningSprite;
 
@@ -1650,7 +1517,7 @@ void CElectrifiedWire::StartElectrifiedThink()
 
 	if( m_iBodySparkFrequency > 0 )
 	{
-		for( size_t uiIndex = 0; uiIndex < GetNumSegments(); ++uiIndex )
+		for( int uiIndex = 0; uiIndex < GetNumSegments(); ++uiIndex )
 		{
 			if( IsValidSegmentIndex( uiIndex ) )
 			{
@@ -1661,7 +1528,7 @@ void CElectrifiedWire::StartElectrifiedThink()
 
 	if( m_uiNumUninsulatedSegments > 0 )
 	{
-		for( size_t uiIndex = 0; uiIndex < m_uiNumUninsulatedSegments; ++uiIndex )
+		for( int uiIndex = 0; uiIndex < m_uiNumUninsulatedSegments; ++uiIndex )
 		{
 			GetSegments()[ uiIndex ]->SetCauseDamageOnTouch( m_bIsActive );
 			GetAltSegments()[ uiIndex ]->SetCauseDamageOnTouch( m_bIsActive );
@@ -1690,7 +1557,7 @@ void CElectrifiedWire::ElectrifiedRopeThink()
 
 		if( m_uiNumUninsulatedSegments > 0 )
 		{
-			for( size_t uiIndex = 0; uiIndex < m_uiNumUninsulatedSegments; ++uiIndex )
+			for( int uiIndex = 0; uiIndex < m_uiNumUninsulatedSegments; ++uiIndex )
 			{
 				if( ShouldDoEffect( m_iBodySparkFrequency ) )
 				{
@@ -1717,7 +1584,7 @@ void CElectrifiedWire::Use( CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 
 	if( m_uiNumUninsulatedSegments > 0 )
 	{
-		for( size_t uiIndex = 0; uiIndex < m_uiNumUninsulatedSegments; ++uiIndex )
+		for( int uiIndex = 0; uiIndex < m_uiNumUninsulatedSegments; ++uiIndex )
 		{
 			GetSegments()[ m_uiUninsulatedSegments[ uiIndex ] ]->SetCauseDamageOnTouch( m_bIsActive );
 			GetAltSegments()[ m_uiUninsulatedSegments[ uiIndex ] ]->SetCauseDamageOnTouch( m_bIsActive );
@@ -1742,7 +1609,7 @@ bool CElectrifiedWire::ShouldDoEffect( const int iFrequency )
 	return RANDOM_LONG( 1, iFrequency ) == 1;
 }
 
-void CElectrifiedWire::DoSpark( const size_t uiSegment, const bool bExertForce )
+void CElectrifiedWire::DoSpark( const int uiSegment, const bool bExertForce )
 {
 	const Vector vecOrigin = GetSegmentAttachmentPoint( uiSegment );
 
@@ -1762,11 +1629,11 @@ void CElectrifiedWire::DoSpark( const size_t uiSegment, const bool bExertForce )
 
 void CElectrifiedWire::DoLightning()
 {
-	const size_t uiSegment1 = RANDOM_LONG( 0, GetNumSegments() - 1 );
+	const int uiSegment1 = RANDOM_LONG( 0, GetNumSegments() - 1 );
 
-	size_t uiSegment2;
+	int uiSegment2;
 
-	size_t uiIndex;
+	int uiIndex;
 
 	//Try to get a random segment.
 	for( uiIndex = 0; uiIndex < 10; ++uiIndex )
