@@ -79,17 +79,8 @@ public:
 	const RopeSampleData* GetData() const { return &data; }
 
 	RopeSampleData* GetData() { return &data; }
-
-	CRope* GetMasterRope() { return mMasterRope; }
-
-	void SetMasterRope( CRope* pRope )
-	{
-		mMasterRope = pRope;
-	}
-
 private:
 	RopeSampleData data;
-	CRope* mMasterRope;
 };
 
 
@@ -108,27 +99,19 @@ public:
 		pev->origin = pos;
 	}
 
-	static CRopeSegment* CreateSegment( CRopeSample* pSample, string_t iszModelName );
+	static CRopeSegment* CreateSegment(CRopeSample* pSample, string_t iszModelName , CRope *rope);
 
 	CRopeSample* GetSample() { return m_Sample; }
 
-	/**
-	*	Applies external force to the segment.
-	*	@param vecForce Force.
-	*/
 	void ApplyExternalForce( const Vector& vecForce );
 
-	/**
-	*	Sets whether the segment should cause damage on touch.
-	*	@param bCauseDamage Whether to cause damage.
-	*/
 	void SetCauseDamageOnTouch( const bool bCauseDamage );
-
-	/**
-	*	Sets whether the segment can be grabbed.
-	*	@param bCanBeGrabbed Whether the segment can be grabbed.
-	*/
 	void SetCanBeGrabbed( const bool bCanBeGrabbed );
+	CRope* GetMasterRope() { return mMasterRope; }
+	void SetMasterRope( CRope* pRope )
+	{
+		mMasterRope = pRope;
+	}
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -141,6 +124,7 @@ private:
 	float mDefaultMass;
 	bool mCauseDamage;
 	bool mCanBeGrabbed;
+	CRope* mMasterRope;
 };
 
 static const char* const g_pszCreakSounds[] =
@@ -272,18 +256,16 @@ void CRope::StartThink()
 	{
 		m_CurrentSys[ uiSample ] = CRopeSample::CreateSample();
 		UTIL_SetOrigin(m_CurrentSys[ uiSample ]->pev, pev->origin);
-
-		m_CurrentSys[ uiSample ]->SetMasterRope( this );
 	}
 
 	memset( m_CurrentSys + m_NumSamples, 0, sizeof( CRopeSample* ) * ( MAX_SAMPLES - m_NumSamples ) );
 
 	{
-		CRopeSegment* pSegment = seg[ 0 ] = CRopeSegment::CreateSegment( m_CurrentSys[ 0 ], GetBodyModel() );
+		CRopeSegment* pSegment = seg[ 0 ] = CRopeSegment::CreateSegment( m_CurrentSys[ 0 ], GetBodyModel(), this );
 
 		pSegment->SetAbsOrigin( pev->origin );
 
-		pSegment = altseg[ 0 ] = CRopeSegment::CreateSegment( m_CurrentSys[ 0 ], GetBodyModel() );
+		pSegment = altseg[ 0 ] = CRopeSegment::CreateSegment( m_CurrentSys[ 0 ], GetBodyModel(), this );
 
 		pSegment->SetAbsOrigin( pev->origin );
 	}
@@ -300,9 +282,9 @@ void CRope::StartThink()
 		for( int uiSeg = 1; uiSeg < m_iSegments - 1; ++uiSeg )
 		{
 			CRopeSample* pSegSample = m_CurrentSys[ uiSeg ];
-			seg[ uiSeg ] = CRopeSegment::CreateSegment( pSegSample, GetBodyModel() );
+			seg[ uiSeg ] = CRopeSegment::CreateSegment( pSegSample, GetBodyModel(), this );
 
-			altseg[ uiSeg ] = CRopeSegment::CreateSegment( pSegSample, GetBodyModel() );
+			altseg[ uiSeg ] = CRopeSegment::CreateSegment( pSegSample, GetBodyModel(), this );
 
 			CRopeSegment* pCurrent = seg[ uiSeg - 1 ];
 
@@ -320,9 +302,9 @@ void CRope::StartThink()
 	}
 
 	CRopeSample* pSegSample = m_CurrentSys[ m_iSegments - 1 ];
-	seg[ m_iSegments - 1 ] = CRopeSegment::CreateSegment( pSegSample, GetEndingModel() );
+	seg[ m_iSegments - 1 ] = CRopeSegment::CreateSegment( pSegSample, GetEndingModel(), this );
 
-	altseg[ m_iSegments - 1 ] = CRopeSegment::CreateSegment( pSegSample, GetEndingModel() );
+	altseg[ m_iSegments - 1 ] = CRopeSegment::CreateSegment( pSegSample, GetEndingModel(), this );
 
 	CRopeSegment* pCurrent = seg[ m_iSegments - 2 ];
 
@@ -385,8 +367,6 @@ void CRope::InitializeRopeSim()
 	for( int uiSample = 0; uiSample < m_NumSamples; ++uiSample )
 	{
 		m_TargetSys[ uiSample ] = CRopeSample::CreateSample();
-
-		m_TargetSys[ uiSample ]->SetMasterRope( this );
 	}
 
 	memset( m_TargetSys + m_NumSamples, 0, sizeof( CRopeSample* ) * ( MAX_SAMPLES - m_NumSamples ) );
@@ -1193,7 +1173,6 @@ TYPEDESCRIPTION	CRopeSample::m_SaveData[] =
 	DEFINE_FIELD( CRopeSample, data.mApplyExternalForce, FIELD_CHARACTER ),
 	DEFINE_FIELD( CRopeSample, data.mMassReciprocal, FIELD_FLOAT ),
 	DEFINE_FIELD( CRopeSample, data.restLength, FIELD_FLOAT ),
-	DEFINE_FIELD( CRopeSample, mMasterRope, FIELD_CLASSPTR ),
 };
 
 IMPLEMENT_SAVERESTORE(CRopeSample, CBaseEntity)
@@ -1224,6 +1203,7 @@ TYPEDESCRIPTION	CRopeSegment::m_SaveData[] =
 	DEFINE_FIELD( CRopeSegment, mDefaultMass, FIELD_FLOAT ),
 	DEFINE_FIELD( CRopeSegment, mCauseDamage, FIELD_CHARACTER ),
 	DEFINE_FIELD( CRopeSegment, mCanBeGrabbed, FIELD_CHARACTER ),
+	DEFINE_FIELD( CRopeSegment, mMasterRope, FIELD_CLASSPTR ),
 };
 IMPLEMENT_SAVERESTORE( CRopeSegment, CBaseAnimating )
 
@@ -1269,7 +1249,7 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 			pOther->TakeDamage( pev, pev, 1, DMG_SHOCK );
 		}
 
-		if( m_Sample->GetMasterRope()->IsAcceptingAttachment() && !(pPlayer->m_afPhysicsFlags & PFLAG_ONROPE) )
+		if( GetMasterRope()->IsAcceptingAttachment() && !(pPlayer->m_afPhysicsFlags & PFLAG_ONROPE) )
 		{
 			if( mCanBeGrabbed )
 			{
@@ -1278,8 +1258,8 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 				pOther->pev->origin = data->mPosition;
 
 				pPlayer->SetOnRopeState( true );
-				pPlayer->SetRope( m_Sample->GetMasterRope() );
-				m_Sample->GetMasterRope()->AttachObjectToSegment( this );
+				pPlayer->SetRope( GetMasterRope() );
+				GetMasterRope()->AttachObjectToSegment( this );
 
 				const Vector& vecVelocity = pOther->pev->velocity;
 
@@ -1291,7 +1271,7 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 					data->mExternalForce = data->mExternalForce + vecVelocity * 750;
 				}
 
-				if( m_Sample->GetMasterRope()->IsSoundAllowed() )
+				if( GetMasterRope()->IsSoundAllowed() )
 				{
 					EMIT_SOUND( edict(), CHAN_BODY, "items/grab_rope.wav", 1.0, ATTN_NORM );
 				}
@@ -1299,7 +1279,7 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 			else
 			{
 				//This segment cannot be grabbed, so grab the highest one if possible. - Solokiller
-				CRope *pRope = m_Sample->GetMasterRope();
+				CRope *pRope = GetMasterRope();
 
 				CRopeSegment* pSegment;
 
@@ -1320,7 +1300,7 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 	}
 }
 
-CRopeSegment* CRopeSegment::CreateSegment( CRopeSample* pSample, string_t iszModelName )
+CRopeSegment* CRopeSegment::CreateSegment( CRopeSample* pSample, string_t iszModelName, CRope* rope )
 {
 	CRopeSegment* pSegment = GetClassPtr<CRopeSegment>( NULL );
 
@@ -1333,6 +1313,7 @@ CRopeSegment* CRopeSegment::CreateSegment( CRopeSample* pSample, string_t iszMod
 	pSegment->mCauseDamage = false;
 	pSegment->mCanBeGrabbed = true;
 	pSegment->mDefaultMass = pSample->GetData()->mMassReciprocal;
+	pSegment->SetMasterRope(rope);
 
 	return pSegment;
 }
