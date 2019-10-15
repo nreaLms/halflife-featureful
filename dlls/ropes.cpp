@@ -1269,6 +1269,8 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 			pOther->TakeDamage( pev, pev, 1, DMG_SHOCK );
 		}
 
+		pPlayer->m_flLastTouchedByRope = gpGlobals->time;
+
 		if (pPlayer->m_afPhysicsFlags & PFLAG_ONBARNACLE)
 			return;
 

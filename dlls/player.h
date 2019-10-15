@@ -376,6 +376,7 @@ public:
 #if FEATURE_ROPE
 	bool m_bIsClimbing;
 	float m_flLastClimbTime;
+	float m_flLastTouchedByRope;
 	CRope *m_pRope;
 	BOOL IsOnRope()
 	{

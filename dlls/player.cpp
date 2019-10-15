@@ -126,6 +126,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 #endif
 #if FEATURE_ROPE
 	DEFINE_FIELD(CBasePlayer, m_pRope, FIELD_CLASSPTR),
+	DEFINE_FIELD(CBasePlayer, m_flLastTouchedByRope, FIELD_TIME),
 #endif
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
 
@@ -2281,6 +2282,26 @@ void CBasePlayer::PreThink( void )
 		}
 		return;
 	}
+
+	if (gpGlobals->time < m_flLastTouchedByRope + 0.5)
+	{
+		TraceResult trace;
+		UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, human_hull, edict(), &trace );
+		if( trace.fStartSolid )
+		{
+			ALERT(at_aiconsole, "Player stuck. Trying to unstuck\n");
+			pev->origin.z++;
+			for( int i = 0; i < 17; i++ )
+			{
+				UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, head_hull, edict(), &trace );
+				if( trace.fStartSolid )
+					pev->origin.z++;
+				else
+					break;
+			}
+		}
+	}
+
 #endif
 
 	// Train speed control
