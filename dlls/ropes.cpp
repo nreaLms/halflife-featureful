@@ -172,22 +172,7 @@ TYPEDESCRIPTION	CRope::m_SaveData[] =
 	DEFINE_FIELD( CRope, m_bMakeSound, FIELD_CHARACTER ),
 };
 
-int CRope::Save( CSave &save )
-{
-	if( !CBaseDelay::Save( save ) )
-		return 0;
-	return save.WriteFields( "CBaseDelay", this, m_SaveData, ARRAYSIZE( m_SaveData ) );
-}
-
-int CRope::Restore( CRestore &restore )
-{
-	if( !CBaseDelay::Restore( restore ) )
-		return 0;
-	int status = restore.ReadFields( "CBaseDelay", this, m_SaveData, ARRAYSIZE( m_SaveData ) );
-
-	return status;
-}
-
+IMPLEMENT_SAVERESTORE( CRope, CBaseDelay )
 
 LINK_ENTITY_TO_CLASS( env_rope, CRope )
 
