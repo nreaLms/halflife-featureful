@@ -76,11 +76,28 @@ public:
 
 	static CRopeSample* CreateSample();
 
-	const RopeSampleData* GetData() const { return &data; }
+	RopeSampleData* GetData() {
+		if (swapped)
+			return &data2;
+		else
+			return &data;
+	}
+	RopeSampleData* GetData2() {
+		if (swapped)
+			return &data;
+		else
+			return &data2;
+	}
 
-	RopeSampleData* GetData() { return &data; }
+	void Swap()
+	{
+		swapped = !swapped;
+	}
+
 private:
 	RopeSampleData data;
+	RopeSampleData data2;
+	BOOL swapped;
 };
 
 
@@ -147,8 +164,7 @@ TYPEDESCRIPTION	CRope::m_SaveData[] =
 	DEFINE_FIELD( CRope, detachTime, FIELD_TIME ),
 	DEFINE_ARRAY( CRope, seg, FIELD_CLASSPTR, MAX_SEGMENTS ),
 	DEFINE_ARRAY( CRope, altseg, FIELD_CLASSPTR, MAX_SEGMENTS ),
-	DEFINE_ARRAY( CRope, m_CurrentSys, FIELD_CLASSPTR, MAX_SAMPLES ),
-	DEFINE_ARRAY( CRope, m_TargetSys, FIELD_CLASSPTR, MAX_SAMPLES ),
+	DEFINE_ARRAY( CRope, m_Samples, FIELD_CLASSPTR, MAX_SAMPLES ),
 	DEFINE_FIELD( CRope, mDisallowPlayerAttachment, FIELD_INTEGER ),
 	DEFINE_FIELD( CRope, mBodyModel, FIELD_STRING ),
 	DEFINE_FIELD( CRope, mEndingModel, FIELD_STRING ),
@@ -254,18 +270,18 @@ void CRope::StartThink()
 
 	for( int uiSample = 0; uiSample < m_NumSamples; ++uiSample )
 	{
-		m_CurrentSys[ uiSample ] = CRopeSample::CreateSample();
-		UTIL_SetOrigin(m_CurrentSys[ uiSample ]->pev, pev->origin);
+		m_Samples[ uiSample ] = CRopeSample::CreateSample();
+		UTIL_SetOrigin(m_Samples[ uiSample ]->pev, pev->origin);
 	}
 
-	memset( m_CurrentSys + m_NumSamples, 0, sizeof( CRopeSample* ) * ( MAX_SAMPLES - m_NumSamples ) );
+	memset( m_Samples + m_NumSamples, 0, sizeof( CRopeSample* ) * ( MAX_SAMPLES - m_NumSamples ) );
 
 	{
-		CRopeSegment* pSegment = seg[ 0 ] = CRopeSegment::CreateSegment( m_CurrentSys[ 0 ], GetBodyModel(), this );
+		CRopeSegment* pSegment = seg[ 0 ] = CRopeSegment::CreateSegment( m_Samples[ 0 ], GetBodyModel(), this );
 
 		pSegment->SetAbsOrigin( pev->origin );
 
-		pSegment = altseg[ 0 ] = CRopeSegment::CreateSegment( m_CurrentSys[ 0 ], GetBodyModel(), this );
+		pSegment = altseg[ 0 ] = CRopeSegment::CreateSegment( m_Samples[ 0 ], GetBodyModel(), this );
 
 		pSegment->SetAbsOrigin( pev->origin );
 	}
@@ -277,11 +293,11 @@ void CRope::StartThink()
 
 	if( m_iSegments > 2 )
 	{
-		CRopeSample** ppCurrentSys = m_CurrentSys;
+		CRopeSample** ppCurrentSys = m_Samples;
 
 		for( int uiSeg = 1; uiSeg < m_iSegments - 1; ++uiSeg )
 		{
-			CRopeSample* pSegSample = m_CurrentSys[ uiSeg ];
+			CRopeSample* pSegSample = m_Samples[ uiSeg ];
 			seg[ uiSeg ] = CRopeSegment::CreateSegment( pSegSample, GetBodyModel(), this );
 
 			altseg[ uiSeg ] = CRopeSegment::CreateSegment( pSegSample, GetBodyModel(), this );
@@ -301,7 +317,7 @@ void CRope::StartThink()
 		}
 	}
 
-	CRopeSample* pSegSample = m_CurrentSys[ m_iSegments - 1 ];
+	CRopeSample* pSegSample = m_Samples[ m_iSegments - 1 ];
 	seg[ m_iSegments - 1 ] = CRopeSegment::CreateSegment( pSegSample, GetEndingModel(), this );
 
 	altseg[ m_iSegments - 1 ] = CRopeSegment::CreateSegment( pSegSample, GetEndingModel(), this );
@@ -364,13 +380,6 @@ void CRope::InitializeRopeSim()
 {
 	int uiIndex;
 
-	for( int uiSample = 0; uiSample < m_NumSamples; ++uiSample )
-	{
-		m_TargetSys[ uiSample ] = CRopeSample::CreateSample();
-	}
-
-	memset( m_TargetSys + m_NumSamples, 0, sizeof( CRopeSample* ) * ( MAX_SAMPLES - m_NumSamples ) );
-
 	for( int uiSeg = 0; uiSeg < m_iSegments; ++uiSeg )
 	{
 		CRopeSegment* pSegment = seg[ uiSeg ];
@@ -393,7 +402,7 @@ void CRope::InitializeRopeSim()
 
 	{
 		//Zero out the anchored segment's mass so it stays in place.
-		CRopeSample *pSample = m_CurrentSys[ 0 ];
+		CRopeSample *pSample = m_Samples[ 0 ];
 
 		pSample->GetData()->mMassReciprocal = 0;
 	}
@@ -412,7 +421,7 @@ void CRope::InitializeRopeSim()
 
 	vecOrigin = vecGravity * flLength + pSegment->pev->origin;
 
-	CRopeSample* pSample = m_CurrentSys[ m_NumSamples - 1 ];
+	CRopeSample* pSample = m_Samples[ m_NumSamples - 1 ];
 
 	RopeSampleData *data = pSample->GetData();
 
@@ -453,15 +462,12 @@ void CRope::RunSimOnSamples()
 
 	int uiIndex = 0;
 
-	CRopeSample** ppSampleSource = m_CurrentSys;
-	CRopeSample** ppSampleTarget = m_TargetSys;
-
 	while( true )
 	{
 		++uiIndex;
 
-		ComputeForces( ppSampleSource );
-		RK4Integrate( flDeltaTime, ppSampleSource, ppSampleTarget );
+		ComputeForces( m_Samples );
+		RK4Integrate( flDeltaTime );
 
 		mLastTime += 0.007;
 
@@ -470,9 +476,15 @@ void CRope::RunSimOnSamples()
 			if( ( uiIndex % 2 ) != 0 )
 				break;
 		}
-		CRopeSample **swap = ppSampleSource;
-		ppSampleSource = ppSampleTarget;
-		ppSampleTarget = swap;
+
+		for (int i=0; i<m_NumSamples; ++i)
+		{
+			m_Samples[i]->Swap();
+		}
+
+		//CRopeSample **swap = ppSampleSource;
+		//ppSampleSource = ppSampleTarget;
+		//ppSampleTarget = swap;
 
 		//std::swap( ppSampleSource, ppSampleTarget );
 
@@ -557,7 +569,7 @@ void CRope::ComputeSpringForce( RopeSampleData& first, RopeSampleData& second )
 	second.mForce = second.mForce - vecForce;
 }
 
-void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource, CRopeSample** ppSampleTarget )
+void CRope::RK4Integrate( const float flDeltaTime )
 {
 	const float flDeltas[ MAX_LIST_SEGMENTS - 1 ] =
 	{
@@ -573,7 +585,7 @@ void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource,
 
 		for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
 		{
-			RopeSampleData *data = ppSampleSource[ uiIndex ]->GetData();
+			RopeSampleData *data = m_Samples[ uiIndex ]->GetData();
 
 			pTemp2->mForce = data->mMassReciprocal * data->mForce * flDeltas[ 0 ];
 			pTemp2->mVelocity = data->mVelocity * flDeltas[ 0 ];
@@ -595,7 +607,7 @@ void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource,
 
 		for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
 		{
-			RopeSampleData *data = ppSampleSource[ uiIndex ]->GetData();
+			RopeSampleData *data = m_Samples[ uiIndex ]->GetData();
 
 			pTemp2->mForce = data->mMassReciprocal * pTemp1->mForce * flDeltas[ uiStep - 1 ];
 			pTemp2->mVelocity = pTemp1->mVelocity * flDeltas[ uiStep - 1 ];
@@ -616,7 +628,7 @@ void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource,
 
 		for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2 )
 		{
-			RopeSampleData *data = ppSampleSource[ uiIndex ]->GetData();
+			RopeSampleData *data = m_Samples[ uiIndex ]->GetData();
 
 			pTemp2->mForce = data->mMassReciprocal * pTemp1->mForce * flDeltas[ 3 ];
 
@@ -631,16 +643,16 @@ void CRope::RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource,
 
 	for( int uiIndex = 0; uiIndex < m_NumSamples; ++uiIndex, ++pTemp1, ++pTemp2, ++pTemp3, ++pTemp4 )
 	{
-		CRopeSample *pSource = ppSampleSource[ uiIndex ];
-		CRopeSample *pTarget = ppSampleTarget[ uiIndex ];
+		RopeSampleData *pSource = m_Samples[ uiIndex ]->GetData();
+		RopeSampleData *pTarget = m_Samples[ uiIndex ]->GetData2();
 
 		const Vector vecPosChange = 1.0f / 6.0f * ( pTemp1->mVelocity + ( pTemp2->mVelocity + pTemp3->mVelocity ) * 2 + pTemp4->mVelocity );
 
 		const Vector vecVelChange = 1.0f / 6.0f * ( pTemp1->mForce + ( pTemp2->mForce + pTemp3->mForce ) * 2 + pTemp4->mForce );
 
-		pTarget->GetData()->mPosition = pSource->GetData()->mPosition + ( vecPosChange );//* flDeltaTime );
+		pTarget->mPosition = pSource->mPosition + ( vecPosChange );//* flDeltaTime );
 
-		pTarget->GetData()->mVelocity = pSource->GetData()->mVelocity + ( vecVelChange );//* flDeltaTime );
+		pTarget->mVelocity = pSource->mVelocity + ( vecVelChange );//* flDeltaTime );
 	}
 }
 
@@ -683,8 +695,8 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 		Vector vecAngles;
 
 		GetAlignmentAngles(
-			m_CurrentSys[ 0 ]->GetData()->mPosition,
-			m_CurrentSys[ 1 ]->GetData()->mPosition,
+			m_Samples[ 0 ]->GetData()->mPosition,
+			m_Samples[ 1 ]->GetData()->mPosition,
 			vecAngles );
 
 		( *ppPrimarySegs )->SetAbsAngles( vecAngles );
@@ -696,7 +708,7 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 	{
 		for( int uiSeg = 1; uiSeg < m_iSegments; ++uiSeg )
 		{
-			CRopeSample* pSample = m_CurrentSys[ uiSeg ];
+			CRopeSample* pSample = m_Samples[ uiSeg ];
 
 			Vector vecDist = pSample->GetData()->mPosition - ppHiddenSegs[ uiSeg ]->pev->origin;
 
@@ -749,12 +761,12 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 		{
 			UTIL_TraceLine(
 				ppHiddenSegs[ uiSeg ]->pev->origin,
-				m_CurrentSys[ uiSeg ]->GetData()->mPosition,
+				m_Samples[ uiSeg ]->GetData()->mPosition,
 				ignore_monsters, edict(), &tr );
 
 			if( tr.flFraction == 1.0 )
 			{
-				Vector vecOrigin = m_CurrentSys[ uiSeg ]->GetData()->mPosition;
+				Vector vecOrigin = m_Samples[ uiSeg ]->GetData()->mPosition;
 
 				TruncateEpsilon( vecOrigin );
 
@@ -792,7 +804,7 @@ void CRope::TraceModels( CRopeSegment** ppPrimarySegs, CRopeSegment** ppHiddenSe
 
 	if( m_iSegments > 1 )
 	{
-		CRopeSample *pSample = m_CurrentSys[ m_NumSamples - 1 ];
+		CRopeSample *pSample = m_Samples[ m_NumSamples - 1 ];
 
 		UTIL_TraceLine( m_LastEndPos, pSample->GetData()->mPosition, ignore_monsters, edict(), &tr );
 
@@ -999,7 +1011,7 @@ void CRope::ApplyForceToSegment( const Vector& vecForce, const int uiSegment )
 	{
 		//Apply force to the last sample.
 
-		RopeSampleData *data = m_CurrentSys[ uiSegment - 1 ]->GetData();
+		RopeSampleData *data = m_Samples[ uiSegment - 1 ]->GetData();
 
 		data->mExternalForce = data->mExternalForce + vecForce;
 
@@ -1090,7 +1102,7 @@ float CRope::GetRopeLength() const
 
 Vector CRope::GetRopeOrigin() const
 {
-	return m_CurrentSys[ 0 ]->GetData()->mPosition;
+	return m_Samples[ 0 ]->GetData()->mPosition;
 }
 
 bool CRope::IsValidSegmentIndex( const int uiSegment ) const
@@ -1103,7 +1115,7 @@ Vector CRope::GetSegmentOrigin( const int uiSegment ) const
 	if( !IsValidSegmentIndex( uiSegment ) )
 		return g_vecZero;
 
-	return m_CurrentSys[ uiSegment ]->GetData()->mPosition;
+	return m_Samples[ uiSegment ]->GetData()->mPosition;
 }
 
 Vector CRope::GetSegmentAttachmentPoint( const int uiSegment ) const
@@ -1139,8 +1151,8 @@ Vector CRope::GetSegmentDirFromOrigin( const int uiSegmentIndex ) const
 
 	//There is one more sample than there are segments, so this is fine.
 	const Vector vecResult =
-		m_CurrentSys[ uiSegmentIndex + 1 ]->GetData()->mPosition -
-		m_CurrentSys[ uiSegmentIndex ]->GetData()->mPosition;
+		m_Samples[ uiSegmentIndex + 1 ]->GetData()->mPosition -
+		m_Samples[ uiSegmentIndex ]->GetData()->mPosition;
 
 	return vecResult.Normalize();
 }
@@ -1153,7 +1165,7 @@ Vector CRope::GetAttachedObjectsPosition() const
 	Vector vecResult;
 
 	if( mAttachedObjectsSegment < m_iSegments )
-		vecResult = m_CurrentSys[ mAttachedObjectsSegment ]->GetData()->mPosition;
+		vecResult = m_Samples[ mAttachedObjectsSegment ]->GetData()->mPosition;
 
 	vecResult = vecResult +
 		( mAttachedObjectsOffset * GetSegmentDirFromOrigin( mAttachedObjectsSegment ) );
@@ -1173,6 +1185,14 @@ TYPEDESCRIPTION	CRopeSample::m_SaveData[] =
 	DEFINE_FIELD( CRopeSample, data.mApplyExternalForce, FIELD_CHARACTER ),
 	DEFINE_FIELD( CRopeSample, data.mMassReciprocal, FIELD_FLOAT ),
 	DEFINE_FIELD( CRopeSample, data.restLength, FIELD_FLOAT ),
+	DEFINE_FIELD( CRopeSample, data2.mPosition, FIELD_VECTOR ),
+	DEFINE_FIELD( CRopeSample, data2.mVelocity, FIELD_VECTOR ),
+	DEFINE_FIELD( CRopeSample, data2.mForce, FIELD_VECTOR ),
+	DEFINE_FIELD( CRopeSample, data2.mExternalForce, FIELD_VECTOR ),
+	DEFINE_FIELD( CRopeSample, data2.mApplyExternalForce, FIELD_CHARACTER ),
+	DEFINE_FIELD( CRopeSample, data2.mMassReciprocal, FIELD_FLOAT ),
+	DEFINE_FIELD( CRopeSample, data2.restLength, FIELD_FLOAT ),
+	DEFINE_FIELD( CRopeSample, swapped, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE(CRopeSample, CBaseEntity)
@@ -1248,6 +1268,9 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 		{
 			pOther->TakeDamage( pev, pev, 1, DMG_SHOCK );
 		}
+
+		if (pPlayer->m_afPhysicsFlags & PFLAG_ONBARNACLE)
+			return;
 
 		if( GetMasterRope()->IsAcceptingAttachment() && !(pPlayer->m_afPhysicsFlags & PFLAG_ONROPE) )
 		{

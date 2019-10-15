@@ -86,7 +86,7 @@ public:
 	*	@param ppSampleSource Previous sample state.
 	*	@param ppSampleTarget Next sample state.
 	*/
-	void RK4Integrate( const float flDeltaTime, CRopeSample** ppSampleSource, CRopeSample** ppSampleTarget );
+	void RK4Integrate(const float flDeltaTime);
 
 	/**
 	*	Traces model positions and angles and corrects them.
@@ -268,8 +268,7 @@ private:
 	Vector m_LastEndPos;
 	Vector m_Gravity;
 
-	CRopeSample* m_CurrentSys[ MAX_SAMPLES ];
-	CRopeSample* m_TargetSys[ MAX_SAMPLES ];
+	CRopeSample* m_Samples[ MAX_SAMPLES ];
 
 	int m_NumSamples;
 
