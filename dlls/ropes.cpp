@@ -184,7 +184,6 @@ int CRope::Restore( CRestore &restore )
 	if( !CBaseDelay::Restore( restore ) )
 		return 0;
 	int status = restore.ReadFields( "CBaseDelay", this, m_SaveData, ARRAYSIZE( m_SaveData ) );
-	m_InitialDeltaTime = 0;
 
 	return status;
 }
@@ -1266,7 +1265,12 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 		//Electrified wires deal damage. - Solokiller
 		if( mCauseDamage )
 		{
-			pOther->TakeDamage( pev, pev, 1, DMG_SHOCK );
+			if( gpGlobals->time >= pev->dmgtime )
+			{
+				if( pev->dmg < 0 ) pOther->TakeHealth( -pev->dmg, DMG_GENERIC );
+				else pOther->TakeDamage( pev, pev, pev->dmg ? pev->dmg : 5, DMG_SHOCK );
+				pev->dmgtime = gpGlobals->time + 0.5f;
+			}
 		}
 
 		pPlayer->m_flLastTouchedByRope = gpGlobals->time;
