@@ -587,7 +587,7 @@ public:
 	void DeathSound(void);
 	void IdleSound(void);
 	void AlertSound(void);
-	void PrescheduleThink(void);
+	void MonsterThink(void);
 	void StartTask(Task_t* pTask);
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 
@@ -659,9 +659,10 @@ void CShockRoach::Spawn()
 	Precache();
 
 	SetMyModel("models/w_shock_rifle.mdl");
+	UTIL_SetOrigin(pev, pev->origin);
 
 	pev->solid = SOLID_SLIDEBOX;
-	pev->movetype = MOVETYPE_STEP;
+	pev->movetype = MOVETYPE_FLY;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
 	SetMyHealth( gSkillData.sroachHealth );
@@ -732,21 +733,26 @@ void CShockRoach::LeapTouch(CBaseEntity *pOther)
 //=========================================================
 // PrescheduleThink
 //=========================================================
-void CShockRoach::PrescheduleThink(void)
+void CShockRoach::MonsterThink(void)
 {
-	if (!m_fRoachSolid && m_flBirthTime + 0.2 >= gpGlobals->time) {
+	float lifeTime = (gpGlobals->time - m_flBirthTime);
+	if (lifeTime >= 0.2)
+	{
+		pev->movetype = MOVETYPE_STEP;
+	}
+	if (!m_fRoachSolid && lifeTime >= 1.0) {
 		m_fRoachSolid = TRUE;
 		SetMySize(Vector(-12, -12, 0), Vector(12, 12, 24));
 	}
 	// explode when ready
-	if (gpGlobals->time >= m_flBirthTime + gSkillData.sroachLifespan)
+	if (lifeTime >= + gSkillData.sroachLifespan)
 	{
 		pev->health = -1;
 		Killed(pev, 0);
 		return;
 	}
 
-	CHeadCrab::PrescheduleThink();
+	CHeadCrab::MonsterThink();
 }
 
 //=========================================================
@@ -806,6 +812,8 @@ void CShockRoach::AttackSound()
 
 int CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	if ( gpGlobals->time - m_flBirthTime < 2.0 )
+		flDamage = 0.0;
 	// Skip headcrab's TakeDamage to avoid unwanted immunity to friendly acid.
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }

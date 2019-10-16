@@ -107,7 +107,7 @@ public:
 	int DefaultGibCount() {
 		return STRIIPER_GIB_COUNT;
 	}
-	void DropShockRoach();
+	void DropShockRoach(bool gibbed);
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -254,7 +254,7 @@ void CStrooper::GibMonster(void)
 {
 	if (GetBodygroup(STROOPER_GUN_GROUP) != STROOPER_GUN_NONE)
 	{
-		DropShockRoach();
+		DropShockRoach(true);
 	}
 
 	CBaseMonster::GibMonster();
@@ -295,7 +295,7 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 		if (GetBodygroup(STROOPER_GUN_GROUP) != STROOPER_GUN_NONE)
 		{
-			DropShockRoach();
+			DropShockRoach(false);
 		}
 	}
 	break;
@@ -540,7 +540,7 @@ void CStrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDi
 	CFollowingMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
-void CStrooper::DropShockRoach()
+void CStrooper::DropShockRoach(bool gibbed)
 {
 	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
 	{
@@ -550,13 +550,23 @@ void CStrooper::DropShockRoach()
 		GetAttachment(0, vecGunPos, vecGunAngles);
 		SetBodygroup(STROOPER_GUN_GROUP, STROOPER_GUN_NONE);
 
-		Vector vecPos = pev->origin;
-		vecPos.z += 32;
+		Vector vecDropGunAngles = pev->angles;
+		vecDropGunAngles.x = vecDropGunAngles.z = 0;
 
 		// now spawn a shockroach.
-		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecPos, pev->angles );
+		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecGunPos, pev->angles );
 		if (pRoach)
 		{
+			if (gibbed)
+			{
+				pRoach->pev->velocity = Vector(RANDOM_FLOAT(-100.0f, 100.0f), RANDOM_FLOAT(-100.0f, 100.0f), RANDOM_FLOAT(200.0f, 300.0f));
+				pRoach->pev->avelocity = Vector(0, RANDOM_FLOAT(200.0f, 300.0f), 0);
+			}
+			else
+			{
+				pRoach->pev->velocity = Vector(RANDOM_FLOAT(-20.0f, 20.0f) , RANDOM_FLOAT(-20.0f, 20.0f), RANDOM_FLOAT(20.0f, 30.0f));
+				pRoach->pev->avelocity = Vector(0, RANDOM_FLOAT(20.0f, 40.0f), 0);
+			}
 			if (ShouldFadeOnDeath())
 				pRoach->pev->spawnflags |= SF_MONSTER_FADECORPSE;
 			CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
