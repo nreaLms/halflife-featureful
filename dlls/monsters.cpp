@@ -3662,15 +3662,18 @@ BOOL CBaseMonster::FCanActiveIdle( void )
 	return FALSE;
 }
 
-void CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
+bool CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
 {
 	if( pszSentence && IsAlive() )
 	{
 		if( pszSentence[0] == '!' )
-			EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, PITCH_NORM );
+		{
+			return EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, PITCH_NORM );
+		}
 		else
-			SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, PITCH_NORM );
+			return SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, PITCH_NORM ) >= 0;
 	}
+	return false;
 }
 
 void CBaseMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )

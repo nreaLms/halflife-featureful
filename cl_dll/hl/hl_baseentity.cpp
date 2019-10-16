@@ -39,7 +39,7 @@ globalvars_t *gpGlobals;
 
 ItemInfo CBasePlayerWeapon::ItemInfoArray[MAX_WEAPONS];
 
-void EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch ) { }
+bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch ) { return true; }
 
 // CBaseEntity Stubs
 int CBaseEntity::TakeHealth( float flHealth, int bitsDamageType ) { return 1; }
@@ -211,7 +211,7 @@ BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecV
 Vector CBaseMonster::ShootAtEnemy( const Vector &shootOrigin ) { return g_vecZero; }
 BOOL CBaseMonster::FacingIdeal( void ) { return FALSE; }
 BOOL CBaseMonster::FCanActiveIdle( void ) { return FALSE; }
-void CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation ) { }
+bool CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation ) { return true; }
 void CBaseMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener ) { }
 void CBaseMonster::SentenceStop( void ) { }
 void CBaseMonster::CorpseFallThink( void ) { }

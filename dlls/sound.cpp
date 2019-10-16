@@ -1377,18 +1377,27 @@ int SENTENCEG_Lookup( const char *sample, char *sentencenum )
 	return -1;
 }
 
-void EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch )
+bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch )
 {
 	if( sample && *sample == '!' )
 	{
 		char name[32];
 		if( SENTENCEG_Lookup( sample, name ) >= 0 )
+		{
 			EMIT_SOUND_DYN2( entity, channel, name, volume, attenuation, flags, pitch );
+			return true;
+		}
 		else
+		{
 			ALERT( at_aiconsole, "Unable to find %s in sentences.txt\n", sample );
+			return false;
+		}
 	}
 	else
+	{
 		EMIT_SOUND_DYN2( entity, channel, sample, volume, attenuation, flags, pitch );
+		return true;
+	}
 }
 
 // play a specific sentence over the HEV suit speaker - just pass player entity, and !sentencename

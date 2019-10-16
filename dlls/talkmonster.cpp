@@ -987,7 +987,7 @@ void CTalkMonster::IdleRespond( void )
 	PlaySentence( m_szGrp[TLK_ANSWER], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
 }
 
-void CTalkMonster::AskQuestion(float duration)
+bool CTalkMonster::AskQuestion(float duration)
 {
 	const char *szQuestionGroup;
 
@@ -996,7 +996,7 @@ void CTalkMonster::AskQuestion(float duration)
 	else
 		szQuestionGroup = m_szGrp[TLK_QUESTION];
 
-	PlaySentence( szQuestionGroup, duration, VOL_NORM, ATTN_IDLE );
+	return PlaySentence( szQuestionGroup, duration, VOL_NORM, ATTN_IDLE );
 }
 
 void CTalkMonster::MakeIdleStatement()
@@ -1178,12 +1178,12 @@ int CTalkMonster::FIdleSpeak( void )
 		// force friend to answer
 		CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
 		if (pTalkMonster->m_flStopTalkTime <= gpGlobals->time + duration &&
-				pTalkMonster->SetAnswerQuestion( this )) // UNDONE: This is EVIL!!!
+				AskQuestion(duration))
 		{
-			AskQuestion(duration);
+			if (pTalkMonster->SetAnswerQuestion( this )) // UNDONE: This is EVIL!!!
+				pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
 
 			m_hTalkTarget = pFriend;
-			pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
 
 			m_nSpeak++;
 			return TRUE;
@@ -1223,21 +1223,23 @@ void CTalkMonster::PlayScriptedSentence( const char *pszSentence, float duration
 	m_hTalkTarget = pListener;
 }
 
-void CTalkMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
+bool CTalkMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
 {
 	if( !pszSentence )
-		return;
+		return false;
 
 	Talk( duration );
 
 	CTalkMonster::g_talkWaitTime = gpGlobals->time + duration + 2.0;
+	bool status = false;
 	if( pszSentence[0] == '!' )
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, GetVoicePitch() );
+		status = EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, GetVoicePitch() );
 	else
-		SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, GetVoicePitch() );
+		status = SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, GetVoicePitch() ) >= 0;
 
 	// If you say anything, don't greet the player - you may have already spoken to them
 	SetBits( m_bitsSaid, bit_saidHelloPlayer );
+	return status;
 }
 
 //=========================================================
