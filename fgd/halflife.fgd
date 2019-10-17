@@ -6,6 +6,7 @@
 // autolycus@valvesoftware.com
 // http://www.valve-erc.com/
 // modified by XaeroX / support@hlfx.ru
+// changes and additions by FreeSlave
 //
 
 //
@@ -5646,7 +5647,7 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles, Classification) size(-16 -16 -16, 16 16 16) = MonsterMaker
+@BaseClass base(Targetname, Angles, Classification) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
 	target(target_destination) : "Target On Release"
 	monstertype(string) : "Monster Type"
