@@ -1992,7 +1992,7 @@
 
 @SolidClass base(Targetname, Global, RenderFields, ZHLT) = func_train : "Moving platform"
 [
-	target(target_source) : "First stop target"
+	target(target_destination) : "First stop target"
 	movesnd(choices) : "Move Sound" : 0 =
 	[
 		0: "No Sound"
@@ -2039,6 +2039,7 @@
 	spawnflags(flags) =
 	[
 		2 : "Origin on paths" : 0
+		4 : "Initially On" : 0
 		8 : "Not solid" : 0
 		64 : "No default damage" : 0
 	]

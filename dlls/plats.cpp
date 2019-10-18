@@ -873,7 +873,7 @@ void CFuncTrain::Activate( void )
 
 		UTIL_SetOrigin( pev, DestinationVector(pevTarg) );
 
-		if( FStringNull( pev->targetname ) )
+		if( FStringNull( pev->targetname ) || (pev->spawnflags & SF_TRAIN_START_ON) )
 		{	// not triggered, so start immediately
 			pev->nextthink = pev->ltime + 0.1;
 			SetThink( &CFuncTrain::ThinkNext );
@@ -2329,7 +2329,10 @@ class CTrainThinker : public CBaseEntity
 				pev->nextthink = gpGlobals->time + 0.1;
 			}
 			else
+			{
 				SetThink( &CBaseEntity::SUB_Remove );
+				pev->nextthink = gpGlobals->time + 0.1;
+			}
 		}
 	}
 };
