@@ -332,7 +332,8 @@ void CBaseDoor::Spawn()
 	m_toggle_state = TS_AT_BOTTOM;
 
 	// if the door is flagged for USE button activation only, use NULL touch function
-	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
+	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) &&
+			!FBitSet ( pev->spawnflags, SF_DOOR_FORCETOUCHABLE ) )
 	{
 		SetTouch( NULL );
 	}
@@ -553,7 +554,7 @@ void CBaseDoor::DoorTouch( CBaseEntity *pOther )
 
 	// If door is somebody's target, then touching does nothing.
 	// You have to activate the owner (e.g. button).
-	if( !FStringNull( pev->targetname ) )
+	if( !FStringNull( pev->targetname ) && !FBitSet(pev->spawnflags,SF_DOOR_FORCETOUCHABLE) )
 	{
 		// play locked sound
 		PlayLockSounds( pev, &m_ls, TRUE, FALSE );
@@ -677,7 +678,8 @@ void CBaseDoor::DoorHitTop( void )
 	if( FBitSet( pev->spawnflags, SF_DOOR_NO_AUTO_RETURN ) )
 	{
 		// Re-instate touch method, movement is complete
-		if( !FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
+		if( !FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) ||
+				FBitSet ( pev->spawnflags, SF_DOOR_FORCETOUCHABLE ) )
 			SetTouch( &CBaseDoor::DoorTouch );
 	}
 	else
@@ -734,7 +736,8 @@ void CBaseDoor::DoorHitBottom( void )
 	m_toggle_state = TS_AT_BOTTOM;
 
 	// Re-instate touch method, cycle is complete
-	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
+	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) &&
+			!FBitSet ( pev->spawnflags, SF_DOOR_FORCETOUCHABLE ) )
 	{
 		// use only door
 		SetTouch( NULL );
@@ -922,7 +925,7 @@ void CRotDoor::Spawn( void )
 
 	m_toggle_state = TS_AT_BOTTOM;
 
-	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) )
+	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) && !FBitSet(pev->spawnflags, SF_DOOR_FORCETOUCHABLE) )
 	{
 		SetTouch( NULL );
 	}

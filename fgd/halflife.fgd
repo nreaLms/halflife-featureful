@@ -499,6 +499,7 @@
 		32: "Toggle" : 0
 		256:"Use Only" : 0
 		512: "Monsters Can't" : 1
+		1024: "Force Touchable" : 0 : "Open door by touching even when it has a name"
 	]
 	// NOTE: must be duplicated in BUTTON
 	locked_sound(choices) : "Locked Sound" : 0 =
