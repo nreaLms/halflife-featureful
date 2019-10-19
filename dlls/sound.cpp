@@ -115,6 +115,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void EXPORT StartPlayFrom( void );
 	void EXPORT RampThink( void );
 	void InitModulationParms( void );
 
@@ -128,6 +129,9 @@ public:
 
 	BOOL m_fActive;	// only TRUE when the entity is playing a looping sound
 	BOOL m_fLooping;	// TRUE when the sound played will loop
+
+	edict_t *m_pPlayFrom; //LRC - the entity to play from
+	int		m_iChannel; //LRC - the channel to play from, for "play from X" sounds
 };
 
 LINK_ENTITY_TO_CLASS( ambient_generic, CAmbientGeneric )
@@ -137,6 +141,8 @@ TYPEDESCRIPTION	CAmbientGeneric::m_SaveData[] =
 	DEFINE_FIELD( CAmbientGeneric, m_flAttenuation, FIELD_FLOAT ),
 	DEFINE_FIELD( CAmbientGeneric, m_fActive, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CAmbientGeneric, m_fLooping, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CAmbientGeneric, m_iChannel, FIELD_INTEGER ), //LRC
+	DEFINE_FIELD( CAmbientGeneric, m_pPlayFrom, FIELD_EDICT ), //LRC
 
 	// HACKHACK - This is not really in the spirit of the save/restore design, but save this
 	// out as a binary data block.  If the dynpitchvol_t is changed, old saved games will NOT
@@ -233,13 +239,47 @@ void CAmbientGeneric::Precache( void )
 		if( m_fLooping )
 			m_fActive = TRUE;
 	}
+
+	if (pev->target)
+	{
+		CBaseEntity *pTarget = UTIL_FindEntityByTargetname( NULL, STRING(pev->target));
+		if (!pTarget)
+		{
+			ALERT(at_console, "WARNING: ambient_generic \"%s\" can't find \"%s\", its entity to play from.\n",
+					STRING(pev->targetname), STRING(pev->target));
+		}
+		else
+		{
+			m_pPlayFrom = ENT(pTarget->pev);
+		}
+	}
+
 	if( m_fActive )
 	{
-		UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, 
-				( m_dpv.vol * 0.01 ), m_flAttenuation, SND_SPAWNING, m_dpv.pitch );
+		if (m_pPlayFrom)
+		{
+			SetThink(&CAmbientGeneric::StartPlayFrom); //LRC
+		}
+		else
+		{
+			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
+					( m_dpv.vol * 0.01 ), m_flAttenuation, SND_SPAWNING, m_dpv.pitch );
+		}
 
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
+}
+
+void CAmbientGeneric :: StartPlayFrom( void )
+{
+	ALERT(at_console, "Inside start play from entity\n");
+	const char* szSoundFile = STRING(pev->message);
+
+	EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, //LRC
+			(m_dpv.vol * 0.01), m_flAttenuation, SND_SPAWNING, m_dpv.pitch);
+
+	SetThink(&CAmbientGeneric::RampThink);
+	pev->nextthink = gpGlobals->time + 0.1;
 }
 
 // RampThink - Think at 5hz if we are dynamically modifying 
@@ -284,8 +324,15 @@ void CAmbientGeneric::RampThink( void )
 			m_dpv.spindown = 0;				// done with ramp down
 
 			// shut sound off
-			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, 
+			if (m_pPlayFrom)
+			{
+				STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile); //LRC
+			}
+			else
+			{
+				UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
 					0, 0, SND_STOP, 0 );
+			}
 
 			// return without setting nextthink
 			return;
@@ -328,8 +375,15 @@ void CAmbientGeneric::RampThink( void )
 			m_dpv.fadeout = 0;				// done with ramp down
 
 			// shut sound off
-			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, 
+			if (m_pPlayFrom)
+			{
+				STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile); //LRC
+			}
+			else
+			{
+				UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
 					0, 0, SND_STOP, 0 );
+			}
 
 			// return without setting nextthink
 			return;
@@ -432,8 +486,16 @@ void CAmbientGeneric::RampThink( void )
 		if( pitch == PITCH_NORM )
 			pitch = PITCH_NORM + 1; // don't send 'no pitch' !
 
-		UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
+		if (m_pPlayFrom)
+		{
+			EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, (vol * 0.01), //LRC
+					m_flAttenuation, flags, pitch);
+		}
+		else
+		{
+			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
 				( vol * 0.01 ), m_flAttenuation, flags, pitch );
+		}
 	}
 
 	// update ramps at 5hz
@@ -555,7 +617,14 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 
 		m_dpv.pitch = (int)( fraction * 255 );
 
-		UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, 0, 0, SND_CHANGE_PITCH, m_dpv.pitch );
+		if (m_pPlayFrom)
+		{
+			EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, 0, 0, SND_CHANGE_PITCH, m_dpv.pitch);
+		}
+		else
+		{
+			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, 0, 0, SND_CHANGE_PITCH, m_dpv.pitch );
+		}
 		return;
 	}
 
@@ -604,8 +673,14 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 				m_dpv.fadein = 0;
 				pev->nextthink = gpGlobals->time + 0.1;
 			}
+			else if (m_pPlayFrom)
+			{
+				STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile);
+			}
 			else
+			{
 				UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, 0, 0, SND_STOP, 0 );
+			}
 		}
 	}
 	else 
@@ -618,6 +693,10 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		// and then restarted.
 		if( m_fLooping )
 			m_fActive = TRUE;
+		else if (m_pPlayFrom)
+		{
+			STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile); //LRC
+		}
 		else
 			// shut sound off now - may be interrupting a long non-looping sound
 			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, 0, 0, SND_STOP, 0 );
@@ -625,7 +704,15 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		// init all ramp params for startup
 		InitModulationParms();
 
-		UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, ( m_dpv.vol * 0.01 ), m_flAttenuation, 0, m_dpv.pitch );
+		if (m_pPlayFrom)
+		{
+			EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, //LRC
+					(m_dpv.vol * 0.01), m_flAttenuation, 0, m_dpv.pitch);
+		}
+		else
+		{
+			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile, ( m_dpv.vol * 0.01 ), m_flAttenuation, 0, m_dpv.pitch );
+		}
 
 		pev->nextthink = gpGlobals->time + 0.1;
 	} 
@@ -638,8 +725,15 @@ void CAmbientGeneric::KeyValue( KeyValueData *pkvd )
 	// NOTE: changing any of the modifiers in this code
 	// NOTE: also requires changing InitModulationParms code.
 
+	// channel (e.g. CHAN_STATIC, etc)
+	if (FStrEq(pkvd->szKeyName, "channel"))
+	{
+		m_iChannel = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+
 	// preset
-	if( FStrEq( pkvd->szKeyName, "preset" ) )
+	else if( FStrEq( pkvd->szKeyName, "preset" ) )
 	{
 		m_dpv.preset = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
