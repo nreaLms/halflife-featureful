@@ -28,9 +28,12 @@
 #define SF_TANK_ALIENS			0x0008
 #define SF_TANK_LINEOFSIGHT		0x0010
 #define SF_TANK_CANCONTROL		0x0020
+#define SF_TANK_LASERSPOT		0x0040 //LRC
+#define SF_TANK_MATCHTARGET		0x0080 //LRC
+#define SF_TANK_SMOKE_ON_EMPTY	0x0100
+#define SF_TANK_SMOKE_IN_ORIGIN	0x0200
+
 #define SF_TANK_SOUNDON			0x8000
-#define SF_TANK_SMOKE_ON_EMPTY	0x0040
-#define SF_TANK_SMOKE_IN_ORIGIN	0x0080
 
 
 enum TANKBULLET
@@ -104,6 +107,8 @@ public:
 
 	void UpdateOnRemove();
 
+	CLaserSpot*  m_pSpot;		// Laser spot entity
+
 protected:
 	CBasePlayer* m_pController;
 	float		m_flNextAttack;
@@ -139,6 +144,8 @@ protected:
 	string_t	m_iszMaster;	// Master entity (game_team_master or multisource)
 	int			m_bulletCount;	// Bullet count left. Negative means infinite.
 	float		m_flEmptySoundTime;
+
+	void UpdateSpot( void );
 };
 
 TYPEDESCRIPTION	CFuncTank::m_SaveData[] =
@@ -170,6 +177,7 @@ TYPEDESCRIPTION	CFuncTank::m_SaveData[] =
 	DEFINE_FIELD( CFuncTank, m_iBulletDamage, FIELD_INTEGER ),
 	DEFINE_FIELD( CFuncTank, m_iszMaster, FIELD_STRING ),
 	DEFINE_FIELD( CFuncTank, m_bulletCount, FIELD_INTEGER ),
+	DEFINE_FIELD( CFuncTank, m_pSpot, FIELD_CLASSPTR ), //LRC
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTank, CBaseEntity )
@@ -372,7 +380,9 @@ BOOL CFuncTank::StartControl( CBasePlayer *pController )
 			return FALSE;
 	}
 
-	ALERT( at_console, "using TANK!\n");
+	ALERT( at_aiconsole, "using TANK!\n");
+
+	if (m_pSpot) m_pSpot->Revive();
 
 	m_pController = pController;
 	m_pController->m_pTank = this;
@@ -402,9 +412,12 @@ void CFuncTank::StopControl()
 	if( m_pController->m_pActiveItem )
 		m_pController->m_pActiveItem->Deploy();
 
-	ALERT( at_console, "stopped using TANK\n");
+	ALERT( at_aiconsole, "stopped using TANK\n");
 
 	m_pController->m_iHideHUD &= ~HIDEHUD_WEAPONS;
+
+	if (m_pSpot)
+		m_pSpot->pev->effects |= EF_NODRAW;
 
 	pev->nextthink = 0;
 
@@ -413,6 +426,29 @@ void CFuncTank::StopControl()
 
 	if( IsActive() )
 		pev->nextthink = pev->ltime + 1.0;
+}
+
+void CFuncTank::UpdateSpot( void )
+{
+	if ( pev->spawnflags & SF_TANK_LASERSPOT )
+	{
+		if (!m_pSpot)
+		{
+			m_pSpot = CLaserSpot::CreateSpot();
+		}
+
+		if (!m_pSpot)
+			return;
+
+		Vector vecAiming;
+		UTIL_MakeVectorsPrivate( pev->angles, vecAiming, NULL, NULL );
+		Vector vecSrc = BarrelPosition( );
+
+		TraceResult tr;
+		UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, ENT(pev), &tr );
+
+		UTIL_SetOrigin( m_pSpot->pev, tr.vecEndPos );
+	}
 }
 
 void CFuncTank::UpdateOnRemove()
@@ -504,9 +540,16 @@ void CFuncTank::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 			return;
 
 		if( IsActive() )
+		{
 			TankDeactivate();
+			if (m_pSpot)
+				m_pSpot->pev->effects |= EF_NODRAW;
+		}
 		else
+		{
 			TankActivate();
+			if (m_pSpot) m_pSpot->Revive();
+		}
 	}
 }
 
@@ -547,6 +590,8 @@ void CFuncTank::TrackTarget( void )
 	// Get a position to aim for
 	if( m_pController )
 	{
+		UpdateSpot();
+
 		// Tanks attempt to mirror the player's angles
 		angles = m_pController->pev->v_angle;
 		angles[0] = 0 - angles[0];
@@ -558,6 +603,8 @@ void CFuncTank::TrackTarget( void )
 			pev->nextthink = pev->ltime + 0.1;
 		else
 			return;
+
+		UpdateSpot();
 
 		if( FNullEnt( pPlayer ) )
 		{

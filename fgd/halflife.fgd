@@ -567,8 +567,9 @@
 		1 : "Active" : 0
 		16: "Only Direct" : 0
 		32: "Controllable" : 0
-		64: "Smoke when no ammo" : 0
-		128: "Smoke in origin" : 0
+		64: "Laser Spot" : 0
+		128: "Reserved (Don't use)" : 0 : "Reserved for 'Match Target' from Spirit"
+		256: "Smoke when no ammo" : 0
 	]
 
 	// Mainly for use with 1009 team settings (game_team_master)
