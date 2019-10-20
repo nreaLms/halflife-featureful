@@ -54,7 +54,7 @@ def build(bld):
 
 	libs = []
 
-	if bld.env.DEST_OS2 not in ['android']:
+	if bld.env.DEST_OS not in ['android']:
 		install_path = os.path.join(bld.env.GAMEDIR, bld.env.SERVER_DIR)
 	else:
 		install_path = bld.env.PREFIX
@@ -68,5 +68,5 @@ def build(bld):
 		use      = libs,
 		install_path = install_path,
 		subsystem = bld.env.MSVC_SUBSYSTEM,
-		idx      = 2
+		idx      = bld.get_taskgen_count()
 	)
