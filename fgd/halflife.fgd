@@ -6048,7 +6048,7 @@
 		1 : "Remove On fire" : 1
 	]
 	globalstate(string) : "Global State to Read"
-	triggerstate(choices) : "Trigger State" : 0 =
+	triggerstate(choices) : "Trigger State" : 2 =
 	[
 		0 : "Off"
 		1 : "On"
@@ -6221,7 +6221,7 @@
 	height(integer) : "Jump Height" : 128
 ]
 
-@PointClass base(Targetname) iconsprite("sprites/trigger.spr") = trigger_motion : "Set the position and movement of an entity"
+@PointClass base(Targetname) = trigger_motion : "Set the position and movement of an entity"
 [
 	target(target_destination) : "Target to affect [LE]"
 	m_iszPosition(string) : "Position (blank = no change)"
@@ -6275,7 +6275,7 @@
 		32:"TouchClientOnly" : 0
 	]
 	master(string) : "Master"
-	delay(string) : "Delay before trigger" : "0"
+	delay(string) : "Delay before trigger"
 ]
 
 @PointClass base(Targetx, Targetname) = trigger_playerfreeze : "Trigger Player Freeze" []
@@ -6355,7 +6355,7 @@
 	[
 		1: "Remove On fire" : 0
 	]
-	triggerstate(choices) : "Trigger State" : 0 =
+	triggerstate(choices) : "Trigger State" : 2 =
 	[
 		0: "Off"
 		1: "On"
