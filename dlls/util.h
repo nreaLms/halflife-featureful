@@ -480,6 +480,7 @@ extern DLL_GLOBAL int			g_Language;
 #define	SF_TRIGGER_ALLOWMONSTERS	1// monsters allowed to fire this trigger
 #define	SF_TRIGGER_NOCLIENTS		2// players not allowed to fire this trigger
 #define SF_TRIGGER_PUSHABLES		4// only pushables can fire this trigger
+#define SF_TRIGGER_EVERYTHING		8// can be triggered by anything else
 
 // func breakable
 #define SF_BREAK_TRIGGER_ONLY	1// may only be broken by trigger

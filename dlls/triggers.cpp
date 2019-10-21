@@ -578,6 +578,7 @@ public:
 	void EXPORT CounterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void InitTrigger( void );
+	bool CanTouch( entvars_t *pevToucher );
 
 	virtual int ObjectCaps( void ) { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 };
@@ -600,6 +601,30 @@ void CBaseTrigger::InitTrigger()
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );    // set size and link into world
 	if( CVAR_GET_FLOAT( "showtriggers" ) == 0 )
 		SetBits( pev->effects, EF_NODRAW );
+}
+
+bool CBaseTrigger::CanTouch(entvars_t *pevToucher)
+{
+	if ( FStringNull(pev->netname) )
+	{
+		// Only touch clients, monsters, or pushables (depending on flags)
+		if (pevToucher->flags & FL_CLIENT)
+			return !(pev->spawnflags & SF_TRIGGER_NOCLIENTS);
+		else if (pevToucher->flags & FL_MONSTER)
+			return pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS;
+		else if (FClassnameIs(pevToucher,"func_pushable"))
+			return pev->spawnflags & SF_TRIGGER_PUSHABLES;
+		else
+			return pev->spawnflags & SF_TRIGGER_EVERYTHING;
+	}
+	else
+	{
+		// If netname is set, it's an entity-specific trigger; we ignore the spawnflags.
+		if (!FClassnameIs(pevToucher, STRING(pev->netname)) &&
+			(!pevToucher->targetname || !FStrEq(STRING(pevToucher->targetname), STRING(pev->netname))))
+			return false;
+	}
+	return true;
 }
 
 //
@@ -1082,21 +1107,7 @@ void CBaseTrigger::HurtTouch( CBaseEntity *pOther )
 	}
 }
 
-/*QUAKED trigger_multiple (.5 .5 .5) ? notouch
-Variable sized repeatable trigger.  Must be targeted at one or more entities.
-If "health" is set, the trigger must be killed to activate each time.
-If "delay" is set, the trigger waits some time after activating before firing.
-"wait" : Seconds between triggerings. (.2 default)
-If notouch is set, the trigger is only fired by other entities, not by touching.
-NOTOUCH has been obsoleted by trigger_relay!
-sounds
-1)      secret
-2)      beep beep
-3)      large switch
-4)
-NEW
-if a trigger has a NETNAME, that NETNAME will become the TARGET of the triggered object.
-*/
+// trigger_multiple
 class CTriggerMultiple : public CBaseTrigger
 {
 public:
@@ -1113,24 +1124,8 @@ void CTriggerMultiple::Spawn( void )
 	InitTrigger();
 
 	ASSERTSZ( pev->health == 0, "trigger_multiple with health" );
-	/*UTIL_SetOrigin( pev, pev->origin );
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
-	if( pev->health > 0 )
-		{
-		if( FBitSet( pev->spawnflags, SPAWNFLAG_NOTOUCH ) )
-			ALERT( at_error, "trigger_multiple spawn: health and notouch don't make sense" );
-		pev->max_health = pev->health;
-UNDONE: where to get pfnDie from?
-		pev->pfnDie = multi_killed;
-		pev->takedamage = DAMAGE_YES;
-		pev->solid = SOLID_BBOX;
-		UTIL_SetOrigin( pev, pev->origin );  // make sure it links into the world
-		}
-	else*/
-		{
-			SetTouch( &CBaseTrigger::MultiTouch );
-		}
-	}
+	SetTouch( &CBaseTrigger::MultiTouch );
+}
 
 /*QUAKED trigger_once (.5 .5 .5) ? notouch
 Variable sized trigger. Triggers once, then removes itself.  You must set the key "target" to the name of another object in the level that has a matching
@@ -1166,9 +1161,7 @@ void CBaseTrigger::MultiTouch( CBaseEntity *pOther )
 	pevToucher = pOther->pev;
 
 	// Only touch clients, monsters, or pushables (depending on flags)
-	if( ( ( pevToucher->flags & FL_CLIENT ) && !( pev->spawnflags & SF_TRIGGER_NOCLIENTS ) ) ||
-		 ( ( pevToucher->flags & FL_MONSTER ) && (pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS ) ) ||
-		 ( ( pev->spawnflags & SF_TRIGGER_PUSHABLES ) && FClassnameIs( pevToucher,"func_pushable" ) ) )
+	if( CanTouch(pevToucher) )
 	{
 
 #if 0

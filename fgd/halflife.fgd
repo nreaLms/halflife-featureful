@@ -670,15 +670,20 @@
 @BaseClass base(Target, Targetname) = Trigger
 [
 	killtarget(target_destination) : "Kill target"
-	netname(target_destination) : "Target Path"
 	master(string) : "Master"
 	delay(string) : "Delay before trigger" : "0"
 	message(string) : "Message (set sound too!)"
+]
+
+@BaseClass = TriggerCond
+[
+	netname(string) : "Triggered only by entity" : : "Classname or targetname of entity required to activate this trigger by touching"
 	spawnflags(flags) =
 	[
 		1: "Monsters" : 0
 		2: "No Clients" : 0
 		4: "Pushables": 0
+		8: "Everything else": 0
 	]
 ]
 
@@ -6257,12 +6262,12 @@
 	]
 ]
 
-@SolidClass base(Trigger) = trigger_multiple : "Trigger: Activate multiple"
+@SolidClass base(Trigger, TriggerCond) = trigger_multiple : "Trigger: Activate multiple"
 [
 	wait(integer) : "Delay before reset" : 10
 ]
 
-@SolidClass base(Trigger) = trigger_once : "Trigger: Activate once" []
+@SolidClass base(Trigger, TriggerCond) = trigger_once : "Trigger: Activate once" []
 
 @SolidClass base(Targetname,Target) = trigger_geneworm_hit : "Trigger GeneWorm Hit"
 [
@@ -6407,7 +6412,7 @@
 	trigger_number(integer) : "Trigger number limit" : : "Stop after triggering this number of targets. 0 means no limit"
 ]
 
-@SolidClass base(Trigger) = trigger_teleport : "Trigger teleport" []
+@SolidClass base(Trigger, TriggerCond) = trigger_teleport : "Trigger teleport" []
 
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []
 
