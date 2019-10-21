@@ -515,7 +515,7 @@ void CBaseButton::Precache( void )
 {
 	const char *pszSound;
 
-	if( FBitSet( pev->spawnflags, SF_BUTTON_SPARK_IF_OFF ) )// this button should spark in OFF state
+	if( IsSparkingButton() )// this button should spark in OFF state
 	{
 		PRECACHE_SOUND( "buttons/spark1.wav" );
 		PRECACHE_SOUND( "buttons/spark2.wav" );
@@ -716,7 +716,7 @@ void CBaseButton::Spawn()
 
 	Precache();
 
-	if( FBitSet( pev->spawnflags, SF_BUTTON_SPARK_IF_OFF ) )// this button should spark in OFF state
+	if( IsSparkingButton() )// this button should spark in OFF state
 	{
 		SetThink( &CBaseButton::ButtonSpark );
 		pev->nextthink = gpGlobals->time + 0.5;// no hurry, make sure everything else spawns
@@ -1115,11 +1115,17 @@ void CBaseButton::ButtonBackHome( void )
 		SetTouch( &CBaseButton::ButtonTouch );
 
 	// reset think for a sparking button
-	if( FBitSet( pev->spawnflags, SF_BUTTON_SPARK_IF_OFF ) )
+	if( IsSparkingButton() )
 	{
 		SetThink( &CBaseButton::ButtonSpark );
 		pev->nextthink = gpGlobals->time + 0.5;// no hurry.
 	}
+}
+
+bool CBaseButton::IsSparkingButton()
+{
+	return FBitSet( pev->spawnflags, SF_BUTTON_SPARK_IF_OFF )
+			&& !FClassnameIs(pev, "func_rot_button"); // there's a clash in flags, don't enable sparking for rotating buttons
 }
 
 //
