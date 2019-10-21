@@ -6359,6 +6359,7 @@
 	spawnflags(flags) =
 	[
 		1: "Remove On fire" : 0
+		64: "Forward activator" : 0 : "Forward my activator when triggering my target. Without this flag trigger_relay passes itself as an activator."
 	]
 	triggerstate(choices) : "Trigger State" : 2 =
 	[
