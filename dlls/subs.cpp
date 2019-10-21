@@ -154,6 +154,7 @@ TYPEDESCRIPTION	CBaseDelay::m_SaveData[] =
 {
 	DEFINE_FIELD( CBaseDelay, m_flDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseDelay, m_iszKillTarget, FIELD_STRING ),
+	DEFINE_FIELD( CBaseToggle, m_hActivator, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CBaseDelay, CBaseEntity )
@@ -253,18 +254,7 @@ void CBaseDelay::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, floa
 		pTemp->m_flDelay = 0; // prevent "recursion"
 		pTemp->pev->target = pev->target;
 
-		// HACKHACK
-		// This wasn't in the release build of Half-Life.  We should have moved m_hActivator into this class
-		// but changing member variable hierarchy would break save/restore without some ugly code.
-		// This code is not as ugly as that code
-		if( pActivator && pActivator->IsPlayer() )		// If a player activates, then save it
-		{
-			pTemp->pev->owner = pActivator->edict();
-		}
-		else
-		{
-			pTemp->pev->owner = NULL;
-		}
+		pTemp->m_hActivator = pActivator;
 
 		return;
 	}
@@ -328,15 +318,8 @@ void SetMovedir( entvars_t *pev )
 
 void CBaseDelay::DelayThink( void )
 {
-	CBaseEntity *pActivator = NULL;
-
-	if( pev->owner != NULL )		// A player activated this on delay
-	{
-		pActivator = CBaseEntity::Instance( pev->owner );	
-	}
-
 	// The use type is cached (and stashed) in pev->button
-	SUB_UseTargets( pActivator, (USE_TYPE)pev->button, 0 );
+	SUB_UseTargets( m_hActivator, (USE_TYPE)pev->button, 0 );
 	REMOVE_ENTITY( ENT( pev ) );
 }
 
@@ -356,7 +339,7 @@ TYPEDESCRIPTION	CBaseToggle::m_SaveData[] =
 	DEFINE_FIELD( CBaseToggle, m_vecAngle2, FIELD_VECTOR ),		// UNDONE: Position could go through transition, but also angle?
 	DEFINE_FIELD( CBaseToggle, m_cTriggersLeft, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseToggle, m_flHeight, FIELD_FLOAT ),
-	DEFINE_FIELD( CBaseToggle, m_hActivator, FIELD_EHANDLE ),
+	//DEFINE_FIELD( CBaseToggle, m_hActivator, FIELD_EHANDLE ), // now in CBaseDelay
 	DEFINE_FIELD( CBaseToggle, m_pfnCallWhenMoveDone, FIELD_FUNCTION ),
 	DEFINE_FIELD( CBaseToggle, m_vecFinalDest, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( CBaseToggle, m_vecFinalAngle, FIELD_VECTOR ),

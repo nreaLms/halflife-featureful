@@ -1525,7 +1525,6 @@ public:
 	string_t m_iszVelocity;
 	string_t m_iszVelFactor;
 	string_t m_iszSpawnTarget;
-	EHANDLE m_hActivator;
 };
 
 TYPEDESCRIPTION CGibShooter::m_SaveData[] =
@@ -1541,7 +1540,6 @@ TYPEDESCRIPTION CGibShooter::m_SaveData[] =
 	DEFINE_FIELD( CGibShooter, m_iszVelocity, FIELD_STRING),
 	DEFINE_FIELD( CGibShooter, m_iszVelFactor, FIELD_STRING),
 	DEFINE_FIELD( CGibShooter, m_iszSpawnTarget, FIELD_STRING),
-	DEFINE_FIELD( CGibShooter, m_hActivator, FIELD_EHANDLE),
 };
 
 IMPLEMENT_SAVERESTORE( CGibShooter, CBaseDelay )

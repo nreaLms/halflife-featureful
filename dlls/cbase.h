@@ -462,6 +462,7 @@ class CBaseDelay : public CBaseEntity
 public:
 	float m_flDelay;
 	string_t m_iszKillTarget;
+	EHANDLE m_hActivator;
 
 	virtual void KeyValue( KeyValueData *pkvd );
 	virtual int Save( CSave &save );
@@ -533,7 +534,6 @@ public:
 
 	int					m_cTriggersLeft;		// trigger_counter only, # of activations remaining
 	float				m_flHeight;
-	EHANDLE				m_hActivator;
 	void (CBaseToggle::*m_pfnCallWhenMoveDone)(void);
 	Vector				m_vecFinalDest;
 	Vector				m_vecFinalAngle;
