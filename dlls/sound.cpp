@@ -217,6 +217,10 @@ void CAmbientGeneric::Spawn( void )
 		m_fLooping = FALSE;
 	else
 		m_fLooping = TRUE;
+
+	if (m_iChannel == 0)
+		m_iChannel = CHAN_STATIC;
+
 	Precache();
 }
 

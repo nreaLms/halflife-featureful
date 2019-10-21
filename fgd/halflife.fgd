@@ -734,8 +734,9 @@
 	message(sound) : "WAV Name"
 	health(integer) : "Volume (10 = loudest)" : 10
 	target(target_destination) : "Entity to play from"
-	channel(choices) : "Channel to use for that entity" : 6 =
+	channel(choices) : "Channel to use for that entity" =
 	[
+		0: "Default (Static)"
 		1: "Weapon"
 		2: "Voice"
 		3: "Item"
