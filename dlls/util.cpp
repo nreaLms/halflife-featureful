@@ -1118,13 +1118,26 @@ int UTIL_IsMasterTriggered( string_t sMaster, CBaseEntity *pActivator )
 {
 	if( sMaster )
 	{
-		edict_t *pentTarget = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( sMaster ) );
+		bool reverse = false;
+		const char* szMaster = STRING( sMaster );
+		if (szMaster[0] == '~')
+		{
+			szMaster++;
+			reverse = true;
+		}
+
+		edict_t *pentTarget = FIND_ENTITY_BY_TARGETNAME( NULL, szMaster );
 
 		if( !FNullEnt( pentTarget ) )
 		{
 			CBaseEntity *pMaster = CBaseEntity::Instance( pentTarget );
 			if( pMaster && ( pMaster->ObjectCaps() & FCAP_MASTER ) )
-				return pMaster->IsTriggered( pActivator );
+			{
+				if (reverse)
+					return !pMaster->IsTriggered( pActivator );
+				else
+					return pMaster->IsTriggered( pActivator );
+			}
 		}
 
 		ALERT( at_console, "Master was null or not a master!\n" );
