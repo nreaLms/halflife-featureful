@@ -28,6 +28,7 @@ class CSquidSpit : public CBaseEntity
 {
 public:
 	void Spawn(void);
+	void Precache();
 
 	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
 	void Touch(CBaseEntity *pOther);
@@ -40,7 +41,7 @@ public:
 	int  m_maxFrame;
 	
 protected:
-	void SpawnHelper(const char* modelName, const char* className);
+	void SpawnHelper(const char* className);
 };
 
 #endif // BULLSQUID_H

@@ -70,9 +70,11 @@ public:
 	void Touch(CBaseEntity *pOther);
 };
 
+LINK_ENTITY_TO_CLASS( gonomeguts, CSquidSpit )
+
 void CGonomeGuts::Spawn()
 {
-	SpawnHelper("sprites/bigspit.spr", "gonomeguts");
+	SpawnHelper("gonomeguts");
 	pev->rendercolor.x = 255;
 }
 
@@ -661,7 +663,7 @@ void CGonome::Precache()
 {
 	PrecacheMyModel("models/gonome.mdl");
 
-	PRECACHE_MODEL("sprites/bigspit.spr");// spit projectile.
+	UTIL_PrecacheOther("gonomeguts");
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
@@ -682,13 +684,8 @@ void CGonome::Precache()
 
 	PRECACHE_SOUND("gonome/gonome_run.wav");
 
-	PRECACHE_SOUND("bullchicken/bc_acid1.wav");
-
 	PRECACHE_SOUND("bullchicken/bc_bite2.wav");
 	PRECACHE_SOUND("bullchicken/bc_bite3.wav");
-
-	PRECACHE_SOUND("bullchicken/bc_spithit1.wav");
-	PRECACHE_SOUND("bullchicken/bc_spithit2.wav");
 }
 
 //=========================================================

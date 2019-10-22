@@ -23,6 +23,7 @@
 #include "decals.h"
 #include "func_break.h"
 #include "shake.h"
+#include "bullsquid.h"
 #include "soundradius.h"
 #include "locus.h"
 #include "mod_features.h"
@@ -3245,6 +3246,7 @@ void CEnvXenMaker::PlaySecondSound()
 
 enum
 {
+	BLOWERCANNON_SQUIDSPIT = 0,
 	BLOWERCANNON_SPOREROCKET = 1,
 	BLOWERCANNON_SPOREGRENADE,
 	BLOWERCANNON_SHOCKBEAM,
@@ -3257,7 +3259,7 @@ enum
 	BLOWERCANNON_FIRE,
 };
 
-class CBlowerCannon : public CBaseEntity
+class CBlowerCannon : public CBaseDelay
 {
 public:
 	void Spawn( void );
@@ -3272,20 +3274,20 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	int m_iWeapType;
-	float m_flDelay;
-	int m_iFireType;
+	short m_iWeapType;
+	short m_iFireType;
 	int m_iZOffSet;
+	string_t m_iszOwner;
 };
 
 LINK_ENTITY_TO_CLASS(env_blowercannon, CBlowerCannon)
 
 TYPEDESCRIPTION	CBlowerCannon::m_SaveData[] =
 {
-	DEFINE_FIELD(CBlowerCannon, m_iFireType, FIELD_INTEGER),
-	DEFINE_FIELD(CBlowerCannon, m_iWeapType, FIELD_INTEGER),
+	DEFINE_FIELD(CBlowerCannon, m_iFireType, FIELD_SHORT),
+	DEFINE_FIELD(CBlowerCannon, m_iWeapType, FIELD_SHORT),
 	DEFINE_FIELD(CBlowerCannon, m_iZOffSet, FIELD_INTEGER),
-	DEFINE_FIELD(CBlowerCannon, m_flDelay, FIELD_FLOAT),
+	DEFINE_FIELD(CBlowerCannon, m_iszOwner, FIELD_STRING),
 };
 IMPLEMENT_SAVERESTORE( CBlowerCannon, CBaseEntity )
 
@@ -3294,17 +3296,12 @@ void CBlowerCannon::KeyValue(KeyValueData *pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "firetype"))
 	{
-		m_iFireType = (int)atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else if (FStrEq(pkvd->szKeyName, "delay"))
-	{
-		m_flDelay = (float)atof(pkvd->szValue);
+		m_iFireType = (short)atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "weaptype"))
 	{
-		m_iWeapType = (int)atoi(pkvd->szValue);
+		m_iWeapType = (short)atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "zoffset"))
@@ -3312,8 +3309,23 @@ void CBlowerCannon::KeyValue(KeyValueData *pkvd)
 		m_iZOffSet = (int)atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "position"))
+	{
+		pev->message = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "direction"))
+	{
+		pev->netname = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "projectile_owner"))
+	{
+		m_iszOwner = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
-		pkvd->fHandled = FALSE;
+		CBaseDelay::KeyValue( pkvd );
 }
 
 void CBlowerCannon::Spawn(void)
@@ -3328,19 +3340,34 @@ void CBlowerCannon::Spawn(void)
 
 void CBlowerCannon::Precache( void )
 {
+	switch (m_iWeapType) {
+	case BLOWERCANNON_SQUIDSPIT:
+		UTIL_PrecacheOther("squidspit");
+		break;
+	case BLOWERCANNON_SHOCKBEAM:
 #if FEATURE_SHOCKBEAM
-	UTIL_PrecacheOther( "shock_beam" );
+		UTIL_PrecacheOther( "shock_beam" );
 #endif
+		break;
+	case BLOWERCANNON_DISPLACERBALL:
 #if FEATURE_DISPLACER
-	UTIL_PrecacheOther( "displacer_ball" );
+		UTIL_PrecacheOther( "displacer_ball" );
 #endif
+		break;
+	case BLOWERCANNON_SPOREGRENADE:
+	case BLOWERCANNON_SPOREROCKET:
 #if FEATURE_SPOREGRENADE
-	UTIL_PrecacheOther( "spore" );
+		UTIL_PrecacheOther( "spore" );
 #endif
+		break;
+	default:
+		break;
+	}
 }
 
 void CBlowerCannon::BlowerCannonStart( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	m_hActivator = pActivator;
 	SetUse( &CBlowerCannon::BlowerCannonStop );
 	SetThink( &CBlowerCannon::BlowerCannonThink );
 	pev->nextthink = gpGlobals->time + m_flDelay;
@@ -3354,39 +3381,68 @@ void CBlowerCannon::BlowerCannonStop( CBaseEntity *pActivator, CBaseEntity *pCal
 
 void CBlowerCannon::BlowerCannonThink( void )
 {
-	CBaseEntity *pTarget = GetNextTarget();
-
-	if( pTarget && pTarget->IsAlive() )
+	Vector direction;
+	bool evaluated = true;
+	if (pev->netname)
 	{
-		Vector direction = pTarget->pev->origin - pev->origin;
-		direction.z = m_iZOffSet + pTarget->pev->origin.z - pev->origin.z;
+		direction = CalcLocus_Velocity(this, m_hActivator, STRING(pev->netname), &evaluated);
+	}
+	else
+	{
+		CBaseEntity *pTarget = GetNextTarget();
+		direction = pTarget->pev->origin - pev->origin;
+	}
+
+	if( evaluated )
+	{
+		direction.z += m_iZOffSet;
 
 		Vector angles = UTIL_VecToAngles( direction );
-		UTIL_MakeVectors( angles );
+		direction = direction.Normalize();
 
-		switch (m_iWeapType)
+		Vector position = pev->origin;
+		if (pev->message)
 		{
+			position = CalcLocus_Position(this, m_hActivator, STRING(pev->message), &evaluated);
+		}
+
+		if ( evaluated )
+		{
+			CBaseEntity* owner = NULL;
+			if (m_iszOwner)
+			{
+				owner = UTIL_FindEntityByTargetname(NULL, STRING(m_iszOwner), m_hActivator);
+			}
+			if (!owner)
+				owner = this;
+
+			switch (m_iWeapType)
+			{
+			case BLOWERCANNON_SQUIDSPIT:
+				CSquidSpit::Shoot(owner->pev, position, direction * 900);
+				break;
 #if FEATURE_SPOREGRENADE
-		case BLOWERCANNON_SPOREROCKET:
-			CSporeGrenade::ShootContact(pev, pev->origin, gpGlobals->v_forward * 1500);
-			break;
-		case BLOWERCANNON_SPOREGRENADE:
-			CSporeGrenade::ShootTimed(pev, pev->origin, gpGlobals->v_forward * 700, false);
-			break;
+			case BLOWERCANNON_SPOREROCKET:
+				CSporeGrenade::ShootContact(owner->pev, position, direction * 1500);
+				break;
+			case BLOWERCANNON_SPOREGRENADE:
+				CSporeGrenade::ShootTimed(owner->pev, position, direction * 700, false);
+				break;
 #endif
 #if FEATURE_SHOCKBEAM
-		case BLOWERCANNON_SHOCKBEAM:
-			CShock::Shoot(pev, pev->angles, pev->origin, gpGlobals->v_forward * 2000);
-			break;
+			case BLOWERCANNON_SHOCKBEAM:
+				CShock::Shoot(owner->pev, angles, position, direction * 2000);
+				break;
 #endif
 #if FEATURE_DISPLACER
-		case BLOWERCANNON_DISPLACERBALL:
-			CDisplacerBall::Shoot(pev, pev->origin, gpGlobals->v_forward * 500, angles);
-			break;
+			case BLOWERCANNON_DISPLACERBALL:
+				CDisplacerBall::Shoot(owner->pev, position, direction * 500, angles);
+				break;
 #endif
-		default:
-			ALERT(at_console, "Unknown projectile type in blowercannon: %d\n", m_iWeapType);
-			break;
+			default:
+				ALERT(at_console, "Unknown projectile type in blowercannon: %d\n", m_iWeapType);
+				break;
+			}
 		}
 	}
 	if( m_iFireType == BLOWERCANNON_FIRE )

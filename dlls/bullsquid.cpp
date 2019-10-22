@@ -71,11 +71,23 @@ IMPLEMENT_SAVERESTORE( CSquidSpit, CBaseEntity )
 
 void CSquidSpit::Spawn( void )
 {
-	SpawnHelper("sprites/bigspit.spr", "squidspit");
+	SpawnHelper("squidspit");
 }
 
-void CSquidSpit::SpawnHelper(const char *modelName, const char *className)
+void CSquidSpit::Precache()
 {
+	PRECACHE_MODEL( "sprites/bigspit.spr" );
+	PRECACHE_SOUND( "bullchicken/bc_acid1.wav" );
+
+	PRECACHE_SOUND( "bullchicken/bc_spithit1.wav" );
+	PRECACHE_SOUND( "bullchicken/bc_spithit2.wav" );
+
+	iSquidSpitSprite = PRECACHE_MODEL( "sprites/tinyspit.spr" );// client side spittle.
+}
+
+void CSquidSpit::SpawnHelper(const char *className)
+{
+	Precache();
 	pev->movetype = MOVETYPE_FLY;
 	pev->classname = MAKE_STRING( className );
 
@@ -83,7 +95,7 @@ void CSquidSpit::SpawnHelper(const char *modelName, const char *className)
 	pev->rendermode = kRenderTransAlpha;
 	pev->renderamt = 255;
 
-	SET_MODEL( ENT( pev ), modelName );
+	SET_MODEL( ENT( pev ), "sprites/bigspit.spr" );
 	pev->frame = 0;
 	pev->scale = 0.5;
 
@@ -176,6 +188,7 @@ class CBigSquidSpit : public CBaseEntity
 {
 public:
 	void Spawn( void );
+	void Precache();
 
 	static void Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
 	void Touch( CBaseEntity *pOther );
@@ -194,7 +207,6 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	int m_maxFrame;
-	float m_attackTime;
 };
 
 LINK_ENTITY_TO_CLASS( bigsquidspit, CBigSquidSpit )
@@ -202,13 +214,13 @@ LINK_ENTITY_TO_CLASS( bigsquidspit, CBigSquidSpit )
 TYPEDESCRIPTION	CBigSquidSpit::m_SaveData[] =
 {
 	DEFINE_FIELD( CBigSquidSpit, m_maxFrame, FIELD_INTEGER ),
-	DEFINE_FIELD( CBigSquidSpit, m_attackTime, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CBigSquidSpit, CBaseEntity )
 
 void CBigSquidSpit::Spawn( void )
 {
+	Precache();
 	pev->movetype = MOVETYPE_FLY;
 	pev->classname = MAKE_STRING( "bigsquidspit" );
 
@@ -226,6 +238,17 @@ void CBigSquidSpit::Spawn( void )
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
 	m_maxFrame = (float)MODEL_FRAMES( pev->modelindex ) - 1;
+}
+
+void CBigSquidSpit::Precache()
+{
+	PRECACHE_MODEL( "sprites/cnt1.spr" );
+	PRECACHE_SOUND( "bullchicken/bc_acid2.wav" );
+
+	PRECACHE_SOUND( "bullchicken/bc_spithit3.wav" );
+	PRECACHE_SOUND( "bullchicken/bc_spithit3.wav" );
+
+	iSquidSpitSprite = PRECACHE_MODEL( "sprites/tinyspit.spr" );
 }
 
 void CBigSquidSpit::Animate( void )
@@ -870,12 +893,10 @@ void CBullsquid::Precache()
 {
 	PrecacheMyModel( "models/bullsquid.mdl" );
 
-	PRECACHE_MODEL( "sprites/bigspit.spr" );// spit projectile.
+	UTIL_PrecacheOther("squidspit");
 #if FEATURE_BULLSQUID_BIGSPIT
-	PRECACHE_MODEL( "sprites/cnt1.spr" ); // big spit projectile
+	UTIL_PrecacheOther("bigsquidspit"); // big spit projectile
 #endif
-
-	iSquidSpitSprite = PRECACHE_MODEL( "sprites/tinyspit.spr" );// client side spittle.
 
 	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
 
@@ -902,15 +923,8 @@ void CBullsquid::Precache()
 	PRECACHE_SOUND( "bullchicken/bc_attackgrowl2.wav" );
 	PRECACHE_SOUND( "bullchicken/bc_attackgrowl3.wav" );
 
-	PRECACHE_SOUND( "bullchicken/bc_acid1.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_acid2.wav" );
-
 	PRECACHE_SOUND( "bullchicken/bc_bite2.wav" );
 	PRECACHE_SOUND( "bullchicken/bc_bite3.wav" );
-
-	PRECACHE_SOUND( "bullchicken/bc_spithit1.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_spithit2.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_spithit3.wav" );
 }
 
 //=========================================================
