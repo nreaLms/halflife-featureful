@@ -344,10 +344,8 @@
 
 	m_iszPosition(string) : "At position (blank = here) [LP]"
 	m_iszVelocity(string) : "At velocity (blank = angle) [LV]"
-	m_flVelocity(string) : "Gib Speed Factor [LR]" : "200"
-
 	// how fast the gibs are fired
-	m_flVelocity(integer) : "Gib Velocity" : 200
+	m_flVelocity(string) : "Gib Speed Factor [LR]" : "200"
 
 	// Course variance
 	m_flVariance(string) : "Course Variance" : "0.15"
@@ -866,7 +864,7 @@
 
 @PointClass color(128 200 64) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_position : "Calculate position"
 [
-	netname(string) : "Entity to use [LE]" : "*locus"
+	netname(target_destination) : "Entity to use [LE]" : "*locus"
 	impulse(choices) : "Position to calculate" : 1 =
 	[
 		0 : "Origin"
@@ -904,7 +902,7 @@
 ]
 @PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_subvelocity : "Calculate velocity based on entity properties"
 [
-	netname(string) : "Entity to use [LE]" : "*locus"
+	netname(target_destination) : "Entity to use [LE]" : "*locus"
 	impulse(choices) : "Value to calculate from" : 0 =
 	[
 		0 : "Movement Velocity"
@@ -1135,7 +1133,7 @@
 [
     delay(string) : "Delay" : "0"
     zoffset(integer) : "Z Offset" : 0
-    target(string) : "Target" : ""
+    target(target_destination) : "Target"
     weaptype(choices) :"Weapon Type" : 1 =
     [
         1: "Spore (Rocket)"
@@ -2415,8 +2413,8 @@
 
 @PointClass base(Targetname, Angles) size(-16 -16 0, 16 16 48 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
 [
-    unlocked_target(string) : "Unlocked target"
-    locked_target(string) : "Locked target"
+    unlocked_target(target_destination) : "Unlocked target"
+    locked_target(target_destination) : "Locked target"
     unlockersname(string) : "Unlockers name"
     reset_delay(integer) : "Reset delay"
 ]
