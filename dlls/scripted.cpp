@@ -278,7 +278,7 @@ BOOL CCineMonster::FindEntity( void )
 	edict_t *pentTarget;
 	CBaseMonster *pTarget = NULL;
 
-	if (!FStringNull(m_iszEntity) && FStrEq(STRING(m_iszEntity), "*locus"))
+	if (UTIL_TargetnameIsActivator(m_iszEntity))
 	{
 		if (m_hActivator != 0 && FBitSet(m_hActivator->pev->flags, FL_MONSTER) && (pTarget = m_hActivator->MyMonsterPointer()) != 0 )
 		{
@@ -672,7 +672,7 @@ void CCineMonster::Activate( void )
 	edict_t *pentTarget;
 	CBaseMonster *pTarget;
 
-	if (!FStringNull(m_iszEntity) && FStrEq(STRING(m_iszEntity), "*locus"))
+	if (UTIL_TargetnameIsActivator(m_iszEntity))
 	{
 		// Can't precache anything because depends on the activator
 		return;
@@ -879,6 +879,7 @@ private:
 	string_t m_iszListener; // name of entity to look at while talking
 	short m_requiredState;
 	short m_followAction;
+	short m_targetActivator;
 };
 
 #define SF_SENTENCE_ONCE	0x0001
@@ -906,6 +907,7 @@ TYPEDESCRIPTION	CScriptedSentence::m_SaveData[] =
 	DEFINE_FIELD( CScriptedSentence, m_iszListener, FIELD_STRING ),
 	DEFINE_FIELD( CScriptedSentence, m_requiredState, FIELD_SHORT ),
 	DEFINE_FIELD( CScriptedSentence, m_followAction, FIELD_SHORT ),
+	DEFINE_FIELD( CScriptedSentence, m_targetActivator, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CScriptedSentence, CBaseToggle )
@@ -964,6 +966,11 @@ void CScriptedSentence::KeyValue( KeyValueData *pkvd )
 		m_followAction = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "target_activator" ) )
+	{
+		m_targetActivator = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseToggle::KeyValue( pkvd );
 }
@@ -973,6 +980,7 @@ void CScriptedSentence::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	if( !m_active )
 		return;
 	//ALERT( at_console, "Firing sentence: %s\n", STRING( m_iszSentence ) );
+	m_hActivator = pActivator;
 	SetThink( &CScriptedSentence::FindThink );
 	pev->nextthink = gpGlobals->time;
 }
@@ -1107,6 +1115,16 @@ CBaseMonster *CScriptedSentence::FindEntity( void )
 	edict_t *pentTarget;
 	CBaseMonster *pMonster;
 
+	if (UTIL_TargetnameIsActivator(m_iszEntity))
+	{
+		if (m_hActivator != 0 && FBitSet(m_hActivator->pev->flags, FL_MONSTER) && (pMonster = m_hActivator->MyMonsterPointer()) != 0 )
+		{
+			if( AcceptableSpeaker( pMonster ) )
+				return pMonster;
+		}
+		return NULL;
+	}
+
 	pentTarget = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_iszEntity ) );
 	pMonster = NULL;
 
@@ -1180,7 +1198,17 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 		}
 	}
 	ALERT( at_aiconsole, "Playing sentence %s (%.1f)\n", STRING( m_iszSentence ), m_flDuration );
-	SUB_UseTargets( NULL, USE_TOGGLE, 0 );
+
+	CBaseEntity* pActivator = NULL;
+	if (m_targetActivator == STA_SCRIPT)
+	{
+		pActivator = this;
+	}
+	else if (m_targetActivator == STA_MONSTER)
+	{
+		pActivator = pTarget;
+	}
+	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 	return TRUE;
 }
 

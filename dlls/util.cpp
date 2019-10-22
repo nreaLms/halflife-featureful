@@ -555,7 +555,7 @@ CBaseEntity *UTIL_FindEntityByTargetname( CBaseEntity *pStartEntity, const char 
 
 CBaseEntity *UTIL_FindEntityByTargetname( CBaseEntity *pStartEntity, const char *szName, CBaseEntity *pActivator )
 {
-	if (FStrEq(szName, "*locus"))
+	if (UTIL_TargetnameIsActivator(szName))
 	{
 		if (pActivator && (pStartEntity == NULL || pActivator->eoffset() > pStartEntity->eoffset()))
 			return pActivator;
@@ -1145,6 +1145,18 @@ int UTIL_IsMasterTriggered( string_t sMaster, CBaseEntity *pActivator )
 
 	// if this isn't a master entity, just say yes.
 	return 1;
+}
+
+bool UTIL_TargetnameIsActivator(const char *targetName)
+{
+	return targetName != 0 && (FStrEq(targetName, "*locus") || FStrEq(targetName, "!activator"));
+}
+
+bool UTIL_TargetnameIsActivator(string_t targetName)
+{
+	if (FStringNull(targetName))
+		return false;
+	return UTIL_TargetnameIsActivator(STRING(targetName));
 }
 
 BOOL UTIL_ShouldShowBlood( int color )

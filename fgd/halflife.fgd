@@ -5914,7 +5914,7 @@
 		8 : "Concurrent"	: 0
 	]
 	sentence(string) : "Sentence Name" : ""
-	entity(string) : "Speaker Type"
+	entity(string) : "Speaker Type [LE]"
 	duration(string) : "Sentence Time" : "3"
 	radius(integer) : "Search Radius" : 512
 	refire(string) : "Delay Before Refire" : "3"
@@ -5943,11 +5943,17 @@
 		1 : "Start following"
 		2 : "Stop following"
 	]
+	target_activator(choices) : "Target's Activator" =
+	[
+		0 : "No (Default)"
+		1 : "This script"
+		2 : "Speaking monster"
+	]
 ]
 
 @PointClass base(Targetname, Targetx, Angles) flags(Angle) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sequence : "Scripted Sequence"
 [
-	m_iszEntity(string) : "Target Monster"
+	m_iszEntity(string) : "Target Monster [LE]"
 	m_iszPlay(string) : "Action Animation"
 	m_iszIdle(string) : "Idle Animation"
 	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
@@ -5976,7 +5982,7 @@
 		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
 		512: "Apply new angles" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
 	]
-	m_targetActivator(choices) : "Target Activator" =
+	m_targetActivator(choices) : "Target's Activator" =
 	[
 		0 : "No (Default)"
 		1 : "This script"
