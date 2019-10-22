@@ -94,6 +94,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_iszFireOnAnimStart = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "m_targetActivator" ) )
+	{
+		m_targetActivator = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -118,6 +123,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_iFinishSchedule, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_interruptable, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CCineMonster, m_iszFireOnAnimStart, FIELD_STRING ),
+	DEFINE_FIELD( CCineMonster, m_targetActivator, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -196,6 +202,7 @@ void CCineMonster::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	{
 		// if not, try finding them
 		m_cantFindReported = false;
+		m_hActivator = pActivator;
 		SetThink( &CCineMonster::CineThink );
 		pev->nextthink = gpGlobals->time;
 	}
@@ -266,13 +273,27 @@ void CCineMonster::Pain( void )
 //
 
 // find a viable entity
-int CCineMonster::FindEntity( void )
+BOOL CCineMonster::FindEntity( void )
 {
 	edict_t *pentTarget;
+	CBaseMonster *pTarget = NULL;
+
+	if (!FStringNull(m_iszEntity) && FStrEq(STRING(m_iszEntity), "*locus"))
+	{
+		if (m_hActivator != 0 && FBitSet(m_hActivator->pev->flags, FL_MONSTER) && (pTarget = m_hActivator->MyMonsterPointer()) != 0 )
+		{
+			if (pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_AI ))
+			{
+				m_hTargetEnt = m_hActivator;
+				return TRUE;
+			}
+		}
+		m_hTargetEnt = 0;
+		return FALSE;
+	}
 
 	pentTarget = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_iszEntity ) );
 	m_hTargetEnt = NULL;
-	CBaseMonster *pTarget = NULL;
 
 	while( !FNullEnt( pentTarget ) )
 	{
@@ -400,6 +421,13 @@ void CCineMonster::CineThink( void )
 	}
 }
 
+typedef enum
+{
+	STA_NO = 0,
+	STA_SCRIPT = 1,
+	STA_MONSTER = 2,
+} SEQUENCE_TARGET_ACTIVATOR;
+
 // lookup a sequence name and setup the target monster to play it
 BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty )
 {
@@ -417,7 +445,16 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 	{
 		if( !FStringNull( m_iszFireOnAnimStart ) )
 		{
-			FireTargets( STRING( m_iszFireOnAnimStart ), NULL, this, USE_TOGGLE, 0 );
+			CBaseEntity* pActivator = NULL;
+			if (m_targetActivator == STA_SCRIPT)
+			{
+				pActivator = this;
+			}
+			else if (m_targetActivator == STA_MONSTER)
+			{
+				pActivator = pTarget;
+			}
+			FireTargets( STRING( m_iszFireOnAnimStart ), pActivator, this, USE_TOGGLE, 0 );
 		}
 	}
 
@@ -467,7 +504,16 @@ void CCineMonster::SequenceDone( CBaseMonster *pMonster )
 
 	// This may cause a sequence to attempt to grab this guy NOW, so we have to clear him out
 	// of the existing sequence
-	SUB_UseTargets( NULL, USE_TOGGLE, 0 );
+	CBaseEntity* pActivator = NULL;
+	if (m_targetActivator == STA_SCRIPT)
+	{
+		pActivator = this;
+	}
+	else if (m_targetActivator == STA_MONSTER)
+	{
+		pActivator = pMonster;
+	}
+	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 }
 
 //=========================================================
@@ -625,6 +671,12 @@ void CCineMonster::Activate( void )
 {
 	edict_t *pentTarget;
 	CBaseMonster *pTarget;
+
+	if (!FStringNull(m_iszEntity) && FStrEq(STRING(m_iszEntity), "*locus"))
+	{
+		// Can't precache anything because depends on the activator
+		return;
+	}
 
 	// The entity name could be a target name or a classname
 	// Check the targetname

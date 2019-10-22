@@ -5975,6 +5975,12 @@
 		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
 		512: "Apply new angles" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
 	]
+	m_targetActivator(choices) : "Target Activator" =
+	[
+		0 : "No (Default)"
+		1 : "This script"
+		2 : "Possessed Monster"
+	]
 ]
 
 @PointClass iconsprite("sprites/speaker.spr") base(Targetname) = speaker : "Announcement Speaker"
