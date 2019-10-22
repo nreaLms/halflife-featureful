@@ -5684,6 +5684,7 @@
 		1024: "Don't Drop Gun" : 0
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
 		8192 : "Warp at monster center" : 0 : "When using warpball template, make it play at the center of monster's body, not origin of monstermaker"
+		16384 : "Pass monster as activator" : 0 : "Pass spawned monster as activator triggering Target on Release"
 	]
 
 	// how many monsters the monstermaker can create (-1 = unlimited)

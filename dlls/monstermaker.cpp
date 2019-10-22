@@ -36,6 +36,7 @@
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
 #define SF_MONSTERMAKER_WARP_AT_MONSTER_CENTER 8192 // When using warpball template, make it play at the center of monster's body, not origin
+#define SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR 16384 // Use the spawned monster as activator to fire target
 
 enum
 {
@@ -304,13 +305,6 @@ int CMonsterMaker::MakeMonster( void )
 		return MONSTERMAKER_NULLENTITY;
 	}
 
-	// If I have a target, fire!
-	if( !FStringNull( pev->target ) )
-	{
-		// delay already overloaded for this entity, so can't call SUB_UseTargets()
-		FireTargets( STRING( pev->target ), this, this, USE_TOGGLE, 0 );
-	}
-
 	pevCreate = VARS( pent );
 	pevCreate->origin = pev->origin;
 	pevCreate->angles = pev->angles;
@@ -408,6 +402,19 @@ int CMonsterMaker::MakeMonster( void )
 		SetThink( NULL );
 		SetUse( NULL );
 	}
+
+	// If I have a target, fire!
+	if( !FStringNull( pev->target ) )
+	{
+		CBaseEntity* pActivator = this;
+		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR))
+		{
+			pActivator = createdMonster;
+		}
+		// delay already overloaded for this entity, so can't call SUB_UseTargets()
+		FireTargets( STRING( pev->target ), pActivator, this, USE_TOGGLE, 0 );
+	}
+
 	return MONSTERMAKER_SPAWNED;
 }
 
