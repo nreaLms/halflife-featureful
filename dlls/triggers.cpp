@@ -2259,6 +2259,65 @@ void CTriggerChangeTarget::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	}
 }
 
+class CTriggerChangeValue : public CBaseDelay
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	int ObjectCaps( void ) { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+
+	static	TYPEDESCRIPTION m_SaveData[];
+
+private:
+	int		m_iszNewValue;
+};
+LINK_ENTITY_TO_CLASS( trigger_changevalue, CTriggerChangeValue )
+
+TYPEDESCRIPTION	CTriggerChangeValue::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerChangeValue, m_iszNewValue, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE(CTriggerChangeValue, CBaseDelay)
+
+void CTriggerChangeValue::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "m_iszNewValue"))
+	{
+		m_iszNewValue = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszValueName"))
+	{
+		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseDelay::KeyValue( pkvd );
+}
+
+void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	CBaseEntity *pTarget = NULL;
+
+	while ((pTarget = UTIL_FindEntityByTargetname( pTarget, STRING( pev->target ), pActivator )) != NULL)
+	{
+		KeyValueData mypkvd;
+		mypkvd.szKeyName = STRING(pev->netname);
+		mypkvd.szValue = STRING(m_iszNewValue);
+		mypkvd.fHandled = FALSE;
+		pTarget->KeyValue(&mypkvd);
+	}
+
+	if (!FStringNull(pev->message))
+	{
+		FireTargets(STRING(pev->message), pActivator, this, USE_TOGGLE, 0.0f);
+	}
+}
+
 #define SF_CAMERA_PLAYER_POSITION	1
 #define SF_CAMERA_PLAYER_TARGET		2
 #define SF_CAMERA_PLAYER_TAKECONTROL 4
