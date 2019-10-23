@@ -685,7 +685,7 @@ void CTalkMonster::OnDying()
 
 void CTalkMonster::StartMonster()
 {
-	CBaseMonster::StartMonster();
+	CFollowingMonster::StartMonster();
 	if (m_fStartSuspicious) {
 		ALERT(at_console, "Talk Monster Pre-Provoked\n");
 		Remember(bits_MEMORY_PROVOKED);

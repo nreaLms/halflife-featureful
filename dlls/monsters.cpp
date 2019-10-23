@@ -3315,14 +3315,23 @@ void CBaseMonster::ReportAIState( void )
 		}
 		else
 		{
+			if (pev->netname)
+			{
+				ALERT( level, "In Squad '%s', ", STRING(pev->netname) );
+			}
+			else
+			{
+				ALERT( level, "In Squad, " );
+			}
+
 			if( pSquadMonster->IsLeader() )
 			{
-				ALERT( level, "InSquad, Leader." );
+				ALERT( level, "Squad Leader." );
 			}
 			else
 			{
 				CSquadMonster* myLeader = pSquadMonster->MySquadLeader();
-				ALERT( level, "In Squad, Leader: %s.", FStringNull(myLeader->pev->targetname) ? STRING(myLeader->pev->classname) : STRING(myLeader->pev->targetname) );
+				ALERT( level, "My Squad Leader: '%s'.", FStringNull(myLeader->pev->targetname) ? STRING(myLeader->pev->classname) : STRING(myLeader->pev->targetname) );
 			}
 		}
 	}
