@@ -14,7 +14,7 @@
 Task_t tlFollow[] =
 {
 	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
-	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_FACE },
+	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_REACHED },
 };
 
 Schedule_t slFollow[] =
@@ -96,12 +96,12 @@ Schedule_t slMoveAwayFail[] =
 
 Task_t tlMoveAwayFollow[] =
 {
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_TARGET_FACE },
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_TARGET_REACHED },
 	{ TASK_STORE_LASTPOSITION, (float)0 },
 	{ TASK_MOVE_AWAY_PATH, (float)100 },
 	{ TASK_WALK_PATH_FOR_UNITS, (float)100 },
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_FACE },
+	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_REACHED },
 };
 
 Schedule_t slMoveAwayFollow[] =
@@ -178,6 +178,7 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 	case SCHED_MOVE_AWAY_FAIL:
 		return slMoveAwayFail;
 	case SCHED_TARGET_FACE:
+	case SCHED_TARGET_REACHED:
 		return slFaceTarget;
 	case SCHED_TARGET_CHASE:
 	case SCHED_FOLLOW:

@@ -259,6 +259,7 @@ public:
 	void StartTask( Task_t *pTask );
 	Schedule_t *GetSchedule ( void );
 	Schedule_t *GetScheduleOfType(int Type);
+	void OnChangeSchedule( Schedule_t *pNewSchedule );
 	CBaseEntity* FollowedPlayer();
 	void StopFollowing( BOOL clearSchedule, bool saySentence = true );
 	void ClearFollowedPlayer();
@@ -3196,11 +3197,12 @@ enum
 Task_t	tlMedicHeal[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_MEDIC_HEAL_FAILED },
-	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move within 50 of target ent (client)
+	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move within 50 of target ent
 	{ TASK_FACE_IDEAL,						(float)0		},
 	{ TASK_MEDIC_SAY_HEAL,					(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_ARM	},			// Whip out the needle
-	{ TASK_MEDIC_HEAL,						(float)0	},	// Put it in the player
+	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move again in case if the target moved away during pull needle animation
+	{ TASK_MEDIC_HEAL,						(float)0	},	// Put it in the target
 	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_DISARM	},			// Put away the needle
 	{ TASK_MEDIC_RESTORE_TARGET_ENT,		(float)0 }
 };
@@ -3328,9 +3330,6 @@ void CMedic::RunTask(Task_t *pTask)
 
 Schedule_t *CMedic::GetSchedule()
 {
-	if (m_fHealing) {
-		StopHealing();
-	}
 	Schedule_t* prioritizedSchedule = PrioritizedSchedule();
 	if (prioritizedSchedule)
 		return prioritizedSchedule;
@@ -3377,6 +3376,13 @@ Schedule_t *CMedic::GetScheduleOfType(int Type)
 	default:
 		return CHFGrunt::GetScheduleOfType(Type);
 	}
+}
+void CMedic::OnChangeSchedule( Schedule_t *pNewSchedule )
+{
+	if (m_fHealing) {
+		StopHealing();
+	}
+	CHFGrunt::OnChangeSchedule( pNewSchedule );
 }
 
 CBaseEntity* CMedic::FollowedPlayer()
@@ -3583,7 +3589,9 @@ void CMedic::FirePistol(const char *shotSound , Bullet bullet)
 
 void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 {
-	m_hLeadingPlayer = m_hTargetEnt;
+	if (m_hTargetEnt != 0 && m_hTargetEnt->IsPlayer())
+		m_hLeadingPlayer = m_hTargetEnt;
+
 	if( m_pCine )
 		m_pCine->CancelScript();
 
@@ -3593,7 +3601,7 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 	m_hTargetEnt = pTarget;
 	ClearConditions( bits_COND_CLIENT_PUSH );
 	ClearSchedule();
-	ChangeSchedule(GetScheduleOfType(SCHED_MEDIC_HEAL));
+	//ChangeSchedule(GetScheduleOfType(SCHED_MEDIC_HEAL));
 	ALERT(at_aiconsole, "Medic started to follow injured %s\n", STRING(pTarget->pev->classname));
 }
 
@@ -3619,7 +3627,7 @@ void CMedic::StopHealing()
 	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM );
 	if (m_hTargetEnt != 0 && !m_hTargetEnt->IsPlayer()) {
 		if(m_movementGoal & MOVEGOAL_TARGETENT)
-			RouteClear(); // Stop him from walking toward the player
+			RouteClear(); // Stop him from walking toward the target
 		m_hTargetEnt = 0;
 		if( m_hEnemy != 0 )
 			m_IdealMonsterState = MONSTERSTATE_COMBAT;

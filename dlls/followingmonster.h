@@ -11,6 +11,7 @@ enum
 	SCHED_MOVE_AWAY = LAST_COMMON_SCHEDULE + 1,		// Try to get out of the player's way
 	SCHED_MOVE_AWAY_FOLLOW,	// same, but follow afterward
 	SCHED_MOVE_AWAY_FAIL,	// Turn back toward player
+	SCHED_TARGET_REACHED, // Schedule to set after reaching a followed target, gives a chance to do something else besides facing a target again
 
 	LAST_FOLLOWINGMONSTER_SCHEDULE		// MUST be last
 };

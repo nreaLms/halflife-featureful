@@ -409,7 +409,7 @@ bool CTalkMonster::TryCallForMedic(CBaseEntity* pOther)
 	{
 		CSquadMonster* medic = pOther->MySquadMonsterPointer();
 
-		if ( medic != 0 && medic->ReadyToHeal() )
+		if ( medic != 0 && medic->ReadyToHeal() && (medic->m_MonsterState == MONSTERSTATE_ALERT || medic->m_MonsterState == MONSTERSTATE_IDLE) )
 		{
 			// Don't break sentence if already talking
 			if (!IsTalking())
@@ -1286,7 +1286,7 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			{
 				// only if not dead or dying!
 				CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
-				pTalkMonster->ChangeSchedule( slIdleStopShooting );
+				pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
 			}
 			ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 		}
@@ -1482,6 +1482,18 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 	case SCHED_FIND_MEDIC:
 		{
 			return slFindMedic;
+		}
+		break;
+	case SCHED_TARGET_REACHED:
+		{
+			if (WantsToCallMedic())
+			{
+				return GetScheduleOfType(SCHED_FIND_MEDIC);
+			}
+			else
+			{
+				return GetScheduleOfType(SCHED_TARGET_FACE);
+			}
 		}
 		break;
 	}

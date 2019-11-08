@@ -966,8 +966,7 @@ Schedule_t *CScientist::GetSchedule( void )
 			}
 		}
 		// was called by other ally
-		else if (m_healTime <= gpGlobals->time && m_hTargetEnt != 0
-				 && m_hTargetEnt->IsAlive() && (m_hTargetEnt->pev->health < m_hTargetEnt->pev->max_health) )
+		else if ( CanHeal() )
 		{
 			return slHeal;
 		}
@@ -1061,7 +1060,9 @@ MONSTERSTATE CScientist::GetIdealState( void )
 
 BOOL CScientist::CanHeal( void )
 { 
-	if( ( m_healTime > gpGlobals->time ) || ( m_hTargetEnt == 0 ) || ( m_hTargetEnt->pev->health > ( m_hTargetEnt->pev->max_health * 0.5 ) ) )
+	if( ( m_healTime > gpGlobals->time ) || ( m_hTargetEnt == 0 ) || ( !m_hTargetEnt->IsAlive() ) ||
+			( m_hTargetEnt->IsPlayer() ? m_hTargetEnt->pev->health > ( m_hTargetEnt->pev->max_health * 0.5 ) :
+			  m_hTargetEnt->pev->health >= m_hTargetEnt->pev->max_health ) )
 		return FALSE;
 
 	return TRUE;
@@ -1078,7 +1079,7 @@ void CScientist::StartFollowingHealTarget(CBaseEntity *pTarget)
 	m_hTargetEnt = pTarget;
 	ClearConditions( bits_COND_CLIENT_PUSH );
 	ClearSchedule();
-	ChangeSchedule(slHeal);
+	//ChangeSchedule(slHeal);
 	ALERT(at_aiconsole, "Scientist started to follow injured %s\n", STRING(pTarget->pev->classname));
 }
 
