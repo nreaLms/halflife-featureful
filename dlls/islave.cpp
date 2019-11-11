@@ -396,6 +396,7 @@ public:
 	int LookupActivity(int activity);
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
 	void SpawnFamiliar(const char *entityName, const Vector& origin, int hullType);
+	void OnChangeSchedule( Schedule_t* pNewSchedule );
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType( int Type );
 	CUSTOM_SCHEDULES
@@ -1131,6 +1132,7 @@ void CISlave::StartTask( Task_t *pTask )
 		{
 			TaskFail();
 		}
+		break;
 	}
 	default:
 		CFollowingMonster::StartTask( pTask );
@@ -1270,7 +1272,7 @@ void CISlave::Spawn()
 
 #if FEATURE_ISLAVE_ENERGY
 	// leader starts with some energy pool
-	if (!m_freeEnergy && pev->spawnflags & SF_SQUADMONSTER_LEADER)
+	if (!m_freeEnergy && (pev->spawnflags & SF_SQUADMONSTER_LEADER))
 		m_freeEnergy = pev->max_health;
 #endif
 }
@@ -1456,7 +1458,7 @@ Task_t tlSlaveGiveArmor[] =
 {
 	{ TASK_MOVE_TO_TARGET_RANGE, (float)100 },
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_TARGET_CHASE },
-	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_FACE_TARGET, (float)0 },
 	{ TASK_SET_ACTIVITY, (float)ACT_ARM },
 	{ TASK_WAIT, 0.5f },
 	{ TASK_ISLAVE_MAKE_CHARGE_TOKEN, (float)0 },
@@ -1490,11 +1492,17 @@ IMPLEMENT_CUSTOM_SCHEDULES( CISlave, CFollowingMonster )
 
 //=========================================================
 //=========================================================
-Schedule_t *CISlave::GetSchedule( void )
+
+void CISlave::OnChangeSchedule(Schedule_t *pNewSchedule)
 {
 	ClearBeams();
 	RemoveChargeToken();
 	m_clawStrikeNum = 0;
+	CFollowingMonster::OnChangeSchedule(pNewSchedule);
+}
+
+Schedule_t *CISlave::GetSchedule( void )
+{
 /*
 	if( pev->spawnflags )
 	{
@@ -2130,7 +2138,7 @@ void CISlave::ReportAIState(ALERT_TYPE level )
 {
 	CFollowingMonster::ReportAIState(level);
 #if FEATURE_ISLAVE_ENERGY
-	ALERT(level, "Free energy: %d. ", m_freeEnergy);
+	ALERT(level, "Free energy: %3.1f. ", m_freeEnergy);
 #endif
 }
 
