@@ -183,6 +183,8 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
+	void ReportAIState(ALERT_TYPE level);
+
 	// checking the feasibility of a grenade toss is kind of costly, so we do it every couple of seconds,
 	// not every server frame.
 	float m_flNextGrenadeCheck;
@@ -282,6 +284,8 @@ public:
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
+
+	void ReportAIState(ALERT_TYPE level);
 
 	CUSTOM_SCHEDULES
 	float m_flHealCharge;
@@ -399,6 +403,12 @@ int CHFGrunt::IRelationship ( CBaseEntity *pTarget )
 void CHFGrunt::SetHead(int head)
 {
 	m_iHead = head;
+}
+
+void CHFGrunt::ReportAIState(ALERT_TYPE level)
+{
+	CTalkMonster::ReportAIState(level);
+	ALERT(level, "Ammo loaded: %d / %d. ", m_cAmmoLoaded, m_cClipSize);
 }
 
 //=========================================================
@@ -3665,6 +3675,12 @@ bool CMedic::ReadyToHeal()
 bool CMedic::InHealSchedule()
 {
 	return m_pSchedule == slMedicHeal;
+}
+
+void CMedic::ReportAIState(ALERT_TYPE level)
+{
+	CHFGrunt::ReportAIState(level);
+	ALERT(level, "Heal charge: %3.1f. ", m_flHealCharge);
 }
 
 //=========================================================

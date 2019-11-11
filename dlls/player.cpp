@@ -3993,7 +3993,10 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		{
 			CBaseMonster *pMonster = pEntity->MyMonsterPointer();
 			if( pMonster )
-				pMonster->ReportAIState();
+			{
+				pMonster->ReportAIState(at_console);
+				ALERT(at_console, "\n\n");
+			}
 		}
 		break;
 	case 104:

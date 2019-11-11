@@ -124,6 +124,8 @@ public:
 
 	CUSTOM_SCHEDULES
 
+	void ReportAIState(ALERT_TYPE level);
+
 protected:
 	void SciSpawnHelper(const char* modelName, float health, int headCount = NUM_SCIENTIST_HEADS);
 	void PrecacheSounds();
@@ -1104,6 +1106,19 @@ void CScientist::Heal( void )
 	m_healTime = gpGlobals->time + gSkillData.scientistHealTime;
 }
 
+void CScientist::ReportAIState(ALERT_TYPE level)
+{
+	CTalkMonster::ReportAIState(level);
+	if (m_healTime <= gpGlobals->time)
+	{
+		ALERT(level, "Can heal now. ");
+	}
+	else
+	{
+		ALERT(level, "Can heal in %3.1f seconds. ", m_healTime - gpGlobals->time);
+	}
+}
+
 //=========================================================
 // Dead Scientist PROP
 //=========================================================
@@ -1425,6 +1440,7 @@ public:
 	const char* DefaultDisplayName() { return "Cleansuit Scientist"; }
 	BOOL CanHeal();
 	bool ReadyToHeal() {return false;}
+	void ReportAIState(ALERT_TYPE level);
 };
 
 LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist, CCleansuitScientist )
@@ -1446,6 +1462,11 @@ void CCleansuitScientist::Precache()
 BOOL CCleansuitScientist::CanHeal()
 {
 	return FALSE;
+}
+
+void CCleansuitScientist::ReportAIState(ALERT_TYPE level)
+{
+	CTalkMonster::ReportAIState(level);
 }
 
 class CDeadCleansuitScientist : public CDeadMonster
@@ -1634,6 +1655,7 @@ public:
 	const char* DefaultDisplayName() { return "Construction Worker"; }
 	BOOL CanHeal();
 	bool ReadyToHeal() {return false;}
+	void ReportAIState(ALERT_TYPE level);
 };
 
 LINK_ENTITY_TO_CLASS( monster_gus, CGus )
@@ -1659,6 +1681,11 @@ void CGus::Precache()
 BOOL CGus::CanHeal()
 {
 	return FALSE;
+}
+
+void CGus::ReportAIState(ALERT_TYPE level)
+{
+	CTalkMonster::ReportAIState(level);
 }
 
 //=========================================================

@@ -477,3 +477,10 @@ CBaseEntity* CFollowingMonster::PlayerToFace()
 		return pPlayer;
 	return 0;
 }
+
+void CFollowingMonster::ReportAIState(ALERT_TYPE level)
+{
+	CSquadMonster::ReportAIState(level);
+	if (IsFollowingPlayer())
+		ALERT(level, "Following a player. ");
+}

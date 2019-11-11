@@ -189,6 +189,8 @@ public:
 	int MyToleranceLevel() { return m_iTolerance ? m_iTolerance : DefaultToleranceLevel(); }
 	static const char* GetRedefinedSentence(string_t sentence);
 
+	void ReportAIState(ALERT_TYPE level);
+
 	struct TalkFriend
 	{
 		const char* name;

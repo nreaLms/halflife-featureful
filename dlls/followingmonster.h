@@ -67,6 +67,8 @@ public:
 
 	CBaseEntity* PlayerToFace();
 
+	void ReportAIState(ALERT_TYPE level);
+
 	CUSTOM_SCHEDULES
 };
 

@@ -404,6 +404,8 @@ public:
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
+	void ReportAIState( ALERT_TYPE level );
+
 	void ClearBeams();
 	void ArmBeam(int side );
 	void ArmBeamMessage(int side );
@@ -2122,6 +2124,14 @@ void CISlave::PlayUseSentence()
 void CISlave::PlayUnUseSentence()
 {
 	SENTENCEG_PlayRndSz( ENT( pev ), "SLV_ALERT", 0.85, ATTN_NORM, 0, m_voicePitch );
+}
+
+void CISlave::ReportAIState(ALERT_TYPE level )
+{
+	CFollowingMonster::ReportAIState(level);
+#if FEATURE_ISLAVE_ENERGY
+	ALERT(level, "Free energy: %d. ", m_freeEnergy);
+#endif
 }
 
 #if FEATURE_ISLAVE_DEAD

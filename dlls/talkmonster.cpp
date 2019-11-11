@@ -1616,3 +1616,12 @@ void CTalkMonster::Precache( void )
 		m_szGrp[TLK_DECLINE] = GetRedefinedSentence(m_iszDecline);
 	CFollowingMonster::Precache();
 }
+
+void CTalkMonster::ReportAIState(ALERT_TYPE level)
+{
+	CFollowingMonster::ReportAIState(level);
+	if ( m_hTalkTarget != 0 )
+		ALERT( level, "Speaking to: %s. ", STRING( m_hTalkTarget->pev->classname ) );
+	if (m_fStartSuspicious)
+		ALERT( level, "Start pre-provoked. " );
+}

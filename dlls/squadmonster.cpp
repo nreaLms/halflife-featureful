@@ -672,3 +672,36 @@ void CSquadMonster::StartTask(Task_t *pTask)
 		break;
 	}
 }
+
+void CSquadMonster::ReportAIState(ALERT_TYPE level)
+{
+	CBaseMonster::ReportAIState(level);
+	ALERT(at_console, "\n");
+	if( !InSquad() )
+	{
+		ALERT( level, "Not In Squad. " );
+	}
+	else
+	{
+		if (pev->netname)
+		{
+			ALERT( level, "In Squad '%s' ", STRING(pev->netname) );
+		}
+		else
+		{
+			ALERT( level, "In Squad " );
+		}
+
+		ALERT( level, "of %d members, ", SquadCount() );
+
+		if( IsLeader() )
+		{
+			ALERT( level, "Squad Leader. " );
+		}
+		else
+		{
+			CSquadMonster* myLeader = MySquadLeader();
+			ALERT( level, "My Squad Leader: '%s'. ", FStringNull(myLeader->pev->targetname) ? STRING(myLeader->pev->classname) : STRING(myLeader->pev->targetname) );
+		}
+	}
+}

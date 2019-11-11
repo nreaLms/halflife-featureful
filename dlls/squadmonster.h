@@ -123,5 +123,7 @@ public:
 	MONSTERSTATE GetIdealState( void );
 	Schedule_t *GetScheduleOfType( int iType );
 	void StartTask( Task_t *pTask );
+
+	void ReportAIState(ALERT_TYPE level);
 };
 #endif // SQUADMONSTER_H

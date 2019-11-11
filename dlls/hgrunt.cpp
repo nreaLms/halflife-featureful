@@ -2272,6 +2272,12 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 	}
 }
 
+void CHGrunt::ReportAIState(ALERT_TYPE level)
+{
+	CFollowingMonster::ReportAIState(level);
+	ALERT(level, "Ammo loaded: %d / %d. ", m_cAmmoLoaded, m_cClipSize);
+}
+
 //=========================================================
 // CHGruntRepel - when triggered, spawns a monster_human_grunt
 // repelling down a line.
