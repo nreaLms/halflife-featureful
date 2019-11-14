@@ -173,7 +173,7 @@ public:
 
 	// Medic related
 	bool			WantsToCallMedic();
-	bool			TryCallForMedic(CBaseEntity* pOther);
+	bool			CanCallThisMedic(CSquadMonster* pOther);
 	virtual void	PlayCallForMedic();
 	bool			IsWounded();
 	bool			IsHeavilyWounded();

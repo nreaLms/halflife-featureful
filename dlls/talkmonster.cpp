@@ -403,20 +403,12 @@ void CTalkMonster::SetActivity( Activity newActivity )
 	CFollowingMonster::SetActivity( newActivity );
 }
 
-bool CTalkMonster::TryCallForMedic(CBaseEntity* pOther)
+bool CTalkMonster::CanCallThisMedic(CSquadMonster* pOther)
 {
-	if ( pOther && pOther != this && pOther->pev->deadflag == DEAD_NO )
+	if ( pOther != 0 && pOther != this && pOther->pev->deadflag == DEAD_NO )
 	{
-		CSquadMonster* medic = pOther->MySquadMonsterPointer();
-
-		if ( medic != 0 && medic->ReadyToHeal() && (medic->m_MonsterState == MONSTERSTATE_ALERT || medic->m_MonsterState == MONSTERSTATE_IDLE) )
+		if ( pOther->ReadyToHeal() && (pOther->m_MonsterState == MONSTERSTATE_ALERT || pOther->m_MonsterState == MONSTERSTATE_IDLE) )
 		{
-			// Don't break sentence if already talking
-			if (!IsTalking())
-				PlayCallForMedic();
-
-			ALERT( at_aiconsole, "Injured %s called for %s\n", STRING(pev->classname), STRING(medic->pev->classname) );
-			medic->StartFollowingHealTarget(this);
 			return true;
 		}
 	}
@@ -512,6 +504,7 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		break;
 	case TASK_FIND_MEDIC:
 		{
+			CSquadMonster* foundMedic = NULL;
 			// First try looking for a medic in my squad
 			if ( InSquad() )
 			{
@@ -521,16 +514,16 @@ void CTalkMonster::StartTask( Task_t *pTask )
 					for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
 					{
 						CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
-						if (TryCallForMedic(pMember))
+						if (FVisible(pMember) && CanCallThisMedic(pMember))
 						{
-							TaskComplete();
+							foundMedic = pMember;
 							break;
 						}
 					}
 				}
 			}
 			// If not, search bsp.
-			if ( !TaskIsComplete() )
+			if ( !foundMedic )
 			{
 				// for each medic in this bsp...
 				for( int i = 0; i < TLK_CFRIENDS; i++ )
@@ -541,15 +534,28 @@ void CTalkMonster::StartTask( Task_t *pTask )
 					CBaseEntity *pFriend = NULL;
 					while ((pFriend = EnumFriends( pFriend, talkFriend.name, TRUE )) != NULL)
 					{
-						if (TryCallForMedic(pFriend))
+						CSquadMonster* friendMedic = pFriend->MySquadMonsterPointer();
+						if (CanCallThisMedic(friendMedic))
 						{
-							TaskComplete();
+							foundMedic = friendMedic;
 							break;
 						}
 					}
 				}
 			}
-			if ( !TaskIsComplete() )
+
+			if (foundMedic)
+			{
+				// Don't break sentence if already talking
+				if (!IsTalking())
+					PlayCallForMedic();
+
+				ALERT( at_aiconsole, "Injured %s called for %s\n", STRING(pev->classname), STRING(foundMedic->pev->classname) );
+				foundMedic->StartFollowingHealTarget(this);
+
+				TaskComplete();
+			}
+			else
 			{
 				TaskFail();
 			}
