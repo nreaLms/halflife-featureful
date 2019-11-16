@@ -503,7 +503,7 @@ void CScientist::StartTask( Task_t *pTask )
 			{
 				m_vecMoveGoal = m_hTargetEnt->pev->origin;
 				if( !MoveToTarget( ACT_WALK_SCARED, 0.5 ) )
-					TaskFail();
+					TaskFail("can't build path to target");
 			}
 		}
 		break;
@@ -530,7 +530,7 @@ void CScientist::RunTask( Task_t *pTask )
 
 			if( m_hEnemy == 0 )
 			{
-				TaskFail();
+				TaskFail("no enemy");
 			}
 			else
 			{

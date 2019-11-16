@@ -219,7 +219,7 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// nowhere to go?
-				TaskFail();
+				TaskFail("can't move away");
 			}
 		}
 		break;
@@ -251,7 +251,7 @@ void CFollowingMonster::RunTask( Task_t *pTask )
 			}
 			else
 			{
-				TaskFail();
+				TaskFail("no player to face");
 			}
 		}
 		break;

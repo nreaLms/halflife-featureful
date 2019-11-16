@@ -1044,13 +1044,12 @@ void CAGrunt::StartTask( Task_t *pTask )
 
 			if( !fSkip )
 			{
-				TaskFail();
+				TaskFail("failed to setup a hidden attack");
 			}
 		}
 		else
 		{
-			ALERT( at_aiconsole, "AGRunt - no enemy monster ptr!!!\n" );
-			TaskFail();
+			TaskFail("no enemy");
 		}
 		break;
 	default:

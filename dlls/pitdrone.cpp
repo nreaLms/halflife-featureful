@@ -1129,14 +1129,21 @@ void CPitdrone::StartTask(Task_t *pTask)
 	}
 	case TASK_GET_PATH_TO_ENEMY:
 	{
-		if (BuildRoute(m_hEnemy->pev->origin, bits_MF_TO_ENEMY, m_hEnemy))
+		CBaseEntity *pEnemy = m_hEnemy;
+
+		if( pEnemy == NULL )
 		{
-			m_iTaskStatus = TASKSTATUS_COMPLETE;
+			TaskFail("no enemy");
+			return;
+		}
+
+		if( BuildRoute( pEnemy->pev->origin, bits_MF_TO_ENEMY, pEnemy ) )
+		{
+			TaskComplete();
 		}
 		else
 		{
-			ALERT(at_aiconsole, "GetPathToEnemy failed!!\n");
-			TaskFail();
+			TaskFail("can't build path to enemy");
 		}
 		break;
 	}

@@ -1081,8 +1081,7 @@ void CISlave::StartTask( Task_t *pTask )
 		}
 		else
 		{
-			ALERT(at_aiconsole, "Vortigaunt wanted to spawn a familiar, but there's no space\n");
-			TaskFail();
+			TaskFail("no space to spawn a familiar");
 		}
 		break;
 	}
@@ -1106,7 +1105,7 @@ void CISlave::StartTask( Task_t *pTask )
 			TaskComplete();
 		}
 		else
-			TaskFail();
+			TaskFail("failed to create charge token entity");
 		break;
 	}
 	case TASK_ISLAVE_SEND_CHARGE_TOKEN:
@@ -1125,12 +1124,12 @@ void CISlave::StartTask( Task_t *pTask )
 			}
 			else
 			{
-				TaskFail();
+				TaskFail("no target player to send charge token to");
 			}
 		}
 		else
 		{
-			TaskFail();
+			TaskFail("no charge token to send");
 		}
 		break;
 	}

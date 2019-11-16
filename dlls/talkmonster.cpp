@@ -557,7 +557,7 @@ void CTalkMonster::StartTask( Task_t *pTask )
 			}
 			else
 			{
-				TaskFail();
+				TaskFail("no unbusy medic found");
 			}
 			m_flMedicWaitTime = CALL_MEDIC_DELAY + gpGlobals->time;
 		}
@@ -591,7 +591,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 		else
 		{
 			// started moving or talking
-			TaskFail();
+			TaskFail("started moving or talking");
 			return;
 		}
 
@@ -599,7 +599,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 		{
 			if (!pPlayer)
 			{
-				TaskFail();
+				TaskFail("no player");
 				return;
 			}
 
@@ -607,14 +607,14 @@ void CTalkMonster::RunTask( Task_t *pTask )
 			if( ( pPlayer->pev->origin - pev->origin ).Length2D() > TLK_STARE_DIST )
 			{
 				// player moved away.
-				TaskFail();
+				TaskFail("player moved away");
 			}
 
 			UTIL_MakeVectors( pPlayer->pev->angles );
 			if( UTIL_DotPoints( pPlayer->pev->origin, pev->origin, gpGlobals->v_forward ) < m_flFieldOfView )
 			{
 				// player looked away
-				TaskFail();
+				TaskFail("player looked away");
 			}
 		}
 

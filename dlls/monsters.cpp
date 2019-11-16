@@ -2071,8 +2071,7 @@ void CBaseMonster::Move( float flInterval )
 		// so refresh it.
 		if( m_movementGoal == MOVEGOAL_NONE || !FRefreshRoute() )
 		{
-			ALERT( at_aiconsole, "Tried to move with no route!\n" );
-			TaskFail();
+			TaskFail("tried to move with no route");
 			return;
 		}
 	}
@@ -2174,7 +2173,7 @@ void CBaseMonster::Move( float flInterval )
 					FRefreshRoute();
 					if( FRouteClear() )
 					{
-						TaskFail();
+						TaskFail("route is empty");
 					}
 					else
 					{
@@ -2187,8 +2186,8 @@ void CBaseMonster::Move( float flInterval )
 				}
 				else
 				{
-					TaskFail();
-					ALERT( at_aiconsole, "%s Failed to move (%d)!\n", STRING( pev->classname ), HasMemory( bits_MEMORY_MOVE_FAILED ) );
+					TaskFail("failed to move");
+					//ALERT( at_aiconsole, "%s Failed to move (%d)!\n", STRING( pev->classname ), HasMemory( bits_MEMORY_MOVE_FAILED ) );
 					//ALERT( at_aiconsole, "%f, %f, %f\n", pev->origin.z, ( pev->origin + ( vecDir * flCheckDist ) ).z, m_Route[m_iRouteIndex].vecLocation.z );
 				}
 				return;

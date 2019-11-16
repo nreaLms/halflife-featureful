@@ -509,8 +509,7 @@ void CController::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT( at_aiconsole, "GetPathToEnemyLKP failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to enemy last known position");
 			}
 			break;
 		}
@@ -520,7 +519,7 @@ void CController::StartTask( Task_t *pTask )
 
 			if( pEnemy == NULL )
 			{
-				TaskFail();
+				TaskFail("no enemy");
 				return;
 			}
 
@@ -531,8 +530,7 @@ void CController::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT( at_aiconsole, "GetPathToEnemy failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to enemy");
 			}
 			break;
 		}
@@ -886,8 +884,7 @@ void CController::Move( float flInterval )
 	// Don't move if no valid route
 	if( FRouteClear() )
 	{
-		ALERT( at_aiconsole, "Tried to move with no route!\n" );
-		TaskFail();
+		TaskFail("route is empty");
 		return;
 	}
 
@@ -997,8 +994,7 @@ void CController::Move( float flInterval )
 					}
 					else
 					{
-						TaskFail();
-						ALERT( at_aiconsole, "Failed to move!\n" );
+						TaskFail("failed to move");
 						//ALERT( at_aiconsole, "%f, %f, %f\n", pev->origin.z, ( pev->origin + ( vecDir * flCheckDist ) ).z, m_Route[m_iRouteIndex].vecLocation.z );
 					}
 					return;

@@ -226,7 +226,7 @@ public:
 	
 	inline void TaskComplete( void ) { if ( !HasConditions( bits_COND_TASK_FAILED ) ) m_iTaskStatus = TASKSTATUS_COMPLETE; }
 	void MovementComplete( void );
-	inline void TaskFail( void ) { SetConditions( bits_COND_TASK_FAILED ); }
+	inline void TaskFail( const char* reason = NULL ) { SetConditions( bits_COND_TASK_FAILED ); taskFailReason = reason; }
 	inline void TaskBegin( void ) { m_iTaskStatus = TASKSTATUS_RUNNING; }
 	int TaskIsRunning( void );
 	inline int TaskIsComplete( void ) { return ( m_iTaskStatus == TASKSTATUS_COMPLETE ); }
@@ -401,6 +401,8 @@ public:
 	Vector m_maxHullSize;
 
 	int m_customSoundMask;
+
+	const char* taskFailReason;
 };
 
 class CDeadMonster : public CBaseMonster

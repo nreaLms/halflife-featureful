@@ -948,7 +948,7 @@ void CBigMomma::StartTask( Task_t *pTask )
 		{
 			CBaseEntity *pTarget = m_hTargetEnt;
 			if( !pTarget )
-				TaskFail();
+				TaskFail("no target ent");
 			else
 			{
 				if( ( pTarget->pev->origin - pev->origin ).Length() < GetNodeRange() )
@@ -962,7 +962,7 @@ void CBigMomma::StartTask( Task_t *pTask )
 					m_vecMoveGoal = pTarget->pev->origin;
 					if( !MoveToTarget( act, 2 ) )
 					{
-						TaskFail();
+						TaskFail("failed to reach target ent");
 					}
 				}
 			}
@@ -992,7 +992,7 @@ void CBigMomma::RunTask( Task_t *pTask )
 			float distance;
 
 			if( m_hTargetEnt == 0 )
-				TaskFail();
+				TaskFail("no target ent");
 			else
 			{
 				distance = ( m_vecMoveGoal - pev->origin ).Length2D();

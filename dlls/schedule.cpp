@@ -256,7 +256,8 @@ void CBaseMonster::MaintainSchedule( void )
 					pNewSchedule = GetScheduleOfType( SCHED_FAIL );
 
 				// schedule was invalid because the current task failed to start or complete
-				ALERT( at_aiconsole, "Schedule Failed at %d! (monster: %s, schedule: %s)\n", m_iScheduleIndex, STRING(pev->classname), m_pSchedule ? m_pSchedule->pName : "unknown" );
+				ALERT( at_aiconsole, "Schedule Failed at %d! (monster: %s, schedule: %s, reason: %s)\n", m_iScheduleIndex, STRING(pev->classname),
+					   m_pSchedule ? m_pSchedule->pName : "unknown", taskFailReason ? taskFailReason : "unspecified" );
 				ChangeSchedule( pNewSchedule );
 			}
 			else
@@ -419,7 +420,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 			float distance;
 
 			if( m_hTargetEnt == 0 )
-				TaskFail();
+				TaskFail("no target ent");
 			else
 			{
 				float checkDistance = pTask->flData;
@@ -634,7 +635,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			}
 			else
 			{
-				TaskFail();
+				TaskFail("could not find hintnode");
 			}
 			break;
 		}
@@ -693,7 +694,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			}
 			else
 			{
-				TaskFail();
+				TaskFail("no schedule of specified type");
 			}
 			break;
 		}
@@ -701,7 +702,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		{
 			if( m_hEnemy == 0 )
 			{
-				TaskFail();
+				TaskFail("no enemy");
 				return;
 			}
 
@@ -713,7 +714,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no coverwhatsoever.
-				TaskFail();
+				TaskFail("no cover found");
 			}
 			break;
 		}
@@ -721,7 +722,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		{
 			if( m_hEnemy == 0 )
 			{
-				TaskFail();
+				TaskFail("no enemy");
 				return;
 			}
 
@@ -733,7 +734,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no coverwhatsoever.
-				TaskFail();
+				TaskFail("no cover found");
 			}
 			break;
 		}
@@ -741,7 +742,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		{
 			if( m_hEnemy == 0 )
 			{
-				TaskFail();
+				TaskFail("no enemy");
 				return;
 			}
 
@@ -753,7 +754,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no coverwhatsoever.
-				TaskFail();
+				TaskFail("no cover found");
 			}
 			break;
 		}
@@ -786,7 +787,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no coverwhatsoever.
-				TaskFail();
+				TaskFail("no cover found");
 			}
 			break;
 		}
@@ -801,7 +802,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no cover!
-				TaskFail();
+				TaskFail("no cover found");
 			}
 		}
 		break;
@@ -851,11 +852,15 @@ void CBaseMonster::StartTask( Task_t *pTask )
 						TaskComplete();
 					}
 				}
-
+				// no coverwhatsoever. or no sound in list
+				if (!TaskIsComplete())
+					TaskFail("no cover found");
 			}
-			// no coverwhatsoever. or no sound in list
-			if (!TaskIsComplete())
-				TaskFail();
+			else
+			{
+				TaskFail("no sound to cover from");
+			}
+
 			break;
 		}
 	case TASK_FACE_HINTNODE:
@@ -875,7 +880,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			SetTurnActivity(); 
 		}
 		else
-			TaskFail();
+			TaskFail("no target ent");
 		break;
 	case TASK_FACE_ENEMY:
 		{
@@ -892,8 +897,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		{
 			if( FRouteClear() )
 			{
-				ALERT( at_aiconsole, "No route to face!\n" );
-				TaskFail();
+				TaskFail("no route to face");
 			}
 			else
 			{
@@ -930,14 +934,14 @@ void CBaseMonster::StartTask( Task_t *pTask )
 	case TASK_MOVE_NEAREST_TO_TARGET_RANGE:
 		{
 			if ( m_hTargetEnt == 0 )
-				TaskFail();
+				TaskFail("no target ent");
 			else if( ( m_hTargetEnt->pev->origin - pev->origin ).Length() < 1 )
 				TaskComplete();
 			else
 			{
 				m_vecMoveGoal = m_hTargetEnt->pev->origin;
 				if( !MoveToTarget( ACT_WALK, 2, pTask->iTask == TASK_MOVE_NEAREST_TO_TARGET_RANGE ) )
-					TaskFail();
+					TaskFail("failed to reach target ent");
 			}
 			break;
 		}
@@ -947,7 +951,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			Activity newActivity;
 
 			if ( m_hTargetEnt == 0 )
-				TaskFail();
+				TaskFail("no target ent");
 			else if( ( m_hTargetEnt->pev->origin - pev->origin ).Length() < 1 )
 				TaskComplete();
 			else
@@ -964,8 +968,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 				{
 					if( m_hTargetEnt == 0 || !MoveToTarget( newActivity, 2 ) )
 					{
-						TaskFail();
-						ALERT( at_aiconsole, "%s Failed to reach target!!!\n", STRING( pev->classname ) );
+						TaskFail("failed to reach target ent");
 						RouteClear();
 					}
 				}
@@ -1038,8 +1041,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT( at_aiconsole, "GetPathToEnemyLKP failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to enemy last known position");
 			}
 			break;
 		}
@@ -1049,7 +1051,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 
 			if( pEnemy == NULL )
 			{
-				TaskFail();
+				TaskFail("no enemy");
 				return;
 			}
 
@@ -1064,8 +1066,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT( at_aiconsole, "GetPathToEnemy failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to enemy");
 			}
 			break;
 		}
@@ -1078,8 +1079,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			}
 			else
 			{
-				ALERT( at_aiconsole, "GetPathToEnemyCorpse failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to enemy corpse");
 			}
 		}
 		break;
@@ -1093,8 +1093,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT( at_aiconsole, "GetPathToSpot failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to spot");
 			}
 			break;
 		}
@@ -1108,8 +1107,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT( at_aiconsole, "GetPathToSpot failed!!\n" );
-				TaskFail();
+				TaskFail("failed to reach target ent");
 			}
 			break;
 		}
@@ -1123,8 +1121,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT( at_aiconsole, "GetPathToHintNode failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to hintnode");
 			}
 			break;
 		}
@@ -1139,8 +1136,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT ( at_aiconsole, "GetPathToLastPosition failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to last position");
 			}
 			break;
 		}
@@ -1157,8 +1153,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT ( at_aiconsole, "GetPathToBestSound failed!!\n" );
-				TaskFail();
+				TaskFail("can't build path to best sound");
 			}
 			break;
 		}
@@ -1175,9 +1170,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				// no way to get there =(
-				ALERT ( at_aiconsole, "GetPathToBestScent failed!!\n" );
-
-				TaskFail();
+				TaskFail("can't build path to best scent");
 			}
 			break;
 		}
