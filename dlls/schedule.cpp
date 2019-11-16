@@ -184,7 +184,7 @@ BOOL CBaseMonster::FScheduleValid( void )
 		return FALSE;
 	}
 
-	if( HasConditions( m_pSchedule->iInterruptMask | bits_COND_SCHEDULE_DONE | bits_COND_TASK_FAILED ) )
+	if( HasConditions( bits_COND_SCHEDULE_DONE | bits_COND_TASK_FAILED ) )
 	{
 #ifdef DEBUG
 		if( HasConditions( bits_COND_TASK_FAILED ) && m_failSchedule == SCHED_NONE )
@@ -197,7 +197,13 @@ BOOL CBaseMonster::FScheduleValid( void )
 			UTIL_Sparks( tmp );
 		}
 #endif // DEBUG
-		// some condition has interrupted the schedule, or the schedule is done
+		// some task failed, or the schedule is done
+		return FALSE;
+	}
+	else if ( HasConditions( m_pSchedule->iInterruptMask ) )
+	{
+		// some condition has interrupted the schedule
+		taskFailReason = "interrupted";
 		return FALSE;
 	}
 	
@@ -250,14 +256,15 @@ void CBaseMonster::MaintainSchedule( void )
 			}
 			if( HasConditions( bits_COND_TASK_FAILED ) && m_MonsterState == m_IdealMonsterState )
 			{
+				// schedule was invalid because the current task failed to start or complete
+				ALERT( at_aiconsole, "Schedule Failed at %d! (monster: %s, schedule: %s, reason: %s)\n", m_iScheduleIndex, STRING(pev->classname),
+					   m_pSchedule ? m_pSchedule->pName : "unknown", taskFailReason ? taskFailReason : "unspecified" );
+
 				if( m_failSchedule != SCHED_NONE )
 					pNewSchedule = GetScheduleOfType( m_failSchedule );
 				else
 					pNewSchedule = GetScheduleOfType( SCHED_FAIL );
 
-				// schedule was invalid because the current task failed to start or complete
-				ALERT( at_aiconsole, "Schedule Failed at %d! (monster: %s, schedule: %s, reason: %s)\n", m_iScheduleIndex, STRING(pev->classname),
-					   m_pSchedule ? m_pSchedule->pName : "unknown", taskFailReason ? taskFailReason : "unspecified" );
 				ChangeSchedule( pNewSchedule );
 			}
 			else
@@ -415,6 +422,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 			break;
 		}
 	case TASK_MOVE_TO_TARGET_RANGE:
+	case TASK_CATCH_WITH_TARGET_RANGE:
 	case TASK_MOVE_NEAREST_TO_TARGET_RANGE:
 		{
 			float distance;
@@ -448,6 +456,8 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					TaskComplete();
 					RouteClear();		// Stop moving
 				}
+				else if ( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE && m_hTargetEnt->IsMoving() )
+					m_movementActivity = ACT_RUN;
 				else if( distance < 190 && m_movementActivity != ACT_WALK )
 					m_movementActivity = ACT_WALK;
 				else if( distance >= 270 && m_movementActivity != ACT_RUN )
@@ -931,6 +941,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			break;
 		}
 	case TASK_MOVE_TO_TARGET_RANGE:
+	case TASK_CATCH_WITH_TARGET_RANGE:
 	case TASK_MOVE_NEAREST_TO_TARGET_RANGE:
 		{
 			if ( m_hTargetEnt == 0 )
@@ -940,7 +951,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				m_vecMoveGoal = m_hTargetEnt->pev->origin;
-				if( !MoveToTarget( ACT_WALK, 2, pTask->iTask == TASK_MOVE_NEAREST_TO_TARGET_RANGE ) )
+				if( !MoveToTarget( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE ? ACT_RUN : ACT_WALK, 2, pTask->iTask == TASK_MOVE_NEAREST_TO_TARGET_RANGE ) )
 					TaskFail("failed to reach target ent");
 			}
 			break;

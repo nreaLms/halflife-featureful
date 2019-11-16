@@ -177,6 +177,7 @@ typedef enum
 		TASK_WAIT_FOR_MOVEMENT,			// wait until MovementIsComplete()
 		TASK_GET_HEALTH_FROM_FOOD,
 		TASK_CHECK_FIRE, // check friendly fire
+		TASK_CATCH_WITH_TARGET_RANGE,
 		LAST_COMMON_TASK // LEAVE THIS AT THE BOTTOM!! (sjb)
 } SHARED_TASKS;
 

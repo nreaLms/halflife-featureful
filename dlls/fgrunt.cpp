@@ -117,7 +117,7 @@ enum
 enum
 {
 	SCHED_MEDIC_HEAL = LAST_HGRUNT_ALLY_SCHEDULE,
-	SCHED_MEDIC_HEAL_FAILED,
+	SCHED_MEDIC_RESTORE_TARGET,
 };
 
 class CHFGrunt : public CTalkMonster
@@ -274,12 +274,13 @@ public:
 	void StartFollowingHealTarget(CBaseEntity* pTarget);
 	bool ReadyToHeal();
 	void RestoreTargetEnt();
-	void StopHealing();
+	void StopHealing(bool clearTargetEnt = true);
 	CBaseEntity* HealTarget();
 	inline bool HasHealTarget() { return HealTarget() != 0; }
 	inline bool HasHealCharge() { return m_flHealCharge >= 1; }
 	bool InHealSchedule();
 	bool CheckHealCharge();
+	bool ShouldDrawGun();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -292,6 +293,7 @@ public:
 	BOOL m_fDepleteLine;
 	BOOL m_fHealing;
 	EHANDLE m_hLeadingPlayer;
+	BOOL m_fSaidHeal;
 };
 
 TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
@@ -3202,18 +3204,21 @@ enum
 	TASK_MEDIC_SAY_HEAL = LAST_HGRUNT_ALLY_TASK + 1,
 	TASK_MEDIC_HEAL,
 	TASK_MEDIC_RESTORE_TARGET_ENT,
+	TASK_MEDIC_DRAW_NEEDLE,
+	TASK_MEDIC_DRAW_GUN,
 };
 
 Task_t	tlMedicHeal[] =
 {
-	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_MEDIC_HEAL_FAILED },
-	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move within 50 of target ent
+	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_MEDIC_RESTORE_TARGET },
+	{ TASK_CATCH_WITH_TARGET_RANGE,			(float)50		},	// Move within 50 of target ent
 	{ TASK_FACE_IDEAL,						(float)0		},
 	{ TASK_MEDIC_SAY_HEAL,					(float)0		},
-	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_ARM	},			// Whip out the needle
-	{ TASK_MOVE_TO_TARGET_RANGE,			(float)50		},	// Move again in case if the target moved away during pull needle animation
+	{ TASK_MEDIC_DRAW_NEEDLE,				(float)0		},	// Whip out the needle
+	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_MEDIC_HEAL }, // Catch up with a target if it got too far
 	{ TASK_MEDIC_HEAL,						(float)0	},	// Put it in the target
-	{ TASK_PLAY_SEQUENCE_FACE_TARGET,		(float)ACT_DISARM	},			// Put away the needle
+	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_MEDIC_RESTORE_TARGET }, // Catch up with a target if it got too far
+	{ TASK_MEDIC_DRAW_GUN,					(float)0		},	// Put away the needle
 	{ TASK_MEDIC_RESTORE_TARGET_ENT,		(float)0 }
 };
 
@@ -3222,15 +3227,32 @@ Schedule_t	slMedicHeal[] =
 	{
 		tlMedicHeal,
 		ARRAYSIZE ( tlMedicHeal ),
-		0,	// Don't interrupt or he'll end up running around with a needle all the time
+		bits_COND_LIGHT_DAMAGE|bits_COND_HEAVY_DAMAGE,
 		0,
 		"Heal"
 	},
 };
 
+Task_t	tlMedicRestoreTarget[] =
+{
+	{ TASK_MEDIC_RESTORE_TARGET_ENT, (float)0 },
+	{ TASK_MEDIC_DRAW_GUN, (float)0 },
+};
+
+Schedule_t	slMedicRestoreTarget[] =
+{
+	{
+		tlMedicRestoreTarget,
+		ARRAYSIZE ( tlMedicRestoreTarget ),
+		0,
+		0,
+		"Restore Target"
+	},
+};
+
 Task_t	tlMedicDrawGun[] =
 {
-	{ TASK_PLAY_SEQUENCE,		(float)ACT_DISARM	},			// Put away the needle
+	{ TASK_MEDIC_DRAW_GUN,		(float)0	},			// Put away the needle
 };
 
 Schedule_t	slMedicDrawGun[] =
@@ -3259,6 +3281,7 @@ IMPLEMENT_SAVERESTORE( CMedic, CHFGrunt )
 DEFINE_CUSTOM_SCHEDULES( CMedic )
 {
 	slMedicHeal,
+	slMedicRestoreTarget,
 	slMedicDrawGun,
 };
 
@@ -3266,11 +3289,10 @@ IMPLEMENT_CUSTOM_SCHEDULES( CMedic, CHFGrunt )
 
 bool CMedic::Heal( void )
 {
-	if ( !HasHealCharge() || !HasHealTarget() )
+	if ( !HasHealTarget() || !CheckHealCharge() )
 		return false;
 
-	Vector target = m_hTargetEnt->pev->origin - pev->origin;
-	if ( target.Length() > 100 )
+	if ( TargetDistance() > 100 )
 		return false;
 
 	m_flHealCharge -= m_hTargetEnt->TakeHealth( Q_min(10, m_flHealCharge), DMG_GENERIC );
@@ -3284,18 +3306,42 @@ void CMedic::StartTask(Task_t *pTask)
 	switch( pTask->iTask )
 	{
 	case TASK_MEDIC_HEAL:
-		m_IdealActivity = ACT_MELEE_ATTACK2;
 		if (Heal())
 			EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "fgrunt/medic_give_shot.wav", 1, ATTN_NORM );
+		m_IdealActivity = ACT_MELEE_ATTACK2;
 		break;
 	case TASK_MEDIC_SAY_HEAL:
-		m_hTalkTarget = m_hTargetEnt;
-		PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
+		if (!m_fSaidHeal && !IsTalking())
+		{
+			m_hTalkTarget = m_hTargetEnt;
+			PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
+			m_fSaidHeal = TRUE;
+		}
 		TaskComplete();
 		break;
 	case TASK_MEDIC_RESTORE_TARGET_ENT:
 		TaskComplete();
 		RestoreTargetEnt();
+		break;
+	case TASK_MEDIC_DRAW_NEEDLE:
+		if (GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE)
+		{
+			TaskComplete();
+		}
+		else
+		{
+			m_IdealActivity = ACT_ARM;
+		}
+		break;
+	case TASK_MEDIC_DRAW_GUN:
+		if (ShouldDrawGun())
+		{
+			m_IdealActivity = ACT_DISARM;
+		}
+		else
+		{
+			TaskComplete();
+		}
 		break;
 	default:
 		CHFGrunt::StartTask(pTask);
@@ -3310,11 +3356,14 @@ void CMedic::RunTask(Task_t *pTask)
 	case TASK_MEDIC_HEAL:
 		if ( m_fSequenceFinished )
 		{
-			if (HasHealTarget() && CheckHealCharge()) {
+			Heal();
+			if (HasHealTarget() && HasHealCharge())
+			{
 				m_IdealActivity = ACT_MELEE_ATTACK2;
 				ALERT(at_aiconsole, "Medic continuing healing\n");
-				Heal();
-			} else {
+			}
+			else
+			{
 				TaskComplete();
 				StopHealing();
 			}
@@ -3322,8 +3371,8 @@ void CMedic::RunTask(Task_t *pTask)
 		else
 		{
 			if ( TargetDistance() > 90 ) {
-				TaskComplete();
-				StopHealing();
+				TaskFail("target ent is too far");
+				StopHealing(false);
 			}
 			if (m_hTargetEnt != 0)
 			{
@@ -3332,6 +3381,18 @@ void CMedic::RunTask(Task_t *pTask)
 			}
 		}
 		break;
+	case TASK_MEDIC_DRAW_NEEDLE:
+	case TASK_MEDIC_DRAW_GUN:
+		{
+			CBaseEntity *pTarget = m_hTargetEnt;
+			if( pTarget )
+			{
+				pev->ideal_yaw = UTIL_VecToYaw( pTarget->pev->origin - pev->origin );
+				ChangeYaw( pev->yaw_speed );
+			}
+			if( m_fSequenceFinished )
+				TaskComplete();
+		}
 	default:
 		CHFGrunt::RunTask(pTask);
 		break;
@@ -3344,8 +3405,7 @@ Schedule_t *CMedic::GetSchedule()
 	if (prioritizedSchedule)
 		return prioritizedSchedule;
 
-	if ( FBitSet( pev->weapons, MEDIC_EAGLE|MEDIC_HANDGUN ) &&
-		 (GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE || GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NONE)) {
+	if ( ShouldDrawGun() ) {
 		return slMedicDrawGun;
 	}
 	switch( m_MonsterState )
@@ -3356,6 +3416,7 @@ Schedule_t *CMedic::GetSchedule()
 		{
 			if (m_hTargetEnt != 0 && FollowedPlayer() == m_hTargetEnt)
 			{
+				m_fSaidHeal = FALSE;
 				if ( TargetDistance() <= 128 )
 				{
 					if ( CheckHealCharge() && m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health * 0.75 ) {
@@ -3379,10 +3440,21 @@ Schedule_t *CMedic::GetScheduleOfType(int Type)
 {
 	switch (Type) {
 	case SCHED_MEDIC_HEAL:
-		return slMedicHeal;
-	case SCHED_MEDIC_HEAL_FAILED:
-		RestoreTargetEnt();
-		return GetScheduleOfType(SCHED_TARGET_CHASE);
+		if (HasHealTarget())
+			return slMedicHeal;
+		else
+			return slMedicRestoreTarget;
+	case SCHED_MEDIC_RESTORE_TARGET:
+		return slMedicRestoreTarget;
+	case SCHED_FAIL:
+		if (ShouldDrawGun())
+		{
+			return slMedicDrawGun;
+		}
+		else
+		{
+			return CHFGrunt::GetScheduleOfType(Type);
+		}
 	default:
 		return CHFGrunt::GetScheduleOfType(Type);
 	}
@@ -3419,7 +3491,7 @@ void CMedic::ClearFollowedPlayer()
 
 bool CMedic::SetAnswerQuestion(CTalkMonster *pSpeaker)
 {
-	if (m_fHealing) {
+	if (InHealSchedule()) {
 		return false;
 	}
 	return CTalkMonster::SetAnswerQuestion(pSpeaker);
@@ -3602,6 +3674,8 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 	if (m_hTargetEnt != 0 && m_hTargetEnt->IsPlayer())
 		m_hLeadingPlayer = m_hTargetEnt;
 
+	m_fSaidHeal = FALSE;
+
 	if( m_pCine )
 		m_pCine->CancelScript();
 
@@ -3617,6 +3691,7 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 
 void CMedic::RestoreTargetEnt()
 {
+	m_fSaidHeal = FALSE;
 	if (m_hLeadingPlayer != 0)
 	{
 		ALERT(at_aiconsole, "Medic restoring old target\n");
@@ -3631,16 +3706,19 @@ void CMedic::RestoreTargetEnt()
 	}
 }
 
-void CMedic::StopHealing()
+void CMedic::StopHealing(bool clearTargetEnt)
 {
 	m_fHealing = FALSE;
 	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM );
 	if (m_hTargetEnt != 0 && !m_hTargetEnt->IsPlayer()) {
 		if(m_movementGoal & MOVEGOAL_TARGETENT)
 			RouteClear(); // Stop him from walking toward the target
-		m_hTargetEnt = 0;
-		if( m_hEnemy != 0 )
-			m_IdealMonsterState = MONSTERSTATE_COMBAT;
+		if (clearTargetEnt)
+		{
+			m_hTargetEnt = 0;
+			if( m_hEnemy != 0 )
+				m_IdealMonsterState = MONSTERSTATE_COMBAT;
+		}
 	}
 }
 
@@ -3657,14 +3735,21 @@ bool CMedic::CheckHealCharge()
 {
 	if ( !HasHealCharge() )
 	{
-		if ( !m_fDepleteLine )
+		if ( !m_fDepleteLine && !IsTalking() )
 		{
+			m_hTalkTarget = m_hTargetEnt;
 			PlaySentence( "MG_NOTHEAL", 2, VOL_NORM, ATTN_IDLE );
 			m_fDepleteLine = TRUE;
 		}
 		return false;
 	}
 	return true;
+}
+
+bool CMedic::ShouldDrawGun()
+{
+	return FBitSet( pev->weapons, MEDIC_EAGLE|MEDIC_HANDGUN ) &&
+		 (GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE || GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NONE);
 }
 
 bool CMedic::ReadyToHeal()
