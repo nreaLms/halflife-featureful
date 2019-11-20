@@ -825,22 +825,19 @@ bool CTalkMonster::ReadyForUse()
 
 void CTalkMonster::PlayUseSentence()
 {
-	PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-	if (m_szGrp[TLK_USE])
+	if (PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE ))
 		m_hTalkTarget = FollowedPlayer();
 }
 
 void CTalkMonster::PlayUnUseSentence()
 {
-	PlaySentence( m_szGrp[TLK_UNUSE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
-	if (m_szGrp[TLK_UNUSE])
+	if (PlaySentence( m_szGrp[TLK_UNUSE], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE ))
 		m_hTalkTarget = FollowedPlayer();
 }
 
 void CTalkMonster::DeclineFollowing(CBaseEntity *pCaller)
 {
-	PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM );
-	if (m_szGrp[TLK_DECLINE])
+	if (PlaySentence( m_szGrp[TLK_DECLINE], 2, VOL_NORM, ATTN_NORM ))
 		m_hTalkTarget = pCaller;
 }
 
@@ -1236,12 +1233,14 @@ bool CTalkMonster::PlaySentence( const char *pszSentence, float duration, float 
 
 	Talk( duration );
 
-	CTalkMonster::g_talkWaitTime = gpGlobals->time + duration + 2.0;
 	bool status = false;
 	if( pszSentence[0] == '!' )
 		status = EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, GetVoicePitch() );
 	else
 		status = SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, GetVoicePitch() ) >= 0;
+
+	if (status)
+		CTalkMonster::g_talkWaitTime = gpGlobals->time + duration + 2.0;
 
 	// If you say anything, don't greet the player - you may have already spoken to them
 	SetBits( m_bitsSaid, bit_saidHelloPlayer );
@@ -1292,7 +1291,8 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			{
 				// only if not dead or dying!
 				CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
-				pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
+				if (!pTalkMonster->IsTalking())
+					pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
 			}
 			ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 		}
@@ -1367,7 +1367,10 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 
 			m_flLastHitByPlayer = gpGlobals->time;
 			// Hey, be careful with that
-			PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
+			if (myTolerance < TOLERANCE_ABSOLUTE || !IsTalking())
+			{
+				PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
+			}
 			Remember( bits_MEMORY_SUSPICIOUS );
 		}
 	}
