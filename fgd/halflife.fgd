@@ -1483,6 +1483,24 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-8 -8 -8,8 8 8) = env_soundmark : "Insert world sound or smell (affects some monsters)"
+[
+	spawnflags(flags) =
+	[
+		1: "Remove On fire" : 0
+	]
+	radius(string) : "Sound Radius" : "384"
+	duration(string) : "Sound Duration" : "0.3"
+	position(string) : "Position (blank = here) [LP]"
+	type(choices) : "Sound Type" : 32 =
+	[
+		1 : "Combat"
+		8 : "Carcass"
+		16 : "Meat"
+		32 : "Danger"
+	]
+]
+
 @PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = env_spark : "Spark"
 [
 	MaxDelay(string) : "Max Delay" : "0"

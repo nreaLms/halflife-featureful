@@ -25,6 +25,7 @@
 #include "gamerules.h"
 #include "tex_materials.h"
 #include "soundent.h"
+#include "locus.h"
 
 // ==================== GENERIC AMBIENT SOUND ======================================
 
@@ -1875,9 +1876,9 @@ void CSpeaker::KeyValue( KeyValueData *pkvd )
 		CBaseEntity::KeyValue( pkvd );
 }
 
-#define SF_TRIGGERSOUND_FIREONCE 1
+#define SF_SOUNDMARK_FIREONCE 1
 
-class CTriggerSound : public CBaseEntity
+class CEnvSoundMark : public CBaseEntity
 {
 public:
 	void Spawn();
@@ -1889,14 +1890,15 @@ public:
 	float GetDuration() const { return pev->frags > 0 ? pev->frags : 0.3; }
 };
 
-LINK_ENTITY_TO_CLASS( trigger_sound, CTriggerSound )
+LINK_ENTITY_TO_CLASS( env_soundmark, CEnvSoundMark )
+LINK_ENTITY_TO_CLASS( trigger_sound, CEnvSoundMark )
 
-void CTriggerSound::Spawn()
+void CEnvSoundMark::Spawn()
 {
 	pev->effects |= EF_NODRAW;
 }
 
-void CTriggerSound::KeyValue(KeyValueData *pkvd)
+void CEnvSoundMark::KeyValue(KeyValueData *pkvd)
 {
 	if( FStrEq( pkvd->szKeyName, "type" ) )
 	{
@@ -1920,23 +1922,21 @@ void CTriggerSound::KeyValue(KeyValueData *pkvd)
 	}
 }
 
-void CTriggerSound::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+void CEnvSoundMark::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	Vector vecPos = pev->origin;
+	Vector vecPos;
 	if (pev->message)
 	{
-		CBaseEntity* posEnt = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
-		if (posEnt)
-		{
-			vecPos = posEnt->pev->origin;
-		}
-		else
-		{
+		bool evaluated;
+		vecPos = CalcLocus_Position(this, pActivator, STRING(pev->message), &evaluated);
+		if (!evaluated)
 			return;
-		}
 	}
+	else
+		vecPos = pev->origin;
+
 	CSoundEnt::InsertSound ( GetType(), vecPos, GetRadius(), GetDuration() );
-	if (FBitSet(pev->spawnflags, SF_TRIGGERSOUND_FIREONCE))
+	if (FBitSet(pev->spawnflags, SF_SOUNDMARK_FIREONCE))
 	{
 		UTIL_Remove(this);
 	}
