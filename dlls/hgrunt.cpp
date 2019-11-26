@@ -2217,15 +2217,16 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 		}
 	case SCHED_VICTORY_DANCE:
 		{
-			if( InSquad() )
-			{
-				if( !IsLeader() )
-				{
-					return &slGruntFail[0];
-				}
-			}
+			Schedule_t* followingSchedule = GetFollowingSchedule(true);
+			if (followingSchedule)
+				return followingSchedule;
 
-			return &slGruntVictoryDance[0];
+			const bool inSquad = InSquad();
+			if ( !inSquad || (inSquad && IsLeader()) )
+			{
+				return &slGruntVictoryDance[ 0 ];
+			}
+			return GetScheduleOfType(SCHED_IDLE_STAND);
 		}
 	case SCHED_GRUNT_SUPPRESS:
 		{

@@ -470,7 +470,6 @@ Schedule_t	slFGruntCombatFail[] =
 //=========================================================
 Task_t	tlFGruntVictoryDance[] =
 {
-	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_FAIL			},
 	{ TASK_STOP_MOVING,						(float)0					},
 	{ TASK_FACE_ENEMY,						(float)0					},
 	{ TASK_WAIT,							1.5f					},
@@ -2152,19 +2151,16 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_VICTORY_DANCE:
 		{
-			if ( InSquad() )
-			{
-				if ( !IsLeader() )
-				{
-					return &slFGruntFail[ 0 ];
-				}
-			}
-			if ( FollowedPlayer() )
-			{
-				return &slFGruntFail[ 0 ];
-			}
+			Schedule_t* followingSchedule = GetFollowingSchedule(true);
+			if (followingSchedule)
+				return followingSchedule;
 
-			return &slFGruntVictoryDance[ 0 ];
+			const bool inSquad = InSquad();
+			if ( !inSquad || (inSquad && IsLeader()) )
+			{
+				return &slFGruntVictoryDance[ 0 ];
+			}
+			return GetScheduleOfType(SCHED_IDLE_STAND);
 		}
 		break;
 	case SCHED_HGRUNT_ALLY_SUPPRESS:

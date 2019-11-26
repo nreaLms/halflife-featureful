@@ -58,7 +58,7 @@ public:
 
 	CFollowingMonster* MyFollowingMonsterPointer() { return this; }
 	virtual bool ReadyForUse();
-	Schedule_t* GetFollowingSchedule();
+	Schedule_t* GetFollowingSchedule(bool ignoreEnemy = false);
 	void EXPORT FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void DoFollowerUse(CBaseEntity* pCaller, bool saySentence);
 
