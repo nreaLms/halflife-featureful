@@ -149,6 +149,7 @@ CBaseEntity *CLocusAlias::FollowAlias( CBaseEntity *pFrom )
 	else
 		return NULL;
 }
+#endif
 
 
 
@@ -176,10 +177,10 @@ public:
 
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	int		m_iszSprite;
-	int		m_iszTargetName;
-	int		m_iszStart;
-	int		m_iszEnd;
+	string_t m_iszSprite;
+	string_t m_iszTargetName;
+	string_t m_iszStart;
+	string_t m_iszEnd;
 	int		m_iWidth;
 	int		m_iDistortion;
 	float	m_fFrame;
@@ -206,10 +207,10 @@ TYPEDESCRIPTION	CLocusBeam::m_SaveData[] =
 	DEFINE_FIELD( CLocusBeam, m_iFlags, FIELD_INTEGER),
 };
 
-LINK_ENTITY_TO_CLASS( locus_beam, CLocusBeam );
-IMPLEMENT_SAVERESTORE(CLocusBeam,CPointEntity);
+LINK_ENTITY_TO_CLASS( locus_beam, CLocusBeam )
+IMPLEMENT_SAVERESTORE(CLocusBeam, CPointEntity)
 
-void CLocusBeam :: KeyValue( KeyValueData *pkvd )
+void CLocusBeam::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "m_iszSprite"))
 	{
@@ -270,7 +271,7 @@ void CLocusBeam :: KeyValue( KeyValueData *pkvd )
 		CBaseEntity::KeyValue( pkvd );
 }
 
-void CLocusBeam :: Precache ( void )
+void CLocusBeam::Precache ( void )
 {
 	PRECACHE_MODEL ( STRING(m_iszSprite) );
 }
@@ -332,7 +333,7 @@ void CLocusBeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 	if (m_fDuration)
 	{
 		pBeam->SetThink(&CBeam:: SUB_Remove );
-		pBeam->SetNextThink( m_fDuration );
+		pBeam->pev->nextthink = gpGlobals->time + m_fDuration;
 	}
 	pBeam->pev->targetname = m_iszTargetName;
 
@@ -355,7 +356,6 @@ void CLocusBeam::Spawn( void )
 	if (pev->spawnflags & SF_LBEAM_SOLID)
 		m_iFlags |= BEAM_FSOLID;
 }
-#endif
 
 //=============================================
 //calc_x entities

@@ -2499,7 +2499,7 @@
 	impulse(choices) : "Start & End are" : 0 =
 	[
 		0: "Entity & Entity [LE LE]"
-		1: "Entity & Position [LE LP]"
+		1: "Position & Entity [LP LE]"
 		2: "Position & Position [LP LP]"
 		3: "Position & Direction [LP LV]"
 	]
