@@ -1534,7 +1534,7 @@
 
 @PointClass studio() base(Targetname) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_modeltrain : "Sprite Train"
 [
-	target(target_source) : "First stop target"
+	target(target_destination) : "First stop target"
 	model(studio) : "Model"
 	speed(integer) : "Speed (units per second)" : 64
 	scale(string) : "Model Scale"
@@ -1551,7 +1551,7 @@
 
 @PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_spritetrain : "Sprite Train"
 [
-	target(target_source) : "First stop target"
+	target(target_destination) : "First stop target"
 	model(sprite) : "Sprite Name" : "sprites/glow01.spr"
 	speed(integer) : "Speed (units per second)" : 64
 	scale(string) : "Sprite Scale"
@@ -1779,8 +1779,8 @@
 @SolidClass base(Targetname, RenderFields, Global, ZHLT) = func_guntarget : "Moving platform"
 [
 	speed(integer) : "Speed (units per second)" : 100
-	target(target_source) : "First stop target"
-	message(target_source) : "Fire on damage"
+	target(target_destination) : "First stop target"
+	message(target_destination) : "Fire on damage"
 	health(integer) : "Damage to Take" : 0
 	_minlight(string) : "Minimum light level"
 ]
@@ -2494,8 +2494,8 @@
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = locus_beam : "Locus System - Beam effect"
 [
-	m_iszStart(string) : "Start at (blank = here)" : ""
-	m_iszEnd(string) : "End at (blank = here)" : "*locus"
+	m_iszStart(target_destination) : "Start at (blank = here)" : ""
+	m_iszEnd(target_destination) : "End at (blank = here)" : "*locus"
 	impulse(choices) : "Start & End are" : 0 =
 	[
 		0: "Entity & Entity [LE LE]"
@@ -5690,7 +5690,7 @@
 [
 	target(target_destination) : "Target On Release"
 	monstertype(string) : "Monster Type"
-	netname(string) : "Childrens' Name"
+	netname(target_source) : "Childrens' Name"
 	spawnflags(Flags) =
 	[
 		1 : "Start ON" 	: 0
@@ -6257,7 +6257,7 @@
 		8: "Kill by squad name" : 0
 		16: "Always gib" : 0
 	]
-	target(string) : "Target" : : "Kill all monsters with such target, class or squad name"
+	target(target_destination) : "Target" : : "Kill all monsters with such targetname, classname or squad name"
 ]
 
 @SolidClass base(Angles) = trigger_monsterjump : "Trigger monster jump"
