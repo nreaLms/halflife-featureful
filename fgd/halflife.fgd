@@ -3857,6 +3857,7 @@
 		3 : "Dead On Back"
 		4 : "Dead On Stomach"
 		5 : "Head Crabbed"
+		6 : "Dead In Canyon"
 	]
 	weapons(Choices) : "Weapons" : 1 =
 	[
