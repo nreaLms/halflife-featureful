@@ -433,6 +433,7 @@ void CDeadMassn::KeyValue( KeyValueData *pkvd )
 }
 
 LINK_ENTITY_TO_CLASS( monster_male_assassin_dead, CDeadMassn )
+LINK_ENTITY_TO_CLASS( monster_massassin_dead, CDeadMassn )
 
 void CDeadMassn::Spawn( )
 {

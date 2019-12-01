@@ -4421,7 +4421,7 @@
 	]
 ]
 
-@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_male_assassin_dead : "Dead Male Assassin"
+@BaseClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = MaleAssassinDead
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 43 =
 	[
@@ -4449,6 +4449,9 @@
 		8 : "Sniper Rifle"
 	]
 ]
+
+@PointClass base(MaleAssassinDead) = monster_male_assassin_dead : "Dead Male Assassin" []
+@PointClass base(MaleAssassinDead) = monster_massassin_dead : "Dead Male Assassin" []
 
 @PointClass base(Monster, Sequence) size(-192 -192 0, 192 192 384) studio("models/nihilanth.mdl") = monster_nihilanth : "Nihilanth"
 [
