@@ -1891,7 +1891,6 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( env_soundmark, CEnvSoundMark )
-LINK_ENTITY_TO_CLASS( trigger_sound, CEnvSoundMark )
 
 void CEnvSoundMark::Spawn()
 {
