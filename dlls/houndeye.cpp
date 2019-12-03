@@ -920,7 +920,7 @@ Schedule_t	slHoundGuardPack[] =
 	{ 
 		tlHoundGuardPack,
 		ARRAYSIZE ( tlHoundGuardPack ), 
-		bits_COND_SEE_HATE		|
+		bits_COND_NEW_ENEMY		|
 		bits_COND_LIGHT_DAMAGE	|
 		bits_COND_HEAVY_DAMAGE	|
 		bits_COND_PROVOKED		|
