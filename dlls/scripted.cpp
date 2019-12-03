@@ -1187,13 +1187,13 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 		if (followingMonster)
 		{
 			CBaseEntity* pPlayer = UTIL_FindEntityByClassname(NULL, "player");
-			if (m_followAction == FOLLOW_START && !followingMonster->IsFollowingPlayer())
+			if (m_followAction == FOLLOW_START)
 			{
-				followingMonster->DoFollowerUse(pPlayer, false);
+				followingMonster->DoFollowerUse(pPlayer, false, USE_ON, true);
 			}
-			else if (m_followAction == FOLLOW_STOP && followingMonster->IsFollowingPlayer())
+			else if (m_followAction == FOLLOW_STOP)
 			{
-				followingMonster->DoFollowerUse(pPlayer, false);
+				followingMonster->DoFollowerUse(pPlayer, false, USE_OFF, true);
 			}
 		}
 	}

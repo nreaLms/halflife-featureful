@@ -25,6 +25,17 @@ enum
 	LAST_FOLLOWINGMONSTER_TASK			// MUST be last
 };
 
+enum
+{
+	FOLLOWING_NOTALLOWED,
+	FOLLOWING_DECLINED,
+	FOLLOWING_STARTED,
+	FOLLOWING_STOPPED,
+	FOLLOWING_NOCHANGE,
+	FOLLOWING_NOTREADY,
+	FOLLOWING_DISCARDED,
+};
+
 class CFollowingMonster : public CSquadMonster
 {
 public:
@@ -60,7 +71,7 @@ public:
 	virtual bool ReadyForUse();
 	Schedule_t* GetFollowingSchedule(bool ignoreEnemy = false);
 	void EXPORT FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void DoFollowerUse(CBaseEntity* pCaller, bool saySentence);
+	int DoFollowerUse(CBaseEntity* pCaller, bool saySentence, USE_TYPE useType, bool ignoreScriptedSentence = false);
 
 	virtual void PlayUseSentence() {}
 	virtual void PlayUnUseSentence() {}

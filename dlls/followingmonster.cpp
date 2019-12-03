@@ -427,38 +427,63 @@ Schedule_t* CFollowingMonster::GetFollowingSchedule(bool ignoreEnemy)
 
 void CFollowingMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if( !ReadyForUse() )
-		return;
-
-	DoFollowerUse(pCaller, true);
+	DoFollowerUse(pCaller, true, USE_TOGGLE);
 }
 
-void CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence)
+int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE_TYPE useType, bool ignoreScriptedSentence)
 {
-	if( pCaller != NULL && pCaller->IsPlayer() && IRelationship(pCaller) < R_DL && IRelationship(pCaller) != R_FR )
+	if( pCaller != NULL && pCaller->IsPlayer() )
 	{
+		if (!ignoreScriptedSentence && !ReadyForUse())
+			return FOLLOWING_NOTREADY;
+
+		int rel = IRelationship(pCaller);
+		if (rel >= R_DL || rel == R_FR)
+			return FOLLOWING_DISCARDED;
+
 		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...
 		if (IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster))
 		{
 			if (saySentence)
 				DeclineFollowing(pCaller);
+			return FOLLOWING_DECLINED;
 		}
-		else if( CanFollow() )
+		if( AbleToFollow() )
 		{
-			LimitFollowers( pCaller, MaxFollowers() );
+			const bool isFollowing = IsFollowingPlayer();
 
-			if( m_afMemory & bits_MEMORY_PROVOKED )
-				ALERT( at_console, "I'm not following you, you evil person!\n" );
-			else
+			if (isFollowing && useType == USE_ON)
 			{
-				StartFollowing( pCaller, saySentence );
+				return FOLLOWING_NOCHANGE;
+			}
+			if (!isFollowing && useType == USE_OFF)
+			{
+				return FOLLOWING_NOCHANGE;
+			}
+
+			if (!isFollowing && (useType == USE_TOGGLE || useType == USE_ON))
+			{
+				LimitFollowers( pCaller, MaxFollowers() );
+
+				if( m_afMemory & bits_MEMORY_PROVOKED )
+				{
+					ALERT( at_console, "I'm not following you, you evil person!\n" );
+					return FOLLOWING_DISCARDED;
+				}
+				else
+				{
+					StartFollowing( pCaller, saySentence );
+					return FOLLOWING_STARTED;
+				}
+			}
+			if (isFollowing && (useType == USE_TOGGLE || useType == USE_OFF))
+			{
+				StopFollowing( TRUE, saySentence );
+				return FOLLOWING_STOPPED;
 			}
 		}
-		else
-		{
-			StopFollowing( TRUE, saySentence );
-		}
 	}
+	return FOLLOWING_NOTALLOWED;
 }
 
 CBaseEntity* CFollowingMonster::PlayerToFace()
