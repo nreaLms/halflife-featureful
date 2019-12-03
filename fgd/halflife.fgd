@@ -5707,7 +5707,6 @@
 		256 : "Pre-Disaster" : 0
 		1024: "Don't Drop Gun" : 0
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
-		8192 : "Warp at monster center" : 0 : "When using warpball template, make it play at the center of monster's body, not origin of monstermaker"
 		16384 : "Pass monster as activator" : 0 : "Pass spawned monster as activator triggering Target on Release"
 	]
 
@@ -5789,7 +5788,17 @@
 		0 : "No"
 		1 : "Yes"
 	]
-    displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
+	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
+	impulse(choices) : "Warp at monster's..." : : "If using warpball template, spawn warpball at this monster position" =
+	[
+		0 : "Origin (default)"
+		1 : "Eyes"
+		3 : "Center"
+		5 : "Attachment point 0"
+		6 : "Attachment point 1"
+		7 : "Attachment point 2"
+		8 : "Attachment point 3"
+	]
 ]
 @PointClass base(MonsterMaker,MonsterSoundMask) = monstermaker : "Monster Maker" []
 @PointClass base(MonsterMaker,MonsterSoundMask) = squadmaker : "Squad Maker" []

@@ -2813,33 +2813,26 @@ void CEnvWarpBall::Precache( void )
 void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	CBaseEntity *pEntity = NULL;
-	edict_t *pos;
+	edict_t *posEnt;
 
-	if (pev->dmg_inflictor && (pEntity = CBaseEntity::Instance(pev->dmg_inflictor)) != NULL)
+	if (useType == USE_SET && pev->dmg_inflictor != NULL)
 	{
-		if (useType == USE_SET)
-		{
-			vecOrigin = pActivator->Center();
-		}
-		else
-		{
-			vecOrigin = pEntity->pev->origin;
-		}
-		pos = pEntity->edict();
+		vecOrigin = pev->vuser1;
+		posEnt = pev->dmg_inflictor;
 	}
 	else if( !FStringNull( pev->message ) && (pEntity = UTIL_FindEntityByTargetname( NULL, STRING( pev->message ) )) != NULL )//target found ?
 	{
 		vecOrigin = pEntity->pev->origin;
-		pos = pEntity->edict();
+		posEnt = pEntity->edict();
 	}
 	else
 	{
-		//use as center
+		//use myself as center
 		vecOrigin = pev->origin;
-		pos = edict();
+		posEnt = edict();
 	}
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
-		EMIT_SOUND( pos, CHAN_BODY, WarpballSound1(), 1, SoundAttenuation() );
+		EMIT_SOUND( posEnt, CHAN_BODY, WarpballSound1(), 1, SoundAttenuation() );
 	
 	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
 		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
@@ -2878,7 +2871,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
-		EMIT_SOUND( pos, CHAN_ITEM, WarpballSound2(), 1, SoundAttenuation() );
+		EMIT_SOUND( posEnt, CHAN_ITEM, WarpballSound2(), 1, SoundAttenuation() );
 
 	int beamRed = pev->punchangle.x;
 	int beamGreen = pev->punchangle.y;
@@ -3099,41 +3092,28 @@ void CEnvXenMaker::KeyValue(KeyValueData *pkvd)
 
 void CEnvXenMaker::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	if (pev->dmg_inflictor)
-	{
-		CBaseEntity* pEntity = CBaseEntity::Instance(pev->dmg_inflictor);
-		if (pEntity)
-		{
-			TrySpawn();
-		}
-	}
-	else
-	{
-		TrySpawn();
-	}
+	TrySpawn();
 }
 
 void CEnvXenMaker::TrySpawn()
 {
 	//use myself as center
-	CBaseEntity *pEntity = this;
-	edict_t *posEnt;
-	Vector vecOrigin;
+	edict_t *posEnt = edict();
+	Vector vecOrigin = pev->origin;
 
-	if (pev->dmg_inflictor)
+	const bool asTemplate = pev->dmg_inflictor != NULL;
+
+	if (asTemplate)
 	{
 		// used as template
-		pEntity = CBaseEntity::Instance(pev->dmg_inflictor);
+		posEnt = pev->dmg_inflictor;
+		vecOrigin = pev->vuser1;
 	}
-	if (!pEntity)
-		return;
 
-	vecOrigin = pEntity->pev->origin;
-	posEnt = pEntity->edict();
-	m_posEntOffset = pEntity->eoffset();
+	m_posEntOffset = OFFSET(posEnt);
 
 	if (!FBitSet(pev->spawnflags, SF_XENMAKER_NOSPAWN)
-			&& !pev->dmg_inflictor) // never spawn if xenmaker is used as a template for monstermaker
+			&& !asTemplate) // never spawn if xenmaker is used as a template for monstermaker
 	{
 		if( !m_flGround )
 		{
@@ -3220,7 +3200,7 @@ void CEnvXenMaker::TrySpawn()
 
 	EMIT_SOUND( posEnt, CHAN_ITEM, XENMAKER_SOUND1, 1, ATTN_NORM );
 
-	if (pev->dmg_inflictor)
+	if (asTemplate)
 	{
 		PlaySecondSound();
 	}
