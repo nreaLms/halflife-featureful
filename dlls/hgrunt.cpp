@@ -2217,10 +2217,6 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 		}
 	case SCHED_VICTORY_DANCE:
 		{
-			Schedule_t* followingSchedule = GetFollowingSchedule(true);
-			if (followingSchedule)
-				return followingSchedule;
-
 			const bool inSquad = InSquad();
 			if ( !inSquad || (inSquad && IsLeader()) )
 			{

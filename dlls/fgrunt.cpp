@@ -2151,10 +2151,6 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_VICTORY_DANCE:
 		{
-			Schedule_t* followingSchedule = GetFollowingSchedule(true);
-			if (followingSchedule)
-				return followingSchedule;
-
 			const bool inSquad = InSquad();
 			if ( !inSquad || (inSquad && IsLeader()) )
 			{

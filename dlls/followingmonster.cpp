@@ -400,7 +400,7 @@ bool CFollowingMonster::ReadyForUse()
 
 Schedule_t* CFollowingMonster::GetFollowingSchedule(bool ignoreEnemy)
 {
-	if( (ignoreEnemy || m_hEnemy == 0) && IsFollowingPlayer() )
+	if( (ignoreEnemy || m_hEnemy == 0 || !m_hEnemy->IsAlive()) && IsFollowingPlayer() )
 	{
 		if( !FollowedPlayer()->IsAlive() )
 		{
