@@ -630,10 +630,7 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 
-		if ( WantsToCallMedic() )
-		{
-			return GetScheduleOfType( SCHED_FIND_MEDIC );
-		}
+		WantsToCallMedic() && FindAndCallMedic();
 
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)

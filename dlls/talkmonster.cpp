@@ -345,36 +345,6 @@ Schedule_t slTlkIdleEyecontact[] =
 	},
 };
 
-//=========================================================
-// Find medic. Grunt stops moving and calls the nearest medic,
-// if none is around, we don't do much. I don't think I have much
-// to put in here, other than to make the grunt stop moving, and
-// run the medic calling task, I guess.
-//=========================================================
-Task_t	tlFindMedic[] =
-{
-	{ TASK_STOP_MOVING,		(float)0	},
-	{ TASK_FIND_MEDIC,		(float)0	},
-	{ TASK_WAIT,			(float)2	},
-};
-
-Schedule_t	slFindMedic[] =
-{
-	{
-		tlFindMedic,
-		ARRAYSIZE ( tlFindMedic ),
-		bits_COND_NEW_ENEMY			|
-		bits_COND_SEE_FEAR			|
-		bits_COND_LIGHT_DAMAGE		|
-		bits_COND_HEAVY_DAMAGE		|
-		bits_COND_HEAR_SOUND		|
-		bits_COND_PROVOKED,
-		bits_SOUND_DANGER,
-
-		"Find Medic"
-	},
-};
-
 DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 {
 	slIdleResponse,
@@ -387,7 +357,6 @@ DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 	slTlkIdleWatchClient,
 	&slTlkIdleWatchClient[1],
 	slTlkIdleEyecontact,
-	slFindMedic,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CTalkMonster, CFollowingMonster )
@@ -501,66 +470,6 @@ void CTalkMonster::StartTask( Task_t *pTask )
 	case TASK_PLAY_SCRIPT:
 		m_hTalkTarget = NULL;
 		CFollowingMonster::StartTask( pTask );
-		break;
-	case TASK_FIND_MEDIC:
-		{
-			CSquadMonster* foundMedic = NULL;
-			// First try looking for a medic in my squad
-			if ( InSquad() )
-			{
-				CSquadMonster *pSquadLeader = MySquadLeader( );
-				if ( pSquadLeader )
-				{
-					for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
-					{
-						CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
-						if (FVisible(pMember) && CanCallThisMedic(pMember))
-						{
-							foundMedic = pMember;
-							break;
-						}
-					}
-				}
-			}
-			// If not, search bsp.
-			if ( !foundMedic )
-			{
-				// for each medic in this bsp...
-				for( int i = 0; i < TLK_CFRIENDS; i++ )
-				{
-					TalkFriend& talkFriend = m_szFriends[i];
-					if (!talkFriend.canHeal)
-						continue;
-					CBaseEntity *pFriend = NULL;
-					while ((pFriend = EnumFriends( pFriend, talkFriend.name, TRUE )) != NULL)
-					{
-						CSquadMonster* friendMedic = pFriend->MySquadMonsterPointer();
-						if (CanCallThisMedic(friendMedic))
-						{
-							foundMedic = friendMedic;
-							break;
-						}
-					}
-				}
-			}
-
-			if (foundMedic)
-			{
-				// Don't break sentence if already talking
-				if (!IsTalking())
-					PlayCallForMedic();
-
-				ALERT( at_aiconsole, "Injured %s called for %s\n", STRING(pev->classname), STRING(foundMedic->pev->classname) );
-				foundMedic->StartFollowingHealTarget(this);
-
-				TaskComplete();
-			}
-			else
-			{
-				TaskFail("no unbusy medic found");
-			}
-			m_flMedicWaitTime = CALL_MEDIC_DELAY + gpGlobals->time;
-		}
 		break;
 	default:
 		CFollowingMonster::StartTask( pTask );
@@ -1488,21 +1397,10 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			return slFollowFallible;
 		}
 		break;
-	case SCHED_FIND_MEDIC:
-		{
-			return slFindMedic;
-		}
-		break;
 	case SCHED_TARGET_REACHED:
 		{
-			if (WantsToCallMedic())
-			{
-				return GetScheduleOfType(SCHED_FIND_MEDIC);
-			}
-			else
-			{
-				return GetScheduleOfType(SCHED_TARGET_FACE);
-			}
+			WantsToCallMedic() && FindAndCallMedic();
+			return GetScheduleOfType(SCHED_TARGET_FACE);
 		}
 		break;
 	}
@@ -1538,6 +1436,67 @@ void CTalkMonster::PrescheduleThink( void )
 bool CTalkMonster::WantsToCallMedic()
 {
 	return IsHeavilyWounded() && ( m_flMedicWaitTime < gpGlobals->time );
+}
+
+bool CTalkMonster::FindAndCallMedic()
+{
+	CSquadMonster* foundMedic = NULL;
+	// First try looking for a medic in my squad
+	if ( InSquad() )
+	{
+		CSquadMonster *pSquadLeader = MySquadLeader( );
+		if ( pSquadLeader )
+		{
+			for (int i = 0; i < MAX_SQUAD_MEMBERS; i++)
+			{
+				CSquadMonster *pMember = pSquadLeader->MySquadMember(i);
+				if (FVisible(pMember) && CanCallThisMedic(pMember))
+				{
+					foundMedic = pMember;
+					break;
+				}
+			}
+		}
+	}
+	// If not, search bsp.
+	if ( !foundMedic )
+	{
+		// for each medic in this bsp...
+		for( int i = 0; i < TLK_CFRIENDS; i++ )
+		{
+			TalkFriend& talkFriend = m_szFriends[i];
+			if (!talkFriend.canHeal)
+				continue;
+			CBaseEntity *pFriend = NULL;
+			while ((pFriend = EnumFriends( pFriend, talkFriend.name, TRUE )) != NULL)
+			{
+				CSquadMonster* friendMedic = pFriend->MySquadMonsterPointer();
+				if (CanCallThisMedic(friendMedic))
+				{
+					foundMedic = friendMedic;
+					break;
+				}
+			}
+		}
+	}
+
+	m_flMedicWaitTime = CALL_MEDIC_DELAY + gpGlobals->time;
+
+	if (foundMedic)
+	{
+		// Don't break sentence if already talking
+		if (!IsTalking())
+			PlayCallForMedic();
+
+		ALERT( at_aiconsole, "Injured %s called for %s\n", STRING(pev->classname), STRING(foundMedic->pev->classname) );
+		foundMedic->StartFollowingHealTarget(this);
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 // try to smell something

@@ -76,7 +76,6 @@ enum
 {
 	SCHED_CANT_FOLLOW = LAST_FOLLOWINGMONSTER_SCHEDULE+1,
 	SCHED_FOLLOW_FALLIBLE,
-	SCHED_FIND_MEDIC,
 
 	LAST_TALKMONSTER_SCHEDULE		// MUST be last
 };
@@ -174,6 +173,7 @@ public:
 	// Medic related
 	bool			WantsToCallMedic();
 	bool			CanCallThisMedic(CSquadMonster* pOther);
+	bool			FindAndCallMedic();
 	virtual void	PlayCallForMedic();
 	bool			IsWounded();
 	bool			IsHeavilyWounded();

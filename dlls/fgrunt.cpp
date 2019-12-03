@@ -2555,10 +2555,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 		{
 			return GetScheduleOfType ( SCHED_RELOAD );
 		}
-		if ( WantsToCallMedic() )
-		{
-			return GetScheduleOfType( SCHED_FIND_MEDIC );
-		}
+		WantsToCallMedic() && FindAndCallMedic();
 
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)
