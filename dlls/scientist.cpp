@@ -906,8 +906,6 @@ Schedule_t *CScientist::GetSchedule( void )
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 
-		WantsToCallMedic() && FindAndCallMedic();
-
 		// Cower when you hear something scary
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
 		{

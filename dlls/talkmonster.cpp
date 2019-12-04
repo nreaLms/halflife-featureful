@@ -1399,7 +1399,6 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 		break;
 	case SCHED_TARGET_REACHED:
 		{
-			WantsToCallMedic() && FindAndCallMedic();
 			return GetScheduleOfType(SCHED_TARGET_FACE);
 		}
 		break;
@@ -1429,6 +1428,10 @@ void CTalkMonster::PrescheduleThink( void )
 	if( !HasConditions( bits_COND_SEE_CLIENT ) )
 	{
 		SetConditions( bits_COND_CLIENT_UNSEEN );
+	}
+	if (m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT)
+	{
+		WantsToCallMedic() && FindAndCallMedic();
 	}
 	CFollowingMonster::PrescheduleThink();
 }
