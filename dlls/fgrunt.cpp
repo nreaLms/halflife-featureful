@@ -3400,7 +3400,7 @@ Schedule_t *CMedic::GetSchedule()
 	{
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_ALERT:
-		if ( m_hEnemy == 0 )
+		if ( m_hEnemy == 0 || !m_hEnemy->IsAlive() )
 		{
 			if (m_hTargetEnt != 0 && FollowedPlayer() == m_hTargetEnt)
 			{

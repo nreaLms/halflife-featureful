@@ -3286,7 +3286,7 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 		ALERT( level, "No Schedule, " );
 
 	if( m_hEnemy != 0 )
-		ALERT( level, "Enemy is %s. ", STRING( m_hEnemy->pev->classname ) );
+		ALERT( level, "Enemy is %s (%s). ", STRING( m_hEnemy->pev->classname ), m_hEnemy->IsAlive() ? "alive" : "dead" );
 	else
 		ALERT( level, "No enemy. " );
 

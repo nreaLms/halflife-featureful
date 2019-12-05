@@ -245,6 +245,12 @@ void CSquadMonster::SquadMakeEnemy( CBaseEntity *pEnemy )
 		return;
 	}
 
+	if ( !pEnemy->IsAlive() )
+	{
+		ALERT( at_console, "ERROR: SquadMakeEnemy() - pEnemy is dead!\n" );
+		return;
+	}
+
 	CSquadMonster *pSquadLeader = MySquadLeader();
 	for( int i = 0; i < MAX_SQUAD_MEMBERS; i++ )
 	{
@@ -381,10 +387,10 @@ int CSquadMonster::CheckEnemy( CBaseEntity *pEnemy )
 {
 	int iUpdatedLKP;
 
-	iUpdatedLKP = CBaseMonster::CheckEnemy( m_hEnemy );
+	iUpdatedLKP = CBaseMonster::CheckEnemy( pEnemy );
 
 	// communicate with squad members about the enemy IF this individual has the same enemy as the squad leader.
-	if( InSquad() && (CBaseEntity *)m_hEnemy == MySquadLeader()->m_hEnemy )
+	if( InSquad() && pEnemy == MySquadLeader()->m_hEnemy )
 	{
 		if( iUpdatedLKP )
 		{
@@ -548,8 +554,6 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 //=========================================================
 MONSTERSTATE CSquadMonster::GetIdealState ( void )
 {
-	IScheduleFlags();
-
 	// If no schedule conditions, the new ideal state is probably the reason we're in here.
 	switch( m_MonsterState )
 	{

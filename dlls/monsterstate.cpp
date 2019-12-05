@@ -45,7 +45,7 @@ void CBaseMonster::SetState( MONSTERSTATE State )
 		if( m_hEnemy != 0 )
 		{
 			m_hEnemy = NULL;// not allowed to have an enemy anymore.
-			ALERT( at_aiconsole, "Stripped\n" );
+			ALERT( at_aiconsole, "%s: stripped enemy\n", STRING(pev->classname) );
 		}
 		break;
 	default:
@@ -202,7 +202,7 @@ MONSTERSTATE CBaseMonster::GetIdealState( void )
 			{
 				m_IdealMonsterState = MONSTERSTATE_ALERT;
 				// pev->effects = EF_BRIGHTFIELD;
-				ALERT( at_aiconsole, "***Combat state with no enemy!\n" );
+				ALERT( at_aiconsole, "*** %s: Combat state with no enemy!\n", STRING(pev->classname) );
 			}
 			break;
 		}
