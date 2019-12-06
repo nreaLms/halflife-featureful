@@ -351,6 +351,7 @@ int CMonsterMaker::MakeMonster( void )
 		createdMonster->m_maxHullSize = m_maxHullSize;
 
 		createdMonster->m_customSoundMask = m_customSoundMask;
+		createdMonster->m_prisonerTo = m_prisonerTo;
 
 		createdMonster->SetHead(m_iHead);
 

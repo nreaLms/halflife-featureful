@@ -2361,6 +2361,8 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pGrunt->m_iTriggerCondition = m_iTriggerCondition;
 	pGrunt->m_iTriggerAltCondition = m_iTriggerAltCondition;
 	pGrunt->m_displayName = m_displayName;
+	pGrunt->m_customSoundMask = m_customSoundMask;
+	pGrunt->m_prisonerTo = m_prisonerTo;
 	PrepareBeforeSpawn(pEntity);
 	DispatchSpawn(pEntity->edict());
 	pGrunt->pev->movetype = MOVETYPE_FLY;

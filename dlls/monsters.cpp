@@ -124,6 +124,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_nextPatrolPathCheck, FIELD_TIME ),
 
 	DEFINE_FIELD( CBaseMonster, m_customSoundMask, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseMonster, m_prisonerTo, FIELD_SHORT ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
@@ -343,8 +344,12 @@ void CBaseMonster::Look( int iDistance )
 			// !!!temporarily only considering other monsters and clients, don't see prisoners
 			if( pSightEnt != this && 
 				 !FBitSet( pSightEnt->pev->spawnflags, SF_MONSTER_PRISONER ) && 
+				 (!m_prisonerTo || m_prisonerTo != pSightEnt->Classify()) &&
 				 pSightEnt->pev->health > 0 )
 			{
+				CBaseMonster* pSightMonster = pSightEnt->MyMonsterPointer();
+				if (pSightMonster && pSightMonster->m_prisonerTo != 0 && pSightMonster->m_prisonerTo == Classify())
+					continue;
 				// the looker will want to consider this entity
 				// don't check anything else about an entity that can't be seen, or an entity that you don't care about.
 				if( IRelationship( pSightEnt ) != R_NO && FInViewCone( pSightEnt ) && !FBitSet( pSightEnt->pev->flags, FL_NOTARGET ) && FVisible( pSightEnt ) )
@@ -3374,6 +3379,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "soundmask" ) )
 	{
 		m_customSoundMask = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "prisonerto" ) )
+	{
+		m_prisonerTo = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

@@ -401,6 +401,7 @@ public:
 	Vector m_maxHullSize;
 
 	int m_customSoundMask;
+	short m_prisonerTo;
 
 	const char* taskFailReason;
 };
