@@ -3215,8 +3215,11 @@ Schedule_t	slMedicHeal[] =
 	{
 		tlMedicHeal,
 		ARRAYSIZE ( tlMedicHeal ),
-		bits_COND_LIGHT_DAMAGE|bits_COND_HEAVY_DAMAGE,
-		0,
+		bits_COND_LIGHT_DAMAGE|
+		bits_COND_HEAVY_DAMAGE|
+		bits_COND_HEAR_SOUND|
+		bits_COND_NEW_ENEMY,
+		bits_SOUND_DANGER,
 		"Heal"
 	},
 };
