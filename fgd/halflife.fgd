@@ -165,17 +165,23 @@
 	]
 ]
 
-@BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence) = DeadMonster
+@BaseClass = BloodColor
 [
-	health(string) : "Custom Health"
-	model(studio) : "Custom Model"
-	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" = 
+	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
 	[
 		0 : "Default"
+		1 : "Human (red)"
+		2 : "Alien (yellow)"
 		247 : "Human (red)"
 		195 : "Alien (yellow)"
 		-1 : "Don't bleed"
 	]
+]
+
+@BaseClass base(Targetname,RenderFields,Appearflags,Angles,Sequence,BloodColor) = DeadMonster
+[
+	health(string) : "Custom Health"
+	model(studio) : "Custom Model"
 	gibmodel(studio) : "Custom gib model"
 ]
 
@@ -246,10 +252,10 @@
 	]
 ]
 
-@BaseClass base(Target, Targetname, RenderFields, Angles, Classification, PrisonerTo, MonsterSoundMask) flags(Angle) color(0 200 200) = Monster
+@BaseClass base(Target, Targetname, RenderFields, Angles, Classification, BloodColor, PrisonerTo, MonsterSoundMask) flags(Angle) color(0 200 200) = Monster
 [
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
-	TriggerCondition(Choices) : "Trigger Condition" : 0 : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
+	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
 	[
 		0 : "No Trigger"
 		1 : "See Player, Mad at Player"
@@ -262,7 +268,7 @@
 		10: "See Player Unconditional"
 		11: "See Player, Not In Combat"
 	]
-	TriggerAltCondition(Choices) : "Trigger Alternative Condition" : 0 : "Alternative condition to fire TriggerTarget (useful to make an important ally fire the same target both when either provoked or dead which is usually a load game condition)" =
+	TriggerAltCondition(Choices) : "Trigger Alternative Condition" : : "Alternative condition to fire TriggerTarget (useful to make an important ally fire the same target both when either provoked or dead which is usually a load game condition)" =
 	[
 		0 : "No Trigger"
 		1 : "See Player, Mad at Player"
@@ -298,15 +304,6 @@
 	model(studio) : "Custom Model"
 	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
 	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
-	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" = 
-	[
-		0 : "Default"
-		1 : "Human (red)"
-		2 : "Alien (yellow)"
-		247 : "Human (red)"
-		195 : "Alien (yellow)"
-		-1 : "Don't bleed"
-	]
 	gibmodel(studio) : "Custom gib model"
 	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
 ]
@@ -5717,7 +5714,7 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles, Classification, PrisonerTo) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
+@BaseClass base(Targetname, Angles, Classification, BloodColor, PrisonerTo, MonsterSoundMask) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
 	target(target_destination) : "Target On Release"
 	monstertype(string) : "Monster Type"
@@ -5756,15 +5753,6 @@
 	body(integer) : "Body"
 	skin(integer) : "Skin"
 	pose(integer) : "Pose (Only for dead monsters)"
-	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
-	[
-		0 : "Default"
-		1 : "Human (red)"
-		2 : "Alien (yellow)"
-		247 : "Human (red)"
-		195 : "Alien (yellow)"
-		-1 : "Don't bleed"
-	]
 	gibmodel(studio) : "Custom gib model"
 	weapons(Choices) : "Grunt/Assassin Weapons" =
 	[
@@ -5827,8 +5815,8 @@
 		8 : "Attachment point 3"
 	]
 ]
-@PointClass base(MonsterMaker,MonsterSoundMask) = monstermaker : "Monster Maker" []
-@PointClass base(MonsterMaker,MonsterSoundMask) = squadmaker : "Squad Maker" []
+@PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
+@PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []
 
 @PointClass base(Targetname) = motion_manager : "Control the movement and direction of an entity"
 [
