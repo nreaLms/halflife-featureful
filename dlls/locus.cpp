@@ -538,6 +538,9 @@ float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
 //=======================================================
 #define SF_CALCVELOCITY_NORMALIZE 1
 #define SF_CALCVELOCITY_SWAPZ 2
+#define SF_CALCVELOCITY_DISCARDX 4
+#define SF_CALCVELOCITY_DISCARDY 8
+#define SF_CALCVELOCITY_DISCARDZ 16
 class CCalcSubVelocity : public CPointEntity
 {
 	Vector Convert( CBaseEntity *pLocus, Vector vecVel );
@@ -615,6 +618,12 @@ Vector CCalcSubVelocity::Convert( CBaseEntity *pLocus, Vector vecDir )
 
 	Vector vecResult = vecOffset + (vecDir*fRatio);
 
+	if (pev->spawnflags & SF_CALCVELOCITY_DISCARDX)
+		vecResult.x = 0;
+	if (pev->spawnflags & SF_CALCVELOCITY_DISCARDY)
+		vecResult.y = 0;
+	if (pev->spawnflags & SF_CALCVELOCITY_DISCARDZ)
+		vecResult.z = 0;
 	if (pev->spawnflags & SF_CALCVELOCITY_SWAPZ)
 		vecResult.z = -vecResult.z;
 //	ALERT(at_console, "calc_subvel returns (%f %f %f) = (%f %f %f) + ((%f %f %f) * %f)\n", vecResult.x, vecResult.y, vecResult.z, vecOffset.x, vecOffset.y, vecOffset.z, vecDir.x, vecDir.y, vecDir.z, fRatio);

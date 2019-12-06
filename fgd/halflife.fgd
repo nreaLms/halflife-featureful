@@ -943,6 +943,9 @@
 	[
 		1 : "Normalize" : 0
 		2 : "Flip Vertical" : 0
+		4 : "Discard X" : 0
+		8 : "Discard Y" : 0
+		16 : "Discard Z" :0
 	]
 ]
 @PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_velocity_path : "Calculate velocity for travelling"
