@@ -144,6 +144,7 @@ protected:
 	string_t	m_iszMaster;	// Master entity (game_team_master or multisource)
 	int			m_bulletCount;	// Bullet count left. Negative means infinite.
 	float		m_flEmptySoundTime;
+	short		m_smokeRenderMode;
 
 	void UpdateSpot( void );
 };
@@ -178,6 +179,7 @@ TYPEDESCRIPTION	CFuncTank::m_SaveData[] =
 	DEFINE_FIELD( CFuncTank, m_iszMaster, FIELD_STRING ),
 	DEFINE_FIELD( CFuncTank, m_bulletCount, FIELD_INTEGER ),
 	DEFINE_FIELD( CFuncTank, m_pSpot, FIELD_CLASSPTR ), //LRC
+	DEFINE_FIELD( CFuncTank, m_smokeRenderMode, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTank, CBaseEntity )
@@ -345,6 +347,11 @@ void CFuncTank::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "master" ) )
 	{
 		m_iszMaster = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "smokerendermode" ) )
+	{
+		m_smokeRenderMode = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -756,7 +763,7 @@ void CFuncTank::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t 
 		{
 			CSprite *pSprite = CSprite::SpriteCreate( STRING( m_iszSpriteSmoke ), barrelEnd, TRUE );
 			pSprite->AnimateAndDie( RANDOM_FLOAT( 15.0, 20.0 ) );
-			pSprite->SetTransparency( kRenderTransAlpha, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, 255, kRenderFxNone );
+			pSprite->SetTransparency( m_smokeRenderMode ? m_smokeRenderMode : kRenderTransAlpha, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, 255, kRenderFxNone );
 			pSprite->pev->velocity.z = RANDOM_FLOAT( 40, 80 );
 			pSprite->SetScale( m_spriteScale );
 		}
