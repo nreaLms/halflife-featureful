@@ -57,7 +57,8 @@ enum
 	SCHED_PANIC,
 	SCHED_STARTLE,
 	SCHED_TARGET_CHASE_SCARED,
-	SCHED_TARGET_FACE_SCARED
+	SCHED_TARGET_FACE_SCARED,
+	SCHED_HEAL
 };
 
 enum
@@ -68,7 +69,9 @@ enum
 	TASK_RUN_PATH_SCARED,
 	TASK_SCREAM,
 	TASK_RANDOM_SCREAM,
-	TASK_MOVE_TO_TARGET_RANGE_SCARED
+	TASK_MOVE_TO_TARGET_RANGE_SCARED,
+	TASK_DRAW_NEEDLE,
+	TASK_PUTAWAY_NEEDLE
 };
 
 //=========================================================
@@ -213,13 +216,13 @@ Schedule_t slStopFollowing[] =
 
 Task_t tlHeal[] =
 {
-	{ TASK_MOVE_TO_TARGET_RANGE, (float)50 },	// Move within 60 of target ent (client)
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_TARGET_CHASE },	// If you fail, catch up with that guy! (change this to put syringe away and then chase)
+	{ TASK_CATCH_WITH_TARGET_RANGE, (float)50 },	// Move within 50 of target ent (client)
 	{ TASK_FACE_IDEAL, (float)0 },
 	{ TASK_SAY_HEAL, (float)0 },
-	{ TASK_PLAY_SEQUENCE_FACE_TARGET, (float)ACT_ARM },			// Whip out the needle
-	{ TASK_HEAL, (float)0 },	// Put it in the player
-	{ TASK_PLAY_SEQUENCE_FACE_TARGET, (float)ACT_DISARM },			// Put away the needle
+	{ TASK_DRAW_NEEDLE, (float)0 },			// Whip out the needle
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_HEAL },	// If you fail, catch up with that guy! (change this to put syringe away and then chase)
+	{ TASK_HEAL, (float)0 },	// Put it in the target
+	{ TASK_PUTAWAY_NEEDLE, (float)0 },			// Put away the needle
 };
 
 Schedule_t slHeal[] =
@@ -227,8 +230,11 @@ Schedule_t slHeal[] =
 	{
 		tlHeal,
 		ARRAYSIZE( tlHeal ),
-		0,	// Don't interrupt or he'll end up running around with a needle all the time
-		0,
+		bits_COND_LIGHT_DAMAGE|
+		bits_COND_HEAVY_DAMAGE|
+		bits_COND_HEAR_SOUND|
+		bits_COND_NEW_ENEMY,
+		bits_SOUND_DANGER,
 		"Heal"
 	},
 };
@@ -400,7 +406,7 @@ Schedule_t slFear[] =
 
 Task_t	tlDisarmNeedle[] =
 {
-	{ TASK_PLAY_SEQUENCE,		(float)ACT_DISARM	},			// Put away the needle
+	{ TASK_PUTAWAY_NEEDLE,		(float)0	},			// Put away the needle
 };
 
 Schedule_t	slDisarmNeedle[] =
@@ -459,10 +465,11 @@ void CScientist::StartTask( Task_t *pTask )
 	switch( pTask->iTask )
 	{
 	case TASK_SAY_HEAL:
-		//if( FOkToSpeak() )
-		Talk( 2 );
-		m_hTalkTarget = m_hTargetEnt;
-		PlaySentence( HealSentence(), 2, VOL_NORM, ATTN_IDLE );
+		if (!IsTalking())
+		{
+			m_hTalkTarget = m_hTargetEnt;
+			PlaySentence( HealSentence(), 2, VOL_NORM, ATTN_IDLE );
+		}
 		TaskComplete();
 		break;
 	case TASK_SCREAM:
@@ -505,6 +512,26 @@ void CScientist::StartTask( Task_t *pTask )
 				if( !MoveToTarget( ACT_WALK_SCARED, 0.5 ) )
 					TaskFail("can't build path to target");
 			}
+		}
+		break;
+	case TASK_DRAW_NEEDLE:
+		if (pev->body >= NUM_SCIENTIST_BODIES)
+		{
+			TaskComplete();
+		}
+		else
+		{
+			m_IdealActivity = ACT_ARM;
+		}
+		break;
+	case TASK_PUTAWAY_NEEDLE:
+		if (pev->body >= NUM_SCIENTIST_BODIES)
+		{
+			m_IdealActivity = ACT_DISARM;
+		}
+		else
+		{
+			TaskComplete();
 		}
 		break;
 	default:
@@ -567,7 +594,9 @@ void CScientist::RunTask( Task_t *pTask )
 		else
 		{
 			if( TargetDistance() > 90 )
-				TaskComplete();
+			{
+				TaskFail("target ent is too far");
+			}
 			if (m_hTargetEnt != 0)
 			{
 				pev->ideal_yaw = UTIL_VecToYaw( m_hTargetEnt->pev->origin - pev->origin );
@@ -575,6 +604,18 @@ void CScientist::RunTask( Task_t *pTask )
 			}
 		}
 		break;
+	case TASK_DRAW_NEEDLE:
+	case TASK_PUTAWAY_NEEDLE:
+		{
+			CBaseEntity *pTarget = m_hTargetEnt;
+			if( pTarget )
+			{
+				pev->ideal_yaw = UTIL_VecToYaw( pTarget->pev->origin - pev->origin );
+				ChangeYaw( pev->yaw_speed );
+			}
+			if( m_fSequenceFinished )
+				TaskComplete();
+		}
 	default:
 		CTalkMonster::RunTask( pTask );
 		break;
@@ -862,6 +903,16 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 		return slScientistStartle;
 	case SCHED_FEAR:
 		return slFear;
+	case SCHED_HEAL:
+		if (CanHeal())
+			return slHeal;
+		else
+			return slDisarmNeedle;
+	case SCHED_FAIL:
+		if (pev->body >= NUM_SCIENTIST_BODIES)
+			return slDisarmNeedle;
+		else
+			return CTalkMonster::GetScheduleOfType(Type);
 	}
 
 	return CTalkMonster::GetScheduleOfType( Type );
@@ -869,9 +920,6 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 
 Schedule_t *CScientist::GetSchedule( void )
 {
-	if (pev->body >= NUM_SCIENTIST_BODIES)
-		return slDisarmNeedle;
-
 	// so we don't keep calling through the EHANDLE stuff
 	CBaseEntity *pEnemy = m_hEnemy;
 
@@ -884,6 +932,9 @@ Schedule_t *CScientist::GetSchedule( void )
 		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
 			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	}
+
+	if (pev->body >= NUM_SCIENTIST_BODIES)
+		return slDisarmNeedle;
 
 	switch( m_MonsterState )
 	{
@@ -949,7 +1000,7 @@ Schedule_t *CScientist::GetSchedule( void )
 				if( TargetDistance() <= 128 )
 				{
 					if( CanHeal() )	// Heal opportunistically
-						return slHeal;
+						return GetScheduleOfType( SCHED_HEAL );
 					if( HasConditions( bits_COND_CLIENT_PUSH ) )	// Player wants me to move
 						return GetScheduleOfType( SCHED_MOVE_AWAY_FOLLOW );
 				}
@@ -965,7 +1016,7 @@ Schedule_t *CScientist::GetSchedule( void )
 		// was called by other ally
 		else if ( CanHeal() )
 		{
-			return slHeal;
+			return GetScheduleOfType( SCHED_HEAL );
 		}
 
 		if( HasConditions( bits_COND_CLIENT_PUSH ) )	// Player wants me to move
