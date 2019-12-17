@@ -304,7 +304,7 @@ void CMassn::MonsterInit()
 	CHGrunt::MonsterInit();
 	if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
 	{
-		m_flDistTooFar = m_flDistTooFar * 1.5;
+		m_flDistTooFar = 2048.0f;
 	}
 }
 
