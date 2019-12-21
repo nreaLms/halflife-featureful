@@ -512,7 +512,12 @@
 	target(target_destination) : "Target"
 	delay(integer) : "Delay before fire"
 	netname(string) : "Fire on Close"
-	health(integer) : "Health (shoot open)" : 0
+	health(integer) : "Health (shoot open)"
+	m_fIgnoreTargetname(choices) : "Ignore Targetname" : : "Set whether the door should ignore its targetname or not. This is useful when you need to reference the func_door in another entity but still want the door to open on touch. Sven Co-op compatible. Effect is the same as 'Force Touchable' flag" =
+	[
+		0: "No"
+		1: "Yes"
+	]
 	spawnflags(flags) =
 	[
 		1 : "Starts Open" : 0
@@ -521,7 +526,7 @@
 		32: "Toggle" : 0
 		256:"Use Only" : 0
 		512: "Monsters Can't" : 1
-		1024: "Force Touchable" : 0 : "Open door by touching even when it has a name"
+		1024: "Force Touchable" : 0 : "Open door by touching even when it has a name. Spirit compatible. Same as parameter 'Ignore Targetname'."
 	]
 	// NOTE: must be duplicated in BUTTON
 	locked_sound(choices) : "Locked Sound" : 0 =

@@ -77,12 +77,17 @@ public:
 	BYTE m_bUnlockedSentence;
 
 	BOOL	m_iDirectUse;
+	BOOL	m_fIgnoreTargetname;
 
 	short m_soundRadius;
 
 	float SoundAttenuation() const
 	{
 		return ::SoundAttenuation(m_soundRadius);
+	}
+	bool IgnoreTargetname() const
+	{
+		return FBitSet(pev->spawnflags, SF_DOOR_FORCETOUCHABLE) || m_fIgnoreTargetname;
 	}
 };
 
@@ -98,6 +103,7 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_bUnlockedSentence, FIELD_CHARACTER ),
 
 	DEFINE_FIELD( CBaseDoor, m_iDirectUse, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBaseDoor, m_fIgnoreTargetname, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseDoor, m_soundRadius, FIELD_SHORT ),
 };
@@ -246,7 +252,12 @@ void CBaseDoor::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "directuse"))
 	{
-		m_iDirectUse = atoi(pkvd->szValue);
+		m_iDirectUse = atoi(pkvd->szValue) != 0;
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_fIgnoreTargetname"))
+	{
+		m_fIgnoreTargetname = atoi(pkvd->szValue) != 0;
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "WaveHeight" ) )
@@ -333,7 +344,7 @@ void CBaseDoor::Spawn()
 
 	// if the door is flagged for USE button activation only, use NULL touch function
 	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) &&
-			!FBitSet ( pev->spawnflags, SF_DOOR_FORCETOUCHABLE ) )
+			!IgnoreTargetname() )
 	{
 		SetTouch( NULL );
 	}
@@ -552,7 +563,7 @@ void CBaseDoor::DoorTouch( CBaseEntity *pOther )
 
 	// If door is somebody's target, then touching does nothing.
 	// You have to activate the owner (e.g. button).
-	if( !FStringNull( pev->targetname ) && !FBitSet(pev->spawnflags,SF_DOOR_FORCETOUCHABLE) )
+	if( !FStringNull( pev->targetname ) && !IgnoreTargetname() )
 	{
 		// play locked sound
 		PlayLockSounds( pev, &m_ls, TRUE, FALSE );
@@ -677,7 +688,7 @@ void CBaseDoor::DoorHitTop( void )
 	{
 		// Re-instate touch method, movement is complete
 		if( !FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) ||
-				FBitSet ( pev->spawnflags, SF_DOOR_FORCETOUCHABLE ) )
+				IgnoreTargetname() )
 			SetTouch( &CBaseDoor::DoorTouch );
 	}
 	else
@@ -735,7 +746,7 @@ void CBaseDoor::DoorHitBottom( void )
 
 	// Re-instate touch method, cycle is complete
 	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) &&
-			!FBitSet ( pev->spawnflags, SF_DOOR_FORCETOUCHABLE ) )
+			!IgnoreTargetname() )
 	{
 		// use only door
 		SetTouch( NULL );
@@ -923,7 +934,7 @@ void CRotDoor::Spawn( void )
 
 	m_toggle_state = TS_AT_BOTTOM;
 
-	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) && !FBitSet(pev->spawnflags, SF_DOOR_FORCETOUCHABLE) )
+	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) && !IgnoreTargetname() )
 	{
 		SetTouch( NULL );
 	}
