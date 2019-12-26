@@ -1454,12 +1454,18 @@ void CMomentaryRotButton::UpdateSelfReturn( float value )
 // Spark
 //----------------------------------------------------------------
 
+#define SF_SPARK_CYCLIC 16
+#define SF_SPARK_TOGGLE 32
+#define SF_SPARK_START_ON 64
+
 class CEnvSpark : public CBaseEntity
 {
 public:
 	void Spawn( void );
 	void Precache( void );
 	void EXPORT SparkThink( void );
+	void EXPORT SparkWait( void );
+	void EXPORT SparkCyclic(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT SparkStart( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT SparkStop( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void KeyValue( KeyValueData *pkvd );
@@ -1486,9 +1492,13 @@ void CEnvSpark::Spawn( void )
 	SetThink( NULL );
 	SetUse( NULL );
 
-	if( FBitSet( pev->spawnflags, 32 ) ) // Use for on/off
+	if (FBitSet(pev->spawnflags, SF_SPARK_CYCLIC))
 	{
-		if( FBitSet( pev->spawnflags, 64 ) ) // Start on
+		SetUse(&CEnvSpark::SparkCyclic);
+	}
+	else if( FBitSet( pev->spawnflags, SF_SPARK_TOGGLE ) ) // Use for on/off
+	{
+		if( FBitSet( pev->spawnflags, SF_SPARK_START_ON ) ) // Start on
 		{
 			SetThink( &CEnvSpark::SparkThink );	// start sparking
 			SetUse( &CEnvSpark::SparkStop );		// set up +USE to stop sparking
@@ -1498,11 +1508,14 @@ void CEnvSpark::Spawn( void )
 	}
 	else
 		SetThink( &CEnvSpark::SparkThink );
-		
-	pev->nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT( 0, 1.5 );
 
-	if( m_flDelay <= 0 )
-		m_flDelay = 1.5;
+	if( this->m_pfnThink )
+	{
+		pev->nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT( 0, 1.5 );
+
+		if( m_flDelay <= 0 )
+			m_flDelay = 1.5;
+	}
 
 	Precache();
 }
@@ -1535,10 +1548,36 @@ void CEnvSpark::KeyValue( KeyValueData *pkvd )
 		CBaseEntity::KeyValue( pkvd );
 }
 
+void EXPORT CEnvSpark::SparkCyclic(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if (m_pfnThink == NULL)
+	{
+		DoSpark( pev, pev->origin );
+		SetThink(&CEnvSpark::SparkWait );
+		pev->nextthink = gpGlobals->time + m_flDelay;
+	}
+	else
+	{
+		SetThink(&CEnvSpark::SparkThink ); // if we're on SparkWait, change to actually spark at the specified time.
+	}
+}
+
+void EXPORT CEnvSpark::SparkWait(void)
+{
+	SetThink( NULL );
+}
+
 void EXPORT CEnvSpark::SparkThink( void )
 {
-	pev->nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT( 0, m_flDelay );
 	DoSpark( pev, pev->origin );
+	if (pev->spawnflags & SF_SPARK_CYCLIC)
+	{
+		SetThink( NULL );
+	}
+	else
+	{
+		pev->nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT( 0, m_flDelay );
+	}
 }
 
 void EXPORT CEnvSpark::SparkStart( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )

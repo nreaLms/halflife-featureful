@@ -1544,9 +1544,10 @@
 
 @PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = env_spark : "Spark"
 [
-	MaxDelay(string) : "Max Delay" : "0"
+	MaxDelay(string) : "Max Time between sparks"
 	spawnflags(flags) =
 	[
+		16: "Cyclic" : 0
 		32: "Toggle" : 0
 		64: "Start ON" : 0
 	]
