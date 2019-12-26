@@ -461,7 +461,6 @@ void CFuncTank::UpdateSpot( void )
 void CFuncTank::UpdateOnRemove()
 {
 	StopControl();
-	StopRotSound();
 	CBaseEntity::UpdateOnRemove();
 }
 
