@@ -3519,6 +3519,7 @@
 	spawnflags(Flags) =
 	[
 		32 : "SquadLeader" : 0
+		32768 : "Start sleeping" : 0 : "Houndeye starts sleeping with eyes closed and doesn't wake up until hears player or combat"
 	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/houndeye_dead.mdl") = monster_houndeye_dead : "Dead Houndeye"
