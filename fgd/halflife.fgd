@@ -3528,6 +3528,12 @@
 	[
 		0 : "dead"
 	]
+	skin(Choices) : "Eye state" =
+	[
+		0 : "Open"
+		1 : "Half open"
+		2 : "Closed"
+	]
 	pose(Choices) : "Pose" : 0 =
 	[
 		0 : "Just plain dead"
