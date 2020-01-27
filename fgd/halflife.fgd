@@ -2376,8 +2376,20 @@
 ]
 
 // Displacer target placement represents the point where the player's feet shall be
-@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_xen_target : "Displacer XEN Target" []
-@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_earth_target : "Displacer EARTH Target" []
+@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_xen_target : "Displacer XEN Target"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Disabled" : 0
+	]
+]
+@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_earth_target : "Displacer EARTH Target"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start Disabled" : 0
+	]
+]
 
 @PointClass base(Target, Angles) size(-4 -4 -4, 4 4 4) color(0 255 0) = info_intermission : "Intermission Spot" []
 

@@ -29,9 +29,6 @@
 
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
-LINK_ENTITY_TO_CLASS(info_displacer_xen_target, CPointEntity)
-LINK_ENTITY_TO_CLASS(info_displacer_earth_target, CPointEntity)
-
 int iPortalSprite = 0;
 int iRingSprite = 0;
 
@@ -567,7 +564,17 @@ void CDisplacer::Teleport( void )
 			pszName = "info_displacer_xen_target";
 		else
 			pszName = "info_displacer_earth_target";
-		pTarget = UTIL_FindEntityByClassname( 0, pszName );
+
+		CBaseEntity *pDisplacerTarget = NULL;
+
+		while ((pDisplacerTarget = UTIL_FindEntityByClassname( pDisplacerTarget, pszName )) != NULL)
+		{
+			if (!FBitSet(pDisplacerTarget->pev->spawnflags, SF_DISPLACER_TARGET_DISABLED))
+			{
+				pTarget = pDisplacerTarget;
+				break;
+			}
+		}
 	}
 
 	if( pTarget )

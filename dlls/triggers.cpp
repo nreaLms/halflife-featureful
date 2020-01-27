@@ -2861,6 +2861,30 @@ void CTriggerRespawn::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 LINK_ENTITY_TO_CLASS(trigger_respawn, CTriggerRespawn)
 
 #if FEATURE_DISPLACER
+class CDisplacerTarget : public CPointEntity
+{
+public:
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+};
+
+void CDisplacerTarget::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	const BOOL enabled = !FBitSet(pev->spawnflags, SF_DISPLACER_TARGET_DISABLED);
+	if (!ShouldToggle(useType, enabled))
+		return;
+	if (enabled)
+	{
+		SetBits(pev->spawnflags, SF_DISPLACER_TARGET_DISABLED);
+	}
+	else
+	{
+		ClearBits(pev->spawnflags, SF_DISPLACER_TARGET_DISABLED);
+	}
+}
+
+LINK_ENTITY_TO_CLASS(info_displacer_xen_target, CDisplacerTarget)
+LINK_ENTITY_TO_CLASS(info_displacer_earth_target, CDisplacerTarget)
+
 class CTriggerXenReturn : public CTriggerTeleport
 {
 public:
@@ -2905,7 +2929,15 @@ void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
 		}
 	}
 
-	pentTarget = FIND_ENTITY_BY_CLASSNAME(pentTarget, "info_displacer_earth_target");
+	edict_t* earthTarget = NULL;
+	while((earthTarget = FIND_ENTITY_BY_CLASSNAME(earthTarget, "info_displacer_earth_target")) != NULL)
+	{
+		if (!FBitSet(earthTarget->v.spawnflags, SF_DISPLACER_TARGET_DISABLED))
+		{
+			pentTarget = earthTarget;
+			break;
+		}
+	}
 	if (FNullEnt(pentTarget))
 		return;
 
