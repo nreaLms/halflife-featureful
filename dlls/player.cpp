@@ -126,7 +126,6 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 #endif
 #if FEATURE_ROPE
 	DEFINE_FIELD(CBasePlayer, m_pRope, FIELD_CLASSPTR),
-	DEFINE_FIELD(CBasePlayer, m_flLastTouchedByRope, FIELD_TIME),
 #endif
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
 
@@ -2160,8 +2159,13 @@ void CBasePlayer::PreThink( void )
 		pev->velocity = g_vecZero;
 
 		Vector vecAttachPos = m_pRope->GetAttachedObjectsPosition();
-
-		pev->origin = vecAttachPos;
+		vecAttachPos.z -= FBitSet(pev->flags, FL_DUCKING) ? 12 : 24;
+		if (!SetClosestOriginOnRope(vecAttachPos))
+		{
+			ALERT(at_aiconsole, "Can't set attach pos as origin for player (would lead to stuck)\n");
+			LetGoRope(0.2);
+			return;
+		}
 
 		Vector vecForce;
 
@@ -2201,13 +2205,7 @@ void CBasePlayer::PreThink( void )
 							if( !m_pRope->MoveDown( flDelta ) )
 							{
 								//Let go of the rope, detach. - Solokiller
-								pev->movetype = MOVETYPE_WALK;
-								pev->solid = SOLID_SLIDEBOX;
-
-								m_afPhysicsFlags &= ~PFLAG_ONROPE;
-								m_pRope->DetachObject();
-								m_pRope = NULL;
-								m_bIsClimbing = false;
+								LetGoRope();
 							}
 						}
 						else
@@ -2223,13 +2221,7 @@ void CBasePlayer::PreThink( void )
 						}
 						else if( !m_pRope->MoveDown( flDelta ) )
 						{
-							//Let go of the rope, detach. - Solokiller
-							pev->movetype = MOVETYPE_WALK;
-							pev->solid = SOLID_SLIDEBOX;
-							m_afPhysicsFlags &= ~PFLAG_ONROPE;
-							m_pRope->DetachObject();
-							m_pRope = NULL;
-							m_bIsClimbing = false;
+							LetGoRope();
 						}
 					}
 				}
@@ -2261,47 +2253,22 @@ void CBasePlayer::PreThink( void )
 
 		if( m_afButtonPressed & IN_JUMP )
 		{
+			CRope* rope = m_pRope;
+			LetGoRope();
 			//We've jumped off the rope, give us some momentum - Solokiller
-			pev->movetype = MOVETYPE_WALK;
-			pev->solid = SOLID_SLIDEBOX;
-			this->m_afPhysicsFlags &= ~PFLAG_ONROPE;
 
 			Vector vecDir = gpGlobals->v_up * 165.0 + gpGlobals->v_forward * 150.0;
 
-			Vector vecVelocity = m_pRope->GetAttachedObjectsVelocity() * 2;
+			Vector vecVelocity = rope->GetAttachedObjectsVelocity() * 2;
 
 			vecVelocity = vecVelocity.Normalize();
 
 			vecVelocity = vecVelocity * 200;
 
 			pev->velocity = vecVelocity + vecDir;
-
-			m_pRope->DetachObject();
-			m_pRope = NULL;
-			m_bIsClimbing = false;
 		}
 		return;
 	}
-
-	if (gpGlobals->time < m_flLastTouchedByRope + 0.5)
-	{
-		TraceResult trace;
-		UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, human_hull, edict(), &trace );
-		if( trace.fStartSolid )
-		{
-			ALERT(at_aiconsole, "Player stuck. Trying to unstuck\n");
-			pev->origin.z++;
-			for( int i = 0; i < 17; i++ )
-			{
-				UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, head_hull, edict(), &trace );
-				if( trace.fStartSolid )
-					pev->origin.z++;
-				else
-					break;
-			}
-		}
-	}
-
 #endif
 
 	// Train speed control
@@ -2387,6 +2354,85 @@ void CBasePlayer::PreThink( void )
 		pev->velocity = g_vecZero;
 	}
 }
+
+#if FEATURE_ROPE
+void CBasePlayer::LetGoRope(float delay)
+{
+	//Let go of the rope, detach. - Solokiller
+	pev->movetype = MOVETYPE_WALK;
+	pev->solid = SOLID_SLIDEBOX;
+	m_afPhysicsFlags &= ~PFLAG_ONROPE;
+	if (m_pRope)
+	{
+		m_pRope->DetachObject(delay);
+		m_pRope = NULL;
+	}
+	m_bIsClimbing = false;
+
+//	TraceResult trace;
+//	UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, human_hull, edict(), &trace );
+//	if( trace.fStartSolid )
+//	{
+//		ALERT(at_aiconsole, "Player stuck. Trying to unstuck downwards\n");
+//		const float originZ = pev->origin.z;
+
+//		int i;
+//		for( i = 0; i < 8; i++ )
+//		{
+//			pev->origin.z -= 4;
+//			UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, human_hull, edict(), &trace );
+//			if( !trace.fStartSolid )
+//				break;
+//		}
+
+//		if (trace.fStartSolid)
+//		{
+//			pev->origin.z = originZ;
+//		}
+//	}
+}
+
+bool CBasePlayer::SetClosestOriginOnRope(const Vector &vecPos)
+{
+	TraceResult trace;
+	UTIL_TraceHull( vecPos, vecPos, ignore_monsters, FBitSet(pev->flags, FL_DUCKING) ? head_hull : human_hull, edict(), &trace );
+
+	if( trace.fStartSolid )
+	{
+		const Vector difference = vecPos - pev->origin;
+		const int stepNumber = 8;
+		const Vector diffStep = difference/stepNumber;
+
+		Vector vecCheckPos = pev->origin;
+
+		for (int j=0; j<stepNumber; ++j)
+		{
+			vecCheckPos = vecCheckPos + diffStep;
+			UTIL_TraceHull( vecCheckPos, vecCheckPos, ignore_monsters, FBitSet(pev->flags, FL_DUCKING) ? head_hull : human_hull, edict(), &trace );
+			if (!trace.fStartSolid)
+			{
+				pev->origin = vecCheckPos;
+			}
+			else
+			{
+				if (j == 0)
+				{
+					return (vecPos - pev->origin).Length() <= 16.0f;
+				}
+				return true;
+			}
+		}
+		return true;
+	}
+	else
+	{
+		pev->origin = vecPos;
+		return true;
+	}
+}
+
+#endif
+
 /* Time based Damage works as follows: 
 	1) There are several types of timebased damage:
 
@@ -4649,17 +4695,7 @@ BOOL CBasePlayer::FBecomeProne( void )
 
 	if( (m_afPhysicsFlags & PFLAG_ONROPE) )
 	{
-		pev->movetype = MOVETYPE_WALK;
-		pev->solid = SOLID_SLIDEBOX;
-		this->m_afPhysicsFlags &= ~PFLAG_ONROPE;
-
-		if (m_pRope)
-		{
-			m_pRope->DetachObject();
-			m_pRope = NULL;
-		}
-
-		m_bIsClimbing = false;
+		LetGoRope();
 	}
 
 	return TRUE;

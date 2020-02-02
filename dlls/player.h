@@ -378,7 +378,6 @@ public:
 #if FEATURE_ROPE
 	bool m_bIsClimbing;
 	float m_flLastClimbTime;
-	float m_flLastTouchedByRope;
 	CRope *m_pRope;
 	BOOL IsOnRope()
 	{
@@ -398,6 +397,9 @@ public:
 
 	}
 	CRope* GetRope() { return m_pRope; }
+
+	void LetGoRope(float delay = 2.0f);
+	bool SetClosestOriginOnRope(const Vector& vecPos);
 #endif
 	BOOL m_settingsLoaded;
 };

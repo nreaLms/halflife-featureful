@@ -162,6 +162,7 @@ TYPEDESCRIPTION	CRope::m_SaveData[] =
 	DEFINE_FIELD( CRope, mObjectAttached, FIELD_CHARACTER ),
 	DEFINE_FIELD( CRope, mAttachedObjectsSegment, FIELD_INTEGER ),
 	DEFINE_FIELD( CRope, detachTime, FIELD_TIME ),
+	DEFINE_FIELD( CRope, detachDelay, FIELD_FLOAT ),
 	DEFINE_ARRAY( CRope, seg, FIELD_CLASSPTR, MAX_SEGMENTS ),
 	DEFINE_ARRAY( CRope, altseg, FIELD_CLASSPTR, MAX_SEGMENTS ),
 	DEFINE_ARRAY( CRope, m_Samples, FIELD_CLASSPTR, MAX_SAMPLES ),
@@ -1008,21 +1009,23 @@ void CRope::AttachObjectToSegment( CRopeSegment* pSegment )
 	mObjectAttached = true;
 
 	detachTime = 0;
+	detachDelay = 2.0f;
 
 	SetAttachedObjectsSegment( pSegment );
 
 	mAttachedObjectsOffset = 0;
 }
 
-void CRope::DetachObject()
+void CRope::DetachObject(float delay)
 {
 	mObjectAttached = false;
 	detachTime = gpGlobals->time;
+	detachDelay = delay;
 }
 
 bool CRope::IsAcceptingAttachment() const
 {
-	if( gpGlobals->time - detachTime > 2.0 && !mObjectAttached )
+	if( gpGlobals->time - detachTime > detachDelay && !mObjectAttached )
 	{
 		return mDisallowPlayerAttachment != 1;
 	}
@@ -1258,8 +1261,6 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 			}
 		}
 
-		pPlayer->m_flLastTouchedByRope = gpGlobals->time;
-
 		if (pPlayer->m_afPhysicsFlags & PFLAG_ONBARNACLE)
 			return;
 
@@ -1269,7 +1270,7 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 			{
 				RopeSampleData *data = m_Sample->GetData();
 
-				pOther->pev->origin = data->mPosition;
+				//pPlayer->SetClosestOriginOnRope(data->mPosition);
 
 				pPlayer->SetOnRopeState( true );
 				pPlayer->SetRope( GetMasterRope() );

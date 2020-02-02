@@ -141,7 +141,7 @@ public:
 	/**
 	*	Detaches an attached object.
 	*/
-	void DetachObject();
+	void DetachObject(float delay = 2.0f);
 
 	/**
 	*	@return Whether an object is attached.
@@ -281,6 +281,7 @@ private:
 	int mAttachedObjectsSegment;
 	float mAttachedObjectsOffset;
 	float detachTime;
+	float detachDelay;
 
 	string_t mBodyModel;
 	string_t mEndingModel;
