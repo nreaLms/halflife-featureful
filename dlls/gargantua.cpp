@@ -62,7 +62,6 @@ const float GARG_ATTACKDIST = 80.0;
 
 #define STOMP_SPRITE_COUNT			10
 
-int gGargGibModel = 0;
 void SpawnExplosion( Vector center, float randomRange, float time, int magnitude );
 
 class CSmoker;
@@ -262,6 +261,7 @@ public:
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
+	const char* DefaultGibModel() { return GARG_GIB_MODEL; }
 	const char* DefaultDisplayName() { return "Gargantua"; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
@@ -312,6 +312,7 @@ public:
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
 
 	int m_stompSprite;
+	int m_GargGibModel;
 
 protected:
 	virtual float DefaultHealth();
@@ -879,7 +880,7 @@ void CGargantua::Precache()
 	PRECACHE_MODEL( GARG_BEAM_SPRITE_NAME );
 	PRECACHE_MODEL( GARG_BEAM_SPRITE2 );
 	m_stompSprite = PRECACHE_MODEL( StompSprite() );
-	gGargGibModel = PRECACHE_MODEL( GARG_GIB_MODEL );
+	m_GargGibModel = PRECACHE_MODEL( GibModel() );
 	PRECACHE_SOUND( GARG_STOMP_BUZZ_SOUND );
 
 	PrecacheSounds();
@@ -1207,19 +1208,19 @@ void CGargantua::RunTask( Task_t *pTask )
 			pev->nextthink = gpGlobals->time + 0.15;
 			SetThink( &CBaseEntity::SUB_Remove );
 			int i;
-			int parts = MODEL_FRAMES( gGargGibModel );
+			int parts = MODEL_FRAMES( m_GargGibModel );
 			for( i = 0; i < 10; i++ )
 			{
 				CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-				pGib->Spawn( GARG_GIB_MODEL );
+				pGib->Spawn( GibModel() );
 
 				int bodyPart = 0;
 				if( parts > 1 )
-					bodyPart = RANDOM_LONG( 0, pev->body - 1 );
+					bodyPart = RANDOM_LONG( 0, parts - 1 );
 
 				pGib->pev->body = bodyPart;
-				pGib->m_bloodColor = BLOOD_COLOR_YELLOW;
+				pGib->m_bloodColor = m_bloodColor;
 				pGib->m_material = matNone;
 				pGib->pev->origin = pev->origin;
 				pGib->pev->velocity = UTIL_RandomBloodVector() * RANDOM_FLOAT( 300, 500 );
@@ -1248,7 +1249,7 @@ void CGargantua::RunTask( Task_t *pTask )
 				WRITE_BYTE( 200 ); 
 
 				// Model
-				WRITE_SHORT( gGargGibModel );	//model id#
+				WRITE_SHORT( m_GargGibModel );	//model id#
 
 				// # of shards
 				WRITE_BYTE( 50 );
@@ -1562,6 +1563,7 @@ public:
 	void SetYawSpeed( void );
 	const char* ReverseRelationshipModel() { return "models/babygargf.mdl"; }
 	const char* DefaultDisplayName() { return "Baby Gargantua"; }
+	const char* DefaultGibModel() { return CFollowingMonster::DefaultGibModel(); }
 	void StartTask( Task_t *pTask );
 	void RunTask( Task_t *pTask );
 	void PlayUseSentence();
