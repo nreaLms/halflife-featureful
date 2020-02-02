@@ -1598,6 +1598,10 @@
 	speed(integer) : "Speed (units per second)" : 64
 	scale(string) : "Sprite Scale"
 	framerate(string) : "Framerate" : "10.0"
+	spawnflags(flags) =
+	[
+		4 : "Initially On" : 0
+	]
 ]
 
 @PointClass base(Targetname) color(128 128 255) = env_state : "Local State"
