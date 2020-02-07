@@ -5757,34 +5757,29 @@
 
 @BaseClass base(Targetname, Angles, Classification, BloodColor, PrisonerTo, MonsterSoundMask) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
-	target(target_destination) : "Target On Release"
-	monstertype(string) : "Monster Type"
-	netname(target_source) : "Childrens' Name"
+	target(target_destination) : "Target On Release" : : "Targets which are fired whenever a monster is spawned."
+	monstertype(string) : "Monster Type" : : "Spawned monster's classname"
+	netname(target_source) : "Childrens' Name" : : "The spawned monster will receive it as its targetname."
 	spawnflags(Flags) =
 	[
-		1 : "Start ON" 	: 0
+		1 : "Start ON" 	: 0 : "Enabled on map start. Note that if the entity does not have a name it acts as Start ON no matter what."
 	// 	2 : "PVS On/Off" : 0  // not implemented
-		4 : "Cyclic" : 0
-		8 : "MonsterClip" : 0
-		16 : "Prisoner" : 0
+		4 : "Cyclic" : 0 : "With this flag set, the entity will spawn one time every time it is fired."
+		8 : "MonsterClip" : 0 : "Monsters spawned by a squadmaker with this flag set will be blocked by the func_monsterclip brush entity."
+		16 : "Prisoner" : 0 : "The spawned monster won't attack its enemies and will be ignored by its enemies."
 		32 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Auto size BBox' flag"
-		64: "Cyclic backlog" : 0 : "Keep track of number of monsters who could not be spawned because of blocking. Try to spawn them later"
-		256 : "Pre-Disaster" : 0
-		1024: "Don't Drop Gun" : 0
-		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
+		64: "Cyclic backlog" : 0 : "Used with 'Cyclic' flag. Keep track of number of monsters who could not be spawned, e.g. because of blocking. Try to spawn them later. Useful when you want to ensure that the specific number of monsters will spawn."
+		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
+		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
+		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
 		16384 : "Pass monster as activator" : 0 : "Pass spawned monster as activator triggering Target on Release"
 	]
 
-	// how many monsters the monstermaker can create (-1 = unlimited)
-	monstercount(integer) : "Number of Monsters" : -1
+	monstercount(integer) : "Number of Monsters" : -1 : "How many monsters the monstermaker can create (-1 = unlimited)"
 
-	// if delay is -1, new monster will be made when last monster dies.
-	// else, delay is how often (seconds) a new monster will be dookied out.
-	delay(string) : "Frequency" : "5"
+	delay(string) : "Frequency" : "5" : "How often (seconds) a new monster will be made"
 
-	// maximum number of live children allowed at one time. (New ones will not be made until one dies)
-	// -1 no limit
-	m_imaxlivechildren(integer) : "Max live children" : 5
+	m_imaxlivechildren(integer) : "Max live children" : 5 : "Maximum number of live children allowed at one time. (New ones will not be made until one dies, -1 = no limit)"
 	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
 	new_model(studio) : "Custom model"
 	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
@@ -5793,7 +5788,7 @@
 	health(integer) : "Custom health"
 	body(integer) : "Body"
 	skin(integer) : "Skin"
-	pose(integer) : "Pose (Only for dead monsters)"
+	pose(integer) : "Pose (Only for dead monsters)" : : "Dead pose index. Should match the one in the spawned entity."
 	gibmodel(studio) : "Custom gib model"
 	weapons(Choices) : "Grunt/Assassin Weapons" =
 	[
