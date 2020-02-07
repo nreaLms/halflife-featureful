@@ -740,16 +740,14 @@ void CShockRoach::MonsterThink(void)
 	{
 		pev->movetype = MOVETYPE_STEP;
 	}
-	if (!m_fRoachSolid && lifeTime >= 1.0) {
+	if (!m_fRoachSolid && lifeTime >= 2.0) {
 		m_fRoachSolid = TRUE;
 		SetMySize(Vector(-12, -12, 0), Vector(12, 12, 24));
 	}
-	// explode when ready
-	if (lifeTime >= + gSkillData.sroachLifespan)
+	// die when ready
+	if (lifeTime >= gSkillData.sroachLifespan)
 	{
-		pev->health = -1;
-		Killed(pev, 0);
-		return;
+		TakeDamage(pev, pev, pev->health, DMG_NEVERGIB);
 	}
 
 	CHeadCrab::MonsterThink();
