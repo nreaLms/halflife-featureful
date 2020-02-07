@@ -560,9 +560,21 @@ void CBigMomma::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecD
 
 int CBigMomma::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	// Don't take any acid damage -- BigMomma's mortar is acid
-	if( bitsDamageType & DMG_ACID )
-		flDamage = 0;
+	// Don't take ally acid damage -- BigMomma's mortar is acid
+	if( bitsDamageType & DMG_ACID && pevAttacker )
+	{
+		CBaseEntity* pAttacker = Instance( pevAttacker );
+		if (pAttacker == this)
+		{
+			flDamage = 0;
+		}
+		else
+		{
+			const int rel = IRelationship( pAttacker );
+			if (rel < R_DL && rel != R_FR)
+				flDamage = 0;
+		}
+	}
 
 	if( !HasMemory( bits_MEMORY_PATH_FINISHED ) )
 	{

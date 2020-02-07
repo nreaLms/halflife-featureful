@@ -446,7 +446,7 @@ BOOL CHeadCrab::CheckRangeAttack2( float flDot, float flDist )
 
 int CHeadCrab::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	// Don't take any acid damage -- BigMomma's mortar is acid
+	// Don't take ally acid damage -- BigMomma's mortar is acid
 	if( ( bitsDamageType & DMG_ACID ) && pevAttacker)
 	{
 		const int rel = IRelationship( Instance( pevAttacker ) );
