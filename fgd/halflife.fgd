@@ -2380,14 +2380,14 @@
 ]
 
 // Displacer target placement represents the point where the player's feet shall be
-@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_xen_target : "Displacer XEN Target"
+@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) offset(0 0 36) = info_displacer_xen_target : "Displacer XEN Target"
 [
 	spawnflags(Flags) =
 	[
 		1 : "Start Disabled" : 0
 	]
 ]
-@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_displacer_earth_target : "Displacer EARTH Target"
+@PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) offset(0 0 36) = info_displacer_earth_target : "Displacer EARTH Target"
 [
 	spawnflags(Flags) =
 	[
@@ -2416,7 +2416,7 @@
 @PointClass base(PlayerClass) sequence(2) studio("models/player.mdl") = info_player_start : "Player 1 start" []
 
 @PointClass base(Targetname) size(-4 -4 -4, 4 4 4) color(200 100 50) = info_target : "Beam Target" []
-@PointClass size(-8 -8 0, 8 8 16) base(PlayerClass, Targetname) = info_teleport_destination : "Teleport destination" []
+@PointClass size(-8 -8 0, 8 8 16) base(Targetname) offset(0 0 36) = info_teleport_destination : "Teleport destination" []
 
 //
 // items
@@ -6500,11 +6500,29 @@
 	trigger_number(integer) : "Trigger number limit" : : "Stop after triggering this number of targets. 0 means no limit"
 ]
 
-@SolidClass base(Trigger, TriggerCond) = trigger_teleport : "Trigger teleport" []
+@BaseClass base(Targetname) = TriggerTeleport
+[
+	master(string) : "Master"
+	teleport_start_inactive(choices) : "Start Inactive" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	spawnflags(flags) =
+	[
+		256 : "Keep Angles" : 0 : "Keep player's angles"
+		512 : "Keep velocity" : 0 : "Keep player's velocity"
+	]
+]
+
+@SolidClass base(TriggerTeleport, TriggerCond) = trigger_teleport : "Trigger teleport"
+[
+	target(target_destination) : "Target" : : "Name of the entity which the player is teleported to. Ideally an info_teleport_destination entity."
+]
 
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []
 
-@SolidClass base(Trigger) = trigger_xen_return : "Return To Earth (self-tele)" []
+@SolidClass base(TriggerTeleport) = trigger_xen_return : "Return To Earth" []
 
 //
 // weapons

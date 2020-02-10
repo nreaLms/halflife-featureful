@@ -569,7 +569,6 @@ void CRenderFxManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 class CBaseTrigger : public CBaseToggle
 {
 public:
-	void EXPORT TeleportTouch( CBaseEntity *pOther );
 	void KeyValue( KeyValueData *pkvd );
 	void EXPORT MultiTouch( CBaseEntity *pOther );
 	void EXPORT HurtTouch( CBaseEntity *pOther );
@@ -1996,24 +1995,91 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 // teleport trigger
 //
 //
-void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
+
+#define SF_TELEPORT_KEEPANGLES 256
+#define SF_TELEPORT_KEEPVELOCITY 512
+
+class CTriggerTeleport : public CBaseTrigger
+{
+public:
+	void Spawn( void );
+	void KeyValue( KeyValueData *pkvd );
+	void EXPORT TeleportTouch( CBaseEntity *pOther );
+	void EXPORT TeleportUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	virtual edict_t* GetTeleportTarget();
+	bool TeleportTouchImpl( CBaseEntity *pOther );
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	BOOL m_fInactive;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_teleport, CTriggerTeleport )
+
+TYPEDESCRIPTION	CTriggerTeleport::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerTeleport, m_fInactive, FIELD_BOOLEAN ),
+};
+
+IMPLEMENT_SAVERESTORE(CTriggerTeleport, CBaseTrigger)
+
+void CTriggerTeleport::Spawn( void )
+{
+	InitTrigger();
+	SetTouch( &CTriggerTeleport::TeleportTouch );
+	if (m_fInactive)
+	{
+		SetUse( &CTriggerTeleport::TeleportUse );
+		if (FStringNull(pev->targetname))
+		{
+			ALERT(at_warning, "Inactive %s without a name!\n", STRING(pev->classname));
+		}
+	}
+}
+
+void CTriggerTeleport::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "teleport_start_inactive"))
+	{
+		m_fInactive = atoi(pkvd->szValue) != 0;
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseTrigger::KeyValue( pkvd );
+}
+
+void CTriggerTeleport::TeleportUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (ShouldToggle(useType, !m_fInactive))
+	{
+		m_fInactive = !m_fInactive;
+	}
+}
+
+bool CTriggerTeleport::TeleportTouchImpl( CBaseEntity *pOther )
 {
 	entvars_t *pevToucher = pOther->pev;
 	edict_t	*pentTarget = NULL;
 
 	// Only teleport monsters or clients
 	if( !FBitSet( pevToucher->flags, FL_CLIENT | FL_MONSTER ) )
-		return;
+		return false;
+
+	if (m_fInactive)
+		return false;
 
 	if( !UTIL_IsMasterTriggered( m_sMaster, pOther ) )
-		return;
+		return false;
 
 	if( !( pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS ) )
 	{
 		// no monsters allowed!
 		if( FBitSet( pevToucher->flags, FL_MONSTER ) )
 		{
-			return;
+			return false;
 		}
 	}
 
@@ -2022,13 +2088,13 @@ void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
 		// no clients allowed
 		if( pOther->IsPlayer() )
 		{
-			return;
+			return false;
 		}
 	}
 
-	pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( pev->target ) );
+	pentTarget = GetTeleportTarget();
 	if( FNullEnt( pentTarget ) )
-	   return;
+		return false;
 
 	Vector tmp = VARS( pentTarget )->origin;
 
@@ -2043,29 +2109,34 @@ void CBaseTrigger::TeleportTouch( CBaseEntity *pOther )
 
 	UTIL_SetOrigin( pevToucher, tmp );
 
-	pevToucher->angles = pentTarget->v.angles;
-
-	if( pOther->IsPlayer() )
+	if (!FBitSet(pev->spawnflags, SF_TELEPORT_KEEPANGLES))
 	{
-		pevToucher->v_angle = pentTarget->v.angles;
+		pevToucher->angles = pentTarget->v.angles;
+
+		if( pOther->IsPlayer() )
+		{
+			pevToucher->v_angle = pentTarget->v.angles;
+		}
+
+		pevToucher->fixangle = TRUE;
 	}
 
-	pevToucher->fixangle = TRUE;
-	pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
+	if (!FBitSet(pev->spawnflags, SF_TELEPORT_KEEPVELOCITY))
+	{
+		pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
+	}
+
+	return true;
 }
 
-class CTriggerTeleport : public CBaseTrigger
+void CTriggerTeleport::TeleportTouch( CBaseEntity *pOther )
 {
-public:
-	void Spawn( void );
-};
+	TeleportTouchImpl(pOther);
+}
 
-LINK_ENTITY_TO_CLASS( trigger_teleport, CTriggerTeleport )
-
-void CTriggerTeleport::Spawn( void )
+edict_t* CTriggerTeleport::GetTeleportTarget()
 {
-	InitTrigger();
-	SetTouch( &CBaseTrigger::TeleportTouch );
+	return FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) );
 }
 
 LINK_ENTITY_TO_CLASS( info_teleport_destination, CPointEntity )
@@ -2888,95 +2959,60 @@ LINK_ENTITY_TO_CLASS(info_displacer_earth_target, CDisplacerTarget)
 class CTriggerXenReturn : public CTriggerTeleport
 {
 public:
-	void Spawn(void);
-	void EXPORT TeleportTouch(CBaseEntity *pOther);
+	void Spawn( void );
+	void Precache( void );
+	void EXPORT TeleportTouch( CBaseEntity *pOther );
+
+	virtual edict_t* GetTeleportTarget();
 };
 
 LINK_ENTITY_TO_CLASS(trigger_xen_return, CTriggerXenReturn)
 
 void CTriggerXenReturn::Spawn(void)
 {
+	CTriggerXenReturn::Precache();
 	CTriggerTeleport::Spawn();
 
 	SetTouch(&CTriggerXenReturn::TeleportTouch);
 }
 
+void CTriggerXenReturn::Precache()
+{
+	PRECACHE_SOUND( "debris/beamstart7.wav" );
+}
+
 void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
 {
-	entvars_t* pevToucher = pOther->pev;
-	edict_t	*pentTarget = NULL;
-
-	// Only teleport monsters or clients
-	if (!FBitSet(pevToucher->flags, FL_CLIENT | FL_MONSTER))
-		return;
-
-	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
-		return;
-
-	if (!(pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS))
-	{// no monsters allowed!
-		if (FBitSet(pevToucher->flags, FL_MONSTER))
-		{
-			return;
-		}
-	}
-
-	if ((pev->spawnflags & SF_TRIGGER_NOCLIENTS))
-	{// no clients allowed
+	if (TeleportTouchImpl(pOther))
+	{
 		if (pOther->IsPlayer())
 		{
-			return;
-		}
-	}
+			// Ensure the current player is marked as being
+			// on earth.
+			((CBasePlayer*)pOther)->m_fInXen = FALSE;
 
+			// Reset gravity to default.
+			pOther->pev->gravity = 1.0f;
+		}
+
+		// Play teleport sound.
+		EMIT_SOUND(ENT(pOther->pev), CHAN_STATIC, "debris/beamstart7.wav", 1, ATTN_NORM );
+	}
+}
+
+edict_t* CTriggerXenReturn::GetTeleportTarget()
+{
 	edict_t* earthTarget = NULL;
 	while((earthTarget = FIND_ENTITY_BY_CLASSNAME(earthTarget, "info_displacer_earth_target")) != NULL)
 	{
 		if (!FBitSet(earthTarget->v.spawnflags, SF_DISPLACER_TARGET_DISABLED))
 		{
-			pentTarget = earthTarget;
-			break;
+			return earthTarget;
 		}
 	}
-	if (FNullEnt(pentTarget))
-		return;
-
-	Vector tmp = VARS(pentTarget)->origin;
-
-	if (pOther->IsPlayer())
-	{
-		tmp.z -= pOther->pev->mins.z;// make origin adjustments in case the teleportee is a player. (origin in center, not at feet)
-	}
-
-	tmp.z++;
-
-	pevToucher->flags &= ~FL_ONGROUND;
-
-	UTIL_SetOrigin(pevToucher, tmp);
-
-	pevToucher->angles = pentTarget->v.angles;
-
-	if (pOther->IsPlayer())
-	{
-		pevToucher->v_angle = pentTarget->v.angles;
-	}
-
-	pevToucher->fixangle = TRUE;
-	pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
-
-	if (pOther->IsPlayer())
-	{
-		// Ensure the current player is marked as being
-		// on earth.
-		((CBasePlayer*)pOther)->m_fInXen = FALSE;
-
-		// Reset gravity to default.
-		pOther->pev->gravity = 1.0f;
-	}
-
-	// Play teleport sound.
-	EMIT_SOUND(ENT(pOther->pev), CHAN_STATIC, "debris/beamstart7.wav", 1, ATTN_NORM );
+	return NULL;
 }
+
 #endif
 
 class CTriggerPlayerFreeze : public CBaseDelay
