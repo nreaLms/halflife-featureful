@@ -641,7 +641,20 @@
 	bulletCount(integer) : "Bullet count" : 0 : "Less or equal to 0 means infinite number of bullets"
 ]
 
-@BaseClass = PlatSounds
+@BaseClass = SoundRadius
+[
+	soundradius(choices) : "Sound radius" =
+	[
+		-2: "Small"
+		-1: "Medium"
+		0: "Default (large)"
+		1: "Huge"
+		2: "Enormous"
+		3: "Play Everywhere"
+	]
+]
+
+@BaseClass base(SoundRadius) = PlatSounds
 [
 	movesnd(choices) : "Move Sound" : 0 =
 	[
@@ -673,13 +686,6 @@
 		8: "quick stop"
 	]
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundradius(choices) : "Sound radius" =
-	[
-		0: "Default (large)"
-		1: "Huge"
-		2: "Enormous"
-		3: "Play Everywhere"
-	]
 	custommovesnd(sound) : "Custom move sound"
 	customstopsnd(sound) : "Custom stop sound"
 ]
@@ -1574,7 +1580,7 @@
 	]
 ]
 
-@PointClass studio() base(Targetname) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_modeltrain : "Sprite Train"
+@PointClass studio() base(Targetname, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_modeltrain : "Model Train"
 [
 	target(target_destination) : "First stop target"
 	model(studio) : "Model"
@@ -1582,13 +1588,6 @@
 	scale(string) : "Model Scale"
 	noise(sound) : "Move Sound"
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundradius(choices) : "Sound radius" =
-	[
-		0: "Default (large)"
-		1: "Huge"
-		2: "Enormous"
-		3: "Play Everywhere"
-	]
 ]
 
 @PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_spritetrain : "Sprite Train"
@@ -2074,7 +2073,7 @@
 	target(target_destination) : "Train Name"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, ZHLT) = func_train : "Moving platform"
+@SolidClass base(Targetname, Global, RenderFields, ZHLT, SoundRadius) = func_train : "Moving platform"
 [
 	target(target_destination) : "First stop target"
 	movesnd(choices) : "Move Sound" : 0 =
@@ -2111,13 +2110,6 @@
 	dmg(integer) : "Damage on crush" : 0
 	skin(integer) : "Contents"
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundradius(choices) : "Sound radius" =
-	[
-		0: "Default (large)"
-		1: "Huge"
-		2: "Enormous"
-		3: "Play Everywhere"
-	]
 	custommovesnd(sound) : "Custom move sound"
 	customstopsnd(sound) : "Custom stop sound"
 	spawnflags(flags) =
