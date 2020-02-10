@@ -903,7 +903,7 @@ void CFuncTrain::Spawn( void )
 		pev->speed = 100;
 
 	if( FStringNull(pev->target) )
-		ALERT( at_console, "FuncTrain with no target" );
+		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
 		pev->dmg = 2;
@@ -1528,7 +1528,7 @@ void CFuncTrackTrain::Spawn( void )
 	m_dir = 1;
 
 	if( FStringNull( pev->target ) )
-		ALERT( at_console, "FuncTrain with no target" );
+		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->spawnflags & SF_TRACKTRAIN_PASSABLE )
 		pev->solid = SOLID_NOT;
@@ -2382,7 +2382,7 @@ void CSpriteTrain::Spawn(void)
 		pev->speed = 100;
 
 	if( FStringNull(pev->target) )
-		ALERT( at_console, "FuncTrain with no target" );
+		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->dmg == 0 )
 		pev->dmg = 2;
@@ -2441,7 +2441,7 @@ void CModelTrain::Spawn( void )
 		pev->speed = 100;
 
 	if( FStringNull(pev->target) )
-		ALERT( at_console, "FuncTrain with no target" );
+		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
 
 	if( pev->dmg == 0 )
 		pev->dmg = 2;
