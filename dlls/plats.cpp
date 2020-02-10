@@ -690,6 +690,7 @@ public:
 	entvars_t *m_pevCurrentTarget;
 	int m_sounds;
 	BOOL m_activated;
+	BOOL m_iObeyTriggerMode;
 };
 
 LINK_ENTITY_TO_CLASS( func_train, CFuncTrain )
@@ -699,6 +700,7 @@ TYPEDESCRIPTION	CFuncTrain::m_SaveData[] =
 	DEFINE_FIELD( CFuncTrain, m_sounds, FIELD_INTEGER ),
 	DEFINE_FIELD( CFuncTrain, m_pevCurrentTarget, FIELD_EVARS ),
 	DEFINE_FIELD( CFuncTrain, m_activated, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CFuncTrain, m_iObeyTriggerMode, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTrain, CBasePlatTrain )
@@ -708,6 +710,11 @@ void CFuncTrain::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "sounds" ) )
 	{
 		m_sounds = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "m_iObeyTriggerMode" ) )
+	{
+		m_iObeyTriggerMode = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -727,6 +734,9 @@ void CFuncTrain::Blocked( CBaseEntity *pOther )
 
 void CFuncTrain::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	if (m_iObeyTriggerMode && !ShouldToggle(useType, !FBitSet(pev->spawnflags, SF_TRAIN_WAIT_RETRIGGER)))
+		return;
+
 	if( pev->spawnflags & SF_TRAIN_WAIT_RETRIGGER )
 	{
 		// Move toward my target

@@ -1580,27 +1580,34 @@
 	]
 ]
 
-@PointClass studio() base(Targetname, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_modeltrain : "Model Train"
+@BaseClass = BaseTrain
 [
 	target(target_destination) : "First stop target"
-	model(studio) : "Model"
 	speed(integer) : "Speed (units per second)" : 64
+	m_iObeyTriggerMode(choices) : "Obey Trigger Mode" : : "Originally trains don't interpret use-types. This parameter allows to take use-type into account. On is to proceed the train, Off is to stop." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	spawnflags(flags) =
+	[
+		4 : "Initially On" : 0
+	]
+]
+
+@PointClass studio() base(Targetname, BaseTrain, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_modeltrain : "Model Train"
+[
+	model(studio) : "Model"
 	scale(string) : "Model Scale"
 	noise(sound) : "Move Sound"
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
 ]
 
-@PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) color(0 128 255)= env_spritetrain : "Sprite Train"
+@PointClass sprite() base(Targetname, RenderFields, BaseTrain) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_spritetrain : "Sprite Train"
 [
-	target(target_destination) : "First stop target"
 	model(sprite) : "Sprite Name" : "sprites/glow01.spr"
-	speed(integer) : "Speed (units per second)" : 64
 	scale(string) : "Sprite Scale"
 	framerate(string) : "Framerate" : "10.0"
-	spawnflags(flags) =
-	[
-		4 : "Initially On" : 0
-	]
 ]
 
 @PointClass base(Targetname) color(128 128 255) = env_state : "Local State"
@@ -2073,9 +2080,8 @@
 	target(target_destination) : "Train Name"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, ZHLT, SoundRadius) = func_train : "Moving platform"
+@SolidClass base(Targetname, Global, RenderFields, ZHLT, BaseTrain, SoundRadius) = func_train : "Moving platform"
 [
-	target(target_destination) : "First stop target"
 	movesnd(choices) : "Move Sound" : 0 =
 	[
 		0: "No Sound"
@@ -2105,7 +2111,6 @@
 		7: "squeek stop"
 		8: "quick stop"
 	]
-	speed(integer) : "Speed (units per second)" : 64
 	avelocity(string) : "Angular Veocity (y z x)"
 	dmg(integer) : "Damage on crush" : 0
 	skin(integer) : "Contents"
@@ -2115,7 +2120,6 @@
 	spawnflags(flags) =
 	[
 		2 : "Origin on paths" : 0
-		4 : "Initially On" : 0
 		8 : "Not solid" : 0
 		64 : "No default damage" : 0
 	]
