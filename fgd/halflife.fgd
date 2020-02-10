@@ -1601,6 +1601,7 @@
 	scale(string) : "Model Scale"
 	noise(sound) : "Move Sound"
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
+	soundpitch(integer) : "Move sound Pitch (default=100)"
 ]
 
 @PointClass sprite() base(Targetname, RenderFields, BaseTrain) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_spritetrain : "Sprite Train"
@@ -2115,6 +2116,7 @@
 	dmg(integer) : "Damage on crush" : 0
 	skin(integer) : "Contents"
 	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
+	soundpitch(integer) : "Movesound Pitch(def.=100)"
 	custommovesnd(sound) : "Custom move sound"
 	customstopsnd(sound) : "Custom stop sound"
 	spawnflags(flags) =

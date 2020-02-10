@@ -691,6 +691,7 @@ public:
 	int m_sounds;
 	BOOL m_activated;
 	BOOL m_iObeyTriggerMode;
+	short m_iPitch;
 };
 
 LINK_ENTITY_TO_CLASS( func_train, CFuncTrain )
@@ -701,6 +702,7 @@ TYPEDESCRIPTION	CFuncTrain::m_SaveData[] =
 	DEFINE_FIELD( CFuncTrain, m_pevCurrentTarget, FIELD_EVARS ),
 	DEFINE_FIELD( CFuncTrain, m_activated, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CFuncTrain, m_iObeyTriggerMode, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CFuncTrain, m_iPitch, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTrain, CBasePlatTrain )
@@ -715,6 +717,11 @@ void CFuncTrain::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "m_iObeyTriggerMode" ) )
 	{
 		m_iObeyTriggerMode = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "soundpitch" ) )
+	{
+		m_iPitch = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -859,7 +866,7 @@ void CFuncTrain::Next( void )
 		if( pev->noiseMovement )
 		{
 			STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noiseMovement ) );
-			EMIT_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, SoundAttenuation() );
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noiseMovement ), m_volume, SoundAttenuation(), 0, m_iPitch );
 		}
 
 		ClearBits( pev->effects, EF_NOINTERP );
@@ -917,6 +924,9 @@ void CFuncTrain::Spawn( void )
 
 	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
 		pev->dmg = 2;
+
+	if (m_iPitch == 0)
+		m_iPitch = 100;
 
 	pev->movetype = MOVETYPE_PUSH;
 
@@ -2394,8 +2404,11 @@ void CSpriteTrain::Spawn(void)
 	if( FStringNull(pev->target) )
 		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
 
-	if( pev->dmg == 0 )
+	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
 		pev->dmg = 2;
+
+	if (m_iPitch == 0)
+		m_iPitch = 100;
 
 	if (!pev->rendermode)
 		pev->rendermode = kRenderTransAdd;
@@ -2453,8 +2466,11 @@ void CModelTrain::Spawn( void )
 	if( FStringNull(pev->target) )
 		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
 
-	if( pev->dmg == 0 )
+	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
 		pev->dmg = 2;
+
+	if (m_iPitch == 0)
+		m_iPitch = 100;
 
 	pev->movetype = MOVETYPE_PUSH;
 
