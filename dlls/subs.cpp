@@ -154,7 +154,7 @@ TYPEDESCRIPTION	CBaseDelay::m_SaveData[] =
 {
 	DEFINE_FIELD( CBaseDelay, m_flDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseDelay, m_iszKillTarget, FIELD_STRING ),
-	DEFINE_FIELD( CBaseToggle, m_hActivator, FIELD_EHANDLE ),
+	DEFINE_FIELD( CBaseDelay, m_hActivator, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CBaseDelay, CBaseEntity )
