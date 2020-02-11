@@ -688,17 +688,18 @@ public:
 	}
 
 	entvars_t *m_pevCurrentTarget;
-	int m_sounds;
 	BOOL m_activated;
 	BOOL m_iObeyTriggerMode;
 	short m_iPitch;
+
+protected:
+	void SetDefaultTrainValues();
 };
 
 LINK_ENTITY_TO_CLASS( func_train, CFuncTrain )
 
 TYPEDESCRIPTION	CFuncTrain::m_SaveData[] =
 {
-	DEFINE_FIELD( CFuncTrain, m_sounds, FIELD_INTEGER ),
 	DEFINE_FIELD( CFuncTrain, m_pevCurrentTarget, FIELD_EVARS ),
 	DEFINE_FIELD( CFuncTrain, m_activated, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CFuncTrain, m_iObeyTriggerMode, FIELD_BOOLEAN ),
@@ -709,12 +710,7 @@ IMPLEMENT_SAVERESTORE( CFuncTrain, CBasePlatTrain )
 
 void CFuncTrain::KeyValue( KeyValueData *pkvd )
 {
-	if( FStrEq( pkvd->szKeyName, "sounds" ) )
-	{
-		m_sounds = atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
-	else if( FStrEq( pkvd->szKeyName, "m_iObeyTriggerMode" ) )
+	if( FStrEq( pkvd->szKeyName, "m_iObeyTriggerMode" ) )
 	{
 		m_iObeyTriggerMode = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
@@ -916,17 +912,8 @@ sounds
 void CFuncTrain::Spawn( void )
 {
 	Precache();
-	if( pev->speed == 0 )
-		pev->speed = 100;
 
-	if( FStringNull(pev->target) )
-		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
-
-	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
-		pev->dmg = 2;
-
-	if (m_iPitch == 0)
-		m_iPitch = 100;
+	SetDefaultTrainValues();
 
 	pev->movetype = MOVETYPE_PUSH;
 
@@ -938,6 +925,21 @@ void CFuncTrain::Spawn( void )
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );
 	UTIL_SetSize( pev, pev->mins, pev->maxs );
 	UTIL_SetOrigin( pev, pev->origin );
+}
+
+void CFuncTrain::SetDefaultTrainValues()
+{
+	if( pev->speed == 0 )
+		pev->speed = 100;
+
+	if( FStringNull(pev->target) )
+		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
+
+	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
+		pev->dmg = 2;
+
+	if (m_iPitch == 0)
+		m_iPitch = 100;
 
 	m_activated = FALSE;
 
@@ -2391,24 +2393,22 @@ LINK_ENTITY_TO_CLASS(env_spritetrain, CSpriteTrain)
 
 void CSpriteTrain::Spawn(void)
 {
+	Precache();
+
+	SetDefaultTrainValues();
+
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_PUSH;
 	pev->effects = 0;
 
-	Precache();
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
-
-	if( pev->speed == 0 )
-		pev->speed = 100;
-
-	if( FStringNull(pev->target) )
-		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
-
-	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
-		pev->dmg = 2;
-
-	if (m_iPitch == 0)
-		m_iPitch = 100;
+	if (FStringNull(pev->model))
+	{
+		ALERT(at_console, "Spawning %s without model!\n", STRING(pev->classname));
+	}
+	else
+	{
+		SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	}
 
 	if (!pev->rendermode)
 		pev->rendermode = kRenderTransAdd;
@@ -2418,16 +2418,19 @@ void CSpriteTrain::Spawn(void)
 	m_lastTime = gpGlobals->time;
 	pev->frame = 0;
 
-	Create("trainthinker", pev->origin, pev->angles, edict());
-
 	UTIL_SetOrigin( pev, pev->origin );
-	m_activated = FALSE;
-	m_volume = 0;
+
+	Create("trainthinker", pev->origin, pev->angles, edict());
 }
 
 void CSpriteTrain::Precache(void)
 {
-	PRECACHE_MODEL( STRING( pev->model ) );
+	if (!FStringNull(pev->model))
+		PRECACHE_MODEL( STRING( pev->model ) );
+	if (!FStringNull(pev->noiseMovement))
+		PRECACHE_SOUND( STRING(pev->noiseMovement) );
+	if (!FStringNull(pev->noiseStopMoving))
+		PRECACHE_SOUND( STRING(pev->noiseStopMoving) );
 }
 
 void CSpriteTrain::Animate( float frames )
@@ -2460,17 +2463,8 @@ LINK_ENTITY_TO_CLASS(env_modeltrain, CModelTrain)
 void CModelTrain::Spawn( void )
 {
 	Precache();
-	if( pev->speed == 0 )
-		pev->speed = 100;
 
-	if( FStringNull(pev->target) )
-		ALERT( at_console, "%s with no target\n", STRING(pev->classname) );
-
-	if( pev->dmg == 0 && !FBitSet(pev->spawnflags, SF_TRAIN_NO_DAMAGE) )
-		pev->dmg = 2;
-
-	if (m_iPitch == 0)
-		m_iPitch = 100;
+	SetDefaultTrainValues();
 
 	pev->movetype = MOVETYPE_PUSH;
 
@@ -2478,7 +2472,7 @@ void CModelTrain::Spawn( void )
 
 	if (FStringNull(pev->model))
 	{
-		ALERT(at_console, "Spawning env_modeltrain without model!\n");
+		ALERT(at_console, "Spawning %s without model!\n", STRING(pev->classname));
 	}
 	else
 	{
@@ -2487,11 +2481,6 @@ void CModelTrain::Spawn( void )
 	UTIL_SetSize( pev, pev->mins, pev->maxs );
 	UTIL_SetOrigin( pev, pev->origin );
 
-	m_activated = FALSE;
-	if( m_volume == 0 )
-		m_volume = 0.85;
-	if (!pev->noiseMovement)
-		m_volume = 0;
 	pev->sequence = 0;
 	ResetSequenceInfo();
 
@@ -2504,6 +2493,8 @@ void CModelTrain::Precache(void)
 		PRECACHE_MODEL( STRING( pev->model ) );
 	if (!FStringNull(pev->noiseMovement))
 		PRECACHE_SOUND( STRING(pev->noiseMovement) );
+	if (!FStringNull(pev->noiseStopMoving))
+		PRECACHE_SOUND( STRING(pev->noiseStopMoving) );
 }
 
 void CModelTrain::AdvanceAnimation(void)

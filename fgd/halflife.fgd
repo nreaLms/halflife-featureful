@@ -1593,6 +1593,8 @@
 	[
 		4 : "Initially On" : 0
 	]
+	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
+	soundpitch(integer) : "Movesound Pitch (def.=100)"
 ]
 
 @PointClass studio() base(Targetname, BaseTrain, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_modeltrain : "Model Train"
@@ -1600,15 +1602,16 @@
 	model(studio) : "Model"
 	scale(string) : "Model Scale"
 	noise(sound) : "Move Sound"
-	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundpitch(integer) : "Move sound Pitch (default=100)"
+	noise1(sound) : "Stop Sound"
 ]
 
-@PointClass sprite() base(Targetname, RenderFields, BaseTrain) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_spritetrain : "Sprite Train"
+@PointClass sprite() base(Targetname, RenderFields, BaseTrain, SoundRadius) size(-16 -16 -16, 16 16 16) color(0 128 255) = env_spritetrain : "Sprite Train"
 [
 	model(sprite) : "Sprite Name" : "sprites/glow01.spr"
 	scale(string) : "Sprite Scale"
 	framerate(string) : "Framerate" : "10.0"
+	noise(sound) : "Move Sound"
+	noise1(sound) : "Stop Sound"
 ]
 
 @PointClass base(Targetname) color(128 128 255) = env_state : "Local State"
@@ -2115,8 +2118,6 @@
 	avelocity(string) : "Angular Veocity (y z x)"
 	dmg(integer) : "Damage on crush" : 0
 	skin(integer) : "Contents"
-	volume(string) : "Sound Volume 0.0 - 1.0" : "0.85"
-	soundpitch(integer) : "Movesound Pitch(def.=100)"
 	custommovesnd(sound) : "Custom move sound"
 	customstopsnd(sound) : "Custom stop sound"
 	spawnflags(flags) =
