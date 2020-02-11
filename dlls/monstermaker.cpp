@@ -36,7 +36,7 @@
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
-#define SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR 16384 // Use the spawned monster as activator to fire target
+#define SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR 16384 // DEPRECATED. Use the spawned monster as activator to fire target
 
 enum
 {
@@ -46,6 +46,15 @@ enum
 	MONSTERMAKER_SPAWNED,
 	MONSTERMAKER_BADPLACE,
 };
+
+typedef enum
+{
+	MMA_NO = -1,
+	MMA_DEFAULT = 0,
+	MMA_MAKER = 1,
+	MMA_MONSTER = 2,
+	MMA_FORWARD = 3,
+} MONSTERMAKER_TARGET_ACTIVATOR;
 
 //=========================================================
 // MonsterMaker - this ent creates monsters during the game.
@@ -88,6 +97,7 @@ public:
 	int m_cyclicBacklogSize;
 	string_t m_iszPlacePosition;
 	string_t m_iszAngles;
+	short m_targetActivator;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -113,6 +123,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_cyclicBacklogSize, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_iszPlacePosition, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_iszAngles, FIELD_STRING ),
+	DEFINE_FIELD( CMonsterMaker, m_targetActivator, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -189,12 +200,22 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 		m_reverseRelationship = atoi( pkvd->szValue ) != 0;
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "target_activator" ) )
+	{
+		m_targetActivator = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseMonster::KeyValue( pkvd );
 }
 
 void CMonsterMaker::Spawn()
 {
+	if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR))
+	{
+		ALERT(at_console, "%s: Usage of 'Pass monster as activator' flag is deprecated! Use Target's Activator instead\n", STRING(pev->classname));
+	}
+
 	pev->solid = SOLID_NOT;
 
 	m_iszPlacePosition = pev->noise;
@@ -468,10 +489,29 @@ int CMonsterMaker::MakeMonster( void )
 	// If I have a target, fire!
 	if( !FStringNull( pev->target ) )
 	{
+		// NOTE: in Spirit activator is monster.
+		// We keep original Half-Life behavior by default, but it can be configured.
 		CBaseEntity* pActivator = this;
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR))
 		{
 			pActivator = createdMonster;
+		}
+		switch (m_targetActivator) {
+		case MMA_NO:
+			pActivator = NULL;
+			break;
+		case MMA_MAKER:
+			pActivator = this;
+			break;
+		case MMA_MONSTER:
+			pActivator = createdMonster;
+			break;
+		case MMA_FORWARD:
+			pActivator = m_hActivator;
+			break;
+		case MMA_DEFAULT:
+		default:
+			break;
 		}
 		// delay already overloaded for this entity, so can't call SUB_UseTargets()
 		FireTargets( STRING( pev->target ), pActivator, this, USE_TOGGLE, 0 );

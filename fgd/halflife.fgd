@@ -5850,6 +5850,14 @@
 		8 : "Attachment point 3"
 	]
 	noise(string) : "Position to place monster at [LP]"
+	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
+	[
+		-1 : "Don't pass activator"
+		0 : "Default (Monstermaker)"
+		1 : "Monstermaker"
+		2 : "Spawned monster"
+		3 : "Forward my activator"
+	]
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
 @PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []
