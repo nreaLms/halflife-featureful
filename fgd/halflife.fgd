@@ -5849,6 +5849,7 @@
 		7 : "Attachment point 2"
 		8 : "Attachment point 3"
 	]
+	noise(string) : "Position to place monster at [LP]"
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
 @PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []

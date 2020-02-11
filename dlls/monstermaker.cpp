@@ -22,6 +22,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "saverestore.h"
+#include "locus.h"
 
 #define MONSTERMAKER_START_ON_FIX 1
 
@@ -43,6 +44,7 @@ enum
 	MONSTERMAKER_BLOCKED,
 	MONSTERMAKER_NULLENTITY,
 	MONSTERMAKER_SPAWNED,
+	MONSTERMAKER_BADPLACE,
 };
 
 //=========================================================
@@ -84,6 +86,8 @@ public:
 	BOOL m_gag;
 	int m_iHead;
 	int m_cyclicBacklogSize;
+	string_t m_iszPlacePosition;
+	string_t m_iszAngles;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -107,6 +111,8 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_minHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_maxHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_cyclicBacklogSize, FIELD_INTEGER ),
+	DEFINE_FIELD( CMonsterMaker, m_iszPlacePosition, FIELD_STRING ),
+	DEFINE_FIELD( CMonsterMaker, m_iszAngles, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -191,6 +197,12 @@ void CMonsterMaker::Spawn()
 {
 	pev->solid = SOLID_NOT;
 
+	m_iszPlacePosition = pev->noise;
+	pev->noise = iStringNull;
+
+	m_iszAngles = pev->noise2;
+	pev->noise2 = iStringNull;
+
 	m_cLiveChildren = 0;
 	Precache();
 	if( !FStringNull( pev->targetname ) )
@@ -270,6 +282,19 @@ int CMonsterMaker::MakeMonster( void )
 		return MONSTERMAKER_LIMIT;
 	}
 
+	Vector placePosition;
+	if (FStringNull(m_iszPlacePosition))
+	{
+		placePosition = pev->origin;
+	}
+	else
+	{
+		bool evaluated;
+		placePosition = CalcLocus_Position(this, m_hActivator, STRING(m_iszPlacePosition), &evaluated);
+		if (!evaluated)
+			return MONSTERMAKER_BADPLACE;
+	}
+
 	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
 	{
 		if( !m_flGround )
@@ -277,14 +302,14 @@ int CMonsterMaker::MakeMonster( void )
 			// set altitude. Now that I'm activated, any breakables, etc should be out from under me.
 			TraceResult tr;
 
-			UTIL_TraceLine( pev->origin, pev->origin - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );
+			UTIL_TraceLine( placePosition, placePosition - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );
 			m_flGround = tr.vecEndPos.z;
 		}
 	}
 
-	Vector mins = pev->origin - Vector( 34, 34, 0 );
-	Vector maxs = pev->origin + Vector( 34, 34, 0 );
-	maxs.z = pev->origin.z;
+	Vector mins = placePosition - Vector( 34, 34, 0 );
+	Vector maxs = placePosition + Vector( 34, 34, 0 );
+	maxs.z = placePosition.z;
 	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
 		mins.z = m_flGround;
 
@@ -304,9 +329,17 @@ int CMonsterMaker::MakeMonster( void )
 		return MONSTERMAKER_NULLENTITY;
 	}
 
+	Vector placeAngles = pev->angles;
+	if (!FStringNull(m_iszAngles))
+	{
+		CBaseEntity* anglesEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszAngles), m_hActivator);
+		if (anglesEnt)
+			placeAngles.y = anglesEnt->pev->angles.y;
+	}
+
 	pevCreate = VARS( pent );
-	pevCreate->origin = pev->origin;
-	pevCreate->angles = pev->angles;
+	pevCreate->origin = placePosition;
+	pevCreate->angles = placeAngles;
 	SetBits( pevCreate->spawnflags, SF_MONSTER_FALL_TO_GROUND );
 	pevCreate->body = pev->body;
 	pevCreate->skin = pev->skin;
@@ -453,6 +486,8 @@ int CMonsterMaker::MakeMonster( void )
 //=========================================================
 void CMonsterMaker::CyclicUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	m_hActivator = pActivator;
+
 	if (MakeMonster() == MONSTERMAKER_BLOCKED)
 	{
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_CYCLIC_BACKLOG))
@@ -470,6 +505,8 @@ void CMonsterMaker::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 {
 	if( !ShouldToggle( useType, m_fActive ) )
 		return;
+
+	m_hActivator = pActivator;
 
 	if( m_fActive )
 	{
