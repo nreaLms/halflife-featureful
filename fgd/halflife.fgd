@@ -6040,6 +6040,7 @@
 		0 : "No (Default)"
 		1 : "This script"
 		2 : "Speaking monster"
+		3 : "Forward my activator"
 	]
 ]
 
@@ -6079,6 +6080,7 @@
 		0 : "No (Default)"
 		1 : "This script"
 		2 : "Possessed Monster"
+		3 : "Forward my activator"
 	]
 ]
 

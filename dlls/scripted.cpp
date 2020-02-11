@@ -426,7 +426,8 @@ typedef enum
 	STA_NO = 0,
 	STA_SCRIPT = 1,
 	STA_MONSTER = 2,
-} SEQUENCE_TARGET_ACTIVATOR;
+	STA_FORWARD = 3,
+} SCRIPT_TARGET_ACTIVATOR;
 
 // lookup a sequence name and setup the target monster to play it
 BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty )
@@ -453,6 +454,10 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 			else if (m_targetActivator == STA_MONSTER)
 			{
 				pActivator = pTarget;
+			}
+			else if (m_targetActivator == STA_FORWARD)
+			{
+				pActivator = m_hActivator;
 			}
 			FireTargets( STRING( m_iszFireOnAnimStart ), pActivator, this, USE_TOGGLE, 0 );
 		}
@@ -512,6 +517,10 @@ void CCineMonster::SequenceDone( CBaseMonster *pMonster )
 	else if (m_targetActivator == STA_MONSTER)
 	{
 		pActivator = pMonster;
+	}
+	else if (m_targetActivator == STA_FORWARD)
+	{
+		pActivator = m_hActivator;
 	}
 	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 }
@@ -1207,6 +1216,10 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 	else if (m_targetActivator == STA_MONSTER)
 	{
 		pActivator = pTarget;
+	}
+	else if (m_targetActivator == STA_FORWARD)
+	{
+		pActivator = m_hActivator;
 	}
 	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 	return TRUE;
