@@ -1316,7 +1316,7 @@ class CEnvModel : public CBaseAnimating
 {
 	void Spawn( void );
 	void Precache( void );
-	void EXPORT Think( void );
+	void Think( void );
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int	ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
