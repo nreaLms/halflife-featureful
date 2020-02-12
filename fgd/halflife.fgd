@@ -1155,6 +1155,8 @@
 		5 : "Moxie"
 		6 : "Random"
 	]
+	model(studio) : "Custom Model"
+	weapons(integer) : "Health for Pickup"
 ]
 
 @PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) color(255 0 0) = env_blood : "Blood Effects"

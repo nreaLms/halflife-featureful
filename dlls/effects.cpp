@@ -2472,6 +2472,8 @@ void CEnvFunnel::KeyValue( KeyValueData *pkvd )
 // overloaded pev->frags, is now a flag for whether or not a can is stuck in the dispenser. 
 // overloaded pev->health, is now how many cans remain in the machine.
 //=========================================================
+#define DEFAULT_CAN_MODEL "models/can.mdl"
+
 class CEnvBeverage : public CBaseDelay
 {
 public:
@@ -2482,7 +2484,7 @@ public:
 
 void CEnvBeverage::Precache( void )
 {
-	PRECACHE_MODEL( "models/can.mdl" );
+	PRECACHE_MODEL( FStringNull( pev->model ) ? DEFAULT_CAN_MODEL : STRING( pev->model ) );
 	PRECACHE_SOUND( "weapons/g_bounce3.wav" );
 }
 
@@ -2507,16 +2509,24 @@ void CEnvBeverage::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	else
 		vecPos = pev->origin;
 
-	CBaseEntity *pCan = CBaseEntity::Create( "item_sodacan", vecPos, pev->angles, edict() );
+	CBaseEntity *pCan = CBaseEntity::CreateNoSpawn( "item_sodacan", vecPos, pev->angles, edict() );
 
-	if( pev->skin == 6 )
+	if (pCan)
 	{
-		// random
-		pCan->pev->skin = RANDOM_LONG( 0, 5 );
-	}
-	else
-	{
-		pCan->pev->skin = pev->skin;
+		pCan->pev->model = pev->model;
+		DispatchSpawn( pCan->edict() );
+
+		pCan->pev->health = pev->weapons;
+
+		if( pev->skin == 6 )
+		{
+			// random
+			pCan->pev->skin = RANDOM_LONG( 0, 5 );
+		}
+		else
+		{
+			pCan->pev->skin = pev->skin;
+		}
 	}
 
 	pev->frags = 1;
@@ -2553,7 +2563,7 @@ public:
 
 void CItemSoda::Precache( void )
 {
-	PRECACHE_MODEL( "models/can.mdl" );
+	PRECACHE_MODEL( FStringNull( pev->model ) ? DEFAULT_CAN_MODEL : STRING( pev->model ) );
 	PRECACHE_SOUND( "weapons/g_bounce3.wav" );
 }
 
@@ -2565,7 +2575,7 @@ void CItemSoda::Spawn( void )
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_TOSS;
 
-	SET_MODEL( ENT( pev ), "models/can.mdl" );
+	SET_MODEL( ENT( pev ), FStringNull( pev->model ) ? DEFAULT_CAN_MODEL : STRING( pev->model ) );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	
 	SetThink( &CItemSoda::CanThink );
@@ -2590,7 +2600,7 @@ void CItemSoda::CanTouch( CBaseEntity *pOther )
 	}
 
 	// spoit sound here
-	pOther->TakeHealth( gSkillData.sodaHeal, DMG_GENERIC );// a bit of health.
+	pOther->TakeHealth( pev->health ? pev->health : gSkillData.sodaHeal, DMG_GENERIC );// a bit of health.
 
 	if( !FNullEnt( pev->owner ) )
 	{
