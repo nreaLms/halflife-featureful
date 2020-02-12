@@ -2395,6 +2395,7 @@ class CEnvFunnel : public CBaseDelay
 public:
 	void Spawn( void );
 	void Precache( void );
+	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	int m_iSprite;	// Don't save, precache
@@ -2453,6 +2454,17 @@ void CEnvFunnel::Spawn( void )
 	Precache();
 	pev->solid = SOLID_NOT;
 	pev->effects = EF_NODRAW;
+}
+
+void CEnvFunnel::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "sprite" ) )
+	{
+		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseDelay::KeyValue( pkvd );
 }
 
 //=========================================================
