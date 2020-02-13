@@ -176,6 +176,8 @@ public:
 	float		m_fTurnOnTime;
 	float		m_fTurnOffTime;
 	string_t	m_sMaster;
+	string_t	m_fireWhenOn;
+	string_t	m_fireWhenOff;
 };
 
 void CEnvState::Spawn( void )
@@ -184,6 +186,10 @@ void CEnvState::Spawn( void )
 		m_iState = STATE_ON;
 	else
 		m_iState = STATE_OFF;
+	m_fireWhenOn = pev->noise1;
+	pev->noise1 = iStringNull;
+	m_fireWhenOff = pev->noise2;
+	pev->noise2 = iStringNull;
 }
 
 TYPEDESCRIPTION CEnvState::m_SaveData[] =
@@ -192,6 +198,8 @@ TYPEDESCRIPTION CEnvState::m_SaveData[] =
 	DEFINE_FIELD( CEnvState, m_fTurnOnTime, FIELD_FLOAT ),
 	DEFINE_FIELD( CEnvState, m_fTurnOffTime, FIELD_FLOAT ),
 	DEFINE_FIELD( CEnvState, m_sMaster, FIELD_STRING ),
+	DEFINE_FIELD( CEnvState, m_fireWhenOn, FIELD_STRING ),
+	DEFINE_FIELD( CEnvState, m_fireWhenOff, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvState, CPointEntity )
@@ -260,15 +268,15 @@ void CEnvState::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 				if (pev->target)
 				{
 					ALERT(at_console,": firing \"%s\"",STRING(pev->target));
-					if (pev->noise2)
-						ALERT(at_console," and \"%s\"",STRING(pev->noise2));
+					if (m_fireWhenOff)
+						ALERT(at_console," and \"%s\"",STRING(m_fireWhenOff));
 				}
-				else if (pev->noise2)
-					ALERT(at_console,": firing \"%s\"",STRING(pev->noise2));
+				else if (m_fireWhenOff)
+					ALERT(at_console,": firing \"%s\"",STRING(m_fireWhenOff));
 				ALERT(at_console,".\n");
 			}
 			FireTargets(STRING(pev->target),pActivator,this,USE_OFF,0);
-			FireTargets(STRING(pev->noise2),pActivator,this,USE_TOGGLE,0);
+			FireTargets(STRING(m_fireWhenOff),pActivator,this,USE_TOGGLE,0);
 			pev->nextthink = -1;
 		}
 		break;
@@ -292,15 +300,15 @@ void CEnvState::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 				if (pev->target)
 				{
 					ALERT(at_console,": firing \"%s\"",STRING(pev->target));
-					if (pev->noise1)
-						ALERT(at_console," and \"%s\"",STRING(pev->noise1));
+					if (m_fireWhenOn)
+						ALERT(at_console," and \"%s\"",STRING(m_fireWhenOn));
 				}
-				else if (pev->noise1)
-					ALERT(at_console,": firing \"%s\"", STRING(pev->noise1));
+				else if (m_fireWhenOn)
+					ALERT(at_console,": firing \"%s\"", STRING(m_fireWhenOn));
 				ALERT(at_console,".\n");
 			}
 			FireTargets(STRING(pev->target),pActivator,this,USE_ON,0);
-			FireTargets(STRING(pev->noise1),pActivator,this,USE_TOGGLE,0);
+			FireTargets(STRING(m_fireWhenOn),pActivator,this,USE_TOGGLE,0);
 			pev->nextthink = -1;
 		}
 		break;
@@ -320,15 +328,15 @@ void CEnvState::Think( void )
 			if (pev->target)
 			{
 				ALERT(at_console,": firing %s",STRING(pev->target));
-				if (pev->noise1)
-					ALERT(at_console," and %s",STRING(pev->noise1));
+				if (m_fireWhenOn)
+					ALERT(at_console," and %s",STRING(m_fireWhenOn));
 			}
-			else if (pev->noise1)
-				ALERT(at_console,": firing %s",STRING(pev->noise1));
+			else if (m_fireWhenOn)
+				ALERT(at_console,": firing %s",STRING(m_fireWhenOn));
 			ALERT(at_console,".\n");
 		}
 		FireTargets(STRING(pev->target),this,this,USE_ON,0);
-		FireTargets(STRING(pev->noise1),this,this,USE_TOGGLE,0);
+		FireTargets(STRING(m_fireWhenOn),this,this,USE_TOGGLE,0);
 	}
 	else if (m_iState == STATE_TURN_OFF)
 	{
@@ -338,14 +346,14 @@ void CEnvState::Think( void )
 			ALERT(at_console,"DEBUG: env_state \"%s\" turned itself off",STRING(pev->targetname));
 			if (pev->target)
 				ALERT(at_console,": firing %s",STRING(pev->target));
-				if (pev->noise2)
-					ALERT(at_console," and %s",STRING(pev->noise2));
-			else if (pev->noise2)
-				ALERT(at_console,": firing %s",STRING(pev->noise2));
+				if (m_fireWhenOff)
+					ALERT(at_console," and %s",STRING(m_fireWhenOff));
+			else if (m_fireWhenOff)
+				ALERT(at_console,": firing %s",STRING(m_fireWhenOff));
 			ALERT(at_console,".\n");
 		}
 		FireTargets(STRING(pev->target),this,this,USE_OFF,0);
-		FireTargets(STRING(pev->noise2),this,this,USE_TOGGLE,0);
+		FireTargets(STRING(m_fireWhenOff),this,this,USE_TOGGLE,0);
 	}
 }
 

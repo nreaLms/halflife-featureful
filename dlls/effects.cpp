@@ -3719,6 +3719,7 @@ void CEnvDecal::Spawn( void )
 	if (pev->impulse == 0)
 	{
 		pev->skin = DECAL_INDEX( STRING(pev->noise) );
+		pev->noise = iStringNull;
 
 		if ( pev->skin == 0 )
 			ALERT( at_console, "%s \"%s\" can't find decal \"%s\"\n", STRING(pev->classname), STRING(pev->noise) );
