@@ -353,8 +353,6 @@ public:
 
 	int m_iAutoWepSwitch;
 
-	float m_flNextChatTime;
-
 	Vector m_vecLastViewAngles;
 	float m_flNextRespawnMessageTime;
 #if FEATURE_DISPLACER

@@ -3756,7 +3756,7 @@ bool CMedic::InHealSchedule()
 void CMedic::ReportAIState(ALERT_TYPE level)
 {
 	CHFGrunt::ReportAIState(level);
-	ALERT(level, "Heal charge: %3.1f. ", m_flHealCharge);
+	ALERT(level, "Heal charge: %3.1f. ", (double)m_flHealCharge);
 }
 
 //=========================================================

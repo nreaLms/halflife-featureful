@@ -2140,7 +2140,7 @@ void CISlave::ReportAIState(ALERT_TYPE level )
 {
 	CFollowingMonster::ReportAIState(level);
 #if FEATURE_ISLAVE_ENERGY
-	ALERT(level, "Free energy: %3.1f. ", m_freeEnergy);
+	ALERT(level, "Free energy: %3.1f. ", (double)m_freeEnergy);
 #endif
 }
 

@@ -99,7 +99,7 @@ void CEagle::SecondaryAttack()
 {
 	bool wasActive = m_fEagleLaserActive;
 	m_fEagleLaserActive = !m_fEagleLaserActive;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5f;
 	if (wasActive)
 	{
 #ifndef CLIENT_DLL
@@ -120,7 +120,7 @@ void CEagle::PrimaryAttack()
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2;
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 		}
 		return;
 	}
@@ -130,7 +130,7 @@ void CEagle::PrimaryAttack()
 	{
 		UpdateSpot( );
 		PlayEmptySound( );
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase()+ 0.15;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15f;
 		return;
 	}
 
@@ -164,7 +164,7 @@ void CEagle::PrimaryAttack()
 	if (m_fEagleLaserActive)
 	{
 		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_EAGLE, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase()+ 0.5;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5f;
 #ifndef CLIENT_DLL
 		m_pEagleLaser->Suspend( 0.6 );
 #endif
@@ -173,10 +173,10 @@ void CEagle::PrimaryAttack()
 	{
 		flSpread = 0.1;
 		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector(flSpread, flSpread, flSpread), 8192, BULLET_PLAYER_EAGLE, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase()+ 0.22;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.22f;
 	}
 
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usEagle, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usEagle, 0.0f, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	// HEV suit - indicate out of ammo condition
@@ -199,15 +199,15 @@ void CEagle::Reload( void )
 #ifndef CLIENT_DLL
 		m_pEagleLaser->Suspend( 1.6 );
 #endif
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.5;
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.5f;
 	}
 
 	int iResult;
 
 	if (m_iClip == 0)
-		iResult = DefaultReload( EAGLE_MAX_CLIP, EAGLE_RELOAD, 1.5 );
+		iResult = DefaultReload( EAGLE_MAX_CLIP, EAGLE_RELOAD, 1.5f );
 	else
-		iResult = DefaultReload( EAGLE_MAX_CLIP, EAGLE_RELOAD_NOT_EMPTY, 1.5 );
+		iResult = DefaultReload( EAGLE_MAX_CLIP, EAGLE_RELOAD_NOT_EMPTY, 1.5f );
 
 	if (iResult)
 	{
@@ -260,7 +260,7 @@ void CEagle::WeaponIdle( void )
 
 		if (m_pEagleLaser)
 		{
-			if (flRand > 0.5 )
+			if (flRand > 0.5f )
 			{
 				iAnim = EAGLE_IDLE5;//Done
 				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
@@ -273,7 +273,7 @@ void CEagle::WeaponIdle( void )
 		}
 		else
 		{
-			if (flRand <= 0.3 )
+			if (flRand <= 0.3f )
 			{
 				iAnim = EAGLE_IDLE1;//Done
 				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;

@@ -13,7 +13,7 @@
 
 Task_t tlFollow[] =
 {
-	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128 },	// Move within 128 of target ent (client)
+	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128.0f },	// Move within 128 of target ent (client)
 	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_REACHED },
 };
 
@@ -59,11 +59,11 @@ Schedule_t slFaceTarget[] =
 Task_t tlMoveAway[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_MOVE_AWAY_FAIL },
-	{ TASK_STORE_LASTPOSITION, (float)0 },
-	{ TASK_MOVE_AWAY_PATH, (float)100 },
-	{ TASK_WALK_PATH_FOR_UNITS, (float)100 },
-	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_FACE_PLAYER, (float)0.5 },
+	{ TASK_STORE_LASTPOSITION, 0.0f },
+	{ TASK_MOVE_AWAY_PATH, 100.0f },
+	{ TASK_WALK_PATH_FOR_UNITS, 100.0f },
+	{ TASK_STOP_MOVING, 0.0f },
+	{ TASK_FACE_PLAYER, 0.5f },
 };
 
 Schedule_t slMoveAway[] =
@@ -79,8 +79,8 @@ Schedule_t slMoveAway[] =
 
 Task_t tlMoveAwayFail[] =
 {
-	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_FACE_PLAYER, (float)0.5 },
+	{ TASK_STOP_MOVING, 0.0f },
+	{ TASK_FACE_PLAYER, 0.5f },
 };
 
 Schedule_t slMoveAwayFail[] =
@@ -142,7 +142,7 @@ void CFollowingMonster::Touch( CBaseEntity *pOther )
 
 		// Heuristic for determining if the player is pushing me away
 		float speed = fabs( pOther->pev->velocity.x ) + fabs( pOther->pev->velocity.y );
-		if( speed > 50 )
+		if( speed > 50.0f )
 		{
 			SetConditions( bits_COND_CLIENT_PUSH );
 			MakeIdealYaw( pOther->pev->origin );
@@ -213,7 +213,7 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 			else if( FindCover( pev->origin, pev->view_ofs, 0, CoverRadius() ) )
 			{
 				// then try for plain ole cover
-				m_flMoveWaitFinished = gpGlobals->time + 2;
+				m_flMoveWaitFinished = gpGlobals->time + 2.0f;
 				TaskComplete();
 			}
 			else

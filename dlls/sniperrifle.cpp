@@ -115,7 +115,7 @@ void CSniperrifle::SecondaryAttack()
 
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/sniper_zoom.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5f;
 }
 void CSniperrifle::PrimaryAttack()
 {
@@ -127,7 +127,7 @@ void CSniperrifle::PrimaryAttack()
 		if (m_fFireOnEmpty)
 		{
 			PlayEmptySound();
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2;
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 		}
 
 		return;
@@ -137,11 +137,11 @@ void CSniperrifle::PrimaryAttack()
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound( );
-		m_flNextPrimaryAttack = 0.15;
+		m_flNextPrimaryAttack = 0.15f;
 		return;
 	}
 
-	float flSpread = 0.001;
+	float flSpread = 0.001f;
 
 	m_iClip--;
 
@@ -167,14 +167,14 @@ void CSniperrifle::PrimaryAttack()
 	Vector vecDir;
 
 	vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_762, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-	m_flNextPrimaryAttack = 1.75;
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSniper, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, ( m_iClip == 0 ) ? 1 : 0, 0, 0, 0 );
+	m_flNextPrimaryAttack = 1.75f;
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSniper, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, ( m_iClip == 0 ) ? 1 : 0, 0, 0, 0 );
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	// HEV suit - indicate out of ammo condition
 	m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 68.0 / 38.0;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 68.0f / 38.0f;
 }
 
 
@@ -192,14 +192,14 @@ void CSniperrifle::Reload( void )
 
 	if (m_iClip == 0)
 	{
-		iResult = DefaultReload( 5, SNIPER_RELOAD1, 80.0 / 34 );
+		iResult = DefaultReload( SNIPERRIFLE_MAX_CLIP, SNIPER_RELOAD1, 80.0f / 34.0f );
 		m_fInSpecialReload = 1;
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 2.25;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.25;
 	}
 	else
 	{
-		iResult = DefaultReload( SNIPERRIFLE_MAX_CLIP, SNIPER_RELOAD3, 2.25 );
+		iResult = DefaultReload( SNIPERRIFLE_MAX_CLIP, SNIPER_RELOAD3, 2.25f );
 	}
 }
 void CSniperrifle::WeaponIdle( void )
@@ -215,8 +215,8 @@ void CSniperrifle::WeaponIdle( void )
 	{
 		m_fInSpecialReload = 0;
 		SendWeaponAnim( SNIPER_RELOAD2 );
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 49.0 / 27.0;
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 49.0 / 27.0;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 49.0f / 27.0f;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 49.0f / 27.0f;
 	}
 	else
 	{
@@ -224,12 +224,12 @@ void CSniperrifle::WeaponIdle( void )
 		if (m_iClip <= 0)
 		{
 			iAnim = SNIPER_SLOWIDLE2;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 80.0 / 16.0;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 80.0f / 16.0f;
 		}
 		else
 		{
 			iAnim = SNIPER_SLOWIDLE1;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 67.5 / 16;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 67.5f / 16.0f;
 		}
 		SendWeaponAnim( iAnim, 1 );
 	}

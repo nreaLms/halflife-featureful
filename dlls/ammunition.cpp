@@ -144,7 +144,7 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 		{
 			SetTouch( NULL );
 			SetThink( &CBaseEntity::SUB_Remove );
-			pev->nextthink = gpGlobals->time + .1;
+			pev->nextthink = gpGlobals->time + 0.1f;
 		}
 	}
 	else if( gEvilImpulse101 )
@@ -152,7 +152,7 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 		// evil impulse 101 hack, kill always
 		SetTouch( NULL );
 		SetThink( &CBaseEntity::SUB_Remove );
-		pev->nextthink = gpGlobals->time + .1;
+		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 }
 

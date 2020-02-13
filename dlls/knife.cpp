@@ -114,8 +114,8 @@ void CKnife::SecondaryAttack()
 		m_flStabStart = gpGlobals->time;
 	}
 	m_iSwingMode = 1;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.3;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.3f;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.1f;
 }
 
 void CKnife::Smack()
@@ -138,7 +138,7 @@ int CKnife::Swing(int fFirst)
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecEnd = vecSrc + gpGlobals->v_forward * 32;
+	Vector vecEnd = vecSrc + gpGlobals->v_forward * 32.0f;
 
 	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
 
@@ -161,7 +161,7 @@ int CKnife::Swing(int fFirst)
 	if ( fFirst )
 	{
 		PLAYBACK_EVENT_FULL(FEV_NOTHOST, m_pPlayer->edict(), m_usKnife,
-			0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 1,
+			0.0f, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 1,
 			0, 0, 0);
 	}
 
@@ -203,7 +203,7 @@ int CKnife::Swing(int fFirst)
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
 		// play thwack, smack, or dong sound
-		float flVol = 1.0;
+		float flVol = 1.0f;
 		int fHitWorld = TRUE;
 
 		if( pEntity )
@@ -224,7 +224,7 @@ int CKnife::Swing(int fFirst)
 			else
 			{
 				// subsequent swings do half
-				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgKnife / 2, gpGlobals->v_forward, &tr, DMG_CLUB );
+				pEntity->TraceAttack( m_pPlayer->pev, gSkillData.plrDmgKnife * 0.5f, gpGlobals->v_forward, &tr, DMG_CLUB );
 			}
 			ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
 
@@ -234,10 +234,10 @@ int CKnife::Swing(int fFirst)
 				switch( RANDOM_LONG( 0, 1 ) )
 				{
 				case 0:
-					EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/knife_hit_flesh1.wav", 1, ATTN_NORM );
+					EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/knife_hit_flesh1.wav", 1.0f, ATTN_NORM );
 					break;
 				case 1:
-					EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/knife_hit_flesh2.wav", 1, ATTN_NORM );
+					EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/knife_hit_flesh2.wav", 1.0f, ATTN_NORM );
 					break;
 				}
 				m_pPlayer->m_iWeaponVolume = KNIFE_BODYHIT_VOLUME;
@@ -247,7 +247,7 @@ int CKnife::Swing(int fFirst)
 					return TRUE;
 				}
 				else
-					flVol = 0.1;
+					flVol = 0.1f;
 
 				fHitWorld = FALSE;
 			}
@@ -258,14 +258,14 @@ int CKnife::Swing(int fFirst)
 
 		if (fHitWorld)
 		{
-			float fvolbar = TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd - vecSrc) * 2, BULLET_PLAYER_CROWBAR);
+			float fvolbar = TEXTURETYPE_PlaySound(&tr, vecSrc, vecSrc + (vecEnd - vecSrc) * 2.0f, BULLET_PLAYER_CROWBAR);
 
 			if (g_pGameRules->IsMultiplayer())
 			{
 				// override the volume here, cause we don't play texture sounds in multiplayer,
 				// and fvolbar is going to be 0 from the above call.
 
-				fvolbar = 1;
+				fvolbar = 1.0f;
 			}
 
 			// also play knife strike
@@ -286,13 +286,13 @@ int CKnife::Swing(int fFirst)
 		m_pPlayer->m_iWeaponVolume = flVol * KNIFE_WALLHIT_VOLUME;
 
 		SetThink(&CKnife::Smack);
-		pev->nextthink = UTIL_WeaponTimeBase() + 0.2;
+		pev->nextthink = UTIL_WeaponTimeBase() + 0.2f;
 #endif
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25;
-		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25f;
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25f;
 	}
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5.0;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 5.0f;
 	return fDidHit;
 }
 
@@ -302,15 +302,15 @@ void CKnife::Stab()
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
 	Vector vecSrc	= m_pPlayer->GetGunPosition( );
-	Vector vecEnd	= vecSrc + gpGlobals->v_forward * 32;
+	Vector vecEnd	= vecSrc + gpGlobals->v_forward * 32.0f;
 
 	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
 
 #ifndef CLIENT_DLL
-	if ( tr.flFraction >= 1.0 )
+	if ( tr.flFraction >= 1.0f )
 	{
 		UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT( m_pPlayer->pev ), &tr );
-		if ( tr.flFraction < 1.0 )
+		if ( tr.flFraction < 1.0f )
 		{
 			// Calculate the point of intersection of the line (or hull) and the object we hit
 			// This is and approximation of the "best" intersection
@@ -328,7 +328,7 @@ void CKnife::Stab()
 		(float*)&g_vecZero,
 		0, 0, 0, 0, 0, 0 );
 
-	if ( tr.flFraction >= 1.0 )
+	if ( tr.flFraction >= 1.0f )
 	{
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -348,9 +348,9 @@ void CKnife::Stab()
 		if( pEntity )
 		{
 			ClearMultiDamage();
-			float flDamage = (gpGlobals->time - m_flStabStart) * gSkillData.plrDmgKnife + gSkillData.plrDmgKnife*2;
-			if (flDamage > 100) {
-				flDamage = 100;
+			float flDamage = (gpGlobals->time - m_flStabStart) * gSkillData.plrDmgKnife + gSkillData.plrDmgKnife*2.0f;
+			if (flDamage > 100.0f) {
+				flDamage = 100.0f;
 			}
 			pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_CLUB|DMG_NEVERGIB);
 
@@ -358,7 +358,7 @@ void CKnife::Stab()
 		}
 
 		// play thwack, smack, or dong sound
-		float flVol = 1.0;
+		float flVol = 1.0f;
 		int fHitWorld = TRUE;
 
 		if (pEntity)
@@ -369,17 +369,17 @@ void CKnife::Stab()
 				switch( RANDOM_LONG(0,1) )
 				{
 				case 0:
-					EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh1.wav", 1, ATTN_NORM);
+					EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh1.wav", 1.0f, ATTN_NORM);
 					break;
 				case 1:
-					EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh2.wav", 1, ATTN_NORM);
+					EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/knife_hit_flesh2.wav", 1.0f, ATTN_NORM);
 					break;
 				}
 				m_pPlayer->m_iWeaponVolume = KNIFE_BODYHIT_VOLUME;
 				if ( !pEntity->IsAlive() )
 					  return;
 				else
-					  flVol = 0.1;
+					  flVol = 0.1f;
 
 				fHitWorld = false;
 			}
@@ -395,7 +395,7 @@ void CKnife::Stab()
 				// override the volume here, cause we don't play texture sounds in multiplayer,
 				// and fvolbar is going to be 0 from the above call.
 
-				fvolbar = 1;
+				fvolbar = 1.0f;
 			}
 
 			switch( RANDOM_LONG(0,1) )
@@ -421,15 +421,15 @@ void CKnife::WeaponIdle( void )
 {
 	if ( m_iSwingMode == 1 )
 	{
-		if ( gpGlobals->time > m_flStabStart + 0.8 )
+		if ( gpGlobals->time > m_flStabStart + 0.8f )
 		{
 			m_iSwingMode = 2;
 		}
 	}
 	else if (m_iSwingMode == 2)
 	{
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.9;
-		m_flNextSecondaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.9f;
+		m_flNextSecondaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0f;
 		Stab();
 		m_iSwingMode = 0;
 		return;
@@ -441,22 +441,22 @@ void CKnife::WeaponIdle( void )
 			return;
 		int iAnim;
 		float flRand = UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, 1 );
-		if( flRand > 0.9 )
+		if( flRand > 0.9f )
 		{
 			iAnim = KNIFE_IDLE2;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 160.0 / 30.0;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 160.0f / 30.0f;
 		}
 		else
 		{
-			if( flRand > 0.5 )
+			if( flRand > 0.5f )
 			{
 				iAnim = KNIFE_IDLE1;
-				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 70.0 / 25.0;
+				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 70.0f / 25.0f;
 			}
 			else
 			{
 				iAnim = KNIFE_IDLE3;
-				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 160.0 / 30.0;
+				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 160.0f / 30.0f;
 			}
 		}
 		SendWeaponAnim( iAnim );
