@@ -330,7 +330,7 @@ public:
 	float m_flPlayAftershock;
 	float m_flNextAmmoBurn;// while charging, when to absorb another unit of player's ammo?
 
-	//Player ID
+	// Player ID
 	void InitStatusBar( void );
 	void UpdateStatusBar( void );
 
@@ -347,7 +347,14 @@ public:
 	int m_lastSeenHealth;
 	int m_lastSeenArmor;
 
+	void SetPrefsFromUserinfo( char *infobuffer );
+
 	float m_flNextChatTime;
+
+	int m_iAutoWepSwitch;
+
+	float m_flNextChatTime;
+
 	Vector m_vecLastViewAngles;
 	float m_flNextRespawnMessageTime;
 #if FEATURE_DISPLACER

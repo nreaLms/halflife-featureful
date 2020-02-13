@@ -221,7 +221,7 @@ void CBarney::AlertSound( void )
 	{
 		if( FOkToSpeak() )
 		{
-			PlaySentence( "BA_ATTACK", RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_IDLE );
+			PlaySentence( "BA_ATTACK", RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 		}
 	}
 }
@@ -260,22 +260,22 @@ void CBarney::SetYawSpeed( void )
 //=========================================================
 BOOL CBarney::CheckRangeAttack1( float flDot, float flDist )
 {
-	if( flDist <= 1024 && flDot >= 0.5 )
+	if( flDist <= 1024.0f && flDot >= 0.5f )
 	{
 		if( gpGlobals->time > m_checkAttackTime )
 		{
 			TraceResult tr;
 
-			Vector shootOrigin = pev->origin + Vector( 0, 0, 55 );
+			Vector shootOrigin = pev->origin + Vector( 0.0f, 0.0f, 55.0f );
 			CBaseEntity *pEnemy = m_hEnemy;
 			Vector shootTarget = ( ( pEnemy->BodyTarget( shootOrigin ) - pEnemy->pev->origin ) + m_vecEnemyLKP );
 			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ENT( pev ), &tr );
-			m_checkAttackTime = gpGlobals->time + 1;
-			if( tr.flFraction == 1.0 || ( tr.pHit != NULL && CBaseEntity::Instance( tr.pHit ) == pEnemy ) )
+			m_checkAttackTime = gpGlobals->time + 1.0f;
+			if( tr.flFraction == 1.0f || ( tr.pHit != NULL && CBaseEntity::Instance( tr.pHit ) == pEnemy ) )
 				m_lastAttackCheck = TRUE;
 			else
 				m_lastAttackCheck = FALSE;
-			m_checkAttackTime = gpGlobals->time + 1.5;
+			m_checkAttackTime = gpGlobals->time + 1.5f;
 		}
 		return m_lastAttackCheck;
 	}
@@ -307,9 +307,9 @@ void CBarney::BarneyFirePistol( const char* shotSound, Bullet bullet )
 		pitchShift = 0;
 	else
 		pitchShift -= 5;
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, shotSound, 1, ATTN_NORM, 0, 100 + pitchShift );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, shotSound, 1.0f, ATTN_NORM, 0, 100 + pitchShift );
 
-	CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
+	CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 384, 0.3f );
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
@@ -357,7 +357,7 @@ void CBarney::SpawnImpl(const char* modelName, float health)
 	pev->movetype = MOVETYPE_STEP;
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	SetMyHealth( health );
-	pev->view_ofs = Vector ( 0, 0, 50 );// position of the eyes relative to monster's origin.
+	pev->view_ofs = Vector ( 0.0f, 0.0f, 50.0f );// position of the eyes relative to monster's origin.
 	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_HackedGunPos = Vector ( 0, 0, 55 );
@@ -467,18 +467,18 @@ void CBarney::PainSound( void )
 	if( gpGlobals->time < m_painTime )
 		return;
 
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
+	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
 
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain2.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 2:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain3.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	}
 }
@@ -491,10 +491,10 @@ void CBarney::DeathSound( void )
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die2.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 2:
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
@@ -510,17 +510,17 @@ void CBarney::TraceAttackImpl( entvars_t *pevAttacker, float flDamage, Vector ve
 	case HITGROUP_STOMACH:
 		if (bitsDamageType & ( DMG_BULLET | DMG_SLASH | DMG_BLAST ) )
 		{
-			flDamage = flDamage / 2;
+			flDamage = flDamage * 0.5f;
 		}
 		break;
 	case 10:
 		if( (bitsDamageType & ( DMG_BULLET | DMG_SLASH | DMG_CLUB )) && hasHelmet )
 		{
-			flDamage -= 20;
-			if( flDamage <= 0 )
+			flDamage -= 20.0f;
+			if( flDamage <= 0.0f )
 			{
-				UTIL_Ricochet( ptr->vecEndPos, 1.0 );
-				flDamage = 0.01;
+				UTIL_Ricochet( ptr->vecEndPos, 1.0f );
+				flDamage = 0.01f;
 			}
 		}
 

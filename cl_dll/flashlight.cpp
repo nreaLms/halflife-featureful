@@ -55,7 +55,7 @@ void CHudFlashlight::Reset( void )
 	m_fFade = 0;
 	m_fOn = 0;
 	m_iBat = 100;
-	m_flBat = 1.0;
+	m_flBat = 1.0f;
 }
 
 int CHudFlashlight::VidInit( void )
@@ -80,7 +80,7 @@ int CHudFlashlight::MsgFunc_FlashBat( const char *pszName,  int iSize, void *pbu
 	BEGIN_READ( pbuf, iSize );
 	int x = READ_BYTE();
 	m_iBat = x;
-	m_flBat = ( (float)x ) / 100.0;
+	m_flBat = ( (float)x ) / 100.0f;
 
 	return 1;
 }
@@ -91,7 +91,7 @@ int CHudFlashlight::MsgFunc_Flashlight( const char *pszName,  int iSize, void *p
 	m_fOn = READ_BYTE();
 	int x = READ_BYTE();
 	m_iBat = x;
-	m_flBat = ( (float)x ) / 100.0;
+	m_flBat = ( (float)x ) / 100.0f;
 
 	return 1;
 }
@@ -131,7 +131,7 @@ int CHudFlashlight::Draw( float flTime )
 	else
 		a = MIN_ALPHA;
 
-	if( m_flBat < 0.20 )
+	if( m_flBat < 0.20f )
 		UnpackRGB( r,g,b, RGB_REDISH );
 	else
 		UnpackRGB( r,g,b, gHUD.m_iHUDColor );
@@ -156,7 +156,7 @@ int CHudFlashlight::Draw( float flTime )
 
 	// draw the flashlight energy level
 	x = ScreenWidth - m_iWidth - m_iWidth / 2;
-	int iOffset = m_iWidth * ( 1.0 - m_flBat );
+	int iOffset = m_iWidth * ( 1.0f - m_flBat );
 	if( iOffset < m_iWidth )
 	{
 		rc = *m_prc2;

@@ -314,7 +314,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
-			m_flSoundTime = gpGlobals->time + 0.62;
+			m_flSoundTime = gpGlobals->time + 0.62f;
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeno1.wav", 0.85, ATTN_NORM );
 		}
 		return;
@@ -332,7 +332,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 	else
 	{
-		m_goToOffTime = gpGlobals->time + 0.25;
+		m_goToOffTime = gpGlobals->time + 0.25f;
 	}
 
 	// Time to recharge yet?
@@ -342,7 +342,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	TurnChargeToPlayer(pActivator->pev->origin);
 	switch (m_iState) {
 	case Idle:
-		m_flSoundTime = 0.56 + gpGlobals->time;
+		m_flSoundTime = 0.56f + gpGlobals->time;
 		SetChargeState(GiveShot);
 		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1.0, ATTN_NORM );
 		break;
@@ -382,7 +382,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	// govern the rate of charge
-	m_flNextCharge = gpGlobals->time + 0.1;
+	m_flNextCharge = gpGlobals->time + 0.1f;
 }
 
 void CRechargeDecay::Recharge( void )

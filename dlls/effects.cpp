@@ -90,7 +90,7 @@ void CBubbling::Spawn( void )
 	if( !( pev->spawnflags & SF_BUBBLES_STARTOFF ) )
 	{
 		SetThink( &CBubbling::FizzThink );
-		pev->nextthink = gpGlobals->time + 2.0;
+		pev->nextthink = gpGlobals->time + 2.0f;
 		m_state = 1;
 	}
 	else 
@@ -110,7 +110,7 @@ void CBubbling::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	if( m_state )
 	{
 		SetThink( &CBubbling::FizzThink );
-		pev->nextthink = gpGlobals->time + 0.1;
+		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 	else
 	{
@@ -150,9 +150,9 @@ void CBubbling::FizzThink( void )
 	MESSAGE_END();
 
 	if( m_frequency > 19 )
-		pev->nextthink = gpGlobals->time + 0.5;
+		pev->nextthink = gpGlobals->time + 0.5f;
 	else
-		pev->nextthink = gpGlobals->time + 2.5 - ( 0.1 * m_frequency );
+		pev->nextthink = gpGlobals->time + 2.5f - ( 0.1f * m_frequency );
 }
 
 // --------------------------------------------------
@@ -458,7 +458,7 @@ void CLightning::Spawn( void )
 		if( pev->dmg > 0 )
 		{
 			SetThink( &CLightning::DamageThink );
-			pev->nextthink = gpGlobals->time + 0.1;
+			pev->nextthink = gpGlobals->time + 0.1f;
 		}
 		if( pev->targetname )
 		{
@@ -484,7 +484,7 @@ void CLightning::Spawn( void )
 		if( FStringNull( pev->targetname ) || FBitSet( pev->spawnflags, SF_BEAM_STARTON ) )
 		{
 			SetThink( &CLightning::StrikeThink );
-			pev->nextthink = gpGlobals->time + 1.0;
+			pev->nextthink = gpGlobals->time + 1.0f;
 		}
 	}
 }
@@ -598,7 +598,7 @@ void CLightning::StrikeUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	else
 	{
 		SetThink( &CLightning::StrikeThink );
-		pev->nextthink = gpGlobals->time + 0.1;
+		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 
 	if( !FBitSet( pev->spawnflags, SF_BEAM_TOGGLE ) )
@@ -620,7 +620,7 @@ void CLightning::StrikeThink( void )
 	if( m_life != 0 )
 	{
 		if( pev->spawnflags & SF_BEAM_RANDOM )
-			pev->nextthink = gpGlobals->time + m_life + RANDOM_FLOAT( 0, m_restrike );
+			pev->nextthink = gpGlobals->time + m_life + RANDOM_FLOAT( 0.0f, m_restrike );
 		else
 			pev->nextthink = gpGlobals->time + m_life + m_restrike;
 	}
@@ -700,7 +700,7 @@ void CLightning::StrikeThink( void )
 			WRITE_SHORT( m_spriteTexture );
 			WRITE_BYTE( m_frameStart ); // framestart
 			WRITE_BYTE( (int)pev->framerate ); // framerate
-			WRITE_BYTE( (int)( m_life * 10.0 ) ); // life
+			WRITE_BYTE( (int)( m_life * 10.0f ) ); // life
 			WRITE_BYTE( m_boltWidth );  // width
 			WRITE_BYTE( m_noiseAmplitude );   // noise
 			WRITE_BYTE( (int)pev->rendercolor.x );   // r, g, b
@@ -722,7 +722,7 @@ void CLightning::StrikeThink( void )
 void CBeam::BeamDamage(TraceResult *ptr , entvars_t *pevAttacker)
 {
 	RelinkBeam();
-	if( ptr->flFraction != 1.0 && ptr->pHit != NULL )
+	if( ptr->flFraction != 1.0f && ptr->pHit != NULL )
 	{
 		CBaseEntity *pHit = CBaseEntity::Instance( ptr->pHit );
 		if( pHit )
@@ -742,7 +742,7 @@ void CBeam::BeamDamage(TraceResult *ptr , entvars_t *pevAttacker)
 
 void CLightning::DamageThink( void )
 {
-	pev->nextthink = gpGlobals->time + 0.1;
+	pev->nextthink = gpGlobals->time + 0.1f;
 	TraceResult tr;
 	UTIL_TraceLine( GetStartPos(), GetEndPos(), dont_ignore_monsters, NULL, &tr );
 	BeamDamage( &tr );
@@ -762,7 +762,7 @@ void CLightning::Zap( const Vector &vecSrc, const Vector &vecDest )
 		WRITE_SHORT( m_spriteTexture );
 		WRITE_BYTE( m_frameStart ); // framestart
 		WRITE_BYTE( (int)pev->framerate ); // framerate
-		WRITE_BYTE( (int)( m_life * 10.0) ); // life
+		WRITE_BYTE( (int)( m_life * 10.0f ) ); // life
 		WRITE_BYTE( m_boltWidth );  // width
 		WRITE_BYTE( m_noiseAmplitude );   // noise
 		WRITE_BYTE( (int)pev->rendercolor.x );   // r, g, b
@@ -797,32 +797,32 @@ void CLightning::RandomArea( void )
 	{
 		Vector vecSrc = pev->origin;
 
-		Vector vecDir1 = Vector( RANDOM_FLOAT( -1.0, 1.0 ), RANDOM_FLOAT( -1.0, 1.0 ),RANDOM_FLOAT( -1.0, 1.0 ) );
+		Vector vecDir1 = Vector( RANDOM_FLOAT( -1.0f, 1.0f ), RANDOM_FLOAT( -1.0f, 1.0f ),RANDOM_FLOAT( -1.0f, 1.0f ) );
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
 		UTIL_TraceLine( vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, ENT( pev ), &tr1 );
 
-		if( tr1.flFraction == 1.0 )
+		if( tr1.flFraction == 1.0f )
 			continue;
 
 		Vector vecDir2;
 		do
 		{
-			vecDir2 = Vector( RANDOM_FLOAT( -1.0, 1.0 ), RANDOM_FLOAT( -1.0, 1.0 ),RANDOM_FLOAT( -1.0, 1.0 ) );
-		} while( DotProduct( vecDir1, vecDir2 ) > 0 );
+			vecDir2 = Vector( RANDOM_FLOAT( -1.0f, 1.0f ), RANDOM_FLOAT( -1.0f, 1.0f ),RANDOM_FLOAT( -1.0f, 1.0f ) );
+		} while( DotProduct( vecDir1, vecDir2 ) > 0.0f );
 		vecDir2 = vecDir2.Normalize();
 		TraceResult tr2;
 		UTIL_TraceLine( vecSrc, vecSrc + vecDir2 * m_radius, ignore_monsters, ENT( pev ), &tr2 );
 
-		if( tr2.flFraction == 1.0 )
+		if( tr2.flFraction == 1.0f )
 			continue;
 
-		if( ( tr1.vecEndPos - tr2.vecEndPos ).Length() < m_radius * 0.1 )
+		if( ( tr1.vecEndPos - tr2.vecEndPos ).Length() < m_radius * 0.1f )
 			continue;
 
 		UTIL_TraceLine( tr1.vecEndPos, tr2.vecEndPos, ignore_monsters, ENT( pev ), &tr2 );
 
-		if( tr2.flFraction != 1.0 )
+		if( tr2.flFraction != 1.0f )
 			continue;
 
 		Zap( tr1.vecEndPos, tr2.vecEndPos );
@@ -837,15 +837,15 @@ void CLightning::RandomPoint( Vector &vecSrc )
 
 	for( iLoops = 0; iLoops < 10; iLoops++ )
 	{
-		Vector vecDir1 = Vector( RANDOM_FLOAT( -1.0, 1.0 ), RANDOM_FLOAT( -1.0, 1.0 ),RANDOM_FLOAT( -1.0, 1.0 ) );
+		Vector vecDir1 = Vector( RANDOM_FLOAT( -1.0f, 1.0f ), RANDOM_FLOAT( -1.0f, 1.0f ), RANDOM_FLOAT( -1.0f, 1.0f ) );
 		vecDir1 = vecDir1.Normalize();
 		TraceResult tr1;
 		UTIL_TraceLine( vecSrc, vecSrc + vecDir1 * m_radius, ignore_monsters, ENT( pev ), &tr1 );
 
-		if( ( tr1.vecEndPos - vecSrc ).Length() < m_radius * 0.1 )
+		if( ( tr1.vecEndPos - vecSrc ).Length() < m_radius * 0.1f )
 			continue;
 
-		if( tr1.flFraction == 1.0 )
+		if( tr1.flFraction == 1.0f )
 			continue;
 
 		Zap( vecSrc, tr1.vecEndPos );
@@ -1071,7 +1071,7 @@ void CLaser::StrikeThink( void )
 
 	UTIL_TraceLine( pev->origin, m_firePosition, dont_ignore_monsters, NULL, &tr );
 	FireAtPoint( tr );
-	pev->nextthink = gpGlobals->time + 0.1;
+	pev->nextthink = gpGlobals->time + 0.1f;
 }
 
 class CGlow : public CPointEntity
@@ -1109,8 +1109,8 @@ void CGlow::Spawn( void )
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );
 
 	m_maxFrame = (float) MODEL_FRAMES( pev->modelindex ) - 1;
-	if( m_maxFrame > 1.0 && pev->framerate != 0 )
-		pev->nextthink	= gpGlobals->time + 0.1;
+	if( m_maxFrame > 1.0f && pev->framerate != 0 )
+		pev->nextthink	= gpGlobals->time + 0.1f;
 
 	m_lastTime = gpGlobals->time;
 }
@@ -1119,7 +1119,7 @@ void CGlow::Think( void )
 {
 	Animate( pev->framerate * ( gpGlobals->time - m_lastTime ) );
 
-	pev->nextthink = gpGlobals->time + 0.1;
+	pev->nextthink = gpGlobals->time + 0.1f;
 	m_lastTime = gpGlobals->time;
 }
 
@@ -1212,7 +1212,7 @@ void CSprite::AnimateThink( void )
 {
 	Animate( pev->framerate * ( gpGlobals->time - m_lastTime ) );
 
-	pev->nextthink = gpGlobals->time + 0.1;
+	pev->nextthink = gpGlobals->time + 0.1f;
 	m_lastTime = gpGlobals->time;
 }
 
@@ -1249,7 +1249,7 @@ void CSprite::ExpandThink( void )
 	}
 	else
 	{
-		pev->nextthink = gpGlobals->time + 0.1;
+		pev->nextthink = gpGlobals->time + 0.1f;
 		m_lastTime = gpGlobals->time;
 	}
 }
@@ -1280,7 +1280,7 @@ void CSprite::TurnOff( void )
 void CSprite::TurnOn( void )
 {
 	pev->effects = 0;
-	if( ( pev->framerate && m_maxFrame > 1.0 ) || ( pev->spawnflags & SF_SPRITE_ONCE ) )
+	if( ( pev->framerate && m_maxFrame > 1.0f ) || ( pev->spawnflags & SF_SPRITE_ONCE ) )
 	{
 		SetThink( &CSprite::AnimateThink );
 		pev->nextthink = gpGlobals->time;
@@ -1704,9 +1704,9 @@ void CGibShooter::ShootThink( void )
 	{
 		Vector vecShootDir = baseShootDir;
 
-		vecShootDir = vecShootDir + gpGlobals->v_right * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
-		vecShootDir = vecShootDir + gpGlobals->v_forward * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
-		vecShootDir = vecShootDir + gpGlobals->v_up * RANDOM_FLOAT( -1, 1 ) * m_flVariance;;
+		vecShootDir = vecShootDir + gpGlobals->v_right * RANDOM_FLOAT( -1.0f, 1.0f ) * m_flVariance;;
+		vecShootDir = vecShootDir + gpGlobals->v_forward * RANDOM_FLOAT( -1.0f, 1.0f ) * m_flVariance;;
+		vecShootDir = vecShootDir + gpGlobals->v_up * RANDOM_FLOAT( -1.0f, 1.0f ) * m_flVariance;;
 
 		vecShootDir = vecShootDir.Normalize();
 
@@ -1717,12 +1717,12 @@ void CGibShooter::ShootThink( void )
 			pGib->pev->origin = vecPos;
 			pGib->pev->velocity = vecShootDir * flGibVelocity;
 
-			pGib->pev->avelocity.x = RANDOM_FLOAT( 100, 200 );
-			pGib->pev->avelocity.y = RANDOM_FLOAT( 100, 300 );
+			pGib->pev->avelocity.x = RANDOM_FLOAT( 100.0f, 200.0f );
+			pGib->pev->avelocity.y = RANDOM_FLOAT( 100.0f, 300.0f );
 
 			float thinkTime = pGib->pev->nextthink - gpGlobals->time;
 
-			pGib->m_lifeTime = ( m_flGibLife * RANDOM_FLOAT( 0.95, 1.05 ) );	// +/- 5%
+			pGib->m_lifeTime = ( m_flGibLife * RANDOM_FLOAT( 0.95f, 1.05f ) );	// +/- 5%
 			if( pGib->m_lifeTime < thinkTime )
 			{
 				pGib->pev->nextthink = gpGlobals->time + pGib->m_lifeTime;
@@ -1895,7 +1895,7 @@ void CTestEffect::TestThink( void )
 		TraceResult tr;
 
 		Vector vecSrc = pev->origin;
-		Vector vecDir = Vector( RANDOM_FLOAT( -1.0, 1.0 ), RANDOM_FLOAT( -1.0, 1.0 ),RANDOM_FLOAT( -1.0, 1.0 ) );
+		Vector vecDir = Vector( RANDOM_FLOAT( -1.0f, 1.0f ), RANDOM_FLOAT( -1.0f, 1.0f ),RANDOM_FLOAT( -1.0f, 1.0f ) );
 		vecDir = vecDir.Normalize();
 		UTIL_TraceLine( vecSrc, vecSrc + vecDir * 128, ignore_monsters, ENT( pev ), &tr );
 
@@ -1909,7 +1909,7 @@ void CTestEffect::TestThink( void )
 		m_pBeam[m_iBeam] = pbeam;
 		m_iBeam++;
 #if 0
-		Vector vecMid = ( vecSrc + tr.vecEndPos ) * 0.5;
+		Vector vecMid = ( vecSrc + tr.vecEndPos ) * 0.5f;
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_DLIGHT );
 			WRITE_COORD( vecMid.x );	// X
@@ -1925,15 +1925,15 @@ void CTestEffect::TestThink( void )
 #endif
 	}
 
-	if( t < 3.0 )
+	if( t < 3.0f )
 	{
 		for( i = 0; i < m_iBeam; i++ )
 		{
-			t = ( gpGlobals->time - m_flBeamTime[i] ) / ( 3 + m_flStartTime - m_flBeamTime[i] );
-			m_pBeam[i]->SetBrightness( (int)( 255 * t ) );
+			t = ( gpGlobals->time - m_flBeamTime[i] ) / ( 3.0f + m_flStartTime - m_flBeamTime[i] );
+			m_pBeam[i]->SetBrightness( (int)( 255.0f * t ) );
 			// m_pBeam[i]->SetScrollRate( 20 * t );
 		}
-		pev->nextthink = gpGlobals->time + 0.1;
+		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 	else
 	{
@@ -1951,7 +1951,7 @@ void CTestEffect::TestThink( void )
 void CTestEffect::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	SetThink( &CTestEffect::TestThink );
-	pev->nextthink = gpGlobals->time + 0.1;
+	pev->nextthink = gpGlobals->time + 0.1f;
 	m_flStartTime = gpGlobals->time;
 }
 
@@ -2053,7 +2053,7 @@ Vector CBlood::BloodPosition( CBaseEntity *pActivator )
 		else
 			pPlayer = g_engfuncs.pfnPEntityOfEntIndex( 1 );
 		if( pPlayer )
-			return( pPlayer->v.origin + pPlayer->v.view_ofs ) + Vector( RANDOM_FLOAT( -10, 10 ), RANDOM_FLOAT( -10, 10 ), RANDOM_FLOAT( -10, 10 ) );
+			return( pPlayer->v.origin + pPlayer->v.view_ofs ) + Vector( RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ) );
 	}
 	else if (pev->target)
 	{
@@ -2077,7 +2077,7 @@ void CBlood::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 		TraceResult tr;
 
 		UTIL_TraceLine( start, start + forward * BloodAmount() * 2, ignore_monsters, NULL, &tr );
-		if( tr.flFraction != 1.0 )
+		if( tr.flFraction != 1.0f )
 			UTIL_BloodDecalTrace( &tr, Color() );
 	}
 }
@@ -2330,8 +2330,8 @@ void CMessage::Spawn( void )
 	pev->impulse = 0;
 
 	// No volume, use normal
-	if( pev->scale <= 0 )
-		pev->scale = 1.0;
+	if( pev->scale <= 0.0f )
+		pev->scale = 1.0f;
 }
 
 void CMessage::Precache( void )
@@ -2579,7 +2579,7 @@ void CItemSoda::Spawn( void )
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	
 	SetThink( &CItemSoda::CanThink );
-	pev->nextthink = gpGlobals->time + 0.5;
+	pev->nextthink = gpGlobals->time + 0.5f;
 }
 
 void CItemSoda::CanThink( void )

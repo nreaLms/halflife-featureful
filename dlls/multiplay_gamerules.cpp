@@ -635,6 +635,11 @@ BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerW
 		return TRUE;
 	}
 
+	if( !pPlayer->m_iAutoWepSwitch )
+	{
+		return FALSE;
+	}
+
 	if( !pPlayer->m_pActiveItem->CanHolster() )
 	{
 		// can't put away the active item.
