@@ -542,7 +542,7 @@ void CStrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDi
 
 void CStrooper::DropShockRoach(bool gibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		Vector	vecGunPos;
 		Vector	vecGunAngles;

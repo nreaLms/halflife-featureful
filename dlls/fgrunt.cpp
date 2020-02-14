@@ -1148,7 +1148,7 @@ void CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const
 
 void CHFGrunt::DropMyItems(BOOL isGibbed)
 {
-	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;
@@ -2958,7 +2958,7 @@ void CTorch::GibMonster()
 
 void CTorch::DropMyItems(BOOL isGibbed)
 {
-	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		if (!isGibbed) {
 			pev->body = TORCH_GUN_NONE;
@@ -3620,7 +3620,7 @@ void CMedic::GibMonster()
 
 void CMedic::DropMyItems(BOOL isGibbed)
 {
-	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		if (!isGibbed) {
 			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );

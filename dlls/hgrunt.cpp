@@ -221,7 +221,7 @@ void CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const 
 
 void CHGrunt::DropMyItems(BOOL isGibbed)
 {
-	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GRUN))
+	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		Vector vecGunPos;
 		Vector vecGunAngles;
@@ -2344,7 +2344,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 
 	const int knownFlags =
 			SF_MONSTER_GAG | SF_MONSTER_HITMONSTERCLIP | SF_MONSTER_PRISONER |
-			SF_MONSTER_DONT_DROP_GRUN | SF_SQUADMONSTER_LEADER | SF_MONSTER_PREDISASTER;
+			SF_MONSTER_DONT_DROP_GUN | SF_SQUADMONSTER_LEADER | SF_MONSTER_PREDISASTER;
 	const int flagsToSet = knownFlags & pev->spawnflags;
 	SetBits(pEntity->pev->spawnflags, flagsToSet);
 

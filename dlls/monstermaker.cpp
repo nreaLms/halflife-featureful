@@ -381,7 +381,7 @@ int CMonsterMaker::MakeMonster( void )
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PREDISASTER ))
 			SetBits( pevCreate->spawnflags, SF_MONSTER_PREDISASTER );
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_DONT_DROP_GUN))
-			SetBits(pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GRUN);
+			SetBits(pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GUN);
 		if (m_gag > 0)
 			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
 		pevCreate->weapons = pev->weapons;

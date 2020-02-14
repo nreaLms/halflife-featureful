@@ -52,7 +52,7 @@
 #define SF_MONSTER_NO_YELLOW_BLOBS_SPIRIT 128 // Wait for script is not used anyway. Add compatibility with spirit.
 #define SF_MONSTER_PREDISASTER			256	//this is a predisaster scientist or barney. Influences how they speak.
 #define SF_MONSTER_FADECORPSE			512 // Fade out corpse after death
-#define SF_MONSTER_DONT_DROP_GRUN		1024
+#define SF_MONSTER_DONT_DROP_GUN		1024
 #define SF_MONSTER_NO_YELLOW_BLOBS		8192
 #define SF_MONSTER_NONSOLID_CORPSE		65536
 #define SF_MONSTER_FALL_TO_GROUND		0x80000000
