@@ -556,7 +556,7 @@ void CBigMomma::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecD
 
 		flDamage = 0.1f;// don't hurt the monster much, but allow bits_COND_LIGHT_DAMAGE to be generated
 	}
-	else if( gpGlobals->time > m_painSoundTime )
+	else if( !HasMemory(bits_MEMORY_KILLED) && gpGlobals->time > m_painSoundTime )
 	{
 		m_painSoundTime = gpGlobals->time + RANDOM_LONG( 1, 3 );
 		EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pPainSounds );
