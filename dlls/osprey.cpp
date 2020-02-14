@@ -24,7 +24,7 @@
 #include "customentity.h"
 #include "mod_features.h"
 
-#define SF_OSPREY_DONT_DEPLOY (1 << 15)
+#define SF_OSPREY_DONT_DEPLOY SF_MONSTER_SPECIAL_FLAG
 
 typedef struct 
 {

@@ -37,8 +37,8 @@
 #define		NUM_SCIENTIST_BODIES 4
 #endif
 
-#define SF_SCI_DONT_STOP_FOLLOWING (1 << 15)
-#define SF_SCI_SITTING_DONT_DROP (1 << 15) // Don't drop to the floor. We can re-use the same value as sitting scientists can't follow
+#define SF_SCI_DONT_STOP_FOLLOWING SF_MONSTER_SPECIAL_FLAG
+#define SF_SCI_SITTING_DONT_DROP SF_MONSTER_SPECIAL_FLAG // Don't drop to the floor. We can re-use the same value as sitting scientists can't follow
 
 enum
 {

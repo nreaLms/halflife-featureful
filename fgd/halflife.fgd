@@ -3031,6 +3031,7 @@
 	spawnflags(Flags) =
 	[
 		1024: "No Babycrabs" : 0
+		32768: "Monsterclip Babycrabs" : 0
 	]
 ]
 

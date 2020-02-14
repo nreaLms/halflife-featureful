@@ -30,6 +30,7 @@
 #define SF_INFOBM_WAIT		0x0002
 
 #define SF_BIGMOM_NOBABYCRABS SF_MONSTER_DONT_DROP_GUN
+#define SF_MONSTERCLIP_BABYCRABS SF_MONSTER_SPECIAL_FLAG
 
 // AI Nodes for Big Momma
 class CInfoBM : public CPointEntity
@@ -604,6 +605,9 @@ void CBigMomma::LayHeadcrab( void )
 	}
 
 	pChild->pev->spawnflags |= SF_MONSTER_FALL_TO_GROUND;
+
+	if (FBitSet(pev->spawnflags, SF_MONSTERCLIP_BABYCRABS))
+		pChild->pev->spawnflags |= SF_MONSTER_HITMONSTERCLIP;
 
 	// Is this the second crab in a pair?
 	if( HasMemory( bits_MEMORY_CHILDPAIR ) )
