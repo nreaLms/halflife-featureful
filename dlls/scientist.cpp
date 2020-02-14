@@ -1163,7 +1163,7 @@ void CScientist::ReportAIState(ALERT_TYPE level)
 	}
 	else
 	{
-		ALERT(level, "Can heal in %3.1f seconds. ", m_healTime - gpGlobals->time);
+		ALERT(level, "Can heal in %3.1f seconds. ", (double)(m_healTime - gpGlobals->time));
 	}
 }
 

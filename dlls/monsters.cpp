@@ -3261,14 +3261,73 @@ int CBaseMonster::FindHintNode( void )
 	return NO_NODE;
 }		
 
+static const char* ClassifyDisplayName(int classify)
+{
+	switch (classify) {
+	case CLASS_NONE:
+		return "None";
+	case CLASS_MACHINE:
+		return "Machine";
+	case CLASS_PLAYER:
+		return "Player";
+	case CLASS_HUMAN_PASSIVE:
+		return "Human Passive";
+	case CLASS_HUMAN_MILITARY:
+		return "Human Military";
+	case CLASS_ALIEN_MILITARY:
+		return "Alien Military";
+	case CLASS_ALIEN_PASSIVE:
+		return "Alien Passive";
+	case CLASS_ALIEN_MONSTER:
+		return "Alien Monster";
+	case CLASS_ALIEN_PREY:
+		return "Alien Prey";
+	case CLASS_ALIEN_PREDATOR:
+		return "Alien Predator";
+	case CLASS_INSECT:
+		return "Insect";
+	case CLASS_PLAYER_ALLY:
+		return "Player Ally";
+	case CLASS_PLAYER_BIOWEAPON:
+		return "Player Bioweapon";
+	case CLASS_ALIEN_BIOWEAPON:
+		return "Alien Bioweapon";
+	case CLASS_RACEX_PREDATOR:
+		return "Race X Predator";
+	case CLASS_RACEX_SHOCK:
+		return "Race X Shock";
+	case CLASS_PLAYER_ALLY_MILITARY:
+		return "Player Ally Military";
+	case CLASS_HUMAN_BLACKOPS:
+		return "Human Blackops";
+	case CLASS_SNARK:
+		return "Snark";
+	case CLASS_GARGANTUA:
+		return "Gargantua";
+	default:
+		return "Unknown";
+	}
+}
+
 void CBaseMonster::ReportAIState( ALERT_TYPE level )
 {
-	static const char *pStateNames[] = { "None", "Idle", "Combat", "Alert", "Hunt", "Prone", "Scripted", "Dead" };
+	static const char *pStateNames[] = { "None", "Idle", "Combat", "Alert", "Hunt", "Prone", "Scripted", "PlayDead", "Dead" };
+	static const char *pDeadNames[] = {"No", "Dying", "Dead", "Respawnable", "DiscardBody"};
 
 	ALERT( level, "%s: ", STRING(pev->classname) );
-	ALERT( level, "Classify: %d, ", Classify() );
+	const int classify = Classify();
+	ALERT( level, "Classify: %s (%d), ", ClassifyDisplayName(classify), classify );
+
 	if( (int)m_MonsterState < ARRAYSIZE( pStateNames ) )
 		ALERT( level, "State: %s, ", pStateNames[m_MonsterState] );
+	else
+		ALERT( level, "State: %d, ", (int)m_MonsterState );
+
+	if( pev->deadflag < ARRAYSIZE( pDeadNames ) )
+		ALERT( level, "Dead flag: %s, ", pDeadNames[pev->deadflag] );
+	else
+		ALERT( level, "Dead flag: %d, ", pev->deadflag );
+
 	int i = 0;
 	while( activity_map[i].type != 0 )
 	{
