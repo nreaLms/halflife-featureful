@@ -3028,6 +3028,10 @@
 		19 : "falldeath"
 	]
 	netname(string) : "First node" : ""
+	spawnflags(Flags) =
+	[
+		1024: "No Babycrabs" : 0
+	]
 ]
 
 @PointClass base(Repel, Sequence) size(-16 -16 0, 16 16 72) studio("models/massn.mdl") = monster_assassin_repel : "Male Assassin (Repel)"

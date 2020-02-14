@@ -29,6 +29,8 @@
 #define SF_INFOBM_RUN		0x0001
 #define SF_INFOBM_WAIT		0x0002
 
+#define SF_BIGMOM_NOBABYCRABS SF_MONSTER_DONT_DROP_GUN
+
 // AI Nodes for Big Momma
 class CInfoBM : public CPointEntity
 {
@@ -252,6 +254,9 @@ public:
 
 	BOOL CanLayCrab( void ) 
 	{ 
+		if (FBitSet(pev->spawnflags, SF_BIGMOM_NOBABYCRABS))
+			return FALSE;
+
 		if( m_crabTime < gpGlobals->time && m_crabCount < BIG_MAXCHILDREN )
 		{
 			// Don't spawn crabs inside each other
