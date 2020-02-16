@@ -178,6 +178,16 @@ BOOL CCineAI::FCanOverrideState( void )
 	return TRUE;
 }
 
+bool CCineMonster::ShouldResetOnGroundFlag()
+{
+	return false;
+}
+
+bool CCineAI::ShouldResetOnGroundFlag()
+{
+	return true;
+}
+
 //
 // CineStart
 //
@@ -385,7 +395,8 @@ void CCineMonster::PossessEntity( void )
 			pTarget->m_scriptState = SCRIPT_WAIT;
 			m_startTime = gpGlobals->time + (float)1E6;
 			// UNDONE: Add a flag to do this so people can fixup physics after teleporting monsters
-			//			pTarget->pev->flags &= ~FL_ONGROUND;
+			if (ShouldResetOnGroundFlag())
+				pTarget->pev->flags &= ~FL_ONGROUND;
 			break;
 		}
 		//ALERT( at_aiconsole, "\"%s\" found and used (INT: %s)\n", STRING( pTarget->pev->targetname ), FBitSet( pev->spawnflags, SF_SCRIPT_NOINTERRUPT )? "No" : "Yes" );

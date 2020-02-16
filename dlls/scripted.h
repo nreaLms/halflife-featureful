@@ -79,6 +79,7 @@ public:
 	BOOL	CanInterrupt( void );
 	void	AllowInterrupt( BOOL fAllow );
 	int		IgnoreConditions( void );
+	virtual bool	ShouldResetOnGroundFlag();
 
 	string_t m_iszIdle;		// string index for idle animation
 	string_t m_iszPlay;		// string index for scripted animation
@@ -104,5 +105,6 @@ public:
 class CCineAI : public CCineMonster
 {
 	BOOL FCanOverrideState ( void );
+	bool ShouldResetOnGroundFlag();
 };
 #endif //SCRIPTED_H
