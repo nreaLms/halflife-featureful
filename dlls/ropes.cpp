@@ -171,6 +171,7 @@ TYPEDESCRIPTION	CRope::m_SaveData[] =
 	DEFINE_FIELD( CRope, mEndingModel, FIELD_STRING ),
 	DEFINE_FIELD( CRope, mAttachedObjectsOffset, FIELD_FLOAT ),
 	DEFINE_FIELD( CRope, m_bMakeSound, FIELD_CHARACTER ),
+	DEFINE_FIELD( CRope, m_activated, FIELD_CHARACTER ),
 };
 
 IMPLEMENT_SAVERESTORE( CRope, CBaseDelay )
@@ -242,14 +243,21 @@ void CRope::Spawn()
 
 	mObjectAttached = false;
 
-
 	m_NumSamples = m_iSegments + 1;
 
-	SetThink(&CRope::StartThink);
-	pev->nextthink = gpGlobals->time + 0.01;
+	m_activated = false;
 }
 
-void CRope::StartThink()
+void CRope::Activate()
+{
+	if (!m_activated)
+	{
+		InitRope();
+		m_activated = true;
+	}
+}
+
+void CRope::InitRope()
 {
 	AddFlags( FL_ALWAYSTHINK );
 
@@ -1355,7 +1363,7 @@ class CElectrifiedWire : public CRope
 {
 public:
 	CElectrifiedWire();
-	void EXPORT StartElectrifiedThink();
+	void EXPORT InitElectrifiedRope();
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
@@ -1365,6 +1373,7 @@ public:
 	void Precache();
 
 	void Spawn();
+	void Activate();
 
 	void EXPORT ElectrifiedRopeThink();
 
@@ -1500,13 +1509,20 @@ void CElectrifiedWire::Spawn()
 {
 	CRope::Spawn();
 	pev->classname = MAKE_STRING( "env_electrified_wire" );
-
-	SetThink(&CElectrifiedWire::StartElectrifiedThink);
 }
 
-void CElectrifiedWire::StartElectrifiedThink()
+void CElectrifiedWire::Activate()
 {
-	StartThink();
+	if (!m_activated)
+	{
+		InitElectrifiedRope();
+		m_activated = true;
+	}
+}
+
+void CElectrifiedWire::InitElectrifiedRope()
+{
+	InitRope();
 
 	m_uiNumUninsulatedSegments = 0;
 	m_bIsActive = true;
