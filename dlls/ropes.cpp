@@ -1358,12 +1358,13 @@ void CRopeSegment::SetCanBeGrabbed( const bool bCanBeGrabbed )
 	mCanBeGrabbed = bCanBeGrabbed;
 }
 
+#define SF_ELECTRIFIEDWIRE_OBEYTRIGGERMODE 4
 
 class CElectrifiedWire : public CRope
 {
 public:
 	CElectrifiedWire();
-	void EXPORT InitElectrifiedRope();
+	void InitElectrifiedRope();
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
@@ -1592,6 +1593,14 @@ void CElectrifiedWire::ElectrifiedRopeThink()
 
 void CElectrifiedWire::Use( CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float flValue )
 {
+	if (FBitSet(pev->spawnflags, SF_ELECTRIFIEDWIRE_OBEYTRIGGERMODE))
+	{
+		if (!ShouldToggle(useType, m_bIsActive))
+		{
+			return;
+		}
+	}
+
 	m_bIsActive = !m_bIsActive;
 
 	if( m_uiNumUninsulatedSegments > 0 )
