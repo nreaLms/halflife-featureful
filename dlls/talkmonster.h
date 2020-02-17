@@ -165,7 +165,7 @@ public:
 	virtual void	StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
 	void			LimitFollowers( CBaseEntity *pPlayer, int maxFollowers );
 	virtual int		TalkFriendCategory() { return TALK_FRIEND_PERSONNEL; }
-	bool	ReadyForUse();
+	bool	InScriptedSentence();
 	virtual void PlayUseSentence();
 	virtual void PlayUnUseSentence();
 	virtual void DeclineFollowing(CBaseEntity* pCaller);

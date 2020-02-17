@@ -222,6 +222,7 @@ Task_t tlHeal[] =
 	{ TASK_DRAW_NEEDLE, 0.0f },			// Whip out the needle
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_HEAL },	// If you fail, catch up with that guy! (change this to put syringe away and then chase)
 	{ TASK_HEAL, 0.0f },	// Put it in the target
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_FAIL },
 	{ TASK_PUTAWAY_NEEDLE, 0.0f },			// Put away the needle
 };
 
@@ -465,7 +466,7 @@ void CScientist::StartTask( Task_t *pTask )
 	switch( pTask->iTask )
 	{
 	case TASK_SAY_HEAL:
-		if (!IsTalking())
+		if (!InScriptedSentence())
 		{
 			m_hTalkTarget = m_hTargetEnt;
 			PlaySentence( HealSentence(), 2, VOL_NORM, ATTN_IDLE );

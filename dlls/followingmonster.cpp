@@ -393,9 +393,9 @@ void CFollowingMonster::ClearFollowedPlayer()
 	m_hTargetEnt = 0;
 }
 
-bool CFollowingMonster::ReadyForUse()
+bool CFollowingMonster::InScriptedSentence()
 {
-	return true;
+	return false;
 }
 
 Schedule_t* CFollowingMonster::GetFollowingSchedule(bool ignoreEnemy)
@@ -434,7 +434,7 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 {
 	if( pCaller != NULL && pCaller->IsPlayer() )
 	{
-		if (!ignoreScriptedSentence && !ReadyForUse())
+		if (!ignoreScriptedSentence && InScriptedSentence())
 			return FOLLOWING_NOTREADY;
 
 		int rel = IRelationship(pCaller);

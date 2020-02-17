@@ -726,10 +726,10 @@ void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 	}
 }
 
-bool CTalkMonster::ReadyForUse()
+bool CTalkMonster::InScriptedSentence()
 {
 	// Don't allow use during a scripted_sentence
-	return m_useTime <= gpGlobals->time;
+	return m_useTime > gpGlobals->time;
 }
 
 void CTalkMonster::PlayUseSentence()

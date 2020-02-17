@@ -3302,7 +3302,7 @@ void CMedic::StartTask(Task_t *pTask)
 		m_IdealActivity = ACT_MELEE_ATTACK2;
 		break;
 	case TASK_MEDIC_SAY_HEAL:
-		if (!m_fSaidHeal && !IsTalking())
+		if (!m_fSaidHeal && !InScriptedSentence())
 		{
 			m_hTalkTarget = m_hTargetEnt;
 			PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
