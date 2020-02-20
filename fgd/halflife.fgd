@@ -3289,7 +3289,7 @@
 		21 : "bust"
 	]
 ]
-@PointClass base(Monster, RenderFields, Sequence) size(-16 -16 -36, 16 16 36) studio() = monster_generic : "Generic Script Monster"
+@PointClass base(Monster, Sequence) size(-16 -16 -36, 16 16 36) studio() = monster_generic : "Generic Script Monster"
 [
 	spawnflags(Flags) =
 	[
