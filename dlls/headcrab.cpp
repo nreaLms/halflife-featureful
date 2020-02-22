@@ -81,6 +81,7 @@ public:
 	void Spawn( void );
 	void SpawnHelper(const char* modelName, float health);
 	void Precache( void );
+	void PrecacheSounds();
 	void RunTask ( Task_t *pTask );
 	void StartTask ( Task_t *pTask );
 	void SetYawSpeed ( void );
@@ -322,14 +323,19 @@ void CHeadCrab::SpawnHelper(const char *modelName, float health)
 //=========================================================
 void CHeadCrab::Precache()
 {
+	PrecacheSounds();
+
+	PrecacheMyModel( "models/headcrab.mdl" );
+}
+
+void CHeadCrab::PrecacheSounds()
+{
 	PRECACHE_SOUND_ARRAY( pIdleSounds );
 	PRECACHE_SOUND_ARRAY( pAlertSounds );
 	PRECACHE_SOUND_ARRAY( pPainSounds );
 	PRECACHE_SOUND_ARRAY( pAttackSounds );
 	PRECACHE_SOUND_ARRAY( pDeathSounds );
 	PRECACHE_SOUND_ARRAY( pBiteSounds );
-
-	PrecacheMyModel( "models/headcrab.mdl" );
 }
 
 //=========================================================
@@ -523,6 +529,7 @@ LINK_ENTITY_TO_CLASS( monster_babycrab, CBabyCrab )
 
 void CBabyCrab::Spawn( void )
 {
+	Precache();
 	SpawnHelper("models/baby_headcrab.mdl", gSkillData.headcrabHealth * 0.25f); // less health than full grown
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 192;
@@ -532,8 +539,9 @@ void CBabyCrab::Spawn( void )
 
 void CBabyCrab::Precache( void )
 {
+	PrecacheSounds();
+
 	PrecacheMyModel( "models/baby_headcrab.mdl" );
-	CHeadCrab::Precache();
 }
 
 void CBabyCrab::SetYawSpeed( void )
