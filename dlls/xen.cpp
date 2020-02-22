@@ -18,6 +18,9 @@
 #include "animation.h"
 #include "effects.h"
 
+#define SF_XEN_PLANT_DROP_TO_FLOOR 2
+#define SF_XEN_PLANT_NONSOLID 8
+
 #define XEN_PLANT_GLOW_SPRITE		"sprites/flare3.spr"
 #define XEN_PLANT_HIDE_TIME			5
 
@@ -33,6 +36,8 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
+protected:
+	void DropToFloor();
 private:
 	Activity m_Activity;
 };
@@ -53,6 +58,15 @@ void CActAnimating::SetActivity( Activity act )
 		m_Activity = act; 
 		pev->frame = 0;
 		ResetSequenceInfo();
+	}
+}
+
+void CActAnimating::DropToFloor()
+{
+	if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
+	{
+		ALERT(at_error, "Item %s fell out of level at %f,%f,%f\n", STRING( pev->classname ), pev->origin.x, pev->origin.y, pev->origin.z);
+		UTIL_Remove( this );
 	}
 }
 
@@ -90,12 +104,21 @@ void CXenPLight::Spawn( void )
 
 	SET_MODEL( ENT( pev ), "models/light.mdl" );
 	pev->movetype = MOVETYPE_NONE;
+
+	if (FBitSet(pev->spawnflags, SF_XEN_PLANT_DROP_TO_FLOOR))
+	{
+		DropToFloor();
+	}
+
 	pev->solid = SOLID_TRIGGER;
 
 	UTIL_SetSize( pev, Vector( -80, -80, 0 ), Vector( 80, 80, 32 ) );
 	SetActivity( ACT_IDLE );
 	pev->nextthink = gpGlobals->time + 0.1f;
 	pev->frame = RANDOM_FLOAT( 0, 255 );
+
+	if (FBitSet(pev->flags, FL_KILLME))
+		return;
 
 	m_pGlow = CSprite::SpriteCreate( XEN_PLANT_GLOW_SPRITE, pev->origin + Vector( 0, 0, ( pev->mins.z + pev->maxs.z ) * 0.5f ), FALSE );
 	m_pGlow->SetTransparency( kRenderGlow, (int)pev->rendercolor.x, (int)pev->rendercolor.y, (int)pev->rendercolor.z, (int)pev->renderamt, (int)pev->renderfx );
@@ -194,6 +217,11 @@ void CXenHair::Spawn( void )
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
 	pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.1f, 0.4f );	// Load balance these a bit
+
+	if (FBitSet(pev->spawnflags, SF_XEN_PLANT_DROP_TO_FLOOR))
+	{
+		DropToFloor();
+	}
 }
 
 void CXenHair::Think( void )
@@ -277,7 +305,7 @@ void CXenTree::Spawn( void )
 
 	SET_MODEL( ENT( pev ), "models/tree.mdl" );
 	pev->movetype = MOVETYPE_NONE;
-	pev->solid = SOLID_BBOX;
+	pev->solid = FBitSet(pev->spawnflags, SF_XEN_PLANT_NONSOLID) ? SOLID_NOT : SOLID_BBOX;
 
 	pev->takedamage = DAMAGE_YES;
 
@@ -286,6 +314,14 @@ void CXenTree::Spawn( void )
 	pev->nextthink = gpGlobals->time + 0.1f;
 	pev->frame = RANDOM_FLOAT( 0, 255 );
 	pev->framerate = RANDOM_FLOAT( 0.7f, 1.4f );
+
+	if (FBitSet(pev->spawnflags, SF_XEN_PLANT_DROP_TO_FLOOR))
+	{
+		DropToFloor();
+	}
+
+	if (FBitSet(pev->flags, FL_KILLME))
+		return;
 
 	Vector triggerPosition;
 	UTIL_MakeVectorsPrivate( pev->angles, triggerPosition, NULL, NULL );
@@ -492,9 +528,15 @@ void CXenSporeLarge::Spawn( void )
 	CXenSpore::Spawn();
 	UTIL_SetSize( pev, Vector( -48, -48, 110 ), Vector( 48, 48, 240 ) );
 
+	if (FBitSet(pev->flags, FL_KILLME))
+		return;
+
 	Vector forward, right;
 
 	UTIL_MakeVectorsPrivate( pev->angles, forward, right, NULL );
+
+	if (FBitSet(pev->spawnflags, SF_XEN_PLANT_NONSOLID))
+		return;
 
 	// Rotate the leg hulls into position
 	for( int i = 0; i < (int)ARRAYSIZE( m_hullSizes ); i++ )
@@ -507,7 +549,7 @@ void CXenSpore :: Spawn( void )
 
 	SET_MODEL( ENT( pev ), pModelNames[pev->skin] );
 	pev->movetype = MOVETYPE_NONE;
-	pev->solid = SOLID_BBOX;
+	pev->solid = FBitSet(pev->spawnflags, SF_XEN_PLANT_NONSOLID) ? SOLID_NOT : SOLID_BBOX;
 	pev->takedamage = DAMAGE_YES;
 
 	//SetActivity( ACT_IDLE );
@@ -516,6 +558,11 @@ void CXenSpore :: Spawn( void )
 	pev->framerate = RANDOM_FLOAT( 0.7f, 1.4f );
 	ResetSequenceInfo();
 	pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.1f, 0.4f );	// Load balance these a bit
+
+	if (FBitSet(pev->spawnflags, SF_XEN_PLANT_DROP_TO_FLOOR))
+	{
+		DropToFloor();
+	}
 }
 
 const char *CXenSpore::pModelNames[] =
