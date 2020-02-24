@@ -590,6 +590,8 @@
 		7: "Gen. Containment"
 		8: "Maintenance area"
 	]
+	noise1(sound) : "Move Sound Override"
+	noise2(sound) : "Stop Sound Override"
 	_minlight(string) : "Minimum light level"
 ]
 

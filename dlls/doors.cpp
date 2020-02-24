@@ -365,88 +365,102 @@ void CBaseDoor::Precache( void )
 	const char *pszSound;
 	BOOL NullSound = FALSE;
 
-	// set the door's "in-motion" sound
-	switch( m_bMoveSnd )
+	if ( FStringNull( pev->noiseMoving ) )
 	{
-		case 1:
-			pszSound = "doors/doormove1.wav";
-			break;
-		case 2:
-			pszSound = "doors/doormove2.wav";
-			break;
-		case 3:
-			pszSound = "doors/doormove3.wav";
-			break;
-		case 4:
-			pszSound = "doors/doormove4.wav";
-			break;
-		case 5:
-			pszSound = "doors/doormove5.wav";
-			break;
-		case 6:
-			pszSound = "doors/doormove6.wav";
-			break;
-		case 7:
-			pszSound = "doors/doormove7.wav";
-			break;
-		case 8:
-			pszSound = "doors/doormove8.wav";
-			break;
-		case 9:
-			pszSound = "doors/doormove9.wav";
-			break;
-		case 10:
-			pszSound = "doors/doormove10.wav";
-			break;
-		case 0:
-		default:
-			pszSound = "common/null.wav";
-			NullSound = TRUE;
-			break;
+		// set the door's "in-motion" sound
+		switch( m_bMoveSnd )
+		{
+			case 1:
+				pszSound = "doors/doormove1.wav";
+				break;
+			case 2:
+				pszSound = "doors/doormove2.wav";
+				break;
+			case 3:
+				pszSound = "doors/doormove3.wav";
+				break;
+			case 4:
+				pszSound = "doors/doormove4.wav";
+				break;
+			case 5:
+				pszSound = "doors/doormove5.wav";
+				break;
+			case 6:
+				pszSound = "doors/doormove6.wav";
+				break;
+			case 7:
+				pszSound = "doors/doormove7.wav";
+				break;
+			case 8:
+				pszSound = "doors/doormove8.wav";
+				break;
+			case 9:
+				pszSound = "doors/doormove9.wav";
+				break;
+			case 10:
+				pszSound = "doors/doormove10.wav";
+				break;
+			case 0:
+			default:
+				pszSound = "common/null.wav";
+				NullSound = TRUE;
+				break;
+		}
+		pev->noiseMoving = MAKE_STRING( pszSound );
+	}
+	else
+	{
+		pszSound = STRING( pev->noiseMoving );
 	}
 
 	if( !NullSound )
 		PRECACHE_SOUND( pszSound );
-	pev->noiseMoving = MAKE_STRING( pszSound );
 	NullSound = FALSE;
 
-	// set the door's 'reached destination' stop sound
-	switch( m_bStopSnd )
+	if ( FStringNull( pev->noiseArrived ) )
 	{
-		case 1:
-			pszSound = "doors/doorstop1.wav";
-			break;
-		case 2:
-			pszSound = "doors/doorstop2.wav";
-			break;
-		case 3:
-			pszSound = "doors/doorstop3.wav";
-			break;
-		case 4:
-			pszSound = "doors/doorstop4.wav";
-			break;
-		case 5:
-			pszSound = "doors/doorstop5.wav";
-			break;
-		case 6:
-			pszSound = "doors/doorstop6.wav";
-			break;
-		case 7:
-			pszSound = "doors/doorstop7.wav";
-			break;
-		case 8:
-			pszSound = "doors/doorstop8.wav";
-			break;
-		case 0:
-		default:
-			pszSound = "common/null.wav";
-			NullSound = TRUE;
-			break;
+		// set the door's 'reached destination' stop sound
+		switch( m_bStopSnd )
+		{
+			case 1:
+				pszSound = "doors/doorstop1.wav";
+				break;
+			case 2:
+				pszSound = "doors/doorstop2.wav";
+				break;
+			case 3:
+				pszSound = "doors/doorstop3.wav";
+				break;
+			case 4:
+				pszSound = "doors/doorstop4.wav";
+				break;
+			case 5:
+				pszSound = "doors/doorstop5.wav";
+				break;
+			case 6:
+				pszSound = "doors/doorstop6.wav";
+				break;
+			case 7:
+				pszSound = "doors/doorstop7.wav";
+				break;
+			case 8:
+				pszSound = "doors/doorstop8.wav";
+				break;
+			case 0:
+			default:
+				pszSound = "common/null.wav";
+				NullSound = TRUE;
+				break;
+		}
+		pev->noiseArrived = MAKE_STRING( pszSound );
+	}
+	else
+	{
+		pszSound = STRING( pev->noiseArrived );
 	}
 
 	if( !NullSound )
 		PRECACHE_SOUND( pszSound );
-	pev->noiseArrived = MAKE_STRING( pszSound );
 
 	// get door button sounds, for doors which are directly 'touched' to open
 	if( m_bLockedSound )
