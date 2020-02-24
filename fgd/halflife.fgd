@@ -474,7 +474,20 @@
 	explodemagnitude(integer) : "Explode Magnitude (0=none)" : 0
 ]
 
-@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles) = Door
+@BaseClass = SoundRadius
+[
+	soundradius(choices) : "Sound radius" =
+	[
+		-2: "Small"
+		-1: "Medium"
+		0: "Default (large)"
+		1: "Huge"
+		2: "Enormous"
+		3: "Play Everywhere"
+	]
+]
+
+@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius) = Door
 [
 	killtarget(target_destination) : "KillTarget"
 	speed(integer) : "Speed" : 100
@@ -577,13 +590,6 @@
 		7: "Gen. Containment"
 		8: "Maintenance area"
 	]
-	soundradius(choices) : "Sound radius" =
-	[
-		0: "Default"
-		1: "Huge"
-		2: "Enormous"
-		3: "Play Everywhere"
-	]
 	_minlight(string) : "Minimum light level"
 ]
 
@@ -639,19 +645,6 @@
 	maxRange(string) : "Maximum target range"
 	_minlight(string) : "Minimum light level"
 	bulletCount(integer) : "Bullet count" : 0 : "Less or equal to 0 means infinite number of bullets"
-]
-
-@BaseClass = SoundRadius
-[
-	soundradius(choices) : "Sound radius" =
-	[
-		-2: "Small"
-		-1: "Medium"
-		0: "Default (large)"
-		1: "Huge"
-		2: "Enormous"
-		3: "Play Everywhere"
-	]
 ]
 
 @BaseClass base(SoundRadius) = PlatSounds
@@ -1635,7 +1628,7 @@
 	]
 ]
 
-@PointClass sprite() base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
+@PointClass sprite() base(Targetname, RenderFields, SoundRadius) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
 [
 	model(sprite) : "Sprite Name" : "sprites/fexplo1.spr"
 	amplitude(string) : "Shake Amplitude 0-16"
@@ -1658,13 +1651,6 @@
 	]
 	noise1(sound) : "Custom sound 1"
 	noise2(sound) : "Custom sound 2"
-	soundradius(choices) : "Sound radius" =
-	[
-		0: "Default (large)"
-		1: "Huge"
-		2: "Enormous"
-		3: "Play Everywhere"
-	]
 ]
 
 @PointClass base(Target, Targetname) size(-24 -24 -24,24 24 24) = env_xenmaker :"Xen Portal. This entity is present just for compatibility with Sven Co-op"
