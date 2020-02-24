@@ -3486,7 +3486,7 @@ public:
 	int m_iStartFrame;
 	int m_iSpriteTexture;
 	char m_cType;
-	int m_iszPosition;
+	string_t m_iszPosition;
 };
 
 LINK_ENTITY_TO_CLASS( env_shockwave, CEnvShockwave )

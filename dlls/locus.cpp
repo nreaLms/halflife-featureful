@@ -810,11 +810,11 @@ public:
 
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	int m_iszPosition;
-	int m_iszVelocity;
-	int m_iszRatio;
-	int m_iszTargetName;
-	int m_iszFireOnSpawn;
+	string_t m_iszPosition;
+	string_t m_iszVelocity;
+	string_t m_iszRatio;
+	string_t m_iszTargetName;
+	string_t m_iszFireOnSpawn;
 	float m_fDuration;
 };
 

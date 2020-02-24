@@ -184,7 +184,7 @@ public:
 	Schedule_t *GetScheduleOfType( int Type );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 
-	void NodeStart( int iszNextNode );
+	void NodeStart(string_t iszNextNode );
 	void NodeReach( void );
 	BOOL ShouldGoToNode( void );
 
@@ -709,7 +709,7 @@ void CBigMomma::Activate( void )
 		Remember( bits_MEMORY_ADVANCE_NODE );	// Start 'er up
 }
 
-void CBigMomma::NodeStart( int iszNextNode )
+void CBigMomma::NodeStart( string_t iszNextNode )
 {
 	pev->netname = iszNextNode;
 

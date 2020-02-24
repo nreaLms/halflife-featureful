@@ -3504,13 +3504,13 @@ public:
 
 	void	KeyValue( KeyValueData *pkvd );
 
-	int m_iszPosition;
+	string_t m_iszPosition;
 	int m_iPosMode;
-	int m_iszAngles;
+	string_t m_iszAngles;
 	int m_iAngMode;
-	int m_iszVelocity;
+	string_t m_iszVelocity;
 	int m_iVelMode;
-	int m_iszAVelocity;
+	string_t m_iszAVelocity;
 	int m_iAVelMode;
 };
 LINK_ENTITY_TO_CLASS( trigger_motion, CTriggerMotion )
