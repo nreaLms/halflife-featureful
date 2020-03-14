@@ -1588,6 +1588,12 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 	if (triangDepth > ARRAYSIZE(vecApexes))
 		triangDepth = ARRAYSIZE(vecApexes);
 
+	if (FBitSet(iMoveFlag, bits_MF_NO_TRIDEPTH))
+	{
+		ClearBits(iMoveFlag, bits_MF_NO_TRIDEPTH);
+		triangDepth = 1;
+	}
+
 	RouteNew();
 	const bool nearest = FBitSet(iMoveFlag, bits_MF_NEAREST_PATH);
 	m_movementGoal = RouteClassify( iMoveFlag );
@@ -2803,7 +2809,7 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 				if( tr.flFraction == 1.0f )
 				{
 					// try to actually get there
-					if( BuildRoute( node.m_vecOrigin, bits_MF_TO_LOCATION, NULL ) )
+					if( BuildRoute( node.m_vecOrigin, bits_MF_TO_LOCATION | bits_MF_NO_TRIDEPTH, NULL ) )
 					{
 						// flMaxDist = flDist;
 						m_vecMoveGoal = node.m_vecOrigin;
