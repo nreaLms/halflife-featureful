@@ -1375,6 +1375,7 @@
 		1: "Loop"
 		2: "Change state when sequence ends"
 	]
+	m_flFramerate_On(string) : "Framerate when on (1 is default)"
 	m_iszSequence_Off(string) : "Sequence when off"
 	m_iAction_Off(choices) : "Behaviour when off" : 0 =
 	[
@@ -1382,6 +1383,7 @@
 		1: "Loop"
 		2: "Change state when sequence ends"
 	]
+	m_flFramerate_Off(string) : "Framerate when off (1 is default)"
 	spawnflags(flags) =
 	[
 		1: "Initially Off" : 0

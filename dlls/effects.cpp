@@ -1336,6 +1336,8 @@ class CEnvModel : public CBaseAnimating
 	string_t m_iszSequence_Off;
 	int m_iAction_On;
 	int m_iAction_Off;
+	float m_flFramerate_On;
+	float m_flFramerate_Off;
 };
 
 TYPEDESCRIPTION CEnvModel::m_SaveData[] =
@@ -1344,6 +1346,8 @@ TYPEDESCRIPTION CEnvModel::m_SaveData[] =
 	DEFINE_FIELD( CEnvModel, m_iszSequence_Off, FIELD_STRING ),
 	DEFINE_FIELD( CEnvModel, m_iAction_On, FIELD_INTEGER ),
 	DEFINE_FIELD( CEnvModel, m_iAction_Off, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvModel, m_flFramerate_On, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvModel, m_flFramerate_Off, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvModel, CBaseAnimating )
@@ -1369,6 +1373,16 @@ void CEnvModel::KeyValue( KeyValueData *pkvd )
 	else if (FStrEq(pkvd->szKeyName, "m_iAction_Off"))
 	{
 		m_iAction_Off = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_flFramerate_On"))
+	{
+		m_flFramerate_On = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_flFramerate_Off"))
+	{
+		m_flFramerate_Off = atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1488,6 +1502,11 @@ void CEnvModel :: SetSequence( void )
 
 	pev->frame = 0;
 	ResetSequenceInfo( );
+
+	if ((pev->spawnflags & SF_ENVMODEL_OFF) && m_flFramerate_Off)
+		pev->framerate = m_flFramerate_Off;
+	else if (m_flFramerate_On)
+		pev->framerate = m_flFramerate_On;
 
 	if (pev->spawnflags & SF_ENVMODEL_OFF)
 	{
