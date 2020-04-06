@@ -119,6 +119,7 @@ public:
 	void EXPORT StartPlayFrom( void );
 	void EXPORT RampThink( void );
 	void InitModulationParms( void );
+	virtual const char* GetNextSound() { return STRING(pev->message); }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -709,6 +710,8 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		// init all ramp params for startup
 		InitModulationParms();
 
+		szSoundFile = GetNextSound();
+
 		if (m_pPlayFrom)
 		{
 			EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, //LRC
@@ -896,6 +899,50 @@ void CAmbientGeneric::KeyValue( KeyValueData *pkvd )
 	}
 	else
 		CBaseEntity::KeyValue( pkvd );
+}
+
+class CAmbientRandom : public CAmbientGeneric
+{
+public:
+	void Precache();
+	const char* GetNextSound();
+};
+
+LINK_ENTITY_TO_CLASS( ambient_random, CAmbientRandom )
+
+void CAmbientRandom::Precache()
+{
+	if (!FStringNull(pev->noise))
+		PRECACHE_SOUND(STRING(pev->noise));
+	if (!FStringNull(pev->noise1))
+		PRECACHE_SOUND(STRING(pev->noise1));
+	if (!FStringNull(pev->noise2))
+		PRECACHE_SOUND(STRING(pev->noise2));
+	if (!FStringNull(pev->noise3))
+		PRECACHE_SOUND(STRING(pev->noise3));
+	CAmbientGeneric::Precache();
+}
+
+const char* CAmbientRandom::GetNextSound()
+{
+	int count = 0;
+	string_t* noises[4] = {0};
+	if (!FStringNull(pev->noise))
+		noises[count++] = &pev->noise;
+	if (!FStringNull(pev->noise1))
+		noises[count++] = &pev->noise1;
+	if (!FStringNull(pev->noise2))
+		noises[count++] = &pev->noise2;
+	if (!FStringNull(pev->noise3))
+		noises[count++] = &pev->noise3;
+	if (count > 0)
+	{
+		string_t *chosen = noises[RANDOM_LONG(0,count-1)];
+		string_t tmp = pev->message;
+		pev->message = *chosen;
+		*chosen = tmp;
+	}
+	return STRING(pev->message);
 }
 
 // =================== ROOM SOUND FX ==========================================
