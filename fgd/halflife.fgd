@@ -6458,6 +6458,7 @@
 		4 : "Reusable (Unique only)" : 0
 		8 : "Timed" : 0
 		16 : "Unique" : 0
+		32 : "Not repetitive" : 0 : "Don't repeat the same target twice in a row. Targets still can be repeated if there're several with the same name."
 	]
 	min_delay(string) : "Minimum delay (Timed only)"
 	max_delay(string) : "Maximum delay (Timed only)"

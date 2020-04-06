@@ -2682,6 +2682,7 @@ void CTriggerCamera::Move()
 #define SF_TRIGGER_RANDOM_REUSABLE 4
 #define SF_TRIGGER_RANDOM_TIMED 8
 #define SF_TRIGGER_RANDOM_UNIQUE 16
+#define SF_TRIGGER_RANDOM_DONT_REPEAT 32
 
 class CTriggerRandom : public CBaseEntity
 {
@@ -2706,7 +2707,20 @@ public:
 	int m_triggerCounter;
 	float m_minDelay;
 	float m_maxDelay;
-	BOOL m_active;
+	string_t m_lastTarget;
+
+	inline bool IsActive() { return pev->spawnflags & SF_TRIGGER_RANDOM_START_ON; }
+	inline void SetActive(bool active)
+	{
+		if (active)
+		{
+			SetBits(pev->spawnflags, SF_TRIGGER_RANDOM_START_ON);
+		}
+		else
+		{
+			ClearBits(pev->spawnflags, SF_TRIGGER_RANDOM_START_ON);
+		}
+	}
 };
 
 LINK_ENTITY_TO_CLASS( trigger_random, CTriggerRandom )
@@ -2724,7 +2738,7 @@ TYPEDESCRIPTION	CTriggerRandom::m_SaveData[] =
 	DEFINE_FIELD( CTriggerRandom, m_triggerCounter, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerRandom, m_minDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerRandom, m_maxDelay, FIELD_FLOAT ),
-	DEFINE_FIELD( CTriggerRandom, m_active, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CTriggerRandom, m_lastTarget, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CTriggerRandom, CBaseEntity )
@@ -2797,11 +2811,9 @@ void CTriggerRandom::Spawn()
 	if (FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_UNIQUE)) {
 		m_uniqueTargetsLeft = TargetCount();
 	}
-	m_active = FALSE;
 	if (FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_TIMED)) {
 
-		if (pev->spawnflags & SF_TRIGGER_RANDOM_START_ON) {
-			m_active = TRUE;
+		if (IsActive()) {
 			SetThink(&CTriggerRandom::TimedThink);
 			pev->nextthink = gpGlobals->time + GetRandomDelay() + 0.1;
 		}
@@ -2811,8 +2823,8 @@ void CTriggerRandom::Spawn()
 void CTriggerRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	if (pev->spawnflags & SF_TRIGGER_RANDOM_TIMED) {
-		m_active = !m_active;
-		if (m_active) {
+		SetActive(!IsActive());
+		if (IsActive()) {
 			SetThink(&CTriggerRandom::TimedThink);
 			pev->nextthink = gpGlobals->time + GetRandomDelay();
 		} else {
@@ -2822,30 +2834,30 @@ void CTriggerRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	} else {
 		const int chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
-			FireTargets(STRING(chosenTarget), pActivator, this, useType, value);
+			FireTargets(STRING(chosenTarget), pActivator, this, USE_TOGGLE, value);
 		}
 	}
 }
 
 void CTriggerRandom::TimedThink()
 {
-	if (m_active) {
+	if (IsActive()) {
 		int chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
 			FireTargets(STRING(chosenTarget), this, this, USE_TOGGLE, 0);
 			if (m_triggerNumberLimit) {
 				m_triggerCounter++;
 				if (m_triggerCounter >= m_triggerNumberLimit) {
-					m_active = FALSE;
+					SetActive(false);
 					m_triggerCounter = 0;
 				}
 			}
 		}
 
 		if (pev->spawnflags & SF_TRIGGER_RANDOM_ONCE)
-			m_active = FALSE;
+			SetActive(false);
 
-		if (m_active) {
+		if (IsActive()) {
 			pev->nextthink = gpGlobals->time + GetRandomDelay();
 		}
 	}
@@ -2853,10 +2865,20 @@ void CTriggerRandom::TimedThink()
 
 string_t CTriggerRandom::ChooseTarget()
 {
+	int chosenTargetIndex = 0;
+	string_t chosenTarget = iStringNull;
+
 	if (pev->spawnflags & SF_TRIGGER_RANDOM_UNIQUE) {
 		if (m_uniqueTargetsLeft) {
-			int chosenTargetIndex = RANDOM_LONG(0, m_uniqueTargetsLeft - 1);
-			string_t chosenTarget = m_targets[chosenTargetIndex];
+			chosenTargetIndex = RANDOM_LONG(0, m_uniqueTargetsLeft - 1);
+			chosenTarget = m_targets[chosenTargetIndex];
+
+			if (chosenTarget == m_lastTarget && FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_DONT_REPEAT) && m_uniqueTargetsLeft > 1)
+			{
+				chosenTargetIndex = (chosenTargetIndex+1) % m_uniqueTargetsLeft;
+				chosenTarget = m_targets[chosenTargetIndex];
+			}
+
 			m_targets[chosenTargetIndex] = m_targets[m_uniqueTargetsLeft-1];
 			m_targets[m_uniqueTargetsLeft-1] = chosenTarget;
 			m_uniqueTargetsLeft--;
@@ -2867,12 +2889,21 @@ string_t CTriggerRandom::ChooseTarget()
 			return chosenTarget;
 		}
 	} else {
-		int targetCount = TargetCount();
+		const int targetCount = TargetCount();
 		if (targetCount) {
-			return m_targets[RANDOM_LONG(0, targetCount - 1)];
+			chosenTargetIndex = RANDOM_LONG(0, targetCount - 1);
+			chosenTarget = m_targets[chosenTargetIndex];
+			if (chosenTarget == m_lastTarget && FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_DONT_REPEAT) && targetCount > 1)
+			{
+				chosenTargetIndex = (chosenTargetIndex+1) % targetCount;
+				chosenTarget = m_targets[chosenTargetIndex];
+			}
+
+			m_lastTarget = chosenTarget;
+			return chosenTarget;
 		}
 	}
-	return 0;
+	return iStringNull;
 }
 
 float CTriggerRandom::GetRandomDelay()
