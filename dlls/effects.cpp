@@ -1259,9 +1259,14 @@ void CSprite::Animate( float frames )
 	pev->frame += frames;
 	if( pev->frame > m_maxFrame )
 	{
-		if( pev->spawnflags & SF_SPRITE_ONCE )
+		if( FBitSet( pev->spawnflags, SF_SPRITE_ONCE|SF_SPRITE_ONCE_AND_REMOVE ) )
 		{
 			TurnOff();
+			if (FBitSet(pev->spawnflags, SF_SPRITE_ONCE_AND_REMOVE))
+			{
+				SetThink(&CBaseEntity::SUB_Remove);
+				pev->nextthink = gpGlobals->time;
+			}
 		}
 		else
 		{
@@ -1280,7 +1285,7 @@ void CSprite::TurnOff( void )
 void CSprite::TurnOn( void )
 {
 	pev->effects = 0;
-	if( ( pev->framerate && m_maxFrame > 1.0f ) || ( pev->spawnflags & SF_SPRITE_ONCE ) )
+	if( ( pev->framerate && m_maxFrame > 1.0f ) || FBitSet( pev->spawnflags, SF_SPRITE_ONCE|SF_SPRITE_ONCE_AND_REMOVE ) )
 	{
 		SetThink( &CSprite::AnimateThink );
 		pev->nextthink = gpGlobals->time;
