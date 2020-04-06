@@ -3466,7 +3466,24 @@ void CTriggerSetPatrol::Spawn( void )
 
 void CTriggerSetPatrol::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	CBaseEntity *pTarget = UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
+	CBaseEntity *pTarget = NULL;
+
+	if (UTIL_TargetnameIsActivator(STRING(pev->target)))
+	{
+		if (pActivator != 0 && pActivator->MyMonsterPointer() && FBitSet(pActivator->pev->flags, FL_MONSTER))
+		{
+			pTarget = pActivator;
+		}
+		else
+		{
+			return;
+		}
+	}
+	else
+	{
+		pTarget = UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
+	}
+
 	CBaseEntity *pPath = UTIL_FindEntityByTargetname( NULL, STRING( m_iszPath ) );
 
 	if (pTarget && pPath)
