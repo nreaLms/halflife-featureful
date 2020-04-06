@@ -5767,10 +5767,14 @@
 		16 : "Prisoner" : 0 : "The spawned monster won't attack its enemies and will be ignored by its enemies."
 		32 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Auto size BBox' flag"
 		64: "Cyclic backlog" : 0 : "Used with 'Cyclic' flag. Keep track of number of monsters who could not be spawned, e.g. because of blocking. Try to spawn them later. Useful when you want to ensure that the specific number of monsters will spawn."
+		128 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Wait for script' flag"
 		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
 		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
-		16384 : "Pass monster as activator" : 0 : "Pass spawned monster as activator triggering Target on Release"
+		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
+		16384 : "Monster is activator (deprecated)" : 0 : "Pass spawned monster as activator triggering Target on Release. Deprecated. Use Target's Activator instead."
+		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
+		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
 	]
 
 	monstercount(integer) : "Number of Monsters" : -1 : "How many monsters the monstermaker can create (-1 = unlimited)"

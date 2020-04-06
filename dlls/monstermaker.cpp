@@ -31,12 +31,17 @@
 #define	SF_MONSTERMAKER_CYCLIC		4 // drop one monster every time fired.
 #define SF_MONSTERMAKER_MONSTERCLIP	8 // Children are blocked by monsterclip
 #define SF_MONSTERMAKER_PRISONER	16
+#define SF_MONSTERMAKER_AUTOSIZEBBOX 32 // TODO: implement
 #define SF_MONSTERMAKER_CYCLIC_BACKLOG 64
+#define SF_MONSTERMAKER_WAIT_FOR_SCRIPT 128 // TODO: implement
 #define SF_MONSTERMAKER_PREDISASTER 256
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 
+#define SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED 8192
 #define SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR 16384 // DEPRECATED. Use the spawned monster as activator to fire target
+#define SF_MONSTERMAKER_SPECIAL_FLAG		32768
+#define SF_MONSTERMAKER_NONSOLID_CORPSE		65536
 
 enum
 {
@@ -382,6 +387,12 @@ int CMonsterMaker::MakeMonster( void )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_PREDISASTER );
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_DONT_DROP_GUN))
 			SetBits(pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GUN);
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED ))
+			SetBits( pevCreate->spawnflags, SF_MONSTER_WAIT_UNTIL_PROVOKED );
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_SPECIAL_FLAG ))
+			SetBits( pevCreate->spawnflags, SF_MONSTER_SPECIAL_FLAG );
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_NONSOLID_CORPSE ))
+			SetBits( pevCreate->spawnflags, SF_MONSTER_NONSOLID_CORPSE );
 		if (m_gag > 0)
 			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
 		pevCreate->weapons = pev->weapons;
