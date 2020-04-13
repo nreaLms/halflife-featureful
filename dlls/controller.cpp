@@ -91,6 +91,9 @@ public:
 	void OnDying();
 	void GibMonster( void );
 
+	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 64.0f ); }
+
 	CSprite *m_pBall[2];	// hand balls
 	int m_iBall[2];		// how bright it should be
 	float m_iBallTime[2];	// when it should be that color
@@ -351,7 +354,7 @@ void CController::Spawn()
 	Precache();
 
 	SetMyModel( "models/controller.mdl" );
-	SetMySize( Vector( -32.0f, -32.0f, 0.0f ), Vector( 32.0f, 32.0f, 64.0f ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_FLY;

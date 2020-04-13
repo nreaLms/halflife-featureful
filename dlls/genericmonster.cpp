@@ -47,6 +47,8 @@ public:
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
+	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
+	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
 private:
 	float m_talkTime;
 	EHANDLE m_hTalkTarget;
@@ -141,7 +143,7 @@ void CGenericMonster::Spawn()
 	if( FStrEq( STRING( pev->model ), "models/player.mdl" ) || FStrEq( STRING( pev->model ), "models/holo.mdl" ) )
 		SetMySize( VEC_HULL_MIN, VEC_HULL_MAX );
 	else
-		SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+		SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;

@@ -375,6 +375,9 @@ public:
 	virtual const char* DefaultDisplayName() { return NULL; }
 	const char* DisplayName();
 
+	virtual Vector DefaultMinHullSize();
+	virtual Vector DefaultMaxHullSize();
+
 	// Allows to set a head via monstermaker before spawn
 	virtual void SetHead(int head) {}
 

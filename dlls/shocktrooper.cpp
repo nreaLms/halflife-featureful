@@ -112,6 +112,8 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	Vector DefaultMinHullSize() { return Vector( -24.0f, -24.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 24.0f, 24.0f, 72.0f ); }
 
 	BOOL m_bRightClaw;
 	float m_rechargeTime;
@@ -393,7 +395,7 @@ void CStrooper::Spawn()
 	Precache();
 
 	SpawnHelper("models/strooper.mdl", gSkillData.strooperHealth * 2.5, BLOOD_COLOR_GREEN);
-	SetMySize( Vector(-24, -24, 0), Vector(24, 24, 72) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	if (pev->weapons == 0)
 	{

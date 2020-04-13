@@ -395,6 +395,9 @@ public:
 	void PrescheduleThink();
 	int LookupActivity(int activity);
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
+	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
+
 	void SpawnFamiliar(const char *entityName, const Vector& origin, int hullType);
 	void OnChangeSchedule( Schedule_t* pNewSchedule );
 	Schedule_t *GetSchedule( void );
@@ -1238,7 +1241,7 @@ void CISlave::Spawn()
 	Precache();
 
 	SetMyModel( "models/islave.mdl" );
-	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

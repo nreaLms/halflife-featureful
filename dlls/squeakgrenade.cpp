@@ -53,6 +53,8 @@ public:
 	virtual float MaximumExplosionDamage();
 
 	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	Vector DefaultMinHullSize() { return Vector( -4.0f, -4.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 4.0f, 4.0f, 8.0f ); }
 
 	static float m_flNextBounceSoundTime;
 
@@ -107,7 +109,7 @@ void CSqueakGrenade::SpawnImpl(const char* modelName , float damage)
 	SetMyBloodColor( BLOOD_COLOR_YELLOW );
 
 	SET_MODEL( ENT( pev ), modelName );
-	UTIL_SetSize( pev, Vector( -4.0f, -4.0f, 0.0f ), Vector( 4.0f, 4.0f, 8.0f ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 	UTIL_SetOrigin( pev, pev->origin );
 
 	SetTouch( &CSqueakGrenade::SuperBounceTouch );

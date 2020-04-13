@@ -252,6 +252,8 @@ public:
 	CUSTOM_SCHEDULES
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	Vector DefaultMinHullSize() { return Vector( -16.0f, -16.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 16.0f, 16.0f, 48.0f ); }
 
 	float	m_flLastHurtTime;
 	float	m_flNextSpitTime;// last time the PitDrone used the spit attack.
@@ -660,7 +662,7 @@ void CPitdrone::Spawn()
 	Precache();
 
 	SetMyModel("models/pit_drone.mdl");
-	SetMySize(Vector(-16, -16, 0), Vector(16, 16, 48));
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;

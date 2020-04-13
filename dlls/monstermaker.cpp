@@ -103,6 +103,8 @@ public:
 	string_t m_iszPlacePosition;
 	string_t m_iszAngles;
 	short m_targetActivator;
+	Vector m_defaultMinHullSize;
+	Vector m_defaultMaxHullSize;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -129,6 +131,8 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iszPlacePosition, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_iszAngles, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_targetActivator, FIELD_SHORT ),
+	DEFINE_FIELD( CMonsterMaker, m_defaultMinHullSize, FIELD_VECTOR ),
+	DEFINE_FIELD( CMonsterMaker, m_defaultMaxHullSize, FIELD_VECTOR ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -291,7 +295,7 @@ void CMonsterMaker::Precache( void )
 	if (!FStringNull(m_gibModel))
 		PRECACHE_MODEL(STRING(m_gibModel));
 
-	UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship );
+	UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize );
 }
 
 //=========================================================
@@ -335,6 +339,28 @@ int CMonsterMaker::MakeMonster( void )
 
 	Vector mins = placePosition - Vector( 34, 34, 0 );
 	Vector maxs = placePosition + Vector( 34, 34, 0 );
+
+	if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_AUTOSIZEBBOX))
+	{
+		if (m_minHullSize != g_vecZero)
+		{
+			mins = placePosition + Vector( m_minHullSize.x, m_minHullSize.y, 0 );
+		}
+		else if (m_defaultMinHullSize != g_vecZero)
+		{
+			mins = placePosition + Vector( m_defaultMinHullSize.x, m_defaultMinHullSize.y, 0 );
+		}
+
+		if (m_maxHullSize != g_vecZero)
+		{
+			maxs = placePosition + Vector( m_maxHullSize.x, m_maxHullSize.y, 0 );
+		}
+		else if (m_defaultMaxHullSize != g_vecZero)
+		{
+			maxs = placePosition + Vector( m_defaultMaxHullSize.x, m_defaultMaxHullSize.y, 0 );
+		}
+	}
+
 	maxs.z = placePosition.z;
 	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
 		mins.z = m_flGround;
@@ -344,6 +370,9 @@ int CMonsterMaker::MakeMonster( void )
 	if( count )
 	{
 		// don't build a stack of monsters!
+		CBaseEntity* blocker = pList[0];
+		const char* blockerName = blocker ? (FStringNull(blocker->pev->classname) ? "" : STRING(blocker->pev->classname)) : "";
+		ALERT( at_aiconsole, "Spawning of %s is blocked by %s\n", STRING(m_iszMonsterClassname), blockerName );
 		return MONSTERMAKER_BLOCKED;
 	}
 

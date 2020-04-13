@@ -107,6 +107,9 @@ public:
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
 
+	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 64.0f ); }
+
 	static const char *pAttackHitSounds[];
 	static const char *pAttackMissSounds[];
 	static const char *pAttackSounds[];
@@ -597,7 +600,7 @@ void CAGrunt::Spawn()
 	Precache();
 
 	SetMyModel( "models/agrunt.mdl" );
-	SetMySize( Vector( -32.0f, -32.0f, 0.0f ), Vector( 32.0f, 32.0f, 64.0f ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;

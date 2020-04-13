@@ -935,7 +935,7 @@ void CHGrunt::SpawnHelper(const char* modelName, int health, int bloodColor)
 	Precache();
 
 	SetMyModel( modelName );
-	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

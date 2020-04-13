@@ -140,6 +140,8 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	Vector DefaultMinHullSize() { return Vector( -16.0f, -16.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 16.0f, 16.0f, 36.0f ); }
 
 	int m_iSpriteTexture;
 	short m_iAsleep;// some houndeyes sleep in idle mode if this is set, the houndeye is lying down
@@ -341,7 +343,7 @@ void CHoundeye::Spawn()
 	Precache();
 
 	SetMyModel( "models/houndeye.mdl" );
-	SetMySize( Vector( -16, -16, 0 ), Vector( 16, 16, 36 ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

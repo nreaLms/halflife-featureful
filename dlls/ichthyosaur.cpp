@@ -91,6 +91,8 @@ public:
 	float ChangePitch( int speed );
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, -32.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 32.0f ); }
 
 	Vector m_SaveVelocity;
 	float m_idealDist;
@@ -469,7 +471,7 @@ void CIchthyosaur::Spawn()
 	Precache();
 
 	SetMyModel( "models/icky.mdl" );
-	SetMySize( Vector( -32, -32, -32 ), Vector( 32, 32, 32 ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_BBOX;
 	pev->movetype		= MOVETYPE_FLY;

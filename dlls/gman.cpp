@@ -47,6 +47,9 @@ public:
 
 	void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
 
+	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
+	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
+
 	EHANDLE m_hPlayer;
 	EHANDLE m_hTalkTarget;
 	float m_flTalkTime;
@@ -120,7 +123,7 @@ void CGMan::Spawn()
 	Precache();
 
 	SetMyModel( "models/gman.mdl" );
-	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

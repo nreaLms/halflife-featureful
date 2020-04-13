@@ -4001,6 +4001,16 @@ const char* CBaseMonster::DisplayName()
 	return FStringNull(m_displayName) ? DefaultDisplayName() : STRING(m_displayName);
 }
 
+Vector CBaseMonster::DefaultMinHullSize()
+{
+	return g_vecZero;
+}
+
+Vector CBaseMonster::DefaultMaxHullSize()
+{
+	return g_vecZero;
+}
+
 void CBaseMonster::GlowShellOn( Vector color, float flDuration )
 {
 	if (!m_glowShellUpdate)

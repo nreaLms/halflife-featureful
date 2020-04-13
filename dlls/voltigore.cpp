@@ -349,6 +349,8 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	Vector DefaultMinHullSize() { return Vector( -80.0f, -80.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 80.0f, 80.0f, 90.0f ); }
 
 	float m_flNextZapTime; // next time the voltigore can use the spit attack.
 	BOOL m_fShouldUpdateBeam;
@@ -745,7 +747,7 @@ void CVoltigore::Spawn()
 	Precache();
 
 	SetMyModel("models/voltigore.mdl");
-	SetMySize(Vector(-80, -80, 0), Vector(80, 80, 90));
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
@@ -1254,6 +1256,8 @@ public:
 	Schedule_t* GetScheduleOfType(int Type);
 
 	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	Vector DefaultMinHullSize() { return Vector( -16.0f, -16.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 16.0f, 16.0f, 32.0f ); }
 };
 
 LINK_ENTITY_TO_CLASS(monster_alien_babyvoltigore, CBabyVoltigore)
@@ -1268,7 +1272,7 @@ void CBabyVoltigore::Spawn()
 	Precache();
 
 	SetMyModel("models/baby_voltigore.mdl");
-	SetMySize(Vector(-16, -16, 0), Vector(16, 16, 32));
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

@@ -1662,7 +1662,7 @@ void UTIL_PrecacheOther( const char *szClassname )
 	REMOVE_ENTITY( pent );
 }
 
-void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship)
+void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax)
 {
 	edict_t	*pent = CREATE_NAMED_ENTITY( MAKE_STRING( szClassname ) );
 	if( FNullEnt( pent ) )
@@ -1676,7 +1676,13 @@ void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship)
 	{
 		CBaseMonster *pMonster = pEntity->MyMonsterPointer();
 		if (pMonster)
+		{
 			pMonster->m_reverseRelationship = reverseRelationship;
+			if (vecMin)
+				*vecMin = pMonster->DefaultMinHullSize();
+			if (vecMax)
+				*vecMax = pMonster->DefaultMaxHullSize();
+		}
 		pEntity->Precache();
 	}
 	REMOVE_ENTITY( pent );

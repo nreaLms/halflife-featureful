@@ -709,7 +709,7 @@ void CScientist::SciSpawnHelper(const char* modelName, float health, int headCou
 	Precache();
 
 	SetMyModel( modelName );
-	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
@@ -1228,6 +1228,8 @@ public:
 	virtual bool SetAnswerQuestion( CTalkMonster *pSpeaker );
 
 	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
+	Vector DefaultMinHullSize() { return Vector(-14.0f, -14.0f, 0.0f); }
+	Vector DefaultMaxHullSize() { return Vector(14.0f, 14.0f, 36.0f); }
 
 	int FIdleSpeak( void );
 	int m_baseSequence;	
@@ -1269,7 +1271,7 @@ void CSittingScientist::SciSpawnHelper(const char* modelName)
 	Precache();
 	InitBoneControllers();
 
-	SetMySize( Vector( -14, -14, 0 ), Vector( 14, 14, 36 ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	if (FBitSet(pev->spawnflags, SF_SCI_SITTING_DONT_DROP))

@@ -163,6 +163,8 @@ public:
 	static const char *pAttackMissSounds[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
+	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
 protected:
 	float m_flNextFlinch;
 	float m_flNextThrowTime;// last time the gonome used the guts attack.
@@ -641,7 +643,7 @@ void CGonome::Spawn()
 	Precache();
 
 	SetMyModel("models/gonome.mdl");
-	SetMySize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;

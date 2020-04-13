@@ -108,6 +108,8 @@ public:
 	CUSTOM_SCHEDULES
 
 	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	Vector DefaultMinHullSize() { return Vector( -12.0f, -12.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 12.0f, 12.0f, 24.0f ); }
 
 	static const char *pIdleSounds[];
 	static const char *pAlertSounds[];
@@ -305,7 +307,7 @@ void CHeadCrab::Spawn()
 void CHeadCrab::SpawnHelper(const char *modelName, float health)
 {
 	SetMyModel( modelName );
-	SetMySize( Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
@@ -533,7 +535,6 @@ void CBabyCrab::Spawn( void )
 	SpawnHelper("models/baby_headcrab.mdl", gSkillData.headcrabHealth * 0.25f); // less health than full grown
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 192;
-	SetMySize( Vector( -12, -12, 0 ), Vector( 12, 12, 24 ) );
 	MonsterInit();
 }
 

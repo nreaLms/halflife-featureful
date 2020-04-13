@@ -310,6 +310,8 @@ public:
 	CUSTOM_SCHEDULES
 
 	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 64.0f ); }
 
 	int m_stompSprite;
 	int m_GargGibModel;
@@ -847,7 +849,7 @@ void CGargantua::Spawn()
 	Precache();
 
 	SetMyModel( DefaultModel() );
-	SetMySize( Vector( -32, -32, 0 ), Vector( 32, 32, 64 ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

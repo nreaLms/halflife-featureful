@@ -251,6 +251,8 @@ int CBaseMonster::DefaultGibCount() {return 0;}
 int CBaseMonster::GibCount() {return 0;}
 bool CBaseMonster::IsAlienMonster() {return false;}
 const char* CBaseMonster::DisplayName() { return NULL; }
+Vector CBaseMonster::DefaultMinHullSize() {return Vector(0,0,0); }
+Vector CBaseMonster::DefaultMaxHullSize() {return Vector(0,0,0); }
 
 int TrainSpeed( int iSpeed, int iMax ) { return 0; }
 void CBasePlayer::DeathSound( void ) { }

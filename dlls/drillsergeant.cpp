@@ -61,7 +61,7 @@ void CDrillSergeant::Spawn()
 	Precache();
 
 	SetMyModel( "models/drill.mdl" );
-	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;

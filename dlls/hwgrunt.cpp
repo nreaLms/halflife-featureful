@@ -62,6 +62,8 @@ public:
 	Schedule_t *GetScheduleOfType( int Type );
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
+	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
 
 	int Save( CSave &save );
 	int Restore( CRestore &restore );
@@ -89,7 +91,7 @@ void CHWGrunt::Spawn()
 	Precache();
 
 	SetMyModel( "models/hwgrunt.mdl" );
-	SetMySize( VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid		= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

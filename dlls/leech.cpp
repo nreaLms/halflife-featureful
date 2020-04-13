@@ -115,6 +115,8 @@ public:
 	static const char *pAlertSounds[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	Vector DefaultMinHullSize() { return Vector( -1.0f, -1.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 1.0f, 1.0f, 2.0f ); }
 
 private:
 	// UNDONE: Remove unused boid vars, do group behavior
@@ -178,7 +180,7 @@ void CLeech::Spawn( void )
 	//	SET_MODEL( ENT( pev ), "models/icky.mdl" );
 	
 	//UTIL_SetSize( pev, g_vecZero, g_vecZero );
-	SetMySize( Vector( -1, -1, 0 ), Vector( 1, 1, 2 ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 	// Don't push the minz down too much or the water check will fail because this entity is really point-sized
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
