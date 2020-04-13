@@ -94,7 +94,6 @@ public:
 	BOOL m_fActive;
 	BOOL m_fFadeChildren;// should we make the children fadeout?
 	string_t m_customModel;
-	int m_classify;
 	int m_iPose;
 	BOOL m_notSolid;
 	BOOL m_gag;
@@ -120,7 +119,6 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_fActive, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_fFadeChildren, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_customModel, FIELD_STRING ),
-	DEFINE_FIELD( CMonsterMaker, m_classify, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_iPose, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_notSolid, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CMonsterMaker, m_gag, FIELD_BOOLEAN ),
@@ -162,11 +160,6 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "new_model" ) )
 	{
 		m_customModel = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
-	else if( FStrEq( pkvd->szKeyName, "classify" ) )
-	{
-		m_classify = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "pose" ) )
@@ -426,8 +419,8 @@ int CMonsterMaker::MakeMonster( void )
 			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
 		pevCreate->weapons = pev->weapons;
 
-		if (m_classify)
-			createdMonster->m_iClass = m_classify;
+		if (m_iClass)
+			createdMonster->m_iClass = m_iClass;
 		createdMonster->m_reverseRelationship = m_reverseRelationship;
 		createdMonster->m_displayName = m_displayName;
 		createdMonster->SetMyBloodColor(m_bloodColor);
