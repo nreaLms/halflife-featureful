@@ -2886,6 +2886,7 @@ string_t CTriggerRandom::ChooseTarget()
 			if (!m_uniqueTargetsLeft && (pev->spawnflags & SF_TRIGGER_RANDOM_REUSABLE) ) {
 				m_uniqueTargetsLeft = TargetCount();
 			}
+			m_lastTarget = chosenTarget;
 			return chosenTarget;
 		}
 	} else {
