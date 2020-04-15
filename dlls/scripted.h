@@ -100,6 +100,7 @@ public:
 	string_t m_iszFireOnAnimStart;
 	short m_targetActivator;
 	bool m_cantFindReported; // no need to save
+	bool m_cantPlayReported;
 };
 
 class CCineAI : public CCineMonster
