@@ -6509,7 +6509,7 @@
 
 @PointClass base(Targetname) = trigger_startpatrol : "Trigger Start Patrol"
 [
-	target(target_destination) : "Target monster"
+	target(string) : "Target monster [LE]"
 	m_iszPath(target_destination) : "Patrol path start"
 ]
 
