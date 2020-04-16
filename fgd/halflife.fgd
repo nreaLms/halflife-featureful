@@ -6256,7 +6256,8 @@
 
 @PointClass base(Target, Targetname) iconsprite("sprites/trigger_changetarget.spr") = trigger_changetarget : "Trigger Change Target"
 [
-	m_iszNewTarget(string) : "New Target"
+	target(string) : "Entity to affect [LE]"
+	m_iszNewTarget(string) : "New Target [LE]"
 ]
 
 @PointClass base(Target, Targetname) = trigger_changevalue : "Change any entity's values"

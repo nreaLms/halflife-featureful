@@ -2317,11 +2317,20 @@ void CTriggerChangeTarget::Spawn( void )
 
 void CTriggerChangeTarget::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	CBaseEntity *pTarget = UTIL_FindEntityByString( NULL, "targetname", STRING( pev->target ) );
+	CBaseEntity *pTarget = UTIL_FindEntityByTargetname( NULL, STRING( pev->target ), pActivator );
 
 	if( pTarget )
 	{
-		pTarget->pev->target = m_iszNewTarget;
+		if (UTIL_TargetnameIsActivator(m_iszNewTarget))
+		{
+			if (pActivator)
+				pTarget->pev->target = pActivator->pev->targetname;
+			else
+				ALERT(at_error, "%s \"%s\" requires a locus!\n", STRING(pev->classname), STRING(pev->targetname));
+		}
+		else
+			pTarget->pev->target = m_iszNewTarget;
+
 		CBaseMonster *pMonster = pTarget->MyMonsterPointer();
 		if( pMonster )
 		{
