@@ -2701,6 +2701,8 @@ public:
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	void EXPORT TimedThink();
 
+	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
@@ -3108,7 +3110,6 @@ void CTriggerKillMonster::KillMonster(CBaseEntity *pEntity)
 	CBaseMonster* pMonster = pEntity->MyMonsterPointer();
 	if (pEntity->IsAlive() && pMonster)
 	{
-		entvars_t* inflictor = pev;
 		switch (RANDOM_LONG(0,4)) {
 		case 0:
 			pMonster->m_LastHitGroup = HITGROUP_GENERIC;
@@ -3121,7 +3122,6 @@ void CTriggerKillMonster::KillMonster(CBaseEntity *pEntity)
 			break;
 		case 3:
 			pMonster->m_LastHitGroup = HITGROUP_GENERIC;
-			inflictor = NULL;
 			break;
 		default:
 			break;
@@ -3244,6 +3244,8 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	void Think();
+
+	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
