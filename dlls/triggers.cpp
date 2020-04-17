@@ -4144,3 +4144,159 @@ void CTriggerCommand::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		SERVER_COMMAND( szCommand );
 	}
 }
+
+#define SF_TRIGGER_HURT_REMOTE_INSTANT_KILL 1
+#define SF_TRIGGER_HURT_REMOTE_CONSTANT 2
+#define SF_TRIGGER_HURT_REMOTE_STARTON 4
+
+class CTriggerHurtRemote : public CPointEntity
+{
+public:
+	void Spawn();
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void KeyValue( KeyValueData *pkvd );
+	void EXPORT PeriodicHurt();
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	EHANDLE m_hActivator;
+
+protected:
+	void DoDamage();
+	void DoDamage(CBaseEntity* pTarget);
+	string_t TargetClass() const { return pev->netname; }
+	int DamageType() const { return pev->weapons; }
+	float Delay() const { return pev->frags ? pev->frags : 0.1; }
+	bool IsActive() const { return FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_STARTON); }
+};
+
+LINK_ENTITY_TO_CLASS( trigger_hurt_remote, CTriggerHurtRemote )
+
+TYPEDESCRIPTION	CTriggerHurtRemote::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerHurtRemote, m_hActivator, FIELD_EHANDLE ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerHurtRemote, CPointEntity )
+
+void CTriggerHurtRemote::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "targetclass"))
+	{
+		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "delay"))
+	{
+		pev->frags = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "damagetype"))
+	{
+		pev->weapons = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CTriggerHurtRemote::Spawn()
+{
+	CPointEntity::Spawn();
+	if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_STARTON))
+	{
+		SetThink(&CTriggerHurtRemote::PeriodicHurt);
+		pev->nextthink = gpGlobals->time + 0.1;
+	}
+}
+
+void CTriggerHurtRemote::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_CONSTANT))
+	{
+		if (ShouldToggle(useType, IsActive()))
+		{
+			if (IsActive())
+			{
+				ClearBits(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_STARTON);
+				SetThink(NULL);
+				pev->nextthink = 0.0f;
+				m_hActivator = 0;
+			}
+			else
+			{
+				SetBits(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_STARTON);
+				SetThink(&CTriggerHurtRemote::PeriodicHurt);
+				pev->nextthink = gpGlobals->time;
+				m_hActivator = pActivator;
+			}
+		}
+	}
+	else
+	{
+		if (useType != USE_OFF)
+		{
+			m_hActivator = pActivator;
+			DoDamage();
+		}
+	}
+}
+
+void CTriggerHurtRemote::PeriodicHurt()
+{
+	DoDamage();
+	pev->nextthink = gpGlobals->time + Delay();
+}
+
+void CTriggerHurtRemote::DoDamage()
+{
+	CBaseEntity *pTarget = NULL;
+	CBaseEntity *pActivator = m_hActivator;
+	while ( (pTarget = UTIL_FindEntityByTargetname( pTarget, STRING( pev->target ), pActivator )) != NULL )
+	{
+		DoDamage(pTarget);
+	}
+
+	string_t targetClass = TargetClass();
+	if (!FStringNull(targetClass))
+	{
+		pTarget = NULL;
+		while ( (pTarget = UTIL_FindEntityByClassname( pTarget, STRING( targetClass ) )) != NULL )
+		{
+			DoDamage(pTarget);
+		}
+	}
+}
+
+void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
+{
+	if (!pTarget->IsAlive())
+		return;
+
+	entvars_t* pevAttacker = m_hActivator ? m_hActivator->pev : pev;
+	if (pev->dmg > 0)
+	{
+		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))
+		{
+			pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health, DamageType() | DMG_ALWAYSGIB);
+		}
+		else
+		{
+			pTarget->TakeDamage(pTarget->pev, pevAttacker, pev->dmg, DamageType());
+		}
+	}
+	else if (pev->dmg < 0)
+	{
+		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))
+		{
+			pTarget->TakeHealth(Q_max( pTarget->pev->max_health - pTarget->pev->health, 0 ), DamageType());
+		}
+		else
+		{
+			pTarget->TakeHealth(-pev->dmg, DamageType());
+		}
+	}
+}

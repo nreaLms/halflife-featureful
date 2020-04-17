@@ -6301,19 +6301,8 @@
 	gravity(integer) : "Gravity (0-1)" : 1
 ]
 
-@SolidClass base(Targetname,Target) = trigger_hurt : "Trigger player hurt"
+@BaseClass = DamageType
 [
-	spawnflags(flags) =
-	[
-		1: "Target Once" : 0
-		2: "Start Off" : 0
-		8: "No clients" : 0
-		16:"FireClientOnly" : 0
-		32:"TouchClientOnly" : 0
-	]
-	master(string) : "Master"
-	dmg(integer) : "Damage" : 10
-	delay(string) : "Delay before trigger" : "0"
 	damagetype(choices) : "Damage Type" : 0 =
 	[
 		0 : "GENERIC"
@@ -6338,6 +6327,35 @@
 		2097152 : "SLOWBURN"
 		4194304 : "SLOWFREEZE"
 	]
+]
+
+@SolidClass base(Targetname,Target,DamageType) = trigger_hurt : "Trigger player hurt"
+[
+	spawnflags(flags) =
+	[
+		1: "Target Once" : 0
+		2: "Start Off" : 0
+		8: "No clients" : 0
+		16:"FireClientOnly" : 0
+		32:"TouchClientOnly" : 0
+	]
+	master(string) : "Master"
+	dmg(integer) : "Damage" : 10
+	delay(string) : "Delay before trigger" : "0"
+]
+
+@PointClass base(Targetname, Target, DamageType) = trigger_hurt_remote : "Trigger Hurt (non-touch)"
+[
+	spawnflags(Flags) =
+	[
+		1 : "Instant Kill" : 0
+		2 : "Constant" : 0
+		4 : "Start On" : 0
+	]
+	target(string) : "Target [LE]"
+	targetclass(string) : "Target Class" : : "If specified, all entities with the given class will be affected. This is independent from Target, which means the entity might cause damage twice to the same entity if Target is class of Target Class."
+	dmg(integer) : "Damage" : 10 : "Damage to deal. If 'Constant' flag is selected, this is a damage to deal every 'Delay' seconds. Can be negative to provide healing instead of dealing damage."
+	delay(string) : "Delay (Only when Constant)" : "1"
 ]
 
 @PointClass base(Targetname) = trigger_killmonster : "Trigger Kill Monster"
