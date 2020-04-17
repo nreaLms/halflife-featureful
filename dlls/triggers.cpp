@@ -3090,8 +3090,10 @@ public:
 
 	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
+	void OldUse();
 protected:
 	void KillMonster(CBaseEntity* pEntity);
+	bool CheckTarget(CBaseEntity* pEntity);
 };
 
 LINK_ENTITY_TO_CLASS( trigger_killmonster, CTriggerKillMonster )
@@ -3132,11 +3134,77 @@ void CTriggerKillMonster::KillMonster(CBaseEntity *pEntity)
 	}
 }
 
+bool CTriggerKillMonster::CheckTarget(CBaseEntity *pEntity)
+{
+	if (!FStringNull(pev->target))
+	{
+		if (FStringNull(pEntity->pev->targetname))
+			return false;
+		if (!FStrEq(STRING(pev->target), STRING(pEntity->pev->targetname)))
+			return false;
+	}
+
+	if (!FStringNull(pev->message))
+	{
+		if (FStringNull(pEntity->pev->classname))
+			return false;
+		if (!FClassnameIs(pEntity->pev, STRING(pev->message)))
+			return false;
+	}
+
+	if (!FStringNull(pev->netname))
+	{
+		if (FStringNull(pEntity->pev->netname))
+			return false;
+		if (!FStrEq(STRING(pev->netname), STRING(pEntity->pev->netname)))
+			return false;
+	}
+
+	return true;
+}
+
 void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	if (FStringNull( pev->target ))
-		return;
+	if (FBitSet(pev->spawnflags, SF_KILLMONSTER_KILL_BY_TARGETNAME|SF_KILLMONSTER_KILL_BY_CLASSNAME|SF_KILLMONSTER_KILL_BY_SQUADNAME))
+	{
+		ALERT(at_console, "Using old trigger_killmonster behavior\n");
+		OldUse();
+	}
+	else
+	{
+		CBaseEntity* pEntity = NULL;
+		if (!FStringNull(pev->target))
+		{
+			while((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->target))) != NULL)
+			{
+				if (CheckTarget(pEntity))
+					KillMonster(pEntity);
+			}
+		}
+		else if (!FStringNull(pev->message))
+		{
+			while((pEntity = UTIL_FindEntityByClassname(pEntity, STRING(pev->message))) != NULL)
+			{
+				if (CheckTarget(pEntity))
+					KillMonster(pEntity);
+			}
+		}
+		else if (!FStringNull(pev->netname))
+		{
+			while((pEntity = UTIL_FindEntityByString(pEntity, "netname", STRING(pev->netname))) != NULL)
+			{
+				if (CheckTarget(pEntity))
+					KillMonster(pEntity);
+			}
+		}
+	}
 
+	if( pev->spawnflags & SF_RELAY_FIREONCE )
+		UTIL_Remove( this );
+}
+
+void CTriggerKillMonster::OldUse()
+{
 	CBaseEntity* pEntity;
 	if ( pev->spawnflags & SF_KILLMONSTER_KILL_BY_TARGETNAME )
 	{
@@ -3164,9 +3232,6 @@ void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 			KillMonster(pEntity);
 		}
 	}
-
-	if( pev->spawnflags & SF_RELAY_FIREONCE )
-		UTIL_Remove( this );
 }
 
 #define SF_TRIGGER_TIMER_START_ON 1
