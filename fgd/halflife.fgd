@@ -6296,6 +6296,27 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-12 -12 -12, 12 12 12) color(255 255 0) = trigger_entity_iterator : "Entity Iterator"
+[
+	name_filter(target_destination) : "Filter Entities by Name"
+	classname_filter(string) : "Filter Entities by Classname"
+	status_filter(choices) : "Filter Entities by Status" : 1 =
+	[
+		0 : "No Filter (default)"
+		1 : "Only Living Entities"
+		2 : "Only Dead Entities"
+	]
+	target(target_destination) : "Entity's Trigger Target"
+	triggerstate(choices) : "Entity's Trigger State" : 2 =
+	[
+		0 : "Off"
+		1 : "On"
+		2 : "Toggle"
+	]
+	trigger_after_run(target_destination) : "Trigger at end of each Run"
+	maximum_runs(integer) : "Maximum Runs (0 for unlimited)"
+]
+
 @SolidClass base(Trigger) = trigger_gravity : "Trigger Gravity"
 [
 	gravity(integer) : "Gravity (0-1)" : 1

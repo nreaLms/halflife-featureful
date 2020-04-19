@@ -4302,3 +4302,140 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 		}
 	}
 }
+
+class CTriggerEntityIterator : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void KeyValue( KeyValueData *pkvd );
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	void Iterate(CBaseEntity* pEntity);
+
+	string_t m_nameFilter;
+	string_t m_classnameFilter;
+	short m_statusFilter;
+	short m_triggerState;
+	string_t m_triggerAfterRun;
+	int m_maxRuns;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_entity_iterator, CTriggerEntityIterator )
+
+TYPEDESCRIPTION	CTriggerEntityIterator::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerEntityIterator, m_nameFilter, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerEntityIterator, m_classnameFilter, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerEntityIterator, m_statusFilter, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerEntityIterator, m_triggerState, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerEntityIterator, m_triggerAfterRun, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerEntityIterator, m_maxRuns, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerEntityIterator, CPointEntity )
+
+void CTriggerEntityIterator::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "name_filter"))
+	{
+		m_nameFilter = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	if (FStrEq(pkvd->szKeyName, "classname_filter"))
+	{
+		m_classnameFilter = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "status_filter"))
+	{
+		m_statusFilter = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
+	{
+		m_triggerState = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "status_filter"))
+	{
+		m_triggerAfterRun = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "maximum_runs"))
+	{
+		m_maxRuns = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CTriggerEntityIterator::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	CBaseEntity *pEntity;
+	if (!FStringNull(m_nameFilter))
+	{
+		pEntity = NULL;
+		while ( (pEntity = UTIL_FindEntityByTargetname( pEntity, STRING( m_nameFilter ) )) != NULL )
+		{
+			if (FStringNull(m_classnameFilter) || FClassnameIs(pEntity->pev, STRING(m_classnameFilter)))
+			{
+				Iterate(pEntity);
+			}
+		}
+	}
+	else if (!FStringNull(m_classnameFilter))
+	{
+		pEntity = NULL;
+		while ( (pEntity = UTIL_FindEntityByClassname( pEntity, STRING( m_classnameFilter ) )) != NULL )
+		{
+			if (FStringNull(m_nameFilter) ||
+					(!FStringNull(pEntity->pev->targetname) && FStrEq(STRING(pEntity->pev->targetname), STRING(m_nameFilter))) )
+			{
+				Iterate(pEntity);
+			}
+		}
+	}
+
+	if (m_maxRuns > 0)
+	{
+		m_maxRuns--;
+		if (m_maxRuns == 0)
+			UTIL_Remove(this);
+	}
+}
+
+void CTriggerEntityIterator::Iterate(CBaseEntity *pEntity)
+{
+	if (m_statusFilter)
+	{
+		if (m_statusFilter == 1)
+		{
+			if (pEntity->pev->deadflag != DEAD_NO)
+				return;
+		}
+		else if (m_statusFilter == 2)
+		{
+			if (pEntity->pev->deadflag == DEAD_NO)
+				return;
+		}
+	}
+
+	USE_TYPE useType;
+	switch (m_triggerState) {
+	case 0:
+		useType = USE_OFF;
+		break;
+	case 1:
+		useType = USE_ON;
+		break;
+	default:
+		useType = USE_TOGGLE;
+		break;
+	}
+	SUB_UseTargets(pEntity, useType, 0.0f);
+}
