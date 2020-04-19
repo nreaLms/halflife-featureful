@@ -45,6 +45,8 @@
 // whether vortigaunt marked as squadleader has a different beam color
 #define FEATURE_ISLAVE_LEADER_COLOR 1
 
+#define FEATURE_ISLAVE_CAP_SQUAD 0
+
 // free energy dependent abilities
 
 // whether vortigaunts can heal allies using a free energy
@@ -1251,7 +1253,11 @@ void CISlave::Spawn()
 	pev->view_ofs		= Vector( 0, 0, 64 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState		= MONSTERSTATE_NONE;
-	m_afCapability		= bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_RANGE_ATTACK2 | bits_CAP_DOORS_GROUP | bits_CAP_SQUAD;
+	m_afCapability		= bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_RANGE_ATTACK2 | bits_CAP_DOORS_GROUP;
+
+#if FEATURE_ISLAVE_CAP_SQUAD
+	m_afCapability |= bits_CAP_SQUAD;
+#endif
 
 	m_voicePitch		= RANDOM_LONG( 85, 110 );
 
