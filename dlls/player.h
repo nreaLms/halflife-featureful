@@ -98,6 +98,9 @@ enum sbar_data
 
 #define CHAT_INTERVAL 1.0f
 
+#define ARMOR_RATIO	0.2	// Armor Takes 80% of the damage
+#define ARMOR_BONUS	0.5	// Each Point of Armor is work 1/x points of health
+
 class CBasePlayer : public CBaseMonster
 {
 public:

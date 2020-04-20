@@ -4208,7 +4208,7 @@ void CTriggerHurtRemote::KeyValue(KeyValueData *pkvd)
 void CTriggerHurtRemote::Spawn()
 {
 	CPointEntity::Spawn();
-	if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_STARTON))
+	if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_CONSTANT) && IsActive())
 	{
 		SetThink(&CTriggerHurtRemote::PeriodicHurt);
 		pev->nextthink = gpGlobals->time + 0.1;
@@ -4279,18 +4279,25 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 		return;
 
 	entvars_t* pevAttacker = m_hActivator ? m_hActivator->pev : pev;
-	if (pev->dmg > 0)
+	if (pev->dmg >= 0)
 	{
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))
 		{
-			pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health, DamageType() | DMG_ALWAYSGIB);
+			if (pTarget->IsPlayer())
+			{
+				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health + pTarget->pev->armorvalue / ARMOR_BONUS, DamageType());
+			}
+			else
+			{
+				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health, DamageType() | DMG_ALWAYSGIB);
+			}
 		}
 		else
 		{
 			pTarget->TakeDamage(pTarget->pev, pevAttacker, pev->dmg, DamageType());
 		}
 	}
-	else if (pev->dmg < 0)
+	else
 	{
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))
 		{
