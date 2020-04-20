@@ -4360,7 +4360,7 @@ void CTriggerEntityIterator::KeyValue(KeyValueData *pkvd)
 		m_triggerState = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if (FStrEq(pkvd->szKeyName, "status_filter"))
+	else if (FStrEq(pkvd->szKeyName, "trigger_after_run"))
 	{
 		m_triggerAfterRun = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
@@ -4399,6 +4399,11 @@ void CTriggerEntityIterator::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 				Iterate(pEntity);
 			}
 		}
+	}
+
+	if (!FStringNull(m_triggerAfterRun))
+	{
+		FireTargets(STRING(m_triggerAfterRun), pActivator, this, USE_TOGGLE, 0.0f);
 	}
 
 	if (m_maxRuns > 0)

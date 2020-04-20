@@ -6313,7 +6313,7 @@
 		1 : "On"
 		2 : "Toggle"
 	]
-	trigger_after_run(target_destination) : "Trigger at end of each Run"
+	trigger_after_run(target_destination) : "Trigger at end of each Run" : : "Trigger something after the full run has been completed. The original activator is forwarded."
 	maximum_runs(integer) : "Maximum Runs (0 for unlimited)"
 ]
 
