@@ -1492,6 +1492,7 @@
 	[
 		1 : "Repeatable" 	: 0
 		2 : "Scale models" : 0
+		4 : "Don't wait till land" : 0 : "Start fading right after life time has expired"
 	]
 ]
 

@@ -1514,7 +1514,7 @@ public:
 	void EXPORT ShootThink( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	virtual CGib *CreateGib( void );
+	virtual CGib *CreateGib( float lifeTime );
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -1639,13 +1639,17 @@ void CGibShooter::Spawn( void )
 	pev->body = MODEL_FRAMES( m_iGibModelIndex );
 }
 
-CGib *CGibShooter::CreateGib( void )
+CGib *CGibShooter::CreateGib( float lifeTime )
 {
 	if( CVAR_GET_FLOAT( "violence_hgibs" ) == 0 )
 		return NULL;
 
 	CGib *pGib = GetClassPtr( (CGib *)NULL );
+	if (!pGib)
+		return NULL;
+
 	pGib->Spawn( "models/hgibs.mdl" );
+	pGib->m_lifeTime = lifeTime;
 	pGib->m_bloodColor = BLOOD_COLOR_RED;
 
 	if( pev->body <= 1 )
@@ -1715,7 +1719,8 @@ void CGibShooter::ShootThink( void )
 
 		vecShootDir = vecShootDir.Normalize();
 
-		CGib *pGib = CreateGib();
+		const float lifeTime = ( m_flGibLife * RANDOM_FLOAT( 0.95f, 1.05f ) );	// +/- 5%
+		CGib *pGib = CreateGib(lifeTime);
 
 		if( pGib )
 		{
@@ -1727,7 +1732,6 @@ void CGibShooter::ShootThink( void )
 
 			float thinkTime = pGib->pev->nextthink - gpGlobals->time;
 
-			pGib->m_lifeTime = ( m_flGibLife * RANDOM_FLOAT( 0.95f, 1.05f ) );	// +/- 5%
 			if( pGib->m_lifeTime < thinkTime )
 			{
 				pGib->pev->nextthink = gpGlobals->time + pGib->m_lifeTime;
@@ -1759,12 +1763,14 @@ void CGibShooter::ShootThink( void )
 }
 
 #define SF_ENVSHOOTER_SCALEMODELS 2
+#define SF_ENVSHOOTER_DONT_WAIT_TILL_LAND 4
+
 class CEnvShooter : public CGibShooter
 {
 	void Precache( void );
 	void KeyValue( KeyValueData *pkvd );
 
-	CGib *CreateGib( void );
+	CGib *CreateGib( float lifeTime );
 };
 
 LINK_ENTITY_TO_CLASS( env_shooter, CEnvShooter )
@@ -1815,11 +1821,20 @@ void CEnvShooter::Precache( void )
 	CBreakable::MaterialSoundPrecache( (Materials)m_iGibMaterial );
 }
 
-CGib *CEnvShooter::CreateGib( void )
+CGib *CEnvShooter::CreateGib( float lifeTime )
 {
 	CGib *pGib = GetClassPtr( (CGib *)NULL );
+	if (!pGib)
+		return NULL;
 
 	pGib->Spawn( STRING( pev->model ) );
+	pGib->m_lifeTime = lifeTime;
+
+	if (FBitSet(pev->spawnflags, SF_ENVSHOOTER_DONT_WAIT_TILL_LAND))
+	{
+		pGib->SetThink( &CGib::StartFadeOut );
+		pGib->pev->nextthink = gpGlobals->time + lifeTime;
+	}
 
 	int bodyPart = 0;
 
