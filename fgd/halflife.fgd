@@ -5878,6 +5878,7 @@
 		2 : "Spawned monster"
 		3 : "Forward my activator"
 	]
+	yawdeviation(integer) : "Max yaw deviation" : : "Maximum value for random yaw deviation, from 0 to the specified value, on both sides."
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
 @PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []

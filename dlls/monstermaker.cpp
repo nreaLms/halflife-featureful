@@ -101,6 +101,7 @@ public:
 	int m_cyclicBacklogSize;
 	string_t m_iszPlacePosition;
 	short m_targetActivator;
+	short m_iMaxYawDeviation;
 	Vector m_defaultMinHullSize;
 	Vector m_defaultMaxHullSize;
 };
@@ -127,6 +128,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_cyclicBacklogSize, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_iszPlacePosition, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_targetActivator, FIELD_SHORT ),
+	DEFINE_FIELD( CMonsterMaker, m_iMaxYawDeviation, FIELD_SHORT ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMinHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMaxHullSize, FIELD_VECTOR ),
 };
@@ -208,6 +210,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "spawnorigin" ) )
 	{
 		m_iszPlacePosition = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "yawdeviation" ) )
+	{
+		m_iMaxYawDeviation = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -464,6 +471,17 @@ int CMonsterMaker::MakeMonster( void )
 		if (foundPlayer) {
 			placeAngles = Vector(0, UTIL_VecToYaw(foundPlayer->pev->origin - placePosition), 0);
 		}
+	}
+
+	if (m_iMaxYawDeviation)
+	{
+		const int deviation = RANDOM_LONG(0, m_iMaxYawDeviation);
+		if (RANDOM_LONG(0,1)) {
+			placeAngles.y += deviation;
+		} else {
+			placeAngles.y -= deviation;
+		}
+		placeAngles.y = UTIL_AngleMod(placeAngles.y);
 	}
 
 	pent = CREATE_NAMED_ENTITY( m_iszMonsterClassname );
