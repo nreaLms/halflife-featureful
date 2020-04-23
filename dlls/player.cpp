@@ -1811,6 +1811,7 @@ void CBasePlayer::InitStatusBar()
 	m_lastSeenEntityIndex = -1;
 	m_lastSeenHealth = -1;
 	m_lastSeenArmor = -1;
+	m_lastSeenTime = 0;
 }
 
 static void ClearMonsterInfoChannel(CBasePlayer* player)
@@ -1841,6 +1842,8 @@ static void ClearMonsterInfoChannel(CBasePlayer* player)
 	UTIL_HudMessage(player, textParms, "");
 }
 
+#define MONSTERINFO_LINGER_TIME 2
+
 void CBasePlayer::UpdateStatusBar()
 {
 	int newSBarState[SBAR_END] = {0};
@@ -1865,7 +1868,7 @@ void CBasePlayer::UpdateStatusBar()
 
 	bool showMonsterInfo = false;
 
-	if (pEntity)
+	if (pEntity && g_pGameRules->IsCoOp())
 	{
 		CBaseMonster* pMonster = pEntity->MyMonsterPointer();
 		if (pMonster && pMonster->IsAlive() && pMonster->m_IdealMonsterState != MONSTERSTATE_DEAD && g_pGameRules->IsMultiplayer()) {
@@ -1879,6 +1882,9 @@ void CBasePlayer::UpdateStatusBar()
 			const bool isFriendPlayer = pEntity->IsPlayer() && g_pGameRules->PlayerRelationship(this, pEntity) == GR_TEAMMATE;
 			const bool isFriendMonster = (pMonster->IDefaultRelationship(this) == R_AL);
 			showMonsterInfo = isFriendPlayer || (allowmonsterinfo.value == 1 && !pMonster->IsPlayer()) || (allowmonsterinfo.value == 2 && isFriendMonster);
+			if (showMonsterInfo)
+				m_lastSeenTime = gpGlobals->time;
+
 			if (showMonsterInfo && (m_lastSeenEntityIndex != entityIndex || m_lastSeenHealth != health || (m_lastSeenArmor != armor && isFriendPlayer))) {
 				m_lastSeenEntityIndex = entityIndex;
 				m_lastSeenHealth = health;
@@ -1982,7 +1988,7 @@ void CBasePlayer::UpdateStatusBar()
 	{
 		return;
 	}
-	else
+	else if (m_lastSeenEntityIndex >= 0 && m_lastSeenTime + MONSTERINFO_LINGER_TIME <= gpGlobals->time  && g_pGameRules->IsCoOp())
 	{
 		ClearMonsterInfoChannel(this);
 	}

@@ -349,6 +349,7 @@ public:
 	int m_lastSeenEntityIndex;
 	int m_lastSeenHealth;
 	int m_lastSeenArmor;
+	float m_lastSeenTime;
 
 	void SetPrefsFromUserinfo( char *infobuffer );
 
