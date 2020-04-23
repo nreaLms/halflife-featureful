@@ -37,7 +37,7 @@
 #define SF_MONSTERMAKER_PREDISASTER 256
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
-
+#define SF_MONSTERMAKER_ALIGN_TO_PLAYER 4096 // Align to closest player on spawn
 #define SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED 8192
 #define SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR 16384 // DEPRECATED. Use the spawned monster as activator to fire target
 #define SF_MONSTERMAKER_SPECIAL_FLAG		32768
@@ -444,6 +444,25 @@ int CMonsterMaker::MakeMonster( void )
 			const char* blockerName = FStringNull(pBlocker->pev->classname) ? "" : STRING(pBlocker->pev->classname);
 			ALERT( at_aiconsole, "Spawning of %s is blocked by %s\n", STRING(m_iszMonsterClassname), blockerName );
 			return MONSTERMAKER_BLOCKED;
+		}
+	}
+
+	if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_ALIGN_TO_PLAYER))
+	{
+		float minDist = 10000.0f;
+		CBaseEntity* foundPlayer = NULL;
+		for (int i = 1; i <= gpGlobals->maxClients; ++i) {
+			CBaseEntity* player = UTIL_PlayerByIndex(i);
+			if (player && player->IsPlayer() && player->IsAlive()) {
+				const float dist = (pev->origin - player->pev->origin).Length();
+				if (dist < minDist) {
+					minDist = dist;
+					foundPlayer = player;
+				}
+			}
+		}
+		if (foundPlayer) {
+			placeAngles = Vector(0, UTIL_VecToYaw(foundPlayer->pev->origin - placePosition), 0);
 		}
 	}
 

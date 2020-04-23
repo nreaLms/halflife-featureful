@@ -5787,6 +5787,7 @@
 		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
 		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
+		4096 : "Align to player" : 0 : "Spawned monsters will be aligned to the closest player increasing the chance of seeing the player right after the spawn."
 		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
 		16384 : "Monster is activator (deprecated)" : 0 : "Pass spawned monster as activator triggering Target on Release. Deprecated. Use Target's Activator instead."
 		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
