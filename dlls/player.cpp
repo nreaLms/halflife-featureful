@@ -895,10 +895,8 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
  *
  * ENTITY_METHOD(PlayerDie)
  */
-entvars_t *g_pevLastInflictor;  // Set in combat.cpp.  Used to pass the damage inflictor for death messages.
-				// Better solution:  Add as parameter to all Killed() functions.
 
-void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
+void CBasePlayer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	CSound *pSound;
 
@@ -906,7 +904,7 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	if( m_pActiveItem )
 		m_pActiveItem->Holster();
 
-	g_pGameRules->PlayerKilled( this, pevAttacker, g_pevLastInflictor );
+	g_pGameRules->PlayerKilled( this, pevAttacker, pevInflictor );
 
 	if( m_pTank != 0 )
 		m_pTank->Use( this, this, USE_OFF, 0 );

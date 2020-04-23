@@ -41,7 +41,7 @@ public:
 	void EXPORT SuperBounceTouch( CBaseEntity *pOther );
 	void EXPORT HuntThink( void );
 	int	BloodColor( void ) { return CBaseMonster::BloodColor(); }
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
 
 	virtual int Save( CSave &save ); 
@@ -155,7 +155,7 @@ void CSqueakGrenade::PrecacheImpl( const char* modelName )
 	PRECACHE_SOUND( "squeek/sqk_deploy1.wav" );
 }
 
-void CSqueakGrenade::Killed( entvars_t *pevAttacker, int iGib )
+void CSqueakGrenade::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	pev->model = iStringNull;// make invisible
 	SetThink( &CBaseEntity::SUB_Remove );
@@ -183,7 +183,7 @@ void CSqueakGrenade::Killed( entvars_t *pevAttacker, int iGib )
 	if( m_hOwner != 0 )
 		pev->owner = m_hOwner->edict();
 
-	CBaseMonster::Killed( pevAttacker, GIB_ALWAYS );
+	CBaseMonster::Killed( pevInflictor, pevAttacker, GIB_ALWAYS );
 }
 
 void CSqueakGrenade::GibMonster( void )
@@ -220,7 +220,7 @@ void CSqueakGrenade::HuntThink( void )
 	{
 		g_vecAttackDir = pev->velocity.Normalize();
 		pev->health = -1;
-		Killed( pev, 0 );
+		Killed( pev, pev, 0 );
 		return;
 	}
 
@@ -418,7 +418,7 @@ class CPenguinGrenade : public CSqueakGrenade
 {
 	void Spawn( void );
 	void Precache( void );
-	void Killed(entvars_t *pevAttacker, int iGib);
+	void Killed(entvars_t *pevInflictor,entvars_t *pevAttacker, int iGib);
 	float AdditionalExplosionDamage();
 	float MaximumExplosionDamage();
 	float ExplosionRadius()
@@ -438,7 +438,7 @@ void CPenguinGrenade::Precache()
 	PrecacheImpl("models/w_penguin.mdl");
 }
 
-void CPenguinGrenade::Killed(entvars_t *pevAttacker, int iGib)
+void CPenguinGrenade::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib)
 {
 	if( m_hOwner != 0 )
 		pev->owner = m_hOwner->edict();

@@ -41,7 +41,7 @@ public:
 	void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
 	void IdleHeadTurn( Vector &vecFriend );
 	void MonsterThink();
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 
 	int Save( CSave &save );
 	int Restore( CRestore &restore );
@@ -237,10 +237,10 @@ void CGenericMonster::MonsterThink()
 	CBaseMonster::MonsterThink();
 }
 
-void CGenericMonster::Killed(entvars_t *pevAttacker, int iGib)
+void CGenericMonster::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib)
 {
 	SentenceStop();
-	CBaseMonster::Killed(pevAttacker, iGib);
+	CBaseMonster::Killed(pevInflictor, pevAttacker, iGib);
 }
 
 class CDeadGenericMonster : public CBaseMonster

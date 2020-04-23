@@ -100,7 +100,7 @@ public:
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int BloodColor( void ) { return DONT_BLEED; }
 	BOOL HasAlienGibs() {return TRUE;}
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void Activate( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	int DefaultClassify( void ) { return CLASS_INSECT; }
@@ -657,7 +657,7 @@ void CLeech::SwimThink( void )
 	UpdateMotion();
 }
 
-void CLeech::Killed( entvars_t *pevAttacker, int iGib )
+void CLeech::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	Vector vecSplatDir;
 	TraceResult tr;

@@ -726,7 +726,7 @@ void CBarnacleGrapple::DestroyEffect( void )
 #ifndef CLIENT_DLL
 	if( m_pTip )
 	{
-		m_pTip->Killed( NULL, GIB_NEVER );
+		m_pTip->Killed( NULL, NULL, GIB_NEVER );
 		m_pTip = NULL;
 	}
 #endif

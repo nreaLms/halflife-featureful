@@ -90,7 +90,7 @@ void CEagle::Holster( int skiplocal /* = 0 */ )
 
 	if (m_pEagleLaser)
 	{
-		m_pEagleLaser->Killed( NULL, GIB_NEVER );
+		m_pEagleLaser->Killed( NULL, NULL, GIB_NEVER );
 		m_pEagleLaser = NULL;
 	}
 }
@@ -106,7 +106,7 @@ void CEagle::SecondaryAttack()
 		if (m_pEagleLaser)
 		{
 			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/desert_eagle_sight2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			m_pEagleLaser->Killed( NULL, GIB_NORMAL );
+			m_pEagleLaser->Killed( NULL, NULL, GIB_NORMAL );
 			m_pEagleLaser = NULL;
 		}
 #endif

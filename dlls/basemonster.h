@@ -310,7 +310,7 @@ public:
 	float UpdateTarget( entvars_t *pevTarget );
 	virtual Activity GetDeathActivity( void );
 	Activity GetSmallFlinchActivity( void );
-	virtual void Killed( entvars_t *pevAttacker, int iGib );
+	virtual void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	virtual void OnDying();
 	virtual void GibMonster( void );
 	virtual void UpdateOnRemove( void );

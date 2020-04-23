@@ -577,7 +577,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 	}
 }
 
-void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
+void CTalkMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
 	if( MyToleranceLevel() < TOLERANCE_ABSOLUTE_NO_ALERTS
@@ -588,7 +588,7 @@ void CTalkMonster::Killed( entvars_t *pevAttacker, int iGib )
 		AlertFriends();
 		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
 	}
-	CFollowingMonster::Killed( pevAttacker, iGib );
+	CFollowingMonster::Killed( pevInflictor, pevAttacker, iGib );
 }
 
 void CTalkMonster::OnDying()

@@ -37,7 +37,7 @@ public:
 	int DefaultClassify( void ) { return CLASS_ALIEN_MILITARY; }
 	void UpdateOnRemove();
 	int BloodColor( void ) { return BLOOD_COLOR_YELLOW; }
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
 
 	void SetObjectCollisionBox( void )
@@ -434,9 +434,9 @@ void CNihilanth::StartupThink( void )
 	pev->nextthink = gpGlobals->time + 0.1f;
 }
 
-void CNihilanth::Killed( entvars_t *pevAttacker, int iGib )
+void CNihilanth::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
-	CBaseMonster::Killed( pevAttacker, iGib );
+	CBaseMonster::Killed( pevInflictor, pevAttacker, iGib );
 }
 
 void CNihilanth::DyingThink( void )

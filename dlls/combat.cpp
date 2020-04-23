@@ -37,7 +37,6 @@ extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
 
 extern Vector VecBModelOrigin( entvars_t *pevBModel );
-extern entvars_t *g_pevLastInflictor;
 
 #define GERMAN_GIB_COUNT		4
 #define	HUMAN_GIB_COUNT			6
@@ -736,7 +735,7 @@ void CBaseMonster::CallGibMonster( void )
 Killed
 ============
 */
-void CBaseMonster::Killed( entvars_t *pevAttacker, int iGib )
+void CBaseMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	//unsigned int	cCount = 0;
 	//BOOL		fDone = FALSE;
@@ -1131,22 +1130,18 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	if( pev->health <= 0 )
 	{
-		g_pevLastInflictor = pevInflictor;
-
 		if( bitsDamageType & DMG_ALWAYSGIB )
 		{
-			Killed( pevAttacker, GIB_ALWAYS );
+			Killed( pevInflictor, pevAttacker, GIB_ALWAYS );
 		}
 		else if( bitsDamageType & DMG_NEVERGIB )
 		{
-			Killed( pevAttacker, GIB_NEVER );
+			Killed( pevInflictor, pevAttacker, GIB_NEVER );
 		}
 		else
 		{
-			Killed( pevAttacker, GIB_NORMAL );
+			Killed( pevInflictor, pevAttacker, GIB_NORMAL );
 		}
-
-		g_pevLastInflictor = NULL;
 
 		return 0;
 	}
@@ -1226,7 +1221,7 @@ int CBaseMonster::DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 		if( pev->health <= flDamage )
 		{
 			pev->health = -50;
-			Killed( pevAttacker, GIB_ALWAYS );
+			Killed( pevInflictor, pevAttacker, GIB_ALWAYS );
 			return 0;
 		}
 		// Accumulate corpse gibbing damage, so you can gib with multiple hits

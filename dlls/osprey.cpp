@@ -52,7 +52,7 @@ public:
 	const char* DefaultDisplayName() { return "Osprey"; }
 	int DefaultClassify( void ) { return CLASS_MACHINE; }
 	int BloodColor( void ) { return DONT_BLEED; }
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 
 	void UpdateGoal( void );
 	BOOL HasDead( void );
@@ -587,7 +587,7 @@ int COsprey::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 }
 */
 
-void COsprey::Killed( entvars_t *pevAttacker, int iGib )
+void COsprey::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->gravity = 0.3f;

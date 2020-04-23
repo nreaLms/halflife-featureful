@@ -409,7 +409,7 @@ public:
 	void Spawn(void);
 	void Precache(void);
 	int  DefaultClassify(void) { return CLASS_RACEX_SHOCK; }
-	void Killed(entvars_t *pevAttacker, int iGib);
+	void Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib);
 	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void FireHurtTargets(const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 
@@ -674,9 +674,9 @@ void CGeneWorm::HitTouch( CBaseEntity *pOther )
 }
 
 
-void CGeneWorm::Killed(entvars_t *pevAttacker, int iGib)
+void CGeneWorm::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib)
 {
-	CBaseMonster::Killed(pevAttacker, iGib);
+	CBaseMonster::Killed(pevInflictor, pevAttacker, iGib);
 }
 
 void CGeneWorm::DyingThink(void)

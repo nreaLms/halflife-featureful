@@ -333,7 +333,7 @@ public:
 	Schedule_t *GetSchedule(void);
 	Schedule_t *GetScheduleOfType(int Type);
 	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	virtual void Killed(entvars_t *pevAttacker, int iGib);
+	virtual void Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib);
 	void UpdateOnRemove();
 	const char* DefaultGibModel() {
 		return "models/vgibs.mdl";
@@ -1047,7 +1047,7 @@ void CVoltigore::StartTask(Task_t *pTask)
 	}
 }
 
-void CVoltigore::Killed(entvars_t *pevAttacker, int iGib)
+void CVoltigore::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib)
 {
 	DestroyBeams();
 	DestroyGlow();
@@ -1089,7 +1089,7 @@ void CVoltigore::Killed(entvars_t *pevAttacker, int iGib)
 		iTimes++;
 	}
 
-	CSquadMonster::Killed(pevAttacker, iGib);
+	CSquadMonster::Killed(pevInflictor, pevAttacker, iGib);
 }
 
 void CVoltigore::UpdateOnRemove()
@@ -1250,7 +1250,7 @@ public:
 	BOOL	CheckMeleeAttack1(float flDot, float flDist);
 	BOOL	CheckRangeAttack1(float flDot, float flDist);
 	void	StartTask(Task_t *pTask);
-	void	Killed(entvars_t *pevAttacker, int iGib);
+	void	Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib);
 	void	GibMonster();
 	Schedule_t* GetSchedule();
 	Schedule_t* GetScheduleOfType(int Type);
@@ -1390,10 +1390,10 @@ void CBabyVoltigore::StartTask(Task_t *pTask)
 	}
 }
 
-void CBabyVoltigore::Killed(entvars_t* pevAttacker, int iGib)
+void CBabyVoltigore::Killed(entvars_t *pevInflictor, entvars_t* pevAttacker, int iGib)
 {
 	DestroyBeams();
-	CSquadMonster::Killed(pevAttacker, iGib);
+	CSquadMonster::Killed(pevInflictor, pevAttacker, iGib);
 }
 
 void CBabyVoltigore::GibMonster()

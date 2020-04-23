@@ -41,7 +41,7 @@ public:
 	const char* DefaultDisplayName() { return "Apache"; }
 	const char* ReverseRelationshipModel() { return "models/apachef.mdl"; }
 	int BloodColor( void ) { return DONT_BLEED; }
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
 
 	void SetObjectCollisionBox( void )
@@ -225,7 +225,7 @@ void CApache::StartupUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	SetUse( NULL );
 }
 
-void CApache::Killed( entvars_t *pevAttacker, int iGib )
+void CApache::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	pev->movetype = MOVETYPE_TOSS;
 	pev->gravity = 0.3f;

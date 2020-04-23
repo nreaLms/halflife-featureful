@@ -66,7 +66,7 @@ public:
 
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 
 	MONSTERSTATE GetIdealState( void ) { return MONSTERSTATE_IDLE; };
 	int CanPlaySequence( BOOL fDisregardState ) { return TRUE; };
@@ -1002,7 +1002,7 @@ int CTentacle::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 	return 1;
 }
 
-void CTentacle::Killed( entvars_t *pevAttacker, int iGib )
+void CTentacle::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	m_iGoalAnim = TENTACLE_ANIM_Pit_Idle;
 	return;

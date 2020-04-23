@@ -46,7 +46,7 @@ public:
 		return "models/computergibs.mdl";
 	}
 
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void BecomeDead();
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
@@ -309,9 +309,9 @@ void CRGrunt::Explode()
 	pev->nextthink = gpGlobals->time;
 }
 
-void CRGrunt::Killed( entvars_t *pevAttacker, int iGib )
+void CRGrunt::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
-	CBaseMonster::Killed( pevAttacker, GIB_NEVER );
+	CBaseMonster::Killed( pevInflictor, pevAttacker, GIB_NEVER );
 }
 
 void CRGrunt::BecomeDead()

@@ -286,7 +286,7 @@ public:
 
 	void PrescheduleThink( void );
 
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void OnDying();
 	void DeathEffect( void );
 
@@ -972,9 +972,9 @@ void CGargantua::DeathEffect( void )
 	pSmoker->pev->nextthink = gpGlobals->time + 2.5f;	// Start in 2.5 seconds
 }
 
-void CGargantua::Killed( entvars_t *pevAttacker, int iGib )
+void CGargantua::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
-	CFollowingMonster::Killed( pevAttacker, GIB_NEVER );
+	CFollowingMonster::Killed( pevInflictor, pevAttacker, GIB_NEVER );
 }
 
 void CGargantua::OnDying()
