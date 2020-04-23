@@ -869,11 +869,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 							if (m_hEnemy)
 							{
-								revivedVort->m_hEnemy = m_hEnemy;
-								revivedVort->m_vecEnemyLKP = m_vecEnemyLKP;
-								revivedVort->SetConditions( bits_COND_NEW_ENEMY );
-								revivedVort->m_MonsterState = MONSTERSTATE_COMBAT;
-								revivedVort->m_IdealMonsterState = MONSTERSTATE_COMBAT;
+								revivedVort->PushEnemy(m_hEnemy, m_vecEnemyLKP);
 							}
 
 							// revived vort starts with zero energy
