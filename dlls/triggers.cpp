@@ -1079,7 +1079,7 @@ void CBaseTrigger::HurtTouch( CBaseEntity *pOther )
 	}
 #endif
 	if( fldmg < 0 )
-		pOther->TakeHealth( -fldmg, m_bitsDamageInflict );
+		pOther->TakeHealth( this, -fldmg, m_bitsDamageInflict );
 	else
 		pOther->TakeDamage( pev, pev, fldmg, m_bitsDamageInflict );
 
@@ -4278,9 +4278,10 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 	if (!pTarget->IsAlive())
 		return;
 
-	entvars_t* pevAttacker = m_hActivator ? m_hActivator->pev : pev;
+	CBaseEntity* pActivator = m_hActivator;
 	if (pev->dmg >= 0)
 	{
+		entvars_t* pevAttacker = pActivator != 0 ? pActivator->pev : pev;
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))
 		{
 			if (pTarget->IsPlayer())
@@ -4299,13 +4300,14 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 	}
 	else
 	{
+		CBaseEntity* healer = pActivator != 0 ? pActivator : this;
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))
 		{
-			pTarget->TakeHealth(Q_max( pTarget->pev->max_health - pTarget->pev->health, 0 ), DamageType());
+			pTarget->TakeHealth(healer, Q_max( pTarget->pev->max_health - pTarget->pev->health, 0 ), DamageType());
 		}
 		else
 		{
-			pTarget->TakeHealth(-pev->dmg, DamageType());
+			pTarget->TakeHealth(healer, -pev->dmg, DamageType());
 		}
 	}
 }

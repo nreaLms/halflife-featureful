@@ -1843,7 +1843,7 @@ void CISlave::ZapBeam( int side )
 			if (pEntity->pev->flags & (FL_CLIENT | FL_MONSTER)) {
 				//TODO: check that target is actually a living creature, not machine
 				const float toHeal = gSkillData.slaveDmgZap;
-				const int healed = TakeHealth(toHeal, DMG_GENERIC);
+				const int healed = TakeHealth(this, toHeal, DMG_GENERIC);
 				if (healed) // give some health to vortigaunt like in Decay bonus mission
 				{
 					ALERT(at_aiconsole, "Vortigaunt gets health from enemy\n");
@@ -2095,7 +2095,7 @@ int CISlave::HealOther(CBaseEntity *pEntity)
 {
 	int result = 0;
 	if (pEntity->IsAlive()) {
-		result = pEntity->TakeHealth(HealPower(), DMG_GENERIC);
+		result = pEntity->TakeHealth(this, HealPower(), DMG_GENERIC);
 		SpendEnergy(result);
 	}
 	return result;

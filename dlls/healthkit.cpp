@@ -71,7 +71,7 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 		return FALSE;
 	}
 
-	if( pPlayer->TakeHealth( gSkillData.healthkitCapacity, DMG_GENERIC ) )
+	if( pPlayer->TakeHealth( this, gSkillData.healthkitCapacity, DMG_GENERIC ) )
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING( pev->classname ) );
@@ -376,7 +376,7 @@ public:
 	float SoundVolume() { return 1.0f; }
 	bool GiveCharge(CBaseEntity* pActivator)
 	{
-		return pActivator->TakeHealth( 1, DMG_GENERIC ) > 0;
+		return pActivator->TakeHealth( this, 1, DMG_GENERIC ) > 0;
 	}
 };
 
@@ -718,7 +718,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	}
 
 	// charge the player
-	if( pActivator->TakeHealth( 1, DMG_GENERIC ) )
+	if( pActivator->TakeHealth( this, 1, DMG_GENERIC ) )
 	{
 		m_iJuice--;
 		if (m_iJuice <= 0)

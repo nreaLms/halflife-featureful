@@ -325,7 +325,7 @@ public:
 
 	virtual	Vector GetGunPosition( void );
 
-	virtual int TakeHealth( float flHealth, int bitsDamageType );
+	virtual int TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType );
 	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 

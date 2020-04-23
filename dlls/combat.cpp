@@ -992,7 +992,7 @@ void CGib::StartFadeOut()
 }
 
 // take health
-int CBaseMonster::TakeHealth( float flHealth, int bitsDamageType )
+int CBaseMonster::TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamageType )
 {
 	if( !pev->takedamage )
 		return 0;
@@ -1003,7 +1003,7 @@ int CBaseMonster::TakeHealth( float flHealth, int bitsDamageType )
 
 	m_bitsDamageType &= ~( bitsDamageType & ~DMG_TIMEBASED );
 
-	return CBaseEntity::TakeHealth( flHealth, bitsDamageType );
+	return CBaseEntity::TakeHealth( pHealer, flHealth, bitsDamageType );
 }
 
 void AddScoreForDamage(entvars_t *pevAttacker, CBaseEntity* victim, const float damage)

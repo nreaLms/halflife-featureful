@@ -42,7 +42,7 @@ ItemInfo CBasePlayerWeapon::ItemInfoArray[MAX_WEAPONS];
 bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch ) { return true; }
 
 // CBaseEntity Stubs
-int CBaseEntity::TakeHealth( float flHealth, int bitsDamageType ) { return 1; }
+int CBaseEntity::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType ) { return 1; }
 int CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 1; }
 CBaseEntity *CBaseEntity::GetNextTarget( void ) { return NULL; }
 int CBaseEntity::Save( CSave &save ) { return 1; }
@@ -239,7 +239,7 @@ void CBaseMonster::RunAI( void ) {}
 void CBaseMonster::Killed( entvars_t *pevAttacker, int iGib ) {}
 void CBaseMonster::OnDying() {}
 void CBaseMonster::UpdateOnRemove() {}
-int CBaseMonster::TakeHealth(float flHealth, int bitsDamageType) { return 0; }
+int CBaseMonster::TakeHealth(CBaseEntity* pHealer, float flHealth, int bitsDamageType) { return 0; }
 int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; }
 int CBaseMonster::Restore( class CRestore & ) { return 1; }
 int CBaseMonster::Save( class CSave & ) { return 1; }
@@ -256,7 +256,7 @@ Vector CBaseMonster::DefaultMaxHullSize() {return Vector(0,0,0); }
 
 int TrainSpeed( int iSpeed, int iMax ) { return 0; }
 void CBasePlayer::DeathSound( void ) { }
-int CBasePlayer::TakeHealth( float flHealth, int bitsDamageType ) { return 0; }
+int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType ) { return 0; }
 void CBasePlayer::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
 int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; }
 void CBasePlayer::PackDeadPlayerItems( void ) { }

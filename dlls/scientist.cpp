@@ -1148,7 +1148,7 @@ void CScientist::Heal( void )
 	if( target.Length() > 100.0f )
 		return;
 
-	m_hTargetEnt->TakeHealth( gSkillData.scientistHeal, DMG_GENERIC );
+	m_hTargetEnt->TakeHealth(this, gSkillData.scientistHeal, DMG_GENERIC );
 	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "items/medshot4.wav", 0.75, ATTN_NORM );
 
 	// Don't heal again for 1 minute

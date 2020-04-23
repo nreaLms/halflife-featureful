@@ -1308,9 +1308,20 @@ bool CTalkMonster::IsHeavilyWounded()
 	return pev->health <= pev->max_health * 0.5f;
 }
 
-int CTalkMonster::TakeHealth(float flHealth, int bitsDamageType)
+int CTalkMonster::TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamageType)
 {
-	int ret = CFollowingMonster::TakeHealth(flHealth, bitsDamageType);
+	int ret = CFollowingMonster::TakeHealth(pHealer, flHealth, bitsDamageType);
+
+	if (pHealer && pHealer->IsPlayer() && IsFriendWithPlayerBeforeProvoked())
+	{
+		// Got healed by a player. Be nice again if was provoked.
+		Forget(bits_MEMORY_PROVOKED|bits_MEMORY_SUSPICIOUS);
+		if (m_hEnemy != 0 && m_hEnemy->IsPlayer()) {
+			m_hEnemy = NULL;
+			SetState(MONSTERSTATE_ALERT);
+		}
+	}
+
 	// Clear bits upon healing so monster could say it again when injured again
 	if ( !IsHeavilyWounded() )
 		ClearBits( m_bitsSaid, bit_saidWoundHeavy );

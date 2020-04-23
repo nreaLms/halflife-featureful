@@ -398,9 +398,9 @@ void CBasePlayer::DeathSound( void )
 
 // override takehealth
 // bitsDamageType indicates type of damage healed. 
-int CBasePlayer::TakeHealth( float flHealth, int bitsDamageType )
+int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType )
 {
-	const int healed = CBaseMonster::TakeHealth(flHealth, bitsDamageType);
+	const int healed = CBaseMonster::TakeHealth(pHealer, flHealth, bitsDamageType);
 #if FEATURE_MEDKIT
 	CBasePlayerWeapon* pPlayerMedkit = WeaponById(WEAPON_MEDKIT);
 	if (pPlayerMedkit) {
@@ -2549,7 +2549,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				{
 					int idif = Q_min( m_idrowndmg - m_idrownrestored, 10 );
 
-					TakeHealth( idif, DMG_GENERIC );
+					TakeHealth( this, idif, DMG_GENERIC );
 					m_idrownrestored += idif;
 				}
 				bDuration = 4;	// get up to 5*10 = 50 points back

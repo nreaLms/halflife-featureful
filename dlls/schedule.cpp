@@ -1371,7 +1371,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 	case TASK_GET_HEALTH_FROM_FOOD:
 #if FEATURE_EAT_FOR_HEALTH
 		ALERT(at_aiconsole, "%s eating. Current health: %d/%d\n", STRING(pev->classname), (int)pev->health, (int)pev->max_health);
-		TakeHealth( pev->max_health * pTask->flData, DMG_GENERIC);
+		TakeHealth(this, pev->max_health * pTask->flData, DMG_GENERIC);
 		ALERT(at_aiconsole, "%s health after eating: %d/%d\n", STRING(pev->classname), (int)pev->health, (int)pev->max_health);
 #endif
 		TaskComplete();

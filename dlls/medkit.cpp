@@ -196,7 +196,7 @@ void CMedkit::WeaponIdle(void)
 		const int maxHeal = Q_min((int)gSkillData.plrDmgMedkit, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 		if (m_secondaryAttack) {
 			const int diff = (int)(m_pPlayer->pev->max_health - m_pPlayer->pev->health);
-			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= m_pPlayer->TakeHealth(Q_min(maxHeal, diff), DMG_GENERIC);
+			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= m_pPlayer->TakeHealth(m_pPlayer, Q_min(maxHeal, diff), DMG_GENERIC);
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/medshot5.wav", 1.0, ATTN_NORM, 0, 100);
 		} else {
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
@@ -205,18 +205,8 @@ void CMedkit::WeaponIdle(void)
 	
 			if (healTarget) {
 				const int diff = (int)ceil(healTarget->pev->max_health - healTarget->pev->health);
-				const int healResult = healTarget->TakeHealth(Q_min(maxHeal, diff), DMG_GENERIC);
+				const int healResult = healTarget->TakeHealth(m_pPlayer, Q_min(maxHeal, diff), DMG_GENERIC);
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= healResult;
-#ifndef CLIENT_DLL
-				CBaseMonster* monster = healTarget->MyMonsterPointer();
-				if (monster) {
-					monster->Forget(bits_MEMORY_PROVOKED|bits_MEMORY_SUSPICIOUS);
-					if (monster->m_hEnemy.Get() && monster->m_hEnemy->IsPlayer()) {
-						monster->m_hEnemy = NULL;
-						monster->SetState(MONSTERSTATE_ALERT);
-					}
-				}
-#endif
 				EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/medshot4.wav", 1.0, ATTN_NORM, 0, 100);
 			}
 		}

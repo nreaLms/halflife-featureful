@@ -486,7 +486,7 @@ CBaseEntity * EHANDLE::operator -> ()
 }
 
 // give health
-int CBaseEntity::TakeHealth( float flHealth, int bitsDamageType )
+int CBaseEntity::TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamageType )
 {
 	if( !pev->takedamage )
 		return 0;
