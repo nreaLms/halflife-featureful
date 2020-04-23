@@ -100,7 +100,6 @@ public:
 	int m_iHead;
 	int m_cyclicBacklogSize;
 	string_t m_iszPlacePosition;
-	string_t m_iszAngles;
 	short m_targetActivator;
 	Vector m_defaultMinHullSize;
 	Vector m_defaultMaxHullSize;
@@ -127,7 +126,6 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_maxHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_cyclicBacklogSize, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_iszPlacePosition, FIELD_STRING ),
-	DEFINE_FIELD( CMonsterMaker, m_iszAngles, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_targetActivator, FIELD_SHORT ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMinHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMaxHullSize, FIELD_VECTOR ),
@@ -207,6 +205,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 		m_targetActivator = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "spawnorigin" ) )
+	{
+		m_iszPlacePosition = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseMonster::KeyValue( pkvd );
 }
@@ -220,11 +223,12 @@ void CMonsterMaker::Spawn()
 
 	pev->solid = SOLID_NOT;
 
-	m_iszPlacePosition = pev->noise;
-	pev->noise = iStringNull;
-
-	m_iszAngles = pev->noise2;
-	pev->noise2 = iStringNull;
+	if (FStringNull(m_iszPlacePosition))
+	{
+		// Spirit compat
+		m_iszPlacePosition = pev->noise;
+		pev->noise = iStringNull;
+	}
 
 	m_cLiveChildren = 0;
 	Precache();
@@ -291,6 +295,25 @@ void CMonsterMaker::Precache( void )
 	UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize );
 }
 
+static CBaseEntity* MakerBlocker(const Vector& mins, const Vector& maxs)
+{
+	CBaseEntity *pList[2];
+	int count = UTIL_EntitiesInBox( pList, 2, mins, maxs, FL_CLIENT | FL_MONSTER );
+	if( count )
+	{
+		// don't build a stack of monsters!
+		return pList[0];
+	}
+	return NULL;
+}
+
+static float MakerGroundLevel(const Vector& position, entvars_t* pev)
+{
+	TraceResult tr;
+	UTIL_TraceLine( position, position - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );
+	return tr.vecEndPos.z;
+}
+
 //=========================================================
 // MakeMonster-  this is the code that drops the monster
 //=========================================================
@@ -305,68 +328,123 @@ int CMonsterMaker::MakeMonster( void )
 		return MONSTERMAKER_LIMIT;
 	}
 
-	Vector placePosition;
-	if (FStringNull(m_iszPlacePosition))
-	{
-		placePosition = pev->origin;
-	}
-	else
-	{
-		bool evaluated;
-		placePosition = CalcLocus_Position(this, m_hActivator, STRING(m_iszPlacePosition), &evaluated);
-		if (!evaluated)
-			return MONSTERMAKER_BADPLACE;
-	}
-
-	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
-	{
-		if( !m_flGround )
-		{
-			// set altitude. Now that I'm activated, any breakables, etc should be out from under me.
-			TraceResult tr;
-
-			UTIL_TraceLine( placePosition, placePosition - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );
-			m_flGround = tr.vecEndPos.z;
-		}
-	}
-
-	Vector mins = placePosition - Vector( 34, 34, 0 );
-	Vector maxs = placePosition + Vector( 34, 34, 0 );
+	Vector minHullSize = Vector( -34, -34, 0 );
+	Vector maxHullSize = Vector( 34, 34, 0 );
 
 	if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_AUTOSIZEBBOX))
 	{
 		if (m_minHullSize != g_vecZero)
 		{
-			mins = placePosition + Vector( m_minHullSize.x, m_minHullSize.y, 0 );
+			minHullSize = Vector( m_minHullSize.x, m_minHullSize.y, 0 );
 		}
 		else if (m_defaultMinHullSize != g_vecZero)
 		{
-			mins = placePosition + Vector( m_defaultMinHullSize.x, m_defaultMinHullSize.y, 0 );
+			minHullSize = Vector( m_defaultMinHullSize.x, m_defaultMinHullSize.y, 0 );
 		}
 
 		if (m_maxHullSize != g_vecZero)
 		{
-			maxs = placePosition + Vector( m_maxHullSize.x, m_maxHullSize.y, 0 );
+			maxHullSize = Vector( m_maxHullSize.x, m_maxHullSize.y, 0 );
 		}
 		else if (m_defaultMaxHullSize != g_vecZero)
 		{
-			maxs = placePosition + Vector( m_defaultMaxHullSize.x, m_defaultMaxHullSize.y, 0 );
+			maxHullSize = Vector( m_defaultMaxHullSize.x, m_defaultMaxHullSize.y, 0 );
 		}
 	}
 
-	maxs.z = placePosition.z;
-	if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
-		mins.z = m_flGround;
+	Vector placePosition;
+	Vector placeAngles;
+	Vector mins, maxs;
 
-	CBaseEntity *pList[2];
-	int count = UTIL_EntitiesInBox( pList, 2, mins, maxs, FL_CLIENT | FL_MONSTER );
-	if( count )
+	const char* placeIdentifier = STRING(m_iszPlacePosition);
+	if (!FStringNull(m_iszPlacePosition) && *placeIdentifier == '@' && placeIdentifier[1] != '\0')
 	{
-		// don't build a stack of monsters!
-		CBaseEntity* blocker = pList[0];
-		const char* blockerName = blocker ? (FStringNull(blocker->pev->classname) ? "" : STRING(blocker->pev->classname)) : "";
-		ALERT( at_aiconsole, "Spawning of %s is blocked by %s\n", STRING(m_iszMonsterClassname), blockerName );
-		return MONSTERMAKER_BLOCKED;
+		// Random spot out of several ones
+
+		const char* candidateName = placeIdentifier+1;
+
+		int total = 0;
+		CBaseEntity* pCandidate = NULL;
+		CBaseEntity* pLastValidCandidate = NULL;
+		CBaseEntity* pChosenSpot = NULL;
+		bool foundAnything = false;
+
+		while( ( pCandidate = UTIL_FindEntityByTargetname( pCandidate, candidateName ) ) != NULL )
+		{
+			foundAnything = true;
+
+			mins = pCandidate->pev->origin + minHullSize;
+			maxs = pCandidate->pev->origin + maxHullSize;
+			maxs.z = pCandidate->pev->origin.z;
+
+			if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
+			{
+				mins.z = MakerGroundLevel(pCandidate->pev->origin, pev);
+			}
+
+			if (MakerBlocker(mins, maxs) == 0)
+			{
+				pLastValidCandidate = pCandidate;
+				total++;
+				if (RANDOM_LONG(0, total - 1) < 1)
+					pChosenSpot = pLastValidCandidate;
+			}
+		}
+
+		if (pChosenSpot)
+		{
+			placePosition = pChosenSpot->pev->origin;
+			placeAngles = pChosenSpot->pev->angles;
+		}
+		else
+		{
+			if (foundAnything)
+				return MONSTERMAKER_BLOCKED;
+			else
+				return MONSTERMAKER_BADPLACE;
+		}
+	}
+	else
+	{
+		// Single spot
+		placeAngles = pev->angles;
+
+		if (FStringNull(m_iszPlacePosition))
+		{
+			placePosition = pev->origin;
+		}
+		else
+		{
+			bool evaluated;
+			placePosition = CalcLocus_Position(this, m_hActivator, placeIdentifier, &evaluated);
+			if (!evaluated)
+				return MONSTERMAKER_BADPLACE;
+		}
+
+		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
+		{
+			if( !m_flGround
+					|| !FStringNull(m_iszPlacePosition) ) // The position could change, so we need to calculate the new ground level.
+			{
+				// set altitude. Now that I'm activated, any breakables, etc should be out from under me.
+				m_flGround = MakerGroundLevel(placePosition, pev);
+			}
+		}
+
+		mins = placePosition + minHullSize;
+		maxs = placePosition + maxHullSize;
+
+		maxs.z = placePosition.z;
+		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
+			mins.z = m_flGround;
+
+		CBaseEntity *pBlocker = MakerBlocker(mins, maxs);
+		if (pBlocker)
+		{
+			const char* blockerName = FStringNull(pBlocker->pev->classname) ? "" : STRING(pBlocker->pev->classname);
+			ALERT( at_aiconsole, "Spawning of %s is blocked by %s\n", STRING(m_iszMonsterClassname), blockerName );
+			return MONSTERMAKER_BLOCKED;
+		}
 	}
 
 	pent = CREATE_NAMED_ENTITY( m_iszMonsterClassname );
@@ -375,14 +453,6 @@ int CMonsterMaker::MakeMonster( void )
 	{
 		ALERT ( at_console, "NULL Ent in MonsterMaker!\n" );
 		return MONSTERMAKER_NULLENTITY;
-	}
-
-	Vector placeAngles = pev->angles;
-	if (!FStringNull(m_iszAngles))
-	{
-		CBaseEntity* anglesEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszAngles), m_hActivator);
-		if (anglesEnt)
-			placeAngles.y = anglesEnt->pev->angles.y;
 	}
 
 	pevCreate = VARS( pent );
