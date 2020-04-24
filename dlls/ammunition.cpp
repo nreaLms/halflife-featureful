@@ -110,30 +110,6 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 		return;
 	}
 
-#if 0
-	CBasePlayer* pPlayer = (CBasePlayer*)pOther;
-	bool hasWeaponWithThisAmmo = false;
-	for( int i = 0; !hasWeaponWithThisAmmo && i < MAX_WEAPONS; i++ )
-	{
-		CBasePlayerWeapon* pWeapon = pPlayer->m_rgpPlayerWeapons[i];
-		if( pWeapon )
-		{
-			if (pWeapon->pszAmmo1() && FStrEq(AmmoName(), pWeapon->pszAmmo1()) ) {
-				hasWeaponWithThisAmmo = true;
-				break;
-			}
-			if (pWeapon->pszAmmo2() && FStrEq(AmmoName(), pWeapon->pszAmmo2()) ) {
-				hasWeaponWithThisAmmo = true;
-				break;
-			}
-		}
-	}
-
-	if (!hasWeaponWithThisAmmo) {
-		return;
-	}
-#endif
-
 	if( AddAmmo( pOther ) )
 	{
 		if( g_pGameRules->AmmoShouldRespawn( this ) == GR_AMMO_RESPAWN_YES )

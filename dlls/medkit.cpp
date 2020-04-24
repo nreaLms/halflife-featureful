@@ -133,9 +133,7 @@ void CMedkit::PrimaryAttack(void)
 
 	CBaseEntity* healTarget;
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 && (healTarget = FindHealTarget()) ) {
-//		if (healTarget->IsPlayer()) {
-//			m_pPlayer->TryToSayHealing();
-//		}
+		//
 	} else {
 		PlayEmptySound();
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.8;

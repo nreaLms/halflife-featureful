@@ -4719,10 +4719,12 @@ BOOL CBasePlayer::FBecomeProne( void )
 {
 	m_afPhysicsFlags |= PFLAG_ONBARNACLE;
 
+#if FEATURE_ROPE
 	if( (m_afPhysicsFlags & PFLAG_ONROPE) )
 	{
 		LetGoRope();
 	}
+#endif
 
 	return TRUE;
 }

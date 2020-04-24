@@ -3911,7 +3911,7 @@ CBaseEntity *CBaseMonster::DropItem( const char *pszItemName, const Vector &vecP
 	else
 	{
 		ALERT( at_console, "DropItem() - Didn't create!\n" );
-		return FALSE;
+		return NULL;
 	}
 }
 
