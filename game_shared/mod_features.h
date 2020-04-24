@@ -63,6 +63,9 @@
 // enable reverse relationship models, like barnabus
 #define FEATURE_REVERSE_RELATIONSHIP_MODELS 0
 
+// monsters who carry hand grenades will drop one hand grenade upon death
+#define FEATURE_MONSTERS_DROP_HANDGRENADES 0
+
 // New weapons
 #define FEATURE_PIPEWRENCH (0 || FEATURE_OPFOR_WEAPONS)
 #define FEATURE_KNIFE (0 || FEATURE_OPFOR_WEAPONS)

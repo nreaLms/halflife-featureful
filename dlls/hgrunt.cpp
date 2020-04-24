@@ -210,13 +210,14 @@ void CHGrunt::GibMonster( void )
 	CBaseMonster::GibMonster();
 }
 
-void CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, BOOL isGibbed)
+CBaseEntity *CHGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, BOOL isGibbed)
 {
 	CBaseEntity* pGun = DropItem(entityName, vecGunPos, vecGunAngles);
 	if (pGun && isGibbed) {
 		pGun->pev->velocity = Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) );
 		pGun->pev->avelocity = Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 );
 	}
+	return pGun;
 }
 
 void CHGrunt::DropMyItems(BOOL isGibbed)
@@ -238,6 +239,17 @@ void CHGrunt::DropMyItems(BOOL isGibbed)
 		if( FBitSet( pev->weapons, HGRUNT_GRENADELAUNCHER ) ) {
 			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
 		}
+#if FEATURE_MONSTERS_DROP_HANDGRENADES
+		if ( FBitSet (pev->weapons, HGRUNT_HANDGRENADE ) ) {
+			CBaseEntity* pGrenadeEnt = DropMyItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+			if (pGrenadeEnt)
+			{
+				CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
+				if (pGrenadeWeap)
+					pGrenadeWeap->m_iDefaultAmmo = 1;
+			}
+		}
+#endif
 	}
 	pev->weapons = 0;
 }

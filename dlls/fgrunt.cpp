@@ -170,7 +170,7 @@ public:
 	void JustSpoke( void );
 
 	void DropMyItems(BOOL isGibbed);
-	void DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, BOOL isGibbed);
+	CBaseEntity* DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, BOOL isGibbed);
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
@@ -1137,13 +1137,14 @@ void CHFGrunt :: GibMonster ( void )
 	CTalkMonster::GibMonster();
 }
 
-void CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, BOOL isGibbed)
+CBaseEntity* CHFGrunt::DropMyItem(const char* entityName, const Vector& vecGunPos, const Vector& vecGunAngles, BOOL isGibbed)
 {
 	CBaseEntity* pGun = DropItem(entityName, vecGunPos, vecGunAngles);
 	if (pGun && isGibbed) {
 		pGun->pev->velocity = Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) );
 		pGun->pev->avelocity = Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 );
 	}
+	return pGun;
 }
 
 void CHFGrunt::DropMyItems(BOOL isGibbed)
@@ -1174,6 +1175,17 @@ void CHFGrunt::DropMyItems(BOOL isGibbed)
 		{
 			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
 		}
+#if FEATURE_MONSTERS_DROP_HANDGRENADES
+		if ( FBitSet (pev->weapons, FGRUNT_HANDGRENADE ) ) {
+			CBaseEntity* pGrenadeEnt = DropMyItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+			if (pGrenadeEnt)
+			{
+				CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
+				if (pGrenadeWeap)
+					pGrenadeWeap->m_iDefaultAmmo = 1;
+			}
+		}
+#endif
 	}
 	pev->weapons = 0;
 }

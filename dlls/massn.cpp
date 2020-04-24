@@ -173,6 +173,17 @@ void CMassn::DropMyItems(BOOL isGibbed)
 		if( FBitSet( pev->weapons, MASSN_GRENADELAUNCHER ) ) {
 			DropMyItem( "ammo_ARgrenades", isGibbed ? vecGunPos : BodyTarget( pev->origin ), vecGunAngles, isGibbed );
 		}
+#if FEATURE_MONSTERS_DROP_HANDGRENADES
+		if ( FBitSet (pev->weapons, MASSN_HANDGRENADE ) ) {
+			CBaseEntity* pGrenadeEnt = DropMyItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles, isGibbed );
+			if (pGrenadeEnt)
+			{
+				CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
+				if (pGrenadeWeap)
+					pGrenadeWeap->m_iDefaultAmmo = 1;
+			}
+		}
+#endif
 	}
 	pev->weapons = 0;
 }
