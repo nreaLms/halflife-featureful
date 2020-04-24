@@ -714,7 +714,7 @@ void EV_FirePython( event_args_t *args )
 //======================
 //	   GAUSS START
 //======================
-#define SND_STOP			(1<<5)
+#define SND_STOP			(1 << 5)
 #define SND_CHANGE_PITCH	(1 << 7)		// duplicated in protocol.h change sound pitch
 
 void EV_SpinGauss( event_args_t *args )
