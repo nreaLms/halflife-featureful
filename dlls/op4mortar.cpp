@@ -462,37 +462,37 @@ void COp4Mortar::KeyValue(KeyValueData *pvkd)
 	if(strcmp(pvkd->szKeyName, "m_hmax"))
 	{
 		m_hmax = atoi(pvkd->szValue);
-		pvkd->fHandled = 1;
+		pvkd->fHandled = TRUE;
 	}
 	else if(strcmp(pvkd->szKeyName, "m_hmin"))
 	{
 		m_hmin = atoi(pvkd->szValue);
-		pvkd->fHandled = 1;
+		pvkd->fHandled = TRUE;
 	}
 	else if(strcmp(pvkd->szKeyName, "mortar_velocity"))
 	{
 		m_velocity = atoi(pvkd->szValue);
-		pvkd->fHandled = 1;
+		pvkd->fHandled = TRUE;
 	}
 	else if(strcmp(pvkd->szKeyName, "mindist"))
 	{
 		m_minRange = atoi(pvkd->szValue);
-		pvkd->fHandled = 1;
+		pvkd->fHandled = TRUE;
 	}
 	else if(strcmp(pvkd->szKeyName, "maxdist"))
 	{
 		m_maxRange = atoi(pvkd->szValue);
-		pvkd->fHandled = 1;
+		pvkd->fHandled = TRUE;
 	}
 	else if(strcmp(pvkd->szKeyName, "enemytype"))
 	{
 		m_iEnemyType = atoi(pvkd->szValue);
-		pvkd->fHandled = 1;
+		pvkd->fHandled = TRUE;
 	}
 	else if(strcmp(pvkd->szKeyName, "firedelay"))
 	{
 		m_FireDelay = atoi(pvkd->szValue);
-		pvkd->fHandled = 1;
+		pvkd->fHandled = TRUE;
 	}
 	else
 	{

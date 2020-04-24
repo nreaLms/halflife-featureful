@@ -1142,7 +1142,7 @@ BOOL CPitWorm::ClawAttack()
 	}
 	m_fAttacking = TRUE;
 	m_fLockHeight = TRUE;
-	return 1;
+	return TRUE;
 }
 
 void CPitWorm::ShootBeam()
