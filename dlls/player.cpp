@@ -210,6 +210,7 @@ int gmsgNightvision = 0;
 int gmsgMovementState = 0;
 #endif
 
+int gmsgUseSound = 0;
 
 void LinkUserMessages( void )
 {
@@ -270,7 +271,7 @@ void LinkUserMessages( void )
 #if FEATURE_MOVE_MODE
 	gmsgMovementState = REG_USER_MSG( "MoveMode", 2 );
 #endif
-
+	gmsgUseSound = REG_USER_MSG( "UseSound", 1 );
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer )
@@ -1636,7 +1637,18 @@ void CBasePlayer::PlayerUse( void )
 		caps = pObject->ObjectCaps();
 
 		if( m_afButtonPressed & IN_USE )
+		{
+#if FEATURE_CLIENTSIDE_HUDSOUND
+			if (IsNetClient())
+			{
+					MESSAGE_BEGIN( MSG_ONE, gmsgUseSound, NULL, pev );
+							WRITE_BYTE( 1 );
+					MESSAGE_END();
+			}
+#else
 			EMIT_SOUND( ENT(pev), CHAN_ITEM, "common/wpn_select.wav", 0.4, ATTN_NORM );
+#endif
+		}
 
 		if( ( ( pev->button & IN_USE ) && ( caps & FCAP_CONTINUOUS_USE ) ) ||
 			 ( ( m_afButtonPressed & IN_USE ) && ( caps & ( FCAP_IMPULSE_USE | FCAP_ONOFF_USE ) ) ) )
@@ -1655,7 +1667,18 @@ void CBasePlayer::PlayerUse( void )
 	else
 	{
 		if( m_afButtonPressed & IN_USE )
+		{
+#if FEATURE_CLIENTSIDE_HUDSOUND
+			if (IsNetClient())
+			{
+					MESSAGE_BEGIN( MSG_ONE, gmsgUseSound, NULL, pev );
+							WRITE_BYTE( 0 );
+					MESSAGE_END();
+			}
+#else
 			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "common/wpn_denyselect.wav", 0.4, ATTN_NORM );
+#endif
+		}
 	}
 }
 

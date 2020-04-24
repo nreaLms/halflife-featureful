@@ -126,6 +126,20 @@ int __MsgFunc_Bhopcap( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int __MsgFunc_UseSound( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	int soundType = READ_BYTE();
+
+	if (soundType)
+		PlaySound( "common/wpn_select.wav", 0.4 );
+	else
+		PlaySound( "common/wpn_denyselect.wav", 0.4 );
+
+	return 1;
+}
+
 void GibHitCallback( TEMPENTITY* ent, pmtrace_t* pmtrace )
 {
 	static const char* redBloodDecals[] = {"{blood1", "{blood2", "{blood3", "{blood4", "{blood5", "{blood6"};
@@ -517,6 +531,7 @@ void DLLEXPORT HUD_Init( void )
 	gHUD.Init();
 
 	gEngfuncs.pfnHookUserMsg( "Bhopcap", __MsgFunc_Bhopcap );
+	gEngfuncs.pfnHookUserMsg( "UseSound", __MsgFunc_UseSound );
 	gEngfuncs.pfnHookUserMsg( "RandomGibs", __MsgFunc_RandomGibs );
 }
 
