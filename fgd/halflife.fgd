@@ -472,6 +472,7 @@
 		38: "HEV Suit"
 	]
 	explodemagnitude(integer) : "Explode Magnitude (0=none)" : 0
+	randomitem_template(string) : "info_item_random entity"
 ]
 
 @BaseClass = SoundRadius
@@ -2373,6 +2374,44 @@
 	texture(decal)
 ]
 
+@BaseClass color(140 115 65) base(Targetname) = RandomItem
+[
+	info_null(string) : "No item chance"
+	item_healthkit(string) : "Healthkit chance"
+	item_battery(string) : "Battery chance"
+	ammo_9mmclip(string) : "9mm clip chance"
+	ammo_9mmAR(string) : "9mmAR clip chance"
+	ammo_9mmbox(string) : "9mm Box chance"
+	ammo_ARgrenades(string) : "AR grenades chance"
+	ammo_buckshot(string) : "Shotgun shells chance"
+	ammo_crossbow(string) : "Crossbow bolts chance"
+	ammo_357(string) : "357 bullets chance"
+	ammo_556(string) : "556 bullets chance"
+	ammo_762(string) : "762 bullets chance"
+	ammo_rpgclip(string) : "RPG rocket chance"
+	ammo_gaussclip(string) : "Gauss clip chance"
+	weapon_handgrenade(string) : "Hand Grenades chance"
+	weapon_tripmine(string) : "Tripmine chance"
+	weapon_satchel(string) : "Satchel chance"
+	weapon_snark(string) : "Snarks chance"
+	weapon_crowbar(string) : "Crowbar chance"
+	weapon_9mmhandgun(string) : "Glock chance"
+	weapon_357(string) : "Python chance"
+	weapon_9mmAR(string) : "MP5 chance"
+	weapon_shotgun(string) : "Shotgun chance"
+	weapon_crossbow(string) : "Crossbow chance"
+	weapon_rpg(string) : "RPG chance"
+	weapon_hornetgun(string) : "Hornetgun chance"
+	weapon_pipewrench(string) : "Pipewrench chance"
+	weapon_knife(string) : "Knife chance"
+	weapon_grapple(string) : "Grapple chance"
+	weapon_medkit(string) : "Medkit chance"
+	weapon_eagle(string) : "Desert Eagle chance"
+	weapon_penguin(string) : "Penguins chance"
+	weapon_m249(string) : "M249 chance"
+	weapon_sniperrifle(string) : "Sniperrifle chance"
+]
+
 @PointClass base(Targetname) size(-24 -24 0, 24 24 16) color(20 190 60) = info_bigmomma : "Big Mamma Node"
 [
 	spawnflags(Flags) =
@@ -2407,6 +2446,8 @@
 ]
 
 @PointClass base(Target, Angles) size(-4 -4 -4, 4 4 4) color(0 255 0) = info_intermission : "Intermission Spot" []
+
+@PointClass base(RandomItem) = info_item_random : "Template for item_random_proxy. Supports up to 16 different entities." []
 
 @PointClass base(Targetname) = info_landmark : "Transition Landmark" []
 
@@ -2478,6 +2519,13 @@
 		2 : "No logon" : 0
 	]
 ]
+
+@PointClass size(-16 -16 0, 16 16 36) base(Target, Angles, RandomItem) = item_random : "Random item" []
+@PointClass size(-16 -16 0, 16 16 36) color(140 115 65) base(Target, Angles) = item_random_proxy : "Random item proxy. Must be used with info_item_random."
+[
+	template(string) : "info_item_random entity"
+]
+
 @PointClass base(Weapon, Targetx, RenderFields) studio() = item_generic : "Generic scenery item"
 [
 	model(studio) : "Model" : "models/w_security.mdl"

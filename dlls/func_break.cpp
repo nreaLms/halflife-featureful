@@ -125,6 +125,11 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 			m_iszSpawnObject = MAKE_STRING( pSpawnObjects[object] );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "randomitem_template" ) )
+	{
+		pev->message = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "explodemagnitude" ) )
 	{
 		ExplosionSetMagnitude( atoi( pkvd->szValue ) );
@@ -760,6 +765,7 @@ void CBreakable::Die( void )
 	// Don't fire something that could fire myself
 	pev->targetname = 0;
 
+	const int originalSolidity = pev->solid;
 	pev->solid = SOLID_NOT;
 
 	// Fire targets on break
@@ -767,8 +773,24 @@ void CBreakable::Die( void )
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = pev->ltime + 0.1f;
-	if( m_iszSpawnObject )
+	if (pev->message)
+	{
+		CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
+		if ( foundEntity && FClassnameIs(foundEntity->pev, "info_item_random"))
+		{
+			pev->solid = originalSolidity;
+			foundEntity->Use(this, this, USE_TOGGLE, 0.0f);
+			pev->solid = SOLID_NOT;
+		}
+		else
+		{
+			ALERT(at_error, "Random item template %s for %s not found or not info_item_random\n", STRING(pev->message), STRING(pev->classname));
+		}
+	}
+	else if( !FStringNull(m_iszSpawnObject) )
+	{
 		CBaseEntity::Create( STRING( m_iszSpawnObject ), VecBModelOrigin( pev ), pev->angles, edict() );
+	}
 
 	if( Explodable() )
 	{

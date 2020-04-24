@@ -88,6 +88,207 @@ void CWorldItem::Spawn( void )
 	REMOVE_ENTITY( edict() );
 }
 
+class CItemRandomProxy : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Spawn( void );
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void EXPORT SpawnItemThink();
+	void SpawnItem();
+};
+
+LINK_ENTITY_TO_CLASS( item_random_proxy, CItemRandomProxy )
+
+void CItemRandomProxy::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "template"))
+	{
+		pev->message = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue( pkvd );
+}
+
+void CItemRandomProxy::Spawn( void )
+{
+	pev->solid = SOLID_NOT;
+	pev->effects = EF_NODRAW;
+	if (FStringNull(pev->message))
+	{
+		ALERT(at_error, "No template for item_random_proxy\n");
+		REMOVE_ENTITY( edict() );
+		return;
+	}
+	if (FStringNull(pev->targetname)) {
+		SetThink(&CItemRandomProxy::SpawnItemThink);
+		pev->nextthink = gpGlobals->time + 0.1;
+	}
+}
+
+void CItemRandomProxy::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	SpawnItem();
+	UTIL_Remove(this);
+}
+
+void CItemRandomProxy::SpawnItemThink()
+{
+	SpawnItem();
+	SetThink( &CBaseEntity::SUB_Remove );
+	pev->nextthink = gpGlobals->time + 0.1;
+}
+
+void CItemRandomProxy::SpawnItem()
+{
+	CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
+	if ( foundEntity && FClassnameIs(foundEntity->pev, "info_item_random"))
+	{
+		foundEntity->Use(this, this, USE_TOGGLE, 0.0f);
+	}
+	else
+	{
+		ALERT(at_error, "Random item template %s for item_random_proxy not found or not info_item_random\n", STRING(pev->message));
+	}
+}
+
+#define ITEM_RANDOM_MAX_COUNT 16
+
+class CItemRandom : public CPointEntity
+{
+public:
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	void KeyValue( KeyValueData *pkvd );
+	void Spawn();
+	void Precache();
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void SpawnItem(const Vector& origin, const Vector& angles, string_t target);
+
+	string_t m_itemNames[ITEM_RANDOM_MAX_COUNT];
+	float m_itemProbabilities[ITEM_RANDOM_MAX_COUNT];
+	int m_itemCount;
+
+	static bool IsAppropriateItemName(const char* name);
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+private:
+	float m_probabilitySum;
+};
+
+LINK_ENTITY_TO_CLASS( item_random, CItemRandom )
+
+TYPEDESCRIPTION CItemRandom::m_SaveData[] =
+{
+	DEFINE_ARRAY( CItemRandom, m_itemNames, FIELD_STRING, ITEM_RANDOM_MAX_COUNT ),
+	DEFINE_ARRAY( CItemRandom, m_itemProbabilities, FIELD_FLOAT, ITEM_RANDOM_MAX_COUNT ),
+	DEFINE_FIELD( CItemRandom, m_itemCount, FIELD_INTEGER ),
+};
+IMPLEMENT_SAVERESTORE( CItemRandom, CBaseEntity )
+
+bool CItemRandom::IsAppropriateItemName(const char *name)
+{
+	return FStrEq(name, "info_null") || (strncmp(name, "ammo_", 5) == 0) || (strncmp(name, "item_", 5) == 0) || (strncmp(name, "weapon_", 7) == 0);
+}
+
+void CItemRandom::KeyValue(KeyValueData *pkvd)
+{
+	if (IsAppropriateItemName(pkvd->szKeyName))
+	{
+		const float probability = atof(pkvd->szValue);
+		if (m_itemCount < ITEM_RANDOM_MAX_COUNT && probability > 0)
+		{
+			m_itemNames[m_itemCount] = ALLOC_STRING(pkvd->szKeyName);
+			m_itemProbabilities[m_itemCount] = probability;
+			m_itemCount++;
+		}
+		pkvd->fHandled = TRUE;
+	}
+	else
+	{
+		CBaseEntity::KeyValue(pkvd);
+	}
+}
+
+void CItemRandom::Spawn()
+{
+	Precache();
+	pev->solid = SOLID_NOT;
+	pev->effects = EF_NODRAW;
+	if (FStringNull(pev->targetname))
+	{
+		SpawnItem(pev->origin, pev->angles, pev->target);
+		REMOVE_ENTITY( edict() );
+	}
+}
+
+void CItemRandom::Precache()
+{
+	m_probabilitySum = 0;
+	for (int i=0; i<m_itemCount; ++i)
+	{
+		m_probabilitySum += m_itemProbabilities[i];
+	}
+}
+
+void CItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	SpawnItem(pev->origin, pev->angles, pev->target);
+	UTIL_Remove(this);
+}
+
+void CItemRandom::SpawnItem(const Vector &origin, const Vector &angles, string_t target)
+{
+	const float choice = RANDOM_FLOAT(0, m_probabilitySum);
+	float sum = 0;
+	for (int i=0; i<m_itemCount; ++i)
+	{
+		sum += m_itemProbabilities[i];
+		if (choice <= sum)
+		{
+			CBaseEntity *pEntity = CBaseEntity::Create( STRING(m_itemNames[i]), origin, angles );
+			if (!pEntity)
+				ALERT(at_error, "Could not spawn random item %s\n", STRING(m_itemNames[i]));
+			else
+				pEntity->pev->target = target;
+			break;
+		}
+	}
+}
+
+class CInfoItemRandom : public CItemRandom
+{
+public:
+	void Spawn();
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+};
+
+LINK_ENTITY_TO_CLASS( info_item_random, CInfoItemRandom )
+
+void CInfoItemRandom::Spawn()
+{
+	Precache();
+	pev->solid = SOLID_NOT;
+	pev->effects = EF_NODRAW;
+}
+
+void CInfoItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	// Was called by SOLID_BSP entity, e.g. func_breakable
+	if (pActivator->IsBSPModel())
+	{
+		SpawnItem(VecBModelOrigin( pActivator->pev ), pActivator->pev->angles, iStringNull);
+	}
+	else
+	{
+		SpawnItem(pActivator->pev->origin, pActivator->pev->angles, pActivator->pev->target);
+	}
+}
+
+//=========
+
 extern int gEvilImpulse101;
 
 void CItem::Spawn( void )
