@@ -328,6 +328,7 @@ int CMonsterMaker::MakeMonster( void )
 {
 	edict_t	*pent;
 	entvars_t *pevCreate;
+	edict_t *posEnt = NULL;
 
 	if( m_iMaxLiveChildren > 0 && m_cLiveChildren >= m_iMaxLiveChildren )
 	{
@@ -402,6 +403,7 @@ int CMonsterMaker::MakeMonster( void )
 		{
 			placePosition = pChosenSpot->pev->origin;
 			placeAngles = pChosenSpot->pev->angles;
+			posEnt = pChosenSpot->edict();
 		}
 		else
 		{
@@ -419,6 +421,7 @@ int CMonsterMaker::MakeMonster( void )
 		if (FStringNull(m_iszPlacePosition))
 		{
 			placePosition = pev->origin;
+			posEnt = edict();
 		}
 		else
 		{
@@ -426,6 +429,13 @@ int CMonsterMaker::MakeMonster( void )
 			placePosition = CalcLocus_Position(this, m_hActivator, placeIdentifier, &evaluated);
 			if (!evaluated)
 				return MONSTERMAKER_BADPLACE;
+			CBaseEntity* tempPosEnt = CBaseEntity::Create("info_target", placePosition, pev->angles);
+			if (tempPosEnt)
+			{
+				tempPosEnt->SetThink(&CBaseEntity::SUB_Remove);
+				tempPosEnt->pev->nextthink = gpGlobals->time + 0.1;
+				posEnt = tempPosEnt->edict();
+			}
 		}
 
 		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
@@ -602,10 +612,14 @@ int CMonsterMaker::MakeMonster( void )
 			}
 
 			foundEntity->pev->vuser1 = vecPosition;
-			foundEntity->pev->dmg_inflictor = edict();
+			foundEntity->pev->dmg_inflictor = posEnt;
 			foundEntity->Use(this, this, USE_SET, 0.0f);
 			foundEntity->pev->vuser1 = g_vecZero;
 			foundEntity->pev->dmg_inflictor = NULL;
+		}
+		else
+		{
+			ALERT(at_error, "template %s for %s is not env_warpball or does not exist\n", STRING(pev->message), STRING(pev->classname));
 		}
 	}
 
