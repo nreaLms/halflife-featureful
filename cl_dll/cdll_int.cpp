@@ -43,11 +43,11 @@ extern "C"
 }
 
 #include <string.h>
-
-#ifdef CLDLL_FOG
 #include "r_studioint.h"
+
 extern engine_studio_api_t IEngineStudio;
 
+#ifdef CLDLL_FOG
 GLAPI_glEnable GL_glEnable = NULL;
 GLAPI_glDisable GL_glDisable = NULL;
 GLAPI_glFogi GL_glFogi = NULL;
@@ -57,7 +57,6 @@ GLAPI_glHint GL_glHint = NULL;
 GLAPI_glGetIntegerv GL_glGetIntegerv = NULL;
 
 #ifdef _WIN32
-#include <windows.h>
 HMODULE libOpenGL = NULL;
 
 HMODULE LoadOpenGL()
@@ -133,9 +132,9 @@ int __MsgFunc_UseSound( const char *pszName, int iSize, void *pbuf )
 	int soundType = READ_BYTE();
 
 	if (soundType)
-		PlaySound( "common/wpn_select.wav", 0.4 );
+		PlaySound( "common/wpn_select.wav", 0.4f );
 	else
-		PlaySound( "common/wpn_denyselect.wav", 0.4 );
+		PlaySound( "common/wpn_denyselect.wav", 0.4f );
 
 	return 1;
 }

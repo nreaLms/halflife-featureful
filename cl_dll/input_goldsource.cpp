@@ -219,6 +219,7 @@ enum _ControlList
 };
 
 #if !defined(USE_SDL2) && defined(_WIN32)
+#include <mmsystem.h>
 DWORD dwAxisFlags[JOY_MAX_AXES] =
 {
 	JOY_RETURNX,
