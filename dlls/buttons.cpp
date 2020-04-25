@@ -1517,7 +1517,7 @@ void CEnvSpark::Spawn( void )
 	else
 		SetThink( &CEnvSpark::SparkThink );
 
-	if( this->m_pfnThink )
+	if( !FBitSet(pev->spawnflags, SF_SPARK_CYCLIC) )
 	{
 		pev->nextthink = gpGlobals->time + 0.1 + RANDOM_FLOAT( 0.0f, 1.5f );
 
