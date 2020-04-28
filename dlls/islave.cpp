@@ -864,6 +864,12 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 							// TODO: should restore the actual values that the vort had before he died
 							revivedVort->pev->rendermode = kRenderNormal;
 							revivedVort->pev->renderamt = 255;
+							if (revivedVort->ShouldFadeOnDeath())
+							{
+								// Force fading upon death if monster should have faded originally
+								revivedVort->pev->spawnflags |= SF_MONSTER_FADECORPSE;
+							}
+							revivedVort->pev->owner = NULL; // nullify owner to avoid additional DeathNotice calls
 							revivedVort->Spawn();
 							revivedVort->Remember(bits_MEMORY_ISLAVE_REVIVED);
 
