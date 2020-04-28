@@ -1205,15 +1205,11 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 			
 			SetBits( pNew->pev->spawnflags, SF_MONSTER_FALL_TO_GROUND );
 			if (pNewMonster) {
+				if (m_iClass || m_reverseRelationship) {
+					pNewMonster->m_iClass = Classify();
+				}
 				if (m_hEnemy) {
-					pNewMonster->m_hEnemy = m_hEnemy;
-					pNewMonster->m_vecEnemyLKP = m_vecEnemyLKP;
-					pNewMonster->SetConditions( bits_COND_NEW_ENEMY );
-					pNewMonster->m_MonsterState = MONSTERSTATE_COMBAT;
-					pNewMonster->m_IdealMonsterState = MONSTERSTATE_COMBAT;
-					if (m_iClass || m_reverseRelationship) {
-						pNewMonster->m_iClass = Classify();
-					}
+					pNewMonster->PushEnemy(m_hEnemy, m_vecEnemyLKP);
 				}
 			}
 		}
