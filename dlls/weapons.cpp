@@ -1363,6 +1363,10 @@ void CWeaponBox::TouchOrUse( CBaseEntity *pOther )
 	if (shouldRemove) {
 		EMIT_SOUND( pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
 		SetTouch( NULL );
+		if (!FStringNull(pev->target))
+		{
+			FireTargets(STRING(pev->target), pOther, this, USE_TOGGLE, 0.0f);
+		}
 		UTIL_Remove(this);
 	}
 }
