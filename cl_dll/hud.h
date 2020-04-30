@@ -559,7 +559,7 @@ private:
 
 	int m_HUD_title_life;
 	int m_HUD_title_half;
-#if FEATURE_OPFOR_SPECIFIC
+#if FEATURE_OPFOR_TITLE
 	int m_HUD_title_opposing;
 	int m_HUD_title_force;
 #endif

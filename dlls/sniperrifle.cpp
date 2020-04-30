@@ -62,7 +62,7 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = 5;
-#if FEATURE_OPFOR_SPECIFIC
+#if FEATURE_OPFOR_WEAPON_SLOTS
 	p->iSlot = 5;
 	p->iPosition = 2;
 #else

@@ -1705,7 +1705,7 @@ void GameDLLInit( void )
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
-#if FEATURE_OPFOR_SPECIFIC
+#if FEATURE_OPFOR_SKILL
 	SERVER_COMMAND( "exec skillopfor.cfg\n" );
 #endif
 }

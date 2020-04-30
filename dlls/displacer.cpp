@@ -294,7 +294,7 @@ int CDisplacer::GetItemInfo(ItemInfo *p)
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iFlags = 0;
-#if FEATURE_OPFOR_SPECIFIC
+#if FEATURE_OPFOR_WEAPON_SLOTS
 	p->iSlot = 5;
 	p->iPosition = 1;
 #else

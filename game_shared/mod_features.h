@@ -11,6 +11,12 @@
 // Follow the symbol to see what it actually changes
 #define FEATURE_OPFOR_SPECIFIC 0
 
+#define FEATURE_OPFOR_WEAPON_SLOTS (0 || FEATURE_OPFOR_SPECIFIC)
+#define FEATURE_OPFOR_TITLE (0 || FEATURE_OPFOR_SPECIFIC)
+#define FEATURE_OPFOR_TENTACLE_HEIGHT (0 || FEATURE_OPFOR_SPECIFIC)
+#define FEATURE_OPFOR_SCIENTIST_BODIES (0 || FEATURE_OPFOR_SPECIFIC)
+#define FEATURE_OPFOR_SKILL (0 || FEATURE_OPFOR_SPECIFIC)
+
 // Fast way to enable/disable entities that require extra content to be added in mod
 #define FEATURE_OPFOR_WEAPONS 1
 #define FEATURE_OPFOR_MONSTERS 1

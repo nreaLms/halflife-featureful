@@ -81,7 +81,7 @@ int CSporelauncher::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = SPORELAUNCHER_MAX_CLIP;
-#if FEATURE_OPFOR_SPECIFIC
+#if FEATURE_OPFOR_WEAPON_SLOTS
 	p->iSlot = 6;
 	p->iPosition = 0;
 #else

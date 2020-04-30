@@ -92,7 +92,7 @@ int CShockrifle::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
-#if FEATURE_OPFOR_SPECIFIC
+#if FEATURE_OPFOR_WEAPON_SLOTS
 	p->iSlot = 6;
 	p->iPosition = 1;
 #else
