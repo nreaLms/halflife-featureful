@@ -28,6 +28,9 @@
 #include "locus.h"
 #include "mod_features.h"
 
+#define FEATURE_ENV_WARPBALL 1
+#define FEATURE_ENV_XENMAKER 1
+
 #define	SF_GIBSHOOTER_REPEATABLE		1 // allows a gibshooter to be refired
 
 #define SF_FUNNEL_REVERSE			1 // funnel effect repels particles instead of attracting them.
@@ -2706,6 +2709,8 @@ void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, const B
 //=========================================================
 // env_warpball
 //=========================================================
+#if FEATURE_ENV_WARPBALL
+
 #define SF_REMOVE_ON_FIRE	0x0001
 #define SF_KILL_CENTER		0x0002
 #define SF_WARPBALL_NOSHAKE	0x0004
@@ -2977,10 +2982,11 @@ void CEnvWarpBall::Think( void )
 	if( pev->spawnflags & SF_REMOVE_ON_FIRE )
 		UTIL_Remove( this );
 }
-
+#endif
 //=========================================================
 // env_xenmaker
 //=========================================================
+#if FEATURE_ENV_XENMAKER
 
 #define SF_XENMAKER_TRYONCE 1
 #define SF_XENMAKER_NOSPAWN 2
@@ -3278,6 +3284,7 @@ void CEnvXenMaker::PlaySecondSound()
 	if (posEnt)
 		EMIT_SOUND( posEnt, CHAN_BODY, XENMAKER_SOUND2, 1, ATTN_NORM );
 }
+#endif
 
 #if FEATURE_DISPLACER || FEATURE_SHOCKBEAM || FEATURE_SPOREGRENADE
 
