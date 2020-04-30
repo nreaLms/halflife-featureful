@@ -3007,8 +3007,10 @@ public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
+	void PlaySecondSound( edict_t* posEnt );
+
 	void EXPORT TrySpawn();
-	void EXPORT PlaySecondSound();
+	void EXPORT PlaySecondSoundThink();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -3035,7 +3037,9 @@ public:
 	Vector m_vEndSpriteColor;
 
 	float m_flGround;
-	EOFFSET m_posEntOffset;
+
+	Vector m_defaultMinHullSize;
+	Vector m_defaultMaxHullSize;
 
 	int m_beamTexture;
 };
@@ -3060,6 +3064,8 @@ TYPEDESCRIPTION	CEnvXenMaker::m_SaveData[] =
 	DEFINE_FIELD(CEnvXenMaker, m_iEndSpriteAlpha, FIELD_INTEGER),
 	DEFINE_FIELD(CEnvXenMaker, m_vEndSpriteColor, FIELD_VECTOR),
 	DEFINE_FIELD(CEnvXenMaker, m_flGround, FIELD_FLOAT ),
+	DEFINE_FIELD(CEnvXenMaker, m_defaultMinHullSize, FIELD_VECTOR),
+	DEFINE_FIELD(CEnvXenMaker, m_defaultMaxHullSize, FIELD_VECTOR),
 };
 IMPLEMENT_SAVERESTORE( CEnvXenMaker, CBaseEntity )
 
@@ -3068,7 +3074,7 @@ void CEnvXenMaker::Precache()
 	m_beamTexture = PRECACHE_MODEL(XENMAKER_BEAM);
 	if (!FBitSet(pev->spawnflags, SF_XENMAKER_NOSPAWN) && !FStringNull(m_iszMonsterClassname))
 	{
-		UTIL_PrecacheOther(STRING(m_iszMonsterClassname));
+		UTIL_PrecacheMonster(STRING(m_iszMonsterClassname), FALSE, &m_defaultMinHullSize, &m_defaultMaxHullSize);
 	}
 	PRECACHE_SOUND(XENMAKER_SOUND1);
 	PRECACHE_SOUND(XENMAKER_SOUND2);
@@ -3177,8 +3183,6 @@ void CEnvXenMaker::TrySpawn()
 		vecOrigin = pev->vuser1;
 	}
 
-	m_posEntOffset = OFFSET(posEnt);
-
 	if (!FBitSet(pev->spawnflags, SF_XENMAKER_NOSPAWN)
 			&& !asTemplate) // never spawn if xenmaker is used as a template for monstermaker
 	{
@@ -3190,8 +3194,21 @@ void CEnvXenMaker::TrySpawn()
 			UTIL_TraceLine( pev->origin, pev->origin - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pev ), &tr );
 			m_flGround = tr.vecEndPos.z;
 		}
-		Vector mins = pev->origin - Vector( 34, 34, 0 );
-		Vector maxs = pev->origin + Vector( 34, 34, 0 );
+
+		Vector minHullSize = Vector( -34, -34, 0 );
+		Vector maxHullSize = Vector( 34, 34, 0 );
+
+		if (m_defaultMinHullSize != g_vecZero)
+		{
+			minHullSize = Vector( m_defaultMinHullSize.x, m_defaultMinHullSize.y, 0 );
+		}
+		if (m_defaultMaxHullSize != g_vecZero)
+		{
+			maxHullSize = Vector( m_defaultMaxHullSize.x, m_defaultMaxHullSize.y, 0 );
+		}
+
+		Vector mins = pev->origin + minHullSize;
+		Vector maxs = pev->origin + maxHullSize;
 		maxs.z = pev->origin.z;
 		mins.z = m_flGround;
 
@@ -3269,20 +3286,23 @@ void CEnvXenMaker::TrySpawn()
 
 	if (asTemplate)
 	{
-		PlaySecondSound();
+		PlaySecondSound(posEnt);
 	}
 	else
 	{
-		SetThink(&CEnvXenMaker::PlaySecondSound);
+		SetThink(&CEnvXenMaker::PlaySecondSoundThink);
 		pev->nextthink = gpGlobals->time + 0.8;
 	}
 }
 
-void CEnvXenMaker::PlaySecondSound()
+void CEnvXenMaker::PlaySecondSoundThink()
 {
-	edict_t* posEnt = ENT(m_posEntOffset);
-	if (posEnt)
-		EMIT_SOUND( posEnt, CHAN_BODY, XENMAKER_SOUND2, 1, ATTN_NORM );
+	PlaySecondSound(edict());
+}
+
+void CEnvXenMaker::PlaySecondSound(edict_t* posEnt)
+{
+	EMIT_SOUND( posEnt, CHAN_BODY, XENMAKER_SOUND2, 1, ATTN_NORM );
 }
 #endif
 
