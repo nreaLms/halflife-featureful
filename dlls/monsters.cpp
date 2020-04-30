@@ -1573,16 +1573,13 @@ int CBaseMonster::RouteClassify( int iMoveFlag )
 //=========================================================
 // BuildRoute
 //=========================================================
-extern cvar_t tridepth;
-extern cvar_t npc_nearest;
-
 BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget )
 {
 	float flDist;
 	Vector vecApexes[3];
 	int iLocalMove;
 
-	int triangDepth = (int)tridepth.value;
+	int triangDepth = TridepthValue();
 	if (triangDepth < 1)
 		triangDepth = 1;
 	if (triangDepth > ARRAYSIZE(vecApexes))
@@ -1644,7 +1641,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 
 	if (nearest)
 	{
-		if (npc_nearest.value)
+		if (NpcFollowNearest())
 		{
 			SetBits(iMoveFlag, bits_MF_NEAREST_PATH);
 

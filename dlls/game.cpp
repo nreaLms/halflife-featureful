@@ -64,15 +64,25 @@ cvar_t bhopcap		= { "mp_bhopcap", "1", FCVAR_SERVER };
 cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
 cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 
+#if FEATURE_USE_THROUGH_WALLS_CVAR
 cvar_t use_through_walls = { "use_through_walls", "1", FCVAR_SERVER };
+#endif
+#if FEATURE_TRIDEPTH_CVAR
 cvar_t tridepth = { "tridepth", "1", FCVAR_SERVER };
+#endif
+#if FEATURE_NPC_NEAREST_CVAR
 cvar_t npc_nearest = { "npc_nearest", "0", FCVAR_SERVER };
+#endif
 cvar_t npc_patrol = { "npc_patrol", "1", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
 
+#if FEATURE_USE_TO_TAKE_CVAR
 cvar_t use_to_take = { "use_to_take","0", FCVAR_SERVER };
+#endif
+#if FEATURE_GRENADE_JUMP_CVAR
 cvar_t grenade_jump = { "grenade_jump","1", FCVAR_SERVER };
+#endif
 
 cvar_t keepinventory	= { "mp_keepinventory","0", FCVAR_SERVER }; // keep inventory across level transitions in multiplayer coop
 
@@ -871,9 +881,15 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );
+#if FEATURE_USE_THROUGH_WALLS_CVAR
 	CVAR_REGISTER( &use_through_walls );
+#endif
+#if FEATURE_TRIDEPTH_CVAR
 	CVAR_REGISTER( &tridepth );
+#endif
+#if FEATURE_NPC_NEAREST_CVAR
 	CVAR_REGISTER( &npc_nearest );
+#endif
 	CVAR_REGISTER( &npc_patrol );
 
 	CVAR_REGISTER( &teamplay );
@@ -917,8 +933,12 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &mp_chattime );
 
+#if FEATURE_USE_TO_TAKE_CVAR
 	CVAR_REGISTER( &use_to_take );
+#endif
+#if FEATURE_GRENADE_JUMP_CVAR
 	CVAR_REGISTER( &grenade_jump );
+#endif
 
 	CVAR_REGISTER( &keepinventory );
 

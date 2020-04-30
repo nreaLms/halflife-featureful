@@ -374,4 +374,11 @@ protected:
 };
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;
+
+int TridepthValue();
+bool AllowUseThroughWalls();
+bool NeedUseToTake();
+bool NpcFollowNearest();
+bool AllowGrenadeJump();
+
 #endif // GAMERULES_H

@@ -68,7 +68,7 @@ void CBasePlayerAmmo::Materialize( void )
 
 void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther )
 {
-	if (!use_to_take.value) {
+	if (!NeedUseToTake()) {
 		//Prevent dropped ammo from touching at the same time
 		if( pev->bInDuck && !( pev->flags & FL_ONGROUND ) )
 		{
@@ -81,7 +81,7 @@ void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther )
 
 int CBasePlayerAmmo::ObjectCaps()
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
 		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
 	} else {
 		return CBaseEntity::ObjectCaps();
@@ -96,7 +96,7 @@ void CBasePlayerAmmo::SetObjectCollisionBox()
 
 void CBasePlayerAmmo::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW) ) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW) ) {
 		TouchOrUse(pActivator);
 	}
 }

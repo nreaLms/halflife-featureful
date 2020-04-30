@@ -501,3 +501,53 @@ CGameRules *InstallGameRules( void )
 		}
 	}
 }
+
+int TridepthValue()
+{
+#if FEATURE_TRIDEPTH_CVAR
+	extern cvar_t tridepth;
+	return (int)tridepth.value;
+#else
+	return 1;
+#endif
+}
+
+bool AllowUseThroughWalls()
+{
+#if FEATURE_USE_THROUGH_WALLS_CVAR
+	extern cvar_t use_through_walls;
+	return use_through_walls.value != 0;
+#else
+	return true;
+#endif
+}
+
+bool NeedUseToTake()
+{
+#if FEATURE_USE_TO_TAKE_CVAR
+	extern cvar_t use_to_take;
+	return use_to_take.value != 0;
+#else
+	return false;
+#endif
+}
+
+bool NpcFollowNearest()
+{
+#if FEATURE_NPC_NEAREST_CVAR
+	extern cvar_t npc_nearest;
+	return npc_nearest.value != 0;
+#else
+	return false;
+#endif
+}
+
+bool AllowGrenadeJump()
+{
+#if FEATURE_GRENADE_JUMP_CVAR
+	extern cvar_t grenade_jump;
+	return grenade_jump.value != 0;
+#else
+	return true;
+#endif
+}

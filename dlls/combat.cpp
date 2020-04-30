@@ -1108,7 +1108,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( ( !FNullEnt( pevInflictor ) ) && ( pev->movetype == MOVETYPE_WALK ) && ( !pevAttacker || pevAttacker->solid != SOLID_TRIGGER ) )
 	{
 		Vector velocityAdd = vecDir * -DamageForce( flDamage );
-		if (!grenade_jump.value)
+		if (!AllowGrenadeJump())
 		{
 			velocityAdd.z = 0;
 		}

@@ -597,14 +597,14 @@ CBaseEntity* CBasePlayerWeapon::Respawn( void )
 
 void CBasePlayerWeapon::DefaultTouch( CBaseEntity *pOther )
 {
-	if (!use_to_take.value) {
+	if (!NeedUseToTake()) {
 		TouchOrUse(pOther);
 	}
 }
 
 int CBasePlayerWeapon::ObjectCaps()
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
 		return CBaseAnimating::ObjectCaps() | FCAP_IMPULSE_USE;
 	} else {
 		return CBaseAnimating::ObjectCaps();
@@ -613,7 +613,7 @@ int CBasePlayerWeapon::ObjectCaps()
 
 void CBasePlayerWeapon::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW) ) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW) ) {
 		TouchOrUse(pActivator);
 	}
 }
@@ -1277,14 +1277,14 @@ void CWeaponBox::Kill( void )
 
 void CWeaponBox::Touch( CBaseEntity *pOther )
 {
-	if (!use_to_take.value) {
+	if (!NeedUseToTake()) {
 		TouchOrUse(pOther);
 	}
 }
 
 int CWeaponBox::ObjectCaps()
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
 		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
 	} else {
 		return CBaseEntity::ObjectCaps();
@@ -1293,7 +1293,7 @@ int CWeaponBox::ObjectCaps()
 
 void CWeaponBox::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW) ) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW) ) {
 		TouchOrUse(pActivator);
 	}
 }

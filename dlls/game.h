@@ -53,9 +53,6 @@ extern cvar_t dmgperscore;
 extern cvar_t allydmgpenalty;
 extern cvar_t npckill;
 
-extern cvar_t use_to_take;
-extern cvar_t grenade_jump;
-
 extern cvar_t keepinventory;
 
 // Engine Cvars

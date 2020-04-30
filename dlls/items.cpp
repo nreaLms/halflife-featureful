@@ -317,7 +317,7 @@ void CItem::Spawn( void )
 
 void CItem::ItemTouch( CBaseEntity *pOther )
 {
-	if (!use_to_take.value) {
+	if (!NeedUseToTake()) {
 		TouchOrUse(pOther);
 	}
 }
@@ -335,7 +335,7 @@ void CItem::FallThink()
 
 int CItem::ObjectCaps()
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
 		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
 	} else {
 		return CBaseEntity::ObjectCaps();
@@ -350,7 +350,7 @@ void CItem::SetObjectCollisionBox()
 
 void CItem::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (use_to_take.value && !(pev->effects & EF_NODRAW)) {
+	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
 		TouchOrUse(pActivator);
 	}
 }

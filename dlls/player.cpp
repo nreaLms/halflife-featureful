@@ -1523,8 +1523,6 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 //
 #define	PLAYER_SEARCH_RADIUS	(float)64
 
-extern cvar_t use_through_walls;
-
 void CBasePlayer::PlayerUse( void )
 {
 	if( IsObserver() )
@@ -1607,7 +1605,7 @@ void CBasePlayer::PlayerUse( void )
 				// if it's "hull" is in the view cone
 				vecLOS = UTIL_ClampVectorToBox( vecLOS, pObject->pev->size * 0.5 );
 
-				if (!use_through_walls.value || (caps & FCAP_ONLYVISIBLE_USE) )
+				if (!AllowUseThroughWalls() || (caps & FCAP_ONLYVISIBLE_USE) )
 				{
 					UTIL_TraceLine(pev->origin + pev->view_ofs, pObject->Center(), dont_ignore_monsters, edict(), &tr);
 					if (tr.flFraction < 1.0f && tr.pHit != pObject->edict())
@@ -3746,7 +3744,7 @@ void CBasePlayer::GiveNamedItem(const char *pszName , int spawnFlags)
 
 	DispatchSpawn( pent );
 
-	if (use_to_take.value) {
+	if (NeedUseToTake()) {
 		CBaseEntity* entity = (CBaseEntity *)GET_PRIVATE( pent );
 		if (entity) {
 			entity->Use(this, this, USE_TOGGLE, 0.0f);
