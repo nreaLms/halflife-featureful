@@ -1783,3 +1783,116 @@ void CDeadGus :: Spawn( )
 	MonsterInitDead();
 }
 #endif
+
+#if FEATURE_KELLER
+class CKeller : public CScientist
+{
+public:
+	void Spawn();
+	void Precache();
+	const char* DefaultDisplayName() { return "Richard Keller"; }
+	void TalkInit();
+	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
+	const char* FearSentence() { return "DK_FEAR"; }
+	const char* PlayerFearSentence() { return "DK_PLFEAR"; }
+	void PainSound();
+
+	BOOL CanHeal() { return false; }
+	bool ReadyToHeal() {return false; }
+};
+
+LINK_ENTITY_TO_CLASS( monster_wheelchair, CKeller )
+
+void CKeller::Spawn()
+{
+	SciSpawnHelper("models/wheelchair_sci.mdl", gSkillData.scientistHealth * 2);
+	TalkMonsterInit();
+}
+
+void CKeller::Precache()
+{
+	PrecacheMyModel("models/wheelchair_sci.mdl");
+	PRECACHE_SOUND( "keller/dk_pain1.wav" );
+	PRECACHE_SOUND( "keller/dk_pain2.wav" );
+	PRECACHE_SOUND( "keller/dk_pain3.wav" );
+	PRECACHE_SOUND( "keller/dk_pain4.wav" );
+	PRECACHE_SOUND( "keller/dk_pain5.wav" );
+	PRECACHE_SOUND( "keller/dk_pain6.wav" );
+	PRECACHE_SOUND( "keller/dk_pain7.wav" );
+
+	PRECACHE_SOUND( "wheelchair/wheelchair_jog.wav" );
+	PRECACHE_SOUND( "wheelchair/wheelchair_run.wav" );
+	PRECACHE_SOUND( "wheelchair/wheelchair_walk.wav" );
+
+	TalkInit();
+	CTalkMonster::Precache();
+}
+
+void CKeller::TalkInit()
+{
+	CTalkMonster::TalkInit();
+
+	m_szGrp[TLK_ANSWER] = NULL;
+	m_szGrp[TLK_QUESTION] = NULL;
+	m_szGrp[TLK_IDLE] = "DK_IDLE";
+	m_szGrp[TLK_STARE] = "DK_STARE";
+	m_szGrp[TLK_USE] = "DK_OK";
+	m_szGrp[TLK_UNUSE] = "DK_WAIT";
+	m_szGrp[TLK_DECLINE] = "DK_POK";
+	m_szGrp[TLK_STOP] = "DK_STOP";
+	m_szGrp[TLK_NOSHOOT] = "DK_SCARED";
+	m_szGrp[TLK_HELLO] = "DK_HELLO";
+
+	m_szGrp[TLK_PLHURT1] = NULL;
+	m_szGrp[TLK_PLHURT2] = NULL;
+	m_szGrp[TLK_PLHURT3] = NULL;
+
+	m_szGrp[TLK_PHELLO] = NULL;
+	m_szGrp[TLK_PIDLE] = NULL;
+	m_szGrp[TLK_PQUESTION] = NULL;
+	m_szGrp[TLK_SMELL] = NULL;
+
+	m_szGrp[TLK_WOUND] = NULL;
+	m_szGrp[TLK_MORTAL] = NULL;
+
+	m_szGrp[TLK_SHOT] = NULL;
+	m_szGrp[TLK_MAD] = NULL;
+
+	m_voicePitch = 100;
+}
+
+void CKeller::PainSound()
+{
+	if( gpGlobals->time < m_painTime )
+		return;
+
+	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
+
+	const char* painSound = NULL;
+	switch( RANDOM_LONG( 1, 7 ) )
+	{
+	case 1:
+		painSound ="keller/dk_pain1.wav";
+		break;
+	case 2:
+		painSound ="keller/dk_pain2.wav";
+		break;
+	case 3:
+		painSound ="keller/dk_pain3.wav";
+		break;
+	case 4:
+		painSound ="keller/dk_pain4.wav";
+		break;
+	case 5:
+		painSound ="keller/dk_pain5.wav";
+		break;
+	case 6:
+		painSound ="keller/dk_pain6.wav";
+		break;
+	case 7:
+		painSound ="keller/dk_pain7.wav";
+		break;
+	}
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, painSound, 1, ATTN_NORM, 0, GetVoicePitch() );
+}
+#endif

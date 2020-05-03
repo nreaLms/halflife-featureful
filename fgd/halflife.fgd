@@ -5602,6 +5602,7 @@
 		64 : "Start Inactive" : 0
 	]
 ]
+@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/wheelchair_sci.mdl") = monster_wheelchair : "Dr. Keller" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Scientist Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
