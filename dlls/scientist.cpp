@@ -1793,6 +1793,7 @@ public:
 	const char* DefaultDisplayName() { return "Richard Keller"; }
 	void TalkInit();
 	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
+	const char* ScreamSentence() { return "DK_SCREAM"; }
 	const char* FearSentence() { return "DK_FEAR"; }
 	const char* PlayerFearSentence() { return "DK_PLFEAR"; }
 	void PainSound();
