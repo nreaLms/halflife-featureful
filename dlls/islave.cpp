@@ -1088,6 +1088,7 @@ void CISlave::StartTask( Task_t *pTask )
 		}
 		else
 		{
+			m_flSpawnFamiliarTime = gpGlobals->time + ISLAVE_SPAWNFAMILIAR_DELAY; // still set delay to avoid constant trying
 			TaskFail("no space to spawn a familiar");
 		}
 		break;
@@ -1443,7 +1444,6 @@ Schedule_t slSlaveCoverAndSummon[] =
 
 Task_t tlSlaveSummon[] =
 {
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RANGE_ATTACK1 },
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
 	{ TASK_ISLAVE_SUMMON_FAMILIAR, (float)0 }
@@ -1547,7 +1547,7 @@ Schedule_t *CISlave::GetSchedule( void )
 			if( !HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 			{
 				const int sched = CanSpawnFamiliar() ? (int)SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR : (int)SCHED_TAKE_COVER_FROM_ENEMY;
-				if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) && RANDOM_LONG(0,1)) // give chance to use electro attack to restore health
+				if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) && HasConditions( bits_COND_SEE_ENEMY ) && RANDOM_LONG(0,1)) // give chance to use electro attack to restore health
 				{
 					m_failSchedule = SCHED_RANGE_ATTACK1;
 				}
