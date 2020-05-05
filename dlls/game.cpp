@@ -71,6 +71,9 @@ cvar_t use_through_walls = { "use_through_walls", "1", FCVAR_SERVER };
 #if FEATURE_TRIDEPTH_CVAR
 cvar_t tridepth = { "tridepth", "1", FCVAR_SERVER };
 #endif
+#if FEATURE_TRIDEPTH_ALL_CVAR
+cvar_t tridepth_all = { "tridepth_all", "0", FCVAR_SERVER };
+#endif
 #if FEATURE_NPC_NEAREST_CVAR
 cvar_t npc_nearest = { "npc_nearest", "0", FCVAR_SERVER };
 #endif
@@ -941,6 +944,9 @@ void GameDLLInit( void )
 #endif
 #if FEATURE_TRIDEPTH_CVAR
 	CVAR_REGISTER( &tridepth );
+#endif
+#if FEATURE_TRIDEPTH_ALL_CVAR
+	CVAR_REGISTER( &tridepth_all );
 #endif
 #if FEATURE_NPC_NEAREST_CVAR
 	CVAR_REGISTER( &npc_nearest );

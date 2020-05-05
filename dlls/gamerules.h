@@ -384,6 +384,7 @@ protected:
 extern DLL_GLOBAL CGameRules *g_pGameRules;
 
 int TridepthValue();
+bool TridepthForAll();
 bool AllowUseThroughWalls();
 bool NeedUseToTake();
 bool NpcFollowNearest();

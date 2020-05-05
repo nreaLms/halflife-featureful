@@ -29,7 +29,7 @@
 #include "saverestore.h"
 #include "weapons.h"
 #include "scripted.h"
-#include "squadmonster.h"
+#include "followingmonster.h"
 #include "decals.h"
 #include "soundent.h"
 #include "gamerules.h"
@@ -1664,16 +1664,29 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 	Vector vecApexes[3];
 	int iLocalMove;
 
-	int triangDepth = TridepthValue();
-	if (triangDepth < 1)
-		triangDepth = 1;
-	if (triangDepth > ARRAYSIZE(vecApexes))
-		triangDepth = ARRAYSIZE(vecApexes);
+	int triangDepth = 1;
 
 	if (FBitSet(iMoveFlag, bits_MF_NO_TRIDEPTH))
 	{
 		ClearBits(iMoveFlag, bits_MF_NO_TRIDEPTH);
-		triangDepth = 1;
+	}
+	else
+	{
+		bool shouldApplyTridepth = TridepthForAll() || (m_MonsterState == MONSTERSTATE_SCRIPT);
+		if (!shouldApplyTridepth)
+		{
+			CFollowingMonster* followingMonster = MyFollowingMonsterPointer();
+			shouldApplyTridepth = followingMonster != 0 && followingMonster->IsFollowingPlayer();
+		}
+
+		if (shouldApplyTridepth)
+		{
+			triangDepth = TridepthValue();
+			if (triangDepth < 1)
+				triangDepth = 1;
+			if (triangDepth > ARRAYSIZE(vecApexes))
+				triangDepth = ARRAYSIZE(vecApexes);
+		}
 	}
 
 	RouteNew();

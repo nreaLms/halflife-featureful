@@ -537,6 +537,16 @@ int TridepthValue()
 #endif
 }
 
+bool TridepthForAll()
+{
+#if FEATURE_TRIDEPTH_ALL_CVAR
+	extern cvar_t tridepth_all;
+	return tridepth_all.value > 0;
+#else
+	return 0;
+#endif
+}
+
 bool AllowUseThroughWalls()
 {
 #if FEATURE_USE_THROUGH_WALLS_CVAR
