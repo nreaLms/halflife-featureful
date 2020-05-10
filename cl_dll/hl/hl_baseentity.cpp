@@ -106,7 +106,7 @@ CBaseEntity *UTIL_FindEntityInSphere( CBaseEntity *pStartEntity, const Vector &v
 
 Vector UTIL_VecToAngles( const Vector &vec ){ return 0; }
 CSprite *CSprite::SpriteCreate( const char *pSpriteName, const Vector &origin, BOOL animate ) { return 0; }
-void CBeam::PointEntInit( const Vector &start, int endIndex ) { }
+void CBeam::PointEntInit( const Vector &start, int endIndex, int endAttachment ) { }
 CBeam *CBeam::BeamCreate( const char *pSpriteName, int width ) { return NULL; }
 void CSprite::Expand( float scaleSpeed, float fadeSpeed ) { }
 

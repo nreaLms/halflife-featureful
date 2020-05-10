@@ -264,23 +264,23 @@ void CBeam::HoseInit( const Vector &start, const Vector &direction )
 	RelinkBeam();
 }
 
-void CBeam::PointEntInit( const Vector &start, int endIndex )
+void CBeam::PointEntInit(const Vector &start, int endIndex , int endAttachment)
 {
 	SetType( BEAM_ENTPOINT );
 	SetStartPos( start );
 	SetEndEntity( endIndex );
 	SetStartAttachment( 0 );
-	SetEndAttachment( 0 );
+	SetEndAttachment( endAttachment );
 	RelinkBeam();
 }
 
-void CBeam::EntsInit( int startIndex, int endIndex )
+void CBeam::EntsInit(int startIndex, int endIndex , int startAttachment, int endAttachment)
 {
 	SetType( BEAM_ENTS );
 	SetStartEntity( startIndex );
 	SetEndEntity( endIndex );
-	SetStartAttachment( 0 );
-	SetEndAttachment( 0 );
+	SetStartAttachment( startAttachment );
+	SetEndAttachment( endAttachment );
 	RelinkBeam();
 }
 

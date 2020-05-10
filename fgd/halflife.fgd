@@ -2646,6 +2646,8 @@
 	]
 	m_iszTargetName(target_source) : "Name of children"
 	target(target_destination) : "Fire on spawn (locus = child)"
+	m_iStartAttachment(integer) : "Start attachment [1-4]" : : "Used when start is entity"
+	m_iEndAttachment(integer) : "End attachment [1-4]" : : "Used when end is entity"
 	spawnflags(flags) =
 	[
 		8 : "Ring"			: 0

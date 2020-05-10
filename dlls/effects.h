@@ -281,8 +281,8 @@ public:
 	// Init after BeamCreate()
 	void		BeamInit( const char *pSpriteName, int width );
 	void		PointsInit( const Vector &start, const Vector &end );
-	void		PointEntInit( const Vector &start, int endIndex );
-	void		EntsInit( int startIndex, int endIndex );
+	void		PointEntInit( const Vector &start, int endIndex, int endAttachment = 0 );
+	void		EntsInit(int startIndex, int endIndex, int startAttachment = 0, int endAttachment = 0 );
 	void		HoseInit( const Vector &start, const Vector &direction );
 
 	static CBeam *BeamCreate( const char *pSpriteName, int width );

@@ -189,6 +189,8 @@ public:
 	float	m_fDamage;
 	int		m_iDamageType;
 	int		m_iFlags;
+	byte	m_iStartAttachment;
+	byte	m_iEndAttachment;
 };
 
 TYPEDESCRIPTION	CLocusBeam::m_SaveData[] = 
@@ -205,6 +207,8 @@ TYPEDESCRIPTION	CLocusBeam::m_SaveData[] =
 	DEFINE_FIELD( CLocusBeam, m_fDamage, FIELD_FLOAT),
 	DEFINE_FIELD( CLocusBeam, m_iDamageType, FIELD_INTEGER),
 	DEFINE_FIELD( CLocusBeam, m_iFlags, FIELD_INTEGER),
+	DEFINE_FIELD( CLocusBeam, m_iStartAttachment, FIELD_CHARACTER),
+	DEFINE_FIELD( CLocusBeam, m_iEndAttachment, FIELD_CHARACTER),
 };
 
 LINK_ENTITY_TO_CLASS( locus_beam, CLocusBeam )
@@ -267,6 +271,20 @@ void CLocusBeam::KeyValue( KeyValueData *pkvd )
 		m_iDamageType = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_iStartAttachment"))
+	{
+		m_iStartAttachment = atoi(pkvd->szValue);
+		if (m_iStartAttachment > 4 || m_iStartAttachment < 0)
+			m_iStartAttachment = 0;
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iEndAttachment"))
+	{
+		m_iEndAttachment = atoi(pkvd->szValue);
+		if (m_iEndAttachment > 4 || m_iEndAttachment < 0)
+			m_iEndAttachment = 0;
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -293,7 +311,7 @@ void CLocusBeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		if (pStartEnt == NULL || pEndEnt == NULL)
 			return;
 		pBeam = CBeam::BeamCreate( STRING(m_iszSprite), m_iWidth );
-		pBeam->EntsInit( pStartEnt->entindex(), pEndEnt->entindex() );
+		pBeam->EntsInit( pStartEnt->entindex(), pEndEnt->entindex(), m_iStartAttachment, m_iEndAttachment );
 		break;
 
 	case 1: // pointent
@@ -303,7 +321,7 @@ void CLocusBeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		if (pEndEnt == NULL)
 			return;
 		pBeam = CBeam::BeamCreate( STRING(m_iszSprite), m_iWidth );
-		pBeam->PointEntInit( vecStartPos, pEndEnt->entindex() );
+		pBeam->PointEntInit( vecStartPos, pEndEnt->entindex(), m_iEndAttachment );
 		break;
 	case 2: // points
 		vecStartPos = CalcLocus_Position( this, pActivator, STRING(m_iszStart) );
