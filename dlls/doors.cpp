@@ -81,6 +81,15 @@ public:
 
 	short m_soundRadius;
 
+	string_t m_fireOnOpening;
+	string_t m_fireOnClosing;
+	string_t m_fireOnOpened;
+	string_t m_fireOnClosed;
+	BYTE m_fireOnOpeningState;
+	BYTE m_fireOnClosingState;
+	BYTE m_fireOnOpenedState;
+	BYTE m_fireOnClosedState;
+
 	float SoundAttenuation() const
 	{
 		return ::SoundAttenuation(m_soundRadius);
@@ -106,6 +115,16 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_fIgnoreTargetname, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseDoor, m_soundRadius, FIELD_SHORT ),
+
+	DEFINE_FIELD( CBaseDoor, m_fireOnOpening, FIELD_STRING ),
+	DEFINE_FIELD( CBaseDoor, m_fireOnClosing, FIELD_STRING ),
+	DEFINE_FIELD( CBaseDoor, m_fireOnOpened, FIELD_STRING ),
+	DEFINE_FIELD( CBaseDoor, m_fireOnClosed, FIELD_STRING ),
+
+	DEFINE_FIELD( CBaseDoor, m_fireOnOpeningState, FIELD_CHARACTER ),
+	DEFINE_FIELD( CBaseDoor, m_fireOnClosingState, FIELD_CHARACTER ),
+	DEFINE_FIELD( CBaseDoor, m_fireOnOpenedState, FIELD_CHARACTER ),
+	DEFINE_FIELD( CBaseDoor, m_fireOnClosedState, FIELD_CHARACTER ),
 };
 
 IMPLEMENT_SAVERESTORE( CBaseDoor, CBaseToggle )
@@ -263,6 +282,46 @@ void CBaseDoor::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "WaveHeight" ) )
 	{
 		pev->scale = atof( pkvd->szValue ) * ( 1.0f / 8.0f );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonopening"))
+	{
+		m_fireOnOpening = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonopening_triggerstate"))
+	{
+		m_fireOnOpeningState = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonclosing"))
+	{
+		m_fireOnClosing = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonclosing_triggerstate"))
+	{
+		m_fireOnClosingState = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonopened"))
+	{
+		m_fireOnOpened = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonopened_triggerstate"))
+	{
+		m_fireOnOpenedState = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonclosed"))
+	{
+		m_fireOnClosed = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fireonclosed_triggerstate"))
+	{
+		m_fireOnClosedState = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -681,6 +740,9 @@ void CBaseDoor::DoorGoUp( void )
 	}
 	else
 		LinearMove( m_vecPosition2, pev->speed );
+
+	if (m_fireOnOpening)
+		FireTargets(STRING(m_fireOnOpening), m_hActivator, this, (USE_TYPE)m_fireOnOpeningState, 0.0f);
 }
 
 //
@@ -721,6 +783,9 @@ void CBaseDoor::DoorHitTop( void )
 	if( pev->netname && ( pev->spawnflags & SF_DOOR_START_OPEN ) )
 		FireTargets( STRING( pev->netname ), m_hActivator, this, USE_TOGGLE, 0 );
 
+	if (m_fireOnOpened)
+		FireTargets(STRING(m_fireOnOpened), m_hActivator, this, (USE_TYPE)m_fireOnOpenedState, 0.0f);
+
 	SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 ); // this isn't finished
 }
 
@@ -742,6 +807,9 @@ void CBaseDoor::DoorGoDown( void )
 		AngularMove( m_vecAngle1, pev->speed );
 	else
 		LinearMove( m_vecPosition1, pev->speed );
+
+	if (m_fireOnClosing)
+		FireTargets(STRING(m_fireOnClosing), m_hActivator, this, (USE_TYPE)m_fireOnClosingState, 0.0f);
 }
 
 //
@@ -773,6 +841,9 @@ void CBaseDoor::DoorHitBottom( void )
 	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
 	if( pev->netname && !( pev->spawnflags & SF_DOOR_START_OPEN ) )
 		FireTargets( STRING( pev->netname ), m_hActivator, this, USE_TOGGLE, 0 );
+
+	if (m_fireOnClosed)
+		FireTargets(STRING(m_fireOnClosed), m_hActivator, this, (USE_TYPE)m_fireOnClosedState, 0.0f);
 }
 
 void CBaseDoor::Blocked( CBaseEntity *pOther )

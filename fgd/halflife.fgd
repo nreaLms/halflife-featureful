@@ -488,7 +488,42 @@
 	]
 ]
 
-@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius) = Door
+@BaseClass = OpenClosable
+[
+	fireonopening(target_destination) : "Fire On Open Start"
+	fireonopening_triggerstate(choices) : "Fire On Open Start Trigger State" =
+	[
+		0: "Off"
+		1: "On"
+		2: "Toggle"
+	]
+
+	fireonclosing(target_destination) : "Fire On Close Start"
+	fireonclosing_triggerstate(choices) : "Fire On Close Start Trigger State" =
+	[
+		0: "Off"
+		1: "On"
+		2: "Toggle"
+	]
+
+	fireonopened(target_destination) : "Fire On Open End"
+	fireonopened_triggerstate(choices) : "Fire On Open End Trigger State" =
+	[
+		0: "Off"
+		1: "On"
+		2: "Toggle"
+	]
+
+	fireonclosed(target_destination) : "Fire On Close End"
+	fireonclosed_triggerstate(choices) : "Fire On Close End Trigger State" =
+	[
+		0: "Off"
+		1: "On"
+		2: "Toggle"
+	]
+]
+
+@BaseClass base(Appearflags, Targetname, RenderFields, Global, Angles, SoundRadius, OpenClosable) = Door
 [
 	killtarget(target_destination) : "KillTarget"
 	speed(integer) : "Speed" : 100
