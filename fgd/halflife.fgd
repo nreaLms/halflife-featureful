@@ -567,6 +567,12 @@
 		0: "No"
 		1: "Yes"
 	]
+	m_iObeyTriggerMode(choices) : "Obey Trigger Mode" =
+	[
+		0 : "No"
+		1 : "Yes"
+		2 : "Yes, even when currently moving"
+	]
 	spawnflags(flags) =
 	[
 		1 : "Starts Open" : 0
