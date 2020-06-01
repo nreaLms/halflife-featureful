@@ -26,6 +26,9 @@
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"game.h"
+#include	"gamerules.h"
+
+#define FEATURE_HASSSASSIN_DROP_AMMO 0
 
 extern DLL_GLOBAL int  g_iSkillLevel;
 
@@ -83,6 +86,7 @@ public:
 	void PlayUnUseSentence();
 	void DeathSound( void );
 	void IdleSound( void );
+	void OnDying();
 	CUSTOM_SCHEDULES
 
 	int Save( CSave &save ); 
@@ -152,6 +156,33 @@ void CHAssassin::DeathSound( void )
 //=========================================================
 void CHAssassin::IdleSound( void )
 {
+}
+
+void CHAssassin::OnDying()
+{
+#if FEATURE_HASSSASSIN_DROP_AMMO || FEATURE_MONSTERS_DROP_HANDGRENADES
+	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) )
+	{
+		// drop the gun!
+		Vector vecGunPos;
+		Vector vecGunAngles;
+
+		GetAttachment( 0, vecGunPos, vecGunAngles );
+#if FEATURE_HASSSASSIN_DROP_AMMO
+		DropItem( "ammo_9mmclip", vecGunPos, vecGunAngles );
+#endif
+#if FEATURE_MONSTERS_DROP_HANDGRENADES
+		CBaseEntity* pGrenadeEnt = DropItem( "weapon_handgrenade", BodyTarget( pev->origin ), vecGunAngles );
+		if (pGrenadeEnt)
+		{
+			CBasePlayerWeapon* pGrenadeWeap = pGrenadeEnt->MyWeaponPointer();
+			if (pGrenadeWeap)
+				pGrenadeWeap->m_iDefaultAmmo = 1;
+		}
+#endif
+	}
+#endif
+	CFollowingMonster::OnDying();
 }
 
 //=========================================================
