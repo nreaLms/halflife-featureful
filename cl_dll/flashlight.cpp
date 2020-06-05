@@ -36,9 +36,7 @@ int CHudFlashlight::Init( void )
 	m_fFade = 0;
 	m_fOn = 0;
 
-#if !FEATURE_NIGHTVISION
 	HOOK_MESSAGE( Flashlight );
-#endif
 	HOOK_MESSAGE( FlashBat );
 
 	m_iFlags |= HUD_ACTIVE;
