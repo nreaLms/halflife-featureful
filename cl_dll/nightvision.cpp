@@ -29,9 +29,6 @@
 #include <stdio.h>
 
 DECLARE_MESSAGE( m_Nightvision, Nightvision )
-#if FEATURE_NIGHTVISION
-DECLARE_MESSAGE( m_Nightvision, Flashlight )
-#endif
 
 #if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
 DECLARE_COMMAND( m_Nightvision, ToggleNVGStyle )
@@ -44,9 +41,6 @@ int CHudNightvision::Init(void)
 	m_fOn = 0;
 
 	HOOK_MESSAGE(Nightvision);
-#if FEATURE_NIGHTVISION
-	HOOK_MESSAGE(Flashlight);
-#endif
 
 	m_iFlags |= HUD_ACTIVE;
 
@@ -87,16 +81,6 @@ int CHudNightvision::VidInit(void)
 
 
 int CHudNightvision::MsgFunc_Nightvision(const char *pszName, int iSize, void *pbuf)
-{
-	return MsgImpl(pszName, iSize, pbuf);
-}
-
-int CHudNightvision::MsgFunc_Flashlight( const char *pszName, int iSize, void *pbuf )
-{
-	return MsgImpl(pszName, iSize, pbuf);
-}
-
-int CHudNightvision::MsgImpl(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ( pbuf, iSize );
 	m_fOn = READ_BYTE();

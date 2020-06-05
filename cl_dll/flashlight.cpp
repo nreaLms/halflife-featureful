@@ -27,9 +27,7 @@
 #include <stdio.h>
 
 DECLARE_MESSAGE( m_Flash, FlashBat )
-#if !FEATURE_NIGHTVISION
 DECLARE_MESSAGE( m_Flash, Flashlight )
-#endif
 
 #define BAT_NAME "sprites/%d_Flashlight.spr"
 

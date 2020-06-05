@@ -4491,6 +4491,13 @@ void CBasePlayer::UpdateClientData( void )
 			WRITE_BYTE( m_iFlashBattery );
 		MESSAGE_END();
 
+#if FEATURE_NIGHTVISION
+		// Send Nightvision Off message.
+		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
+			WRITE_BYTE( FlashlightIsOn() ? 1 : 0 );
+		MESSAGE_END();
+#endif
+
 		// Vit_amiN: the geiger state could run out of sync, too
 		MESSAGE_BEGIN( MSG_ONE, gmsgGeigerRange, NULL, pev );
 			WRITE_BYTE( 0 );

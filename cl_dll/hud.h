@@ -468,8 +468,6 @@ public:
 	int Draw( float flTime );
 	void Reset( void );
 	int MsgFunc_Nightvision( const char *pszName, int iSize, void *pbuf );
-	int MsgFunc_Flashlight( const char *pszName, int iSize, void *pbuf );
-	int MsgImpl(const char *pszName, int iSize, void *pbuf);
 	void DrawCSNVG(float flTime);
 	void DrawOpforNVG(float flTime);
 	void RemoveCSdlight();
