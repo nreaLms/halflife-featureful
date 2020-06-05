@@ -66,9 +66,6 @@ extern CGraph WorldGraph;
 #define TRAIN_FAST		0x04
 #define TRAIN_BACK		0x05
 
-#define	FLASH_DRAIN_TIME	 1.2f //100 units/3 minutes
-#define	FLASH_CHARGE_TIME	 0.2f // 100 units/20 seconds  (seconds per unit)
-
 // Global Savedata for player
 TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 {
@@ -3817,7 +3814,7 @@ void CBasePlayer::FlashlightTurnOn( void )
 		MESSAGE_END();
 #endif
 
-		m_flFlashLightTime = FLASH_DRAIN_TIME + gpGlobals->time;
+		m_flFlashLightTime = gSkillData.flashlightDrainTime/100 + gpGlobals->time;
 	}
 }
 
@@ -3845,7 +3842,7 @@ void CBasePlayer::FlashlightTurnOff( bool playOffSound )
 	MESSAGE_END();
 #endif
 
-	m_flFlashLightTime = FLASH_CHARGE_TIME + gpGlobals->time;
+	m_flFlashLightTime = gSkillData.flashlightChargeTime/100 + gpGlobals->time;
 }
 
 /*
@@ -4601,7 +4598,7 @@ void CBasePlayer::UpdateClientData( void )
 		{
 			if( m_iFlashBattery )
 			{
-				m_flFlashLightTime = FLASH_DRAIN_TIME + gpGlobals->time;
+				m_flFlashLightTime = gSkillData.flashlightDrainTime/100 + gpGlobals->time;
 				m_iFlashBattery--;
 
 				if( !m_iFlashBattery )
@@ -4612,7 +4609,7 @@ void CBasePlayer::UpdateClientData( void )
 		{
 			if( m_iFlashBattery < 100 )
 			{
-				m_flFlashLightTime = FLASH_CHARGE_TIME + gpGlobals->time;
+				m_flFlashLightTime = gSkillData.flashlightChargeTime/100 + gpGlobals->time;
 				m_iFlashBattery++;
 			}
 			else

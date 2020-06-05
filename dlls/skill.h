@@ -282,6 +282,9 @@ struct skilldata_t
 	float plrStomach;
 	float plrLeg;
 	float plrArm;
+
+	float flashlightDrainTime;
+	float flashlightChargeTime;
 };
 
 extern	DLL_GLOBAL	skilldata_t	gSkillData;

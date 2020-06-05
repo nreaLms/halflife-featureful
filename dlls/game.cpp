@@ -865,6 +865,16 @@ cvar_t	sk_player_leg1	= { "sk_player_leg1","1" };
 cvar_t	sk_player_leg2	= { "sk_player_leg2","1" };
 cvar_t	sk_player_leg3	= { "sk_player_leg3","1" };
 
+// flashlight settings
+
+cvar_t	sk_flashlight_drain_time1	= { "sk_flashlight_drain_time1","120" };
+cvar_t	sk_flashlight_drain_time2	= { "sk_flashlight_drain_time2","1020" };
+cvar_t	sk_flashlight_drain_time3	= { "sk_flashlight_drain_time3","120" };
+
+cvar_t	sk_flashlight_charge_time1	= { "sk_flashlight_charge_time1","20" };
+cvar_t	sk_flashlight_charge_time2	= { "sk_flashlight_charge_time2","20" };
+cvar_t	sk_flashlight_charge_time3	= { "sk_flashlight_charge_time3","20" };
+
 // END Cvars for Skill Level settings
 
 // Register your console variables here
@@ -1702,6 +1712,14 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_player_leg1 );
 	CVAR_REGISTER( &sk_player_leg2 );
 	CVAR_REGISTER( &sk_player_leg3 );
+
+	CVAR_REGISTER( &sk_flashlight_drain_time1 );
+	CVAR_REGISTER( &sk_flashlight_drain_time2 );
+	CVAR_REGISTER( &sk_flashlight_drain_time3 );
+
+	CVAR_REGISTER( &sk_flashlight_charge_time1 );
+	CVAR_REGISTER( &sk_flashlight_charge_time2 );
+	CVAR_REGISTER( &sk_flashlight_charge_time3 );
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 
 	SERVER_COMMAND( "exec skill.cfg\n" );

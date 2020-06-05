@@ -457,6 +457,9 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.plrStomach = GetSkillCvar( "sk_player_stomach" );
 	gSkillData.plrLeg = GetSkillCvar( "sk_player_leg" );
 	gSkillData.plrArm = GetSkillCvar( "sk_player_arm" );
+
+	gSkillData.flashlightDrainTime = GetSkillCvar( "sk_flashlight_drain_time" );
+	gSkillData.flashlightChargeTime = GetSkillCvar( "sk_flashlight_charge_time" );
 }
 
 void CGameRules::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer )
