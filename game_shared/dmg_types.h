@@ -31,4 +31,7 @@
 #define DMG_SLOWFREEZE		(1 << 22)	// in a subzero freezer
 #define DMG_MORTAR			(1 << 23)	// Hit by air raid (done to distinguish grenade from mortar)
 
+#define HEAL_GENERIC 0
+#define HEAL_CHARGE (1<<0) // Charge my portable medkit
+
 #endif

@@ -401,7 +401,7 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 	const int healed = CBaseMonster::TakeHealth(pHealer, flHealth, bitsDamageType);
 #if FEATURE_MEDKIT
 	CBasePlayerWeapon* pPlayerMedkit = WeaponById(WEAPON_MEDKIT);
-	if (pPlayerMedkit) {
+	if ((bitsDamageType & HEAL_CHARGE) != 0 && pPlayerMedkit) {
 		const int rest = (int)flHealth - healed;
 		if (rest > 0) {
 			const int medAmmoIndex = GetAmmoIndex(pPlayerMedkit->pszAmmo1());
