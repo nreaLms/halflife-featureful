@@ -1294,7 +1294,12 @@ void CSprite::TurnOn( void )
 		pev->nextthink = gpGlobals->time;
 		m_lastTime = gpGlobals->time;
 	}
-	pev->frame = 0;
+	if ( pev->impulse == 0 )
+		pev->frame = 0;
+	else if ( pev->impulse < 0 )
+		pev->frame = RANDOM_LONG(0, (int)m_maxFrame-1);
+	else
+		pev->frame = Q_min((int)m_maxFrame-1, pev->impulse);
 }
 
 void CSprite::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )

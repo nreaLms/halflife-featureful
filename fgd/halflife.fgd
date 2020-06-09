@@ -1639,6 +1639,7 @@
 		2: "Play Once" : 0
 		4: "Once + Remove" : 0
 	]
+	impulse(integer) : "Start frame" : : "Start frame for animation, negative value means random frame."
 ]
 
 @BaseClass = BaseTrain
