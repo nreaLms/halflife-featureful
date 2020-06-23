@@ -2673,41 +2673,57 @@ struct BeamParams
 	int red, green, blue, alpha;
 };
 
-void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, const BeamParams& params, int iBeams)
+static void DrawChaoticBeam(Vector vecOrigin, Vector vecDest, const BeamParams& params)
+{
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_BEAMPOINTS );
+		WRITE_COORD( vecOrigin.x );
+		WRITE_COORD( vecOrigin.y );
+		WRITE_COORD( vecOrigin.z );
+		WRITE_COORD( vecDest.x );
+		WRITE_COORD( vecDest.y );
+		WRITE_COORD( vecDest.z );
+		WRITE_SHORT( params.texture );
+		WRITE_BYTE( 0 ); // framestart
+		WRITE_BYTE( 10 ); // framerate
+		WRITE_BYTE( RANDOM_LONG(params.lifeMin, params.lifeMax) ); // life
+		WRITE_BYTE( params.width );  // width
+		WRITE_BYTE( params.noise );   // noise
+		WRITE_BYTE( params.red );   // r, g, b
+		WRITE_BYTE( params.green );   // r, g, b
+		WRITE_BYTE( params.blue );   // r, g, b
+		WRITE_BYTE( params.alpha );	// brightness
+		WRITE_BYTE( 35 );		// speed
+	MESSAGE_END();
+}
+
+static void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, const BeamParams& params, int iBeams)
 {
 	int iTimes = 0;
 	int iDrawn = 0;
-	while( iDrawn < iBeams && iTimes < ( iBeams * 3 ) )
+	while( iDrawn < iBeams && iTimes < ( iBeams * 2 ) )
 	{
 		TraceResult tr;
-		Vector vecDest = radius * ( Vector( RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ) ).Normalize() );
-		UTIL_TraceLine( vecOrigin, vecOrigin + vecDest, ignore_monsters, pentIgnore, &tr );
+		Vector vecDest = vecOrigin + radius * ( Vector( RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ) ).Normalize() );
+		UTIL_TraceLine( vecOrigin, vecDest, ignore_monsters, pentIgnore, &tr );
 		if( tr.flFraction != 1.0 )
 		{
 			// we hit something.
 			iDrawn++;
-			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-				WRITE_BYTE( TE_BEAMPOINTS );
-				WRITE_COORD( vecOrigin.x );
-				WRITE_COORD( vecOrigin.y );
-				WRITE_COORD( vecOrigin.z );
-				WRITE_COORD( tr.vecEndPos.x );
-				WRITE_COORD( tr.vecEndPos.y );
-				WRITE_COORD( tr.vecEndPos.z );
-				WRITE_SHORT( params.texture );
-				WRITE_BYTE( 0 ); // framestart
-				WRITE_BYTE( 10 ); // framerate
-				WRITE_BYTE( RANDOM_LONG(params.lifeMin, params.lifeMax) ); // life
-				WRITE_BYTE( params.width );  // width
-				WRITE_BYTE( params.noise );   // noise
-				WRITE_BYTE( params.red );   // r, g, b
-				WRITE_BYTE( params.green );   // r, g, b
-				WRITE_BYTE( params.blue );   // r, g, b
-				WRITE_BYTE( params.alpha );	// brightness
-				WRITE_BYTE( 35 );		// speed
-			MESSAGE_END();
+			DrawChaoticBeam(vecOrigin, tr.vecEndPos, params);
 		}
 		iTimes++;
+	}
+
+	// If drew less than half of requested beams, just draw beams without respect to the walls, but with smaller radius.
+	if ( iDrawn < iBeams/2 )
+	{
+		iBeams = Q_min(iBeams-iDrawn, iBeams/2);
+		for (int i=0; i<iBeams; ++i)
+		{
+			Vector vecDest = vecOrigin + radius*0.5f * Vector( RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ) );
+			DrawChaoticBeam(vecOrigin, vecDest, params);
+		}
 	}
 }
 
