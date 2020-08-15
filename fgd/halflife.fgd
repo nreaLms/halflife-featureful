@@ -6468,6 +6468,7 @@
 		1 : "Rotate by [LV]"
 		2 : "Rotate by (Y Z X)"
 		3 : "Set avelocity (Y Z X)"
+		4 : "Set angles [LA]"
 	]
 	spawnflags(flags) =
 	[

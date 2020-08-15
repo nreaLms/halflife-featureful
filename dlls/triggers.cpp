@@ -4371,6 +4371,23 @@ void CMotionThread::MotionThink( void )
 				Motion_PrintVectors("DEBUG: Set avelocity", m_hTarget->pev->avelocity, vecTemp);
 			UTIL_SetAvelocity(m_hTarget, vecTemp);
 			break;
+		case 4:
+		{
+			CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, STRING(m_iszFacing), m_hLocus);
+			if (pCalc != NULL)
+			{
+				if (pev->spawnflags & SF_MOTION_DEBUG)
+					ALERT(at_console, "DEBUG: Set angles from %f %f %f ", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+				UTIL_SetAngles(m_hTarget, pCalc->pev->angles);
+				if (pev->spawnflags & SF_MOTION_DEBUG)
+					ALERT(at_console, "to %f %f %f\n", m_hTarget->pev->angles.x, m_hTarget->pev->angles.y, m_hTarget->pev->angles.z);
+			}
+			else
+			{
+				ALERT(at_error, "Could not find \"%s\" to set angles for \"%s\"", STRING(m_iszFacing), STRING(m_hTarget->pev->targetname));
+			}
+		}
+			break;
 		}
 	}
 }
