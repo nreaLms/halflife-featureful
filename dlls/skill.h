@@ -214,6 +214,9 @@ struct skilldata_t
 	float miniturretHealth;
 	float sentryHealth;
 
+	float zaptrapSenseRadius;
+	float zaptrapRespawnTime;
+
 	// Player Weapons
 	float plrDmgCrowbar;
 	float plrDmg9MM;

@@ -392,6 +392,10 @@ void CGameRules::RefreshSkillData ( void )
 	// Sentry Turret
 	gSkillData.sentryHealth = GetSkillCvar( "sk_sentry_health" );
 
+	// Zap ball trap
+	gSkillData.zaptrapSenseRadius = GetSkillCvar( "sk_zaptrap_sense_radius" );
+	gSkillData.zaptrapRespawnTime = GetSkillCvar( "sk_zaptrap_respawn_time" );
+
 	// PLAYER WEAPONS
 
 	// Crowbar whack

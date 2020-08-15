@@ -1191,7 +1191,7 @@ void CControllerHeadBall::Spawn( void )
 
 void CControllerHeadBall::Precache( void )
 {
-	PRECACHE_MODEL( "sprites/xspark1.spr" );
+	PRECACHE_MODEL( "sprites/xspark4.spr" );
 	PRECACHE_SOUND( "debris/zap4.wav" );
 	PRECACHE_SOUND( "weapons/electro4.wav" );
 }
@@ -1422,3 +1422,236 @@ void CControllerZapBall::ExplodeTouch( CBaseEntity *pOther )
 
 	UTIL_Remove( this );
 }
+
+#define ZAPBALLTRAP_DETECT_SOUND "ambience/alien_frantic.wav"
+#define ZAPBALLTRAP_LAUNCH_SOUND "debris/beamstart4.wav"
+
+class CZapBallTrap : public CBaseEntity
+{
+public:
+	void KeyValue( KeyValueData* pkvd );
+	void Spawn();
+	void Precache();
+	void Animate();
+	void EXPORT DetectThink();
+	void EXPORT Materialize();
+	void LaunchBall(CBaseEntity* pTarget);
+	void EXPORT EnableUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+
+	float IdleThinkPeriod() {
+		return 0.2f;
+	}
+	float AlertThinkPeriod() {
+		return 0.1f;
+	}
+	float ThinkPeriod() const {
+		return pev->frags;
+	}
+	void SetThinkPeriod(float value) const {
+		pev->frags = value;
+	}
+
+	float SenseRadius() const {
+		return pev->health > 0.0f ? pev->health : gSkillData.zaptrapSenseRadius;
+	}
+	float FastSenseRadius() const {
+		return SenseRadius() / 3;
+	}
+
+	bool IncreaseAwareness(CBaseEntity *pTarget, int value);
+	void DecreaseAwareness();
+	void AwareEffect();
+	int CurrentAwareness() const {
+		return pev->button;
+	}
+	int MaxAwareness() const {
+		return 20;
+	}
+
+	int BaseBrigthness() const {
+		return 80;
+	}
+	int MaxBrightness() const {
+		return 255;
+	}
+
+	float BaseScale() const {
+		return 1.0f;
+	}
+	float MaxScale() const {
+		return BaseScale() * 2;
+	}
+
+	float RespawnTime() const {
+		return pev->dmg_take > 0 ? pev->dmg_take : gSkillData.zaptrapRespawnTime;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( env_energy_ball_trap, CZapBallTrap )
+
+void CZapBallTrap::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "wait"))
+	{
+		pev->dmg_take = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "radius"))
+	{
+		pev->health = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue( pkvd );
+}
+
+void CZapBallTrap::Precache()
+{
+	UTIL_PrecacheOther("controller_head_ball");
+	PRECACHE_SOUND(ZAPBALLTRAP_DETECT_SOUND);
+	PRECACHE_SOUND(ZAPBALLTRAP_LAUNCH_SOUND);
+}
+
+void CZapBallTrap::Spawn()
+{
+	Precache();
+
+	pev->movetype = MOVETYPE_NONE;
+	pev->solid = SOLID_NOT;
+
+	SET_MODEL(ENT( pev ), "sprites/xspark4.spr" );
+	pev->rendermode = kRenderTransAdd;
+	pev->rendercolor.x = 255;
+	pev->rendercolor.y = 255;
+	pev->rendercolor.z = 255;
+
+	UTIL_SetSize(pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
+	UTIL_SetOrigin( pev, pev->origin );
+
+	if (FStringNull(pev->targetname))
+	{
+		Materialize();
+	}
+	else
+	{
+		pev->effects |= EF_NODRAW;
+		SetUse(&CZapBallTrap::EnableUse);
+	}
+}
+
+void CZapBallTrap::EnableUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (useType != USE_OFF)
+	{
+		Materialize();
+		SetUse(NULL);
+	}
+}
+
+void CZapBallTrap::Animate()
+{
+	pev->frame = ( (int)pev->frame + 1 ) % 11;
+}
+
+void CZapBallTrap::DetectThink()
+{
+	Animate();
+	CBaseEntity *pFoundTarget = NULL;
+	for( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
+		if (pPlayer && pPlayer->IsPlayer())
+		{
+			const float distance = (pPlayer->pev->origin - pev->origin).Length();
+			if (distance <= SenseRadius())
+			{
+				TraceResult tr;
+				UTIL_TraceLine(pev->origin, pPlayer->Center(), dont_ignore_monsters, ENT(pev), &tr);
+				CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
+				if (pEntity == pPlayer)
+				{
+					pFoundTarget = pPlayer;
+					bool ballLaunched = IncreaseAwareness(pPlayer, distance <= FastSenseRadius() ? 4 : 2);
+					if (ballLaunched)
+						return;
+				}
+			}
+		}
+	}
+	if (!pFoundTarget)
+	{
+		DecreaseAwareness();
+	}
+	pev->nextthink = gpGlobals->time + ThinkPeriod();
+}
+
+void CZapBallTrap::LaunchBall(CBaseEntity *pTarget)
+{
+	pev->effects |= EF_NODRAW;
+	SetThink(&CZapBallTrap::Materialize);
+	pev->nextthink = gpGlobals->time + RespawnTime();
+
+	EMIT_SOUND(edict(), CHAN_WEAPON, ZAPBALLTRAP_LAUNCH_SOUND, 1.0f, ATTN_STATIC);
+
+	CBaseMonster *pBall = (CBaseMonster*)CBaseEntity::Create( "controller_head_ball", pev->origin, pev->angles, edict() );
+
+	pBall->pev->velocity = Vector( 0.0f, 0.0f, 32.0f );
+	pBall->m_hEnemy = pTarget;
+}
+
+void CZapBallTrap::Materialize()
+{
+	pev->renderamt = BaseBrigthness();
+	pev->scale = BaseScale();
+	pev->button = 0;
+	SetThinkPeriod(IdleThinkPeriod());
+	pev->effects &= ~EF_NODRAW;
+	pev->frame = 0;
+	SetThink( &CZapBallTrap::DetectThink );
+	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+bool CZapBallTrap::IncreaseAwareness(CBaseEntity *pTarget, int value)
+{
+	const int prevAwareness = CurrentAwareness();
+	pev->button += value;
+	const int newAwareness = pev->button;
+
+	if (newAwareness >= MaxAwareness())
+	{
+		STOP_SOUND(edict(), CHAN_ITEM, ZAPBALLTRAP_DETECT_SOUND);
+		LaunchBall(pTarget);
+		return true;
+	}
+	if (prevAwareness == 0)
+	{
+		SetThinkPeriod(AlertThinkPeriod());
+		EMIT_SOUND_DYN(edict(), CHAN_ITEM, ZAPBALLTRAP_DETECT_SOUND, 0.8f, ATTN_STATIC, 0, 110);
+	}
+
+	AwareEffect();
+
+	return false;
+}
+
+void CZapBallTrap::DecreaseAwareness()
+{
+	if (pev->button > 0)
+	{
+		pev->button--;
+		AwareEffect();
+		if (pev->button == 0)
+		{
+			STOP_SOUND(edict(), CHAN_ITEM, ZAPBALLTRAP_DETECT_SOUND);
+			SetThinkPeriod(IdleThinkPeriod());
+		}
+	}
+}
+
+void CZapBallTrap::AwareEffect()
+{
+	const float factor = (float)CurrentAwareness() / (float)MaxAwareness();
+	pev->scale = BaseScale() + (MaxScale() - BaseScale()) * factor;
+	pev->renderamt = BaseBrigthness() + (MaxBrightness() - BaseBrigthness()) * factor;
+}
+

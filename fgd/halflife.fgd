@@ -2538,6 +2538,12 @@
 	m_vEndSpriteColor(color255) : "Sprite2 Color" : "159 240 214"
 ]
 
+@PointClass sprite("sprites/xspark4.spr") base(Targetname) size(-16 -16 -16, 16 16 16) = env_energy_ball_trap : "Energy ball (similar to one used by alien controllers) that detects the presence of the player and shoots itself into the player if they stay nearby for too long. Respawns after some time"
+[
+	radius(string) : "Custom detection radius"
+	wait(string) : "Custom respawn time"
+]
+
 @BaseClass = BreakableSpawnFlags
 [
 	spawnflags(Flags) =

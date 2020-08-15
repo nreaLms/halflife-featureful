@@ -1010,6 +1010,9 @@ DECLARE_SKILL_VALUE(sk_miniturret_health, "0")
 // Sentry Turret
 DECLARE_SKILL_VALUE(sk_sentry_health, "0")
 
+DECLARE_SKILL_VALUE(sk_zaptrap_sense_radius, "244")
+DECLARE_SKILL_VALUE(sk_zaptrap_respawn_time, "18")
+
 // PLAYER WEAPONS
 
 // Crowbar whack
@@ -1765,6 +1768,9 @@ void GameDLLInit( void )
 
 	// Sentry Turret
 	REGISTER_SKILL_CVARS(sk_sentry_health);
+
+	REGISTER_SKILL_CVARS(sk_zaptrap_sense_radius);
+	REGISTER_SKILL_CVARS(sk_zaptrap_respawn_time);
 
 	// PLAYER WEAPONS
 
