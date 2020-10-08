@@ -475,6 +475,64 @@
 	randomitem_template(string) : "info_item_random entity"
 ]
 
+@BaseClass = BaseLockable
+[
+	locked_sound(choices) : "Locked Sound" : 0 =
+	[
+		0: "None"
+		2: "Access Denied"
+		8: "Small zap"
+		10: "Buzz"
+		11: "Buzz Off"
+		12: "Latch Locked"
+	]
+	unlocked_sound(choices) : "Unlocked Sound" : 0 =
+	[
+		0: "None"
+		1: "Big zap & Warmup"
+		3: "Access Granted"
+		4: "Quick Combolock"
+		5: "Power Deadbolt 1"
+		6: "Power Deadbolt 2"
+		7: "Plunger"
+		8: "Small zap"
+		9: "Keycard Sound"
+		10: "Buzz"
+		13: "Latch Unlocked"
+		14: "Lightswitch"
+	]
+	locked_sentence(choices) : "Locked Sentence" : 0 =
+	[
+		0: "None"
+		1: "Gen. Access Denied"
+		2: "Security Lockout"
+		3: "Blast Door"
+		4: "Fire Door"
+		5: "Chemical Door"
+		6: "Radiation Door"
+		7: "Gen. Containment"
+		8: "Maintenance Door"
+		9: "Broken Shut Door"
+	]
+	unlocked_sentence(choices) : "Unlocked Sentence" : 0 =
+	[
+		0: "None"
+		1: "Gen. Access Granted"
+		2: "Security Disengaged"
+		3: "Blast Door"
+		4: "Fire Door"
+		5: "Chemical Door"
+		6: "Radiation Door"
+		7: "Gen. Containment"
+		8: "Maintenance area"
+	]
+
+	locked_sound_override(sound) : "Locked Sound Override"
+	unlocked_sound_override(sound) : "Unlocked Sound Override"
+	locked_sentence_override(string) : "Locked Sentence Override"
+	unlocked_sentence_override(string) : "Unlocked Sentence Override"
+]
+
 @BaseClass = SoundRadius
 [
 	soundradius(choices) : "Sound radius" =
@@ -1759,7 +1817,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Global,Targetname, Target, RenderFields, Angles, ZHLT) = func_button : "Button"
+@SolidClass base(Global, Targetname, Target, RenderFields, Angles, ZHLT, BaseLockable) = func_button : "Button"
 [
 	speed(integer) : "Speed" : 5
 	health(integer) : "Health (shootable if > 0)"
@@ -1781,6 +1839,7 @@
 		11: "Buzz Off"
 		14: "Lightswitch"
 	]
+	noise(sound) : "Sound Override"
 	wait(integer) : "delay before reset (-1 stay)" : 3
 	delay(string) : "Delay before trigger" : "0"
 	spawnflags(flags) =
@@ -1791,55 +1850,6 @@
 		64: "Sparks" : 0
 		256:"Touch Activates": 0
 		512:"Player Can't Use": 0
-	]
-	locked_sound(choices) : "Locked Sound" =
-	[
-		0: "None"
-		2: "Access Denied"
-		8: "Small zap"
-		10: "Buzz"
-		11: "Buzz Off"
-		12: "Latch Locked"
-	]
-	unlocked_sound(choices) : "Unlocked Sound" =
-	[
-		0: "None"
-		1: "Big zap & Warmup"
-		3: "Access Granted"
-		4: "Quick Combolock"
-		5: "Power Deadbolt 1"
-		6: "Power Deadbolt 2"
-		7: "Plunger"
-		8: "Small zap"
-		9: "Keycard Sound"
-		10: "Buzz"
-		13: "Latch Unlocked"
-		14: "Lightswitch"
-	]
-	locked_sentence(choices) : "Locked Sentence" =
-	[
-		0: "None"
-		1: "Gen. Access Denied"
-		2: "Security Lockout"
-		3: "Blast Door"
-		4: "Fire Door"
-		5: "Chemical Door"
-		6: "Radiation Door"
-		7: "Gen. Containment"
-		8: "Maintenance Door"
-		9: "Broken Shut Door"
-	]
-	unlocked_sentence(choices) : "Unlocked Sentence" =
-	[
-		0: "None"
-		1: "Gen. Access Granted"
-		2: "Security Disengaged"
-		3: "Blast Door"
-		4: "Fire Door"
-		5: "Chemical Door"
-		6: "Radiation Door"
-		7: "Gen. Containment"
-		8: "Maintenance area"
 	]
 	_minlight(string) : "Minimum light level"
 	target_on_locked(target_destination) : "Target on locked" : : "Trigger if used when locked"
@@ -1997,7 +2007,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT) = func_rot_button : "RotatingButton"
+@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable) = func_rot_button : "RotatingButton"
 [
 	target(target_destination) : "Targetted object"
 	// changetarget will change the button's target's TARGET field to the button's changetarget.
@@ -2013,6 +2023,7 @@
 		24: "Clean Ratchet"
 		25: "Gas Clunk"
 	]
+	noise(sound) : "Sound Override"
 	wait(choices) : "Delay before reset" : 3 =
 	[
 		-1: "Stays pressed"

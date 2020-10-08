@@ -515,6 +515,10 @@ TYPEDESCRIPTION CBaseButton::m_SaveData[] =
 	//DEFINE_FIELD( CBaseButton, m_ls, FIELD_??? ),   // This is restored in Precache()
 	DEFINE_FIELD( CBaseButton, m_targetOnLocked, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_targetOnLockedTime, FIELD_TIME ),
+	DEFINE_FIELD( CBaseButton, m_lockedSoundOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_unlockedSoundOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_lockedSentenceOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_unlockedSentenceOverride, FIELD_STRING ),
 };
 	
 IMPLEMENT_SAVERESTORE( CBaseButton, CBaseToggle )
@@ -534,14 +538,26 @@ void CBaseButton::Precache( void )
 	}
 
 	// get door button sounds, for doors which require buttons to open
-	if( m_bLockedSound )
+	if (!FStringNull(m_lockedSoundOverride))
+	{
+		pszSound = STRING( m_lockedSoundOverride );
+		PRECACHE_SOUND( pszSound );
+		m_ls.sLockedSound = m_lockedSoundOverride;
+	}
+	else if( m_bLockedSound )
 	{
 		pszSound = ButtonSound( (int)m_bLockedSound );
 		PRECACHE_SOUND( pszSound );
 		m_ls.sLockedSound = MAKE_STRING( pszSound );
 	}
 
-	if( m_bUnlockedSound )
+	if (!FStringNull(m_unlockedSoundOverride))
+	{
+		pszSound = STRING( m_unlockedSoundOverride );
+		PRECACHE_SOUND( pszSound );
+		m_ls.sUnlockedSound = m_unlockedSoundOverride;
+	}
+	else if( m_bUnlockedSound )
 	{
 		pszSound = ButtonSound( (int)m_bUnlockedSound );
 		PRECACHE_SOUND( pszSound );
@@ -549,69 +565,83 @@ void CBaseButton::Precache( void )
 	}
 
 	// get sentence group names, for doors which are directly 'touched' to open
-	switch( m_bLockedSentence )
+	if (!FStringNull(m_lockedSentenceOverride))
 	{
-		case 1: // access denied
-			m_ls.sLockedSentence = MAKE_STRING( "NA" );
-			break;
-		case 2: // security lockout
-			m_ls.sLockedSentence = MAKE_STRING( "ND" );
-			break;
-		case 3: // blast door
-			m_ls.sLockedSentence = MAKE_STRING( "NF" );
-			break;
-		case 4: // fire door
-			m_ls.sLockedSentence = MAKE_STRING( "NFIRE" );
-			break;
-		case 5: // chemical door
-			m_ls.sLockedSentence = MAKE_STRING( "NCHEM" );
-			break;
-		case 6: // radiation door
-			m_ls.sLockedSentence = MAKE_STRING( "NRAD" );
-			break;
-		case 7: // gen containment
-			m_ls.sLockedSentence = MAKE_STRING( "NCON" );
-			break;
-		case 8: // maintenance door
-			m_ls.sLockedSentence = MAKE_STRING( "NH" );
-			break;
-		case 9: // broken door
-			m_ls.sLockedSentence = MAKE_STRING( "NG" );
-			break;
-		default:
-			m_ls.sLockedSentence = 0;
-			break;
+		m_ls.sLockedSentence = m_lockedSentenceOverride;
+	}
+	else
+	{
+		switch( m_bLockedSentence )
+		{
+			case 1: // access denied
+				m_ls.sLockedSentence = MAKE_STRING( "NA" );
+				break;
+			case 2: // security lockout
+				m_ls.sLockedSentence = MAKE_STRING( "ND" );
+				break;
+			case 3: // blast door
+				m_ls.sLockedSentence = MAKE_STRING( "NF" );
+				break;
+			case 4: // fire door
+				m_ls.sLockedSentence = MAKE_STRING( "NFIRE" );
+				break;
+			case 5: // chemical door
+				m_ls.sLockedSentence = MAKE_STRING( "NCHEM" );
+				break;
+			case 6: // radiation door
+				m_ls.sLockedSentence = MAKE_STRING( "NRAD" );
+				break;
+			case 7: // gen containment
+				m_ls.sLockedSentence = MAKE_STRING( "NCON" );
+				break;
+			case 8: // maintenance door
+				m_ls.sLockedSentence = MAKE_STRING( "NH" );
+				break;
+			case 9: // broken door
+				m_ls.sLockedSentence = MAKE_STRING( "NG" );
+				break;
+			default:
+				m_ls.sLockedSentence = 0;
+				break;
+		}
 	}
 
-	switch( m_bUnlockedSentence )
+	if (!FStringNull(m_unlockedSentenceOverride))
 	{
-		case 1: // access granted
-			m_ls.sUnlockedSentence = MAKE_STRING( "EA" );
-			break;
-		case 2: // security door
-			m_ls.sUnlockedSentence = MAKE_STRING( "ED" );
-			break;
-		case 3: // blast door
-			m_ls.sUnlockedSentence = MAKE_STRING( "EF" );
-			break;
-		case 4: // fire door
-			m_ls.sUnlockedSentence = MAKE_STRING( "EFIRE" );
-			break;
-		case 5: // chemical door
-			m_ls.sUnlockedSentence = MAKE_STRING( "ECHEM" );
-			break;
-		case 6: // radiation door
-			m_ls.sUnlockedSentence = MAKE_STRING( "ERAD" );
-			break;
-		case 7: // gen containment
-			m_ls.sUnlockedSentence = MAKE_STRING( "ECON" );
-			break;
-		case 8: // maintenance door
-			m_ls.sUnlockedSentence = MAKE_STRING( "EH" );
-			break;
-		default:
-			m_ls.sUnlockedSentence = 0;
-			break;
+		m_ls.sUnlockedSentence = m_unlockedSentenceOverride;
+	}
+	else
+	{
+		switch( m_bUnlockedSentence )
+		{
+			case 1: // access granted
+				m_ls.sUnlockedSentence = MAKE_STRING( "EA" );
+				break;
+			case 2: // security door
+				m_ls.sUnlockedSentence = MAKE_STRING( "ED" );
+				break;
+			case 3: // blast door
+				m_ls.sUnlockedSentence = MAKE_STRING( "EF" );
+				break;
+			case 4: // fire door
+				m_ls.sUnlockedSentence = MAKE_STRING( "EFIRE" );
+				break;
+			case 5: // chemical door
+				m_ls.sUnlockedSentence = MAKE_STRING( "ECHEM" );
+				break;
+			case 6: // radiation door
+				m_ls.sUnlockedSentence = MAKE_STRING( "ERAD" );
+				break;
+			case 7: // gen containment
+				m_ls.sUnlockedSentence = MAKE_STRING( "ECON" );
+				break;
+			case 8: // maintenance door
+				m_ls.sUnlockedSentence = MAKE_STRING( "EH" );
+				break;
+			default:
+				m_ls.sUnlockedSentence = 0;
+				break;
+		}
 	}
 }
 
@@ -653,6 +683,26 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "target_on_locked" ) )
 	{
 		m_targetOnLocked = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "locked_sound_override" ) )
+	{
+		m_lockedSoundOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "unlocked_sound_override" ) )
+	{
+		m_unlockedSoundOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "locked_sentence_override" ) )
+	{
+		m_lockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence_override" ) )
+	{
+		m_unlockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else 
@@ -718,9 +768,20 @@ void CBaseButton::Spawn()
 	//determine sounds for buttons
 	//a sound of 0 should not make a sound
 	//----------------------------------------------------
-	pszSound = ButtonSound( m_sounds );
-	PRECACHE_SOUND( pszSound );
-	pev->noise = MAKE_STRING( pszSound );
+	if (!FStringNull(pev->noise))
+	{
+		pszSound = STRING(pev->noise);
+		PRECACHE_SOUND( pszSound );
+	}
+	else
+	{
+		pszSound = ButtonSound( m_sounds );
+		if (pszSound)
+		{
+			PRECACHE_SOUND( pszSound );
+			pev->noise = MAKE_STRING( pszSound );
+		}
+	}
 
 	Precache();
 
@@ -781,7 +842,7 @@ void CBaseButton::Spawn()
 
 const char *ButtonSound( int sound )
 { 
-	const char *pszSound;
+	const char *pszSound = NULL;
 
 	switch( sound )
 	{
@@ -1154,9 +1215,20 @@ void CRotButton::Spawn( void )
 	//determine sounds for buttons
 	//a sound of 0 should not make a sound
 	//----------------------------------------------------
-	pszSound = ButtonSound( m_sounds );
-	PRECACHE_SOUND( pszSound );
-	pev->noise = MAKE_STRING( pszSound );
+	if (!FStringNull(pev->noise))
+	{
+		pszSound = STRING(pev->noise);
+		PRECACHE_SOUND( pszSound );
+	}
+	else
+	{
+		pszSound = ButtonSound( m_sounds );
+		if (pszSound)
+		{
+			PRECACHE_SOUND( pszSound );
+			pev->noise = MAKE_STRING( pszSound );
+		}
+	}
 
 	// set the axis of rotation
 	CBaseToggle::AxisDir( pev );

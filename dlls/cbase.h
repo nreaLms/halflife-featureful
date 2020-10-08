@@ -708,6 +708,10 @@ public:
 	int m_sounds;
 	string_t m_targetOnLocked;
 	float m_targetOnLockedTime;
+	string_t m_lockedSoundOverride;
+	string_t m_unlockedSoundOverride;
+	string_t m_lockedSentenceOverride;
+	string_t m_unlockedSentenceOverride;
 };
 
 //
