@@ -91,6 +91,11 @@ public:
 	BYTE m_fireOnOpenedState;
 	BYTE m_fireOnClosedState;
 
+	string_t m_lockedSoundOverride;
+	string_t m_unlockedSoundOverride;
+	string_t m_lockedSentenceOverride;
+	string_t m_unlockedSentenceOverride;
+
 	float SoundAttenuation() const
 	{
 		return ::SoundAttenuation(m_soundRadius);
@@ -127,6 +132,11 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_fireOnClosingState, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_fireOnOpenedState, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_fireOnClosedState, FIELD_CHARACTER ),
+
+	DEFINE_FIELD( CBaseButton, m_lockedSoundOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_unlockedSoundOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_lockedSentenceOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_unlockedSentenceOverride, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CBaseDoor, CBaseToggle )
@@ -331,6 +341,26 @@ void CBaseDoor::KeyValue( KeyValueData *pkvd )
 		m_fireOnClosedState = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "locked_sound_override" ) )
+	{
+		m_lockedSoundOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "unlocked_sound_override" ) )
+	{
+		m_unlockedSoundOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "locked_sentence_override" ) )
+	{
+		m_lockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence_override" ) )
+	{
+		m_unlockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseToggle::KeyValue( pkvd );
 }
@@ -529,14 +559,26 @@ void CBaseDoor::Precache( void )
 		PRECACHE_SOUND( pszSound );
 
 	// get door button sounds, for doors which are directly 'touched' to open
-	if( m_bLockedSound )
+	if (!FStringNull(m_lockedSoundOverride))
+	{
+		pszSound = STRING( m_lockedSoundOverride );
+		PRECACHE_SOUND( pszSound );
+		m_ls.sLockedSound = m_lockedSoundOverride;
+	}
+	else if( m_bLockedSound )
 	{
 		pszSound = ButtonSound( (int)m_bLockedSound );
 		PRECACHE_SOUND( pszSound );
 		m_ls.sLockedSound = MAKE_STRING( pszSound );
 	}
 
-	if( m_bUnlockedSound )
+	if (!FStringNull(m_unlockedSoundOverride))
+	{
+		pszSound = STRING( m_unlockedSoundOverride );
+		PRECACHE_SOUND( pszSound );
+		m_ls.sUnlockedSound = m_unlockedSoundOverride;
+	}
+	else if( m_bUnlockedSound )
 	{
 		pszSound = ButtonSound( (int)m_bUnlockedSound );
 		PRECACHE_SOUND( pszSound );
@@ -544,86 +586,100 @@ void CBaseDoor::Precache( void )
 	}
 
 	// get sentence group names, for doors which are directly 'touched' to open
-	switch( m_bLockedSentence )
+	if (!FStringNull(m_lockedSentenceOverride))
 	{
-		case 1:
-			// access denied
-			m_ls.sLockedSentence = MAKE_STRING( "NA" );
-			break;
-		case 2:
-			// security lockout
-			m_ls.sLockedSentence = MAKE_STRING( "ND" );
-			break;
-		case 3:
-			// blast door
-			m_ls.sLockedSentence = MAKE_STRING( "NF" );
-			break;
-		case 4:
-			// fire door
-			m_ls.sLockedSentence = MAKE_STRING( "NFIRE" );
-			break;
-		case 5:
-			// chemical door
-			m_ls.sLockedSentence = MAKE_STRING( "NCHEM" );
-			break;
-		case 6:
-			// radiation door
-			m_ls.sLockedSentence = MAKE_STRING( "NRAD" );
-			break;
-		case 7:
-			// gen containment
-			m_ls.sLockedSentence = MAKE_STRING( "NCON" );
-			break;
-		case 8:
-			// maintenance door
-			m_ls.sLockedSentence = MAKE_STRING( "NH" );
-			break;
-		case 9:
-			// broken door
-			m_ls.sLockedSentence = MAKE_STRING( "NG" );
-			break;
-		default:
-			m_ls.sLockedSentence = 0;
-			break;
+		m_ls.sLockedSentence = m_lockedSentenceOverride;
+	}
+	else
+	{
+		switch( m_bLockedSentence )
+		{
+			case 1:
+				// access denied
+				m_ls.sLockedSentence = MAKE_STRING( "NA" );
+				break;
+			case 2:
+				// security lockout
+				m_ls.sLockedSentence = MAKE_STRING( "ND" );
+				break;
+			case 3:
+				// blast door
+				m_ls.sLockedSentence = MAKE_STRING( "NF" );
+				break;
+			case 4:
+				// fire door
+				m_ls.sLockedSentence = MAKE_STRING( "NFIRE" );
+				break;
+			case 5:
+				// chemical door
+				m_ls.sLockedSentence = MAKE_STRING( "NCHEM" );
+				break;
+			case 6:
+				// radiation door
+				m_ls.sLockedSentence = MAKE_STRING( "NRAD" );
+				break;
+			case 7:
+				// gen containment
+				m_ls.sLockedSentence = MAKE_STRING( "NCON" );
+				break;
+			case 8:
+				// maintenance door
+				m_ls.sLockedSentence = MAKE_STRING( "NH" );
+				break;
+			case 9:
+				// broken door
+				m_ls.sLockedSentence = MAKE_STRING( "NG" );
+				break;
+			default:
+				m_ls.sLockedSentence = 0;
+				break;
+		}
 	}
 
-	switch( m_bUnlockedSentence )
+	if (!FStringNull(m_unlockedSentenceOverride))
 	{
-		case 1:
-			// access granted
-			m_ls.sUnlockedSentence = MAKE_STRING( "EA" );
-			break;
-		case 2:
-			// security door
-			m_ls.sUnlockedSentence = MAKE_STRING( "ED" );
-			break;
-		case 3:
-			// blast door
-			m_ls.sUnlockedSentence = MAKE_STRING( "EF" );
-			break;
-		case 4:
-			// fire door
-			m_ls.sUnlockedSentence = MAKE_STRING( "EFIRE" );
-			break;
-		case 5:
-			// chemical door
-			m_ls.sUnlockedSentence = MAKE_STRING( "ECHEM" );
-			break;
-		case 6:
-			// radiation door
-			m_ls.sUnlockedSentence = MAKE_STRING( "ERAD" );
-			break;
-		case 7:
-			// gen containment
-			m_ls.sUnlockedSentence = MAKE_STRING( "ECON" );
-			break;
-		case 8:
-			// maintenance door
-			m_ls.sUnlockedSentence = MAKE_STRING( "EH" );
-			break;
-		default:
-			m_ls.sUnlockedSentence = 0;
-			break;
+		m_ls.sUnlockedSentence = m_unlockedSentenceOverride;
+	}
+	else
+	{
+		switch( m_bUnlockedSentence )
+		{
+			case 1:
+				// access granted
+				m_ls.sUnlockedSentence = MAKE_STRING( "EA" );
+				break;
+			case 2:
+				// security door
+				m_ls.sUnlockedSentence = MAKE_STRING( "ED" );
+				break;
+			case 3:
+				// blast door
+				m_ls.sUnlockedSentence = MAKE_STRING( "EF" );
+				break;
+			case 4:
+				// fire door
+				m_ls.sUnlockedSentence = MAKE_STRING( "EFIRE" );
+				break;
+			case 5:
+				// chemical door
+				m_ls.sUnlockedSentence = MAKE_STRING( "ECHEM" );
+				break;
+			case 6:
+				// radiation door
+				m_ls.sUnlockedSentence = MAKE_STRING( "ERAD" );
+				break;
+			case 7:
+				// gen containment
+				m_ls.sUnlockedSentence = MAKE_STRING( "ECON" );
+				break;
+			case 8:
+				// maintenance door
+				m_ls.sUnlockedSentence = MAKE_STRING( "EH" );
+				break;
+			default:
+				m_ls.sUnlockedSentence = 0;
+				break;
+		}
 	}
 }
 
