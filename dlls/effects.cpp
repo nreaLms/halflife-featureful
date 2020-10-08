@@ -1880,7 +1880,7 @@ CGib *CEnvShooter::CreateGib( float lifeTime )
 	/*
 	 * Some env_shooters in Half-Life maps have a custom scale value.
 	 * It did not have any effect in original Half-Life because models did not get scaled.
-	 * Not we have spirit-like scaling which may cause visual issues.
+	 * Now we have spirit-like scaling which may cause visual issues.
 	 * To avoid unintended scaling we allow model scaling only when the corresponding flag is set.
 	*/
 	const char* model = STRING(pev->model);
