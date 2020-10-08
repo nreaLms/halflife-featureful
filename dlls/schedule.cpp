@@ -856,7 +856,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					dir.z = 0;
 					Vector targetLocation = pev->origin + dir.Normalize() * distance;
 
-					if( MoveToLocation( ACT_RUN, 2, targetLocation ) )
+					if( MoveToLocation( ACT_RUN, 0, targetLocation ) )
 					{
 						//ALERT(at_aiconsole, "Using the last resort to run away\n");
 						TaskComplete();
