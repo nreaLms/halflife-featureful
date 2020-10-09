@@ -1017,6 +1017,7 @@ TYPEDESCRIPTION	CFuncTrackTrain::m_SaveData[] =
 	DEFINE_FIELD( CFuncTrackTrain, m_flVolume, FIELD_FLOAT ),
 	DEFINE_FIELD( CFuncTrackTrain, m_flBank, FIELD_FLOAT ),
 	DEFINE_FIELD( CFuncTrackTrain, m_oldSpeed, FIELD_FLOAT ),
+	DEFINE_FIELD( CFuncTrackTrain, m_customMoveSound, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTrackTrain, CBaseEntity )
@@ -1166,12 +1167,13 @@ void CFuncTrackTrain::StopSound( void )
 
 		us_encode = us_sound;
 
-		PLAYBACK_EVENT_FULL( FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0, 
+		if (!m_customMoveSound)
+			PLAYBACK_EVENT_FULL( FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0,
 			g_vecZero, g_vecZero, 0.0, 0.0, us_encode, 0, 1, 0 );
-		/*
-		STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noise ) );
-		*/
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, "plats/ttrain_brake1.wav", m_flVolume, ATTN_NORM, 0, 100 );
+		else
+			STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noise ) );
+
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, STRING(pev->noise1), m_flVolume, ATTN_NORM, 0, 100 );
 	}
 
 	m_soundPlaying = 0;
@@ -1192,30 +1194,34 @@ void CFuncTrackTrain::UpdateSound( void )
 	if( !m_soundPlaying )
 	{
 		// play startup sound for train
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, "plats/ttrain_start1.wav", m_flVolume, ATTN_NORM, 0, 100 );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, STRING(pev->noise2), m_flVolume, ATTN_NORM, 0, 100 );
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noise ), m_flVolume, ATTN_NORM, 0, (int)flpitch );
 		m_soundPlaying = 1;
 	} 
 	else
 	{
-/*
-		// update pitch
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noise ), m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, (int)flpitch );
-*/
-		// volume 0.0 - 1.0 - 6 bits
-		// m_sounds 3 bits
-		// flpitch = 6 bits
-		// 15 bits total
+		if (m_customMoveSound)
+		{
+			// update pitch
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noise ), m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, (int)flpitch );
+		}
+		else
+		{
+			// volume 0.0 - 1.0 - 6 bits
+			// m_sounds 3 bits
+			// flpitch = 6 bits
+			// 15 bits total
 
-		unsigned short us_encode;
-		unsigned short us_sound  = ( ( unsigned short )( m_sounds ) & 0x0007 ) << 12;
-		unsigned short us_pitch  = ( ( unsigned short )( flpitch / 10.0f ) & 0x003f ) << 6;
-		unsigned short us_volume = ( ( unsigned short )( m_flVolume * 40.0f ) & 0x003f );
+			unsigned short us_encode;
+			unsigned short us_sound  = ( ( unsigned short )( m_sounds ) & 0x0007 ) << 12;
+			unsigned short us_pitch  = ( ( unsigned short )( flpitch / 10.0f ) & 0x003f ) << 6;
+			unsigned short us_volume = ( ( unsigned short )( m_flVolume * 40.0f ) & 0x003f );
 
-		us_encode = us_sound | us_pitch | us_volume;
+			us_encode = us_sound | us_pitch | us_volume;
 
-		PLAYBACK_EVENT_FULL( FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0f,
-			g_vecZero, g_vecZero, 0.0f, 0.0f, us_encode, 0, 0, 0 );
+			PLAYBACK_EVENT_FULL( FEV_RELIABLE | FEV_UPDATE, edict(), m_usAdjustPitch, 0.0f,
+				g_vecZero, g_vecZero, 0.0f, 0.0f, us_encode, 0, 0, 0 );
+		}
 	}
 }
 
@@ -1537,6 +1543,11 @@ sounds
 
 void CFuncTrackTrain::Spawn( void )
 {
+	if (!FStringNull(pev->noise))
+	{
+		m_customMoveSound = TRUE;
+	}
+
 	if( pev->speed == 0 )
 		m_speed = 100;
 	else
@@ -1584,42 +1595,52 @@ void CFuncTrackTrain::Precache( void )
 	if( m_flVolume == 0.0f )
 		m_flVolume = 1.0f;
 
-	switch( m_sounds )
+	if (FStringNull( pev->noise ))
 	{
-	default:
-		// no sound
-		pszSound = NULL;
-		break;
-	case 1:
-		pszSound = "plats/ttrain1.wav";
-		break;
-	case 2:
-		pszSound = "plats/ttrain2.wav";
-		break;
-	case 3:
-		pszSound = "plats/ttrain3.wav";
-		break; 
-	case 4:
-		pszSound = "plats/ttrain4.wav";
-		break;
-	case 5:
-		pszSound = "plats/ttrain6.wav";
-		break;
-	case 6:
-		pszSound = "plats/ttrain7.wav";
-		break;
-	}
+		switch( m_sounds )
+		{
+		default:
+			// no sound
+			pszSound = NULL;
+			break;
+		case 1:
+			pszSound = "plats/ttrain1.wav";
+			break;
+		case 2:
+			pszSound = "plats/ttrain2.wav";
+			break;
+		case 3:
+			pszSound = "plats/ttrain3.wav";
+			break;
+		case 4:
+			pszSound = "plats/ttrain4.wav";
+			break;
+		case 5:
+			pszSound = "plats/ttrain6.wav";
+			break;
+		case 6:
+			pszSound = "plats/ttrain7.wav";
+			break;
+		}
 
-	if( pszSound )
-	{
-		PRECACHE_SOUND( pszSound );
-		pev->noise = MAKE_STRING( pszSound );
+		if( pszSound )
+		{
+			PRECACHE_SOUND( pszSound );
+			pev->noise = MAKE_STRING( pszSound );
+		}
 	}
 	else
-		pev->noise = 0;
+	{
+		PRECACHE_SOUND( STRING(pev->noise) );
+	}
 
-	PRECACHE_SOUND( "plats/ttrain_brake1.wav" );
-	PRECACHE_SOUND( "plats/ttrain_start1.wav" );
+	if (FStringNull(pev->noise1))
+		pev->noise1 = MAKE_STRING("plats/ttrain_brake1.wav");
+	PRECACHE_SOUND( STRING(pev->noise1) );
+
+	if (FStringNull(pev->noise2))
+		pev->noise2 = MAKE_STRING("plats/ttrain_start1.wav");
+	PRECACHE_SOUND( STRING(pev->noise2) );
 
 	m_usAdjustPitch = PRECACHE_EVENT( 1, "events/train.sc" );
 }

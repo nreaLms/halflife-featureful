@@ -2086,6 +2086,9 @@
 		5: "Rail 6"
 		6: "Rail 7"
 	]
+	noise(sound) : "Move Sound Override"
+	noise1(sound) : "Brake Sound Override"
+	noise2(sound) : "Start Sound Override"
 	wheels(integer) : "Distance between the wheels" : 50
 	height(integer) : "Height above track" : 4
 	startspeed(integer) : "Initial speed" : 0

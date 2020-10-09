@@ -118,6 +118,7 @@ public:
 	float m_flVolume;
 	float m_flBank;
 	float m_oldSpeed;
+	BOOL m_customMoveSound;
 
 private:
 	unsigned short m_usAdjustPitch;
