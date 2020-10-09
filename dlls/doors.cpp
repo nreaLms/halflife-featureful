@@ -133,10 +133,10 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_fireOnOpenedState, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_fireOnClosedState, FIELD_CHARACTER ),
 
-	DEFINE_FIELD( CBaseButton, m_lockedSoundOverride, FIELD_STRING ),
-	DEFINE_FIELD( CBaseButton, m_unlockedSoundOverride, FIELD_STRING ),
-	DEFINE_FIELD( CBaseButton, m_lockedSentenceOverride, FIELD_STRING ),
-	DEFINE_FIELD( CBaseButton, m_unlockedSentenceOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseDoor, m_lockedSoundOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseDoor, m_unlockedSoundOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseDoor, m_lockedSentenceOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseDoor, m_unlockedSentenceOverride, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CBaseDoor, CBaseToggle )
