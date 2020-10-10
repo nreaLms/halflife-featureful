@@ -996,11 +996,12 @@ void CEyeScanner::Spawn()
 	willUnlock = false;
 
 	SET_MODEL(ENT(pev), "models/EYE_SCANNER.mdl");
+	const float yCos = fabs(cos(pev->angles.y * M_PI_F / 180.0f));
+	const float ySin = fabs(sin(pev->angles.y * M_PI_F / 180.0f));
+	UTIL_SetSize(pev, Vector(-10-ySin*6, -10-yCos*6, 32), Vector(10+ySin*6, 10+yCos*6, 72));
 	UTIL_SetOrigin(pev, pev->origin);
-	UTIL_SetSize(pev, Vector(-12, -12, 32), Vector(12, 12, 72));
 	SetActivity(ACT_CROUCHIDLE);
 	ResetSequenceInfo();
-	SetThink(NULL);
 }
 
 void CEyeScanner::Precache()
