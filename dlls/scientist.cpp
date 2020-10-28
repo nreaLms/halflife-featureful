@@ -22,7 +22,6 @@
 #include	"monsters.h"
 #include	"talkmonster.h"
 #include	"schedule.h"
-#include	"defaultai.h"
 #include	"scripted.h"
 #include	"animation.h"
 #include	"soundent.h"
@@ -1035,7 +1034,7 @@ Schedule_t *CScientist::GetSchedule( void )
 			return slScientistCover;		// Take Cover
 
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
-			return slTakeCoverFromBestSound;	// Cower and panic from the scary sound!
+			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );	// Cower and panic from the scary sound!
 
 		return slScientistCover;			// Run & Cower
 		break;

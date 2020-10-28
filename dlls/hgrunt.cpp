@@ -42,7 +42,6 @@
 #include	"gamerules.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
-#include	"gamerules.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
