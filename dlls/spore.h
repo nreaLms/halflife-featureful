@@ -2,8 +2,11 @@
 #define SPORE_H
 
 #include "mod_features.h"
+#include "basemonster.h"
 
 #if FEATURE_SPOREGRENADE
+class CSprite;
+
 class CSporeGrenade : public CBaseMonster
 {
 public:

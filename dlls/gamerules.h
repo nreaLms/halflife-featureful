@@ -18,6 +18,8 @@
 #pragma once
 #ifndef GAMERULES_H
 #define GAMERULES_H
+
+#include "cbase.h"
 //#include "weapons.h"
 //#include "items.h"
 class CBasePlayerWeapon;

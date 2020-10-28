@@ -2,6 +2,8 @@
 #ifndef AMMUNITION_H
 #define AMMUNITION_H
 
+#include "cbase.h"
+
 class CBasePlayerAmmo : public CBaseDelay
 {
 public:

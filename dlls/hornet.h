@@ -18,6 +18,9 @@
 #pragma once
 #ifndef HORNET_H
 #define HORNET_H
+
+#include "basemonster.h"
+
 //=========================================================
 // Hornet Defines
 //=========================================================

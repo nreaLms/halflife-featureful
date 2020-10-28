@@ -20,6 +20,8 @@
 #include "scriptevent.h"
 #endif
 
+#include "basemonster.h"
+
 #define SF_SCRIPT_WAITTILLSEEN		1
 #define SF_SCRIPT_EXITAGITATED		2
 #define SF_SCRIPT_REPEATABLE		4

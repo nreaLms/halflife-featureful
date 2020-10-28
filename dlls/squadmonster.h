@@ -20,6 +20,8 @@
 #ifndef SQUADMONSTER_H
 #define SQUADMONSTER_H
 
+#include "basemonster.h"
+
 #define	SF_SQUADMONSTER_LEADER	32
 
 #define bits_NO_SLOT		0

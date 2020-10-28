@@ -18,6 +18,7 @@
 
 #include "pm_materials.h"
 #include "mod_features.h"
+#include "basemonster.h"
 #if FEATURE_ROPE
 #include "ropes.h"
 #endif

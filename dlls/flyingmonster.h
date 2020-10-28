@@ -17,6 +17,8 @@
 #ifndef FLYINGMONSTER_H
 #define FLYINGMONSTER_H
 
+#include "basemonster.h"
+
 class CFlyingMonster : public CBaseMonster
 {
 public:

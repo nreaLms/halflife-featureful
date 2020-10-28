@@ -19,6 +19,8 @@
 #ifndef	SCHEDULE_H
 #define	SCHEDULE_H
 
+#include "vector.h"
+
 #define	TASKSTATUS_NEW				0			// Just started
 #define TASKSTATUS_RUNNING			1			// Running task & movement
 #define TASKSTATUS_RUNNING_MOVEMENT	2			// Just running movement

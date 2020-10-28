@@ -15,6 +15,8 @@
 #pragma once
 #ifndef UTIL_H
 #define UTIL_H
+
+#include "extdll.h"
 //
 // Misc utility code
 //

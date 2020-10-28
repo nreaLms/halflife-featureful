@@ -15,6 +15,9 @@
 #pragma once
 #ifndef CBASE_H
 #define CBASE_H
+
+#include "extdll.h"
+#include "util.h"
 /*
 
 Class Hierachy

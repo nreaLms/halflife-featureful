@@ -16,6 +16,8 @@
 #ifndef EFFECTS_H
 #define EFFECTS_H
 
+#include "cbase.h"
+
 #define SF_BEAM_STARTON			0x0001
 #define SF_BEAM_TOGGLE			0x0002
 #define SF_BEAM_RANDOM			0x0004

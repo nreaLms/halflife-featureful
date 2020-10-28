@@ -20,6 +20,8 @@ class CRopeSample;
 
 struct RopeSampleData;
 
+#include "cbase.h"
+
 #define MAX_SEGMENTS 63
 #define MAX_SAMPLES  64
 

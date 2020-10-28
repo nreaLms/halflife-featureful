@@ -16,6 +16,8 @@
 #ifndef FUNC_BREAK_H
 #define FUNC_BREAK_H
 
+#include "cbase.h"
+
 typedef enum
 {
 	expRandom,

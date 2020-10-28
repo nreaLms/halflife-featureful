@@ -18,6 +18,8 @@
 #ifndef PLANE_H
 #define PLANE_H
 
+#include "extdll.h"
+
 class CPlane
 {
 public:

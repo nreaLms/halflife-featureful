@@ -16,6 +16,8 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
+#include "cbase.h"
+
 class CItem : public CBaseDelay
 {
 public:

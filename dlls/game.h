@@ -16,6 +16,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "cvardef.h"
+
 extern void GameDLLInit( void );
 
 extern cvar_t displaysoundlist;

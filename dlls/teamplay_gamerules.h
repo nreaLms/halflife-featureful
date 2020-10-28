@@ -19,6 +19,8 @@
 #ifndef TEAMPLAY_GAMERULES_H
 #define TEAMPLAY_GAMERULES_H
 
+#include "gamerules.h"
+
 #define MAX_TEAMNAME_LENGTH		16
 #define MAX_TEAMS			32
 
