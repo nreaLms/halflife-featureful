@@ -567,7 +567,6 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 			return slBarneyEnemyDraw;
 		}
 		break;
-	// Hook these to make a looping schedule
 	case SCHED_RANGE_ATTACK1:
 		return slBaRangeAttack1;
 	}
