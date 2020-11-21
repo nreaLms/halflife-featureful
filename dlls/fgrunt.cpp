@@ -2113,7 +2113,7 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_HGRUNT_ALLY_ELOF_FAIL:
 		{
-			return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
 		}
 		break;
 	case SCHED_HGRUNT_ALLY_ESTABLISH_LINE_OF_FIRE:
