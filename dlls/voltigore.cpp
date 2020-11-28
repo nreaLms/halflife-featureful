@@ -849,35 +849,6 @@ Schedule_t	slVoltigoreRangeAttack1[] =
 	},
 };
 
-// Chase enemy schedule
-Task_t tlVoltigoreChaseEnemy1[] =
-{
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_CHASE_ENEMY_FAILED },
-	{ TASK_GET_PATH_TO_ENEMY, (float)0 },
-	{ TASK_RUN_PATH, (float)0 },
-	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
-};
-
-Schedule_t slVoltigoreChaseEnemy[] =
-{
-	{
-		tlVoltigoreChaseEnemy1,
-		ARRAYSIZE(tlVoltigoreChaseEnemy1),
-		bits_COND_NEW_ENEMY |
-		bits_COND_ENEMY_DEAD |
-		bits_COND_SMELL_FOOD |
-		bits_COND_CAN_RANGE_ATTACK1 |
-		bits_COND_CAN_MELEE_ATTACK1 |
-		bits_COND_CAN_MELEE_ATTACK2 |
-		bits_COND_TASK_FAILED |
-		bits_COND_HEAR_SOUND,
-
-		bits_SOUND_DANGER |
-		bits_SOUND_MEAT,
-		"Voltigore Chase Enemy"
-	},
-};
-
 //=========================================================
 // Victory dance!
 //=========================================================
@@ -917,7 +888,6 @@ Schedule_t slVoltigoreVictoryDance[] =
 DEFINE_CUSTOM_SCHEDULES(CVoltigore)
 {
 	slVoltigoreRangeAttack1,
-	slVoltigoreChaseEnemy,
 	slVoltigoreVictoryDance
 };
 
@@ -979,9 +949,6 @@ Schedule_t* CVoltigore::GetScheduleOfType(int Type)
 	{
 	case SCHED_RANGE_ATTACK1:
 		return &slVoltigoreRangeAttack1[0];
-		break;
-	case SCHED_CHASE_ENEMY:
-		return &slVoltigoreChaseEnemy[0];
 		break;
 	case SCHED_VICTORY_DANCE:
 		return &slVoltigoreVictoryDance[0];
@@ -1449,7 +1416,7 @@ Schedule_t *CBabyVoltigore::GetScheduleOfType(int Type)
 	// For some cryptic reason baby voltigore tries to start the range attack even though its model does not have sequence with range attack activity. 
 	// This hack is for preventing baby voltigore to do this.
 	case SCHED_RANGE_ATTACK1:
-		return &slVoltigoreChaseEnemy[0];
+		return GetScheduleOfType(SCHED_CHASE_ENEMY);
 		break;
 	default:
 		return CVoltigore::GetScheduleOfType(Type);
