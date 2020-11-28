@@ -709,7 +709,7 @@ Schedule_t slChaseEnemyFailed[] =
 		bits_COND_CAN_MELEE_ATTACK2 |
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_DANGER,
-		"tlChaseEnemyFailed"
+		"Chase Enemy Failed"
 	},
 };
 
