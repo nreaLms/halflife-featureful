@@ -1862,6 +1862,27 @@
 	_minlight(string) : "Minimum light level"
 ]
 
+@SolidClass base(Targetname) = func_breakable_effect : "Effect similar to func_breakable destruction, but without visible object"
+[
+	material(choices) :"Material type" : 0 =
+	[
+		0: "Glass"
+		1: "Wood"
+		2: "Metal"
+		3: "Flesh"
+		4: "Cinder Block"
+		5: "Ceiling Tile"
+		6: "Computer"
+		7: "Unbreakable Glass"
+		8: "Rocks"
+	]
+	gibmodel(studio) : "Gib Model"
+	spawnflags(Flags) =
+	[
+		1 : "Repeatable" : 0
+	]
+]
+
 @SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable) = func_button : "Button"
 [
 	speed(integer) : "Speed" : 5

@@ -301,61 +301,44 @@ void CBreakable::MaterialSoundRandom( edict_t *pEdict, Materials soundMaterial, 
 		EMIT_SOUND( pEdict, CHAN_BODY, pSoundList[RANDOM_LONG( 0, soundCount - 1 )], volume, 1.0f );
 }
 
-void CBreakable::Precache( void )
+static void PrecacheMaterialBustSounds( Materials material )
 {
-	const char *pGibName = NULL;
-
-	switch( m_Material )
+	switch( material )
 	{
 	case matWood:
-		pGibName = "models/woodgibs.mdl";
-
 		PRECACHE_SOUND( "debris/bustcrate1.wav" );
 		PRECACHE_SOUND( "debris/bustcrate2.wav" );
 		break;
 	case matFlesh:
-		pGibName = "models/fleshgibs.mdl";
-
 		PRECACHE_SOUND( "debris/bustflesh1.wav" );
 		PRECACHE_SOUND( "debris/bustflesh2.wav" );
 		break;
 	case matComputer:
 		PRECACHE_SOUND( "buttons/spark5.wav" );
 		PRECACHE_SOUND( "buttons/spark6.wav" );
-		pGibName = "models/computergibs.mdl";
 
 		PRECACHE_SOUND( "debris/bustmetal1.wav" );
 		PRECACHE_SOUND( "debris/bustmetal2.wav" );
 		break;
 	case matUnbreakableGlass:
 	case matGlass:
-		pGibName = "models/glassgibs.mdl";
-
 		PRECACHE_SOUND( "debris/bustglass1.wav" );
 		PRECACHE_SOUND( "debris/bustglass2.wav" );
 		break;
 	case matMetal:
-		pGibName = "models/metalplategibs.mdl";
-
 		PRECACHE_SOUND( "debris/bustmetal1.wav" );
 		PRECACHE_SOUND( "debris/bustmetal2.wav" );
 		break;
 	case matCinderBlock:
-		pGibName = "models/cindergibs.mdl";
-
 		PRECACHE_SOUND( "debris/bustconcrete1.wav" );
 		PRECACHE_SOUND( "debris/bustconcrete2.wav" );
 		break;
 	case matRocks:
-		pGibName = "models/rockgibs.mdl";
-
 		PRECACHE_SOUND( "debris/bustconcrete1.wav" );
 		PRECACHE_SOUND( "debris/bustconcrete2.wav" );
 		break;
 	case matCeilingTile:
-		pGibName = "models/ceilinggibs.mdl";
-
-		PRECACHE_SOUND( "debris/bustceiling.wav" );  
+		PRECACHE_SOUND( "debris/bustceiling.wav" );
 		break;
 	case matNone:
 	case matLastMaterial:
@@ -363,9 +346,48 @@ void CBreakable::Precache( void )
 	default:
 		break;
 	}
+}
+
+static const char* DefaultMaterialGibModel( Materials material )
+{
+	switch( material )
+	{
+	case matWood:
+		return "models/woodgibs.mdl";
+	case matFlesh:
+		return "models/fleshgibs.mdl";
+	case matComputer:
+		return "models/computergibs.mdl";
+	case matUnbreakableGlass:
+	case matGlass:
+		return "models/glassgibs.mdl";;
+	case matMetal:
+		return "models/metalplategibs.mdl";
+	case matCinderBlock:
+		return "models/cindergibs.mdl";
+	case matRocks:
+		return "models/rockgibs.mdl";
+	case matCeilingTile:
+		return "models/ceilinggibs.mdl";
+	case matNone:
+	case matLastMaterial:
+		break;
+	default:
+		break;
+	}
+	return NULL;
+}
+
+void CBreakable::Precache( void )
+{
+	PrecacheMaterialBustSounds(m_Material);
 	MaterialSoundPrecache( m_Material );
+
+	const char *pGibName = NULL;
 	if( m_iszGibModel )
 		pGibName = STRING( m_iszGibModel );
+	else
+		pGibName = DefaultMaterialGibModel(m_Material);
 
 	m_idShard = PRECACHE_MODEL( pGibName );
 
@@ -613,6 +635,85 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	return 1;
 }
 
+static char PlayBreakableBustSound( entvars_t* pev, Materials material, float fvol, int pitch )
+{
+	switch( material )
+	{
+	case matGlass:
+		switch( RANDOM_LONG( 0, 1 ) )
+		{
+		case 0:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustglass1.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		case 1:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustglass2.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		}
+		return BREAK_GLASS;
+		break;
+	case matWood:
+		switch( RANDOM_LONG( 0, 1 ) )
+		{
+		case 0:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustcrate1.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		case 1:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustcrate2.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		}
+		return BREAK_WOOD;
+		break;
+	case matComputer:
+	case matMetal:
+		switch( RANDOM_LONG( 0, 1 ) )
+		{
+		case 0:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustmetal1.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		case 1:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustmetal2.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		}
+		return BREAK_METAL;
+		break;
+	case matFlesh:
+		switch( RANDOM_LONG( 0, 1 ) )
+		{
+		case 0:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustflesh1.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		case 1:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustflesh2.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		}
+		return BREAK_FLESH;
+		break;
+	case matRocks:
+	case matCinderBlock:
+		switch( RANDOM_LONG( 0, 1 ) )
+		{
+		case 0:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustconcrete1.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		case 1:
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustconcrete2.wav", fvol, ATTN_NORM, 0, pitch );
+			break;
+		}
+		return BREAK_CONCRETE;
+		break;
+	case matCeilingTile:
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustceiling.wav", fvol, ATTN_NORM, 0, pitch );
+		break;
+	case matNone:
+	case matLastMaterial:
+	case matUnbreakableGlass:
+		break;
+	default:
+		break;
+	}
+	return 0;
+}
+
 void CBreakable::Die( void )
 {
 	Vector vecSpot;// shard origin
@@ -634,80 +735,7 @@ void CBreakable::Die( void )
 	if( fvol > 1.0f )
 		fvol = 1.0f;
 
-	switch( m_Material )
-	{
-	case matGlass:
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustglass1.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		case 1:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustglass2.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		}
-		cFlag = BREAK_GLASS;
-		break;
-	case matWood:
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustcrate1.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		case 1:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustcrate2.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		}
-		cFlag = BREAK_WOOD;
-		break;
-	case matComputer:
-	case matMetal:
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustmetal1.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		case 1:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustmetal2.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		}
-		cFlag = BREAK_METAL;
-		break;
-	case matFlesh:
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustflesh1.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		case 1:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustflesh2.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		}
-		cFlag = BREAK_FLESH;
-		break;
-	case matRocks:
-	case matCinderBlock:
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustconcrete1.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		case 1:
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustconcrete2.wav", fvol, ATTN_NORM, 0, pitch );
-			break;
-		}
-		cFlag = BREAK_CONCRETE;
-		break;
-	case matCeilingTile:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "debris/bustceiling.wav", fvol, ATTN_NORM, 0, pitch );
-		break;
-	case matNone:
-	case matLastMaterial:
-	case matUnbreakableGlass:
-		break;
-	default:
-		break;
-	}
+	cFlag = PlayBreakableBustSound(pev, m_Material, fvol, pitch);
 
 	if( m_Explosion == expDirected )
 		vecVelocity = -g_vecAttackDir * 100.0f;
@@ -1067,4 +1095,138 @@ int CPushable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 		return CBreakable::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 
 	return 1;
+}
+
+#define ENV_BREAKABLE_REPEATABLE 1
+
+class CFuncBreakableEffect : public CBaseEntity
+{
+public:
+	void Spawn();
+	void Precache();
+	void KeyValue( KeyValueData* pkvd);
+	virtual int ObjectCaps( void ) { return ( CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ); }
+
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	Materials m_Material;
+	int m_idShard;
+	string_t m_iszGibModel;
+};
+
+void CFuncBreakableEffect::KeyValue( KeyValueData* pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "material" ) )
+	{
+		int i = atoi( pkvd->szValue );
+
+		// 0:glass, 1:metal, 2:flesh, 3:wood
+
+		if( ( i < 0 ) || ( i >= matLastMaterial ) )
+			m_Material = matWood;
+		else
+			m_Material = (Materials)i;
+
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "gibmodel" ) )
+	{
+		m_iszGibModel = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue( pkvd );
+}
+
+LINK_ENTITY_TO_CLASS( func_breakable_effect, CFuncBreakableEffect )
+
+TYPEDESCRIPTION CFuncBreakableEffect::m_SaveData[] =
+{
+	DEFINE_FIELD( CFuncBreakableEffect, m_Material, FIELD_INTEGER ),
+	DEFINE_FIELD( CFuncBreakableEffect, m_iszGibModel, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CFuncBreakableEffect, CBaseEntity )
+
+void CFuncBreakableEffect::Spawn()
+{
+	Precache();
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+
+	SET_MODEL( ENT( pev ), STRING( pev->model ) );//set size and link into world.
+	pev->effects |= EF_NODRAW;
+}
+
+void CFuncBreakableEffect::Precache()
+{
+	PrecacheMaterialBustSounds(m_Material);
+	CBreakable::MaterialSoundPrecache( m_Material );
+
+	const char *pGibName = NULL;
+	if( m_iszGibModel )
+		pGibName = STRING( m_iszGibModel );
+	else
+		pGibName = DefaultMaterialGibModel(m_Material);
+
+	m_idShard = PRECACHE_MODEL( pGibName );
+}
+
+void CFuncBreakableEffect::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	int pitch = 95 + RANDOM_LONG( 0, 29 );
+
+	if( pitch > 97 && pitch < 103 )
+		pitch = 100;
+
+	float fvol = RANDOM_FLOAT( 0.85f, 1.0 );
+
+	if( fvol > 1.0f )
+		fvol = 1.0f;
+
+	char cFlag = PlayBreakableBustSound(pev, m_Material, fvol, pitch);
+
+	Vector vecSpot = pev->origin + ( pev->mins + pev->maxs ) * 0.5f;
+
+	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
+		WRITE_BYTE( TE_BREAKMODEL );
+
+		// position
+		WRITE_COORD( vecSpot.x );
+		WRITE_COORD( vecSpot.y );
+		WRITE_COORD( vecSpot.z );
+
+		// size
+		WRITE_COORD( pev->size.x );
+		WRITE_COORD( pev->size.y );
+		WRITE_COORD( pev->size.z );
+
+		// velocity
+		WRITE_COORD( 0 );
+		WRITE_COORD( 0 );
+		WRITE_COORD( 0 );
+
+		// randomization
+		WRITE_BYTE( 10 );
+
+		// Model
+		WRITE_SHORT( m_idShard );	//model id#
+
+		// # of shards
+		WRITE_BYTE( 0 );	// let client decide
+
+		// duration
+		WRITE_BYTE( 25 );// 2.5 seconds
+
+		// flags
+		WRITE_BYTE( cFlag );
+	MESSAGE_END();
+
+	if (!FBitSet(pev->spawnflags, ENV_BREAKABLE_REPEATABLE))
+		UTIL_Remove(this);
 }
