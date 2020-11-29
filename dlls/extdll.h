@@ -63,7 +63,7 @@ typedef int BOOL;
 #endif //_WIN32
 
 // Misc C-runtime library headers
-#include <cstdio>
+#include <stdio.h>
 #include <cstdlib>
 #include <cstddef>
 #if HAVE_CMATH
