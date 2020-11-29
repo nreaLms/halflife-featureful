@@ -170,6 +170,8 @@ public:
 	// another such system used to track the search for cover nodes, helps greatly with two monsters trying to get to the same node.
 	int		m_iLastCoverSearch;
 
+	int		m_iLastFreeroamNode;
+
 	// functions to create the graph
 	int		LinkVisibleNodes ( CLink *pLinkPool, FILE *file, int *piBadNode );
 	int		RejectInlineLinks ( CLink *pLinkPool, FILE *file );

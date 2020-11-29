@@ -455,10 +455,6 @@ void ResetGlobalState( void )
 
 LINK_ENTITY_TO_CLASS( worldspawn, CWorld )
 
-#define SF_WORLD_DARK		0x0001		// Fade from black at startup
-#define SF_WORLD_TITLE		0x0002		// Display game title at startup
-#define SF_WORLD_FORCETEAM	0x0004		// Force teams
-
 extern DLL_GLOBAL BOOL		g_fGameOver;
 float g_flWeaponCheat; 
 
@@ -733,6 +729,14 @@ void CWorld::KeyValue( KeyValueData *pkvd )
 		if( atoi( pkvd->szValue ) )
 		{
 			pev->spawnflags |= SF_WORLD_FORCETEAM;
+		}
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "freeroam" ) )
+	{
+		if (atoi( pkvd->szValue ))
+		{
+			pev->spawnflags |= SF_WORLD_FREEROAM;
 		}
 		pkvd->fHandled = TRUE;
 	}

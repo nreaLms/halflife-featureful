@@ -1376,6 +1376,41 @@ void CBaseMonster::StartTask( Task_t *pTask )
 #endif
 		TaskComplete();
 		break;
+	case TASK_GET_PATH_TO_FREEROAM_NODE:
+		{
+			if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
+			{
+				TaskFail("graph not ready for freeroam");
+			}
+			else
+			{
+				for( int i = 0; i < WorldGraph.m_cNodes; i++ )
+				{
+					int nodeNumber = ( i + WorldGraph.m_iLastFreeroamNode ) % WorldGraph.m_cNodes;
+
+					CNode &node = WorldGraph.Node( nodeNumber );
+
+					// Don't go to the node if already is close enough
+					if ((node.m_vecOrigin - pev->origin).Length() < 16.0f)
+						continue;
+
+					TraceResult tr;
+					UTIL_TraceLine( pev->origin + pev->view_ofs, node.m_vecOrigin + pev->view_ofs, dont_ignore_monsters, ENT( pev ), &tr );
+
+					if (tr.flFraction == 1.0f && MoveToLocation( ACT_WALK, 2, node.m_vecOrigin ))
+					{
+						TaskComplete();
+						WorldGraph.m_iLastFreeroamNode = nodeNumber + 1;
+						break;
+					}
+				}
+				if (!TaskIsComplete())
+				{
+					TaskFail("Could not find node to freeroam");
+				}
+			}
+		}
+		break;
 	default:
 		{
 			ALERT( at_aiconsole, "No StartTask entry for %d\n", (SHARED_TASKS)pTask->iTask );
@@ -1443,7 +1478,19 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 					}
 				}
 				// no valid route!
-				return GetScheduleOfType( SCHED_IDLE_STAND );
+				if (m_freeRoam == FREEROAM_ALWAYS)
+					return GetScheduleOfType( SCHED_FREEROAM );
+				else
+				{
+					if (m_freeRoam == FREEROAM_MAPDEFAULT)
+					{
+						entvars_t *pevWorld = VARS( INDEXENT( 0 ) );
+						if (pevWorld->spawnflags & SF_WORLD_FREEROAM) {
+							return  GetScheduleOfType( SCHED_FREEROAM );
+						}
+					}
+					return GetScheduleOfType( SCHED_IDLE_STAND );
+				}
 			}
 			else
 			{

@@ -1023,6 +1023,29 @@ Schedule_t slTakeCoverFromEnemy[] =
 	},
 };
 
+Task_t tlFreeroam[] =
+{
+	{ TASK_GET_PATH_TO_FREEROAM_NODE, (float)0 },
+	{ TASK_FACE_ROUTE, (float)0 },
+	{ TASK_WALK_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_WAIT_PVS, (float)0 },
+};
+
+Schedule_t slFreeroam[] =
+{
+	{
+		tlFreeroam,
+		ARRAYSIZE( tlFreeroam ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER | bits_SOUND_COMBAT,
+		"Free Roaming"
+	},
+};
+
 Schedule_t *CBaseMonster::m_scheduleList[] =
 {
 	slIdleStand,
@@ -1271,6 +1294,10 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_FAIL:
 		{
 			return slFail;
+		}
+	case SCHED_FREEROAM:
+		{
+			return slFreeroam;
 		}
 	default:
 		{

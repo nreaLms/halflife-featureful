@@ -43,6 +43,11 @@
 		0 : "Fewest Players"
 		1 : "First Team"
 	]
+	freeroam(choices) : "Roaming monsters (node graph)" : 0 =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 ]
 
 //
@@ -306,6 +311,12 @@
 	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
 	gibmodel(studio) : "Custom gib model"
 	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
+	freeroam(Choices) : "Monster Roaming (nodes)" =
+	[
+		0 : "Map Default"
+		1 : "Never"
+		2 : "Always"
+	]
 ]
 
 @BaseClass base(Monster) = Repel
@@ -5939,6 +5950,12 @@
 		3 : "Forward my activator"
 	]
 	yawdeviation(integer) : "Max yaw deviation" : : "Maximum value for random yaw deviation, from 0 to the specified value, on both sides."
+	freeroam(Choices) : "Monster Roaming (nodes)" =
+	[
+		0 : "Map Default"
+		1 : "Never"
+		2 : "Always"
+	]
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
 @PointClass base(MonsterMaker) = squadmaker : "Squad Maker" []

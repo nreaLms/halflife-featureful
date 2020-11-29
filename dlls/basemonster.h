@@ -407,9 +407,14 @@ public:
 
 	int m_customSoundMask;
 	short m_prisonerTo;
+	short m_freeRoam;
 
 	const char* taskFailReason;
 };
+
+#define FREEROAM_MAPDEFAULT 0
+#define FREEROAM_NEVER 1
+#define FREEROAM_ALWAYS 2
 
 class CDeadMonster : public CBaseMonster
 {

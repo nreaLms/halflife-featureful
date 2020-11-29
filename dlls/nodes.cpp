@@ -108,6 +108,7 @@ void CGraph::InitGraph( void )
 
 	m_iLastActiveIdleSearch = 0;
 	m_iLastCoverSearch = 0;
+	m_iLastFreeroamNode = 0;
 }
 	
 //=========================================================

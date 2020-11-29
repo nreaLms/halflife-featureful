@@ -125,6 +125,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 
 	DEFINE_FIELD( CBaseMonster, m_customSoundMask, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_prisonerTo, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseMonster, m_freeRoam, FIELD_SHORT ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
@@ -3450,6 +3451,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "prisonerto" ) )
 	{
 		m_prisonerTo = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "freeroam" ) )
+	{
+		m_freeRoam = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
