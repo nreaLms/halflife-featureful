@@ -1505,6 +1505,10 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 			{
 				return GetScheduleOfType( SCHED_VICTORY_DANCE );
 			}
+			if ( HasConditions( bits_COND_ENEMY_LOST ) )
+			{
+				return GetScheduleOfType( SCHED_MOVE_TO_ENEMY_LKP );
+			}
 
 			if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 			{
@@ -1537,6 +1541,23 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 				if( GetEnemy() )
 				{
 					ClearConditions( bits_COND_ENEMY_DEAD );
+					return GetSchedule();
+				}
+				else
+				{
+					SetState( MONSTERSTATE_ALERT );
+					return GetSchedule();
+				}
+			}
+
+			if ( HasConditions( bits_COND_ENEMY_LOST ) )
+			{
+				ALERT(at_aiconsole, "%s did not see an enemy for a while. Just forget about it\n", STRING(pev->classname));
+				m_hEnemy = NULL;
+
+				if( GetEnemy() )
+				{
+					ClearConditions( bits_COND_ENEMY_LOST );
 					return GetSchedule();
 				}
 				else

@@ -198,7 +198,7 @@ Schedule_t* CRecruit::GetSchedule()
 		break;
 	case MONSTERSTATE_COMBAT:
 	{
-		if( HasConditions( bits_COND_ENEMY_DEAD ) )
+		if( HasConditions( bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST ) )
 		{
 			// call base class, all code to handle dead enemies is centralized there.
 			return CBaseMonster::GetSchedule();

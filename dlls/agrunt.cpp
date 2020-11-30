@@ -770,6 +770,7 @@ Schedule_t slAGruntRangeAttack1[] =
 		ARRAYSIZE( tlAGruntRangeAttack1 ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_HEAVY_DAMAGE,
 		0,
 		"AGrunt Range Attack1"
@@ -1087,7 +1088,7 @@ Schedule_t *CAGrunt::GetSchedule( void )
 	case MONSTERSTATE_COMBAT:
 		{
 			// dead enemy
-			if( HasConditions( bits_COND_ENEMY_DEAD ) )
+			if( HasConditions( bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST ) )
 			{
 				// call base class, all code to handle dead enemies is centralized there.
 				return CBaseMonster::GetSchedule();

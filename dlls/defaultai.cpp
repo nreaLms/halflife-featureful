@@ -409,6 +409,7 @@ Schedule_t slCombatStand[] =
 		ARRAYSIZE( tlCombatStand1 ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_CAN_ATTACK, 
@@ -434,7 +435,8 @@ Schedule_t slCombatFace[] =
 		ARRAYSIZE( tlCombatFace1 ),
 		bits_COND_CAN_ATTACK |
 		bits_COND_NEW_ENEMY |
-		bits_COND_ENEMY_DEAD,
+		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST,
 		0,
 		"Combat Face"
 	},
@@ -460,6 +462,7 @@ Schedule_t slStandoff[] =
 		bits_COND_CAN_RANGE_ATTACK1 |
 		bits_COND_CAN_RANGE_ATTACK2 |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_NEW_ENEMY |
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_DANGER,
@@ -526,6 +529,7 @@ Schedule_t slRangeAttack1[] =
 		ARRAYSIZE( tlRangeAttack1 ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
@@ -551,6 +555,7 @@ Schedule_t slRangeAttack2[] =
 		ARRAYSIZE( tlRangeAttack2 ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
@@ -575,6 +580,7 @@ Schedule_t slPrimaryMeleeAttack[] =
 		ARRAYSIZE( tlPrimaryMeleeAttack1 ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED,
@@ -598,6 +604,7 @@ Schedule_t slSecondaryMeleeAttack[] =
 		ARRAYSIZE( tlSecondaryMeleeAttack1 ), 
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED,
@@ -621,6 +628,7 @@ Schedule_t slSpecialAttack1[] =
 		ARRAYSIZE( tlSpecialAttack1 ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
@@ -646,6 +654,7 @@ Schedule_t slSpecialAttack2[] =
 		ARRAYSIZE( tlSpecialAttack2 ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
@@ -1046,6 +1055,28 @@ Schedule_t slFreeroam[] =
 	},
 };
 
+Task_t tlMoveToEnemyLKP[] =
+{
+	{ TASK_GET_PATH_TO_ENEMY_LKP, (float)0 },
+	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+};
+
+Schedule_t slMoveToEnemyLKP[] =
+{
+	{
+		tlMoveToEnemyLKP,
+		ARRAYSIZE( tlMoveToEnemyLKP ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_CAN_ATTACK |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"Move to Enemy LKP"
+	},
+};
+
 Schedule_t *CBaseMonster::m_scheduleList[] =
 {
 	slIdleStand,
@@ -1088,6 +1119,7 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slTakeCoverFromBestSound,
 	slTakeCoverFromEnemy,
 	slFreeroam,
+	slMoveToEnemyLKP,
 	slFail
 };
 
@@ -1299,6 +1331,10 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_FREEROAM:
 		{
 			return slFreeroam;
+		}
+	case SCHED_MOVE_TO_ENEMY_LKP:
+		{
+			return slMoveToEnemyLKP;
 		}
 	default:
 		{

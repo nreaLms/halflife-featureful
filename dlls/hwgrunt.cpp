@@ -403,6 +403,7 @@ Schedule_t slHWGruntStartRangeAttack[] =
 		ARRAYSIZE( tlHWGruntStartRangeAttack ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
 		bits_COND_NO_AMMO_LOADED |
@@ -429,6 +430,7 @@ Schedule_t slHWGruntContinueRangeAttack[] =
 		ARRAYSIZE( tlHWGruntContinueRangeAttack ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_ENEMY_OCCLUDED |
 		bits_COND_NO_AMMO_LOADED |

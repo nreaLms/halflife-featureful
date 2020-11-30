@@ -1098,7 +1098,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	int	iUpdatedLKP;// set this to TRUE if you update the EnemyLKP in this function.
 
 	iUpdatedLKP = FALSE;
-	ClearConditions( bits_COND_ENEMY_FACING_ME );
+	ClearConditions( bits_COND_ENEMY_FACING_ME | bits_COND_ENEMY_LOST );
 
 	if( !FVisible( pEnemy ) )
 	{
@@ -1140,6 +1140,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 
 		iUpdatedLKP = TRUE;
 		m_vecEnemyLKP = pEnemy->pev->origin;
+		m_flLastTimeObservedEnemy = gpGlobals->time;
 
 		pEnemyMonster = pEnemy->MyMonsterPointer();
 
@@ -1170,6 +1171,15 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 		// enemy is. 
 		iUpdatedLKP = TRUE;
 		m_vecEnemyLKP = pEnemy->pev->origin;
+		m_flLastTimeObservedEnemy = gpGlobals->time;
+	}
+	else
+	{
+		const int forgetEnemyTime = NpcForgetEnemyTime();
+		if (forgetEnemyTime > 0 && m_flLastTimeObservedEnemy + forgetEnemyTime <= gpGlobals->time)
+		{
+			SetConditions( bits_COND_ENEMY_LOST );
+		}
 	}
 
 	if( flDistToEnemy >= m_flDistTooFar )
@@ -1244,6 +1254,7 @@ BOOL CBaseMonster::PopEnemy()
 			{
 				m_hEnemy = m_hOldEnemy[i];
 				m_vecEnemyLKP = m_vecOldEnemy[i];
+				m_flLastTimeObservedEnemy = gpGlobals->time;
 				// ALERT( at_console, "remembering\n" );
 				return TRUE;
 			}
@@ -3861,6 +3872,7 @@ BOOL CBaseMonster::GetEnemy( void )
 					SetConditions( bits_COND_NEW_ENEMY );
 					m_hEnemy = pNewEnemy;
 					m_vecEnemyLKP = m_hEnemy->pev->origin;
+					m_flLastTimeObservedEnemy = gpGlobals->time;
 				}
 				// if the new enemy has an owner, take that one as well
 				if( pNewEnemy->pev->owner != NULL )

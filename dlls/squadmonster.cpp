@@ -210,7 +210,10 @@ void CSquadMonster::SquadPasteEnemyInfo( void )
 {
 	CSquadMonster *pSquadLeader = MySquadLeader();
 	if( pSquadLeader )
+	{
 		pSquadLeader->m_vecEnemyLKP = m_vecEnemyLKP;
+		pSquadLeader->m_flLastTimeObservedEnemy = gpGlobals->time;
+	}
 }
 
 //=========================================================
@@ -225,7 +228,10 @@ void CSquadMonster::SquadCopyEnemyInfo( void )
 {
 	CSquadMonster *pSquadLeader = MySquadLeader();
 	if( pSquadLeader )
+	{
 		m_vecEnemyLKP = pSquadLeader->m_vecEnemyLKP;
+		m_flLastEnemySightTime = pSquadLeader->m_flLastEnemySightTime;
+	}
 }
 
 //=========================================================
@@ -271,6 +277,7 @@ void CSquadMonster::SquadMakeEnemy( CBaseEntity *pEnemy )
 				pMember->m_hEnemy = pEnemy;
 				pMember->m_vecEnemyLKP = pEnemy->pev->origin;
 				pMember->SetConditions( bits_COND_NEW_ENEMY );
+				pMember->m_flLastTimeObservedEnemy = gpGlobals->time;
 			}
 		}
 	}

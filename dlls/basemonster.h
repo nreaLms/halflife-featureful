@@ -409,6 +409,8 @@ public:
 	short m_prisonerTo;
 	short m_freeRoam;
 
+	float m_flLastTimeObservedEnemy;
+
 	const char* taskFailReason;
 };
 

@@ -514,6 +514,7 @@ Schedule_t slFGruntEstablishLineOfFire[] =
 		ARRAYSIZE ( tlFGruntEstablishLineOfFire ),
 		bits_COND_NEW_ENEMY			|
 		bits_COND_ENEMY_DEAD		|
+		bits_COND_ENEMY_LOST		|
 		bits_COND_CAN_RANGE_ATTACK1	|
 		bits_COND_CAN_MELEE_ATTACK1	|
 		bits_COND_CAN_RANGE_ATTACK2	|
@@ -567,6 +568,7 @@ Schedule_t	slFGruntCombatFace[] =
 		ARRAYSIZE ( tlFGruntCombatFace1 ),
 		bits_COND_NEW_ENEMY				|
 		bits_COND_ENEMY_DEAD			|
+		bits_COND_ENEMY_LOST			|
 		bits_COND_CAN_RANGE_ATTACK1		|
 		bits_COND_CAN_RANGE_ATTACK2,
 		0,
@@ -606,6 +608,7 @@ Schedule_t	slFGruntSignalSuppress[] =
 		tlFGruntSignalSuppress,
 		ARRAYSIZE ( tlFGruntSignalSuppress ),
 		bits_COND_ENEMY_DEAD		|
+		bits_COND_ENEMY_LOST		|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE		|
 		bits_COND_HEAR_SOUND		|
@@ -643,6 +646,7 @@ Schedule_t	slFGruntSuppress[] =
 		tlFGruntSuppress,
 		ARRAYSIZE ( tlFGruntSuppress ),
 		bits_COND_ENEMY_DEAD		|
+		bits_COND_ENEMY_LOST		|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE		|
 		bits_COND_HEAR_SOUND		|
@@ -807,6 +811,7 @@ Schedule_t slFGruntHideReload[] =
 		ARRAYSIZE ( tlFGruntHideReload ),
 		bits_COND_HEAVY_DAMAGE	|
 		bits_COND_ENEMY_DEAD	| // stop running away if enemy is already dead
+		bits_COND_ENEMY_LOST	|
 		bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
@@ -874,6 +879,7 @@ Schedule_t	slFGruntRangeAttack1A[] =
 		ARRAYSIZE ( tlFGruntRangeAttack1A ),
 		bits_COND_NEW_ENEMY			|
 		bits_COND_ENEMY_DEAD		|
+		bits_COND_ENEMY_LOST		|
 		bits_COND_HEAVY_DAMAGE		|
 		bits_COND_ENEMY_OCCLUDED	|
 		bits_COND_HEAR_SOUND		|
@@ -914,6 +920,7 @@ Schedule_t	slFGruntRangeAttack1B[] =
 		ARRAYSIZE ( tlFGruntRangeAttack1B ),
 		bits_COND_NEW_ENEMY			|
 		bits_COND_ENEMY_DEAD		|
+		bits_COND_ENEMY_LOST		|
 		bits_COND_HEAVY_DAMAGE		|
 		bits_COND_ENEMY_OCCLUDED	|
 		bits_COND_NO_AMMO_LOADED	|
@@ -2387,7 +2394,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 	case MONSTERSTATE_COMBAT:
 		{
 // dead enemy
-			if ( HasConditions( bits_COND_ENEMY_DEAD ) )
+			if ( HasConditions( bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST ) )
 			{
 				// call base class, all code to handle dead enemies is centralized there.
 				return CTalkMonster::GetSchedule();

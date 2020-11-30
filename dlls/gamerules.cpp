@@ -545,6 +545,16 @@ bool NpcFollowNearest()
 #endif
 }
 
+int NpcForgetEnemyTime()
+{
+#if FEATURE_NPC_FORGET_ENEMY_CVAR
+	extern cvar_t npc_forget_enemy_time;
+	return npc_forget_enemy_time.value != 0;
+#else
+	return false;
+#endif
+}
+
 bool AllowGrenadeJump()
 {
 #if FEATURE_GRENADE_JUMP_CVAR

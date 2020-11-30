@@ -537,7 +537,8 @@ Schedule_t slGargStomp[] =
 		tlGargStomp,
 		ARRAYSIZE( tlGargStomp ),
 		bits_COND_NEW_ENEMY |
-		bits_COND_ENEMY_DEAD,
+		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST,
 		0,
 		"GargStomp"
 	},

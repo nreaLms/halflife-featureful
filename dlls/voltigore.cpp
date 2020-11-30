@@ -842,6 +842,7 @@ Schedule_t	slVoltigoreRangeAttack1[] =
 		ARRAYSIZE(tlVoltigoreRangeAttack1),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_NO_AMMO_LOADED,
 		0,
@@ -903,7 +904,7 @@ Schedule_t *CVoltigore::GetSchedule(void)
 	case MONSTERSTATE_COMBAT:
 	{
 		// dead enemy
-		if (HasConditions(bits_COND_ENEMY_DEAD))
+		if (HasConditions(bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST))
 		{
 			// call base class, all code to handle dead enemies is centralized there.
 			return CSquadMonster::GetSchedule();
@@ -1383,7 +1384,7 @@ Schedule_t *CBabyVoltigore::GetSchedule(void)
 	case MONSTERSTATE_COMBAT:
 	{
 		// dead enemy
-		if (HasConditions(bits_COND_ENEMY_DEAD))
+		if (HasConditions(bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST))
 		{
 			// call base class, all code to handle dead enemies is centralized there.
 			return CSquadMonster::GetSchedule();

@@ -77,6 +77,7 @@ typedef enum
 		SCHED_AISCRIPT,
 		SCHED_FAIL,
 		SCHED_FREEROAM,
+		SCHED_MOVE_TO_ENEMY_LKP,
 
 		LAST_COMMON_SCHEDULE			// Leave this at the bottom
 } SCHEDULE_TYPE;
@@ -287,6 +288,7 @@ struct WayPoint_t
 #define bits_COND_ENEMY_DEAD			( 1 << 20) // enemy was killed. If you get this in combat, try to find another enemy. If you get it in alert, victory dance.
 #define bits_COND_SEE_CLIENT			( 1 << 21) // see a client
 #define bits_COND_SEE_NEMESIS			( 1 << 22) // see my nemesis
+#define bits_COND_ENEMY_LOST			( 1 << 23 ) // did not observe an enemy for a while
 
 #define bits_COND_CLIENT_PUSH			( 1 << 26 ) // Clients can push ally monsters out of their way
 #define bits_COND_NOFIRE				( 1 << 27) // better stop firing (usually as friendly fire is possible)
