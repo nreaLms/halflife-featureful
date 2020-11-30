@@ -1436,6 +1436,20 @@ Task_t *CBaseMonster::GetTask( void )
 	}
 }
 
+Schedule_t* CBaseMonster::GetFreeroamSchedule()
+{
+	if (m_freeRoam == FREEROAM_ALWAYS)
+		return GetScheduleOfType( SCHED_FREEROAM );
+	else if (m_freeRoam == FREEROAM_MAPDEFAULT)
+	{
+		entvars_t *pevWorld = VARS( INDEXENT( 0 ) );
+		if (pevWorld->spawnflags & SF_WORLD_FREEROAM) {
+			return  GetScheduleOfType( SCHED_FREEROAM );
+		}
+	}
+	return NULL;
+}
+
 //=========================================================
 // GetSchedule - Decides which type of schedule best suits
 // the monster's current state and conditions. Then calls
@@ -1478,19 +1492,10 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 					}
 				}
 				// no valid route!
-				if (m_freeRoam == FREEROAM_ALWAYS)
-					return GetScheduleOfType( SCHED_FREEROAM );
-				else
-				{
-					if (m_freeRoam == FREEROAM_MAPDEFAULT)
-					{
-						entvars_t *pevWorld = VARS( INDEXENT( 0 ) );
-						if (pevWorld->spawnflags & SF_WORLD_FREEROAM) {
-							return  GetScheduleOfType( SCHED_FREEROAM );
-						}
-					}
-					return GetScheduleOfType( SCHED_IDLE_STAND );
-				}
+				Schedule_t* freeroamSchedule = GetFreeroamSchedule();
+				if (freeroamSchedule)
+					return freeroamSchedule;
+				return GetScheduleOfType( SCHED_IDLE_STAND );
 			}
 			else
 			{
@@ -1527,6 +1532,9 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 			}
 			else
 			{
+				Schedule_t* freeroamSchedule = GetFreeroamSchedule();
+				if (freeroamSchedule)
+					return freeroamSchedule;
 				return GetScheduleOfType( SCHED_ALERT_STAND );
 			}
 			break;

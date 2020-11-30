@@ -203,6 +203,7 @@ public:
 	virtual void RunTask( Task_t *pTask );
 	virtual Schedule_t *GetScheduleOfType( int Type );
 	virtual Schedule_t *GetSchedule( void );
+	Schedule_t* GetFreeroamSchedule();
 	virtual void ScheduleChange( void ) {}
 	// virtual int CanPlaySequence( void ) { return ((m_pCine == NULL) && (m_MonsterState == MONSTERSTATE_NONE || m_MonsterState == MONSTERSTATE_IDLE || m_IdealMonsterState == MONSTERSTATE_IDLE)); }
 	virtual int CanPlaySequence( BOOL fDisregardState, int interruptLevel );
