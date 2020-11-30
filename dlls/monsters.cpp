@@ -2634,7 +2634,6 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 		int nodeNumber = ( i + WorldGraph.m_iLastCoverSearch ) % WorldGraph.m_cNodes;
 
 		CNode &node = WorldGraph.Node( nodeNumber );
-		WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
 
 		// could use an optimization here!!
 		flDist = ( pev->origin - node.m_vecOrigin ).Length();
@@ -2667,6 +2666,7 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 						MESSAGE_END();
 						*/
 
+						WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
 						return TRUE;
 					}
 				}
@@ -2726,7 +2726,6 @@ BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDi
 		int nodeNumber = ( i + WorldGraph.m_iLastCoverSearch ) % WorldGraph.m_cNodes;
 
 		CNode &node = WorldGraph.Node( nodeNumber );
-		WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
 
 		// could use an optimization here!!
 		flDist = ( pev->origin - node.m_vecOrigin ).Length();
@@ -2740,6 +2739,7 @@ BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDi
 			{
 				if( FValidateCover( node.m_vecOrigin ) && MoveToLocation( ACT_RUN, 0, node.m_vecOrigin ) )
 				{
+					WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
 					return TRUE;
 				}
 			}
@@ -2803,7 +2803,6 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 		int nodeNumber = ( i + WorldGraph.m_iLastCoverSearch ) % WorldGraph.m_cNodes;
 
 		CNode &node = WorldGraph.Node( nodeNumber );
-		WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
 
 		// can I get there?
 		if( WorldGraph.NextNodeInRoute( iMyNode, nodeNumber, iMyHullIndex, 0 ) != iMyNode )
@@ -2823,6 +2822,7 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 					{
 						// flMaxDist = flDist;
 						m_vecMoveGoal = node.m_vecOrigin;
+						WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
 						return TRUE; // UNDONE: keep looking for something closer!
 					}
 				}
