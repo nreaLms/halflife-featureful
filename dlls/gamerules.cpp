@@ -549,7 +549,7 @@ int NpcForgetEnemyTime()
 {
 #if FEATURE_NPC_FORGET_ENEMY_CVAR
 	extern cvar_t npc_forget_enemy_time;
-	return npc_forget_enemy_time.value != 0;
+	return (int)npc_forget_enemy_time.value;
 #else
 	return false;
 #endif
