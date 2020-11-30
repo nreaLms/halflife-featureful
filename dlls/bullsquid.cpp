@@ -1265,14 +1265,14 @@ Schedule_t *CBullsquid::GetSchedule( void )
 	{
 	case MONSTERSTATE_ALERT:
 		{
-			if( HasConditions( bits_COND_ENEMY_DEAD ) && pev->health < pev->max_health )
-			{
-				return GetScheduleOfType( SCHED_VICTORY_DANCE );
-			}
-			
 			if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 			{
 				return GetScheduleOfType( SCHED_SQUID_HURTHOP );
+			}
+
+			if( HasConditions( bits_COND_ENEMY_DEAD ) && pev->health < pev->max_health )
+			{
+				return GetScheduleOfType( SCHED_VICTORY_DANCE );
 			}
 
 			if( HasConditions( bits_COND_SMELL_FOOD ) )

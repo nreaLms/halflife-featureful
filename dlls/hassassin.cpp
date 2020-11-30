@@ -867,13 +867,9 @@ Schedule_t *CHAssassin::GetSchedule( void )
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_ALERT:
 		{
-			Schedule_t* followingSchedule = GetFollowingSchedule();
-			if (followingSchedule)
-				return followingSchedule;
-
+			CSound *pSound = NULL;
 			if( HasConditions( bits_COND_HEAR_SOUND ) )
 			{
-				CSound *pSound;
 				pSound = PBestSound();
 
 				ASSERT( pSound != NULL );
@@ -881,10 +877,15 @@ Schedule_t *CHAssassin::GetSchedule( void )
 				{
 					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 				}
-				if( pSound &&( pSound->m_iType & bits_SOUND_COMBAT ) )
-				{
-					return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
-				}
+			}
+
+			Schedule_t* followingSchedule = GetFollowingSchedule();
+			if (followingSchedule)
+				return followingSchedule;
+
+			if( pSound &&( pSound->m_iType & bits_SOUND_COMBAT ) )
+			{
+				return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
 			}
 		}
 		break;
