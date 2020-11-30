@@ -1087,6 +1087,7 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slTakeCoverFromOrigin,
 	slTakeCoverFromBestSound,
 	slTakeCoverFromEnemy,
+	slFreeroam,
 	slFail
 };
 
