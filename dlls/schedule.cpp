@@ -840,6 +840,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
 					TaskComplete();
 				}
+
 				// The point is to just run away from danger. Try to find a node without actual cover.
 				else if (FindRunAway( pBestSound->m_vecOrigin, pBestSound->m_iVolume, CoverRadius() ))
 				{
@@ -1153,18 +1154,27 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_GET_PATH_TO_BESTSOUND:
 		{
-			CSound *pSound;
+			CSound *pSound = PBestSound();
 
-			pSound = PBestSound();
-
-			if( pSound && MoveToLocation( m_movementActivity, 2, pSound->m_vecOrigin ) )
+			if(pSound)
 			{
-				TaskComplete();
+				if( MoveToLocation( m_movementActivity, 2, pSound->m_vecOrigin ) )
+				{
+					TaskComplete();
+				}
+				else if( BuildNearestRoute( pSound->m_vecOrigin, pev->view_ofs, 0, pSound->m_iVolume ) )
+				{
+					TaskComplete();
+				}
+				else
+				{
+					// no way to get there =(
+					TaskFail("can't build path to best sound");
+				}
 			}
 			else
 			{
-				// no way to get there =(
-				TaskFail("can't build path to best sound");
+				TaskFail("no sound detected");
 			}
 			break;
 		}
@@ -1526,9 +1536,33 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 					return GetScheduleOfType( SCHED_ALERT_SMALL_FLINCH );
 				}
 			}
-			else if( HasConditions ( bits_COND_HEAR_SOUND ) )
+			if( HasConditions ( bits_COND_HEAR_SOUND ) )
 			{
+				if (HasMemory(bits_MEMORY_ALERT_AFTER_COMBAT))
+				{
+					CSound *pSound = PBestSound();
+					if (pSound)
+					{
+						const int type = pSound->m_iType;
+						const bool isCombat = (type & bits_SOUND_COMBAT);
+						const bool isDanger = (type & bits_SOUND_DANGER);
+						const bool isPlayer = (type & bits_SOUND_PLAYER);
+						if (isCombat && // it's combat sound
+								!isDanger && // but not danger
+								( !isPlayer || IDefaultRelationship(CLASS_PLAYER) != R_AL )) // and it's not combat sound produced by ally player
+						{
+							ALERT(at_aiconsole, "%s trying to investigate sound after combat\n", STRING(pev->classname));
+							return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
+						}
+					}
+				}
 				return GetScheduleOfType( SCHED_ALERT_FACE );
+			}
+			else if (!HasMemory(bits_MEMORY_DID_ROAM_IN_ALERT) && HasMemory(bits_MEMORY_ALERT_AFTER_COMBAT))
+			{
+				ALERT(at_aiconsole, "%s trying to freeroam after combat\n", STRING(pev->classname));
+				Remember(bits_MEMORY_DID_ROAM_IN_ALERT);
+				return GetScheduleOfType( SCHED_FREEROAM );
 			}
 			else
 			{

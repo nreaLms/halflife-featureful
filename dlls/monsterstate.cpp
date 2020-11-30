@@ -48,6 +48,15 @@ void CBaseMonster::SetState( MONSTERSTATE State )
 			ALERT( at_aiconsole, "%s: stripped enemy\n", STRING(pev->classname) );
 		}
 		break;
+	case MONSTERSTATE_ALERT:
+		if (m_MonsterState == MONSTERSTATE_COMBAT)
+		{
+			Remember(bits_MEMORY_ALERT_AFTER_COMBAT);
+		}
+		break;
+	case MONSTERSTATE_COMBAT:
+		Forget(bits_MEMORY_DID_ROAM_IN_ALERT|bits_MEMORY_ALERT_AFTER_COMBAT);
+		break;
 	default:
 		break;
 	}
