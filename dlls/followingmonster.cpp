@@ -441,6 +441,9 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 		if (rel >= R_DL || rel == R_FR)
 			return FOLLOWING_DISCARDED;
 
+		if (!AbleToFollow())
+			return FOLLOWING_NOTALLOWED;
+
 		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...
 		if (IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster))
 		{
@@ -448,39 +451,35 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 				DeclineFollowing(pCaller);
 			return FOLLOWING_DECLINED;
 		}
-		if( AbleToFollow() )
+
+		const bool isFollowing = IsFollowingPlayer();
+		if (isFollowing && useType == USE_ON)
 		{
-			const bool isFollowing = IsFollowingPlayer();
+			return FOLLOWING_NOCHANGE;
+		}
+		if (!isFollowing && useType == USE_OFF)
+		{
+			return FOLLOWING_NOCHANGE;
+		}
+		if (!isFollowing && (useType == USE_TOGGLE || useType == USE_ON))
+		{
+			LimitFollowers( pCaller, MaxFollowers() );
 
-			if (isFollowing && useType == USE_ON)
+			if( m_afMemory & bits_MEMORY_PROVOKED )
 			{
-				return FOLLOWING_NOCHANGE;
+				ALERT( at_console, "I'm not following you, you evil person!\n" );
+				return FOLLOWING_DISCARDED;
 			}
-			if (!isFollowing && useType == USE_OFF)
+			else
 			{
-				return FOLLOWING_NOCHANGE;
+				StartFollowing( pCaller, saySentence );
+				return FOLLOWING_STARTED;
 			}
-
-			if (!isFollowing && (useType == USE_TOGGLE || useType == USE_ON))
-			{
-				LimitFollowers( pCaller, MaxFollowers() );
-
-				if( m_afMemory & bits_MEMORY_PROVOKED )
-				{
-					ALERT( at_console, "I'm not following you, you evil person!\n" );
-					return FOLLOWING_DISCARDED;
-				}
-				else
-				{
-					StartFollowing( pCaller, saySentence );
-					return FOLLOWING_STARTED;
-				}
-			}
-			if (isFollowing && (useType == USE_TOGGLE || useType == USE_OFF))
-			{
-				StopFollowing( TRUE, saySentence );
-				return FOLLOWING_STOPPED;
-			}
+		}
+		if (isFollowing && (useType == USE_TOGGLE || useType == USE_OFF))
+		{
+			StopFollowing( TRUE, saySentence );
+			return FOLLOWING_STOPPED;
 		}
 	}
 	return FOLLOWING_NOTALLOWED;
