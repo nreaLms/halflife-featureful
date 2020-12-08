@@ -1917,7 +1917,7 @@
 		64: "X Axis" : 0
 		128: "Y Axis" : 0
 	]
-	_minlight(integer) : "_minlight"
+	_minlight(string) : "Minimum light level"
 ]
 
 @SolidClass base(Targetname,Global,RenderFields, PlatSounds, ZHLT) = func_plat : "Elevator"
@@ -2003,7 +2003,7 @@
 		256:"Touch Activates": 0
 		512:"Player Can't Use": 0
 	]
-	_minlight(integer) : "_minlight"
+	_minlight(string) : "Minimum light level"
 ]
 
 @SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT) = func_rotating : "Rotating Object"
@@ -2034,7 +2034,7 @@
 		256: "Medium Radius" : 0
 		512: "Large Radius" : 1
 	]
-	_minlight(integer) : "_minlight"
+	_minlight(integer) : "Minimum light level"
 	spawnorigin(string) : "X Y Z - Move here after lighting" : "0 0 0"
 	dmg(integer) : "Damage inflicted when blocked" : 0
 ]
