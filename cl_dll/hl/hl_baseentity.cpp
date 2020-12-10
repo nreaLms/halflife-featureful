@@ -144,7 +144,8 @@ BOOL CBaseMonster::CheckMeleeAttack2( float flDot, float flDist ) { return FALSE
 void CBaseMonster::CheckAttacks( CBaseEntity *pTarget, float flDist ) { }
 BOOL CBaseMonster::FCanCheckAttacks( void ) { return FALSE; }
 int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy ) { return 0; }
-void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, Vector &vecLastKnownPos ) { }
+void CBaseMonster::SetEnemy(CBaseEntity *pEnemy) {}
+void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, const Vector &vecLastKnownPos ) { }
 BOOL CBaseMonster::PopEnemy() { return FALSE; }
 void CBaseMonster::SetActivity( Activity NewActivity ) { }
 void CBaseMonster::SetSequenceByName( const char *szSequence ) { }

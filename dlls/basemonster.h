@@ -222,7 +222,8 @@ public:
 
 	void CheckAttacks( CBaseEntity *pTarget, float flDist );
 	virtual int CheckEnemy( CBaseEntity *pEnemy );
-	void PushEnemy( CBaseEntity *pEnemy, Vector &vecLastKnownPos );
+	void SetEnemy( CBaseEntity* pEnemy );
+	void PushEnemy(CBaseEntity *pEnemy, const Vector &vecLastKnownPos );
 	BOOL PopEnemy( void );
 
 	BOOL FGetNodeRoute( Vector vecDest );

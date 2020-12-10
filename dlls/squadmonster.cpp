@@ -268,16 +268,9 @@ void CSquadMonster::SquadMakeEnemy( CBaseEntity *pEnemy )
 					// My enemy might be not an enemy for member of my squad, e.g. if I was provoked by player.
 					&& pMember->IRelationship(pEnemy) >= R_DL )
 			{
-				if( pMember->m_hEnemy != 0 )
-				{
-					// remember their current enemy
-					pMember->PushEnemy( pMember->m_hEnemy, pMember->m_vecEnemyLKP );
-				}
 				// give them a new enemy
-				pMember->m_hEnemy = pEnemy;
-				pMember->m_vecEnemyLKP = pEnemy->pev->origin;
+				pMember->SetEnemy(pEnemy);
 				pMember->SetConditions( bits_COND_NEW_ENEMY );
-				pMember->m_flLastTimeObservedEnemy = gpGlobals->time;
 			}
 		}
 	}

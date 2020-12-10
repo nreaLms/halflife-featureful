@@ -1216,10 +1216,36 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	return iUpdatedLKP;
 }
 
+// SetEnemy - set main enemy
+void CBaseMonster::SetEnemy(CBaseEntity *pNewEnemy)
+{
+	if (!pNewEnemy || pNewEnemy == m_hEnemy)
+		return;
+
+	CBaseEntity* pPreviousEnemy = m_hEnemy;
+	Vector previousEnemyLKP = m_vecEnemyLKP;
+
+	m_hEnemy = pNewEnemy;
+	m_vecEnemyLKP = pNewEnemy->pev->origin;
+	m_flLastTimeObservedEnemy = gpGlobals->time;
+	//ALERT(at_aiconsole, "%s got %s as new enemy\n", STRING(pev->classname), STRING(pNewEnemy->pev->classname));
+
+	// Don't keep the new enemy in the list of old enemies
+	for( int i = 0; i < MAX_OLD_ENEMIES; i++ )
+	{
+		if( m_hOldEnemy[i] == pNewEnemy )
+		{
+			m_hOldEnemy[i] = NULL;
+			break;
+		}
+	}
+	PushEnemy(pPreviousEnemy, previousEnemyLKP);
+}
+
 //=========================================================
-// PushEnemy - remember the last few enemies, always remember the player
+// PushEnemy - remember the last few enemies
 //=========================================================
-void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, Vector &vecLastKnownPos )
+void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, const Vector &vecLastKnownPos )
 {
 	int i;
 
@@ -1230,8 +1256,12 @@ void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, Vector &vecLastKnownPos )
 	for( i = 0; i < MAX_OLD_ENEMIES; i++ )
 	{
 		if( m_hOldEnemy[i] == pEnemy )
+		{
+			// we already have this enemy, just update LKP
+			m_vecOldEnemy[i] = vecLastKnownPos;
 			return;
-		if( m_hOldEnemy[i] == 0 ) // someone died, reuse their slot
+		}
+		if( m_hOldEnemy[i] == 0 || !m_hOldEnemy[i]->IsAlive() ) // someone died, reuse their slot
 			break;
 	}
 	if( i >= MAX_OLD_ENEMIES )
@@ -1239,6 +1269,7 @@ void CBaseMonster::PushEnemy( CBaseEntity *pEnemy, Vector &vecLastKnownPos )
 
 	m_hOldEnemy[i] = pEnemy;
 	m_vecOldEnemy[i] = vecLastKnownPos;
+	//ALERT(at_aiconsole, "%s pushed %s to its enemy queue\n", STRING(pev->classname), STRING(pEnemy->pev->classname));
 }
 
 //=========================================================
@@ -1256,7 +1287,8 @@ BOOL CBaseMonster::PopEnemy()
 				m_hEnemy = m_hOldEnemy[i];
 				m_vecEnemyLKP = m_vecOldEnemy[i];
 				m_flLastTimeObservedEnemy = gpGlobals->time;
-				// ALERT( at_console, "remembering\n" );
+				ALERT( at_aiconsole, "%s remembering old enemy %s\n", STRING(pev->classname), STRING(m_hEnemy->pev->classname) );
+				m_hOldEnemy[i] = NULL;
 				return TRUE;
 			}
 			else
@@ -3374,6 +3406,14 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	else
 		ALERT( level, "No enemy. " );
 
+	for (i=0; i<MAX_OLD_ENEMIES; ++i)
+	{
+		if (m_hOldEnemy[i] != 0)
+		{
+			ALERT( level, "Old enemy is %s (%s). ", STRING( m_hOldEnemy[i]->pev->classname ), m_hOldEnemy[i]->IsAlive() ? "alive" : "dead" );
+		}
+	}
+
 	if ( m_hTargetEnt != 0 )
 		ALERT( level, "Target ent: %s. ", STRING( m_hTargetEnt->pev->classname ) );
 
@@ -3869,17 +3909,14 @@ BOOL CBaseMonster::GetEnemy( void )
 			{
 				if( m_pSchedule->iInterruptMask & bits_COND_NEW_ENEMY )
 				{
-					PushEnemy( m_hEnemy, m_vecEnemyLKP );
+					SetEnemy(pNewEnemy);
 					SetConditions( bits_COND_NEW_ENEMY );
-					m_hEnemy = pNewEnemy;
-					m_vecEnemyLKP = m_hEnemy->pev->origin;
-					m_flLastTimeObservedEnemy = gpGlobals->time;
 				}
 				// if the new enemy has an owner, take that one as well
 				if( pNewEnemy->pev->owner != NULL )
 				{
 					CBaseEntity *pOwner = GetMonsterPointer( pNewEnemy->pev->owner );
-					if( pOwner && ( pOwner->pev->flags & FL_MONSTER ) && IRelationship( pOwner ) != R_NO )
+					if( pOwner && ( pOwner->pev->flags & FL_MONSTER ) && IRelationship( pOwner ) >= R_DL )
 						PushEnemy( pOwner, m_vecEnemyLKP );
 				}
 			}
