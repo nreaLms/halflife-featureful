@@ -3419,14 +3419,16 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 
 	if( IsMoving() )
 	{
-		ALERT( level, " Moving " );
+		ALERT( level, "Moving" );
 		if( m_flMoveWaitFinished > gpGlobals->time )
-			ALERT( level, ": Stopped for %.2f. ", (double)(m_flMoveWaitFinished - gpGlobals->time) );
+			ALERT( level, ": Stopped for %.2f", (double)(m_flMoveWaitFinished - gpGlobals->time) );
 		else if( m_IdealActivity == GetStoppedActivity() )
-			ALERT( level, ": In stopped anim. " );
+			ALERT( level, ": In stopped anim" );
+		ALERT( level, ". " );
 	}
 
-	ALERT( level, "Yaw speed: %3.1f, Health: %3.1f / %3.1f. ", (double)pev->yaw_speed, (double)pev->health, (double)pev->max_health );
+	ALERT( level, "Yaw speed: %3.1f, Current Yaw: %3.1f, Ideal Yaw: %3.1f, Health: %3.1f / %3.1f. ",
+		   (double)pev->yaw_speed, (double)UTIL_AngleMod( pev->angles.y ), (double)pev->ideal_yaw, (double)pev->health, (double)pev->max_health );
 	if( pev->spawnflags & SF_MONSTER_PRISONER )
 		ALERT( level, " PRISONER! " );
 	if( pev->spawnflags & SF_MONSTER_PREDISASTER )
