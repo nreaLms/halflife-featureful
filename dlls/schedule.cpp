@@ -1396,7 +1396,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			{
 				for( int i = 0; i < WorldGraph.m_cNodes; i++ )
 				{
-					int nodeNumber = ( i + WorldGraph.m_iLastFreeroamNode ) % WorldGraph.m_cNodes;
+					int nodeNumber = ( i + WorldGraph.m_iLastActiveIdleSearch ) % WorldGraph.m_cNodes;
 
 					CNode &node = WorldGraph.Node( nodeNumber );
 
@@ -1410,7 +1410,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					if (tr.flFraction == 1.0f && MoveToLocation( ACT_WALK, 2, node.m_vecOrigin ))
 					{
 						TaskComplete();
-						WorldGraph.m_iLastFreeroamNode = nodeNumber + 1;
+						WorldGraph.m_iLastActiveIdleSearch = nodeNumber + 1;
 						break;
 					}
 				}
