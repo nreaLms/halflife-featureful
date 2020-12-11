@@ -112,6 +112,7 @@ enum
 	SCHED_HGRUNT_ALLY_WAIT_FACE_ENEMY,
 	SCHED_HGRUNT_ALLY_TAKECOVER_FAILED,// special schedule type that forces analysis of conditions and picks the best possible schedule to recover from this type of failure.
 	SCHED_HGRUNT_ALLY_ELOF_FAIL,
+	SCHED_HGRUNT_ALLY_RELOAD_NOT_EMPTY,
 	LAST_HGRUNT_ALLY_SCHEDULE,
 };
 
@@ -153,6 +154,7 @@ public:
 	Schedule_t *GetScheduleOfType ( int Type );
 	Schedule_t *GetSchedule ( void );
 	Schedule_t *PrioritizedSchedule();
+	Schedule_t *GetReloadSchedule();
 	MONSTERSTATE GetIdealState ( void );
 
 	void AlertSound( void );
@@ -819,6 +821,25 @@ Schedule_t slFGruntHideReload[] =
 	}
 };
 
+Task_t	tlFGruntReloadNotEmpty[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_PLAY_SEQUENCE, float(ACT_RELOAD) },
+};
+
+Schedule_t slFGruntReloadNotEmpty[] =
+{
+	{
+		tlFGruntReloadNotEmpty,
+		ARRAYSIZE( tlFGruntReloadNotEmpty ),
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_NEW_ENEMY |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"FGruntReloadNotEmpty"
+	}
+};
+
 //=========================================================
 // Do a turning sweep of the area
 //=========================================================
@@ -1060,6 +1081,7 @@ DEFINE_CUSTOM_SCHEDULES( CHFGrunt )
 	slFGruntRepel,
 	slFGruntRepelAttack,
 	slFGruntRepelLand,
+	slFGruntReloadNotEmpty,
 };
 
 
@@ -2175,6 +2197,9 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 			{
 				return &slFGruntVictoryDance[ 0 ];
 			}
+			Schedule_t* reloadSched = GetReloadSchedule();
+			if (reloadSched)
+				return reloadSched;
 			return GetScheduleOfType(SCHED_IDLE_STAND);
 		}
 		break;
@@ -2221,6 +2246,10 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 			return &slFGruntRepelLand[ 0 ];
 		}
 		break;
+	case SCHED_HGRUNT_ALLY_RELOAD_NOT_EMPTY:
+		{
+			return &slFGruntReloadNotEmpty[ 0 ];
+		}
 	default:
 		{
 			return CTalkMonster :: GetScheduleOfType ( Type );
@@ -2373,6 +2402,19 @@ Schedule_t* CHFGrunt::PrioritizedSchedule()
 				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 			}
 		}
+	}
+	return NULL;
+}
+
+Schedule_t *CHFGrunt::GetReloadSchedule()
+{
+	if ( HasConditions ( bits_COND_NO_AMMO_LOADED ) )
+	{
+		return GetScheduleOfType ( SCHED_RELOAD );
+	}
+	else if ( m_cAmmoLoaded <= m_cClipSize/2 )
+	{
+		return GetScheduleOfType( SCHED_HGRUNT_ALLY_RELOAD_NOT_EMPTY );
 	}
 	return NULL;
 }
@@ -2570,10 +2612,9 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
 	{
-		if ( HasConditions ( bits_COND_NO_AMMO_LOADED ) )
-		{
-			return GetScheduleOfType ( SCHED_RELOAD );
-		}
+		Schedule_t* reloadSched = GetReloadSchedule();
+		if (reloadSched)
+			return reloadSched;
 
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)
