@@ -1911,8 +1911,6 @@ void CHFGrunt :: Precache()
 
 	PRECACHE_SOUND("weapons/sbarrel1.wav");
 
-	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
-
 	m_iShotgunShell = PRECACHE_MODEL ("models/shotgunshell.mdl");// shotgun shell
 	m_iM249Shell = PRECACHE_MODEL ("models/saw_shell.mdl");// saw shell
 	m_iM249Link = PRECACHE_MODEL ("models/saw_link.mdl");// saw link
@@ -1938,6 +1936,7 @@ void CHFGrunt::PrecacheHelper()
 	PRECACHE_SOUND_ARRAY(pDeathSounds);
 
 	PRECACHE_SOUND("fgrunt/medic.wav");
+	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
 	m_iBrassShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 }
@@ -3549,6 +3548,7 @@ void CMedic::Precache()
 	PrecacheMyModel("models/hgrunt_medic.mdl");
 	PRECACHE_SOUND("weapons/desert_eagle_fire.wav");
 	PRECACHE_SOUND("weapons/desert_eagle_reload.wav");
+	PRECACHE_SOUND("hgrunt/gr_reload1.wav");
 	PRECACHE_SOUND("weapons/pl_gun3.wav");
 	PRECACHE_SOUND("fgrunt/medic_give_shot.wav");
 	PRECACHE_SOUND("fgrunt/medical.wav");
@@ -3592,7 +3592,10 @@ void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
 		}
 		break;
 	case HGRUNT_ALLY_AE_RELOAD:
-		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/desert_eagle_reload.wav", 1, ATTN_NORM );
+		if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
+			EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/desert_eagle_reload.wav", 1, ATTN_NORM );
+		else
+			EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hgrunt/gr_reload1.wav", 1, ATTN_NORM );
 		m_cAmmoLoaded = m_cClipSize;
 		ClearConditions(bits_COND_NO_AMMO_LOADED);
 		break;
