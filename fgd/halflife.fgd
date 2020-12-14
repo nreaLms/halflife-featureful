@@ -1208,6 +1208,20 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_beamtrail : "Beam trail effect"
+[
+	target(target_destination) : "Entity to trail [LE]"
+	netname(sprite) : "Sprite Name" : "sprites/smoke.spr"
+	renderamt(integer) : "Brightness (1 - 255)" : 255
+	rendercolor(color255) : "Color (R G B)" : "255 255 255"
+	armorvalue(integer) : "Width" : 5
+	health(string) : "Fade time (secs)" : "4.0"
+	spawnflags(flags) =
+	[
+		1: "Start off" : 0
+	]
+]
+
 @PointClass base(Targetname, Angles) size(-4 -4 -4, 4 4 4) = env_beverage : "Beverage Dispenser"
 [
 	target(string) : "Initial position (blank = here) [LP]"

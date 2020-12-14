@@ -4025,3 +4025,102 @@ void CEnvFog :: SendData ( Vector col, int iFadeTime, int iStartDist, int iEndDi
 }
 
 LINK_ENTITY_TO_CLASS( env_fog, CEnvFog )
+
+#define SF_BEAMTRAIL_OFF 1
+class CEnvBeamTrail : public CPointEntity
+{
+public:
+	void	Spawn( void );
+	void	Precache( void );
+	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void	EXPORT StartTrailThink ( void );
+	void	Affect( CBaseEntity *pTarget, USE_TYPE useType );
+
+	int		m_iSprite;	// Don't save, precache
+};
+
+void CEnvBeamTrail::Precache ( void )
+{
+	//if (pev->target)
+	//	PRECACHE_MODEL("sprites/null.spr");
+	if (pev->netname)
+		m_iSprite = PRECACHE_MODEL ( STRING(pev->netname) );
+}
+
+LINK_ENTITY_TO_CLASS( env_beamtrail, CEnvBeamTrail )
+
+void CEnvBeamTrail::StartTrailThink ( void )
+{
+	pev->spawnflags |= SF_BEAMTRAIL_OFF; // fake turning off, so the Use turns it on properly
+	Use(this, this, USE_ON, 0);
+}
+
+void CEnvBeamTrail::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if (pev->target)
+	{
+		CBaseEntity *pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target), pActivator );
+		while (pTarget)
+		{
+			Affect(pTarget, useType);
+			pTarget = UTIL_FindEntityByTargetname(pTarget, STRING(pev->target), pActivator );
+		}
+	}
+	else
+	{
+		if (!ShouldToggle( useType, !(pev->spawnflags & SF_BEAMTRAIL_OFF) ))
+			return;
+		Affect(this, useType);
+	}
+
+	if (useType == USE_ON)
+		pev->spawnflags &= ~SF_BEAMTRAIL_OFF;
+	else if (useType == USE_OFF)
+		pev->spawnflags |= SF_BEAMTRAIL_OFF;
+	else
+	{
+		if (pev->spawnflags & SF_BEAMTRAIL_OFF)
+			pev->spawnflags &= ~SF_BEAMTRAIL_OFF;
+		else
+			pev->spawnflags |= SF_BEAMTRAIL_OFF;
+	}
+}
+
+void CEnvBeamTrail::Affect( CBaseEntity *pTarget, USE_TYPE useType )
+{
+	if (useType == USE_ON || pev->spawnflags & SF_BEAMTRAIL_OFF)
+	{
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_BEAMFOLLOW );
+			WRITE_SHORT(pTarget->entindex());	// entity
+			WRITE_SHORT( m_iSprite );	// model
+			WRITE_BYTE( pev->health*10 ); // life
+			WRITE_BYTE( pev->armorvalue );  // width
+			WRITE_BYTE( pev->rendercolor.x );   // r, g, b
+			WRITE_BYTE( pev->rendercolor.y );   // r, g, b
+			WRITE_BYTE( pev->rendercolor.z );   // r, g, b
+			WRITE_BYTE( pev->renderamt );	// brightness
+		MESSAGE_END();
+	}
+	else
+	{
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE(TE_KILLBEAM);
+			WRITE_SHORT(pTarget->entindex());
+		MESSAGE_END();
+	}
+}
+
+void CEnvBeamTrail::Spawn( void )
+{
+	Precache();
+
+	//SET_MODEL(ENT(pev), "sprites/null.spr");
+	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+
+	if (!(pev->spawnflags & SF_BEAMTRAIL_OFF))
+	{
+		SetThink(&CEnvBeamTrail::StartTrailThink);
+		pev->nextthink = gpGlobals->time + 0.1f;
+	}
+}
