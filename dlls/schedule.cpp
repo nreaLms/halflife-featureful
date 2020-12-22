@@ -1580,7 +1580,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 				// clear the current (dead) enemy and try to find another.
 				m_hEnemy = NULL;
 
-				if( GetEnemy() )
+				if( GetEnemy(true) )
 				{
 					ClearConditions( bits_COND_ENEMY_DEAD );
 					return GetSchedule();
@@ -1597,7 +1597,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 				ALERT(at_aiconsole, "%s did not see an enemy for a while. Just forget about it\n", STRING(pev->classname));
 				m_hEnemy = NULL;
 
-				if( GetEnemy() )
+				if( GetEnemy(true) )
 				{
 					ClearConditions( bits_COND_ENEMY_LOST );
 					return GetSchedule();

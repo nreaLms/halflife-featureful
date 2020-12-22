@@ -306,7 +306,7 @@ public:
 	// PrescheduleThink 
 	virtual void PrescheduleThink( void ) { return; };
 
-	BOOL GetEnemy( void );
+	BOOL GetEnemy( bool forcePopping );
 	void MakeDamageBloodDecal( int cCount, float flNoise, TraceResult *ptr, const Vector &vecDir );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 

@@ -3893,7 +3893,7 @@ BOOL CBaseMonster::BBoxFlat( void )
 //=========================================================
 // Get Enemy - tries to find the best suitable enemy for the monster.
 //=========================================================
-BOOL CBaseMonster::GetEnemy( void )
+BOOL CBaseMonster::GetEnemy( bool forcePopping )
 {
 	CBaseEntity *pNewEnemy;
 
@@ -3926,14 +3926,19 @@ BOOL CBaseMonster::GetEnemy( void )
 	}
 
 	// remember old enemies
-	if( m_hEnemy == 0 && PopEnemy() )
+	if( m_hEnemy == 0 )
 	{
-		if( m_pSchedule )
+		if (forcePopping)
 		{
-			if( m_pSchedule->iInterruptMask & bits_COND_NEW_ENEMY )
+			if (PopEnemy() && m_pSchedule != NULL && (m_pSchedule->iInterruptMask & bits_COND_NEW_ENEMY))
 			{
 				SetConditions( bits_COND_NEW_ENEMY );
 			}
+		}
+		else if (m_pSchedule != NULL && (m_pSchedule->iInterruptMask & bits_COND_NEW_ENEMY))
+		{
+			if (PopEnemy())
+				SetConditions( bits_COND_NEW_ENEMY );
 		}
 	}
 

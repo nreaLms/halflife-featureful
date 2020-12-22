@@ -218,7 +218,7 @@ void CBaseMonster::SentenceStop( void ) { }
 void CBaseMonster::CorpseFallThink( void ) { }
 void CBaseMonster::MonsterInitDead( void ) { }
 BOOL CBaseMonster::BBoxFlat( void ) { return TRUE; }
-BOOL CBaseMonster::GetEnemy( void ) { return FALSE; }
+BOOL CBaseMonster::GetEnemy( bool forcePopping ) { return FALSE; }
 void CBaseMonster::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
 CBaseEntity* CBaseMonster::DropItem( const char *pszItemName, const Vector &vecPos, const Vector &vecAng ) { return NULL; }
 BOOL CBaseMonster::ShouldFadeOnDeath( void ) { return FALSE; }
