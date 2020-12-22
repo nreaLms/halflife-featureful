@@ -32,7 +32,6 @@
 #include "game.h"
 #include "gamerules.h"
 
-extern CGraph WorldGraph;
 extern int gEvilImpulse101;
 
 #define NOT_USED 255
