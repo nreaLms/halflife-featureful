@@ -39,6 +39,7 @@ extern CGraph WorldGraph;
 
 enum
 {
+	HOUNDEYE_FORCE_LAZY_WAKING = -2,
 	HOUNDEYE_FORCE_URGENT_WAKING = -1,
 	HOUNDEYE_AWAKE = 0,
 	HOUNDEYE_SLEEPING,
@@ -132,6 +133,7 @@ public:
 	float HearingSensitivity();
 	BOOL FInViewCone( CBaseEntity *pEntity );
 	void EXPORT TouchSleeping( CBaseEntity* pToucher );
+	void EXPORT UseSleeping( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	int Save( CSave &save );
 	int Restore( CRestore &restore );
@@ -704,6 +706,7 @@ void CHoundeye::StartTask( Task_t *pTask )
 			{
 				ClearBits(pev->spawnflags, SF_HOUNDEYE_START_SLEEPING);
 				SetTouch(&CHoundeye::TouchSleeping);
+				SetUse(&CHoundeye::UseSleeping);
 				m_iAsleep = HOUNDEYE_DEEP_SLEEPING;
 			}
 			else
@@ -1059,6 +1062,27 @@ Schedule_t	slHoundWakeLazy[] =
 	},
 };
 
+// wake and stand up lazily, without random waiting
+Task_t	tlHoundWakeLazyNoWait[] =
+{
+	{ TASK_STOP_MOVING,			(float)0			},
+	{ TASK_HOUND_HALF_ASLEEP,	(float)0			},
+	{ TASK_PLAY_SEQUENCE,		(float)ACT_STAND	},
+	{ TASK_HOUND_OPEN_EYE,		(float)0			},
+	{ TASK_HOUND_WAKE_UP,		(float)0			},
+};
+
+Schedule_t	slHoundWakeLazyNoWait[] =
+{
+	{
+		tlHoundWakeLazyNoWait,
+		ARRAYSIZE ( tlHoundWakeLazyNoWait ),
+		0,
+		0,
+		"WakeLazyNoWait"
+	},
+};
+
 // wake and stand up with great urgency!
 Task_t	tlHoundWakeUrgent[] =
 {
@@ -1252,6 +1276,7 @@ DEFINE_CUSTOM_SCHEDULES( CHoundeye )
 	slHoundEat,
 	slHoundSleep,
 	slHoundWakeLazy,
+	slHoundWakeLazyNoWait,
 	slHoundWakeUrgent,
 	slHoundDeepSleep,
 	slHoundSpecialAttack1,
@@ -1277,6 +1302,10 @@ Schedule_t *CHoundeye::GetScheduleOfType( int Type )
 		if (m_iAsleep == HOUNDEYE_FORCE_URGENT_WAKING)
 		{
 			return &slHoundWakeUrgent[0];
+		}
+		if (m_iAsleep == HOUNDEYE_FORCE_LAZY_WAKING)
+		{
+			return &slHoundWakeLazyNoWait[0];
 		}
 		// if the hound is sleeping, must wake and stand!
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
@@ -1510,7 +1539,19 @@ void CHoundeye::TouchSleeping(CBaseEntity *pToucher)
 			MakeIdealYaw( pToucher->pev->origin );
 		}
 		SetTouch(NULL);
+		SetUse( &CBaseMonster::MonsterUse );
 	}
+}
+
+void CHoundeye::UseSleeping(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (m_iAsleep == HOUNDEYE_DEEP_SLEEPING)
+	{
+		ClearSchedule();
+		m_iAsleep = useType == USE_ON ? HOUNDEYE_FORCE_URGENT_WAKING : HOUNDEYE_FORCE_LAZY_WAKING;
+	}
+	SetTouch(NULL);
+	SetUse( &CBaseMonster::MonsterUse );
 }
 
 #if FEATURE_HOUNDEYE_DEAD
