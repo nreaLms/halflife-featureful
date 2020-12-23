@@ -1116,6 +1116,14 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 		return FALSE;
 	}
 
+	// The classify of enemy has been changed to an ally or neutral. Pretend to lose the enemy.
+	if (IRelationship(pEnemy) < R_DL)
+	{
+		SetConditions(bits_COND_ENEMY_LOST);
+		ClearConditions( bits_COND_SEE_ENEMY | bits_COND_ENEMY_OCCLUDED );
+		return FALSE;
+	}
+
 	Vector vecEnemyPos = pEnemy->pev->origin;
 
 	// distance to enemy's origin

@@ -6339,6 +6339,8 @@
 	]
 ]
 
+@PointClass base(Targetname, Target, Classification) color(128 96 2) = trigger_change_class : "Trigger Change Class" []
+
 @SolidClass = trigger_changelevel : "Trigger: Change level"
 [
 	targetname(target_source) : "Name"

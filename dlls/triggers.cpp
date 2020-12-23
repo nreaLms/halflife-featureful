@@ -4173,6 +4173,69 @@ void CTriggerCommand::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 }
 #endif
 
+class CTriggerChangeClass : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void KeyValue( KeyValueData *pkvd );
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	void Affect(CBaseEntity* pEntity, USE_TYPE useType);
+
+	int m_iClass;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_change_class, CTriggerChangeClass )
+
+TYPEDESCRIPTION	CTriggerChangeClass::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerChangeClass, m_iClass, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerChangeClass, CPointEntity )
+
+void CTriggerChangeClass::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "classify"))
+	{
+		m_iClass = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CTriggerChangeClass::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (FStringNull(pev->target))
+		return;
+	CBaseEntity* pEntity = NULL;
+	while((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->target), pActivator)) != NULL)
+	{
+		Affect(pEntity, useType);
+	}
+}
+
+void CTriggerChangeClass::Affect(CBaseEntity *pEntity, USE_TYPE useType)
+{
+	if (!pEntity)
+		return;
+	if (pEntity->IsPlayer())
+		return; // don't change the class of player
+	CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+	if (pMonster)
+	{
+		if (useType == USE_OFF)
+			pMonster->m_iClass = 0;
+		else
+			pMonster->m_iClass = m_iClass;
+	}
+}
+
 #if FEATURE_TRIGGER_HURT_REMOTE
 
 #define SF_TRIGGER_HURT_REMOTE_INSTANT_KILL 1
