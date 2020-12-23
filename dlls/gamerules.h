@@ -381,7 +381,7 @@ int TridepthValue();
 bool AllowUseThroughWalls();
 bool NeedUseToTake();
 bool NpcFollowNearest();
-int NpcForgetEnemyTime();
+float NpcForgetEnemyTime();
 bool AllowGrenadeJump();
 
 #endif // GAMERULES_H

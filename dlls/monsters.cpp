@@ -1184,10 +1184,12 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	}
 	else
 	{
-		const int forgetEnemyTime = NpcForgetEnemyTime();
+		const float forgetEnemyTime = NpcForgetEnemyTime();
 		if (forgetEnemyTime > 0 && m_flLastTimeObservedEnemy + forgetEnemyTime <= gpGlobals->time)
 		{
 			SetConditions( bits_COND_ENEMY_LOST );
+			ClearConditions( bits_COND_ENEMY_OCCLUDED );
+			return FALSE;
 		}
 	}
 
