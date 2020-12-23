@@ -233,7 +233,7 @@ public:
 	void DeathSound(void);
 	void PlayUseSentence();
 	void PlayUnUseSentence();
-	void BodyChange(float horns);
+	void BodyChange(int horns);
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int IgnoreConditions(void);
 	Schedule_t* GetSchedule(void);
@@ -622,7 +622,7 @@ int	CPitdrone::DefaultClassify(void)
 	return	CLASS_RACEX_PREDATOR;
 }
 
-void CPitdrone::BodyChange(float horns)
+void CPitdrone::BodyChange(int horns)
 {
 	if (horns <= 0)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS0);
@@ -1076,22 +1076,6 @@ Schedule_t *CPitdrone::GetSchedule(void)
 		if (HasConditions(bits_COND_NEW_ENEMY))
 		{
 			return GetScheduleOfType(SCHED_WAKE_ANGRY);
-		}
-
-		if (HasConditions(bits_COND_SMELL_FOOD))
-		{
-			CSound		*pSound;
-
-			pSound = PBestScent();
-
-			if (pSound && (!FInViewCone(&pSound->m_vecOrigin) || !FVisible(pSound->m_vecOrigin)))
-			{
-				// scent is behind or occluded
-				return GetScheduleOfType(SCHED_PDRONE_SNIFF_AND_EAT);
-			}
-
-			// food is right out in the open. Just go get it.
-			return GetScheduleOfType(SCHED_PDRONE_EAT);
 		}
 
 		if( HasConditions( bits_COND_NO_AMMO_LOADED ) && (m_iInitialAmmo >= 0) )
