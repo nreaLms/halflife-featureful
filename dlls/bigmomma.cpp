@@ -602,8 +602,9 @@ void CBigMomma::LayHeadcrab( void )
 {
 	CBaseEntity *pChild = CBaseEntity::Create( BIG_CHILDCLASS, pev->origin, pev->angles, edict() );
 	CBaseMonster *pNewMonster = pChild->MyMonsterPointer();
-	if (pNewMonster && (m_iClass != 0 || m_reverseRelationship)) {
-		pNewMonster->m_iClass = Classify();
+	if (pNewMonster) {
+		pNewMonster->m_iClass = m_iClass;
+		pNewMonster->m_reverseRelationship = m_reverseRelationship;
 	}
 
 	pChild->pev->spawnflags |= SF_MONSTER_FALL_TO_GROUND;

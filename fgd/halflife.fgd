@@ -194,6 +194,7 @@
 [
 	classify(choices) : "Classification" : : "Relationship class of monster" =
 	[
+		-1 : "None"
 		0 : "Default"
 		1 : "Machine"
 		3 : "Human passive"

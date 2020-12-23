@@ -572,8 +572,9 @@ void CStrooper::DropShockRoach(bool gibbed)
 			if (ShouldFadeOnDeath())
 				pRoach->pev->spawnflags |= SF_MONSTER_FADECORPSE;
 			CBaseMonster *pNewMonster = pRoach->MyMonsterPointer();
-			if (pNewMonster && (m_iClass != 0 || m_reverseRelationship)) {
-				pNewMonster->m_iClass = Classify();
+			if (pNewMonster) {
+				pNewMonster->m_iClass = m_iClass;
+				pNewMonster->m_reverseRelationship = m_reverseRelationship;
 			}
 		}
 	}
