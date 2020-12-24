@@ -1455,17 +1455,20 @@ int CSittingScientist::FIdleSpeak( void )
 	// if there is a friend nearby to speak to, play sentence, set friend's response time, return
 
 	// try to talk to any standing or sitting scientists nearby
-	CBaseEntity *pentFriend = FindNearestFriend( FALSE );
+	CBaseEntity *pFriend = FindNearestFriend( FALSE );
 
-	if( pentFriend && RANDOM_LONG( 0, 1 ) )
+	if( pFriend && RANDOM_LONG( 0, 1 ) )
 	{
 		PlaySentence( m_szGrp[TLK_PQUESTION], RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
 
-		CTalkMonster *pTalkMonster = GetClassPtr( (CTalkMonster *)pentFriend->pev );
-		pTalkMonster->SetAnswerQuestion( this );
-		pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
-
-		IdleHeadTurn( pentFriend->pev->origin );
+		CBaseMonster* pMonster = pFriend->MyMonsterPointer();
+		if (pMonster)
+		{
+			CTalkMonster *pTalkMonster = pMonster->MyTalkMonsterPointer();
+			if (pTalkMonster && pTalkMonster->SetAnswerQuestion( this ))
+				pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
+		}
+		IdleHeadTurn( pFriend->pev->origin );
 		return TRUE;
 	}
 

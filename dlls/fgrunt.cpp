@@ -2687,10 +2687,17 @@ void CTalkMonsterRepel::KeyValue(KeyValueData *pkvd)
 
 void CTalkMonsterRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 {
-	CTalkMonster* monster = (CTalkMonster*)pEntity;
-	monster->m_iszUse = m_iszUse;
-	monster->m_iszUnUse = m_iszUnUse;
-	monster->m_iszDecline = m_iszDecline;
+	CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+	if (pMonster)
+	{
+		CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
+		if (pTalkMonster)
+		{
+			pTalkMonster->m_iszUse = m_iszUse;
+			pTalkMonster->m_iszUnUse = m_iszUnUse;
+			pTalkMonster->m_iszDecline = m_iszDecline;
+		}
+	}
 }
 
 class CHFGruntRepel : public CTalkMonsterRepel

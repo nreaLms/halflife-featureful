@@ -275,7 +275,7 @@ void CFollowingMonster::RunTask( Task_t *pTask )
 
 void CFollowingMonster::PrescheduleThink()
 {
-	if (IsFollowingPlayer() && IsLockedByMaster())
+	if (IsFollowingPlayer() && ShouldDeclineFollowing())
 	{
 		StopFollowing(TRUE, false);
 	}
@@ -430,6 +430,11 @@ void CFollowingMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCall
 	DoFollowerUse(pCaller, true, USE_TOGGLE);
 }
 
+bool CFollowingMonster::ShouldDeclineFollowing()
+{
+	return IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster);
+}
+
 int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE_TYPE useType, bool ignoreScriptedSentence)
 {
 	if( pCaller != NULL && pCaller->IsPlayer() )
@@ -445,7 +450,7 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 			return FOLLOWING_NOTALLOWED;
 
 		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...
-		if (IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster))
+		if (ShouldDeclineFollowing())
 		{
 			if (saySentence)
 				DeclineFollowing(pCaller);

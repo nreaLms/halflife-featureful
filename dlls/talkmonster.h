@@ -169,6 +169,7 @@ public:
 	virtual void PlayUseSentence();
 	virtual void PlayUnUseSentence();
 	virtual void DeclineFollowing(CBaseEntity* pCaller);
+	CTalkMonster* MyTalkMonsterPointer() { return this; }
 
 	// Medic related
 	bool			WantsToCallMedic();

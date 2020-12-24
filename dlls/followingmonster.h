@@ -36,6 +36,8 @@ enum
 	FOLLOWING_DISCARDED,
 };
 
+class CTalkMonster;
+
 class CFollowingMonster : public CSquadMonster
 {
 public:
@@ -72,6 +74,7 @@ public:
 	Schedule_t* GetFollowingSchedule(bool ignoreEnemy = false);
 	void EXPORT FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int DoFollowerUse(CBaseEntity* pCaller, bool saySentence, USE_TYPE useType, bool ignoreScriptedSentence = false);
+	bool ShouldDeclineFollowing();
 
 	virtual void PlayUseSentence() {}
 	virtual void PlayUnUseSentence() {}

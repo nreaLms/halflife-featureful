@@ -29,7 +29,7 @@
 #include "gamerules.h"
 #include "skill.h"
 #include "monsters.h"
-#include "followingmonster.h"
+#include "talkmonster.h"
 #include "locus.h"
 
 #define FEATURE_TRIGGER_RANDOM 1
@@ -4547,3 +4547,251 @@ void CTriggerEntityIterator::Iterate(CBaseEntity *pEntity)
 	SUB_UseTargets(pEntity, useType, 0.0f);
 }
 #endif
+
+class CTriggerConfigureMonster : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void KeyValue( KeyValueData *pkvd );
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	void Affect(CBaseEntity* pEntity);
+
+	// For all these variables zero means no change
+	short m_gagFlag;
+	short m_monsterClipFlag;
+	short m_predisasterFlag;
+	short m_dontDropGunFlag;
+	int m_iClass;
+	int m_soundMask;
+	short m_iTriggerCondition;
+	short m_iTriggerAltCondition;
+	string_t m_iszTriggerTarget;
+
+	// Talk monsters
+	string_t m_iszUse;
+	string_t m_iszUnUse;
+	string_t m_iszDecline;
+	short m_provokedState;
+	short m_iTolerance;
+};
+
+LINK_ENTITY_TO_CLASS( trigger_configure_monster, CTriggerConfigureMonster )
+
+TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerConfigureMonster, m_gagFlag, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_monsterClipFlag, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_predisasterFlag, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_dontDropGunFlag, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iClass, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_soundMask, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerCondition, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerAltCondition, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iszTriggerTarget, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iszUse, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iszUnUse, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iszDecline, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_provokedState, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_iTolerance, FIELD_SHORT ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerConfigureMonster, CPointEntity )
+
+void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "gag_flag"))
+	{
+		m_gagFlag = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "monsterclip_flag"))
+	{
+		m_monsterClipFlag = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "predisaster_flag"))
+	{
+		m_predisasterFlag = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "dont_drop_gun_flag"))
+	{
+		m_dontDropGunFlag = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "soundmask"))
+	{
+		m_soundMask = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "classify"))
+	{
+		m_iClass = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerTarget" ) )
+	{
+		m_iszTriggerTarget = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerCondition" ) )
+	{
+		m_iTriggerCondition = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerAltCondition" ) )
+	{
+		m_iTriggerAltCondition = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "UseSentence" ) )
+	{
+		m_iszUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "UnUseSentence" ) )
+	{
+		m_iszUnUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq( pkvd->szKeyName, "RefusalSentence" ))
+	{
+		m_iszDecline = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "provoked_state"))
+	{
+		m_provokedState = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "tolerance"))
+	{
+		m_iTolerance = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue( pkvd );
+}
+
+void CTriggerConfigureMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (FStringNull(pev->target))
+	{
+		ALERT(at_console, "%s with null target!\n", STRING(pev->classname));
+		return;
+	}
+	CBaseEntity* pEntity = NULL;
+	while((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->target), pActivator)) != NULL)
+	{
+		Affect(pEntity);
+	}
+}
+
+void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
+{
+	if (!pEntity)
+		return;
+	if (pEntity->IsPlayer())
+		return; // refuse to change player's parameters
+	CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+	if (!pMonster)
+		return;
+
+	CFollowingMonster* followingMonster = pMonster->MyFollowingMonsterPointer();
+
+	if (m_gagFlag < 0)
+		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_GAG);
+	else if (m_gagFlag > 0)
+		SetBits(pMonster->pev->spawnflags, SF_MONSTER_GAG);
+
+	if (m_monsterClipFlag < 0)
+	{
+		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_HITMONSTERCLIP);
+		ClearBits(pMonster->pev->flags, FL_MONSTERCLIP);
+	}
+	else if (m_monsterClipFlag > 0)
+	{
+		SetBits(pMonster->pev->spawnflags, SF_MONSTER_HITMONSTERCLIP);
+		SetBits(pMonster->pev->flags, FL_MONSTERCLIP);
+	}
+
+	if (m_predisasterFlag < 0)
+		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_PREDISASTER);
+	else if (m_predisasterFlag > 0)
+		SetBits(pMonster->pev->spawnflags, SF_MONSTER_PREDISASTER);
+
+	if (m_dontDropGunFlag < 0)
+		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_DONT_DROP_GUN);
+	else if (m_dontDropGunFlag > 0)
+		SetBits(pMonster->pev->spawnflags, SF_MONSTER_DONT_DROP_GUN);
+
+	if (m_iClass == -2)
+		pMonster->m_iClass = 0;
+	else if (m_iClass)
+		pMonster->m_iClass = m_iClass;
+
+	if (m_soundMask == -2)
+		pMonster->m_customSoundMask = 0;
+	else if (m_soundMask)
+		pMonster->m_customSoundMask = m_soundMask;
+
+	if (m_iTriggerCondition < 0)
+		pMonster->m_iTriggerCondition = 0;
+	else if (m_iTriggerCondition > 0)
+		pMonster->m_iTriggerCondition = m_iTriggerCondition;
+
+	if (m_iTriggerAltCondition < 0)
+		pMonster->m_iTriggerAltCondition = 0;
+	else if (m_iTriggerAltCondition > 0)
+		pMonster->m_iTriggerAltCondition = m_iTriggerAltCondition;
+
+	if (!FStringNull(m_iszTriggerTarget))
+	{
+		if (FStrEq(STRING(m_iszTriggerTarget), "null"))
+			pMonster->m_iszTriggerTarget = iStringNull;
+		else
+			pMonster->m_iszTriggerTarget = m_iszTriggerTarget;
+	}
+
+	CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
+	if (pTalkMonster)
+	{
+		if (m_provokedState < 0)
+		{
+			pTalkMonster->Forget(bits_MEMORY_PROVOKED|bits_MEMORY_SUSPICIOUS);
+		}
+		else if (m_provokedState > 0)
+		{
+			pTalkMonster->Remember( bits_MEMORY_PROVOKED );
+			pTalkMonster->StopFollowing( TRUE );
+		}
+
+		if (!FStringNull(m_iszUse))
+		{
+			pTalkMonster->m_iszUse = m_iszUse;
+			pTalkMonster->m_szGrp[TLK_USE] = CTalkMonster::GetRedefinedSentence(m_iszUse);
+		}
+
+		if (!FStringNull(m_iszUnUse))
+		{
+			pTalkMonster->m_iszUnUse = m_iszUnUse;
+			pTalkMonster->m_szGrp[TLK_UNUSE] = CTalkMonster::GetRedefinedSentence(m_iszUnUse);
+		}
+
+		if (!FStringNull(m_iszDecline))
+		{
+			pTalkMonster->m_iszDecline = m_iszDecline;
+			pTalkMonster->m_szGrp[TLK_DECLINE] = CTalkMonster::GetRedefinedSentence(m_iszDecline);
+		}
+
+		if (m_iTolerance < 0)
+			pTalkMonster->m_iTolerance = 0;
+		else if (m_iTolerance > 0)
+			pTalkMonster->m_iTolerance = m_iTolerance;
+	}
+}

@@ -463,7 +463,7 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		TaskComplete();
 		break;
 	case TASK_CANT_FOLLOW:
-		StopFollowing( FALSE );
+		StopFollowing( FALSE, false );
 		PlaySentence( m_szGrp[TLK_STOP], RANDOM_FLOAT( 2, 2.5 ), VOL_NORM, ATTN_NORM );
 		TaskComplete();
 		break;
@@ -712,16 +712,21 @@ void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 		CBaseEntity *pFriend = NULL;
 		while( ( pFriend = EnumFriends( pFriend, talkFriend.name, FALSE ) ) )
 		{
-			CTalkMonster *pMonster = (CTalkMonster*)pFriend->MyMonsterPointer();
-			if( pMonster )
+			CBaseMonster* pMonster = pFriend->MyMonsterPointer();
+			if (pMonster)
 			{
-				if( pMonster->FollowedPlayer() == pPlayer )
+				CTalkMonster *pTalkMonster = pMonster->MyTalkMonsterPointer();
+				if( pTalkMonster )
 				{
-					count++;
-					if( count > maxFollowers )
-						pMonster->StopFollowing( TRUE );
+					if( pTalkMonster->FollowedPlayer() == pPlayer )
+					{
+						count++;
+						if( count > maxFollowers )
+							pTalkMonster->StopFollowing( TRUE );
+					}
 				}
 			}
+
 		}
 	}
 }
@@ -1088,17 +1093,21 @@ int CTalkMonster::FIdleSpeak( void )
 	{
 		float duration = RandomSentenceDuraion();
 		// force friend to answer
-		CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
-		if (pTalkMonster->m_flStopTalkTime <= gpGlobals->time + duration &&
-				AskQuestion(duration))
+		CBaseMonster* pMonster = pFriend->MyMonsterPointer();
+		if (pMonster)
 		{
-			if (pTalkMonster->SetAnswerQuestion( this )) // UNDONE: This is EVIL!!!
-				pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
+			CTalkMonster *pTalkMonster = pMonster->MyTalkMonsterPointer();
+			if (pTalkMonster && pTalkMonster->m_flStopTalkTime <= gpGlobals->time + duration &&
+					AskQuestion(duration))
+			{
+				if (pTalkMonster->SetAnswerQuestion( this )) // UNDONE: This is EVIL!!!
+					pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
 
-			m_hTalkTarget = pFriend;
+				m_hTalkTarget = pFriend;
 
-			m_nSpeak++;
-			return TRUE;
+				m_nSpeak++;
+				return TRUE;
+			}
 		}
 	}
 
@@ -1196,12 +1205,16 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		{
 			CBaseEntity *pFriend = FindNearestFriend( FALSE );
 
+			// only if not dead or dying!
 			if( pFriend && pFriend->IsAlive() )
 			{
-				// only if not dead or dying!
-				CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
-				if (!pTalkMonster->IsTalking())
-					pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
+				CBaseMonster* pMonster = pFriend->MyMonsterPointer();
+				if (pMonster)
+				{
+					CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
+					if (pTalkMonster && !pTalkMonster->IsTalking())
+						pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
+				}
 			}
 			ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 		}
