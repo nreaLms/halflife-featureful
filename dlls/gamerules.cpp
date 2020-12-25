@@ -256,6 +256,12 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.gwormDmgSpit = GetSkillCvar( "sk_geneworm_dmg_spit" );
 	gSkillData.gwormDmgHit = GetSkillCvar( "sk_geneworm_dmg_hit" );
 #endif
+
+	gSkillData.ospreyHealth = GetSkillCvar( "sk_osprey" );
+#if FEATURE_BLACK_OSPREY
+	gSkillData.blackopsOspreyHealth = GetSkillCvar( "sk_blkopsosprey", "sk_osprey" );
+#endif
+
 #if FEATURE_OTIS
 	// Otis
 	gSkillData.otisHealth = GetSkillCvar( "sk_otis_health", "sk_barney_health" );

@@ -377,6 +377,18 @@ cvar_t	sk_nihilanth_zap1 = {"sk_nihilanth_zap1","0"};
 cvar_t	sk_nihilanth_zap2 = {"sk_nihilanth_zap2","0"};
 cvar_t	sk_nihilanth_zap3 = {"sk_nihilanth_zap3","0"};
 
+// Osprey
+cvar_t	sk_osprey1	= {"sk_osprey1","400"};
+cvar_t	sk_osprey2	= {"sk_osprey2","400"};
+cvar_t	sk_osprey3	= {"sk_osprey3","400"};
+
+// Blackops Osprey
+#if FEATURE_BLACK_OSPREY
+cvar_t	sk_blkopsosprey1	= {"sk_blkopsosprey1"};
+cvar_t	sk_blkopsosprey2	= {"sk_blkopsosprey2"};
+cvar_t	sk_blkopsosprey3	= {"sk_blkopsosprey3"};
+#endif
+
 #if FEATURE_OTIS
 // Otis
 cvar_t	sk_otis_health1	= {"sk_otis_health1","0"};
@@ -1234,6 +1246,16 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_nihilanth_zap1 );
 	CVAR_REGISTER( &sk_nihilanth_zap2 );
 	CVAR_REGISTER( &sk_nihilanth_zap3 );
+
+	CVAR_REGISTER ( &sk_osprey1 );
+	CVAR_REGISTER ( &sk_osprey2 );
+	CVAR_REGISTER ( &sk_osprey3 );
+
+#if FEATURE_BLACK_OSPREY
+	CVAR_REGISTER ( &sk_blkopsosprey1 );
+	CVAR_REGISTER ( &sk_blkopsosprey2 );
+	CVAR_REGISTER ( &sk_blkopsosprey3 );
+#endif
 
 #if FEATURE_OTIS
 	// Otis

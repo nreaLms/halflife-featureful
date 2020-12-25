@@ -139,6 +139,12 @@ struct skilldata_t
 	float gwormDmgHit;
 #endif
 
+	float ospreyHealth;
+
+#if FEATURE_BLACK_OSPREY
+	float blackopsOspreyHealth;
+#endif
+
 #if FEATURE_OTIS
 	float otisHealth;
 #endif

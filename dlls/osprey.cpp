@@ -109,7 +109,7 @@ public:
 	int m_iDoRightSmokePuff;
 	
 protected:
-	void SpawnImpl(const char* modelName);
+	void SpawnImpl(const char* modelName, const float defaultHealth);
 	void PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs);
 	virtual const char* TrooperName();
 	float RotorVolume() const {
@@ -160,10 +160,10 @@ IMPLEMENT_SAVERESTORE( COsprey, CBaseMonster )
 
 void COsprey::Spawn()
 {
-	SpawnImpl("models/osprey.mdl");
+	SpawnImpl("models/osprey.mdl", gSkillData.ospreyHealth);
 }
 
-void COsprey::SpawnImpl(const char* modelName)
+void COsprey::SpawnImpl(const char* modelName, const float defaultHealth)
 {
 	Precache();
 	// motor
@@ -178,7 +178,7 @@ void COsprey::SpawnImpl(const char* modelName)
 	pev->takedamage = DAMAGE_YES;
 	m_flRightHealth = 200;
 	m_flLeftHealth = 200;
-	SetMyHealth( 400 );
+	SetMyHealth( defaultHealth );
 
 	m_flFieldOfView = 0; // 180 degrees
 
@@ -892,7 +892,7 @@ LINK_ENTITY_TO_CLASS( monster_blkop_osprey, CBlkopOsprey )
 
 void CBlkopOsprey::Spawn()
 {
-	SpawnImpl("models/blkop_osprey.mdl");
+	SpawnImpl("models/blkop_osprey.mdl", gSkillData.blackopsOspreyHealth);
 }
 
 void CBlkopOsprey::Precache()
