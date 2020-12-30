@@ -274,7 +274,6 @@ BOOL CBarney::CheckRangeAttack1( float flDot, float flDist )
 				m_lastAttackCheck = TRUE;
 			else
 				m_lastAttackCheck = FALSE;
-			m_checkAttackTime = gpGlobals->time + 1.5f;
 		}
 		return m_lastAttackCheck;
 	}
