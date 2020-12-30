@@ -1061,7 +1061,7 @@ void CApacheHVR::AccelerateThink( void )
 	pev->nextthink = gpGlobals->time + 0.1f;
 }
 
-#ifdef FEATURE_BLACK_APACHE
+#if FEATURE_BLACK_APACHE
 class CBlkopApache : public CApache
 {
 public:

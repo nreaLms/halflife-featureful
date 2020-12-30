@@ -869,7 +869,7 @@ void COsprey::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	}
 }
 
-#ifdef FEATURE_BLACK_OSPREY
+#if FEATURE_BLACK_OSPREY
 class CBlkopOsprey : public COsprey
 {
 public:
