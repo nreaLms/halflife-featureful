@@ -64,7 +64,6 @@ public:
 	// Override these to set behavior
 	Schedule_t *GetScheduleOfType( int Type );
 	Schedule_t *GetSchedule( void );
-	MONSTERSTATE GetIdealState( void );
 
 	void DeathSound( void );
 	void PainSound( void );
@@ -647,11 +646,6 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 Schedule_t *CBarney :: GetSchedule ( void )
 {
 	return GetScheduleImpl("BA_KILL");
-}
-
-MONSTERSTATE CBarney::GetIdealState( void )
-{
-	return CTalkMonster::GetIdealState();
 }
 
 //=========================================================

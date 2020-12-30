@@ -155,7 +155,6 @@ public:
 	Schedule_t *GetSchedule ( void );
 	Schedule_t *PrioritizedSchedule();
 	Schedule_t *GetReloadSchedule();
-	MONSTERSTATE GetIdealState ( void );
 
 	void AlertSound( void );
 	void DeathSound( void );
@@ -2629,10 +2628,6 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 	}
 
 	return CTalkMonster :: GetSchedule();
-}
-MONSTERSTATE CHFGrunt :: GetIdealState ( void )
-{
-	return CTalkMonster::GetIdealState();
 }
 
 //=========================================================
