@@ -106,7 +106,7 @@ BOOL FBoxVisible( entvars_t *pevLooker, entvars_t *pevTarget, Vector &vecTargetO
 #define bits_MEMORY_MOVE_FAILED			( 1 << 5 )// Movement has already failed
 #define bits_MEMORY_FLINCHED			( 1 << 6 )// Has already flinched
 #define bits_MEMORY_KILLED				( 1 << 7 )// HACKHACK -- remember that I've already called my Killed()
-#define bits_MEMORY_DID_ROAM_IN_ALERT	( 1 << 8 )
+#define bits_MEMORY_SHOULD_ROAM_IN_ALERT	( 1 << 8 )
 #define bits_MEMORY_ALERT_AFTER_COMBAT	( 1 << 9 )
 #define bits_MEMORY_CUSTOM4				( 1 << 28 )	// Monster-specific memory
 #define bits_MEMORY_CUSTOM3				( 1 << 29 )	// Monster-specific memory

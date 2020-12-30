@@ -25,6 +25,7 @@
 #include "animation.h"
 #include "saverestore.h"
 #include "soundent.h"
+#include "followingmonster.h"
 
 //=========================================================
 // SetState
@@ -52,10 +53,16 @@ void CBaseMonster::SetState( MONSTERSTATE State )
 		if (m_MonsterState == MONSTERSTATE_COMBAT)
 		{
 			Remember(bits_MEMORY_ALERT_AFTER_COMBAT);
+			// Don't roam after fight if was following the player
+			CFollowingMonster* pFollowingMonster = MyFollowingMonsterPointer();
+			if (!pFollowingMonster || !pFollowingMonster->IsFollowingPlayer())
+			{
+				Remember(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
+			}
 		}
 		break;
 	case MONSTERSTATE_COMBAT:
-		Forget(bits_MEMORY_DID_ROAM_IN_ALERT|bits_MEMORY_ALERT_AFTER_COMBAT);
+		Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT|bits_MEMORY_ALERT_AFTER_COMBAT);
 		break;
 	default:
 		break;

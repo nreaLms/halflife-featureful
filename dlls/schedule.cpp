@@ -1558,10 +1558,10 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 				}
 				return GetScheduleOfType( SCHED_ALERT_FACE );
 			}
-			else if (!HasMemory(bits_MEMORY_DID_ROAM_IN_ALERT) && HasMemory(bits_MEMORY_ALERT_AFTER_COMBAT))
+			else if (HasMemory(bits_MEMORY_SHOULD_ROAM_IN_ALERT))
 			{
 				ALERT(at_aiconsole, "%s trying to freeroam after combat\n", STRING(pev->classname));
-				Remember(bits_MEMORY_DID_ROAM_IN_ALERT);
+				Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
 				return GetScheduleOfType( SCHED_FREEROAM );
 			}
 			else
