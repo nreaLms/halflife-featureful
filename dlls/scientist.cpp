@@ -445,9 +445,8 @@ void CScientist::DeclineFollowing(CBaseEntity *pCaller )
 
 void CScientist::Scream( void )
 {
-	if( FOkToSpeak() )
+	if( FOkToSpeak(SPEAK_DISREGARD_ENEMY|SPEAK_DISREGARD_OTHER_SPEAKING) )
 	{
-		Talk( 10 );
 		m_hTalkTarget = m_hEnemy;
 		PlaySentence( ScreamSentence(), RANDOM_FLOAT( 3.0f, 6.0f ), VOL_NORM, ATTN_NORM );
 	}
@@ -482,7 +481,7 @@ void CScientist::StartTask( Task_t *pTask )
 		TaskComplete();
 		break;
 	case TASK_SAY_FEAR:
-		if( FOkToSpeak() )
+		if( FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 		{
 			Talk( 2 );
 			m_hTalkTarget = m_hEnemy;
@@ -932,7 +931,10 @@ Schedule_t *CScientist::GetSchedule( void )
 
 		ASSERT( pSound != NULL );
 		if( pSound && ( pSound->m_iType & bits_SOUND_DANGER ) )
+		{
+			Scream();
 			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+		}
 	}
 
 	if (pev->body >= NUM_SCIENTIST_BODIES)

@@ -1863,7 +1863,7 @@ void CSpeaker::SpeakerThink( void )
 	int pitch = 100;
 
 	// Wait for the talkmonster to finish first.
-	if( gpGlobals->time <= CTalkMonster::g_talkWaitTime )
+	if( CTalkMonster::SomeoneIsTalking() )
 	{
 		pev->nextthink = CTalkMonster::g_talkWaitTime + RANDOM_FLOAT( 5.0f, 10.0f );
 		return;

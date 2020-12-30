@@ -272,7 +272,7 @@ int CHGrunt::DefaultISoundMask( void )
 BOOL CHGrunt::FOkToSpeak( void )
 {
 	// if someone else is talking, don't speak
-	if( gpGlobals->time <= CTalkMonster::g_talkWaitTime )
+	if( CTalkMonster::SomeoneIsTalking() )
 		return FALSE;
 
 	if( pev->spawnflags & SF_MONSTER_GAG )

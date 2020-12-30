@@ -937,7 +937,7 @@ float CTalkMonster::RandomSentenceDuraion()
 		return RANDOM_FLOAT( 2.8f, 3.2f );
 }
 
-int CTalkMonster::FOkToSpeak( void )
+int CTalkMonster::FOkToSpeak(int speakFlags )
 {
 	// if in the grip of a barnacle, don't speak
 	if( m_MonsterState == MONSTERSTATE_PRONE || m_IdealMonsterState == MONSTERSTATE_PRONE )
@@ -951,11 +951,16 @@ int CTalkMonster::FOkToSpeak( void )
 		return FALSE;
 	}
 
-	// if someone else is talking, don't speak
-	if( gpGlobals->time <= CTalkMonster::g_talkWaitTime )
+	if( pev->spawnflags & SF_MONSTER_GAG )
 		return FALSE;
 
-	if( pev->spawnflags & SF_MONSTER_GAG )
+	// if someone else is talking, don't speak
+	if ( FBitSet(speakFlags, SPEAK_DISREGARD_OTHER_SPEAKING) )
+	{
+		if (IsTalking())
+			return FALSE;
+	}
+	else if( CTalkMonster::SomeoneIsTalking() )
 		return FALSE;
 
 	// if player is not in pvs, don't speak
@@ -963,7 +968,7 @@ int CTalkMonster::FOkToSpeak( void )
 		return FALSE;
 
 	// don't talk if you're in combat
-	if( m_hEnemy != 0 && FVisible( m_hEnemy ) )
+	if( !FBitSet(speakFlags, SPEAK_DISREGARD_ENEMY) && m_hEnemy != 0 && FVisible( m_hEnemy ) )
 		return FALSE;
 
 	return TRUE;
@@ -1619,4 +1624,9 @@ void CTalkMonster::ReportAIState(ALERT_TYPE level)
 		ALERT( level, "Speaking to: %s. ", STRING( m_hTalkTarget->pev->classname ) );
 	if (m_fStartSuspicious)
 		ALERT( level, "Start pre-provoked. " );
+}
+
+bool CTalkMonster::SomeoneIsTalking()
+{
+	return gpGlobals->time <= CTalkMonster::g_talkWaitTime;
 }

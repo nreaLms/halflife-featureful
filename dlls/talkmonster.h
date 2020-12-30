@@ -110,6 +110,10 @@ enum
 	TOLERANCE_ABSOLUTE_NO_ALERTS,
 };
 
+#define	SPEAK_NORMAL_CHECK 0
+#define	SPEAK_DISREGARD_ENEMY (1 << 0)
+#define	SPEAK_DISREGARD_OTHER_SPEAKING (1 << 1)
+
 class CTalkMonster : public CFollowingMonster
 {
 public:
@@ -152,7 +156,7 @@ public:
 	int				FIdleSpeak( void );
 	int				FIdleStare( void );
 	int				FIdleHello( void );
-	int				FOkToSpeak( void );
+	int				FOkToSpeak( int speakFlags = SPEAK_NORMAL_CHECK );
 	void			TrySmellTalk( void );
 	CBaseEntity		*EnumFriends( CBaseEntity *pentPrevious, int listNumber, BOOL bTrace );
 	CBaseEntity		*EnumFriends(CBaseEntity *pentPrevious, const char* pszFriend, BOOL bTrace );
@@ -205,6 +209,7 @@ public:
 
 	static TalkFriend m_szFriends[TLK_CFRIENDS];		// array of friend names
 	static float g_talkWaitTime;
+	static bool SomeoneIsTalking();
 	
 	int			m_bitsSaid;						// set bits for sentences we don't want repeated
 	int			m_nSpeak;						// number of times initiated talking

@@ -218,7 +218,7 @@ void CBarney::AlertSound( void )
 {
 	if( m_hEnemy != 0 )
 	{
-		if( FOkToSpeak() )
+		if( FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 		{
 			PlaySentence( "BA_ATTACK", RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 		}
@@ -590,7 +590,7 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 		if( pSound && (pSound->m_iType & bits_SOUND_DANGER) )
 			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 	}
-	if( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak() )
+	if( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 	{
 		PlaySentence( sentenceKill, 4, VOL_NORM, ATTN_NORM );
 	}
@@ -780,7 +780,7 @@ void COtis :: AlertSound( void )
 {
 	if ( m_hEnemy != 0 )
 	{
-		if ( FOkToSpeak() )
+		if ( FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 		{
 			PlaySentence( "OT_ATTACK", RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE );
 		}
