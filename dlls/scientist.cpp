@@ -221,7 +221,7 @@ Task_t tlHeal[] =
 	{ TASK_DRAW_NEEDLE, 0.0f },			// Whip out the needle
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_HEAL },	// If you fail, catch up with that guy! (change this to put syringe away and then chase)
 	{ TASK_HEAL, 0.0f },	// Put it in the target
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_FAIL },
+	{ TASK_CLEAR_FAIL_SCHEDULE, 0.0f },
 	{ TASK_PUTAWAY_NEEDLE, 0.0f },			// Put away the needle
 };
 
@@ -929,11 +929,6 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 			return slHeal;
 		else
 			return slDisarmNeedle;
-	case SCHED_FAIL:
-		if (pev->body >= NUM_SCIENTIST_BODIES)
-			return slDisarmNeedle;
-		else
-			return CTalkMonster::GetScheduleOfType(Type);
 	}
 
 	return CTalkMonster::GetScheduleOfType( Type );
@@ -957,8 +952,7 @@ Schedule_t *CScientist::GetSchedule( void )
 		}
 	}
 
-	if (pev->body >= NUM_SCIENTIST_BODIES)
-		return slDisarmNeedle;
+	const bool wantsToDisarm = (pev->body >= NUM_SCIENTIST_BODIES);
 
 	switch( m_MonsterState )
 	{
@@ -1024,6 +1018,8 @@ Schedule_t *CScientist::GetSchedule( void )
 					if( HasConditions( bits_COND_CLIENT_PUSH ) )	// Player wants me to move
 						return GetScheduleOfType( SCHED_MOVE_AWAY_FOLLOW );
 				}
+				if (wantsToDisarm)
+					return slDisarmNeedle;
 				return GetScheduleOfType( SCHED_TARGET_FACE );	// Just face and follow.
 			}
 			else	// UNDONE: When afraid, scientist won't move out of your way.  Keep This?  If not, write move away scared
@@ -1041,6 +1037,9 @@ Schedule_t *CScientist::GetSchedule( void )
 
 		if( HasConditions( bits_COND_CLIENT_PUSH ) )	// Player wants me to move
 			return GetScheduleOfType( SCHED_MOVE_AWAY );
+
+		if (wantsToDisarm)
+			return slDisarmNeedle;
 
 		// try to say something about smells
 		TrySmellTalk();
