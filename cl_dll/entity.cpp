@@ -23,6 +23,7 @@ void Game_AddObjects( void );
 extern vec3_t v_origin;
 
 int g_iAlive = 1;
+int g_iLaserDot = 0;
 
 extern "C"
 {
@@ -93,6 +94,8 @@ void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const stru
 
 	// Fire prevention
 	state->iuser4 = client->iuser4;
+
+	g_iLaserDot = (client->flags & FL_LASERDOT) ? 1 : 0;
 }
 
 /*
@@ -495,6 +498,65 @@ void Beams( void )
 }
 #endif
 
+extern cvar_t *cl_lw;
+
+TEMPENTITY *g_pLaserSpot = NULL;
+
+void CL_UpdateLaserSpot( void )
+{
+	cl_entity_t *player = gEngfuncs.GetLocalPlayer();
+
+	if( !player ) return;
+
+	if(( g_iLaserDot && cl_lw->value ) && !g_pLaserSpot )
+	{
+		// create laserspot
+		int m_iSpotModel = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/laserdot.spr" );
+
+		g_pLaserSpot = gEngfuncs.pEfxAPI->R_TempSprite( Vector( 0, 0, 0), Vector( 0, 0, 0), 1.0, m_iSpotModel, kRenderGlow, kRenderFxNoDissipation, 1.0, 9999, FTENT_SPRCYCLE );
+		if( !g_pLaserSpot ) return;
+
+		g_pLaserSpot->entity.curstate.rendercolor.r = 200;
+		g_pLaserSpot->entity.curstate.rendercolor.g = 12;
+		g_pLaserSpot->entity.curstate.rendercolor.b = 12;
+
+		//		gEngfuncs.Con_Printf( "CLaserSpot::Create()\n" );
+	}
+
+	else if(( !g_iLaserDot || !cl_lw->value ) && g_pLaserSpot )
+	{
+		// destroy laserspot
+		//		gEngfuncs.Con_Printf( "CLaserSpot::Killed()\n" );
+		g_pLaserSpot->die = 0.0f;
+		g_pLaserSpot = NULL;
+		return;
+	}
+	else if( !g_pLaserSpot )
+	{
+		// inactive
+		return;
+	}
+
+	//assert( m_pLaserSpot != NULL );
+
+	Vector forward, vecSrc, vecEnd, origin, angles, view_ofs;
+
+	gEngfuncs.GetViewAngles( (float *)angles );
+
+	AngleVectors( angles, forward, NULL, NULL );
+	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight( view_ofs );
+
+	vecSrc = player->origin + view_ofs;
+	vecEnd = vecSrc + forward * 8192.0f;
+
+	pmtrace_t *trace = gEngfuncs.PM_TraceLine( vecSrc, vecEnd, PM_TRACELINE_ANYVISIBLE, 2, -1 );
+	// update laserspot endpos
+
+	g_pLaserSpot->entity.origin = trace->endpos;
+	g_pLaserSpot->die = gEngfuncs.GetClientTime() + 0.1f;
+}
+
+
 /*
 =========================
 HUD_CreateEntities
@@ -526,6 +588,7 @@ void DLLEXPORT HUD_CreateEntities( void )
 #endif
 	// Add in any game specific objects
 	Game_AddObjects();
+	CL_UpdateLaserSpot();
 }
 
 /*

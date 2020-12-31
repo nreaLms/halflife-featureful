@@ -735,16 +735,17 @@ private:
 
 class CLaserSpot : public CBaseEntity
 {
+public:
 	void Spawn( void );
 	void Precache( void );
 
 	int	ObjectCaps( void ) { return FCAP_DONT_SAVE; }
 
-public:
 	void Suspend( float flSuspendTime );
 	void EXPORT Revive( void );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 
-	static CLaserSpot *CreateSpot( void );
+	static CLaserSpot *CreateSpot( edict_t* pOwner = 0 );
 };
 
 class CRpg : public CBasePlayerWeapon

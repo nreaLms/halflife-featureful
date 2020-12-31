@@ -222,7 +222,7 @@ void CEagle::UpdateSpot( void )
 	{
 		if (!m_pEagleLaser)
 		{
-			m_pEagleLaser = CLaserSpot::CreateSpot();
+			m_pEagleLaser = CLaserSpot::CreateSpot(m_pPlayer->edict());
 			m_pEagleLaser->pev->classname = MAKE_STRING("eagle_laser");
 			m_pEagleLaser->pev->scale = 0.5;
 			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/desert_eagle_sight.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
