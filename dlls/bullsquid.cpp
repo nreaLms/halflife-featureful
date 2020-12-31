@@ -740,9 +740,15 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				}
 #endif
 
-				vecSpitDir.x += RANDOM_FLOAT( -0.05f, 0.05f );
-				vecSpitDir.y += RANDOM_FLOAT( -0.05f, 0.05f );
-				vecSpitDir.z += RANDOM_FLOAT( -0.05f, 0.0f );
+				float dirRandomDeviation = 0.05f;
+				if (g_iSkillLevel == SKILL_HARD)
+					dirRandomDeviation = 0.01f;
+				else if (g_iSkillLevel == SKILL_MEDIUM)
+					dirRandomDeviation = 0.03f;
+
+				vecSpitDir.x += RANDOM_FLOAT( -dirRandomDeviation, dirRandomDeviation );
+				vecSpitDir.y += RANDOM_FLOAT( -dirRandomDeviation, dirRandomDeviation );
+				vecSpitDir.z += RANDOM_FLOAT( -dirRandomDeviation, 0.0f );
 
 				// do stuff for this event.
 				AttackSound(bigSpit);
