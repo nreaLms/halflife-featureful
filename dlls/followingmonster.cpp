@@ -333,9 +333,6 @@ void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 	if( m_pCine )
 		m_pCine->CancelScript();
 
-	if( m_hEnemy != 0 )
-		m_IdealMonsterState = MONSTERSTATE_ALERT;
-
 	m_hTargetEnt = pLeader;
 	if (saySentence)
 	{
@@ -343,7 +340,8 @@ void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 	}
 
 	ClearConditions( bits_COND_CLIENT_PUSH );
-	ClearSchedule();
+	if (!HasConditions(bits_COND_SEE_ENEMY))
+		ClearSchedule();
 }
 
 void CFollowingMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
