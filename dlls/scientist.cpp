@@ -513,15 +513,20 @@ void CScientist::StartTask( Task_t *pTask )
 		break;
 	case TASK_MOVE_TO_TARGET_RANGE_SCARED:
 		{
-			if( ( m_hTargetEnt->pev->origin - pev->origin ).Length() < 1.0f )
-			{
-				TaskComplete();
-			}
+			if( m_hTargetEnt == 0 )
+				TaskFail("no target ent");
 			else
 			{
-				m_vecMoveGoal = m_hTargetEnt->pev->origin;
-				if( !MoveToTarget( ACT_WALK_SCARED, 0.5 ) )
-					TaskFail("can't build path to target");
+				if( ( m_hTargetEnt->pev->origin - pev->origin ).Length() < 1.0f )
+				{
+					TaskComplete();
+				}
+				else
+				{
+					m_vecMoveGoal = m_hTargetEnt->pev->origin;
+					if( !MoveToTarget( ACT_WALK_SCARED, 0.5 ) )
+						TaskFail("can't build path to target");
+				}
 			}
 		}
 		break;
@@ -566,7 +571,11 @@ void CScientist::RunTask( Task_t *pTask )
 			if( RANDOM_LONG( 0, 63 ) < 8 )
 				Scream();
 
-			if( m_hEnemy == 0 )
+			if( m_hTargetEnt == 0 )
+			{
+				TaskFail("no target ent");
+			}
+			else if( m_hEnemy == 0 )
 			{
 				TaskFail("no enemy");
 			}
