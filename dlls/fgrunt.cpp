@@ -3364,13 +3364,20 @@ void CMedic::StartTask(Task_t *pTask)
 		m_IdealActivity = ACT_MELEE_ATTACK2;
 		break;
 	case TASK_MEDIC_SAY_HEAL:
-		if (!m_fSaidHeal && !InScriptedSentence())
+		if (m_hTargetEnt == 0)
+			TaskFail("no target ent");
+		else if (!m_hTargetEnt->IsAlive())
+			TaskFail("target ent is dead");
+		else
 		{
-			m_hTalkTarget = m_hTargetEnt;
-			PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
-			m_fSaidHeal = TRUE;
+			if (!m_fSaidHeal && !InScriptedSentence())
+			{
+				m_hTalkTarget = m_hTargetEnt;
+				PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
+				m_fSaidHeal = TRUE;
+			}
+			TaskComplete();
 		}
-		TaskComplete();
 		break;
 	case TASK_MEDIC_RESTORE_TARGET_ENT:
 		TaskComplete();

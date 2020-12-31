@@ -464,12 +464,22 @@ void CScientist::StartTask( Task_t *pTask )
 	switch( pTask->iTask )
 	{
 	case TASK_SAY_HEAL:
-		if (!InScriptedSentence())
+		if (m_hTargetEnt == 0)
+			TaskFail("no target ent");
+		else if (!m_hTargetEnt->IsAlive())
 		{
-			m_hTalkTarget = m_hTargetEnt;
-			PlaySentence( HealSentence(), 2, VOL_NORM, ATTN_IDLE );
+			// The guy we wanted to heal just died. Probably a good place for some scared sentence?
+			TaskFail("target ent is dead");
 		}
-		TaskComplete();
+		else
+		{
+			if (!InScriptedSentence())
+			{
+				m_hTalkTarget = m_hTargetEnt;
+				PlaySentence( HealSentence(), 2, VOL_NORM, ATTN_IDLE );
+			}
+			TaskComplete();
+		}
 		break;
 	case TASK_SCREAM:
 		Scream();
