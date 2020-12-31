@@ -3522,6 +3522,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 		m_freeRoam = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "size_for_grapple" ) )
+	{
+		m_sizeForGrapple = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseToggle::KeyValue( pkvd );
@@ -4087,6 +4092,15 @@ Vector CBaseMonster::DefaultMinHullSize()
 Vector CBaseMonster::DefaultMaxHullSize()
 {
 	return g_vecZero;
+}
+
+int CBaseMonster::SizeForGrapple()
+{
+	if (m_sizeForGrapple < 0)
+		return GRAPPLE_NOT_A_TARGET;
+	else if (m_sizeForGrapple > 0 && m_sizeForGrapple <= GRAPPLE_FIXED)
+		return m_sizeForGrapple;
+	return DefaultSizeForGrapple();
 }
 
 void CBaseMonster::GlowShellOn( Vector color, float flDuration )

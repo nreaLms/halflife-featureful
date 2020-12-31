@@ -33,7 +33,7 @@ public:
 	void Precache( void );
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
-	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_rat, CRat )

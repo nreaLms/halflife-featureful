@@ -254,6 +254,7 @@ bool CBaseMonster::IsAlienMonster() {return false;}
 const char* CBaseMonster::DisplayName() { return NULL; }
 Vector CBaseMonster::DefaultMinHullSize() {return Vector(0,0,0); }
 Vector CBaseMonster::DefaultMaxHullSize() {return Vector(0,0,0); }
+int CBaseMonster::SizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
 
 int TrainSpeed( int iSpeed, int iMax ) { return 0; }
 void CBasePlayer::DeathSound( void ) { }

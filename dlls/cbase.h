@@ -371,7 +371,8 @@ public:
 	virtual	BOOL FVisible( const Vector &vecOrigin );
 
 	virtual void AddFloatPoints( float score, BOOL bAllowNegativeScore ) {}
-	virtual int SizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
+	virtual int SizeForGrapple() { return DefaultSizeForGrapple(); }
 	virtual CBasePlayerWeapon* MyWeaponPointer() {return NULL;}
 
 	virtual bool IsAlienMonster() { return false; }

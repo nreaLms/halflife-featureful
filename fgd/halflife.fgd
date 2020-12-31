@@ -43,7 +43,7 @@
 		0 : "Fewest Players"
 		1 : "First Team"
 	]
-	freeroam(choices) : "Roaming monsters (node graph)" : 0 =
+	freeroam(choices) : "Roaming monsters (node graph)" =
 	[
 		0 : "No"
 		1 : "Yes"
@@ -317,6 +317,15 @@
 		0 : "Map Default"
 		1 : "Never"
 		2 : "Always"
+	]
+	size_for_grapple(Choices) : "Size For Grapple" =
+	[
+		-1 : "Not a Target"
+		0 : "Monster's Default"
+		1 : "Small"
+		2 : "Medium"
+		3 : "Large"
+		4 : "Fixed"
 	]
 ]
 
@@ -5970,6 +5979,15 @@
 		0 : "Map Default"
 		1 : "Never"
 		2 : "Always"
+	]
+	size_for_grapple(Choices) : "Size For Grapple" =
+	[
+		-1 : "Not a Target"
+		0 : "Monster's Default"
+		1 : "Small"
+		2 : "Medium"
+		3 : "Large"
+		4 : "Fixed"
 	]
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []

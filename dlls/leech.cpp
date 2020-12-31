@@ -114,7 +114,7 @@ public:
 	static const char *pAttackSounds[];
 	static const char *pAlertSounds[];
 
-	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
 	Vector DefaultMinHullSize() { return Vector( -1.0f, -1.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 1.0f, 1.0f, 2.0f ); }
 

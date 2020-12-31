@@ -367,7 +367,7 @@ public:
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_FIXED; }
 
 	int m_iExplode;
 	BOOL borntime;

@@ -102,7 +102,7 @@ public:
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_MEDIUM; }
 	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
 	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
 

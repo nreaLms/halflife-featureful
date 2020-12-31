@@ -74,7 +74,7 @@ public:
 	void PainSound( void );
 	void DeathSound( void );
 
-	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
 
 	static const char *pAttackSounds[];	// vocalization: play sometimes when he launches an attack
 	static const char *pBallSounds[];	// the sound of the lightening ball launch

@@ -396,7 +396,7 @@ public:
 	void RunTask( Task_t *pTask );
 	void PrescheduleThink();
 	int LookupActivity(int activity);
-	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_MEDIUM; }
 	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
 	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
 

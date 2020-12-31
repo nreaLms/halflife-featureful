@@ -560,6 +560,7 @@ int CMonsterMaker::MakeMonster( void )
 		createdMonster->m_customSoundMask = m_customSoundMask;
 		createdMonster->m_prisonerTo = m_prisonerTo;
 		createdMonster->m_freeRoam = m_freeRoam;
+		createdMonster->m_sizeForGrapple = m_sizeForGrapple;
 
 		createdMonster->SetHead(m_iHead);
 

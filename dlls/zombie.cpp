@@ -64,7 +64,7 @@ public:
 	BOOL CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 
-	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_MEDIUM; }
 	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
 	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
 	virtual float OneSlashDamage() { return gSkillData.zombieDmgOneSlash; }

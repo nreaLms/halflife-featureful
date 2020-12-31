@@ -89,7 +89,7 @@ public:
 	void EyeLight(const Vector& vecEyePos);
 	void BeamEffect(TraceResult& tr);
 
-	int SizeForGrapple() { return GRAPPLE_LARGE; }
+	int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
 
 	//
 	float m_flNextPainSound;

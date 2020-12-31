@@ -1247,7 +1247,7 @@ public:
 
 	virtual bool SetAnswerQuestion( CTalkMonster *pSpeaker );
 
-	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_FIXED; }
 	Vector DefaultMinHullSize() { return Vector(-14.0f, -14.0f, 0.0f); }
 	Vector DefaultMaxHullSize() { return Vector(14.0f, 14.0f, 36.0f); }
 

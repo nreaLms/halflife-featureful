@@ -45,7 +45,7 @@ public:
 	BOOL CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
 	BOOL CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_bloater, CBloater )

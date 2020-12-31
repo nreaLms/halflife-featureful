@@ -348,7 +348,7 @@ public:
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual int SizeForGrapple() { return GRAPPLE_LARGE; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
 	Vector DefaultMinHullSize() { return Vector( -80.0f, -80.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 80.0f, 80.0f, 90.0f ); }
 
@@ -1223,7 +1223,7 @@ public:
 	Schedule_t* GetSchedule();
 	Schedule_t* GetScheduleOfType(int Type);
 
-	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
 	Vector DefaultMinHullSize() { return Vector( -16.0f, -16.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 16.0f, 16.0f, 32.0f ); }
 };

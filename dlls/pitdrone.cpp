@@ -251,7 +251,7 @@ public:
 
 	CUSTOM_SCHEDULES
 
-	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_MEDIUM; }
 	Vector DefaultMinHullSize() { return Vector( -16.0f, -16.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 16.0f, 16.0f, 48.0f ); }
 

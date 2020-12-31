@@ -384,6 +384,8 @@ public:
 	virtual Vector DefaultMinHullSize();
 	virtual Vector DefaultMaxHullSize();
 
+	virtual int SizeForGrapple();
+
 	// Allows to set a head via monstermaker before spawn
 	virtual void SetHead(int head) {}
 
@@ -414,6 +416,8 @@ public:
 	short m_freeRoam;
 
 	float m_flLastTimeObservedEnemy;
+
+	short m_sizeForGrapple;
 
 	const char* taskFailReason;
 };

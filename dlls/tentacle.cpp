@@ -73,7 +73,7 @@ public:
 
 	int DefaultClassify( void );
 
-	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
+	virtual int DefaultSizeForGrapple() { return GRAPPLE_FIXED; }
 
 	int Level( float dz );
 	int MyLevel( void );
