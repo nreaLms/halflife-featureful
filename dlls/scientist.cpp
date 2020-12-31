@@ -275,8 +275,8 @@ Schedule_t slSciPanic[] =
 	{
 		tlSciPanic,
 		ARRAYSIZE( tlSciPanic ),
-		0,
-		0,
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
 		"SciPanic"
 	},
 };
@@ -379,8 +379,9 @@ Schedule_t slScientistStartle[] =
 		bits_COND_SEE_ENEMY |
 		bits_COND_SEE_HATE |
 		bits_COND_SEE_FEAR |
-		bits_COND_SEE_DISLIKE,
-		0,
+		bits_COND_SEE_DISLIKE|
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
 		"ScientistStartle"
 	},
 };
@@ -466,9 +467,9 @@ void CScientist::StartTask( Task_t *pTask )
 	case TASK_SAY_HEAL:
 		if (m_hTargetEnt == 0)
 			TaskFail("no target ent");
-		else if (!m_hTargetEnt->IsAlive())
+		else if (m_hTargetEnt->pev->deadflag != DEAD_NO)
 		{
-			// The guy we wanted to heal just died. Probably a good place for some scared sentence?
+			// The guy we wanted to heal is dying or just died. Probably a good place for some scared sentence?
 			TaskFail("target ent is dead");
 		}
 		else
@@ -943,9 +944,9 @@ Schedule_t *CScientist::GetSchedule( void )
 	// so we don't keep calling through the EHANDLE stuff
 	CBaseEntity *pEnemy = m_hEnemy;
 
+	CSound *pSound = NULL;
 	if( HasConditions( bits_COND_HEAR_SOUND ) )
 	{
-		CSound *pSound;
 		pSound = PBestSound();
 
 		ASSERT( pSound != NULL );
@@ -983,10 +984,6 @@ Schedule_t *CScientist::GetSchedule( void )
 		// Cower when you hear something scary
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
 		{
-			CSound *pSound;
-			pSound = PBestSound();
-
-			ASSERT( pSound != NULL );
 			if( pSound )
 			{
 				if( pSound->m_iType & ( bits_SOUND_DANGER | bits_SOUND_COMBAT ) )
@@ -1107,7 +1104,7 @@ MONSTERSTATE CScientist::GetIdealState( void )
 				}
 
 				// Follow if only scared a little
-				if( m_hTargetEnt != 0 )
+				if( m_hTargetEnt != 0 && FollowedPlayer() == m_hTargetEnt )
 				{
 					m_IdealMonsterState = MONSTERSTATE_ALERT;
 					return m_IdealMonsterState;
