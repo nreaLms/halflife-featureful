@@ -1421,6 +1421,41 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			}
 		}
 		break;
+	case TASK_FIND_RUN_AWAY_FROM_ENEMY:
+		{
+			entvars_t *pevThreat;
+			if( m_hEnemy == 0 )
+			{
+				// Find cover from self if no enemy available
+				pevThreat = pev;
+			}
+			else
+				pevThreat = m_hEnemy->pev;
+
+			if( FindLateralCover( pevThreat->origin, pevThreat->view_ofs ) )
+			{
+				// try lateral first
+				m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
+				TaskComplete();
+			}
+			else if( FindCover( pevThreat->origin, pevThreat->view_ofs, 0, CoverRadius() ) )
+			{
+				// then try for plain ole cover
+				m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
+				TaskComplete();
+			}
+			else if (FindRunAway( pevThreat->origin, 128, CoverRadius() ))
+			{
+				m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
+				TaskComplete();
+			}
+			else
+			{
+				// no coverwhatsoever.
+				TaskFail("no cover found");
+			}
+		}
+		break;
 	default:
 		{
 			ALERT( at_aiconsole, "No StartTask entry for %d\n", (SHARED_TASKS)pTask->iTask );

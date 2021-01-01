@@ -317,7 +317,7 @@ Task_t tlScientistCover[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_PANIC },		// If you fail, just panic!
 	{ TASK_STOP_MOVING, 0.0f },
-	{ TASK_FIND_COVER_FROM_ENEMY, 0.0f },
+	{ TASK_FIND_RUN_AWAY_FROM_ENEMY, 0.0f },
 	{ TASK_RUN_PATH_SCARED, 0.0f },
 	{ TASK_TURN_LEFT, 179.0f },
 	{ TASK_SET_SCHEDULE, (float)SCHED_HIDE },
@@ -328,8 +328,9 @@ Schedule_t slScientistCover[] =
 	{
 		tlScientistCover,
 		ARRAYSIZE( tlScientistCover ),
-		bits_COND_NEW_ENEMY,
-		0,
+		bits_COND_NEW_ENEMY|
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
 		"ScientistCover"
 	},
 };
