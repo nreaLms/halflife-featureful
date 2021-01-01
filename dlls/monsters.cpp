@@ -34,6 +34,7 @@
 #include "soundent.h"
 #include "gamerules.h"
 #include "mod_features.h"
+#include "game.h"
 
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
@@ -2371,6 +2372,8 @@ void CBaseMonster::MonsterInit( void )
 	SetThink( &CBaseMonster::MonsterInitThink );
 	pev->nextthink = gpGlobals->time + 0.1f;
 	SetUse( &CBaseMonster::MonsterUse );
+
+	m_flLastYawTime = gpGlobals->time;
 }
 
 //=========================================================
@@ -2466,7 +2469,8 @@ void CBaseMonster::StartMonster( void )
 			if( !WALK_MOVE( ENT( pev ), 0, 0, WALKMOVE_NORMAL ) )
 			{
 				ALERT( at_error, "Monster %s stuck in wall--level design error\n", STRING( pev->classname ) );
-				pev->effects = EF_BRIGHTFIELD;
+				if( g_psv_developer && g_psv_developer->value )
+					pev->effects = EF_BRIGHTFIELD;
 			}
 		}
 	}
@@ -2987,7 +2991,17 @@ float CBaseMonster::ChangeYaw( int yawSpeed )
 	ideal = pev->ideal_yaw;
 	if( current != ideal )
 	{
-		speed = (float)yawSpeed * gpGlobals->frametime * 10;
+		if( monsteryawspeedfix.value )
+		{
+			float delta;
+
+			delta = Q_min( gpGlobals->time - m_flLastYawTime, 0.25f );
+
+			speed = (float)yawSpeed * delta * 2;
+		}
+		else
+			speed = (float)yawSpeed * gpGlobals->frametime * 10;
+
 		move = ideal - current;
 
 		if( ideal > current )
@@ -3030,6 +3044,8 @@ float CBaseMonster::ChangeYaw( int yawSpeed )
 	}
 	else
 		move = 0;
+
+	m_flLastYawTime = gpGlobals->time;
 
 	return move;
 }

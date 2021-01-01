@@ -640,6 +640,12 @@ BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerW
 		return FALSE;
 	}
 
+	if( pPlayer->m_iAutoWepSwitch == 2
+	    && pPlayer->m_afButtonLast & ( IN_ATTACK | IN_ATTACK2 ) )
+	{
+		return FALSE;
+	}
+
 	if( !pPlayer->m_pActiveItem->CanHolster() )
 	{
 		// can't put away the active item.
@@ -898,6 +904,10 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	BOOL		addDefault = TRUE;
 	bool giveSuit = true;
 	CBaseEntity	*pWeaponEntity = NULL;
+	int 		iOldAutoWepSwitch;
+
+	iOldAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
+	pPlayer->m_iAutoWepSwitch = 1;
 
 	if (IsCoOp() && keepinventory.value && RestorePlayerState(pPlayer))
 		return;
@@ -967,6 +977,8 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 		pPlayer->GiveNamedItem( "weapon_9mmhandgun" );
 		pPlayer->GiveAmmo( 68, "9mm" );// 4 full reloads
 	}
+
+	pPlayer->m_iAutoWepSwitch = iOldAutoWepSwitch;
 }
 
 //=========================================================

@@ -419,6 +419,8 @@ public:
 
 	short m_sizeForGrapple;
 
+	float m_flLastYawTime;
+
 	const char* taskFailReason;
 };
 

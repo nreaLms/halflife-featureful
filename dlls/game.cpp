@@ -40,9 +40,9 @@ cvar_t item_respawndelay = { "mp_item_respawndelay","-2",FCVAR_SERVER };
 cvar_t healthcharger_rechargetime = { "mp_healthcharger_rechargetime","-2",FCVAR_SERVER };
 cvar_t hevcharger_rechargetime = { "mp_hevcharger_rechargetime","-2",FCVAR_SERVER };
 
-cvar_t selfgauss	= { "mp_selfgauss", "1", FCVAR_SERVER };
-cvar_t satchelfix	= { "mp_satchelfix", "0", FCVAR_SERVER };
-
+cvar_t selfgauss	= { "selfgauss", "1", FCVAR_SERVER };
+cvar_t satchelfix	= { "satchelfix", "0", FCVAR_SERVER };
+cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "0", FCVAR_SERVER };
 cvar_t forcerespawn	= { "mp_forcerespawn","1", FCVAR_SERVER };
 cvar_t respawndelay	= { "mp_respawndelay","0", FCVAR_SERVER };
 cvar_t flashlight	= { "mp_flashlight","0", FCVAR_SERVER };
@@ -93,6 +93,8 @@ cvar_t keepinventory	= { "mp_keepinventory","0", FCVAR_SERVER }; // keep invento
 cvar_t *g_psv_gravity = NULL;
 cvar_t *g_psv_aim = NULL;
 cvar_t *g_footsteps = NULL;
+
+cvar_t *g_psv_developer;
 
 //CVARS FOR SKILL LEVEL SETTINGS
 // Agrunt
@@ -904,6 +906,8 @@ void GameDLLInit( void )
 	g_psv_aim = CVAR_GET_POINTER( "sv_aim" );
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
 
+	g_psv_developer = CVAR_GET_POINTER( "developer" );
+
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );
 #if FEATURE_USE_THROUGH_WALLS_CVAR
@@ -940,6 +944,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &selfgauss );
 	CVAR_REGISTER( &satchelfix );
 
+	CVAR_REGISTER( &monsteryawspeedfix );
 	CVAR_REGISTER( &forcerespawn );
 	CVAR_REGISTER( &respawndelay );
 	CVAR_REGISTER( &flashlight );
