@@ -403,12 +403,17 @@ void CMultiManager::Spawn( void )
 			if( m_flTargetDelay[i] < m_flTargetDelay[i - 1] )
 			{
 				// Swap out of order elements
-				int name = m_iTargetName[i];
+				string_t name = m_iTargetName[i];
 				float delay = m_flTargetDelay[i];
+				short useType = m_iTargetUseType[i];
+
 				m_iTargetName[i] = m_iTargetName[i - 1];
 				m_flTargetDelay[i] = m_flTargetDelay[i - 1];
+				m_iTargetUseType[i] = m_iTargetUseType[i - 1];
+
 				m_iTargetName[i - 1] = name;
 				m_flTargetDelay[i - 1] = delay;
+				m_iTargetUseType[i - 1] = useType;
 				swapped = 1;
 			}
 		}
@@ -476,6 +481,7 @@ CMultiManager *CMultiManager::Clone( void )
 	pMulti->m_cTargets = m_cTargets;
 	memcpy( pMulti->m_iTargetName, m_iTargetName, sizeof( m_iTargetName ) );
 	memcpy( pMulti->m_flTargetDelay, m_flTargetDelay, sizeof( m_flTargetDelay ) );
+	memcpy( pMulti->m_iTargetUseType, m_iTargetUseType, sizeof( m_iTargetUseType ) );
 
 	return pMulti;
 }
@@ -563,7 +569,8 @@ void CMultiTrigger::Spawn( void )
 				{
 					m_iTargetName[i] = m_iTargetName[j];
 					m_flTargetDelay[i] = m_flTargetDelay[j];
-					m_iTargetName[j] = 0;
+					m_iTargetUseType[i] = m_iTargetUseType[j];
+					m_iTargetName[j] = iStringNull;
 					break;
 				}
 			}
