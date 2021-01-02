@@ -225,6 +225,20 @@ void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *
 	}
 }
 
+void KillTargets(const char* targetName)
+{
+	edict_t *pentKillTarget = NULL;
+
+	pentKillTarget = FIND_ENTITY_BY_TARGETNAME( NULL, targetName );
+	while( !FNullEnt(pentKillTarget) )
+	{
+		UTIL_Remove( CBaseEntity::Instance( pentKillTarget ) );
+
+		ALERT( at_aiconsole, "killing %s\n", STRING( pentKillTarget->v.classname ) );
+		pentKillTarget = FIND_ENTITY_BY_TARGETNAME( pentKillTarget, targetName );
+	}
+}
+
 LINK_ENTITY_TO_CLASS( DelayedUse, CBaseDelay )
 
 void CBaseDelay::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value )
@@ -264,17 +278,8 @@ void CBaseDelay::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, floa
 	//
 	if( m_iszKillTarget )
 	{
-		edict_t *pentKillTarget = NULL;
-
 		ALERT( at_aiconsole, "KillTarget: %s\n", STRING( m_iszKillTarget ) );
-		pentKillTarget = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_iszKillTarget ) );
-		while( !FNullEnt(pentKillTarget) )
-		{
-			UTIL_Remove( CBaseEntity::Instance( pentKillTarget ) );
-
-			ALERT( at_aiconsole, "killing %s\n", STRING( pentKillTarget->v.classname ) );
-			pentKillTarget = FIND_ENTITY_BY_TARGETNAME( pentKillTarget, STRING( m_iszKillTarget ) );
-		}
+		KillTargets(STRING( m_iszKillTarget ));
 	}
 
 	//

@@ -88,6 +88,7 @@ typedef enum
 } USE_TYPE;
 
 extern void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+extern void KillTargets( const char *targetName );
 
 typedef void(CBaseEntity::*BASEPTR)( void );
 typedef void(CBaseEntity::*ENTITYFUNCPTR)( CBaseEntity *pOther );

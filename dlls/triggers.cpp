@@ -266,6 +266,39 @@ void CTriggerRelay::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 #define SF_MULTIMAN_CLONE		0x80000000
 #define SF_MULTIMAN_THREAD		0x00000001
 
+enum
+{
+	MM_USE_TOGGLE = 0,
+	MM_USE_ON,
+	MM_USE_OFF,
+	MM_USE_KILL,
+};
+
+static void ParseMMDelay(const char* value, float& delay, short& mmUseType)
+{
+	int i = 0;
+	char* endPtr;
+	delay = strtof(value, &endPtr);
+	mmUseType = MM_USE_TOGGLE;
+	if (*endPtr == '#')
+	{
+		endPtr++;
+		const char digit = *endPtr;
+		if (digit == '0')
+		{
+			mmUseType = MM_USE_OFF;
+		}
+		else if (digit == '1')
+		{
+			mmUseType = MM_USE_ON;
+		}
+		else if (digit == '2')
+		{
+			mmUseType = MM_USE_KILL;
+		}
+	}
+}
+
 class CMultiManager : public CBaseToggle
 {
 public:
@@ -291,6 +324,7 @@ public:
 	float m_startTime;// Time we started firing
 	string_t m_iTargetName[MAX_MULTI_TARGETS];// list if indexes into global string array
 	float m_flTargetDelay[MAX_MULTI_TARGETS];// delay (in seconds) from time of manager fire to target fire
+	short m_iTargetUseType[MAX_MULTI_TARGETS];
 private:
 	inline BOOL IsClone( void ) { return ( pev->spawnflags & SF_MULTIMAN_CLONE ) ? TRUE : FALSE; }
 	inline BOOL ShouldClone( void )
@@ -314,6 +348,7 @@ TYPEDESCRIPTION	CMultiManager::m_SaveData[] =
 	DEFINE_FIELD( CMultiManager, m_startTime, FIELD_TIME ),
 	DEFINE_ARRAY( CMultiManager, m_iTargetName, FIELD_STRING, MAX_MULTI_TARGETS ),
 	DEFINE_ARRAY( CMultiManager, m_flTargetDelay, FIELD_FLOAT, MAX_MULTI_TARGETS ),
+	DEFINE_ARRAY( CMultiManager, m_iTargetUseType, FIELD_SHORT, MAX_MULTI_TARGETS ),
 };
 
 IMPLEMENT_SAVERESTORE( CMultiManager, CBaseToggle )
@@ -339,7 +374,11 @@ void CMultiManager::KeyValue( KeyValueData *pkvd )
 
 			UTIL_StripToken( pkvd->szKeyName, tmp );
 			m_iTargetName[m_cTargets] = ALLOC_STRING( tmp );
-			m_flTargetDelay[m_cTargets] = atof( pkvd->szValue );
+			float delay;
+			short mmUseType;
+			ParseMMDelay(pkvd->szValue, delay, mmUseType);
+			m_flTargetDelay[m_cTargets] = delay;
+			m_iTargetUseType[m_cTargets] = mmUseType;
 			m_cTargets++;
 			pkvd->fHandled = TRUE;
 		}
@@ -394,7 +433,20 @@ void CMultiManager::ManagerThink( void )
 	time = gpGlobals->time - m_startTime;
 	while( m_index < m_cTargets && m_flTargetDelay[m_index] <= time )
 	{
-		FireTargets( STRING( m_iTargetName[m_index] ), m_hActivator, this, USE_TOGGLE, 0 );
+		short mmUseType = m_iTargetUseType[m_index];
+		if (mmUseType == MM_USE_KILL)
+		{
+			KillTargets(STRING(m_iTargetName[m_index]));
+		}
+		else
+		{
+			USE_TYPE useType = USE_TOGGLE;
+			if (mmUseType == MM_USE_OFF)
+				useType = USE_OFF;
+			else if (mmUseType == MM_USE_ON)
+				useType = USE_ON;
+			FireTargets( STRING( m_iTargetName[m_index] ), m_hActivator, this, useType, 0 );
+		}
 		m_index++;
 	}
 
@@ -490,7 +542,11 @@ void CMultiTrigger::KeyValue( KeyValueData *pkvd )
 		if (num <= 0 || num > MAX_MULTI_TARGETS)
 			return;
 		index = num - 1;
-		m_flTargetDelay[index] = atof( pkvd->szValue );
+		float delay;
+		short mmUseType;
+		ParseMMDelay(pkvd->szValue, delay, mmUseType);
+		m_flTargetDelay[index] = delay;
+		m_iTargetUseType[index] = mmUseType;
 		pkvd->fHandled = TRUE;
 	}
 }
