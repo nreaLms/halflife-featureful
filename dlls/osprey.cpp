@@ -38,6 +38,9 @@ typedef struct
 
 #define MAX_CARRY	24
 
+#define OSPREY_GRUNT_TYPE_HL 0
+#define OSPREY_GRUNT_TYPE_OPFOR 1
+
 class COsprey : public CBaseMonster
 {
 public:
@@ -107,6 +110,8 @@ public:
 
 	int m_iDoLeftSmokePuff;
 	int m_iDoRightSmokePuff;
+
+	short m_gruntType;
 	
 protected:
 	void SpawnImpl(const char* modelName, const float defaultHealth);
@@ -154,6 +159,8 @@ TYPEDESCRIPTION	COsprey::m_SaveData[] =
 
 	DEFINE_FIELD( COsprey, m_iDoLeftSmokePuff, FIELD_INTEGER ),
 	DEFINE_FIELD( COsprey, m_iDoRightSmokePuff, FIELD_INTEGER ),
+
+	DEFINE_FIELD( COsprey, m_gruntType, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( COsprey, CBaseMonster )
@@ -233,7 +240,7 @@ void COsprey::KeyValue(KeyValueData *pkvd)
 	}
 	if( FStrEq(pkvd->szKeyName, "grunttype" ) )
 	{
-		pev->oldbuttons = atoi( pkvd->szValue );
+		m_gruntType = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -324,7 +331,7 @@ BOOL COsprey::HasDead()
 const char* COsprey::TrooperName()
 {
 #if FEATURE_OPFOR_GRUNT
-	if (pev->oldbuttons == 1)
+	if (m_gruntType == OSPREY_GRUNT_TYPE_OPFOR)
 		return "monster_human_grunt_ally";
 	else
 #endif
@@ -386,14 +393,13 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 
 void COsprey::PrepareGruntBeforeSpawn(CBaseEntity *pGrunt)
 {
-	if (pev->oldbuttons == 1)
+	if (m_gruntType == OSPREY_GRUNT_TYPE_OPFOR)
 	{
-		KeyValueData kvd;
-		char buf[128] = {0};
-		sprintf(buf, "%d", -1);
-		kvd.szKeyName = "head";
-		kvd.szValue = buf;
-		pGrunt->KeyValue(&kvd);
+		CBaseMonster* pMonster = pGrunt->MyMonsterPointer();
+		if (pMonster)
+		{
+			pMonster->SetHead(-1);
+		}
 	}
 }
 

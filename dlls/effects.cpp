@@ -2813,7 +2813,7 @@ public:
 		return pev->noise2 ? STRING(pev->noise2) : WARPBALL_SOUND2;
 	}
 	inline float SoundAttenuation() {
-		return ::SoundAttenuation((short)pev->oldbuttons);
+		return ::SoundAttenuation((short)pev->impulse);
 	}
 	inline int SpriteFramerate() {
 		return pev->framerate ? pev->framerate : 12;
@@ -2872,7 +2872,7 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
 	{
-		pev->oldbuttons = atoi( pkvd->szValue );
+		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

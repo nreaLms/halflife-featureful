@@ -2007,7 +2007,7 @@ public:
 	void KeyValue(KeyValueData *pkvd);
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 
-	int GetType() const { return pev->oldbuttons ? pev->oldbuttons : bits_SOUND_DANGER; }
+	int GetType() const { return pev->impulse ? pev->impulse : bits_SOUND_DANGER; }
 	int GetRadius() const { return pev->button > 0 ? pev->button : 384; }
 	float GetDuration() const { return pev->frags > 0 ? pev->frags : 0.3; }
 };
@@ -2023,7 +2023,7 @@ void CEnvSoundMark::KeyValue(KeyValueData *pkvd)
 {
 	if( FStrEq( pkvd->szKeyName, "type" ) )
 	{
-		pev->oldbuttons = atoi( pkvd->szValue );
+		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "radius" ) )
