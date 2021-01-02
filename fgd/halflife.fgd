@@ -5867,7 +5867,7 @@
 @BaseClass base(Targetname, Angles, Classification, BloodColor, PrisonerTo, MonsterSoundMask) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
 	target(target_destination) : "Target On Release" : : "Targets which are fired whenever a monster is spawned."
-	monstertype(string) : "Monster Type" : : "Spawned monster's classname"
+	monstertype(string) : "Monster Type" : "monster_headcrab" : "Spawned monster's classname"
 	netname(target_source) : "Childrens' Name" : : "The spawned monster will receive it as its targetname."
 	spawnflags(Flags) =
 	[
@@ -5876,7 +5876,7 @@
 		4 : "Cyclic" : 0 : "With this flag set, the entity will spawn one time every time it is fired."
 		8 : "MonsterClip" : 0 : "Monsters spawned by a squadmaker with this flag set will be blocked by the func_monsterclip brush entity."
 		16 : "Prisoner" : 0 : "The spawned monster won't attack its enemies and will be ignored by its enemies."
-		32 : "Auto size BBox" : 0 : "When checking if the area is free to spawn, use the monster specific hull size instead of large one provided by default."
+		32 : "Auto size BBox" : 1 : "When checking if the area is free to spawn, use the monster specific hull size instead of large one provided by default."
 		64: "Cyclic backlog" : 0 : "Used with 'Cyclic' flag. Keep track of number of monsters who could not be spawned, e.g. because of blocking. Try to spawn them later. Useful when you want to ensure that the specific number of monsters will spawn."
 		128 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Wait for script' flag"
 		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
@@ -5889,7 +5889,7 @@
 		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
 	]
 
-	monstercount(integer) : "Number of Monsters" : -1 : "How many monsters the monstermaker can create (-1 = unlimited)"
+	monstercount(integer) : "Number of Monsters" : 1 : "How many monsters the monstermaker can create (-1 = unlimited)"
 
 	delay(string) : "Frequency" : "5" : "How often (seconds) a new monster will be made"
 
