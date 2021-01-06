@@ -2774,6 +2774,9 @@ public:
 	inline int MaxBeamCount() {
 		return pev->team > 0 ? pev->team : 20;
 	}
+	inline float SoundVolume() {
+		return (pev->armortype > 0.0f && pev->armortype <= 1.0f) ? pev->armortype : 1.0f;
+	}
 
 	inline float RenderAmount() {
 		return pev->renderamt ? pev->renderamt : 255;
@@ -2805,6 +2808,9 @@ public:
 	}
 	inline void SetMaxBeamCount( int beamCount ) {
 		pev->team = beamCount;
+	}
+	inline void SetSoundVolume( float volume ) {
+		pev->armortype = volume;
 	}
 	inline const char* WarpballSound1() {
 		return pev->noise1 ? STRING(pev->noise1) : WARPBALL_SOUND1;
@@ -2875,6 +2881,11 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "volume" ) )
+	{
+		SetSoundVolume( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -2919,7 +2930,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		posEnt = edict();
 	}
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
-		EMIT_SOUND( posEnt, CHAN_BODY, WarpballSound1(), 1, SoundAttenuation() );
+		EMIT_SOUND( posEnt, CHAN_BODY, WarpballSound1(), SoundVolume(), SoundAttenuation() );
 	
 	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
 		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
@@ -2958,7 +2969,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
-		EMIT_SOUND( posEnt, CHAN_ITEM, WarpballSound2(), 1, SoundAttenuation() );
+		EMIT_SOUND( posEnt, CHAN_ITEM, WarpballSound2(), SoundVolume(), SoundAttenuation() );
 
 	int beamRed = pev->punchangle.x;
 	int beamGreen = pev->punchangle.y;

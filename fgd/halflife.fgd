@@ -1758,6 +1758,7 @@
 	]
 	noise1(sound) : "Custom sound 1"
 	noise2(sound) : "Custom sound 2"
+	volume(string) : "Sound volume (1.0 is max)"
 ]
 
 @PointClass base(Target, Targetname) size(-24 -24 -24,24 24 24) = env_xenmaker :"Xen Portal. This entity is present just for compatibility with Sven Co-op"
