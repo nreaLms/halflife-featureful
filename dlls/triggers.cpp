@@ -278,7 +278,7 @@ static void ParseMMDelay(const char* value, float& delay, short& mmUseType)
 {
 	int i = 0;
 	char* endPtr;
-	delay = strtof(value, &endPtr);
+	delay = (float)strtod(value, &endPtr);
 	mmUseType = MM_USE_TOGGLE;
 	if (*endPtr == '#')
 	{
