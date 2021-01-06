@@ -2777,6 +2777,9 @@ public:
 	inline float SoundVolume() {
 		return (pev->armortype > 0.0f && pev->armortype <= 1.0f) ? pev->armortype : 1.0f;
 	}
+	inline string_t WarpTarget() {
+		return pev->message;
+	}
 
 	inline float RenderAmount() {
 		return pev->renderamt ? pev->renderamt : 255;
@@ -2812,6 +2815,11 @@ public:
 	inline void SetSoundVolume( float volume ) {
 		pev->armortype = volume;
 	}
+	inline void SetWarpTarget( string_t warpTarget ) {
+		pev->message = warpTarget;
+	}
+
+
 	inline const char* WarpballSound1() {
 		return pev->noise1 ? STRING(pev->noise1) : WARPBALL_SOUND1;
 	}
@@ -2855,7 +2863,7 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 	} 
 	else if( FStrEq( pkvd->szKeyName, "warp_target" ) )
 	{
-		pev->message = ALLOC_STRING( pkvd->szValue );
+		SetWarpTarget( ALLOC_STRING( pkvd->szValue ) );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "damage_delay" ) )
@@ -2911,26 +2919,36 @@ void CEnvWarpBall::Precache( void )
 void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	CBaseEntity *pEntity = NULL;
-	edict_t *posEnt;
+	edict_t* playSoundEnt = NULL;
+	bool playSoundOnMyself = false;
+	string_t warpTarget = WarpTarget();
 
 	if (useType == USE_SET && pev->dmg_inflictor != NULL)
 	{
 		vecOrigin = pev->vuser1;
-		posEnt = pev->dmg_inflictor;
+		playSoundEnt = pev->dmg_inflictor;
 	}
-	else if( !FStringNull( pev->message ) && (pEntity = UTIL_FindEntityByTargetname( NULL, STRING( pev->message ) )) != NULL )//target found ?
+	else if( !FStringNull( warpTarget ) && (pEntity = UTIL_FindEntityByTargetname( NULL, STRING( warpTarget ) )) != NULL )//target found ?
 	{
 		vecOrigin = pEntity->pev->origin;
-		posEnt = pEntity->edict();
+		playSoundEnt = pEntity->edict();
 	}
 	else
 	{
 		//use myself as center
 		vecOrigin = pev->origin;
-		posEnt = edict();
+		playSoundEnt = edict();
+		playSoundOnMyself = true;
 	}
+
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
-		EMIT_SOUND( posEnt, CHAN_BODY, WarpballSound1(), SoundVolume(), SoundAttenuation() );
+	{
+		if (playSoundOnMyself)
+			EMIT_SOUND( edict(), CHAN_BODY, WarpballSound1(), SoundVolume(), SoundAttenuation() );
+		else
+			//EMIT_SOUND( playSoundEnt, CHAN_BODY, WarpballSound1(), SoundVolume(), SoundAttenuation() );
+			UTIL_EmitAmbientSound( playSoundEnt, vecOrigin, WarpballSound1(), SoundVolume(), SoundAttenuation(), 0, 100 );
+	}
 	
 	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
 		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
@@ -2969,7 +2987,13 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
-		EMIT_SOUND( posEnt, CHAN_ITEM, WarpballSound2(), SoundVolume(), SoundAttenuation() );
+	{
+		if (playSoundOnMyself)
+			EMIT_SOUND( edict(), CHAN_ITEM, WarpballSound2(), SoundVolume(), SoundAttenuation() );
+		else
+			//EMIT_SOUND( playSoundEnt, CHAN_ITEM, WarpballSound2(), SoundVolume(), SoundAttenuation() );
+			UTIL_EmitAmbientSound( playSoundEnt, vecOrigin, WarpballSound2(), SoundVolume(), SoundAttenuation(), 0, 100 );
+	}
 
 	int beamRed = pev->punchangle.x;
 	int beamGreen = pev->punchangle.y;
