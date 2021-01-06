@@ -1744,7 +1744,7 @@
 	radius(integer) : "Shake and Beam Radius" : 192
 	scale(string) : "Sprite Scale"
 	framerate(string) : "Sprite Framerate"
-	warp_target(target_destination) : "Warp target"
+	warp_target(target_destination) : "Warp target [LE]"
 	damage_delay(string) : "Damage delay"
 	beamcolor(color255) : "Beam color"
 	beamcount(integer) : "Max beam count" : 20

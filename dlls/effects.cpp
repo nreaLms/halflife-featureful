@@ -2931,7 +2931,6 @@ void CEnvWarpBall::Precache( void )
 
 void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	CBaseEntity *pEntity = NULL;
 	edict_t* playSoundEnt = NULL;
 	bool playSoundOnMyself = false;
 	string_t warpTarget = WarpTarget();
@@ -2941,10 +2940,19 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		vecOrigin = pev->vuser1;
 		playSoundEnt = pev->dmg_inflictor;
 	}
-	else if( !FStringNull( warpTarget ) && (pEntity = UTIL_FindEntityByTargetname( NULL, STRING( warpTarget ) )) != NULL )//target found ?
+	else if( !FStringNull( warpTarget ) )
 	{
-		vecOrigin = pEntity->pev->origin;
-		playSoundEnt = pEntity->edict();
+		CBaseEntity *pEntity = UTIL_FindEntityByTargetname( NULL, STRING( warpTarget ), pActivator );
+		if (pEntity)
+		{
+			vecOrigin = pEntity->pev->origin;
+			playSoundEnt = pEntity->edict();
+		}
+		else
+		{
+			ALERT(at_error, "Could not find a warp target %s for %s\n", STRING(warpTarget), STRING(pev->classname));
+			return;
+		}
 	}
 	else
 	{
