@@ -891,6 +891,13 @@ public:
 	BOOL AcceptableSpeaker( CBaseMonster *pMonster );
 	BOOL StartSentence( CBaseMonster *pTarget );
 
+	float SpeakerSearchRadius() const {
+		return m_flRadius;
+	}
+	float ListenerSearchRadius() const {
+		return m_flListenerRadius > 0.0f ? m_flListenerRadius : m_flRadius;
+	}
+
 private:
 	string_t m_iszSentence;		// string index for idle animation
 	string_t m_iszEntity;	// entity that is wanted for this sentence
@@ -904,12 +911,14 @@ private:
 	short m_requiredState;
 	short m_followAction;
 	short m_targetActivator;
+	float m_flListenerRadius;
 };
 
 #define SF_SENTENCE_ONCE	0x0001
 #define SF_SENTENCE_FOLLOWERS	0x0002	// only say if following player
 #define SF_SENTENCE_INTERRUPT	0x0004	// force talking except when dead
 #define SF_SENTENCE_CONCURRENT	0x0008	// allow other people to keep talking
+#define SF_SENTENCE_REQUIRE_LISTENER 0x0010 // require presense of the listener
 
 enum
 {
@@ -932,6 +941,7 @@ TYPEDESCRIPTION	CScriptedSentence::m_SaveData[] =
 	DEFINE_FIELD( CScriptedSentence, m_requiredState, FIELD_SHORT ),
 	DEFINE_FIELD( CScriptedSentence, m_followAction, FIELD_SHORT ),
 	DEFINE_FIELD( CScriptedSentence, m_targetActivator, FIELD_SHORT ),
+	DEFINE_FIELD( CScriptedSentence, m_flListenerRadius, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CScriptedSentence, CBaseToggle )
@@ -993,6 +1003,11 @@ void CScriptedSentence::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "target_activator" ) )
 	{
 		m_targetActivator = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "listener_radius" ) )
+	{
+		m_flListenerRadius = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1057,9 +1072,8 @@ void CScriptedSentence::Spawn( void )
 void CScriptedSentence::FindThink( void )
 {
 	CBaseMonster *pMonster = FindEntity();
-	if( pMonster )
+	if( pMonster && StartSentence( pMonster ) )
 	{
-		StartSentence( pMonster );
 		if( pev->spawnflags & SF_SENTENCE_ONCE )
 			UTIL_Remove( this );
 		SetThink( &CScriptedSentence::DelayThink );
@@ -1165,7 +1179,7 @@ CBaseMonster *CScriptedSentence::FindEntity( void )
 	}
 
 	CBaseEntity *pEntity = NULL;
-	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, m_flRadius ) ) != NULL )
+	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, SpeakerSearchRadius() ) ) != NULL )
 	{
 		if( FClassnameIs( pEntity->pev, STRING( m_iszEntity ) ) )
 		{
@@ -1196,12 +1210,17 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 	CBaseEntity *pListener = NULL;
 	if( !FStringNull( m_iszListener ) )
 	{
-		float radius = m_flRadius;
+		float radius = ListenerSearchRadius();
 
 		if( FStrEq( STRING( m_iszListener ), "player" ) )
 			radius = 4096;	// Always find the player
 
 		pListener = UTIL_FindEntityGeneric( STRING( m_iszListener ), pTarget->pev->origin, radius );
+
+		if (!pListener && FBitSet(pev->spawnflags, SF_SENTENCE_REQUIRE_LISTENER))
+		{
+			return FALSE;
+		}
 	}
 
 	pTarget->PlayScriptedSentence( STRING( m_iszSentence ), m_flDuration,  m_flVolume, m_flAttenuation, bConcurrent, pListener );
