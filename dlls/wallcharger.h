@@ -2,7 +2,9 @@
 #ifndef WALLCHARGER_H
 #define WALLCHARGER_H
 
-class CWallCharger : public CBaseToggle
+#include "cbase.h"
+
+class CWallCharger : public CBaseEntity
 {
 public:
 	void Spawn();
@@ -38,5 +40,8 @@ public:
 	string_t m_triggerOnFirstUse;
 	string_t m_triggerOnEmpty;
 	string_t m_triggerOnRecharged;
+
+	int OnStateFrame();
+	int OffStateFrame();
 };
 #endif

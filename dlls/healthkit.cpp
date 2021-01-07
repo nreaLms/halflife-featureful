@@ -114,13 +114,12 @@ void CWallCharger::Spawn()
 	if (FBitSet(pev->spawnflags, SF_WALLCHARGER_STARTOFF))
 	{
 		m_iJuice = 0;
-		pev->frame = 1;
 	}
 	else
 	{
 		m_iJuice = ChargerCapacity();
-		pev->frame = 0;
 	}
+	pev->frame = 0;
 }
 
 void CWallCharger::Precache()
@@ -135,7 +134,7 @@ void CWallCharger::Precache()
 
 int CWallCharger::ObjectCaps( void )
 {
-	return ( CBaseToggle::ObjectCaps() | FCAP_CONTINUOUS_USE
+	return ( CBaseEntity::ObjectCaps() | FCAP_CONTINUOUS_USE
 			| (FBitSet(pev->spawnflags, SF_WALLCHARGER_ONLYDIRECT)?FCAP_ONLYDIRECT_USE:0) )
 			& ~FCAP_ACROSS_TRANSITION;
 }
@@ -169,7 +168,7 @@ void CWallCharger::Recharge( void )
 	if (rechargeSound)
 		EMIT_SOUND( ENT( pev ), CHAN_ITEM, rechargeSound, 1.0, ATTN_NORM );
 	m_iJuice = ChargerCapacity();
-	pev->frame = 0;
+	pev->frame = OnStateFrame();
 	SetThink( &CBaseEntity::SUB_DoNothing );
 }
 
@@ -260,7 +259,7 @@ void CWallCharger::KeyValue( KeyValueData *pkvd )
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CBaseToggle::KeyValue( pkvd );
+		CBaseEntity::KeyValue( pkvd );
 }
 
 void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -277,7 +276,7 @@ void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 			{
 				EMIT_SOUND( ENT( pev ), CHAN_ITEM, DenySound(), SoundVolume(), ATTN_NORM );
 				m_iJuice = 0;
-				pev->frame = 1;
+				pev->frame = OffStateFrame();
 				Off();
 			}
 			return;
@@ -295,11 +294,11 @@ void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	// if there is no juice left, turn it off
 	if( m_iJuice <= 0 )
 	{
-		if (m_triggerOnEmpty && pev->frame == 0)
+		if (m_triggerOnEmpty && pev->frame == OnStateFrame())
 		{
 			FireTargets( STRING( m_triggerOnEmpty ), this, this, USE_TOGGLE, 0 );
 		}
-		pev->frame = 1;
+		pev->frame = OffStateFrame();
 		Off();
 	}
 
@@ -359,6 +358,20 @@ void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		m_iOn++;
 		EMIT_SOUND( ENT( pev ), CHAN_STATIC, LoopingSound(), 1.0, ATTN_NORM );
 	}
+}
+
+int CWallCharger::OnStateFrame()
+{
+	if (FBitSet(pev->spawnflags, SF_WALLCHARGER_STARTOFF))
+		return 1;
+	return 0;
+}
+
+int CWallCharger::OffStateFrame()
+{
+	if (FBitSet(pev->spawnflags, SF_WALLCHARGER_STARTOFF))
+		return 0;
+	return 1;
 }
 
 //-------------------------------------------------------------
