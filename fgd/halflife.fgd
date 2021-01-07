@@ -4685,7 +4685,16 @@
 	]
 ]
 
-@PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis : "Otis"
+@BaseClass = OtisHead
+[
+	head(Choices) : "Head" : -1 =
+	[
+		-1 : "Random"
+		0 : "Head with hair"
+		1 : "Bald Head"
+	]
+]
+@PointClass base(Monster, TalkMonster, OtisHead, Sequence) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis : "Otis"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -4758,19 +4767,12 @@
 		1 : "Gun Drawn"
 		2 : "Donut"
 	]
-	head(Choices) : "head" : -1 =
-	[
-		-1 : "Random"
-		0 : "Head with hair"
-		1 : "Bald Head"
-	]
 	spawnflags(Flags) =
 	[
 		1024: "Don't Drop Gun" : 0
 	]
 ]
-
-@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis_dead : "Dead Otis"
+@PointClass base(DeadMonster, OtisHead) size(-16 -16 0, 16 16 72) studio("models/otis.mdl") = monster_otis_dead : "Dead Otis"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 35 =
 	[
