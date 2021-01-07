@@ -872,7 +872,7 @@ BOOL CBaseMonster::CineCleanup()
 	return TRUE;
 }
 
-class CScriptedSentence : public CBaseToggle
+class CScriptedSentence : public CBaseDelay
 {
 public:
 	void Spawn( void );
@@ -880,7 +880,7 @@ public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT FindThink( void );
 	void EXPORT DelayThink( void );
-	int ObjectCaps( void ) { return ( CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ); }
+	int ObjectCaps( void ) { return ( CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ); }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -944,7 +944,7 @@ TYPEDESCRIPTION	CScriptedSentence::m_SaveData[] =
 	DEFINE_FIELD( CScriptedSentence, m_flListenerRadius, FIELD_FLOAT ),
 };
 
-IMPLEMENT_SAVERESTORE( CScriptedSentence, CBaseToggle )
+IMPLEMENT_SAVERESTORE( CScriptedSentence, CBaseDelay )
 
 LINK_ENTITY_TO_CLASS( scripted_sentence, CScriptedSentence )
 
@@ -1011,7 +1011,7 @@ void CScriptedSentence::KeyValue( KeyValueData *pkvd )
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CBaseToggle::KeyValue( pkvd );
+		CBaseDelay::KeyValue( pkvd );
 }
 
 void CScriptedSentence::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
