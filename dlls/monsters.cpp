@@ -3459,6 +3459,8 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 		ALERT( level, " PRISONER! " );
 	if( pev->spawnflags & SF_MONSTER_PREDISASTER )
 		ALERT( level, " Pre-Disaster! " );
+	if ( pev->flags & FL_MONSTERCLIP )
+		ALERT( level, "Monsterclip" );
 }
 
 //=========================================================
