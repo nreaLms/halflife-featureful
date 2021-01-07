@@ -112,6 +112,7 @@ public:
 	int m_iDoRightSmokePuff;
 
 	short m_gruntType;
+	short m_gruntNumber;
 	
 protected:
 	void SpawnImpl(const char* modelName, const float defaultHealth);
@@ -161,6 +162,7 @@ TYPEDESCRIPTION	COsprey::m_SaveData[] =
 	DEFINE_FIELD( COsprey, m_iDoRightSmokePuff, FIELD_INTEGER ),
 
 	DEFINE_FIELD( COsprey, m_gruntType, FIELD_SHORT ),
+	DEFINE_FIELD( COsprey, m_gruntNumber, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( COsprey, CBaseMonster )
@@ -238,9 +240,14 @@ void COsprey::KeyValue(KeyValueData *pkvd)
 		pev->armorvalue = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	if( FStrEq(pkvd->szKeyName, "grunttype" ) )
+	else if( FStrEq(pkvd->szKeyName, "grunttype" ) )
 	{
-		m_gruntType = atoi( pkvd->szValue );
+		m_gruntType = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq(pkvd->szKeyName, "num" ) )
+	{
+		m_gruntNumber = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -299,14 +306,23 @@ void COsprey::DeployThink( void )
 	vecSrc = pev->origin + vecForward *  32 + vecRight *  100 + vecUp * -96;
 	m_hRepel[0] = MakeGrunt( vecSrc );
 
-	vecSrc = pev->origin + vecForward * -64 + vecRight *  100 + vecUp * -96;
-	m_hRepel[1] = MakeGrunt( vecSrc );
+	if (m_gruntNumber <= 0 || m_gruntNumber >= 2)
+	{
+		vecSrc = pev->origin + vecForward * -64 + vecRight *  100 + vecUp * -96;
+		m_hRepel[1] = MakeGrunt( vecSrc );
+	}
 
-	vecSrc = pev->origin + vecForward *  32 + vecRight * -100 + vecUp * -96;
-	m_hRepel[2] = MakeGrunt( vecSrc );
+	if (m_gruntNumber <= 0 || m_gruntNumber >= 3)
+	{
+		vecSrc = pev->origin + vecForward *  32 + vecRight * -100 + vecUp * -96;
+		m_hRepel[2] = MakeGrunt( vecSrc );
+	}
 
-	vecSrc = pev->origin + vecForward * -64 + vecRight * -100 + vecUp * -96;
-	m_hRepel[3] = MakeGrunt( vecSrc );
+	if (m_gruntNumber <= 0 || m_gruntNumber >= 4)
+	{
+		vecSrc = pev->origin + vecForward * -64 + vecRight * -100 + vecUp * -96;
+		m_hRepel[3] = MakeGrunt( vecSrc );
+	}
 
 	SetThink( &COsprey::HoverThink );
 	pev->nextthink = gpGlobals->time + 0.1f;
