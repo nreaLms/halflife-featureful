@@ -398,6 +398,7 @@
 	]
 	num(integer) : "(Override) Number of Grunts"
 	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
+	attenuation(string) : "Rotor attenuation"
 ]
 
 @BaseClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = gibshooterbase

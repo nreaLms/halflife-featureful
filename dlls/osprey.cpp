@@ -113,7 +113,9 @@ public:
 
 	short m_gruntType;
 	short m_gruntNumber;
-	
+
+	float m_soundAttenuation;
+
 protected:
 	void SpawnImpl(const char* modelName, const float defaultHealth);
 	void PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs);
@@ -124,6 +126,9 @@ protected:
 			return pev->armorvalue;
 		}
 		return VOL_NORM;
+	}
+	float RotorAttenuation() const {
+		return m_soundAttenuation > 0.0f ? m_soundAttenuation : 0.15f;
 	}
 };
 
@@ -163,6 +168,7 @@ TYPEDESCRIPTION	COsprey::m_SaveData[] =
 
 	DEFINE_FIELD( COsprey, m_gruntType, FIELD_SHORT ),
 	DEFINE_FIELD( COsprey, m_gruntNumber, FIELD_SHORT ),
+	DEFINE_FIELD( COsprey, m_soundAttenuation, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( COsprey, CBaseMonster )
@@ -248,6 +254,11 @@ void COsprey::KeyValue(KeyValueData *pkvd)
 	else if( FStrEq(pkvd->szKeyName, "num" ) )
 	{
 		m_gruntNumber = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq(pkvd->szKeyName, "attenuation" ) )
+	{
+		m_soundAttenuation = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -551,7 +562,7 @@ void COsprey::Flight()
 
 	if( m_iSoundState == 0 )
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), 0.15, 0, 110 );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), 0, 110 );
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", 0.5, 0.2, 0, 110 );
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
@@ -579,7 +590,7 @@ void COsprey::Flight()
 			if( pitch != m_iPitch )
 			{
 				m_iPitch = pitch;
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), 0.15, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
+				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 				// ALERT( at_console, "%.0f\n", pitch );
 			}
 		}
