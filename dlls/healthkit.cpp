@@ -79,15 +79,6 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 
 		EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/smallmedkit1.wav", 1, ATTN_NORM );
 
-		if( g_pGameRules->ItemShouldRespawn( this ) )
-		{
-			Respawn();
-		}
-		else
-		{
-			UTIL_Remove( this );
-		}
-
 		return TRUE;
 	}
 
