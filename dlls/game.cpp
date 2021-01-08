@@ -76,6 +76,9 @@ cvar_t npc_nearest = { "npc_nearest", "0", FCVAR_SERVER };
 #if FEATURE_NPC_FORGET_ENEMY_CVAR
 cvar_t npc_forget_enemy_time = { "npc_forget_enemy_time", "0", FCVAR_SERVER };
 #endif
+#if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
+cvar_t npc_fix_melee_distance = { "npc_fix_melee_distance", "0", FCVAR_SERVER };
+#endif
 cvar_t npc_patrol = { "npc_patrol", "1", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
@@ -925,6 +928,9 @@ void GameDLLInit( void )
 #endif
 #if FEATURE_NPC_FORGET_ENEMY_CVAR
 	CVAR_REGISTER( &npc_forget_enemy_time );
+#endif
+#if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
+	CVAR_REGISTER( &npc_fix_melee_distance );
 #endif
 	CVAR_REGISTER( &npc_patrol );
 

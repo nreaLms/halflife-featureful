@@ -562,6 +562,16 @@ float NpcForgetEnemyTime()
 #endif
 }
 
+bool NpcFixMeleeDistance()
+{
+#if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
+	extern cvar_t npc_fix_melee_distance;
+	return npc_fix_melee_distance.value != 0;
+#else
+	return false;
+#endif
+}
+
 bool AllowGrenadeJump()
 {
 #if FEATURE_GRENADE_JUMP_CVAR

@@ -1053,9 +1053,8 @@ void CBaseMonster::CheckAttacks(CBaseEntity *pTarget, float flDist, float flMele
 	// Clear all attack conditions
 	ClearConditions( bits_COND_CAN_RANGE_ATTACK1 | bits_COND_CAN_RANGE_ATTACK2 | bits_COND_CAN_MELEE_ATTACK1 |bits_COND_CAN_MELEE_ATTACK2 );
 
-#if !FEATURE_FIX_MELEE_ATTACK_DISTANCE
-	flMeleeDist = flDist;
-#endif
+	if (!NpcFixMeleeDistance())
+		flMeleeDist = flDist;
 
 	if( m_afCapability & bits_CAP_RANGE_ATTACK1 )
 	{
