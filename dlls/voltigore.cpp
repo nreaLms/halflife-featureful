@@ -162,7 +162,7 @@ void CVoltigoreEnergyBall::BallTouch(CBaseEntity *pOther)
 	pev->velocity = Vector(0,0,0);
 
 	m_timeToDie = gpGlobals->time + 0.3;
-	ResetTouch();
+	SetTouch(NULL);
 }
 
 //=========================================================

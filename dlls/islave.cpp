@@ -236,13 +236,13 @@ void CChargeToken::ArmorPieceTouch(CBaseEntity *pOther)
 		pOther->pev->armorvalue += pev->health;
 		pOther->pev->armorvalue = Q_min(pOther->pev->armorvalue, MAX_NORMAL_BATTERY);
 		EMIT_SOUND_DYN( ENT( pOther->pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
-		ResetTouch();
+		SetTouch(NULL);
 		SetThink(&CBaseEntity::SUB_Remove);
 		pev->nextthink = gpGlobals->time;
 	}
 	else if (pOther == m_hTarget)
 	{
-		ResetTouch();
+		SetTouch(NULL);
 		SetThink(&CBaseEntity::SUB_Remove);
 		pev->nextthink = gpGlobals->time;
 	}
