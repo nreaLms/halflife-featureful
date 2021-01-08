@@ -1034,7 +1034,7 @@ BOOL CBaseMonster::CheckMeleeAttack2( float flDot, float flDist )
 // CheckAttacks - sets all of the bits for attacks that the
 // monster is capable of carrying out on the passed entity.
 //=========================================================
-void CBaseMonster::CheckAttacks( CBaseEntity *pTarget, float flDist )
+void CBaseMonster::CheckAttacks(CBaseEntity *pTarget, float flDist, float flMeleeDist)
 {
 	Vector2D vec2LOS;
 	float flDot;
@@ -1053,6 +1053,10 @@ void CBaseMonster::CheckAttacks( CBaseEntity *pTarget, float flDist )
 	// Clear all attack conditions
 	ClearConditions( bits_COND_CAN_RANGE_ATTACK1 | bits_COND_CAN_RANGE_ATTACK2 | bits_COND_CAN_MELEE_ATTACK1 |bits_COND_CAN_MELEE_ATTACK2 );
 
+#if !FEATURE_FIX_MELEE_ATTACK_DISTANCE
+	flMeleeDist = flDist;
+#endif
+
 	if( m_afCapability & bits_CAP_RANGE_ATTACK1 )
 	{
 		if( CheckRangeAttack1( flDot, flDist ) )
@@ -1065,12 +1069,12 @@ void CBaseMonster::CheckAttacks( CBaseEntity *pTarget, float flDist )
 	}
 	if( m_afCapability & bits_CAP_MELEE_ATTACK1 )
 	{
-		if( CheckMeleeAttack1( flDot, flDist ) )
+		if( CheckMeleeAttack1( flDot, flMeleeDist ) )
 			SetConditions( bits_COND_CAN_MELEE_ATTACK1 );
 	}
 	if( m_afCapability & bits_CAP_MELEE_ATTACK2 )
 	{
-		if( CheckMeleeAttack2( flDot, flDist ) )
+		if( CheckMeleeAttack2( flDot, flMeleeDist ) )
 			SetConditions( bits_COND_CAN_MELEE_ATTACK2 );
 	}
 }
@@ -1144,6 +1148,21 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 			flDistToEnemy = flDistToEnemy2;
 	}
 
+	float maxSideSize;
+	float minSideSize;
+
+	if (pEnemy->pev->size.x >= pev->size.x)
+	{
+		maxSideSize = pEnemy->pev->size.x;
+		minSideSize = pev->size.x;
+	}
+	else
+	{
+		maxSideSize = pev->size.x;
+		minSideSize = pEnemy->pev->size.x;
+	}
+	const float flMeleeDist = flDistToEnemy - maxSideSize/2 + minSideSize/2;
+
 	if( HasConditions( bits_COND_SEE_ENEMY ) )
 	{
 		CBaseMonster *pEnemyMonster;
@@ -1204,7 +1223,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 
 	if( FCanCheckAttacks() )	
 	{
-		CheckAttacks( m_hEnemy, flDistToEnemy );
+		CheckAttacks( m_hEnemy, flDistToEnemy, flMeleeDist );
 	}
 
 	if( m_movementGoal == MOVEGOAL_ENEMY )

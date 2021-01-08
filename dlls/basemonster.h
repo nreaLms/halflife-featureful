@@ -222,7 +222,7 @@ public:
 	void SetState( MONSTERSTATE State );
 	virtual void ReportAIState( ALERT_TYPE level );
 
-	void CheckAttacks( CBaseEntity *pTarget, float flDist );
+	void CheckAttacks( CBaseEntity *pTarget, float flDist, float flMeleeDist );
 	virtual int CheckEnemy( CBaseEntity *pEnemy );
 	void SetEnemy( CBaseEntity* pEnemy );
 	void PushEnemy(CBaseEntity *pEnemy, const Vector &vecLastKnownPos );

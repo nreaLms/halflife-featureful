@@ -75,6 +75,9 @@
 
 #define FEATURE_DYING_MONSTERS_DONT_COLLIDE_WITH_PLAYER 0
 
+// Take into account monster's size when checking distance of melee attacks
+#define FEATURE_FIX_MELEE_ATTACK_DISTANCE 1
+
 // New weapons
 #define FEATURE_PIPEWRENCH (0 || FEATURE_OPFOR_WEAPONS)
 #define FEATURE_KNIFE (0 || FEATURE_OPFOR_WEAPONS)

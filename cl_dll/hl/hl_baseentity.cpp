@@ -141,7 +141,7 @@ BOOL CBaseMonster::CheckRangeAttack1( float flDot, float flDist ) { return FALSE
 BOOL CBaseMonster::CheckRangeAttack2( float flDot, float flDist ) { return FALSE; }
 BOOL CBaseMonster::CheckMeleeAttack1( float flDot, float flDist ) { return FALSE; }
 BOOL CBaseMonster::CheckMeleeAttack2( float flDot, float flDist ) { return FALSE; }
-void CBaseMonster::CheckAttacks( CBaseEntity *pTarget, float flDist ) { }
+void CBaseMonster::CheckAttacks( CBaseEntity *pTarget, float flDist, float flMeleeDist ) { }
 BOOL CBaseMonster::FCanCheckAttacks( void ) { return FALSE; }
 int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy ) { return 0; }
 void CBaseMonster::SetEnemy(CBaseEntity *pEnemy) {}
