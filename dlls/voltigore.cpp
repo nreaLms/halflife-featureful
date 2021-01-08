@@ -352,7 +352,7 @@ public:
 	Vector DefaultMinHullSize() { return Vector( -80.0f, -80.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 80.0f, 80.0f, 90.0f ); }
 
-	float m_flNextZapTime; // next time the voltigore can use the spit attack.
+	float m_flNextBeamAttackCheck; // next time the voltigore can use the spit attack.
 	BOOL m_fShouldUpdateBeam;
 	CBeam* m_pBeam[3];
 	CSprite* m_pBeamGlow;
@@ -389,7 +389,7 @@ LINK_ENTITY_TO_CLASS(monster_alien_voltigore, CVoltigore)
 
 TYPEDESCRIPTION	CVoltigore::m_SaveData[] =
 {
-	DEFINE_FIELD(CVoltigore, m_flNextZapTime, FIELD_TIME),
+	DEFINE_FIELD(CVoltigore, m_flNextBeamAttackCheck, FIELD_TIME),
 	DEFINE_FIELD(CVoltigore, m_fShouldUpdateBeam, FIELD_BOOLEAN),
 	DEFINE_ARRAY(CVoltigore, m_pBeam, FIELD_CLASSPTR, 3),
 	DEFINE_FIELD(CVoltigore, m_glowBrightness, FIELD_INTEGER),
@@ -507,29 +507,24 @@ BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 		return FALSE;
 	}
 
-	if (flDist > 64 && flDist <= 784 && flDot >= 0.5 && gpGlobals->time >= m_flNextZapTime)
+	if (flDist > 128.0f && flDist <= 1024.0f && flDot >= 0.5f && gpGlobals->time >= m_flNextBeamAttackCheck)
 	{
-		if (m_hEnemy != 0)
-		{
-			if (fabs(pev->origin.z - m_hEnemy->pev->origin.z) > 256)
-			{
-				// don't try to spit at someone up really high or down really low.
-				return FALSE;
-			}
-		}
+		Vector vecStart, vecDir;
+		TraceResult tr;
 
-		if (IsMoving())
+		UTIL_MakeVectors( pev->angles );
+		GetAttachment( 3, vecStart, vecDir );
+		UTIL_TraceLine( vecStart, m_hEnemy->BodyTarget( vecStart ), dont_ignore_monsters, ENT( pev ), &tr );
+
+		if( tr.flFraction == 1.0f || tr.pHit == m_hEnemy->edict() )
 		{
-			// don't spit again for a long time, resume chasing enemy.
-			m_flNextZapTime = gpGlobals->time + 5;
+			m_flNextBeamAttackCheck = gpGlobals->time + RANDOM_FLOAT( 5.0f, 10.0f );
+			return TRUE;
 		}
 		else
 		{
-			// not moving, so spit again pretty soon.
-			m_flNextZapTime = gpGlobals->time + 3;
+			m_flNextBeamAttackCheck = gpGlobals->time + 0.2;
 		}
-
-		return TRUE;
 	}
 
 	return FALSE;
@@ -561,7 +556,7 @@ void CVoltigore::GibMonster()
 //=========================================================
 BOOL CVoltigore::CheckMeleeAttack1(float flDot, float flDist)
 {
-	if (flDist <= 120 && flDot >= 0.7)
+	if (HasConditions(bits_COND_SEE_ENEMY) && flDist <= 128.0f && flDot >= 0.6 && m_hEnemy != 0)
 	{
 		return TRUE;
 	}
@@ -677,7 +672,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case VOLTIGORE_AE_PUNCH_SINGLE:
 	{
 		// SOUND HERE!
-		CBaseEntity *pHurt = CheckTraceHullAttack(120, gSkillData.voltigoreDmgPunch, DMG_CLUB);
+		CBaseEntity *pHurt = CheckTraceHullAttack(128.0f, gSkillData.voltigoreDmgPunch, DMG_CLUB);
 		if (pHurt)
 		{
 			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
@@ -704,7 +699,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case VOLTIGORE_AE_PUNCH_BOTH:
 	{
 		// SOUND HERE!
-		CBaseEntity *pHurt = CheckTraceHullAttack(120, gSkillData.voltigoreDmgPunch, DMG_CLUB);
+		CBaseEntity *pHurt = CheckTraceHullAttack(128.0f, gSkillData.voltigoreDmgPunch, DMG_CLUB);
 		if (pHurt)
 		{
 			if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
@@ -758,7 +753,7 @@ void CVoltigore::Spawn()
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability = bits_CAP_TURN_HEAD | bits_CAP_SQUAD;
 
-	m_flNextZapTime	= gpGlobals->time;
+	m_flNextBeamAttackCheck	= gpGlobals->time;
 
 	m_fShouldUpdateBeam = FALSE;
 	m_pBeamGlow = NULL;
@@ -1251,7 +1246,7 @@ void CBabyVoltigore::Spawn()
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability = bits_CAP_TURN_HEAD | bits_CAP_SQUAD;
 
-	m_flNextZapTime	= gpGlobals->time;
+	m_flNextBeamAttackCheck	= gpGlobals->time;
 
 	MonsterInit();
 	pev->view_ofs		= Vector(0, 0, 32);
@@ -1330,7 +1325,11 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 BOOL CBabyVoltigore::CheckMeleeAttack1(float flDot, float flDist)
 {
-	return CSquadMonster::CheckMeleeAttack1(flDot, flDist);
+	if (HasConditions(bits_COND_SEE_ENEMY) && flDist <= 64.0f && flDot >= 0.6f && m_hEnemy != 0)
+	{
+		return TRUE;
+	}
+	return FALSE;
 }
 
 //=========================================================
