@@ -1088,6 +1088,10 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 		WEAPON_NONE
 #endif
 	};
+
+	// Check this before giving ammo as player can get exhaustible weapon along with ammo.
+	const bool hadWeapons = player->m_pActiveItem != NULL;
+
 	int i;
 	for (i=0; i<MAX_AMMO_SLOTS; ++i)
 	{
@@ -1097,8 +1101,6 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 			player->GiveAmmo(m_ammoCounts[i], ammoInfo.pszName);
 		}
 	}
-
-	const bool hadWeapons = player->m_pActiveItem != NULL;
 
 	for (i=0; i<sizeof(weaponFlags)/sizeof(int); ++i)
 	{
