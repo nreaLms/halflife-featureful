@@ -294,6 +294,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.voltigoreHealth = GetSkillCvar( "sk_voltigore_health" );
 	gSkillData.voltigoreDmgPunch = GetSkillCvar( "sk_voltigore_dmg_punch" );
 	gSkillData.voltigoreDmgBeam = GetSkillCvar( "sk_voltigore_dmg_beam" );
+	gSkillData.voltigoreDmgExplode = GetSkillCvar( "sk_voltigore_dmg_explode", "sk_voltigore_dmg_beam" );
 
 	// Baby Voltigore
 	gSkillData.babyVoltigoreHealth = GetSkillCvar( "sk_babyvoltigore_health" );

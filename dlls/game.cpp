@@ -521,6 +521,10 @@ cvar_t	sk_voltigore_dmg_beam1 = { "sk_voltigore_dmg_beam1", "0" };
 cvar_t	sk_voltigore_dmg_beam2 = { "sk_voltigore_dmg_beam2", "0" };
 cvar_t	sk_voltigore_dmg_beam3 = { "sk_voltigore_dmg_beam3", "0" };
 
+cvar_t	sk_voltigore_dmg_explode1 = { "sk_voltigore_dmg_explode1", "0" };
+cvar_t	sk_voltigore_dmg_explode2 = { "sk_voltigore_dmg_explode2", "0" };
+cvar_t	sk_voltigore_dmg_explode3 = { "sk_voltigore_dmg_explode3", "0" };
+
 // Baby Voltigore
 cvar_t	sk_babyvoltigore_health1 = { "sk_babyvoltigore_health1", "0" };
 cvar_t	sk_babyvoltigore_health2 = { "sk_babyvoltigore_health2", "0" };
@@ -1391,6 +1395,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_voltigore_dmg_beam1 );// { "sk_voltigore_dmg_beam1", "0" };
 	CVAR_REGISTER( &sk_voltigore_dmg_beam2 );// { "sk_voltigore_dmg_beam2", "0" };
 	CVAR_REGISTER( &sk_voltigore_dmg_beam3 );// { "sk_voltigore_dmg_beam3", "0" };
+
+	CVAR_REGISTER( &sk_voltigore_dmg_explode1 );
+	CVAR_REGISTER( &sk_voltigore_dmg_explode2 );
+	CVAR_REGISTER( &sk_voltigore_dmg_explode3 );
 
 	// Baby Voltigore
 	CVAR_REGISTER( &sk_babyvoltigore_health1 );// { "sk_babyvoltigore_health1", "0" };

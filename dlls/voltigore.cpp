@@ -1071,7 +1071,7 @@ void CVoltigore::GibBeamDamage()
 {
 	CBaseEntity *pEntity = NULL;
 	// iterate on all entities in the vicinity.
-	const float attackRadius = Q_min(gSkillData.voltigoreDmgBeam * 4, 200);
+	const float attackRadius = Q_max( Q_min(gSkillData.voltigoreDmgExplode * 2, 200.0f), 160.0f);
 	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, attackRadius ) ) != NULL )
 	{
 		if( pEntity->pev->takedamage != DAMAGE_NO )
@@ -1081,7 +1081,7 @@ void CVoltigore::GibBeamDamage()
 				// voltigores don't hurt other voltigores on death
 				const float flDist = ( pEntity->Center() - pev->origin ).Length();
 
-				float flAdjustedDamage = gSkillData.voltigoreDmgBeam;
+				float flAdjustedDamage = gSkillData.voltigoreDmgExplode;
 				flAdjustedDamage -= ( flDist / attackRadius ) * flAdjustedDamage;
 
 				if( !FVisible( pEntity ) )
