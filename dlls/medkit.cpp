@@ -193,7 +193,7 @@ void CMedkit::WeaponIdle(void)
 	{
 		const int maxHeal = Q_min((int)gSkillData.plrDmgMedkit, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 		if (m_secondaryAttack) {
-			const int diff = (int)(m_pPlayer->pev->max_health - m_pPlayer->pev->health);
+			const int diff = (int)ceil(m_pPlayer->pev->max_health - m_pPlayer->pev->health);
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= m_pPlayer->TakeHealth(m_pPlayer, Q_min(maxHeal, diff), DMG_GENERIC);
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/medshot5.wav", 1.0, ATTN_NORM, 0, 100);
 		} else {
