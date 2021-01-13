@@ -1064,12 +1064,20 @@ Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot
 	Vector vecScale;
 	Vector vecGrenadeVel;
 	Vector vecTemp;
-	float flGravity = g_psv_gravity->value;
+	const float flGravity = g_psv_gravity->value;
 
 	// calculate the midpoint and apex of the 'triangle'
 	vecMidPoint = vecSpot1 + ( vecSpot2 - vecSpot1 ) * 0.5f;
 	UTIL_TraceLine( vecMidPoint, vecMidPoint + Vector( 0.0f, 0.0f, maxHeight ), ignore_monsters, ENT( pev ), &tr );
 	vecApex = tr.vecEndPos;
+
+	// apex is too low, try another mid point
+	if (vecApex.z < vecSpot1.z)
+	{
+		vecMidPoint = vecSpot1 + ( Vector(vecSpot2.x, vecSpot2.y, 0.0f) - Vector(vecSpot1.x, vecSpot1.y, 0.0f) ) * 0.5f;
+		UTIL_TraceLine( vecMidPoint, vecMidPoint + Vector( 0.0f, 0.0f, maxHeight ), ignore_monsters, ENT( pev ), &tr );
+		vecApex = tr.vecEndPos;
+	}
 
 	UTIL_TraceLine( vecSpot1, vecApex, dont_ignore_monsters, ENT( pev ), &tr );
 	if( tr.flFraction != 1.0f )
@@ -1081,17 +1089,25 @@ Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot
 	// Don't worry about actually hitting the target, this won't hurt us!
 
 	// How high should the grenade travel (subtract 15 so the grenade doesn't hit the ceiling)?
-	float height = vecApex.z - vecSpot1.z - 15.0f;
+	const float height = vecApex.z - vecSpot1.z - 15.0f;
+	if (height < 0)
+	{
+		ALERT(at_console, "Got negative height %f on big momma splat\n", height);
+		return g_vecZero;
+	}
 	// How fast does the grenade need to travel to reach that height given gravity?
-	float speed = sqrt( 2.0f * flGravity * height );
+	const float speed = sqrt( 2.0f * flGravity * height );
 	
-	// How much time does it take to get there?
-	float time = speed / flGravity;
+	// How much time does it take to get to enemy position
+	const float deltaY = vecSpot2.y - vecSpot1.y;
+	const float d = speed*speed - 2*flGravity*deltaY; // discriminant, a = -flGravity/2, b = speed, c = -deltaY
+	const float time = (-speed - sqrt(d)) / (-flGravity); // quadratic equation
+	//ALERT(at_console, "speed is %f, d is %f, sqrt(d) is %f, time is %f, gravity is %f\n", speed, d, sqrt(d), time, flGravity);
 	vecGrenadeVel = vecSpot2 - vecSpot1;
 	vecGrenadeVel.z = 0.0f;
 	
 	// Travel half the distance to the target in that time (apex is at the midpoint)
-	vecGrenadeVel = vecGrenadeVel * ( 0.5f / time );
+	vecGrenadeVel = vecGrenadeVel / time;
 	// Speed to offset gravity at the desired height
 	vecGrenadeVel.z = speed;
 
