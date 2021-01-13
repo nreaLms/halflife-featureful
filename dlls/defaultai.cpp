@@ -1238,7 +1238,7 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 		}
 	case SCHED_CHASE_ENEMY_FAILED:
 		{
-			return &slFail[0];
+			return GetScheduleOfType(SCHED_FAIL);
 		}
 	case SCHED_SMALL_FLINCH:
 		{
