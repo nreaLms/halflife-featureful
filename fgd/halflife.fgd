@@ -452,6 +452,7 @@
 @BaseClass base(Targetname,Global) = Breakable
 [
 	target(target_destination) : "Target on break"
+	killtarget(target_destination) : "Kill Target on break"
 	health(integer) : "Strength" : 1
 	material(choices) :"Material type" : 0 =
 	[
