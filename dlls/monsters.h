@@ -60,6 +60,8 @@
 #define SF_MONSTER_NONSOLID_CORPSE		65536
 #define SF_MONSTER_FALL_TO_GROUND		0x80000000
 
+#define SF_DEADMONSTER_DONT_DROP 2 // dead corpse don't fall on the ground
+
 // specialty spawnflags
 #define SF_MONSTER_TURRET_AUTOACTIVATE	32
 #define SF_MONSTER_TURRET_STARTINACTIVE	64

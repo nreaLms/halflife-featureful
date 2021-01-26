@@ -188,6 +188,10 @@
 	health(string) : "Custom Health"
 	model(studio) : "Custom Model"
 	gibmodel(studio) : "Custom gib model"
+	spawnflags(Flags) =
+	[
+		2 : "Don't drop to ground" : 0
+	]
 ]
 
 @BaseClass = Classification

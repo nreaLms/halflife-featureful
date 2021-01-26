@@ -3865,7 +3865,7 @@ void CBaseMonster::MonsterInitDead( void )
 	InitBoneControllers();
 
 	pev->solid		= SOLID_BBOX;
-	pev->movetype		= MOVETYPE_TOSS;// so he'll fall to ground
+	pev->movetype = MOVETYPE_TOSS;// so he'll fall to ground
 
 	pev->frame = 0;
 	ResetSequenceInfo();
@@ -3880,8 +3880,20 @@ void CBaseMonster::MonsterInitDead( void )
 
 	// Setup health counters, etc.
 	BecomeDead();
-	SetThink( &CBaseMonster::CorpseFallThink );
-	pev->nextthink = gpGlobals->time + 0.5f;
+
+	if (FBitSet(pev->spawnflags, SF_DEADMONSTER_DONT_DROP))
+	{
+		pev->movetype = MOVETYPE_FLY;
+		pev->effects |= EF_INVLIGHT;
+		SetThink(NULL);
+		SetSequenceBox();
+		UTIL_SetOrigin( pev, pev->origin );
+	}
+	else
+	{
+		SetThink( &CBaseMonster::CorpseFallThink );
+		pev->nextthink = gpGlobals->time + 0.5f;
+	}
 }
 
 //=========================================================
