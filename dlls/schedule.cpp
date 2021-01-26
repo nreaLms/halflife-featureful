@@ -27,6 +27,7 @@
 #include "defaultai.h"
 #include "soundent.h"
 #include "mod_features.h"
+#include "gamerules.h"
 
 extern CGraph WorldGraph;
 
@@ -571,6 +572,38 @@ void CBaseMonster::RunTask( Task_t *pTask )
 			}
 			break;
 		}
+	case TASK_RUN_TO_TARGET_RADIUS:
+	case TASK_WALK_TO_TARGET_RADIUS:
+		{
+			if( m_hTargetEnt == 0 )
+				TaskFail("no target ent");
+			else
+			{
+				float checkDistance = pTask->flData;
+				if (m_pCine != 0 && m_pCine->m_flMoveToRadius >= 1.0f)
+				{
+					checkDistance = m_pCine->m_flMoveToRadius;
+				}
+
+				float distance = ( m_hTargetEnt->pev->origin - pev->origin ).Length2D();
+
+				if( distance <= checkDistance )
+				{
+					TaskComplete();
+					RouteClear();		// Stop moving
+				}
+				else if (MovementIsComplete())
+				{
+					TaskFail("completed movement before reaching the radius");
+					RouteClear();
+				}
+				else if ( pTask->iTask == TASK_RUN_TO_TARGET_RADIUS )
+					m_movementActivity = ACT_RUN;
+				else
+					m_movementActivity = ACT_WALK;
+			}
+			break;
+		}
 	}
 }
 
@@ -952,7 +985,8 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				m_vecMoveGoal = m_hTargetEnt->pev->origin;
-				if( !MoveToTarget( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE ? ACT_RUN : ACT_WALK, 2, pTask->iTask == TASK_MOVE_NEAREST_TO_TARGET_RANGE ) )
+				const bool closest = pTask->iTask == TASK_MOVE_NEAREST_TO_TARGET_RANGE && NpcFollowNearest();
+				if( !MoveToTarget( pTask->iTask == TASK_CATCH_WITH_TARGET_RANGE ? ACT_RUN : ACT_WALK, 2, closest ) )
 					TaskFail("failed to reach target ent");
 			}
 			break;
@@ -986,6 +1020,44 @@ void CBaseMonster::StartTask( Task_t *pTask )
 				}
 			}
 			TaskComplete();
+			break;
+		}
+	case TASK_RUN_TO_TARGET_RADIUS:
+	case TASK_WALK_TO_TARGET_RADIUS:
+		{
+			float radius = pTask->flData;
+			if (m_pCine != 0 && m_pCine->m_flMoveToRadius >= 1.0f)
+			{
+				radius = m_pCine->m_flMoveToRadius;
+			}
+			if (radius < 1.0f)
+				radius = 1.0f;
+
+			Activity newActivity;
+
+			if ( m_hTargetEnt == 0 )
+				TaskFail("no target ent");
+			else if( ( m_hTargetEnt->pev->origin - pev->origin ).Length() < radius )
+				TaskComplete();
+			else
+			{
+				if( pTask->iTask == TASK_RUN_TO_TARGET_RADIUS )
+					newActivity = ACT_WALK;
+				else
+					newActivity = ACT_RUN;
+
+				// This monster can't do this!
+				if( LookupActivity( newActivity ) == ACTIVITY_NOT_AVAILABLE )
+					TaskComplete();
+				else
+				{
+					if( m_hTargetEnt == 0 || !MoveToTarget( newActivity, 2, true ) )
+					{
+						TaskFail("failed to reach target ent");
+						RouteClear();
+					}
+				}
+			}
 			break;
 		}
 	case TASK_CLEAR_MOVE_WAIT:

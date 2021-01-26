@@ -1715,41 +1715,38 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 
 	if (nearest)
 	{
-		if (NpcFollowNearest())
+		SetBits(iMoveFlag, bits_MF_NEAREST_PATH);
+
+		const Vector localMoveNearest = pev->origin + (vecGoal - pev->origin).Normalize() * flDist;
+
+		m_Route[0].vecLocation = localMoveNearest;
+		m_Route[0].iType = iMoveFlag | bits_MF_IS_GOAL;
+
+		m_vecMoveGoal = localMoveNearest;
+
+		Vector apex;
+		const Vector triangulatedNearest = FTriangulateToNearest(pev->origin, vecGoal, flDist, pTarget, apex);
+
+		if ((vecGoal - triangulatedNearest).Length2D() < (vecGoal - localMoveNearest).Length2D())
 		{
-			SetBits(iMoveFlag, bits_MF_NEAREST_PATH);
-
-			const Vector localMoveNearest = pev->origin + (vecGoal - pev->origin).Normalize() * flDist;
-
-			m_Route[0].vecLocation = localMoveNearest;
-			m_Route[0].iType = iMoveFlag | bits_MF_IS_GOAL;
-
-			m_vecMoveGoal = localMoveNearest;
-
-			Vector apex;
-			const Vector triangulatedNearest = FTriangulateToNearest(pev->origin, vecGoal, flDist, pTarget, apex);
-
-			if ((vecGoal - triangulatedNearest).Length2D() < (vecGoal - localMoveNearest).Length2D())
+			if ((apex - triangulatedNearest).Length2D() < 1)
 			{
-				if ((apex - triangulatedNearest).Length2D() < 1)
-				{
-					m_Route[0].vecLocation = triangulatedNearest;
-					m_Route[0].iType = iMoveFlag | bits_MF_IS_GOAL;
-				}
-				else
-				{
-					m_Route[0].vecLocation = apex;
-					m_Route[0].iType = (iMoveFlag | bits_MF_TO_DETOUR);
-
-					m_Route[1].vecLocation = triangulatedNearest;
-					m_Route[1].iType = iMoveFlag | bits_MF_IS_GOAL;
-
-					RouteSimplify( pTarget );
-				}
-				m_vecMoveGoal = triangulatedNearest;
+				m_Route[0].vecLocation = triangulatedNearest;
+				m_Route[0].iType = iMoveFlag | bits_MF_IS_GOAL;
 			}
-			return TRUE;
+			else
+			{
+				m_Route[0].vecLocation = apex;
+				m_Route[0].iType = (iMoveFlag | bits_MF_TO_DETOUR);
+
+				m_Route[1].vecLocation = triangulatedNearest;
+				m_Route[1].iType = iMoveFlag | bits_MF_IS_GOAL;
+
+				RouteSimplify( pTarget );
+			}
+			m_vecMoveGoal = triangulatedNearest;
 		}
+		return TRUE;
 	}
 
 	// b0rk

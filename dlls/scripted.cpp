@@ -99,6 +99,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_targetActivator = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "moveto_radius" ) )
+	{
+		m_flMoveToRadius = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -124,6 +129,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_interruptable, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CCineMonster, m_iszFireOnAnimStart, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_targetActivator, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_flMoveToRadius, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )

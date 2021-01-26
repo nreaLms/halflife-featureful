@@ -6214,6 +6214,7 @@
 		2 : "Possessed Monster"
 		3 : "Forward my activator"
 	]
+	moveto_radius(string) : "Move to radius"
 ]
 
 @PointClass iconsprite("sprites/speaker.spr") base(Targetname) = speaker : "Announcement Speaker"

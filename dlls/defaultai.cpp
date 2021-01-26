@@ -874,6 +874,27 @@ Schedule_t slWalkToScript[] =
 	},
 };
 
+Task_t tlScriptedWalkToRadius[] =
+{
+	{ TASK_WALK_TO_TARGET_RADIUS, (float)0 },
+	{ TASK_FACE_SCRIPT, (float)0 },
+	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_ENABLE_SCRIPT, (float)0 },
+	{ TASK_WAIT_FOR_SCRIPT, (float)0 },
+	{ TASK_PLAY_SCRIPT, (float)0 },
+};
+
+Schedule_t slWalkToScriptRadius[] =
+{
+	{
+		tlScriptedWalkToRadius,
+		ARRAYSIZE( tlScriptedWalkToRadius ),
+		SCRIPT_BREAK_CONDITIONS,
+		0,
+		"WalkToScriptRadius"
+	},
+};
+
 Task_t tlScriptedRun[] =
 {
 	{ TASK_RUN_TO_TARGET, (float)TARGET_MOVE_SCRIPTED },
@@ -894,6 +915,27 @@ Schedule_t slRunToScript[] =
 		SCRIPT_BREAK_CONDITIONS,
 		0,
 		"RunToScript"
+	},
+};
+
+Task_t tlScriptedRunToRadius[] =
+{
+	{ TASK_RUN_TO_TARGET_RADIUS, (float)0 },
+	{ TASK_FACE_SCRIPT, (float)0 },
+	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_ENABLE_SCRIPT, (float)0 },
+	{ TASK_WAIT_FOR_SCRIPT, (float)0 },
+	{ TASK_PLAY_SCRIPT, (float)0 },
+};
+
+Schedule_t slRunToScriptRadius[] =
+{
+	{
+		tlScriptedRunToRadius,
+		ARRAYSIZE( tlScriptedRunToRadius ),
+		SCRIPT_BREAK_CONDITIONS,
+		0,
+		"RunToScriptRadius"
 	},
 };
 
@@ -1179,9 +1221,17 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 				case 4:
 					return slWaitScript;
 				case 1:
+				{
+					if (m_pCine->m_flMoveToRadius >= 1.0f)
+						return slWalkToScriptRadius;
 					return slWalkToScript;
+				}
 				case 2:
+				{
+					if (m_pCine->m_flMoveToRadius >= 1.0f)
+						return slRunToScriptRadius;
 					return slRunToScript;
+				}
 				case 5:
 					return slFaceScript;
 			}
