@@ -6215,6 +6215,12 @@
 		3 : "Forward my activator"
 	]
 	moveto_radius(string) : "Move to radius"
+	m_fTurnType(choices) : "Turn mode" =
+	[
+		0 : "Match Angle"
+		1 : "Turn to face"
+		2 : "Don't Turn"
+	]
 ]
 
 @PointClass iconsprite("sprites/speaker.spr") base(Targetname) = speaker : "Announcement Speaker"

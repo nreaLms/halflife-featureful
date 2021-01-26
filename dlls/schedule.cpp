@@ -1426,9 +1426,17 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_FACE_SCRIPT:
 		{
-			if( m_hTargetEnt != 0 )
+			if ( m_pCine != 0 && m_pCine->m_fMoveTo != 0)
 			{
-				pev->ideal_yaw = UTIL_AngleMod( m_hTargetEnt->pev->angles.y );
+				switch (m_pCine->m_fTurnType)
+				{
+				case 0:
+					pev->ideal_yaw = UTIL_AngleMod( m_pCine->pev->angles.y );
+					break;
+				case 1:
+					MakeIdealYaw ( m_pCine->pev->origin );
+					break;
+				}
 			}
 
 			TaskComplete();
