@@ -40,6 +40,8 @@ public:
 	virtual void Spawn();
 	void Activate();
 
+	int ObjectCaps();
+
 	void InitRope();
 	void EXPORT RopeThink();
 

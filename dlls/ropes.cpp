@@ -29,6 +29,8 @@
 #if FEATURE_ROPE
 #include "ropes.h"
 
+#define SF_ROPE_NO_TRANSITION 2
+
 #define HOOK_CONSTANT	2500.0f
 #define SPRING_DAMPING	0.1f
 #define ROPE_IGNORE_SAMPLES	4		// integrator may be hanging if less than
@@ -73,6 +75,12 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
+	int ObjectCaps() {
+		if (FBitSet(pev->spawnflags, SF_ROPE_NO_TRANSITION))
+			return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION;
+		else
+			return CBaseEntity::ObjectCaps();
+	}
 
 	static CRopeSample* CreateSample();
 
@@ -109,6 +117,13 @@ public:
 
 	void Spawn();
 
+	int ObjectCaps() {
+		if (FBitSet(pev->spawnflags, SF_ROPE_NO_TRANSITION))
+			return CBaseAnimating::ObjectCaps() & ~FCAP_ACROSS_TRANSITION;
+		else
+			return CBaseAnimating::ObjectCaps();
+	}
+
 	void Touch( CBaseEntity* pOther );
 
 	void SetAbsOrigin(const Vector& pos)
@@ -128,6 +143,8 @@ public:
 	void SetMasterRope( CRope* pRope )
 	{
 		mMasterRope = pRope;
+		if (FBitSet(mMasterRope->pev->spawnflags, SF_ROPE_NO_TRANSITION))
+			pev->spawnflags |= SF_ROPE_NO_TRANSITION;
 	}
 
 	virtual int		Save( CSave &save );
@@ -257,6 +274,14 @@ void CRope::Activate()
 	}
 }
 
+int CRope::ObjectCaps()
+{
+	if (FBitSet(pev->spawnflags, SF_ROPE_NO_TRANSITION))
+		return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION;
+	else
+		return CBaseDelay::ObjectCaps();
+}
+
 void CRope::InitRope()
 {
 	AddFlags( FL_ALWAYSTHINK );
@@ -265,6 +290,8 @@ void CRope::InitRope()
 	{
 		m_Samples[ uiSample ] = CRopeSample::CreateSample();
 		UTIL_SetOrigin(m_Samples[ uiSample ]->pev, pev->origin);
+		if (FBitSet(pev->spawnflags, SF_ROPE_NO_TRANSITION))
+			m_Samples[ uiSample ]->pev->spawnflags |= SF_ROPE_NO_TRANSITION;
 	}
 
 	memset( m_Samples + m_NumSamples, 0, sizeof( CRopeSample* ) * ( MAX_SAMPLES - m_NumSamples ) );
