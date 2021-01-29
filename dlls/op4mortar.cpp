@@ -57,7 +57,7 @@ void CMortarShell::Spawn()
 	SetThink(&CMortarShell::BurnThink);
 	SetTouch(&CMortarShell::MortarExplodeTouch);
 
-	pev->dmg = gSkillData.plrDmgRPG*2;
+	pev->dmg = gSkillData.mortarDmg;
 	pev->nextthink = gpGlobals->time + 0.1;
 	m_flIgniteTime = gpGlobals->time;
 	m_iSoundedOff = FALSE;

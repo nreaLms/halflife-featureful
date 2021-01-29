@@ -268,6 +268,9 @@ struct skilldata_t
 	float monDmg556;
 	float monDmg762;
 
+	// mortar
+	float mortarDmg;
+
 	// health/suit charge
 	float suitchargerCapacity;
 	float batteryCapacity;

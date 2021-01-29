@@ -818,6 +818,11 @@ cvar_t	sk_plr_hornet_dmg1 = {"sk_plr_hornet_dmg1","7"};
 cvar_t	sk_plr_hornet_dmg2 = {"sk_plr_hornet_dmg2","7"};
 cvar_t	sk_plr_hornet_dmg3 = {"sk_plr_hornet_dmg3","7"};
 
+// MORTAR
+cvar_t	sk_mortar1 = {"sk_mortar1","200"};
+cvar_t	sk_mortar2 = {"sk_mortar2","200"};
+cvar_t	sk_mortar3 = {"sk_mortar3","200"};
+
 // HEALTH/CHARGE
 cvar_t	sk_suitcharger1	= { "sk_suitcharger1","0" };
 cvar_t	sk_suitcharger2	= { "sk_suitcharger2","0" };		
@@ -1688,6 +1693,11 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sk_plr_hornet_dmg1 );
 	CVAR_REGISTER( &sk_plr_hornet_dmg2 );
 	CVAR_REGISTER( &sk_plr_hornet_dmg3 );
+
+	// MORTAR
+	CVAR_REGISTER( &sk_mortar1 );
+	CVAR_REGISTER( &sk_mortar2 );
+	CVAR_REGISTER( &sk_mortar3 );
 
 	// HEALTH/SUIT CHARGE DISTRIBUTION
 	CVAR_REGISTER( &sk_suitcharger1 );

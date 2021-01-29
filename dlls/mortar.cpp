@@ -27,6 +27,7 @@
 #include "weapons.h"
 #include "decals.h"
 #include "soundent.h"
+#include "skill.h"
 
 class CFuncMortarField : public CBaseToggle
 {
@@ -206,7 +207,7 @@ void CMortar::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT;
 
-	pev->dmg = 200;
+	pev->dmg = gSkillData.mortarDmg;
 
 	SetThink( &CMortar::MortarExplode );
 	pev->nextthink = 0;
