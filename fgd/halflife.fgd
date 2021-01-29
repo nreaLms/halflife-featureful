@@ -840,35 +840,59 @@
 	]
 ]
 
-//
-// Entities
-//
-
-@PointClass base(Targetname, Targetx, Angles) flags(Angle) size(-16 -16 0, 16 16 72) color(255 0 255)=aiscripted_sequence:"AI Scripted Sequence"
+@BaseClass base(Targetname, Targetx, Angles) flags(Angle) size(-16 -16 0, 16 16 72) color(255 0 255) = ScriptedSequence
 [
-	m_iszEntity(string) : "Target Monster"
-	m_iszPlay(string) : "Action Animation" : ""
+	m_iszEntity(string) : "Target Monster [LE]"
+	m_iszPlay(string) : "Action Animation"
+	m_iszIdle(string) : "Idle Animation"
+	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_flRadius(integer) : "Search Radius" : 512
 	m_flRepeat(integer) : "Repeat Rate ms" : 0
-	m_fMoveTo(Choices) : "Move to Position" : 0 =
+	m_fMoveTo(choices) : "Move to Position" : 0 =
 	[
 		0 : "No"
 		1 : "Walk"
 		2 : "Run"
 		4 : "Instantaneous"
 		5 : "No - Turn to Face"
+		7 : "Teleport"
 	]
-	m_iFinishSchedule(Choices) : "AI Schedule when done" : 0 =
+	m_iFinishSchedule(Choices) : "AI Schedule when done" =
 	[
 		0 : "Default AI"
 		1 : "Ambush"
 	]
 	spawnflags(Flags) =
 	[
-		4 : "Repeatable"		: 0
+		4 : "Repeatable"	: 0
 		8 : "Leave Corpse"	: 0
+		32: "No Interruptions"	: 0
+		64: "Override AI"	: 0
+		128: "No Script Movement" : 0
+		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
+		512: "Apply new angles" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
+	]
+	m_targetActivator(choices) : "Target's Activator" =
+	[
+		0 : "No (Default)"
+		1 : "This script"
+		2 : "Possessed Monster"
+		3 : "Forward my activator"
+	]
+	moveto_radius(string) : "Move to radius"
+	m_fTurnType(choices) : "Turn mode" =
+	[
+		0 : "Match Angle"
+		1 : "Turn to face"
+		2 : "Don't Turn"
 	]
 ]
+
+//
+// Entities
+//
+
+@PointClass base(ScriptedSequence) = aiscripted_sequence:"AI Scripted Sequence" []
 
 @BaseClass iconsprite("sprites/ambient_generic.spr") base(Targetname) = Ambient
 [
@@ -6181,51 +6205,11 @@
 	]
 ]
 
-@PointClass base(Targetname, Targetx, Angles) flags(Angle) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sequence : "Scripted Sequence"
+@PointClass base(ScriptedSequence) = scripted_sequence : "Scripted Sequence"
 [
-	m_iszEntity(string) : "Target Monster [LE]"
-	m_iszPlay(string) : "Action Animation"
-	m_iszIdle(string) : "Idle Animation"
-	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
-	m_flRadius(integer) : "Search Radius" : 512
-	m_flRepeat(integer) : "Repeat Rate ms" : 0
-	m_fMoveTo(choices) : "Move to Position" : 0 =
-	[
-		0 : "No"
-		1 : "Walk"
-		2 : "Run"
-		4 : "Instantaneous"
-		5 : "No - Turn to Face"
-		7 : "Teleport"
-	]
-	m_iFinishSchedule(Choices) : "AI Schedule when done" =
-	[
-		0 : "Default AI"
-		1 : "Ambush"
-	]
 	spawnflags(Flags) =
 	[
-		4 : "Repeatable"	: 0
-		8 : "Leave Corpse"	: 0
-		32: "No Interruptions"	: 0
 		64: "Override AI"	: 0
-		128: "No Script Movement" : 0
-		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
-		512: "Apply new angles" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
-	]
-	m_targetActivator(choices) : "Target's Activator" =
-	[
-		0 : "No (Default)"
-		1 : "This script"
-		2 : "Possessed Monster"
-		3 : "Forward my activator"
-	]
-	moveto_radius(string) : "Move to radius"
-	m_fTurnType(choices) : "Turn mode" =
-	[
-		0 : "Match Angle"
-		1 : "Turn to face"
-		2 : "Don't Turn"
 	]
 ]
 
