@@ -6196,6 +6196,7 @@
 		2 : "Run"
 		4 : "Instantaneous"
 		5 : "No - Turn to Face"
+		7 : "Teleport"
 	]
 	m_iFinishSchedule(Choices) : "AI Schedule when done" =
 	[

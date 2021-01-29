@@ -390,18 +390,18 @@ void CCineMonster::PossessEntity( void )
 
 		switch( m_fMoveTo )
 		{
-		case 0: 
+		case SCRIPT_MOVE_NO:
 			pTarget->m_scriptState = SCRIPT_WAIT; 
 			break;
-		case 1: 
+		case SCRIPT_MOVE_WALK:
 			pTarget->m_scriptState = SCRIPT_WALK_TO_MARK; 
 			DelayStart( 1 ); 
 			break;
-		case 2: 
+		case SCRIPT_MOVE_RUN:
 			pTarget->m_scriptState = SCRIPT_RUN_TO_MARK; 
 			DelayStart( 1 ); 
 			break;
-		case 4: 
+		case SCRIPT_MOVE_INSTANT:
 			UTIL_SetOrigin( pTarget->pev, pev->origin );
 			pTarget->pev->ideal_yaw = pev->angles.y;
 			pTarget->pev->avelocity = Vector( 0, 0, 0 );
@@ -411,6 +411,11 @@ void CCineMonster::PossessEntity( void )
 			pTarget->m_scriptState = SCRIPT_WAIT;
 			m_startTime = gpGlobals->time + (float)1E6;
 			// UNDONE: Add a flag to do this so people can fixup physics after teleporting monsters
+			if (ShouldResetOnGroundFlag())
+				pTarget->pev->flags &= ~FL_ONGROUND;
+			break;
+		case SCRIPT_MOVE_TELEPORT:
+			pTarget->m_scriptState = SCRIPT_WAIT;
 			if (ShouldResetOnGroundFlag())
 				pTarget->pev->flags &= ~FL_ONGROUND;
 			break;

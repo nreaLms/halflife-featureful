@@ -977,6 +977,27 @@ Schedule_t slFaceScript[] =
 	},
 };
 
+//LRC
+Task_t tlScriptedTeleport[] =
+{
+	{ TASK_PLANT_ON_SCRIPT,		(float)0		},
+	{ TASK_WAIT_FOR_SCRIPT,		(float)0		},
+	{ TASK_PLAY_SCRIPT,			(float)0		},
+	//{ TASK_END_SCRIPT,			(float)0		},
+};
+
+//LRC
+Schedule_t slTeleportToScript[] =
+{
+	{
+		tlScriptedTeleport,
+		ARRAYSIZE ( tlScriptedTeleport ),
+		SCRIPT_BREAK_CONDITIONS,
+		0,
+		"TeleportToScript"
+	},
+};
+
 //=========================================================
 // Cower - this is what is usually done when attempts
 // to escape danger fail.
@@ -1156,6 +1177,7 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slRunToScript,
 	slWaitScript,
 	slFaceScript,
+	slTeleportToScript,
 	slCower,
 	slTakeCoverFromOrigin,
 	slTakeCoverFromBestSound,
@@ -1217,23 +1239,25 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 
 			switch( m_pCine->m_fMoveTo )
 			{
-				case 0:
-				case 4:
+				case SCRIPT_MOVE_NO:
+				case SCRIPT_MOVE_INSTANT:
 					return slWaitScript;
-				case 1:
+				case SCRIPT_MOVE_WALK:
 				{
 					if (m_pCine->m_flMoveToRadius >= 1.0f)
 						return slWalkToScriptRadius;
 					return slWalkToScript;
 				}
-				case 2:
+				case SCRIPT_MOVE_RUN:
 				{
 					if (m_pCine->m_flMoveToRadius >= 1.0f)
 						return slRunToScriptRadius;
 					return slRunToScript;
 				}
-				case 5:
+				case SCRIPT_MOVE_FACE:
 					return slFaceScript;
+				case SCRIPT_MOVE_TELEPORT:
+					return slTeleportToScript;
 			}
 			break;
 		}

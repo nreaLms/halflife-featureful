@@ -1416,6 +1416,23 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_PLANT_ON_SCRIPT:
 		{
+			if (m_pCine != NULL)
+			{
+				if (m_pCine->m_fMoveTo == SCRIPT_MOVE_TELEPORT)
+				{
+					if (m_hTargetEnt != 0)
+					{
+						if (m_pCine->m_fTurnType == 0)
+							pev->angles.y = m_hTargetEnt->pev->angles.y;
+						else if (m_pCine->m_fTurnType == 1)
+							pev->angles.y = UTIL_VecToYaw(m_hTargetEnt->pev->origin - pev->origin);
+						pev->ideal_yaw = pev->angles.y;
+					}
+					pev->avelocity = Vector( 0, 0, 0 );
+					pev->velocity = Vector( 0, 0, 0 );
+					pev->effects |= EF_NOINTERP;
+				}
+			}
 			if( m_hTargetEnt != 0 )
 			{
 				pev->origin = m_hTargetEnt->pev->origin;	// Plant on target
