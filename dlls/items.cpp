@@ -783,7 +783,6 @@ void CItemGeneric::Spawn(void)
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 
 	pev->takedamage	 = DAMAGE_NO;
-	pev->sequence	 = 0;
 
 	// Call startup sequence to look for a sequence to play.
 	if (!FStringNull(m_iszSequenceName))
