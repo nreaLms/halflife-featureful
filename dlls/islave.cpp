@@ -1422,7 +1422,7 @@ Task_t tlSlaveCoverAndSummon[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_WAIT, (float)0.1 },
-	{ TASK_FIND_COVER_FROM_ENEMY, (float)0 },
+	{ TASK_FIND_RUN_AWAY_FROM_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
@@ -1437,7 +1437,7 @@ Schedule_t slSlaveCoverAndSummon[] =
 		ARRAYSIZE( tlSlaveCoverAndSummon ),
 		bits_COND_NEW_ENEMY,
 		0,
-		"Slave Cover and Summon"
+		"Slave Run Away and Summon"
 	},
 };
 
@@ -1545,19 +1545,7 @@ Schedule_t *CISlave::GetSchedule( void )
 		{
 			if( !HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 			{
-				const int sched = CanSpawnFamiliar() ? (int)SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR : (int)SCHED_TAKE_COVER_FROM_ENEMY;
-				if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) && HasConditions( bits_COND_SEE_ENEMY ) && RANDOM_LONG(0,1)) // give chance to use electro attack to restore health
-				{
-					m_failSchedule = SCHED_RANGE_ATTACK1;
-				}
-				else if (CanSpawnFamiliar())
-				{
-					m_failSchedule = SCHED_ISLAVE_SUMMON_FAMILIAR;
-				}
-				else
-				{
-					m_failSchedule = SCHED_CHASE_ENEMY;
-				}
+				const int sched = CanSpawnFamiliar() ? (int)SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR : (int)SCHED_RUN_AWAY_FROM_ENEMY;
 
 				if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 				{
@@ -1636,7 +1624,7 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 	case SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR:
 		return slSlaveCoverAndSummon;
 	case SCHED_ISLAVE_SUMMON_FAMILIAR:
-		if (m_failSchedule == SCHED_ISLAVE_SUMMON_FAMILIAR) {
+		if (m_failSchedule == Type) {
 			ALERT(at_aiconsole, "Vort gonna spawn familiar because it was set to failschedule\n");
 		}
 		return slSlaveSummon;
@@ -1644,6 +1632,14 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 		return slSlaveHealOrReviveAttack;
 	case SCHED_ISLAVE_GIVE_CHARGE:
 		return slSlaveGiveArmor;
+	case SCHED_RUN_AWAY_FROM_ENEMY_FAILED:
+		{
+			if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) && HasConditions( bits_COND_SEE_ENEMY ) )
+			{
+				return GetScheduleOfType(SCHED_RANGE_ATTACK1);
+			}
+		}
+		break;
 	}
 	
 	return CFollowingMonster::GetScheduleOfType( Type );

@@ -3475,7 +3475,18 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	if( pev->spawnflags & SF_MONSTER_PREDISASTER )
 		ALERT( level, " Pre-Disaster! " );
 	if ( pev->flags & FL_MONSTERCLIP )
-		ALERT( level, "Monsterclip" );
+		ALERT( level, "Monsterclip " );
+
+	if (HasConditions(bits_COND_CAN_MELEE_ATTACK1))
+		ALERT( level, "Can melee attack 1; " );
+	if (HasConditions(bits_COND_CAN_MELEE_ATTACK2))
+		ALERT( level, "Can melee attack 2; " );
+	if (HasConditions(bits_COND_CAN_RANGE_ATTACK1))
+		ALERT( level, "Can range attack 1; " );
+	if (HasConditions(bits_COND_CAN_RANGE_ATTACK2))
+		ALERT( level, "Can range attack 2; " );
+	if (HasConditions(bits_COND_SEE_ENEMY))
+		ALERT(level, "Sees enemy; ");
 }
 
 //=========================================================

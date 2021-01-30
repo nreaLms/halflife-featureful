@@ -1091,7 +1091,29 @@ Schedule_t slTakeCoverFromEnemy[] =
 		ARRAYSIZE( tlTakeCoverFromEnemy ),
 		bits_COND_NEW_ENEMY,
 		0,
-		"tlTakeCoverFromEnemy"
+		"Take Cover From Enemy"
+	},
+};
+Task_t tlRunAwayFromEnemy[] =
+{
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RUN_AWAY_FROM_ENEMY_FAILED },
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_WAIT, (float)0.2 },
+	{ TASK_FIND_RUN_AWAY_FROM_ENEMY, (float)0 },
+	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_FACE_ENEMY, (float)0 },
+	{ TASK_WAIT, (float)1 },
+};
+
+Schedule_t slRunAwayFromEnemy[] =
+{
+	{
+		tlRunAwayFromEnemy,
+		ARRAYSIZE( tlRunAwayFromEnemy ),
+		bits_COND_NEW_ENEMY,
+		0,
+		"Run Away From Enemy"
 	},
 };
 
@@ -1409,6 +1431,14 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_MOVE_TO_ENEMY_LKP:
 		{
 			return slMoveToEnemyLKP;
+		}
+	case SCHED_RUN_AWAY_FROM_ENEMY:
+		{
+			return slRunAwayFromEnemy;
+		}
+	case SCHED_RUN_AWAY_FROM_ENEMY_FAILED:
+		{
+			return GetScheduleOfType(SCHED_FAIL);
 		}
 	default:
 		{
