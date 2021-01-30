@@ -211,7 +211,7 @@ void CGrenade::DangerSoundThink( void )
 		return;
 	}
 
-	CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5f, (int)pev->velocity.Length(), 0.2 );
+	CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5f, pev->dmg * DEFAULT_EXPLOSTION_RADIUS_MULTIPLIER, 0.2 );
 	pev->nextthink = gpGlobals->time + 0.2f;
 
 	if( pev->waterlevel != 0 )
@@ -356,7 +356,7 @@ void CGrenade::Spawn( void )
 	SET_MODEL( ENT( pev ), "models/grenade.mdl" );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
-	pev->dmg = 100;
+	pev->dmg = gSkillData.plrDmgHandGrenade;
 	m_fRegisteredSound = FALSE;
 }
 
