@@ -2136,6 +2136,11 @@ Schedule_t *CHGrunt::GetSchedule( void )
 	return CFollowingMonster::GetSchedule();
 }
 
+bool CHGrunt::CanDropGrenade() const
+{
+	return FBitSet(pev->weapons, HGRUNT_HANDGRENADE);
+}
+
 //=========================================================
 //=========================================================
 Schedule_t *CHGrunt::GetScheduleOfType( int Type ) 
@@ -2162,14 +2167,19 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 			}
 			else
 			{
-				if( RANDOM_LONG( 0, 1 ) )
+				if (CanDropGrenade())
 				{
-					return &slGruntTakeCover[0];
+					if( RANDOM_LONG( 0, 1 ) )
+					{
+						return &slGruntTakeCover[0];
+					}
+					else
+					{
+						return &slGruntGrenadeCover[0];
+					}
 				}
 				else
-				{
-					return &slGruntGrenadeCover[0];
-				}
+					return &slGruntTakeCover[0];
 			}
 		}
 	case SCHED_TAKE_COVER_FROM_BEST_SOUND:

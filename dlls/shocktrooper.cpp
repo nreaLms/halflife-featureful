@@ -107,6 +107,7 @@ public:
 	int DefaultGibCount() {
 		return STRIIPER_GIB_COUNT;
 	}
+	virtual bool CanDropGrenade() const;
 	void DropShockRoach(bool gibbed);
 
 	static TYPEDESCRIPTION m_SaveData[];
@@ -540,6 +541,11 @@ void CStrooper::DeathSound(void)
 void CStrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	CFollowingMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+}
+
+bool CStrooper::CanDropGrenade() const
+{
+	return false;
 }
 
 void CStrooper::DropShockRoach(bool gibbed)

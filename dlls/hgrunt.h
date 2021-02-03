@@ -95,6 +95,7 @@ public:
 	int IRelationship( CBaseEntity *pTarget );
 
 	virtual BOOL FOkToSpeak( void );
+	virtual bool CanDropGrenade() const;
 	void JustSpoke( void );
 	void DropMyItems(BOOL isGibbed);
 	CBaseEntity* DropMyItem(const char *entityName, const Vector &vecGunPos, const Vector &vecGunAngles, BOOL isGibbed);
