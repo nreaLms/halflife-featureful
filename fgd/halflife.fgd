@@ -3046,6 +3046,12 @@
 		32 : "SquadLeader" : 0
 		64 : "IgnorePlayer" : 0
 	]
+	weapons(Choices) : "Weapons" =
+	[
+		0 : "Default (Electricity)"
+		2 : "Electricity + Snarks"
+		4 : "Electricity + Headcrabs"
+	]
 ]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/islave.mdl") = monster_alien_slave_dead : "Dead Vortigaunt"
 [
