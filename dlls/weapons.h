@@ -1307,7 +1307,6 @@ public:
 	void Reload(void);
 	void WeaponTick();
 	void WeaponIdle(void);
-	virtual BOOL ShouldWeaponIdle(void) { return TRUE; }
 
 	int m_iShell;
 
@@ -1352,8 +1351,6 @@ public:
 	void Reload(void);
 	void WeaponIdle(void);
 	//void ItemPostFrame(void);
-
-	BOOL ShouldWeaponIdle(void) { return TRUE; }
 
 	BOOL m_fInZoom;// don't save this.
 
