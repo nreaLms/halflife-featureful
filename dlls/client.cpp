@@ -1825,6 +1825,12 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 						cd->vuser2.y = ( (CKnife *)pl->m_pActiveItem )->m_iSwingMode;
 					}
 #endif
+#if FEATURE_M249
+					else if( pl->m_pActiveItem->m_iId == WEAPON_M249 )
+					{
+						cd->vuser2.y = ( (CM249 *)pl->m_pActiveItem )->m_iVisibleClip;
+					}
+#endif
 				}
 			}
 		}

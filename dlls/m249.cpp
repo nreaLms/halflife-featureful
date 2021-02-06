@@ -232,18 +232,21 @@ void CM249::Reload(void)
 
 void CM249::WeaponTick()
 {
+	if (!m_fInReload)
+	{
+		m_iVisibleClip = m_iClip;
+	}
 	if ( m_fInSpecialReload )
 	{
+		m_iVisibleClip = m_iClip + Q_min( iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 		if (m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
 		{
-			UpdateTape();
 			m_fInSpecialReload = FALSE;
 			SendWeaponAnim( M249_RELOAD1, UseDecrement(), pev->body );
 			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 2.4;
 		}
-
-		return;
 	}
+	UpdateTape(m_iVisibleClip);
 }
 
 void CM249::WeaponIdle(void)
@@ -251,6 +254,8 @@ void CM249::WeaponIdle(void)
 	ResetEmptySound();
 
 	m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
+
+	UpdateTape(m_iVisibleClip);
 
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
@@ -270,10 +275,16 @@ void CM249::WeaponIdle(void)
 
 void CM249::UpdateTape()
 {
-	if (m_iClip == 0) {
+	UpdateTape(m_iClip);
+	m_iVisibleClip = m_iClip;
+}
+
+void CM249::UpdateTape(int clip)
+{
+	if (clip == 0) {
 		pev->body = 8;
-	} else if (m_iClip > 0 && m_iClip < 8) {
-		pev->body = 9 - m_iClip;
+	} else if (clip > 0 && clip < 8) {
+		pev->body = 9 - clip;
 	} else {
 		pev->body = 0;
 	}

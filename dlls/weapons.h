@@ -1322,6 +1322,9 @@ public:
 	const char* MyWModel() { return "models/w_saw.mdl"; }
 
 	void UpdateTape();
+	void UpdateTape(int clip);
+
+	int m_iVisibleClip;
 
 private:
 	unsigned short m_usM249;

@@ -971,6 +971,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CKnife *)player.m_pActiveItem )->m_iSwingMode = (int)from->client.vuser2[1];
 	}
 #endif
+#if FEATURE_M249
+	if( player.m_pActiveItem->m_iId == WEAPON_M249 )
+	{
+		( (CM249 *)player.m_pActiveItem )->m_iVisibleClip = (int)from->client.vuser2[1];
+	}
+#endif
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -1046,6 +1052,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		from->client.vuser2[1] = ( (CKnife *)player.m_pActiveItem )->m_iSwingMode;
 	}
 #endif
+#if FEATURE_M249
+	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
+	{
+		from->client.vuser2[1] = ( (CM249 *)player.m_pActiveItem )->m_iVisibleClip;
+	}
+#endif
 
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
@@ -1063,10 +1075,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 #if FEATURE_M249
 		if (pWeapon == &g_M249) {
-			if (g_M249.m_iClip == 0) {
+			if (g_M249.m_iVisibleClip == 0) {
 				body = 8;
-			} else if (g_M249.m_iClip > 0 && g_M249.m_iClip < 8) {
-				body = 9 - g_M249.m_iClip;
+			} else if (g_M249.m_iVisibleClip > 0 && g_M249.m_iVisibleClip < 8) {
+				body = 9 - g_M249.m_iVisibleClip;
 			} else {
 				body = 0;
 			}
