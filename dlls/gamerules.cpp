@@ -565,6 +565,16 @@ float NpcForgetEnemyTime()
 #endif
 }
 
+bool NpcActiveAfterCombat()
+{
+#if FEATURE_NPC_ACTIVE_AFTER_COMBAT_CVAR
+	extern cvar_t npc_active_after_combat;
+	return npc_active_after_combat.value != 0;
+#else
+	return false;
+#endif
+}
+
 bool NpcFixMeleeDistance()
 {
 #if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR

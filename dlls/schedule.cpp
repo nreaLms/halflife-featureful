@@ -1673,41 +1673,42 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 					return GetScheduleOfType( SCHED_ALERT_SMALL_FLINCH );
 				}
 			}
-			if( HasConditions ( bits_COND_HEAR_SOUND ) )
+			if (NpcActiveAfterCombat())
 			{
-				if (HasMemory(bits_MEMORY_ALERT_AFTER_COMBAT))
+				if( HasConditions ( bits_COND_HEAR_SOUND ) )
 				{
-					CSound *pSound = PBestSound();
-					if (pSound)
+					if (HasMemory(bits_MEMORY_ALERT_AFTER_COMBAT))
 					{
-						const int type = pSound->m_iType;
-						const bool isCombat = (type & bits_SOUND_COMBAT);
-						const bool isDanger = (type & bits_SOUND_DANGER);
-						const bool isPlayer = (type & bits_SOUND_PLAYER);
-						if (isCombat && // it's combat sound
-								!isDanger && // but not danger
-								( !isPlayer || IDefaultRelationship(CLASS_PLAYER) != R_AL )) // and it's not combat sound produced by ally player
+						CSound *pSound = PBestSound();
+						if (pSound)
 						{
-							ALERT(at_aiconsole, "%s trying to investigate sound after combat\n", STRING(pev->classname));
-							return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
+							const int type = pSound->m_iType;
+							const bool isCombat = (type & bits_SOUND_COMBAT);
+							const bool isDanger = (type & bits_SOUND_DANGER);
+							const bool isPlayer = (type & bits_SOUND_PLAYER);
+							if (isCombat && // it's combat sound
+									!isDanger && // but not danger
+									( !isPlayer || IDefaultRelationship(CLASS_PLAYER) != R_AL )) // and it's not combat sound produced by ally player
+							{
+								ALERT(at_aiconsole, "%s trying to investigate sound after combat\n", STRING(pev->classname));
+								return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
+							}
 						}
 					}
+					return GetScheduleOfType( SCHED_ALERT_FACE );
 				}
-				return GetScheduleOfType( SCHED_ALERT_FACE );
+				else if (HasMemory(bits_MEMORY_SHOULD_ROAM_IN_ALERT))
+				{
+					ALERT(at_aiconsole, "%s trying to freeroam after combat\n", STRING(pev->classname));
+					Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
+					return GetScheduleOfType( SCHED_FREEROAM );
+				}
 			}
-			else if (HasMemory(bits_MEMORY_SHOULD_ROAM_IN_ALERT))
-			{
-				ALERT(at_aiconsole, "%s trying to freeroam after combat\n", STRING(pev->classname));
-				Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
-				return GetScheduleOfType( SCHED_FREEROAM );
-			}
-			else
-			{
-				Schedule_t* freeroamSchedule = GetFreeroamSchedule();
-				if (freeroamSchedule)
-					return freeroamSchedule;
-				return GetScheduleOfType( SCHED_ALERT_STAND );
-			}
+
+			Schedule_t* freeroamSchedule = GetFreeroamSchedule();
+			if (freeroamSchedule)
+				return freeroamSchedule;
+			return GetScheduleOfType( SCHED_ALERT_STAND );
 			break;
 		}
 	case MONSTERSTATE_COMBAT:

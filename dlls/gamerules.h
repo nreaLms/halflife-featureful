@@ -382,6 +382,7 @@ bool AllowUseThroughWalls();
 bool NeedUseToTake();
 bool NpcFollowNearest();
 float NpcForgetEnemyTime();
+bool NpcActiveAfterCombat();
 bool NpcFixMeleeDistance();
 bool AllowGrenadeJump();
 
