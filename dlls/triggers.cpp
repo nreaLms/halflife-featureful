@@ -2643,6 +2643,8 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	SET_VIEW( pActivator->edict(), edict() );
 
+	( (CBasePlayer *)pActivator )->m_hViewEntity = this;
+
 	SET_MODEL( ENT( pev ), STRING( pActivator->pev->model ) );
 
 	// follow the player down
@@ -2660,11 +2662,17 @@ void CTriggerCamera::FollowTarget()
 
 	if( m_hTarget == 0 || m_flReturnTime < gpGlobals->time )
 	{
-		if( m_hPlayer->IsAlive() )
+		CBasePlayer* player = static_cast<CBasePlayer*>(static_cast<CBaseEntity*>(m_hPlayer));
+
+		if( player->IsAlive() )
 		{
-			SET_VIEW( m_hPlayer->edict(), m_hPlayer->edict() );
-			( (CBasePlayer *)( (CBaseEntity *)m_hPlayer ) )->EnableControl( TRUE );
+			SET_VIEW( player->edict(), player->edict() );
+			player->EnableControl( TRUE );
 		}
+
+		player->m_hViewEntity = 0;
+		player->m_bResetViewEntity = false;
+
 		SUB_UseTargets( this, USE_TOGGLE, 0 );
 		pev->avelocity = Vector( 0, 0, 0 );
 		m_state = 0;
