@@ -147,9 +147,7 @@ void CPython::PrimaryAttack()
 
 	if( m_iClip <= 0 )
 	{
-		if( !m_fFireOnEmpty )
-			Reload();
-		else
+		if( m_fFireOnEmpty )
 		{
 			PlayEmptySound();
 			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15f;
