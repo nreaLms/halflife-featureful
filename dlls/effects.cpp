@@ -4933,3 +4933,93 @@ void CParticleShooter::ShootParticle()
 		}
 	}
 }
+
+#define EXTINGUISHER_EXPLO_SOUND "weapons/explode3.wav"
+#define EXTINGUISHER_STEAM_SOUND "ambience/steamjet1.wav"
+#define EXTINGUISHER_SPRITE "sprites/xsmoke1.spr"
+
+#define SF_EXTINGUISHER_REPEATABLE 1
+
+class CEnvExtinguisher : public CPointEntity
+{
+public:
+	void	Spawn( void );
+	void	Precache( void );
+
+	void EXPORT ExtinguisherUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void EXPORT TurnOff();
+};
+
+LINK_ENTITY_TO_CLASS( env_extinguisher, CEnvExtinguisher )
+
+void CEnvExtinguisher::Spawn()
+{
+	Precache();
+	CPointEntity::Spawn();
+	SetUse(&CEnvExtinguisher::ExtinguisherUse);
+}
+
+void CEnvExtinguisher::Precache()
+{
+	PRECACHE_MODEL(EXTINGUISHER_SPRITE);
+	PRECACHE_SOUND(EXTINGUISHER_EXPLO_SOUND);
+	PRECACHE_SOUND(EXTINGUISHER_STEAM_SOUND);
+}
+
+void CEnvExtinguisher::ExtinguisherUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	EMIT_SOUND( edict(), CHAN_WEAPON, EXTINGUISHER_EXPLO_SOUND, 1.0f, ATTN_STATIC );
+	EMIT_SOUND( edict(), CHAN_VOICE, EXTINGUISHER_STEAM_SOUND, 1.0f, ATTN_STATIC );
+
+	UTIL_MakeVectors(pev->angles);
+
+	const float scales[3] = {1.0f, 1.5f, 1.75f};
+	const float turnoffTime = gpGlobals->time + 1.5f;
+
+	for (int i=0; i<ARRAYSIZE(scales); ++i)
+	{
+		CSprite* blastSprite = CSprite::SpriteCreate(EXTINGUISHER_SPRITE, pev->origin + i*(gpGlobals->v_forward * 16.0f), FALSE);
+		if (blastSprite)
+		{
+			blastSprite->AnimateAndDie(10.0f);
+			blastSprite->pev->dmgtime = turnoffTime;
+			blastSprite->pev->renderamt = 125;
+			blastSprite->pev->rendermode = kRenderTransAdd;
+			blastSprite->pev->scale = scales[i];
+		}
+	}
+
+	if (!FStringNull(pev->target))
+	{
+		if (!FStringNull(pev->targetname) && FStrEq(STRING(pev->target), STRING(pev->targetname))) {
+			ALERT(at_error, "%s (%s) triggers itself!\n", STRING(pev->classname), STRING(pev->targetname));
+		} else {
+			FireTargets(STRING(pev->target), this, this, USE_ON, 0.0f);
+		}
+	}
+
+	SetThink(&CEnvExtinguisher::TurnOff);
+	pev->nextthink = turnoffTime;
+	SetUse(NULL);
+}
+
+void CEnvExtinguisher::TurnOff()
+{
+	if (!FStringNull(pev->target))
+	{
+		FireTargets(STRING(pev->target), this, this, USE_OFF, 0.0f);
+	}
+
+	STOP_SOUND( edict(), CHAN_VOICE, EXTINGUISHER_STEAM_SOUND );
+
+	SetThink(NULL);
+	if (FBitSet(pev->spawnflags, SF_EXTINGUISHER_REPEATABLE))
+	{
+		SetUse(&CEnvExtinguisher::ExtinguisherUse);
+	}
+	else
+	{
+		SetThink(&CBaseEntity::SUB_Remove);
+		pev->nextthink = gpGlobals->time;
+	}
+}

@@ -1552,6 +1552,15 @@
 	scale(string) : "Custom sprite scale"
 ]
 
+@PointClass base(Targetname, Angles) flags(Angle) size(-8 -8 -8, 8 8 8) = env_extinguisher : "Fire Extinguisher Blast"
+[
+	target(target_destination) : "Target on start/end" : : "Fire this target two times: when the entity is activated and when it's drained."
+	spawnflags(flags) =
+	[
+		1: "Repeatable" : 0
+	]
+]
+
 @PointClass base(Targetname) color(255 255 128) iconsprite("sprites/env_global.spr") = env_global : "Global State"
 [
 	globalstate(string) : "Global State to Set"
