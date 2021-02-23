@@ -297,7 +297,10 @@ void CDeadGenericMonster::Spawn()
 	SetMyHealth( 8 );
 	MonsterInitDead();
 	if (pev->spawnflags & SF_GENERICMONSTER_NOTSOLID)
+	{
 		pev->solid = SOLID_NOT;
+		pev->takedamage = DAMAGE_NO;
+	}
 }
 
 void CDeadGenericMonster::KeyValue( KeyValueData *pkvd )
@@ -347,6 +350,7 @@ void CLoader::Spawn()
 	if (pev->spawnflags & SF_GENERICMONSTER_NOTSOLID)
 	{
 		pev->solid = SOLID_NOT;
+		pev->takedamage = DAMAGE_NO;
 	}
 }
 
