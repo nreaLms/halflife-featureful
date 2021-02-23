@@ -428,6 +428,8 @@ public:
 #define FREEROAM_NEVER 1
 #define FREEROAM_ALWAYS 2
 
+#define SF_DEADMONSTER_NOTSOLID 4
+
 class CDeadMonster : public CBaseMonster
 {
 public:

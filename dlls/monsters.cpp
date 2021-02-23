@@ -3902,6 +3902,12 @@ void CBaseMonster::MonsterInitDead( void )
 		SetThink( &CBaseMonster::CorpseFallThink );
 		pev->nextthink = gpGlobals->time + 0.5f;
 	}
+
+	if ((pev->spawnflags & SF_DEADMONSTER_NOTSOLID) && MyDeadMonsterPointer() != NULL)
+	{
+		pev->solid = SOLID_NOT;
+		pev->takedamage = DAMAGE_NO;
+	}
 }
 
 //=========================================================

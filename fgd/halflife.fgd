@@ -191,6 +191,7 @@
 	spawnflags(Flags) =
 	[
 		2 : "Don't drop to ground" : 0
+		4 : "Not solid"	: 0
 	]
 ]
 
