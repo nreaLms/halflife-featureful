@@ -1793,7 +1793,7 @@
 	]
 ]
 
-@PointClass base(Targetname) = env_stompshooter : "Garg Stomp Shooter" : "Generate garg stomps on each fire. Should be placed on the floor."
+@PointClass base(Targetname) = env_stompshooter : "Generate garg stomps on each fire. Should be placed on the floor."
 [
 	target(target_destination) : "Stomp target" : : "Optional. If not defined, the entity will shoot at the direction of its alignment"
 	netname(string) : "Stomp owner" : : "The stomp will not hurt its owner"
