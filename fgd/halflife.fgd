@@ -1793,6 +1793,16 @@
 	]
 ]
 
+@PointClass base(Targetname) = env_stompshooter : "Garg Stomp Shooter" : "Generate garg stomps on each fire. Should be placed on the floor."
+[
+	target(target_destination) : "Stomp target" : : "Optional. If not defined, the entity will shoot at the direction of its alignment"
+	netname(string) : "Stomp owner" : : "The stomp will not hurt its owner"
+	spawnflags(flags) =
+	[
+		1 : "Fire once" : 0
+	]
+]
+
 @PointClass sprite() base(Targetname, RenderFields, SoundRadius) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
 [
 	model(sprite) : "Sprite Name" : "sprites/fexplo1.spr"

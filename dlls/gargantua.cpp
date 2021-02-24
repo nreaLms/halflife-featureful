@@ -92,8 +92,9 @@ private:
 
 LINK_ENTITY_TO_CLASS( garg_stomp, CStomp )
 
-#if 0
-class CStompShooter : public CBaseEntity
+#define SF_STOMPSHOOTER_FIRE_ONCE 1
+
+class CStompShooter : public CPointEntity
 {
 public:
 	void Spawn();
@@ -112,21 +113,52 @@ void CStompShooter::Spawn()
 
 void CStompShooter::Precache()
 {
-	m_sprite = PRECACHE_MODEL("sprites/flare3.spr");
+	m_sprite = PRECACHE_MODEL(GARG_STOMP_SPRITE_NAME);
+	PRECACHE_SOUND(GARG_STOMP_BUZZ_SOUND);
 }
 
 void CStompShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	TraceResult trace;
-
-	UTIL_MakeVectors( pev->angles );
 	Vector vecStart = pev->origin;
-	Vector vecEnd = (gpGlobals->v_forward * 1024) + vecStart;
+	Vector vecEnd;
+	if (FStringNull(pev->target))
+	{
+		UTIL_MakeVectors( pev->angles );
+		vecEnd = (gpGlobals->v_forward * 1024) + vecStart;
+		TraceResult trace;
+		UTIL_TraceLine( vecStart, vecEnd, ignore_monsters, edict(), &trace );
+		vecEnd = trace.vecEndPos;
+		vecEnd.z = vecStart.z;
+	}
+	else
+	{
+		CBaseEntity* pEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->target));
+		if (pEntity)
+		{
+			vecEnd = pEntity->pev->origin;
+		}
+		else
+		{
+			ALERT(at_error, "%s: can't find target '%s'", STRING(pev->classname), STRING(pev->target));
+			return;
+		}
+	}
 
-	UTIL_TraceLine( vecStart, vecEnd, ignore_monsters, edict(), &trace );
-	CStomp::StompCreate(vecStart, trace.vecEndPos, 0, "sprites/flare3.spr", Vector(225, 170, 80), gSkillData.babygargantuaDmgStomp, 0.5, m_sprite);
+	CBaseEntity* pOwner = NULL;
+	if (!FStringNull(pev->netname))
+	{
+		pOwner = UTIL_FindEntityByTargetname(NULL, STRING(pev->netname));
+	}
+
+	const float scale = pev->scale > 0 ? pev->scale : 1.0f;
+	CStomp::StompCreate(vecStart, vecEnd, 0, GARG_STOMP_SPRITE_NAME, Vector(255, 255, 255), gSkillData.gargantuaDmgStomp, scale, m_sprite, pOwner ? pOwner->edict() : NULL);
+
+	if (FBitSet(pev->spawnflags, SF_STOMPSHOOTER_FIRE_ONCE))
+	{
+		SetThink(&CBaseEntity::SUB_Remove);
+		pev->nextthink = gpGlobals->time;
+	}
 }
-#endif
 
 CStomp *CStomp::StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName, const Vector &color, float damage, float scale, int sprite, edict_t *garg)
 {
