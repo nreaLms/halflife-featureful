@@ -286,7 +286,7 @@ int CKnife::Swing(int fFirst)
 		m_pPlayer->m_iWeaponVolume = flVol * KNIFE_WALLHIT_VOLUME;
 
 		SetThink(&CKnife::Smack);
-		pev->nextthink = UTIL_WeaponTimeBase() + 0.2f;
+		pev->nextthink = gpGlobals->time + 0.2f;
 #endif
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25f;
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.25f;
