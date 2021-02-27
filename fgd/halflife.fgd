@@ -1797,6 +1797,8 @@
 [
 	target(target_destination) : "Stomp target" : : "Optional. If not defined, the entity will shoot at the direction of its alignment"
 	netname(string) : "Stomp owner" : : "The stomp will not hurt its owner"
+	speed(string) : "Initial speed"
+	attenuation(string) : "Sound attenuation"
 	spawnflags(flags) =
 	[
 		1 : "Fire once" : 0

@@ -83,7 +83,8 @@ class CStomp : public CBaseEntity
 public:
 	void Spawn( void );
 	void Think( void );
-	static CStomp *StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName, const Vector& color , float damage, float scale, int sprite, edict_t* garg = NULL);
+	static CStomp *StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName,
+							   const Vector& color , float damage, float scale, int sprite, edict_t* garg = NULL, float soundAttenuation = 0.0f);
 
 private:
 // UNDONE: re-use this sprite list instead of creating new ones all the time
@@ -99,6 +100,7 @@ class CStompShooter : public CPointEntity
 public:
 	void Spawn();
 	void Precache();
+	void KeyValue(KeyValueData* pkvd);
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 
 	int m_sprite;
@@ -115,6 +117,17 @@ void CStompShooter::Precache()
 {
 	m_sprite = PRECACHE_MODEL(GARG_STOMP_SPRITE_NAME);
 	PRECACHE_SOUND(GARG_STOMP_BUZZ_SOUND);
+}
+
+void CStompShooter::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "attenuation" ) )
+	{
+		pev->armortype = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
 }
 
 void CStompShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -151,7 +164,8 @@ void CStompShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 
 	const float scale = pev->scale > 0 ? pev->scale : 1.0f;
-	CStomp::StompCreate(vecStart, vecEnd, 0, GARG_STOMP_SPRITE_NAME, Vector(255, 255, 255), gSkillData.gargantuaDmgStomp, scale, m_sprite, pOwner ? pOwner->edict() : NULL);
+	CStomp::StompCreate(vecStart, vecEnd, pev->speed, GARG_STOMP_SPRITE_NAME, Vector(255, 255, 255),
+						gSkillData.gargantuaDmgStomp, scale, m_sprite, pOwner ? pOwner->edict() : NULL, pev->armortype);
 
 	if (FBitSet(pev->spawnflags, SF_STOMPSHOOTER_FIRE_ONCE))
 	{
@@ -160,7 +174,8 @@ void CStompShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 }
 
-CStomp *CStomp::StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName, const Vector &color, float damage, float scale, int sprite, edict_t *garg)
+CStomp *CStomp::StompCreate(const Vector &origin, const Vector &end, float speed, const char *spriteName,
+							const Vector &color, float damage, float scale, int sprite, edict_t *garg, float soundAttenuation)
 {
 	CStomp *pStomp = GetClassPtr( (CStomp *)NULL );
 
@@ -174,6 +189,7 @@ CStomp *CStomp::StompCreate(const Vector &origin, const Vector &end, float speed
 	pStomp->pev->dmg = damage;
 	pStomp->pev->frags = scale;
 	pStomp->pev->owner = garg;
+	pStomp->pev->armortype = soundAttenuation;
 	pStomp->Spawn();
 
 	return pStomp;
@@ -189,7 +205,7 @@ void CStomp::Spawn( void )
 	pev->framerate = 30;
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 0;
-	EMIT_SOUND_DYN( edict(), CHAN_BODY, GARG_STOMP_BUZZ_SOUND, 1, ATTN_NORM, 0, PITCH_NORM * 0.55f );
+	EMIT_SOUND_DYN( edict(), CHAN_BODY, GARG_STOMP_BUZZ_SOUND, 1, pev->armortype > 0 ? pev->armortype : ATTN_NORM, 0, PITCH_NORM * 0.55f );
 }
 
 #define	STOMP_INTERVAL		0.025f
@@ -210,12 +226,13 @@ void CStomp::Think( void )
 	if( tr.pHit && tr.pHit != pev->owner )
 	{
 		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
-		entvars_t *pevOwner = pev;
-		if( pev->owner )
-			pevOwner = VARS( pev->owner );
-
-		if( pEntity )
+		if (pEntity && pEntity->pev->takedamage)
+		{
+			entvars_t *pevOwner = pev;
+			if( pev->owner )
+				pevOwner = VARS( pev->owner );
 			pEntity->TakeDamage( pev, pevOwner, pev->dmg, DMG_SONIC );
+		}
 	}
 
 	// Accelerate the effect
