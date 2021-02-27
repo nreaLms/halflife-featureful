@@ -2,8 +2,13 @@
 #define SHOCKBEAM_H
 
 #include "mod_features.h"
+#include "cbase.h"
 
 #if FEATURE_SHOCKBEAM
+
+class CBeam;
+class CSprite;
+
 //=========================================================
 // Shockrifle projectile
 //=========================================================

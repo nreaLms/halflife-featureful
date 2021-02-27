@@ -45,7 +45,7 @@ void CShock::Spawn(void)
 
 	CreateEffects();
 	SetThink( &CShock::FlyThink );
-	pev->nextthink = gpGlobals->time;
+	pev->nextthink = gpGlobals->time + 0.01;
 }
 
 void CShock::Precache()
@@ -170,7 +170,7 @@ void CShock::CreateEffects()
 	m_pSprite = CSprite::SpriteCreate( "sprites/flare3.spr", pev->origin, FALSE );
 	m_pSprite->SetAttachment( edict(), 0 );
 	m_pSprite->pev->scale = 0.35;
-	m_pSprite->SetTransparency( kRenderTransAdd, 255, 255, 255, 170, kRenderFxNoDissipation );
+	m_pSprite->SetTransparency( kRenderTransAdd, 255, 255, 255, 170, kRenderFxDistort );
 	//m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
 	//m_pSprite->pev->flags |= FL_SKIPLOCALHOST;
 
