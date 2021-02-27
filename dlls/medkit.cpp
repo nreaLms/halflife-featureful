@@ -25,29 +25,52 @@
 
 LINK_ENTITY_TO_CLASS(weapon_medkit, CMedkit)
 
-CBaseEntity* CMedkit::FindHealTarget()
+void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity);
+
+CBaseEntity* CMedkit::FindHealTarget(bool increasedRadius)
 {
 #ifndef CLIENT_DLL
 	TraceResult tr;
 
-	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
-	Vector vecSrc = m_pPlayer->EyePosition();
-	Vector vecEnd = vecSrc + gpGlobals->v_forward * 64;
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecEnd = vecSrc + gpGlobals->v_forward * (increasedRadius ? 48.0f : 32.0f);
 
-	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, m_pPlayer->edict(), &tr );
+	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
 
-	if (tr.flFraction != 1.0 && !FNullEnt( tr.pHit )) {
-		CBaseEntity *pHit = CBaseEntity::Instance( tr.pHit );
-		if( pHit && pHit->IsAlive() && pHit->pev->health < pHit->pev->max_health) {
-			if (pHit->IsPlayer()) {
-				return pHit;
-			}
-			CBaseMonster* monster = pHit->MyMonsterPointer();
-			if (monster && monster->IDefaultRelationship(m_pPlayer) == R_AL) {
-				return pHit;
+	if( tr.flFraction >= 1.0f )
+	{
+		UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT( m_pPlayer->pev ), &tr );
+		if( tr.flFraction < 1.0f )
+		{
+			// Calculate the point of intersection of the line (or hull) and the object we hit
+			// This is and approximation of the "best" intersection
+			CBaseEntity *pHit = CBaseEntity::Instance( tr.pHit );
+			if( !pHit || pHit->IsBSPModel() )
+			{
+				FindHullIntersection( vecSrc, tr, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX, m_pPlayer->edict() );
 			}
 		}
 	}
+
+	if (!FNullEnt( tr.pHit )) {
+		CBaseEntity* pEntity = CBaseEntity::Instance( tr.pHit );
+		if( pEntity && pEntity->IsAlive() && pEntity->pev->health < pEntity->pev->max_health) {
+			CBaseEntity* foundTarget = NULL;
+			if (pEntity->IsPlayer()) {
+				foundTarget = pEntity;
+			}
+			else
+			{
+				CBaseMonster* monster = pEntity->MyMonsterPointer();
+				if (monster && monster->IDefaultRelationship(m_pPlayer) == R_AL) {
+					foundTarget = pEntity;
+				}
+			}
+			return foundTarget;
+		}
+	}
+
 #endif
 	return NULL;
 }
@@ -199,7 +222,7 @@ void CMedkit::WeaponIdle(void)
 		} else {
 			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 			
-			CBaseEntity* healTarget = FindHealTarget();
+			CBaseEntity* healTarget = FindHealTarget(true);
 	
 			if (healTarget) {
 				const int diff = (int)ceil(healTarget->pev->max_health - healTarget->pev->health);

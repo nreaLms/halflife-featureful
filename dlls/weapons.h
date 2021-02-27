@@ -1206,7 +1206,7 @@ public:
 	void WeaponIdle(void);
 	BOOL PlayEmptySound(void);
 	BOOL ShouldWeaponIdle(void) { return TRUE; }
-	CBaseEntity* FindHealTarget();
+	CBaseEntity* FindHealTarget(bool increasedRadius = false);
 
 	virtual BOOL UseDecrement( void )
 	{
