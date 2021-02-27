@@ -2,7 +2,11 @@
 #ifndef GL_DYNAMIC_H
 #define GL_DYNAMIC_H
 
+#include "mod_features.h"
+
+#if FEATURE_FOG
 #define CLDLL_FOG
+#endif
 
 #ifdef CLDLL_FOG
 

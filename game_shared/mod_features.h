@@ -134,6 +134,9 @@
 // whether items drop instantly when spawned, e.g. from func_breakable (this is default behavior)
 #define FEATURE_ITEM_INSTANT_DROP 1
 
+// enable/disable opengl fog and env_fog
+#define FEATURE_FOG 0
+
 // Experimental Cvars
 #define FEATURE_EXPERIMENTAL_CVARS 1
 

@@ -3881,6 +3881,7 @@ void CEnvDecal::Spawn( void )
 	}
 }
 
+#if FEATURE_FOG
 //=========================================================
 // LRC - env_fog, extended a bit from the DMC version
 //=========================================================
@@ -4093,6 +4094,7 @@ void CEnvFog :: SendData ( Vector col, int iFadeTime, int iStartDist, int iEndDi
 }
 
 LINK_ENTITY_TO_CLASS( env_fog, CEnvFog )
+#endif
 
 #define SF_BEAMTRAIL_OFF 1
 class CEnvBeamTrail : public CPointEntity
