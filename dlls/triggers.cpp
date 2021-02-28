@@ -4072,7 +4072,7 @@ void CTriggerMotion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 			if (TryCalcLocus_Position( this, pActivator, STRING(m_iszPosition), vecTemp )) {
 				if (debug)
 					Motion_PrintVectors("DEBUG: Set origin", pTarget->pev->origin, vecTemp);
-				pTarget->pev->origin = vecTemp;
+				UTIL_SetOrigin(pTarget->pev, vecTemp);
 			}
 			pTarget->pev->flags &= ~FL_ONGROUND;
 			break;
