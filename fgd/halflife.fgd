@@ -3711,6 +3711,10 @@
 ]
 @PointClass base(Monster, FollowingMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hassassin.mdl") = monster_human_assassin : "Human Assassin"
 [
+	spawnflags(Flags) =
+	[
+		1024: "Don't Drop Items" : 0
+	]
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
 		0 : "fly_up"
