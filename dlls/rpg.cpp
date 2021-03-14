@@ -511,7 +511,7 @@ void CRpg::WeaponIdle( void )
 			else
 				iAnim = RPG_FIDGET;
 
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.0f;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 6.1f;
 		}
 
 		SendWeaponAnim( iAnim );
