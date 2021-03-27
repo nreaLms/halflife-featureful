@@ -2392,6 +2392,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pGrunt->m_customSoundMask = m_customSoundMask;
 	pGrunt->m_prisonerTo = m_prisonerTo;
 	pGrunt->m_freeRoam = m_freeRoam;
+	pGrunt->m_activeAfterCombat = m_activeAfterCombat;
 	pGrunt->m_sizeForGrapple = m_sizeForGrapple;
 	PrepareBeforeSpawn(pEntity);
 	DispatchSpawn(pEntity->edict());

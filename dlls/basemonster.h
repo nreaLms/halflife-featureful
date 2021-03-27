@@ -414,6 +414,7 @@ public:
 	int m_customSoundMask;
 	short m_prisonerTo;
 	short m_freeRoam;
+	short m_activeAfterCombat;
 
 	float m_flLastTimeObservedEnemy;
 
@@ -427,6 +428,10 @@ public:
 #define FREEROAM_MAPDEFAULT 0
 #define FREEROAM_NEVER 1
 #define FREEROAM_ALWAYS 2
+
+#define ACTIVE_ALERT_DEFAULT 0
+#define ACTIVE_ALERT_NEVER 1
+#define ACTIVE_ALERT_ALWAYS 2
 
 #define SF_DEADMONSTER_NOTSOLID 4
 

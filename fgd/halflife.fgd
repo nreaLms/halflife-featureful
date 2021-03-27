@@ -323,6 +323,12 @@
 		1 : "Never"
 		2 : "Always"
 	]
+	active_alert(Choices) : "Active alert after combat" : : "Whether monster will walk around a bit and investigate sounds after the combat is over" =
+	[
+		0 : "Default (by cvar or code)"
+		1 : "Never"
+		2 : "Always"
+	]
 	size_for_grapple(Choices) : "Size For Grapple" =
 	[
 		-1 : "Not a Target"
@@ -6023,6 +6029,12 @@
 	freeroam(Choices) : "Monster Roaming (nodes)" =
 	[
 		0 : "Map Default"
+		1 : "Never"
+		2 : "Always"
+	]
+	active_alert(Choices) : "Active alert after combat" : : "Whether monster will walk around a bit and investigate sounds after the combat is over" =
+	[
+		0 : "Default (by cvar or code)"
 		1 : "Never"
 		2 : "Always"
 	]

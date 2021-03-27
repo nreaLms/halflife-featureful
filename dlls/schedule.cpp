@@ -1673,7 +1673,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 					return GetScheduleOfType( SCHED_ALERT_SMALL_FLINCH );
 				}
 			}
-			if (NpcActiveAfterCombat())
+			if (m_activeAfterCombat == ACTIVE_ALERT_ALWAYS || (m_activeAfterCombat == ACTIVE_ALERT_DEFAULT && NpcActiveAfterCombat()))
 			{
 				if( HasConditions ( bits_COND_HEAR_SOUND ) )
 				{
