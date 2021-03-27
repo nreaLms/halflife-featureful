@@ -218,7 +218,7 @@ void CBarney::AlertSound( void )
 {
 	if( m_hEnemy != 0 )
 	{
-		if( FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
+		if( FOkToSpeak(SPEAK_DISREGARD_ENEMY) && !m_hEnemy->IsPlayer() )
 		{
 			PlaySentence( "BA_ATTACK", RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 		}
@@ -780,7 +780,7 @@ void COtis :: AlertSound( void )
 {
 	if ( m_hEnemy != 0 )
 	{
-		if ( FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
+		if ( FOkToSpeak(SPEAK_DISREGARD_ENEMY) && !m_hEnemy->IsPlayer() )
 		{
 			PlaySentence( "OT_ATTACK", RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE );
 		}
