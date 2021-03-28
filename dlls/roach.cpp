@@ -51,6 +51,8 @@ public:
 	int DefaultClassify( void );
 	void Look( int iDistance );
 	int DefaultISoundMask( void );
+	Vector DefaultMinHullSize() { return Vector( -1, -1, 0 ); }
+	Vector DefaultMaxHullSize() { return  Vector( 1, 1, 2 ); }
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
 
@@ -124,7 +126,7 @@ void CRoach::Spawn()
 	Precache();
 
 	SetMyModel( "models/roach.mdl" );
-	UTIL_SetSize( pev, Vector( -1, -1, 0 ), Vector( 1, 1, 2 ) );
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_STEP;
