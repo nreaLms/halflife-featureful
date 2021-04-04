@@ -66,6 +66,7 @@ playermove_t *pmove = NULL;
 #define	STOP_EPSILON		0.1f
 
 #define CTEXTURESMAX		512			// max number of textures loaded
+#include "pm_materials.h"
 
 #define STEP_CONCRETE		0		// default step sound
 #define STEP_METAL		1		// metal floor
