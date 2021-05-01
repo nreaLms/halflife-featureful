@@ -89,6 +89,11 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 		else
 			m_Explosion = expRandom;
 
+		if (strcmp(pkvd->szValue, "1") == 0)
+		{
+			m_Explosion = expDirected;
+		}
+
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "material" ) )
@@ -694,7 +699,7 @@ void CBreakable::Die( void )
 	}
 
 	if( m_Explosion == expDirected )
-		vecVelocity = g_vecAttackDir * 200.0f;
+		vecVelocity = -g_vecAttackDir * 100.0f;
 	else
 	{
 		vecVelocity.x = 0;
