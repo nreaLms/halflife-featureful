@@ -36,6 +36,7 @@
 #include "game.h"
 #include "pm_shared.h"
 #include "hltv.h"
+#include "talkmonster.h"
 
 // #define DUCKFIX
 
@@ -698,6 +699,32 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 		}
 		else
 			SetSuitUpdate( "!HEV_HLTH1", FALSE, SUIT_NEXT_IN_10MIN );	// health dropping
+	}
+
+	if (fTookDamage > 0 && pAttacker->MyMonsterPointer())
+	{
+		for (int i=0; i<TLK_CFRIENDS; ++i)
+		{
+			CTalkMonster::TalkFriend friendClass = CTalkMonster::m_szFriends[i];
+			if (friendClass.category == TALK_FRIEND_SOLDIER)
+			{
+				CBaseEntity* pEntity = NULL;
+				while((pEntity = UTIL_FindEntityByClassname(pEntity, friendClass.name)))
+				{
+					CSquadMonster* pSquadMonster = pEntity->MySquadMonsterPointer();
+					if (pSquadMonster)
+					{
+						CTalkMonster* pTalkMonster = (CTalkMonster*)pSquadMonster;
+						if (pTalkMonster->m_hEnemy == 0 && pTalkMonster->IsFollowingPlayer(this) && pTalkMonster->IRelationship(pAttacker) >= R_DL)
+						{
+							ALERT(at_aiconsole, "%s is gonna attack player's attacker %s\n", STRING(pTalkMonster->pev->classname), STRING(pAttacker->pev->classname));
+							pTalkMonster->SetEnemy(pAttacker);
+							pTalkMonster->SetConditions( bits_COND_NEW_ENEMY );
+						}
+					}
+				}
+			}
+		}
 	}
 
 	return fTookDamage;
