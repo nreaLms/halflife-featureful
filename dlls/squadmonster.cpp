@@ -123,7 +123,22 @@ void CSquadMonster::OnDying()
 
 	if( InSquad() )
 	{
-		MySquadLeader()->SquadRemove( this );
+		CSquadMonster* pSquadLeader = MySquadLeader();
+
+		for( int i = 0; i < MAX_SQUAD_MEMBERS; i++ )
+		{
+			CSquadMonster* pSquadMember = pSquadLeader->MySquadMember( i );
+			if( pSquadMember && pSquadMember != this )
+			{
+				if ((pSquadMember->m_MonsterState == MONSTERSTATE_IDLE ||
+									   pSquadMember->m_MonsterState == MONSTERSTATE_ALERT))
+				{
+					pSquadMember->m_IdealMonsterState = MONSTERSTATE_HUNT;
+				}
+			}
+		}
+
+		pSquadLeader->SquadRemove( this );
 	}
 	CBaseMonster::OnDying();
 }

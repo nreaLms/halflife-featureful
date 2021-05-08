@@ -250,7 +250,8 @@ void CBaseMonster::MaintainSchedule( void )
 			{
 				if( (m_afConditions && !HasConditions( bits_COND_SCHEDULE_DONE ) ) ||
 						( m_pSchedule && (m_pSchedule->iInterruptMask & bits_COND_SCHEDULE_DONE ) ) ||
-						( ( m_MonsterState == MONSTERSTATE_COMBAT ) && ( m_hEnemy == 0 ) )	)
+						( ( m_MonsterState == MONSTERSTATE_COMBAT ) && ( m_hEnemy == 0 ) ) ||
+						m_MonsterState == MONSTERSTATE_HUNT )
 				{
 					GetIdealState();
 				}
@@ -1822,6 +1823,28 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 			}
 
 			return GetScheduleOfType( SCHED_AISCRIPT );
+		}
+	case MONSTERSTATE_HUNT:
+		{
+			m_huntActivitiesCount++;
+			if( HasConditions ( bits_COND_HEAR_SOUND ) )
+			{
+				CSound *pSound = PBestSound();
+				if (pSound)
+				{
+					const int type = pSound->m_iType;
+					const bool isCombat = (type & bits_SOUND_COMBAT);
+					const bool isDanger = (type & bits_SOUND_DANGER);
+					const bool isPlayer = (type & bits_SOUND_PLAYER);
+					if (isCombat && // it's combat sound
+							!isDanger && // but not danger
+							( !isPlayer || IDefaultRelationship(CLASS_PLAYER) != R_AL )) // and it's not combat sound produced by ally player
+					{
+						return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
+					}
+				}
+			}
+			return GetScheduleOfType( SCHED_FREEROAM );
 		}
 	default:
 		{

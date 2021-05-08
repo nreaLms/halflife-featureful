@@ -415,6 +415,7 @@ public:
 	short m_prisonerTo;
 	short m_freeRoam;
 	short m_activeAfterCombat;
+	short m_huntActivitiesCount;
 
 	float m_flLastTimeObservedEnemy;
 

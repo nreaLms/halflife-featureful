@@ -230,6 +230,21 @@ MONSTERSTATE CBaseMonster::GetIdealState( void )
 		HUNT goes to COMBAT upon seeing enemy
 		*/
 		{
+			if( iConditions & ( bits_COND_NEW_ENEMY | bits_COND_SEE_ENEMY ) )
+			{
+				// see an enemy we MUST attack
+				m_IdealMonsterState = MONSTERSTATE_COMBAT;
+			}
+			else if( iConditions & (bits_COND_LIGHT_DAMAGE|bits_COND_HEAVY_DAMAGE) )
+			{
+				MakeIdealYaw( m_vecEnemyLKP );
+				m_IdealMonsterState = MONSTERSTATE_ALERT;
+			}
+			else if (m_huntActivitiesCount >= 4)
+			{
+				m_huntActivitiesCount = 0;
+				m_IdealMonsterState = MONSTERSTATE_ALERT;
+			}
 			break;
 		}
 	case MONSTERSTATE_SCRIPT:
