@@ -961,6 +961,7 @@ Schedule_t *CScientist::GetSchedule( void )
 	{
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_HUNT:
 		if( pEnemy )
 		{
 			if( HasConditions( bits_COND_SEE_ENEMY ) )
@@ -1071,6 +1072,7 @@ MONSTERSTATE CScientist::GetIdealState( void )
 	{
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_HUNT:
 		if( HasConditions( bits_COND_NEW_ENEMY ) )
 		{
 			if( IsFollowingPlayer() )

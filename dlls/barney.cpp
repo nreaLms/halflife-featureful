@@ -620,6 +620,7 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 		break;
 	case MONSTERSTATE_ALERT:	
 	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_HUNT:
 	{
 		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{

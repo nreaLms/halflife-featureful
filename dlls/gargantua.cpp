@@ -1189,6 +1189,7 @@ Schedule_t *CGargantua::GetSchedule()
 	{
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_HUNT:
 	{
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)

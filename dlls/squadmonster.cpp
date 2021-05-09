@@ -130,10 +130,14 @@ void CSquadMonster::OnDying()
 			CSquadMonster* pSquadMember = pSquadLeader->MySquadMember( i );
 			if( pSquadMember && pSquadMember != this )
 			{
-				if ((pSquadMember->m_MonsterState == MONSTERSTATE_IDLE ||
+				if (pSquadMember->m_IdealMonsterState == pSquadMember->m_MonsterState &&
+						pSquadMember->IsAlive() &&
+						pSquadMember->m_hEnemy == 0 && (pSquadMember->m_MonsterState == MONSTERSTATE_IDLE ||
 									   pSquadMember->m_MonsterState == MONSTERSTATE_ALERT))
 				{
 					pSquadMember->m_IdealMonsterState = MONSTERSTATE_HUNT;
+					pSquadMember->m_vecEnemyLKP = pev->origin;
+					pSquadMember->Remember(bits_MEMORY_SHOULD_GO_TO_LKP);
 				}
 			}
 		}
@@ -577,6 +581,7 @@ MONSTERSTATE CSquadMonster::GetIdealState ( void )
 	{
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_HUNT:
 		if( HasConditions( bits_COND_NEW_ENEMY ) && InSquad() )
 		{
 			SquadMakeEnemy( m_hEnemy );

@@ -64,6 +64,10 @@ void CBaseMonster::SetState( MONSTERSTATE State )
 	case MONSTERSTATE_COMBAT:
 		Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT|bits_MEMORY_ALERT_AFTER_COMBAT);
 		break;
+	case MONSTERSTATE_HUNT:
+		if (m_MonsterState != State)
+			m_huntActivitiesCount = 0;
+		break;
 	default:
 		break;
 	}

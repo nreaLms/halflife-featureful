@@ -866,6 +866,7 @@ Schedule_t *CHAssassin::GetSchedule( void )
 	{
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_HUNT:
 		{
 			CSound *pSound = NULL;
 			if( HasConditions( bits_COND_HEAR_SOUND ) )

@@ -1029,6 +1029,7 @@ Schedule_t *CPitdrone::GetSchedule(void)
 		break;
 	}
 	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_HUNT:
 	{
 		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{

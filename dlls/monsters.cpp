@@ -3727,7 +3727,7 @@ int CBaseMonster::CanPlaySequence( BOOL fDisregardMonsterState, int interruptLev
 		return TRUE;
 	}
 	
-	if( m_MonsterState == MONSTERSTATE_ALERT && interruptLevel >= SS_INTERRUPT_BY_NAME )
+	if( (m_MonsterState == MONSTERSTATE_ALERT || m_MonsterState == MONSTERSTATE_HUNT) && interruptLevel >= SS_INTERRUPT_BY_NAME )
 		return TRUE;
 
 	// unknown situation

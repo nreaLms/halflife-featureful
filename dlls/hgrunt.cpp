@@ -2122,6 +2122,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 		break;
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_HUNT:
 	{
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)

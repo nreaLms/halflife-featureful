@@ -1136,11 +1136,11 @@ BOOL CScriptedSentence::AcceptableSpeaker( CBaseMonster *pMonster )
 				return FALSE;
 			break;
 		case REQUIRED_STATE_ALERT:
-			if (pMonster->m_MonsterState != MONSTERSTATE_ALERT)
+			if (pMonster->m_MonsterState != MONSTERSTATE_ALERT && pMonster->m_MonsterState != MONSTERSTATE_HUNT)
 				return FALSE;
 			break;
 		case REQUIRED_STATE_IDLE_OR_ALERT:
-			if (pMonster->m_MonsterState != MONSTERSTATE_IDLE && pMonster->m_MonsterState != MONSTERSTATE_ALERT)
+			if (pMonster->m_MonsterState != MONSTERSTATE_IDLE && pMonster->m_MonsterState != MONSTERSTATE_ALERT && pMonster->m_MonsterState != MONSTERSTATE_HUNT)
 				return FALSE;
 			break;
 		default:

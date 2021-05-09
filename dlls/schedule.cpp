@@ -82,6 +82,10 @@ void CBaseMonster::ChangeSchedule( Schedule_t *pNewSchedule )
 	ASSERT( pNewSchedule != NULL );
 
 	OnChangeSchedule( pNewSchedule );
+	if (m_MonsterState == MONSTERSTATE_HUNT)
+	{
+		m_huntActivitiesCount++;
+	}
 
 	m_pSchedule = pNewSchedule;
 	m_iScheduleIndex = 0;
@@ -1826,7 +1830,6 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 		}
 	case MONSTERSTATE_HUNT:
 		{
-			m_huntActivitiesCount++;
 			if( HasConditions ( bits_COND_HEAR_SOUND ) )
 			{
 				CSound *pSound = PBestSound();
@@ -1843,6 +1846,11 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 						return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
 					}
 				}
+			}
+			if (HasMemory(bits_MEMORY_SHOULD_GO_TO_LKP))
+			{
+				Forget(bits_MEMORY_SHOULD_GO_TO_LKP);
+				return GetScheduleOfType( SCHED_MOVE_TO_ENEMY_LKP );
 			}
 			return GetScheduleOfType( SCHED_FREEROAM );
 		}

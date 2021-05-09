@@ -1560,6 +1560,7 @@ Schedule_t *CISlave::GetSchedule( void )
 		break;
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_HUNT:
 	{
 		if( !HasConditions( bits_COND_NEW_ENEMY | bits_COND_SEE_ENEMY ) ) // ensure there's no enemy
 		{
