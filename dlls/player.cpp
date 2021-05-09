@@ -701,25 +701,32 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 			SetSuitUpdate( "!HEV_HLTH1", FALSE, SUIT_NEXT_IN_10MIN );	// health dropping
 	}
 
-	if (fTookDamage > 0 && pAttacker->MyMonsterPointer())
+	if (fTookDamage > 0)
 	{
-		for (int i=0; i<TLK_CFRIENDS; ++i)
+		CBaseMonster* pAttackerMonster = pAttacker->MyMonsterPointer();
+		if (pAttackerMonster &&
+				pAttackerMonster->IRelationship(this) >= R_DL) // that was intentional attack
 		{
-			CTalkMonster::TalkFriend friendClass = CTalkMonster::m_szFriends[i];
-			if (friendClass.category == TALK_FRIEND_SOLDIER)
+			for (int i=0; i<TLK_CFRIENDS; ++i)
 			{
-				CBaseEntity* pEntity = NULL;
-				while((pEntity = UTIL_FindEntityByClassname(pEntity, friendClass.name)))
+				CTalkMonster::TalkFriend friendClass = CTalkMonster::m_szFriends[i];
+				if (friendClass.category == TALK_FRIEND_SOLDIER)
 				{
-					CSquadMonster* pSquadMonster = pEntity->MySquadMonsterPointer();
-					if (pSquadMonster)
+					CBaseEntity* pEntity = NULL;
+					while((pEntity = UTIL_FindEntityByClassname(pEntity, friendClass.name)) != NULL)
 					{
-						CTalkMonster* pTalkMonster = (CTalkMonster*)pSquadMonster;
-						if (pTalkMonster->m_hEnemy == 0 && pTalkMonster->IsFollowingPlayer(this) && pTalkMonster->IRelationship(pAttacker) >= R_DL)
+						CSquadMonster* pSquadMonster = pEntity->MySquadMonsterPointer();
+						if (pSquadMonster)
 						{
-							ALERT(at_aiconsole, "%s is gonna attack player's attacker %s\n", STRING(pTalkMonster->pev->classname), STRING(pAttacker->pev->classname));
-							pTalkMonster->SetEnemy(pAttacker);
-							pTalkMonster->SetConditions( bits_COND_NEW_ENEMY );
+							CFollowingMonster* pFollowingMonster = pSquadMonster->MyFollowingMonsterPointer();
+							if (pFollowingMonster && pFollowingMonster->m_hEnemy == 0 &&
+									pFollowingMonster->m_pSchedule && (pFollowingMonster->m_pSchedule->iInterruptMask & bits_COND_NEW_ENEMY) &&
+									pFollowingMonster->IsFollowingPlayer(this) && pFollowingMonster->IRelationship(pAttacker) >= R_DL)
+							{
+								ALERT(at_aiconsole, "%s is gonna attack player's attacker %s\n", STRING(pFollowingMonster->pev->classname), STRING(pAttacker->pev->classname));
+								pFollowingMonster->SetEnemy(pAttacker);
+								pFollowingMonster->SetConditions( bits_COND_NEW_ENEMY );
+							}
 						}
 					}
 				}
