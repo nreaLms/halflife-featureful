@@ -1713,7 +1713,15 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 			Schedule_t* freeroamSchedule = GetFreeroamSchedule();
 			if (freeroamSchedule)
 				return freeroamSchedule;
-			return GetScheduleOfType( SCHED_ALERT_STAND );
+
+			if( HasConditions ( bits_COND_HEAR_SOUND ) )
+			{
+				return GetScheduleOfType( SCHED_ALERT_FACE );
+			}
+			else
+			{
+				return GetScheduleOfType( SCHED_ALERT_STAND );
+			}
 			break;
 		}
 	case MONSTERSTATE_COMBAT:
