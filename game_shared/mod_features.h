@@ -75,6 +75,10 @@
 
 #define FEATURE_DYING_MONSTERS_DONT_COLLIDE_WITH_PLAYER 0
 
+/* Whether a new squad leader gets chosen if the original one dies.
+ * This prevents squad dissolving */
+#define FEATURE_DELEGATE_SQUAD_LEADERSHIP 1
+
 // New weapons
 #define FEATURE_PIPEWRENCH (0 || FEATURE_OPFOR_WEAPONS)
 #define FEATURE_KNIFE (0 || FEATURE_OPFOR_WEAPONS)

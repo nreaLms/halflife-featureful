@@ -25,6 +25,7 @@
 #include "saverestore.h"
 #include "squadmonster.h"
 #include "plane.h"
+#include "mod_features.h"
 
 //=========================================================
 // Save/Restore
@@ -165,13 +166,50 @@ void CSquadMonster::SquadRemove( CSquadMonster *pRemove )
 	// If I'm the leader, get rid of my squad
 	if( pRemove == MySquadLeader() )
 	{
+		int squadCountLeft = 0;
+		CSquadMonster* newLeader = NULL;
+
+#if FEATURE_DELEGATE_SQUAD_LEADERSHIP
 		for( int i = 0; i < MAX_SQUAD_MEMBERS - 1; i++ )
 		{
 			CSquadMonster *pMember = MySquadMember( i );
-			if( pMember )
+			if (pMember && pMember->IsAlive())
 			{
-				pMember->m_hSquadLeader = NULL;
+				squadCountLeft++;
+
+				// choose the healthiest member as a new leader
+				if (!newLeader || pMember->pev->health > newLeader->pev->health)
+					newLeader = pMember;
+			}
+		}
+#endif
+
+		if (newLeader && squadCountLeft > 1)
+		{
+			newLeader->m_hSquadLeader = newLeader;
+
+			for( int i = 0; i < MAX_SQUAD_MEMBERS - 1; i++ )
+			{
+				CSquadMonster *pMember = MySquadMember( i );
+				if ( pMember && pMember != newLeader )
+				{
+					pMember->m_hSquadLeader = newLeader;
+					if (pMember->IsAlive())
+						newLeader->SquadAdd(pMember);
+				}
 				m_hSquadMember[i] = NULL;
+			}
+		}
+		else
+		{
+			for( int i = 0; i < MAX_SQUAD_MEMBERS - 1; i++ )
+			{
+				CSquadMonster *pMember = MySquadMember( i );
+				if( pMember )
+				{
+					pMember->m_hSquadLeader = NULL;
+					m_hSquadMember[i] = NULL;
+				}
 			}
 		}
 	}
