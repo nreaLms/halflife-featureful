@@ -4876,6 +4876,11 @@
 		18 : "jump_over_counter"
 	]
 	initammo(string) : "Initial Ammo" : "6"
+	netname(string) : "Squad Name"
+	spawnflags(Flags) =
+	[
+		32 : "SquadLeader" : 0
+	]
 ]
 
 @PointClass base(DeadMonster) studio("models/pit_drone.mdl") = monster_pitdrone_dead : "Dead Pitdrone"
