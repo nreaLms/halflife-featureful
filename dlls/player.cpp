@@ -701,7 +701,7 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 			SetSuitUpdate( "!HEV_HLTH1", FALSE, SUIT_NEXT_IN_10MIN );	// health dropping
 	}
 
-	if (fTookDamage > 0)
+	if (fTookDamage > 0 && pAttacker != NULL)
 	{
 		CBaseMonster* pAttackerMonster = pAttacker->MyMonsterPointer();
 		if (pAttackerMonster &&
