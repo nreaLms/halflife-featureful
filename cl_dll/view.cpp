@@ -26,6 +26,7 @@
 #include "shake.h"
 #include "hltv.h"
 
+extern cvar_t *cl_viewroll;
 extern cvar_t *cl_rollspeed;
 extern cvar_t *cl_rollangle;
 
@@ -337,13 +338,16 @@ void V_CalcViewRoll( struct ref_params_s *pparams )
 	if( !viewentity )
 		return;
 
-#if FEATURE_STRAFE_BOBBING
-	pparams->viewangles[ROLL] = V_CalcRoll (pparams->viewangles, pparams->simvel, cl_rollangle->value, cl_rollspeed->value ) * 4;
-#else
-	float side;
-	side = V_CalcRoll( viewentity->angles, pparams->simvel, pparams->movevars->rollangle, pparams->movevars->rollspeed );
-	pparams->viewangles[ROLL] += side;
-#endif
+	if (cl_viewroll && cl_viewroll->value > 0)
+	{
+		pparams->viewangles[ROLL] = V_CalcRoll (pparams->viewangles, pparams->simvel, cl_rollangle->value, cl_rollspeed->value ) * 4;
+	}
+	else
+	{
+		float side;
+		side = V_CalcRoll( viewentity->angles, pparams->simvel, pparams->movevars->rollangle, pparams->movevars->rollspeed );
+		pparams->viewangles[ROLL] += side;
+	}
 
 	if( pparams->health <= 0 && ( pparams->viewheight[2] != 0 ) )
 	{
@@ -600,11 +604,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 
 	for( i = 0; i < 3; i++ )
 	{
-#if FEATURE_STRAFE_BOBBING
-		view->origin[i] += bob * 0.4f * pparams->right[i];
-#else
 		view->origin[i] += bob * 0.4f * pparams->forward[i];
-#endif
 	}
 	view->origin[2] += bob;
 
