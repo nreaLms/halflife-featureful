@@ -1016,6 +1016,11 @@ void CTriggerHurt::KeyValue(KeyValueData *pkvd)
 		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq(pkvd->szKeyName, "min_health" ) )
+	{
+		pev->dmg_save = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
 }
@@ -1286,7 +1291,12 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 	if( fldmg < 0 )
 		pOther->TakeHealth( this, -fldmg, m_bitsDamageInflict );
 	else
+	{
+		if (pev->dmg_save > 0) {
+			fldmg = Q_max(Q_min(pOther->pev->health - pev->dmg_save, fldmg), 0.0f);
+		}
 		pOther->TakeDamage( pev, pev, fldmg, m_bitsDamageInflict|DmgGibFlag() );
+	}
 
 	// Store pain time so we can get all of the other entities on this frame
 	pev->pain_finished = gpGlobals->time;
@@ -4708,6 +4718,11 @@ void CTriggerHurtRemote::KeyValue(KeyValueData *pkvd)
 		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq(pkvd->szKeyName, "min_health" ) )
+	{
+		pev->dmg_save = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue( pkvd );
 }
@@ -4788,6 +4803,11 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 	CBaseEntity* pActivator = m_hActivator;
 	if (pev->dmg >= 0)
 	{
+		float fldmg = pev->dmg;
+		if (pev->dmg_save > 0) {
+			fldmg = Q_max(Q_min(pTarget->pev->health - pev->dmg_save, fldmg), 0.0f);
+		}
+
 		entvars_t* pevAttacker = pActivator != 0 ? pActivator->pev : pev;
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_INSTANT_KILL))
 		{
@@ -4802,7 +4822,7 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 		}
 		else
 		{
-			pTarget->TakeDamage(pTarget->pev, pevAttacker, pev->dmg, DamageType());
+			pTarget->TakeDamage(pTarget->pev, pevAttacker, fldmg, DamageType());
 		}
 	}
 	else
