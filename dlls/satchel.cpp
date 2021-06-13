@@ -192,7 +192,7 @@ int CSatchel::AddDuplicate( CBasePlayerWeapon *pOriginal )
 {
 	CSatchel *pSatchel;
 
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	if( bIsMultiplayer() )
 #else
 	if( g_pGameRules->IsMultiplayer() )
@@ -382,7 +382,7 @@ void CSatchel::Throw( void )
 {
 	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 	{
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		Vector vecSrc = m_pPlayer->pev->origin;
 
 		Vector vecThrow = gpGlobals->v_forward * 274 + m_pPlayer->pev->velocity;
@@ -436,7 +436,7 @@ void CSatchel::WeaponIdle( void )
 			return;
 		}
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		m_pPlayer->pev->viewmodel = MAKE_STRING( "models/v_satchel.mdl" );
 		m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel.mdl" );
 #else

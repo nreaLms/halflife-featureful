@@ -32,7 +32,7 @@ LINK_ENTITY_TO_CLASS( weapon_gauss, CGauss )
 
 float CGauss::GetFullChargeTime( void )
 {
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	if( bIsMultiplayer() )
 #else
 	if( g_pGameRules->IsMultiplayer() )
@@ -44,7 +44,7 @@ float CGauss::GetFullChargeTime( void )
 	return 4.0f;
 }
 
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 extern int g_irunninggausspred;
 #endif
 
@@ -103,12 +103,6 @@ int CGauss::GetItemInfo( ItemInfo *p )
 	p->iDropAmmo = AMMO_URANIUMBOX_GIVE;
 
 	return 1;
-}
-
-BOOL CGauss::IsUseable()
-{
-	// Currently charging, allow the player to fire it first. - Solokiller
-	return CBasePlayerWeapon::IsUseable() || m_fInAttack != 0;
 }
 
 BOOL CGauss::Deploy()
@@ -212,26 +206,10 @@ void CGauss::SecondaryAttack()
 	}
 	else
 	{
-		// Moved to before the ammo burn.
-		// Because we drained 1 when m_InAttack == 0, then 1 again now before checking if we're out of ammo,
-		// this resuled in the player having -1 ammo, which in turn caused CanDeploy to think it could be deployed.
-		// This will need to be fixed further down the line by preventing negative ammo unless explicitly required (infinite ammo?),
-		// But this check will prevent the problem for now. - Solokiller
-		// TODO: investigate further.
-		if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
-                {
-                        // out of ammo! force the gun to fire
-                        StartFire();
-                        m_fInAttack = 0;
-                        m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0f;
-                        m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1;
-                        return;
-                }
-
 		// during the charging process, eat one bit of ammo every once in a while
 		if( UTIL_WeaponTimeBase() >= m_pPlayer->m_flNextAmmoBurn && m_pPlayer->m_flNextAmmoBurn != 1000 )
 		{
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 			if( bIsMultiplayer() )
 #else
 			if( g_pGameRules->IsMultiplayer() )
@@ -245,6 +223,16 @@ void CGauss::SecondaryAttack()
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 				m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.3f;
 			}
+		}
+
+		if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
+		{
+			// out of ammo! force the gun to fire
+			StartFire();
+			m_fInAttack = 0;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0f;
+			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1;
+			return;
 		}
 
 		if( UTIL_WeaponTimeBase() >= m_pPlayer->m_flAmmoStartCharge )
@@ -282,7 +270,7 @@ void CGauss::SecondaryAttack()
 			m_fInAttack = 0;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0f;
 			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0f;
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 			m_pPlayer->TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), 50, DMG_SHOCK );
 			UTIL_ScreenFade( m_pPlayer, Vector( 255, 128, 0 ), 2, 0.5f, 128, FFADE_IN );
 #endif
@@ -320,7 +308,7 @@ void CGauss::StartFire( void )
 	if( m_fPrimaryFire )
 	{
 		// fixed damage on primary attack
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 		flDamage = 20.0f;
 #else 
 		flDamage = gSkillData.plrDmgGauss;
@@ -330,7 +318,7 @@ void CGauss::StartFire( void )
 	if( m_fInAttack != 3 )
 	{
 		//ALERT( at_console, "Time:%f Damage:%f\n", gpGlobals->time - m_pPlayer->m_flStartCharge, flDamage );
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		float flZVel = m_pPlayer->pev->velocity.z;
 
 		if( !m_fPrimaryFire )
@@ -358,7 +346,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 {
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 	TraceResult tr, beam_tr;
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	Vector vecSrc = vecOrigSrc;
 	Vector vecDest = vecSrc + vecDir * 8192.0f;
 	edict_t	*pentIgnore;
@@ -388,7 +376,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 	//ALERT( at_console, "%f %f\n", tr.flFraction, flMaxFrac );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	while( flDamage > 10 && nMaxHits > 0 )
 	{
 		nMaxHits--;
@@ -560,10 +548,6 @@ void CGauss::WeaponIdle( void )
 		StartFire();
 		m_fInAttack = 0;
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
-
-		// Need to set m_flNextPrimaryAttack so the weapon gets a chance to complete its secondary fire animation. - Solokiller
-		if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
-			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5f;
 	}
 	else
 	{
@@ -584,7 +568,7 @@ void CGauss::WeaponIdle( void )
 			iAnim = GAUSS_FIDGET;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.0f;
 		}
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		SendWeaponAnim( iAnim );
 #endif
 	}

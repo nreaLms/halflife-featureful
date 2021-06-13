@@ -1226,7 +1226,7 @@ void EV_FireRpg( event_args_t *args )
 //======================
 
 //======================
-//	    EGON END
+//	    EGON START
 //======================
 
 int g_fireAnims1[] = { EGON_FIRE1, EGON_FIRE2, EGON_FIRE3, EGON_FIRE4 };
@@ -1341,10 +1341,11 @@ void EV_EgonFire( event_args_t *args )
 			float g = 50.0f;
 			float b = 125.0f;
 
-			if( IEngineStudio.IsHardware() )
+			// if( IEngineStudio.IsHardware() )
 			{
-				r /= 100.0f;
-				g /= 100.0f;
+				r /= 255.0f;
+				g /= 255.0f;
+				b /= 255.0f;
 			}
 
 			pBeam = gEngfuncs.pEfxAPI->R_BeamEntPoint( idx | 0x1000, tr.endpos, iBeamModelIndex, 99999, 3.5, 0.2, 0.7, 55, 0, 0, r, g, b );

@@ -230,7 +230,7 @@ void CM249::Reload(void)
 	}
 }
 
-void CM249::WeaponTick()
+void CM249::ItemPostFrame()
 {
 	if (!m_fInReload)
 	{
@@ -247,6 +247,8 @@ void CM249::WeaponTick()
 		}
 	}
 	UpdateTape(m_iVisibleClip);
+
+	CBasePlayerWeapon::ItemPostFrame();
 }
 
 void CM249::WeaponIdle(void)

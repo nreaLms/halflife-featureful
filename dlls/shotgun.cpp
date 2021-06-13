@@ -118,7 +118,7 @@ void CShotgun::PrimaryAttack()
 	m_iClip--;
 
 	int flags;
-#if defined( CLIENT_WEAPONS )
+#if CLIENT_WEAPONS
 	flags = FEV_NOTHOST;
 #else
 	flags = 0;
@@ -133,7 +133,7 @@ void CShotgun::PrimaryAttack()
 
 	Vector vecDir;
 
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	if( bIsMultiplayer() )
 #else
 	if( g_pGameRules->IsMultiplayer() )
@@ -188,7 +188,7 @@ void CShotgun::SecondaryAttack( void )
 	m_iClip -= 2;
 
 	int flags;
-#if defined( CLIENT_WEAPONS )
+#if CLIENT_WEAPONS
 	flags = FEV_NOTHOST;
 #else
 	flags = 0;
@@ -203,7 +203,7 @@ void CShotgun::SecondaryAttack( void )
 
 	Vector vecDir;
 
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	if( bIsMultiplayer() )
 #else
 	if( g_pGameRules->IsMultiplayer() )
@@ -283,7 +283,7 @@ void CShotgun::Reload( void )
 	}
 }
 
-void CShotgun::WeaponTick()
+void CShotgun::ItemPostFrame( void )
 {
 	if( m_flPumpTime && m_flPumpTime < gpGlobals->time )
 	{
@@ -291,6 +291,8 @@ void CShotgun::WeaponTick()
 		EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG( 0, 0x1f ) );
 		m_flPumpTime = 0;
 	}
+
+	CBasePlayerWeapon::ItemPostFrame();
 }
 
 void CShotgun::WeaponIdle( void )

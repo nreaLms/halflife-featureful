@@ -1,4 +1,4 @@
-# Half-Life SDK for Xash3D and GoldSource [![Build Status](https://travis-ci.org/FreeSlave/hlsdk-xash3d.svg)](https://travis-ci.org/FreeSlave/hlsdk-xash3d) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FreeSlave/hlsdk-xash3d?svg=true)](https://ci.appveyor.com/project/FreeSlave/hlsdk-xash3d)
+# Half-Life SDK for Xash3D [![Build Status](https://github.com/FreeSlave/hlsdk-xash3d/actions/workflows/.github.yml/badge.svg?branch=modbase)](https://github.com/FreeSlave/hlsdk-xash3d/actions/workflows/.github.yml) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FreeSlave/hlsdk-xash3d?svg=true)](https://ci.appveyor.com/project/a1batross/hlsdk-xash3d)
 
 Half-Life SDK for Xash3D & GoldSource with some fixes and features that can be useful for mod makers. Read the [wiki](https://github.com/FreeSlave/hlsdk-xash3d/wiki) to see what's implemented.
 
