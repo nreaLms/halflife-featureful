@@ -102,7 +102,7 @@ const char *GetAuthID( CBaseEntity *pPlayer )
 		{
 			char *pUid;
 
-			snprintf( uid, 32, "IP_%s", ip );
+			_snprintf( uid, 32, "IP_%s", ip );
 
 			for( pUid = uid; *pUid; pUid++ )
 				if( *pUid == '.' ) *pUid = '_';
