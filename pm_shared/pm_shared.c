@@ -2482,6 +2482,9 @@ void PM_Jump( void )
 		return;
 	}
 
+	if( pmove->flags & FL_FROZEN )
+		return;
+
 	tfc = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "tfc" ) ) == 1 ? true : false;
 
 	// Spy that's feigning death cannot jump
