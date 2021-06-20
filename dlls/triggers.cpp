@@ -3145,24 +3145,82 @@ edict_t* CTriggerXenReturn::GetTeleportTarget()
 
 #endif
 
-class CTriggerPlayerFreeze : public CBaseDelay
+enum
+{
+	USE_FREEZE_OFF = -1,
+	USE_FREEZE_TOGGLE = 0,
+	USE_FREEZE_ON = 1,
+	USE_FREEZE_COPY_INPUT = 2,
+};
+
+class CTriggerPlayerFreeze : public CPointEntity
 {
 public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	int ObjectCaps( void ) { return CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	void KeyValue( KeyValueData *pkvd );
 };
 
 LINK_ENTITY_TO_CLASS( trigger_playerfreeze, CTriggerPlayerFreeze )
+
+void CTriggerPlayerFreeze::KeyValue( KeyValueData *pkvd )
+{
+	if ( FStrEq( pkvd->szKeyName, "use_type") ) {
+		pev->impulse = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	} else {
+		CPointEntity::KeyValue( pkvd );
+	}
+}
 
 void CTriggerPlayerFreeze::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	if( !pActivator || !pActivator->IsPlayer() )
 		pActivator = CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
 
-	if( pActivator && (pActivator->pev->flags & FL_FROZEN) )
-		( (CBasePlayer *)( (CBaseEntity *)pActivator ) )->EnableControl( TRUE );
-	else
-		( (CBasePlayer *)( (CBaseEntity *)pActivator ) )->EnableControl( FALSE );
+	if (pActivator)
+	{
+		CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
+
+		int freezeType = pev->impulse;
+		if (pev->impulse == USE_FREEZE_COPY_INPUT)
+		{
+			if (useType == USE_TOGGLE)
+			{
+				freezeType = USE_FREEZE_TOGGLE;
+			}
+			else if (useType == USE_OFF)
+			{
+				freezeType = USE_FREEZE_OFF;
+			}
+			else if (useType == USE_ON)
+			{
+				freezeType = USE_FREEZE_ON;
+			}
+			else
+			{
+				ALERT(at_console, "%s: Can't interpret input use type: %d\n", STRING(pev->classname), (int)useType);
+				return;
+			}
+		}
+
+		switch (freezeType) {
+		case USE_FREEZE_OFF:
+			pPlayer->EnableControl(TRUE);
+			break;
+		case USE_FREEZE_ON:
+			pPlayer->EnableControl(FALSE);
+			break;
+		case USE_FREEZE_TOGGLE:
+			if( pPlayer->pev->flags & FL_FROZEN )
+				pPlayer->EnableControl( TRUE );
+			else
+				pPlayer->EnableControl( FALSE );
+			break;
+		default:
+			ALERT(at_console, "%s: Unknown bad use type: %d\n", STRING(pev->classname), (int)freezeType);
+			break;
+		}
+	}
 }
 
 #if FEATURE_TRIGGER_KILL_MONSTER

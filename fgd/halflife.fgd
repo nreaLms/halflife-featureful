@@ -6715,7 +6715,16 @@
 	delay(string) : "Delay before trigger"
 ]
 
-@PointClass base(Targetx, Targetname) = trigger_playerfreeze : "Trigger Player Freeze" []
+@PointClass base(Targetname) = trigger_playerfreeze : "Trigger Player Freeze"
+[
+	use_type(choices) : "Use type" =
+	[
+		-1 : "Unfreeze"
+		0 : "Toggle freeze"
+		1 : "Freeze"
+		2 : "Copy input"
+	]
+]
 
 @SolidClass base(Trigger, Angles) = trigger_push : "Trigger player push"
 [
