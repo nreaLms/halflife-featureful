@@ -539,11 +539,20 @@ Schedule_t *CHWGrunt::GetSchedule( void )
 			return GetScheduleOfType( SCHED_HWGRUNT_REPEL );
 		}
 	}
-	if (m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT)
+
+	switch (m_MonsterState)
+	{
+	case MONSTERSTATE_IDLE:
+	case MONSTERSTATE_ALERT:
+	case MONSTERSTATE_HUNT:
 	{
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)
 			return followingSchedule;
+		break;
+	}
+	default:
+		break;
 	}
 	return CFollowingMonster::GetSchedule();
 }

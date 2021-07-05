@@ -80,6 +80,7 @@ public:
 	virtual void PlayUnUseSentence() {}
 
 	CBaseEntity* PlayerToFace();
+	void StopScript();
 
 	void ReportAIState(ALERT_TYPE level);
 

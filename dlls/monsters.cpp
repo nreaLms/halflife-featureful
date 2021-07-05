@@ -4173,6 +4173,14 @@ int CBaseMonster::SizeForGrapple()
 	return DefaultSizeForGrapple();
 }
 
+bool CBaseMonster::IsFreeToManipulate()
+{
+	return m_IdealMonsterState != MONSTERSTATE_SCRIPT &&
+				 (m_MonsterState == MONSTERSTATE_ALERT ||
+				  m_MonsterState == MONSTERSTATE_IDLE ||
+				  m_MonsterState == MONSTERSTATE_HUNT);
+}
+
 void CBaseMonster::GlowShellOn( Vector color, float flDuration )
 {
 	if (!m_glowShellUpdate)

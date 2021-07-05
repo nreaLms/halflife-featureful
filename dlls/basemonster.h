@@ -389,6 +389,8 @@ public:
 	// Allows to set a head via monstermaker before spawn
 	virtual void SetHead(int head) {}
 
+	bool IsFreeToManipulate();
+
 	//
 	// Glowshell effects
 	//

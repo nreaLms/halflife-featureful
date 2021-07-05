@@ -330,8 +330,7 @@ void CFollowingMonster::StopFollowing(BOOL clearSchedule , bool saySentence)
 
 void CFollowingMonster::StartFollowing(CBaseEntity *pLeader , bool saySentence)
 {
-	if( m_pCine )
-		m_pCine->CancelScript();
+	StopScript();
 
 	m_hTargetEnt = pLeader;
 	if (saySentence)
@@ -503,6 +502,17 @@ CBaseEntity* CFollowingMonster::PlayerToFace()
 	if (pPlayer && pPlayer->IsPlayer())
 		return pPlayer;
 	return 0;
+}
+
+void CFollowingMonster::StopScript()
+{
+	if (m_pCine)
+	{
+		m_pCine->CancelScript();
+		if (m_pCine) { // in case it was not cleared out for some reason
+			CineCleanup();
+		}
+	}
 }
 
 void CFollowingMonster::ReportAIState(ALERT_TYPE level)

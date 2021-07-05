@@ -3746,11 +3746,7 @@ void CMedic::StartFollowingHealTarget(CBaseEntity *pTarget)
 
 	m_fSaidHeal = FALSE;
 
-	if( m_pCine )
-		m_pCine->CancelScript();
-
-	if( m_hEnemy != 0 )
-		m_IdealMonsterState = MONSTERSTATE_ALERT;
+	StopScript();
 
 	m_hTargetEnt = pTarget;
 	ClearConditions( bits_COND_CLIENT_PUSH );
@@ -3767,11 +3763,7 @@ void CMedic::RestoreTargetEnt()
 		ALERT(at_aiconsole, "Medic restoring old target\n");
 		m_hTargetEnt = m_hLeadingPlayer;
 		m_hLeadingPlayer = 0;
-		if( m_pCine )
-			m_pCine->CancelScript();
 
-		if( m_hEnemy != 0 )
-			m_IdealMonsterState = MONSTERSTATE_ALERT;
 		ClearConditions( bits_COND_CLIENT_PUSH );
 	}
 }

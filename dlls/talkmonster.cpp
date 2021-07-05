@@ -376,7 +376,7 @@ bool CTalkMonster::CanCallThisMedic(CSquadMonster* pOther)
 {
 	if ( pOther != 0 && pOther != this && pOther->pev->deadflag == DEAD_NO )
 	{
-		if ( pOther->ReadyToHeal() && (pOther->m_MonsterState == MONSTERSTATE_ALERT || pOther->m_MonsterState == MONSTERSTATE_IDLE || pOther->m_MonsterState == MONSTERSTATE_HUNT) )
+		if ( pOther->ReadyToHeal() && pOther->IsFreeToManipulate() )
 		{
 			return true;
 		}
@@ -1458,7 +1458,7 @@ void CTalkMonster::PrescheduleThink( void )
 	{
 		SetConditions( bits_COND_CLIENT_UNSEEN );
 	}
-	if (m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT || m_MonsterState == MONSTERSTATE_HUNT)
+	if (IsFreeToManipulate())
 	{
 		WantsToCallMedic() && FindAndCallMedic();
 	}
