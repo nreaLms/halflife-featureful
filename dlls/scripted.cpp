@@ -230,8 +230,25 @@ void CCineMonster::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		// if not, try finding them
 		m_cantFindReported = false;
 		m_hActivator = pActivator;
-		SetThink( &CCineMonster::CineThink );
-		pev->nextthink = gpGlobals->time;
+
+		if (FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
+		{
+			if( FindEntity() )
+			{
+				PossessEntity();
+				ALERT( at_aiconsole, "script \"%s\" using monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+			}
+			else
+			{
+				if (!FStringNull(pev->targetname))
+					ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+			}
+		}
+		else
+		{
+			SetThink( &CCineMonster::CineThink );
+			pev->nextthink = gpGlobals->time;
+		}
 	}
 }
 
@@ -334,7 +351,7 @@ BOOL CCineMonster::FindEntity( void )
 			}
 			if (!m_cantPlayReported)
 			{
-				ALERT( at_console, "Found %s, but can't play!\n", STRING( m_iszEntity ) );
+				ALERT( at_console, "Found %s, but can't play! (monster is busy)\n", STRING( m_iszEntity ) );
 				m_cantPlayReported = true;
 			}
 		}
@@ -468,7 +485,7 @@ void CCineMonster::CineThink( void )
 		CancelScript();
 		if (!m_cantFindReported && pev->targetname)
 		{
-			ALERT( at_aiconsole, "script \"%s\" can't find monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+			ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
 			m_cantFindReported = true;
 		}
 		pev->nextthink = gpGlobals->time + 1.0f;
