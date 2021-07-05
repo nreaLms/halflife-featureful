@@ -53,6 +53,10 @@ enum SS_INTERRUPT
 	SS_INTERRUPT_AI
 };
 
+#define SCRIPT_REQUIRED_FOLLOWER_STATE_UNSPECIFIED 0
+#define SCRIPT_REQUIRED_FOLLOWER_STATE_FOLLOWING 1
+#define SCRIPT_REQUIRED_FOLLOWER_STATE_NOT_FOLLOWING 2
+
 // when a monster finishes an AI scripted sequence, we can choose
 // a schedule to place them in. These defines are the aliases to
 // resolve worldcraft input to real schedules (sjb)
@@ -81,6 +85,7 @@ public:
 	void Die( void );
 	void DelayStart( int state );
 	BOOL FindEntity( void );
+	bool AcceptedFollowingState(CBaseMonster* pMonster);
 	virtual void PossessEntity( void );
 
 	void ReleaseEntity( CBaseMonster *pEntity );
@@ -114,6 +119,7 @@ public:
 	short m_targetActivator;
 	short m_fTurnType;
 	float m_flMoveToRadius;
+	short m_requiredFollowerState;
 
 	bool m_cantFindReported; // no need to save
 	bool m_cantPlayReported;

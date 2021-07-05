@@ -894,6 +894,12 @@
 		1 : "Turn to face"
 		2 : "Don't Turn"
 	]
+	m_requiredFollowerState(choices) : "Required follower state" =
+	[
+		0 : "Not specified"
+		1 : "Following player"
+		2 : "Not following player"
+	]
 ]
 
 //

@@ -109,6 +109,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_fTurnType = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "m_requiredFollowerState" ) )
+	{
+		m_requiredFollowerState = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -304,7 +309,7 @@ BOOL CCineMonster::FindEntity( void )
 	{
 		if (m_hActivator != 0 && FBitSet(m_hActivator->pev->flags, FL_MONSTER) && (pTarget = m_hActivator->MyMonsterPointer()) != 0 )
 		{
-			if (pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_AI ))
+			if (pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_AI ) && AcceptedFollowingState(pTarget))
 			{
 				m_hTargetEnt = m_hActivator;
 				return TRUE;
@@ -322,7 +327,7 @@ BOOL CCineMonster::FindEntity( void )
 		if( FBitSet( VARS( pentTarget )->flags, FL_MONSTER ) )
 		{
 			pTarget = GetMonsterPointer( pentTarget );
-			if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_BY_NAME ) )
+			if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_BY_NAME ) && AcceptedFollowingState(pTarget) )
 			{
 				m_hTargetEnt = pTarget;
 				return TRUE;
@@ -347,7 +352,7 @@ BOOL CCineMonster::FindEntity( void )
 				if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
 				{
 					pTarget = pEntity->MyMonsterPointer();
-					if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_IDLE ) )
+					if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_IDLE ) && AcceptedFollowingState(pTarget) )
 					{
 						m_hTargetEnt = pTarget;
 						return TRUE;
@@ -359,6 +364,23 @@ BOOL CCineMonster::FindEntity( void )
 	pTarget = NULL;
 	m_hTargetEnt = NULL;
 	return FALSE;
+}
+
+bool CCineMonster::AcceptedFollowingState(CBaseMonster *pMonster)
+{
+	if (m_requiredFollowerState == SCRIPT_REQUIRED_FOLLOWER_STATE_UNSPECIFIED)
+		return true;
+	CFollowingMonster* pFollowingMonster = pMonster->MyFollowingMonsterPointer();
+	if (pFollowingMonster)
+	{
+		if (m_requiredFollowerState == SCRIPT_REQUIRED_FOLLOWER_STATE_FOLLOWING) {
+			return pFollowingMonster->IsFollowingPlayer();
+		}
+		if (m_requiredFollowerState == SCRIPT_REQUIRED_FOLLOWER_STATE_NOT_FOLLOWING) {
+			return !pFollowingMonster->IsFollowingPlayer();
+		}
+	}
+	return true;
 }
 
 // make the entity enter a scripted sequence
