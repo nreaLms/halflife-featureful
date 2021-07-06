@@ -85,7 +85,8 @@ public:
 	void Pain( void );
 	void Die( void );
 	void DelayStart( int state );
-	BOOL FindEntity( void );
+	CBaseMonster *FindEntity( void );
+	bool TryFindAndPossessEntity();
 	bool AcceptedFollowingState(CBaseMonster* pMonster);
 	virtual void PossessEntity( void );
 

@@ -141,6 +141,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_targetActivator, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_fTurnType, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_flMoveToRadius, FIELD_FLOAT ),
+	DEFINE_FIELD( CCineMonster, m_requiredFollowerState, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -233,16 +234,7 @@ void CCineMonster::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 		if (FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
 		{
-			if( FindEntity() )
-			{
-				PossessEntity();
-				ALERT( at_aiconsole, "script \"%s\" using monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
-			}
-			else
-			{
-				if (!FStringNull(pev->targetname))
-					ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
-			}
+			TryFindAndPossessEntity();
 		}
 		else
 		{
@@ -317,7 +309,7 @@ void CCineMonster::Pain( void )
 //
 
 // find a viable entity
-BOOL CCineMonster::FindEntity( void )
+CBaseMonster *CCineMonster::FindEntity( void )
 {
 	edict_t *pentTarget;
 	CBaseMonster *pTarget = NULL;
@@ -328,16 +320,14 @@ BOOL CCineMonster::FindEntity( void )
 		{
 			if (pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_AI ) && AcceptedFollowingState(pTarget))
 			{
-				m_hTargetEnt = m_hActivator;
-				return TRUE;
+				return pTarget;
 			}
 		}
-		m_hTargetEnt = 0;
-		return FALSE;
+		return NULL;
 	}
 
 	pentTarget = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_iszEntity ) );
-	m_hTargetEnt = NULL;
+	pTarget = NULL;
 
 	while( !FNullEnt( pentTarget ) )
 	{
@@ -346,13 +336,13 @@ BOOL CCineMonster::FindEntity( void )
 			pTarget = GetMonsterPointer( pentTarget );
 			if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_BY_NAME ) && AcceptedFollowingState(pTarget) )
 			{
-				m_hTargetEnt = pTarget;
-				return TRUE;
+				return pTarget;
 			}
 			if (!m_cantPlayReported)
 			{
 				ALERT( at_console, "Found %s, but can't play! (monster is busy)\n", STRING( m_iszEntity ) );
-				m_cantPlayReported = true;
+				if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
+					m_cantPlayReported = true;
 			}
 		}
 		pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
@@ -371,16 +361,13 @@ BOOL CCineMonster::FindEntity( void )
 					pTarget = pEntity->MyMonsterPointer();
 					if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_IDLE ) && AcceptedFollowingState(pTarget) )
 					{
-						m_hTargetEnt = pTarget;
-						return TRUE;
+						return pTarget;
 					}
 				}
 			}
 		}
 	}
-	pTarget = NULL;
-	m_hTargetEnt = NULL;
-	return FALSE;
+	return NULL;
 }
 
 bool CCineMonster::AcceptedFollowingState(CBaseMonster *pMonster)
@@ -475,10 +462,19 @@ void CCineMonster::PossessEntity( void )
 
 void CCineMonster::CineThink( void )
 {
-	if( FindEntity() )
+	if (!TryFindAndPossessEntity())
+	{
+		pev->nextthink = gpGlobals->time + 1.0f;
+	}
+}
+
+bool CCineMonster::TryFindAndPossessEntity()
+{
+	if( (m_hTargetEnt = FindEntity()) != 0 )
 	{
 		PossessEntity();
 		ALERT( at_aiconsole, "script \"%s\" using monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+		return true;
 	}
 	else
 	{
@@ -486,9 +482,10 @@ void CCineMonster::CineThink( void )
 		if (!m_cantFindReported && pev->targetname)
 		{
 			ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
-			m_cantFindReported = true;
+			if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
+				m_cantFindReported = true;
 		}
-		pev->nextthink = gpGlobals->time + 1.0f;
+		return false;
 	}
 }
 
