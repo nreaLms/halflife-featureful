@@ -114,6 +114,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_requiredFollowerState = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "m_applySearchRadius" ) )
+	{
+		m_applySearchRadius = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -142,6 +147,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_fTurnType, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_flMoveToRadius, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_requiredFollowerState, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_applySearchRadius, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -318,10 +324,8 @@ CBaseMonster *CCineMonster::FindEntity( void )
 	{
 		if (m_hActivator != 0 && FBitSet(m_hActivator->pev->flags, FL_MONSTER) && (pTarget = m_hActivator->MyMonsterPointer()) != 0 )
 		{
-			if (pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_AI ) && AcceptedFollowingState(pTarget))
-			{
+			if (IsAppropriateTarget(pTarget, SS_INTERRUPT_AI, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
 				return pTarget;
-			}
 		}
 		return NULL;
 	}
@@ -334,13 +338,12 @@ CBaseMonster *CCineMonster::FindEntity( void )
 		if( FBitSet( VARS( pentTarget )->flags, FL_MONSTER ) )
 		{
 			pTarget = GetMonsterPointer( pentTarget );
-			if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_BY_NAME ) && AcceptedFollowingState(pTarget) )
-			{
+
+			if (IsAppropriateTarget(pTarget, SS_INTERRUPT_BY_NAME, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
 				return pTarget;
-			}
 			if (!m_cantPlayReported)
 			{
-				ALERT( at_console, "Found %s, but can't play! (monster is busy)\n", STRING( m_iszEntity ) );
+				ALERT( at_console, "Found %s, but can't play! (busy or too far)\n", STRING( m_iszEntity ) );
 				if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
 					m_cantPlayReported = true;
 			}
@@ -359,7 +362,7 @@ CBaseMonster *CCineMonster::FindEntity( void )
 				if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
 				{
 					pTarget = pEntity->MyMonsterPointer();
-					if( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_IDLE ) && AcceptedFollowingState(pTarget) )
+					if (IsAppropriateTarget(pTarget, SS_INTERRUPT_IDLE, false))
 					{
 						return pTarget;
 					}
@@ -481,12 +484,18 @@ bool CCineMonster::TryFindAndPossessEntity()
 		CancelScript();
 		if (!m_cantFindReported && pev->targetname)
 		{
-			ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
-			if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
-				m_cantFindReported = true;
+			ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\" (busy or too far)\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+			m_cantFindReported = true;
 		}
 		return false;
 	}
+}
+
+bool CCineMonster::IsAppropriateTarget(CBaseMonster *pTarget, int interruptLevel, bool shouldCheckRadius)
+{
+	return pTarget && pTarget->CanPlaySequence( FCanOverrideState(), interruptLevel ) &&
+			AcceptedFollowingState(pTarget) &&
+			(!shouldCheckRadius || (pev->origin - pTarget->pev->origin).Length() <= m_flRadius);
 }
 
 typedef enum

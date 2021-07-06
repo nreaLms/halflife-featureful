@@ -901,6 +901,11 @@
 		1 : "Following player"
 		2 : "Not following player"
 	]
+	m_applySearchRadius(choices) : "Apply search radius" =
+	[
+		0 : "Only to Class Name"
+		1 : "Always"
+	]
 ]
 
 //

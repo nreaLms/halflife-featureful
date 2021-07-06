@@ -58,6 +58,12 @@ enum SS_INTERRUPT
 #define SCRIPT_REQUIRED_FOLLOWER_STATE_FOLLOWING 1
 #define SCRIPT_REQUIRED_FOLLOWER_STATE_NOT_FOLLOWING 2
 
+enum
+{
+	SCRIPT_APPLY_SEARCH_RADIUS_TO_CLASSNAME = 0,
+	SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS = 1
+};
+
 // when a monster finishes an AI scripted sequence, we can choose
 // a schedule to place them in. These defines are the aliases to
 // resolve worldcraft input to real schedules (sjb)
@@ -87,6 +93,7 @@ public:
 	void DelayStart( int state );
 	CBaseMonster *FindEntity( void );
 	bool TryFindAndPossessEntity();
+	bool IsAppropriateTarget(CBaseMonster* pTarget, int interruptLevel, bool shouldCheckRadius);
 	bool AcceptedFollowingState(CBaseMonster* pMonster);
 	virtual void PossessEntity( void );
 
@@ -122,6 +129,7 @@ public:
 	short m_fTurnType;
 	float m_flMoveToRadius;
 	short m_requiredFollowerState;
+	short m_applySearchRadius;
 
 	bool m_cantFindReported; // no need to save
 	bool m_cantPlayReported;
