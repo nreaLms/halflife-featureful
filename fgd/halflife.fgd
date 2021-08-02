@@ -3085,6 +3085,11 @@
 ]
 @PointClass base(Monster,TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/barney.mdl") = monster_barney : "Barney"
 [
+	frags(choices) : "Weapon" =
+	[
+		0 : "Glock (normal)"
+		1 : "Python 357"
+	]
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
 		0 : "idle1"
@@ -3159,7 +3164,7 @@
 		69 : "pepsipush"
 		70 : "buttonpush"
 	]
-    bodystate(Choices) : "Gun State" =
+	bodystate(Choices) : "Gun State" =
 	[
 		-1 : "Random"
 		0 : "Gun Holstered"
@@ -4831,7 +4836,7 @@
 		59 : "cowering"
 		60 : "candygrab"
 	]
-	bodystate(Choices) : "bodystate" : -1 =
+	bodystate(Choices) : "bodystate" =
 	[
 		-1 : "Random"
 		0 : "Gun Holstered"

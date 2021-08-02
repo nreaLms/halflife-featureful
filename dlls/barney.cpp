@@ -324,7 +324,18 @@ void CBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 	switch( pEvent->event )
 	{
 	case BARNEY_AE_SHOOT:
-		BarneyFirePistol("barney/ba_attack2.wav", BULLET_MONSTER_9MM);
+		if (pev->frags)
+		{
+			if (RANDOM_LONG(0, 1))
+				BarneyFirePistol("weapons/357_shot1.wav", BULLET_MONSTER_357);
+			else
+				BarneyFirePistol("weapons/357_shot2.wav", BULLET_MONSTER_357);
+		}
+		else
+		{
+			BarneyFirePistol("barney/ba_attack2.wav", BULLET_MONSTER_9MM);
+		}
+
 		break;
 	case BARNEY_AE_DRAW:
 		// barney's bodygroup switches here so he can pull gun from holster
@@ -547,7 +558,10 @@ void CBarney::OnDying()
 
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-		DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+		if (pev->frags)
+			DropItem( "weapon_357", vecGunPos, vecGunAngles );
+		else
+			DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
 	}
 	CTalkMonster::OnDying();
 }
