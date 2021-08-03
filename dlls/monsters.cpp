@@ -3529,7 +3529,7 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 		m_iClass = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if ( FStrEq( pkvd->szKeyName , "gibmodel" ) )
+	else if ( FStrEq( pkvd->szKeyName , "gibmodel" ) || FStrEq( pkvd->szKeyName, "m_iszGibModel" ) )
 	{
 		m_gibModel = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;

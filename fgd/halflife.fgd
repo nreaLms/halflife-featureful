@@ -3477,7 +3477,18 @@
 	model(studio) : "model"
 	body(integer) : "Body"
 	skin(integer) : "Skin"
-	pose(string) : "Pose (string)"
+	pose(string) : "Pose (string)" : : "Name of the sequence"
+	frags(choices): "Death Type" : 36 =
+	[
+		36 : "Just dead"
+		37 : "Fell backwards"
+		38 : "Fell forwards"
+		39 : "Died violently"
+		66 : "Head shot"
+		67 : "Chest shot"
+		68 : "Gut shot"
+		69 : "Shot in the back"
+	]
 ]
 
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/gman.mdl") = monster_gman : "G-Man"

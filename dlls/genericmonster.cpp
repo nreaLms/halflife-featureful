@@ -250,8 +250,6 @@ public:
 	void Spawn();
 	void KeyValue( KeyValueData *pkvd );
 	int DefaultClassify() { return CLASS_HUMAN_PASSIVE; }
-
-	string_t pose; // no need to save
 };
 
 LINK_ENTITY_TO_CLASS( monster_generic_dead, CDeadGenericMonster )
@@ -281,16 +279,32 @@ void CDeadGenericMonster::Spawn()
 	pev->sequence		= 0;
 	SetMyBloodColor( BLOOD_COLOR_RED );
 
-	if (FStringNull(pose))
+	const int desiredActivity = (int)pev->frags;
+
+	if (FStringNull(pev->netname))
 	{
-		ALERT(at_console, "Spawning monster_generic_dead without pose!\n");
+		if (desiredActivity <= 0)
+			ALERT(at_console, "Spawning %s without pose!\n", STRING(pev->classname));
+		else
+		{
+			pev->sequence = LookupActivity( desiredActivity );
+			if (pev->sequence == -1) {
+				ALERT(at_console, "%s with model %s has no activity %d\n", STRING(pev->classname), STRING(pev->model), desiredActivity);
+				if (desiredActivity != ACT_DIESIMPLE) {
+					pev->sequence = LookupActivity( ACT_DIESIMPLE ); // try simple death animation
+				}
+				if (pev->sequence == -1) {
+					pev->sequence = 0;
+				}
+			}
+		}
 	}
 	else
 	{
-		pev->sequence = LookupSequence( STRING(pose) );
+		pev->sequence = LookupSequence( STRING(pev->netname) );
 		if (pev->sequence == -1)
 		{
-			ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), STRING(pose), STRING(pev->model) );
+			ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), STRING(pev->netname), STRING(pev->model) );
 		}
 	}
 
@@ -301,13 +315,15 @@ void CDeadGenericMonster::Spawn()
 		pev->solid = SOLID_NOT;
 		pev->takedamage = DAMAGE_NO;
 	}
+
+	pev->frame = 255;
 }
 
 void CDeadGenericMonster::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "pose"))
 	{
-		pose = ALLOC_STRING(pkvd->szValue);
+		pev->netname = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
