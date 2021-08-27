@@ -25,6 +25,7 @@
 #include "screenfade.h"
 #include "shake.h"
 #include "hltv.h"
+#include "view.h"
 
 extern cvar_t *cl_viewroll;
 extern cvar_t *cl_rollspeed;
@@ -39,14 +40,6 @@ extern "C"
 	int iHasNewViewOrigin;
 	int iIsSpectator;
 }
-
-#ifndef M_PI
-#define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
-#endif
-
-#ifndef M_PI_F
-#define M_PI_F		(float)M_PI
-#endif
 
 extern "C" 
 {
@@ -1563,8 +1556,8 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	}
 /*
 // Example of how to overlay the whole screen with red at 50 % alpha
-#define SF_TEST
-#if defined SF_TEST
+#define SF_TEST	1
+#if SF_TEST
 	{
 		screenfade_t sf;
 		gEngfuncs.pfnGetScreenFade( &sf );
@@ -1630,8 +1623,8 @@ void V_Init( void )
 	cl_chasedist = gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 }
 
-//#define TRACE_TEST
-#if defined( TRACE_TEST )
+//#define TRACE_TEST	1
+#if TRACE_TEST
 
 extern float in_fov;
 /*

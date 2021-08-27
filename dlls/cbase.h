@@ -13,7 +13,7 @@
 *
 ****/
 #pragma once
-#ifndef CBASE_H
+#if !defined(CBASE_H)
 #define CBASE_H
 
 #include "extdll.h"
@@ -53,7 +53,7 @@ CBaseEntity
 #include "saverestore.h"
 #include "schedule.h"
 
-#ifndef MONSTEREVENT_H
+#if !defined(MONSTEREVENT_H)
 #include "monsterevent.h"
 #endif
 

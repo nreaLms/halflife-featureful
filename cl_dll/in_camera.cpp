@@ -153,6 +153,9 @@ void DLLEXPORT CAM_Think( void )
 #endif
 	vec3_t viewangles;
 
+	if( gEngfuncs.GetMaxClients() > 1 && CL_IsThirdPerson() )
+		CAM_ToFirstPerson();
+
 	switch( (int)cam_command->value )
 	{
 		case CAM_COMMAND_TOTHIRDPERSON:
@@ -459,7 +462,7 @@ void CAM_OutUp( void )
 void CAM_ToThirdPerson( void )
 {
 	vec3_t viewangles;
-#if !defined( _DEBUG )
+#if !_DEBUG
 	if( gEngfuncs.GetMaxClients() > 1 )
 	{
 		// no thirdperson in multiplayer.

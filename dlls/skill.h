@@ -16,7 +16,7 @@
 // skill.h - skill level concerns
 //=========================================================
 #pragma once
-#ifndef SKILL_H
+#if !defined(SKILL_H)
 #define SKILL_H
 
 #include "mod_features.h"

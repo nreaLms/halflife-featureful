@@ -26,8 +26,8 @@ extern "C"
 	void DLLEXPORT HUD_DrawTransparentTriangles( void );
 }
 
-//#define TEST_IT
-#if defined( TEST_IT )
+//#define TEST_IT	1
+#if TEST_IT
 
 /*
 =================
@@ -145,7 +145,7 @@ void DLLEXPORT HUD_DrawNormalTriangles( void )
 {
 	RenderFog();
 	gHUD.m_Spectator.DrawOverview();
-#if defined( TEST_IT )
+#if TEST_IT
 //	Draw_Triangles();
 #endif
 }
@@ -159,7 +159,7 @@ Render any triangles with transparent rendermode needs here
 */
 void DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
-#if defined( TEST_IT )
+#if TEST_IT
 //	Draw_Triangles();
 #endif
 }

@@ -13,7 +13,7 @@
 *
 ****/
 #pragma once
-#ifndef TALKMONSTER_H
+#if !defined(TALKMONSTER_H)
 #define TALKMONSTER_H
 
 #include "followingmonster.h"

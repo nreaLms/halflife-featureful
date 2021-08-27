@@ -17,7 +17,7 @@
 // form squads.
 //=========================================================
 #pragma once
-#ifndef SQUADMONSTER_H
+#if !defined(SQUADMONSTER_H)
 #define SQUADMONSTER_H
 
 #include "basemonster.h"

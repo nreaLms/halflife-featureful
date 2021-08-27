@@ -13,7 +13,7 @@
 *
 ****/
 #pragma once
-#ifndef EFFECTS_H
+#if !defined(EFFECTS_H)
 #define EFFECTS_H
 
 #include "cbase.h"

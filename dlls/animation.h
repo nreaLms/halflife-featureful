@@ -13,14 +13,14 @@
 *
 ****/
 #pragma once
-#ifndef ANIMATION_H
+#if !defined(ANIMATION_H)
 #define ANIMATION_H
 
 #include "extdll.h"
 
 #define ACTIVITY_NOT_AVAILABLE		-1
 
-#ifndef MONSTEREVENT_H
+#if !defined(MONSTEREVENT_H)
 #include "monsterevent.h"
 #endif
 

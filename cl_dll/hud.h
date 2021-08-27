@@ -20,7 +20,7 @@
 // CHud handles the message, calculation, and drawing the HUD
 //
 #pragma once
-#ifndef HUD_H
+#if !defined(HUD_H)
 #define HUD_H
 #include "mod_features.h"
 

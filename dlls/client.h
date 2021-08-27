@@ -13,7 +13,7 @@
 *
 ****/
 #pragma once
-#ifndef CLIENT_H
+#if !defined(CLIENT_H)
 #define CLIENT_H
 
 #include "extdll.h"
