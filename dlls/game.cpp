@@ -392,9 +392,9 @@ cvar_t	sk_osprey3	= {"sk_osprey3","400"};
 
 // Blackops Osprey
 #if FEATURE_BLACK_OSPREY
-cvar_t	sk_blkopsosprey1	= {"sk_blkopsosprey1"};
-cvar_t	sk_blkopsosprey2	= {"sk_blkopsosprey2"};
-cvar_t	sk_blkopsosprey3	= {"sk_blkopsosprey3"};
+cvar_t	sk_blkopsosprey1	= {"sk_blkopsosprey1","0"};
+cvar_t	sk_blkopsosprey2	= {"sk_blkopsosprey2","0"};
+cvar_t	sk_blkopsosprey3	= {"sk_blkopsosprey3","0"};
 #endif
 
 #if FEATURE_OTIS
