@@ -111,6 +111,11 @@
 @BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles) = Item
 [
 	model(studio) : "Custom Model"
+	spawnflags(Flags) =
+	[
+		128 : "TOUCH Only" : 0
+		256 : "USE Only" : 0
+	]
 ]
 @BaseClass = Global
 [

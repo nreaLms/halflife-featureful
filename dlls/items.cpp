@@ -31,6 +31,9 @@
 #include "gamerules.h"
 #include "animation.h"
 
+#define SF_ITEM_TOUCH_ONLY 128
+#define SF_ITEM_USE_ONLY 256
+
 extern int gmsgItemPickup;
 
 class CWorldItem : public CBaseEntity
@@ -289,6 +292,18 @@ void CInfoItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 //=========
 
+static bool AppliedByTouch(CItem* item)
+{
+	return !FBitSet(item->pev->spawnflags, SF_ITEM_USE_ONLY) &&
+			(FBitSet(item->pev->spawnflags, SF_ITEM_TOUCH_ONLY) || !NeedUseToTake());
+}
+
+static bool AppliedByUse(CItem* item)
+{
+	return !FBitSet(item->pev->spawnflags, SF_ITEM_TOUCH_ONLY) &&
+			(FBitSet(item->pev->spawnflags, SF_ITEM_USE_ONLY) || NeedUseToTake());
+}
+
 extern int gEvilImpulse101;
 
 void CItem::Spawn( void )
@@ -317,7 +332,7 @@ void CItem::Spawn( void )
 
 void CItem::ItemTouch( CBaseEntity *pOther )
 {
-	if (!NeedUseToTake()) {
+	if (AppliedByTouch(this)) {
 		TouchOrUse(pOther);
 	}
 }
@@ -335,7 +350,7 @@ void CItem::FallThink()
 
 int CItem::ObjectCaps()
 {
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
+	if (AppliedByUse(this) && !(pev->effects & EF_NODRAW)) {
 		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
 	} else {
 		return CBaseEntity::ObjectCaps();
@@ -350,7 +365,7 @@ void CItem::SetObjectCollisionBox()
 
 void CItem::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
+	if (AppliedByUse(this) && !(pev->effects & EF_NODRAW)) {
 		TouchOrUse(pActivator);
 	}
 }
