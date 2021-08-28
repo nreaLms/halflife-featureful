@@ -1706,7 +1706,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 				{
 					ALERT(at_aiconsole, "%s trying to freeroam after combat\n", STRING(pev->classname));
 					Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
-					return GetScheduleOfType( SCHED_FREEROAM );
+					return GetScheduleOfType( SCHED_FREEROAM_ALERT );
 				}
 			}
 
@@ -1860,7 +1860,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 				Forget(bits_MEMORY_SHOULD_GO_TO_LKP);
 				return GetScheduleOfType( SCHED_MOVE_TO_ENEMY_LKP );
 			}
-			return GetScheduleOfType( SCHED_FREEROAM );
+			return GetScheduleOfType( SCHED_FREEROAM_ALERT );
 		}
 	default:
 		{

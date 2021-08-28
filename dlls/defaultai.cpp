@@ -1135,8 +1135,22 @@ Schedule_t slFreeroam[] =
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND,
-		bits_SOUND_DANGER | bits_SOUND_COMBAT,
+		bits_SOUND_DANGER,
 		"Free Roaming"
+	},
+};
+
+Schedule_t slFreeroamAlert[] =
+{
+	{
+		tlFreeroam,
+		ARRAYSIZE( tlFreeroam ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER | bits_SOUND_COMBAT,
+		"Free Roaming (alert)"
 	},
 };
 
@@ -1427,6 +1441,10 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_FREEROAM:
 		{
 			return slFreeroam;
+		}
+	case SCHED_FREEROAM_ALERT:
+		{
+			return slFreeroamAlert;
 		}
 	case SCHED_MOVE_TO_ENEMY_LKP:
 		{
