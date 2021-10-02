@@ -5448,6 +5448,10 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 }
 
+#define SF_PLAYER_LOAD_SAVED_FREEZE 1
+#define SF_PLAYER_LOAD_SAVED_WEAPONSTRIP 2
+#define SF_PLAYER_LOAD_SAVED_RETURN_TO_MENU 128
+
 class CRevertSaved : public CPointEntity
 {
 public:
@@ -5513,6 +5517,28 @@ void CRevertSaved::KeyValue( KeyValueData *pkvd )
 
 void CRevertSaved::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_WEAPONSTRIP|SF_PLAYER_LOAD_SAVED_FREEZE))
+	{
+		CBasePlayer *pPlayer = NULL;
+		if( pActivator && pActivator->IsPlayer() )
+		{
+			pPlayer = (CBasePlayer *)pActivator;
+		}
+		else if( !g_pGameRules->IsMultiplayer() )
+		{
+			pPlayer = (CBasePlayer *)CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
+		}
+		if (pPlayer) {
+			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_WEAPONSTRIP)) {
+				pPlayer->RemoveAllItems(TRUE);
+			}
+
+			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_FREEZE)) {
+				pPlayer->EnableControl(FALSE);
+			}
+		}
+	}
+
 	UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, FFADE_OUT );
 	pev->nextthink = gpGlobals->time + MessageTime();
 	SetThink( &CRevertSaved::MessageThink );
@@ -5533,9 +5559,15 @@ void CRevertSaved::MessageThink( void )
 
 void CRevertSaved::LoadThink( void )
 {
-	if( !gpGlobals->deathmatch )
+	if( !g_pGameRules->IsMultiplayer() )
 	{
-		SERVER_COMMAND( "reload\n" );
+		if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_RETURN_TO_MENU))
+		{
+			g_engfuncs.pfnEndSection( "_oem_end_training" );
+		} else
+		{
+			SERVER_COMMAND( "reload\n" );
+		}
 	}
 }
 

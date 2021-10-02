@@ -6212,6 +6212,12 @@
 	messagetime(string) : "Show Message delay" : "0"
 	message(string) : "Message To Display" : ""
 	loadtime(string) : "Reload delay" : "0"
+	spawnflags(Flags) =
+	[
+		1 : "Freeze player" : 0
+		2 : "Remove weapons" : 0
+		128 : "Return to menu" : 0 : "Return to menu instead of loading the save"
+	]
 ]
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_weaponstrip : "Strips player's weapons"
