@@ -5455,7 +5455,8 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 class CRevertSaved : public CPointEntity
 {
 public:
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void Spawn();
+	void EXPORT LoadSavedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT MessageThink( void );
 	void EXPORT LoadThink( void );
 	void KeyValue( KeyValueData *pkvd );
@@ -5515,7 +5516,13 @@ void CRevertSaved::KeyValue( KeyValueData *pkvd )
 		CPointEntity::KeyValue( pkvd );
 }
 
-void CRevertSaved::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CRevertSaved::Spawn()
+{
+	CPointEntity::Spawn();
+	SetUse(&CRevertSaved::LoadSavedUse);
+}
+
+void CRevertSaved::LoadSavedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_WEAPONSTRIP|SF_PLAYER_LOAD_SAVED_FREEZE))
 	{
@@ -5530,7 +5537,7 @@ void CRevertSaved::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		}
 		if (pPlayer) {
 			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_WEAPONSTRIP)) {
-				pPlayer->RemoveAllItems(TRUE);
+				pPlayer->RemoveAllItems(FALSE);
 			}
 
 			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_FREEZE)) {
@@ -5541,6 +5548,7 @@ void CRevertSaved::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, FFADE_OUT );
 	pev->nextthink = gpGlobals->time + MessageTime();
+	SetUse( NULL );
 	SetThink( &CRevertSaved::MessageThink );
 }
 
