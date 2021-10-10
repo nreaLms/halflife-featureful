@@ -2208,6 +2208,41 @@ edict_t* CTriggerTeleport::GetTeleportTarget()
 	return FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) );
 }
 
+class CTriggerTeleportPlayer : public CTriggerTeleport
+{
+public:
+	void Spawn( void );
+	void EXPORT TeleportPlayerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual edict_t* GetTeleportTarget();
+};
+
+LINK_ENTITY_TO_CLASS( trigger_player_teleport, CTriggerTeleportPlayer )
+
+void CTriggerTeleportPlayer::Spawn()
+{
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+	SetUse(&CTriggerTeleportPlayer::TeleportPlayerUse);
+}
+
+void CTriggerTeleportPlayer::TeleportPlayerUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	CBaseEntity* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+	if (pPlayer) {
+		ALERT(at_console, "Calling TeleportTouchImpl\n");
+		TeleportTouchImpl(pPlayer);
+	}
+}
+
+edict_t* CTriggerTeleportPlayer::GetTeleportTarget()
+{
+	if (FStringNull(pev->target)) {
+		return edict();
+	} else {
+		return FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) );
+	}
+}
+
 LINK_ENTITY_TO_CLASS( info_teleport_destination, CPointEntity )
 
 class CTriggerSave : public CBaseTrigger

@@ -6904,6 +6904,16 @@
 	target(target_destination) : "Target" : : "Name of the entity which the player is teleported to. Ideally an info_teleport_destination entity."
 ]
 
+@PointClass base(Targetname) = trigger_player_teleport : "Move player to the specified position."
+[
+	target(target_destination) : "Target" : : "Name of the entity which the player is teleported to. If omitted trigger_player_teleport acts as a teleport position itself."
+	spawnflags(flags) =
+	[
+		256 : "Keep Angles" : 0 : "Keep player's angles"
+		512 : "Keep velocity" : 0 : "Keep player's velocity"
+	]
+]
+
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []
 
 @SolidClass base(TriggerTeleport) = trigger_xen_return : "Return To Earth" []
