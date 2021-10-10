@@ -908,12 +908,7 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 	{
-		if (!pActivator || !pActivator->IsPlayer())
-		{
-			if (!g_pGameRules->IsMultiplayer())
-				pActivator = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex( 1 ));
-		}
-		EquipPlayer(pActivator);
+		EquipPlayer(g_pGameRules->EffectivePlayer(pActivator));
 	}
 	void Touch( CBaseEntity *pOther )
 	{

@@ -1610,14 +1610,10 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 
 	pev->dmgtime = gpGlobals->time;
 
-	CBaseEntity *pPlayer = NULL;
-	if (g_pGameRules->IsMultiplayer() && pActivator->IsPlayer())
-	{
-		pPlayer = pActivator;
-	}
-	else
-	{
-		pPlayer = CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );;
+	CBaseEntity *pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+	if (!pPlayer) {
+		ALERT(at_aiconsole, "Could not find a player who activated the change level, aborting\n");
+		return;
 	}
 
 	if (!g_pGameRules->IsCoOp())
@@ -3174,13 +3170,10 @@ void CTriggerPlayerFreeze::KeyValue( KeyValueData *pkvd )
 
 void CTriggerPlayerFreeze::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if( !pActivator || !pActivator->IsPlayer() )
-		pActivator = CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
+	CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 
-	if (pActivator)
+	if (pPlayer)
 	{
-		CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
-
 		int freezeType = pev->impulse;
 		if (pev->impulse == USE_FREEZE_COPY_INPUT)
 		{

@@ -5427,16 +5427,7 @@ LINK_ENTITY_TO_CLASS( player_weaponstrip, CStripWeapons )
 
 void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	CBasePlayer *pPlayer = NULL;
-
-	if( pActivator && pActivator->IsPlayer() )
-	{
-		pPlayer = (CBasePlayer *)pActivator;
-	}
-	else if( !g_pGameRules->IsMultiplayer() )
-	{
-		pPlayer = (CBasePlayer *)CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
-	}
+	CBasePlayer *pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 
 	if( pPlayer ) {
 		const bool removeSuit = (pev->spawnflags & STRIP_SUIT) ? true : false;
@@ -5526,15 +5517,7 @@ void CRevertSaved::LoadSavedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 {
 	if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_WEAPONSTRIP|SF_PLAYER_LOAD_SAVED_FREEZE))
 	{
-		CBasePlayer *pPlayer = NULL;
-		if( pActivator && pActivator->IsPlayer() )
-		{
-			pPlayer = (CBasePlayer *)pActivator;
-		}
-		else if( !g_pGameRules->IsMultiplayer() )
-		{
-			pPlayer = (CBasePlayer *)CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
-		}
+		CBasePlayer *pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if (pPlayer) {
 			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_WEAPONSTRIP)) {
 				pPlayer->RemoveAllItems(FALSE);

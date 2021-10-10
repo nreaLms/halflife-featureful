@@ -169,6 +169,7 @@ public:
 	virtual void EndMultiplayerGame( void ) {}
 
 	virtual void BeforeChangeLevel(const char* nextMap) {}
+	virtual CBasePlayer* EffectivePlayer( CBaseEntity* pActivator );
 };
 
 extern CGameRules *InstallGameRules( void );
@@ -260,6 +261,8 @@ public:
 	// Teamplay stuff	
 	virtual const char *GetTeamID( CBaseEntity *pEntity ) {return "";};
 	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
+
+	CBasePlayer* EffectivePlayer( CBaseEntity* pActivator );
 };
 
 //=========================================================

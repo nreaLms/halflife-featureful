@@ -477,6 +477,14 @@ void CGameRules::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer )
 	pPlayer->SetPrefsFromUserinfo( infobuffer );
 }
 
+CBasePlayer *CGameRules::EffectivePlayer(CBaseEntity *pActivator)
+{
+	if (pActivator && pActivator->IsPlayer()) {
+		return (CBasePlayer*)pActivator;
+	}
+	return NULL;
+}
+
 //=========================================================
 // instantiate the proper game rules object
 //=========================================================
