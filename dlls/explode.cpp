@@ -163,9 +163,7 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 	else
 	{
-		bool evaluated;
-		vecSpot = CalcLocus_Position(this, pActivator, STRING(pev->target),&evaluated);
-		if (!evaluated)
+		if (!TryCalcLocus_Position(this, pActivator, STRING(pev->target), vecSpot))
 			return;
 	}
 

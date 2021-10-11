@@ -1711,8 +1711,7 @@ void CGibShooter::ShootThink( void )
 
 	if (!FStringNull(m_iszVelFactor))
 	{
-		flGibVelocity = CalcLocus_Ratio(m_hActivator, STRING(m_iszVelFactor), &evaluated);
-		if (!evaluated)
+		if (!TryCalcLocus_Ratio(m_hActivator, STRING(m_iszVelFactor), flGibVelocity))
 			return;
 	}
 	else
@@ -1720,8 +1719,7 @@ void CGibShooter::ShootThink( void )
 
 	if (!FStringNull(m_iszVelocity))
 	{
-		baseShootDir = CalcLocus_Velocity(this, m_hActivator, STRING(m_iszVelocity), &evaluated);
-		if (!evaluated)
+		if (!TryCalcLocus_Velocity(this, m_hActivator, STRING(m_iszVelocity), baseShootDir))
 			return;
 		flGibVelocity = flGibVelocity * baseShootDir.Length();
 		baseShootDir = baseShootDir.Normalize();
@@ -1732,8 +1730,7 @@ void CGibShooter::ShootThink( void )
 	Vector vecPos;
 	if (!FStringNull(m_iszPosition))
 	{
-		vecPos = CalcLocus_Position(this, m_hActivator, STRING(m_iszPosition), &evaluated);
-		if (!evaluated)
+		if (!TryCalcLocus_Position(this, m_hActivator, STRING(m_iszPosition), vecPos))
 			return;
 	}
 	else
@@ -2033,8 +2030,8 @@ public:
 		pev->dmg = amount;
 	}
 	
-	Vector Direction(CBaseEntity *pActivator );
-	Vector BloodPosition( CBaseEntity *pActivator );
+	bool CheckBloodDirection(CBaseEntity *pActivator , Vector &bloodDir);
+	bool CheckBloodPosition( CBaseEntity *pActivator, Vector& bloodPos );
 private:
 };
 
@@ -2080,55 +2077,75 @@ void CBlood::KeyValue( KeyValueData *pkvd )
 		CPointEntity::KeyValue( pkvd );
 }
 
-Vector CBlood::Direction( CBaseEntity *pActivator )
+bool CBlood::CheckBloodDirection( CBaseEntity *pActivator, Vector& bloodDir )
 {
-	if( pev->spawnflags & SF_BLOOD_RANDOM )
-		return UTIL_RandomBloodVector();
-	else if (pev->netname)
-		return CalcLocus_Velocity(this, pActivator, STRING(pev->netname));
-	else
-		return pev->movedir;
+	if( pev->spawnflags & SF_BLOOD_RANDOM ) {
+		bloodDir = UTIL_RandomBloodVector();
+		return true;
+	}
+	else if (pev->netname) {
+		return TryCalcLocus_Velocity(this, pActivator, STRING(pev->netname), bloodDir);
+	}
+	else {
+		bloodDir = pev->movedir;
+		return true;
+	}
 }
 
-Vector CBlood::BloodPosition( CBaseEntity *pActivator )
+bool CBlood::CheckBloodPosition( CBaseEntity *pActivator, Vector& bloodPos )
 {
 	if( pev->spawnflags & SF_BLOOD_PLAYER )
 	{
 		edict_t *pPlayer;
-
 		if( pActivator && pActivator->IsPlayer() )
 		{
 			pPlayer = pActivator->edict();
 		}
 		else
 			pPlayer = g_engfuncs.pfnPEntityOfEntIndex( 1 );
-		if( pPlayer )
-			return( pPlayer->v.origin + pPlayer->v.view_ofs ) + Vector( RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ) );
+		if( pPlayer ) {
+			bloodPos = ( pPlayer->v.origin + pPlayer->v.view_ofs ) + Vector( RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ) );
+			return true;
+		}
+		return false;
 	}
 	else if (pev->target)
 	{
-		return CalcLocus_Position(this, pActivator, STRING(pev->target));
+		return TryCalcLocus_Position(this, pActivator, STRING(pev->target), bloodPos);
 	}
 
-	return pev->origin;
+	bloodPos = pev->origin;
+	return true;
 }
 
 void CBlood::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if( pev->spawnflags & SF_BLOOD_STREAM )
-		UTIL_BloodStream( BloodPosition( pActivator ), Direction( pActivator ), ( Color() == BLOOD_COLOR_RED ) ? 70 : Color(), (int)BloodAmount() );
-	else
-		UTIL_BloodDrips( BloodPosition( pActivator ), Direction( pActivator ), Color(), (int)BloodAmount() );
+	Vector bloodPos;
+	Vector bloodDir;
+
+	if( pev->spawnflags & SF_BLOOD_STREAM ) {
+		if (CheckBloodPosition( pActivator, bloodPos ) && CheckBloodDirection( pActivator, bloodDir ))
+			UTIL_BloodStream( bloodPos, bloodDir, ( Color() == BLOOD_COLOR_RED ) ? 70 : Color(), (int)BloodAmount() );
+	} else {
+		if (CheckBloodPosition( pActivator, bloodPos ) && CheckBloodDirection( pActivator, bloodDir ))
+			UTIL_BloodDrips( bloodPos, bloodDir, Color(), (int)BloodAmount() );
+	}
 
 	if( pev->spawnflags & SF_BLOOD_DECAL )
 	{
-		Vector forward = Direction( pActivator );
-		Vector start = BloodPosition( pActivator );
-		TraceResult tr;
+		Vector forward;
+		if (CheckBloodDirection( pActivator, forward ))
+		{
+			Vector start;
+			if (CheckBloodPosition( pActivator, start )) {
+				TraceResult tr;
 
-		UTIL_TraceLine( start, start + forward * BloodAmount() * 2, ignore_monsters, NULL, &tr );
-		if( tr.flFraction != 1.0f )
-			UTIL_BloodDecalTrace( &tr, Color() );
+				UTIL_TraceLine( start, start + forward * BloodAmount() * 2, ignore_monsters, NULL, &tr );
+				if( tr.flFraction != 1.0f )
+					UTIL_BloodDecalTrace( &tr, Color() );
+			}
+		}
+
 	}
 }
 
@@ -2466,9 +2483,7 @@ void CEnvFunnel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 	Vector vecPos;
 	if (pev->message)
 	{
-		bool evaluated;
-		vecPos = CalcLocus_Position( this, pActivator, STRING(pev->message), &evaluated );
-		if (!evaluated)
+		if (!TryCalcLocus_Position( this, pActivator, STRING(pev->message), vecPos ))
 			return;
 	}
 	else
@@ -2551,9 +2566,7 @@ void CEnvBeverage::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	Vector vecPos;
 	if (pev->target)
 	{
-		bool evaluated;
-		vecPos = CalcLocus_Position( this, pActivator, STRING(pev->target), &evaluated );
-		if (!evaluated)
+		if (!TryCalcLocus_Position( this, pActivator, STRING(pev->target), vecPos ))
 			return;
 	}
 	else
@@ -3542,7 +3555,7 @@ void CBlowerCannon::BlowerCannonThink( void )
 	bool evaluated = true;
 	if (pev->netname)
 	{
-		direction = CalcLocus_Velocity(this, m_hActivator, STRING(pev->netname), &evaluated);
+		evaluated = TryCalcLocus_Velocity(this, m_hActivator, STRING(pev->netname), direction);
 	}
 	else
 	{
@@ -3560,7 +3573,7 @@ void CBlowerCannon::BlowerCannonThink( void )
 		Vector position = pev->origin;
 		if (pev->message)
 		{
-			position = CalcLocus_Position(this, m_hActivator, STRING(pev->message), &evaluated);
+			evaluated = TryCalcLocus_Position(this, m_hActivator, STRING(pev->message), position);
 		}
 
 		if ( evaluated )
@@ -3723,9 +3736,7 @@ void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	Vector vecPos;
 	if (!FStringNull(m_iszPosition))
 	{
-		bool evaluated;
-		vecPos = CalcLocus_Position( this, pActivator, STRING(m_iszPosition), &evaluated );
-		if (!evaluated)
+		if (!TryCalcLocus_Position( this, pActivator, STRING(m_iszPosition), vecPos ))
 			return;
 	}
 	else
@@ -3822,8 +3833,7 @@ void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	Vector vecPos;
 	if (!FStringNull(pev->target))
 	{
-		vecPos = CalcLocus_Position( this, pActivator, STRING(pev->target), &evaluated );
-		if (!evaluated)
+		if (!TryCalcLocus_Position( this, pActivator, STRING(pev->target), vecPos ))
 			return;
 	}
 	else
@@ -3834,9 +3844,7 @@ void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	Vector vecOffs;
 	if (!FStringNull(pev->netname))
 	{
-
-		vecOffs = CalcLocus_Velocity( this, pActivator, STRING(pev->netname), &evaluated );
-		if (!evaluated)
+		if (!TryCalcLocus_Velocity( this, pActivator, STRING(pev->netname), vecOffs ))
 			return;
 	}
 	else

@@ -2048,9 +2048,7 @@ void CEnvSoundMark::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	Vector vecPos;
 	if (pev->message)
 	{
-		bool evaluated;
-		vecPos = CalcLocus_Position(this, pActivator, STRING(pev->message), &evaluated);
-		if (!evaluated)
+		if (!TryCalcLocus_Position(this, pActivator, STRING(pev->message), vecPos))
 			return;
 	}
 	else

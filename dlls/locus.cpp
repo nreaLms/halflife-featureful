@@ -14,80 +14,65 @@
 #include "decals.h"
 
 
-Vector CalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, bool* evaluated )
+bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result )
 {
 	if ((*szText >= '0' && *szText <= '9') || *szText == '-')
 	{ // it's a vector
 		Vector tmp;
 		UTIL_StringToRandomVector( (float *)tmp, szText );
-		if (evaluated)
-			*evaluated = true;
-		return tmp;
+		result = tmp;
+		return true;
 	}
 
 	CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, szText, pLocus);
 
 	if (pCalc != NULL)
 	{
-		if (evaluated)
-			*evaluated = true;
-		return pCalc->CalcPosition( pLocus );
+		return pCalc->CalcPosition( pLocus, &result );
 	}
-		
+
 	ALERT(at_error, "%s \"%s\" has bad or missing calc_position value \"%s\"\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname), szText);
-	if (evaluated)
-		*evaluated = false;
-	return g_vecZero;
+	return false;
 }
 
-Vector CalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText , bool *evaluated)
+bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText , Vector& result)
 {
 	if ((*szText >= '0' && *szText <= '9') || *szText == '-')
 	{ // it's a vector
 		Vector tmp;
 		UTIL_StringToRandomVector( (float *)tmp, szText );
-		if (evaluated)
-			*evaluated = true;
-		return tmp;
+		result = tmp;
+		return true;
 	}
 
 	CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, szText, pLocus);
 		
 	if (pCalc != NULL)
 	{
-		if (evaluated)
-			*evaluated = true;
-		return pCalc->CalcVelocity( pLocus );
+		return pCalc->CalcVelocity( pLocus, &result );
 	}
 		
 	ALERT(at_error, "%s \"%s\" has bad or missing calc_velocity value \"%s\"\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname), szText);
-	if (evaluated)
-		*evaluated = false;
-	return g_vecZero;
+	return false;
 }
 
-float CalcLocus_Ratio(CBaseEntity *pLocus, const char *szText , bool *evaluated)
+bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText , float& result)
 {
 	if ((*szText >= '0' && *szText <= '9') || *szText == '-')
 	{ // assume it's a float
-		if (evaluated)
-			*evaluated = true;
-		return atof( szText );
+		result = atof( szText );
+		return true;
 	}
 
 	CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, szText, pLocus);
 
 	if (pCalc != NULL)
 	{
-		if (evaluated)
-			*evaluated = true;
-		return pCalc->CalcRatio( pLocus );
+		return pCalc->CalcRatio( pLocus, &result );
 	}
 
 	ALERT(at_error, "Bad or missing calc_ratio entity \"%s\"\n", szText);
-	if (evaluated)
-		*evaluated = false;
-	return 0; // we need some signal for "fail". NaN, maybe?
+	return false;
 }
 
 //=============================================
@@ -315,7 +300,9 @@ void CLocusBeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		break;
 
 	case 1: // pointent
-		vecStartPos = CalcLocus_Position( this, pActivator, STRING(m_iszStart) );
+		if (!TryCalcLocus_Position( this, pActivator, STRING(m_iszStart), vecStartPos ))
+			return;
+
 		pEndEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszEnd), pActivator);
 
 		if (pEndEnt == NULL)
@@ -324,15 +311,16 @@ void CLocusBeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		pBeam->PointEntInit( vecStartPos, pEndEnt->entindex(), m_iEndAttachment );
 		break;
 	case 2: // points
-		vecStartPos = CalcLocus_Position( this, pActivator, STRING(m_iszStart) );
-		vecEndPos = CalcLocus_Position( this, pActivator, STRING(m_iszEnd) );
+		if (!TryCalcLocus_Position( this, pActivator, STRING(m_iszStart), vecStartPos ) || !TryCalcLocus_Position( this, pActivator, STRING(m_iszEnd), vecEndPos )) {
+			return;
+		}
 
 		pBeam = CBeam::BeamCreate( STRING(m_iszSprite), m_iWidth );
 		pBeam->PointsInit( vecStartPos, vecEndPos );
 		break;
 	case 3: // point & offset
-		vecStartPos = CalcLocus_Position( this, pActivator, STRING(m_iszStart) );
-		vecEndPos = CalcLocus_Velocity( this, pActivator, STRING(m_iszEnd) );
+		if (!TryCalcLocus_Position( this, pActivator, STRING(m_iszStart), vecStartPos ) || !TryCalcLocus_Velocity( this, pActivator, STRING(m_iszEnd), vecEndPos ))
+			return;
 
 		pBeam = CBeam::BeamCreate( STRING(m_iszSprite), m_iWidth );
 		pBeam->PointsInit( vecStartPos, vecStartPos + vecEndPos );
@@ -382,72 +370,90 @@ void CLocusBeam::Spawn( void )
 class CCalcPosition : public CPointEntity
 {
 public:
-	Vector CalcPosition( CBaseEntity *pLocus );
+	bool CalcPosition( CBaseEntity *pLocus, Vector* outVector );
 };
 
 LINK_ENTITY_TO_CLASS( calc_position, CCalcPosition )
 
-Vector CCalcPosition::CalcPosition( CBaseEntity *pLocus )
+bool CCalcPosition::CalcPosition( CBaseEntity *pLocus, Vector* outVector )
 {
 	CBaseEntity *pSubject = UTIL_FindEntityByTargetname(NULL, STRING(pev->netname), pLocus);
+	if ( !pSubject )
+	{
+		ALERT(at_console, "%s \"%s\" failed to find target entity \"%s\"\n", STRING(pev->classname), STRING(pev->targetname), STRING(pev->netname) );
+		return false;
+	}
 
 	Vector vecOffset = g_vecZero;
 
-	if (pev->message)
-		vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message));
+	if (pev->message) {
+		if (!TryCalcLocus_Velocity( this, pLocus, STRING(pev->message), vecOffset)) {
+			ALERT(at_console, "%s \"%s\" failed, bad LV \"%s\"\n", STRING(pev->classname), STRING(pev->targetname), STRING(pev->message) );
+			return false;
+		}
+	}
 
 	Vector vecPosition;
 	Vector vecJunk;
 
-	Vector vecResult;
 	switch (pev->impulse)
 	{
 	case 1: //eyes
-		vecResult = vecOffset + pSubject->EyePosition();
+		*outVector = vecOffset + pSubject->EyePosition();
 		//ALERT(at_console, "calc_subpos returns %f %f %f\n", vecResult.x, vecResult.y, vecResult.z);
-		return vecResult;
+		break;
 		//return vecOffset + pLocus->EyePosition();
 	case 2: // top
-		return vecOffset + pSubject->pev->origin + Vector(
+		*outVector = vecOffset + pSubject->pev->origin + Vector(
 			(pSubject->pev->mins.x + pSubject->pev->maxs.x)/2,
 			(pSubject->pev->mins.y + pSubject->pev->maxs.y)/2,
 			pSubject->pev->maxs.z
 		);
+		break;
 	case 3: // centre
-		return vecOffset + pSubject->pev->origin + Vector(
+		*outVector = vecOffset + pSubject->pev->origin + Vector(
 			(pSubject->pev->mins.x + pSubject->pev->maxs.x)/2,
 			(pSubject->pev->mins.y + pSubject->pev->maxs.y)/2,
 			(pSubject->pev->mins.z + pSubject->pev->maxs.z)/2
 		);
+		break;
 	case 4: // bottom
-		return vecOffset + pSubject->pev->origin + Vector(
+		*outVector = vecOffset + pSubject->pev->origin + Vector(
 			(pSubject->pev->mins.x + pSubject->pev->maxs.x)/2,
 			(pSubject->pev->mins.y + pSubject->pev->maxs.y)/2,
 			pSubject->pev->mins.z
 		);
+		break;
 	case 5:
 		// this could cause problems.
 		// is there a good way to check whether it's really a CBaseAnimating?
 		((CBaseAnimating*)pSubject)->GetAttachment( 0, vecPosition, vecJunk );
-		return vecOffset + vecPosition;
+		*outVector = vecOffset + vecPosition;
+		break;
 	case 6:
 		((CBaseAnimating*)pSubject)->GetAttachment( 1, vecPosition, vecJunk );
-		return vecOffset + vecPosition;
+		*outVector = vecOffset + vecPosition;
+		break;
 	case 7:
 		((CBaseAnimating*)pSubject)->GetAttachment( 2, vecPosition, vecJunk );
-		return vecOffset + vecPosition;
+		*outVector = vecOffset + vecPosition;
+		break;
 	case 8:
 		((CBaseAnimating*)pSubject)->GetAttachment( 3, vecPosition, vecJunk );
-		return vecOffset + vecPosition;
+		*outVector = vecOffset + vecPosition;
+		break;
 	case 9:
-		return vecOffset + pSubject->pev->origin + Vector(
+		*outVector = vecOffset + pSubject->pev->origin + Vector(
 			RANDOM_FLOAT(pSubject->pev->mins.x, pSubject->pev->maxs.x),
 			RANDOM_FLOAT(pSubject->pev->mins.y, pSubject->pev->maxs.y),
 			RANDOM_FLOAT(pSubject->pev->mins.z, pSubject->pev->maxs.z)
 		);
+		break;
 	default:
-		return vecOffset + pSubject->pev->origin;
+		*outVector = vecOffset + pSubject->pev->origin;
+		break;
 	}
+	return true;
 }
 
 //=======================================================
@@ -455,7 +461,7 @@ Vector CCalcPosition::CalcPosition( CBaseEntity *pLocus )
 class CCalcRatio : public CPointEntity
 {
 public:
-	float CalcRatio( CBaseEntity *pLocus );
+	bool CalcRatio( CBaseEntity *pLocus, float* outResult );
 
 	void Spawn();
 	virtual int Save( CSave &save );
@@ -484,9 +490,12 @@ void CCalcRatio::Spawn()
 	pev->noise1 = iStringNull;
 }
 
-float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
+bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 {
-	float fBasis = CalcLocus_Ratio( pLocus, STRING(pev->target));
+	float fBasis = 0;
+	if (!TryCalcLocus_Ratio( pLocus, STRING(pev->target), fBasis)) {
+		return false;
+	}
 
 	switch (pev->impulse)
 	{
@@ -495,33 +504,45 @@ float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
 	case 3:		fBasis = 1/fBasis; break; //reciprocal
 	}
 
-	if (!FStringNull(pev->netname))
-		fBasis += CalcLocus_Ratio( pLocus, STRING(pev->netname));
+	if (!FStringNull(pev->netname)) {
+		float fTmp = 0;
+		if (!TryCalcLocus_Ratio( pLocus, STRING(pev->netname), fTmp))
+			return false;
+		fBasis += fTmp;
+	}
 	//fBasis = fBasis * CalcLocus_Ratio( pLocus, STRING(pev->message));
 
 	if (!FStringNull(m_iszMin))
 	{
-		float fMin = CalcLocus_Ratio( pLocus, STRING(m_iszMin));
+		float fMin = 0;
+		if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszMin), fMin))
+			return false;
 
 		if (!FStringNull(m_iszMax))
 		{
-			float fMax = CalcLocus_Ratio( pLocus, STRING(m_iszMax));
+			float fMax = 0;
+			if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszMax), fMax))
+				return false;
 			
-			if (fBasis >= fMin && fBasis <= fMax)
-				return fBasis;
+			if (fBasis >= fMin && fBasis <= fMax) {
+				*outResult = fBasis;
+				return true;
+			}
 			switch ((int)pev->frags)
 			{
 			case 0:
 				if (fBasis < fMin)
-					return fMin;
+					*outResult = fMin;
 				else
-					return fMax;
+					*outResult = fMax;
+				return true;
 			case 1:
 				while (fBasis < fMin)
 					fBasis += fMax - fMin;
 				while (fBasis > fMax)
 					fBasis -= fMax - fMin;
-				return fBasis;
+				*outResult = fBasis;
+				return true;
 			case 2:
 				while (fBasis < fMin || fBasis > fMax)
 				{
@@ -530,26 +551,30 @@ float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
 					else
 						fBasis = fMax + fMax - fBasis;
 				}
-				return fBasis;
+				*outResult = fBasis;
+				return true;
 			}
 		}
 		
 		if (fBasis > fMin)
-			return fBasis;
+			*outResult = fBasis;
 		else
-			return fMin; // crop to nearest value
+			*outResult = fMin; // crop to nearest value
 	}
 	else if (!FStringNull(m_iszMax))
 	{
-		float fMax = CalcLocus_Ratio( pLocus, STRING(m_iszMax));
+		float fMax = 0;
+		if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszMax), fMax))
+			return false;
 
 		if (fBasis < fMax)
-			return fBasis;
+			*outResult = fBasis;
 		else
-			return fMax; // crop to nearest value
+			*outResult = fMax; // crop to nearest value
 	}
 	else
-		return fBasis;
+		*outResult = fBasis;
+	return true;
 }
 
 
@@ -561,10 +586,10 @@ float CCalcRatio::CalcRatio( CBaseEntity *pLocus )
 #define SF_CALCVELOCITY_DISCARDZ 16
 class CCalcSubVelocity : public CPointEntity
 {
-	Vector Convert( CBaseEntity *pLocus, Vector vecVel );
-	Vector ConvertAngles( CBaseEntity *pLocus, Vector vecAngles );
+	bool Convert( CBaseEntity *pLocus, Vector vecVel, Vector* outVector );
+	bool ConvertAngles( CBaseEntity *pLocus, Vector vecAngles, Vector* outVector );
 public:
-	Vector CalcVelocity( CBaseEntity *pLocus );
+	bool CalcVelocity( CBaseEntity *pLocus, Vector* outResult );
 
 	void Spawn();
 	virtual int Save( CSave &save );
@@ -589,9 +614,14 @@ void CCalcSubVelocity::Spawn()
 	pev->noise = iStringNull;
 }
 
-Vector CCalcSubVelocity::CalcVelocity( CBaseEntity *pLocus )
+bool CCalcSubVelocity::CalcVelocity( CBaseEntity *pLocus, Vector* outResult )
 {
 	pLocus = UTIL_FindEntityByTargetname( NULL, STRING(pev->netname), pLocus );
+	if ( !pLocus )
+	{
+		ALERT(at_console, "%s \"%s\" failed to find target entity \"%s\"\n", STRING(pev->classname), STRING(pev->targetname), STRING(pev->netname) );
+		return false;
+	}
 
 	Vector vecAngles;
 	Vector vecJunk;
@@ -599,40 +629,44 @@ Vector CCalcSubVelocity::CalcVelocity( CBaseEntity *pLocus )
 	switch (pev->impulse)
 	{
 	case 1: //angles
-		return ConvertAngles( pLocus, pLocus->pev->angles );
+		return ConvertAngles( pLocus, pLocus->pev->angles, outResult );
 	case 2: //v_angle
-		return ConvertAngles( pLocus, pLocus->pev->v_angle );
+		return ConvertAngles( pLocus, pLocus->pev->v_angle, outResult );
 	case 5:
 		// this could cause problems.
 		// is there a good way to check whether it's really a CBaseAnimating?
 		((CBaseAnimating*)pLocus)->GetAttachment( 0, vecJunk, vecAngles );
-		return ConvertAngles( pLocus, vecAngles );
+		return ConvertAngles( pLocus, vecAngles, outResult );
 	case 6:
 		((CBaseAnimating*)pLocus)->GetAttachment( 1, vecJunk, vecAngles );
-		return ConvertAngles( pLocus, vecAngles );
+		return ConvertAngles( pLocus, vecAngles, outResult );
 	case 7:
 		((CBaseAnimating*)pLocus)->GetAttachment( 2, vecJunk, vecAngles );
-		return ConvertAngles( pLocus, vecAngles );
+		return ConvertAngles( pLocus, vecAngles, outResult );
 	case 8:
 		((CBaseAnimating*)pLocus)->GetAttachment( 3, vecJunk, vecAngles );
-		return ConvertAngles( pLocus, vecAngles );
+		return ConvertAngles( pLocus, vecAngles, outResult );
 	default:
-		return Convert( pLocus, pLocus->pev->velocity );
+		return Convert( pLocus, pLocus->pev->velocity, outResult );
 	}
 }
 
-Vector CCalcSubVelocity::Convert( CBaseEntity *pLocus, Vector vecDir )
+bool CCalcSubVelocity::Convert( CBaseEntity *pLocus, Vector vecDir, Vector* outVector )
 {
 	if (pev->spawnflags & SF_CALCVELOCITY_NORMALIZE)
 		vecDir = vecDir.Normalize();
 	
 	float fRatio = 1;
-	if (m_iszFactor)
-		CalcLocus_Ratio( pLocus, STRING(m_iszFactor) );
+	if (m_iszFactor) {
+		if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszFactor), fRatio ))
+			return false;
+	}
 	Vector vecOffset = g_vecZero;
 
-	if (pev->message)
-		vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message));
+	if (pev->message) {
+		if (!TryCalcLocus_Velocity( this, pLocus, STRING(pev->message), vecOffset))
+			return false;
+	}
 
 	Vector vecResult = vecOffset + (vecDir*fRatio);
 
@@ -645,13 +679,14 @@ Vector CCalcSubVelocity::Convert( CBaseEntity *pLocus, Vector vecDir )
 	if (pev->spawnflags & SF_CALCVELOCITY_SWAPZ)
 		vecResult.z = -vecResult.z;
 //	ALERT(at_console, "calc_subvel returns (%f %f %f) = (%f %f %f) + ((%f %f %f) * %f)\n", vecResult.x, vecResult.y, vecResult.z, vecOffset.x, vecOffset.y, vecOffset.z, vecDir.x, vecDir.y, vecDir.z, fRatio);
-	return vecResult;
+	*outVector = vecResult;
+	return true;
 }
 
-Vector CCalcSubVelocity::ConvertAngles( CBaseEntity *pLocus, Vector vecAngles )
+bool CCalcSubVelocity::ConvertAngles( CBaseEntity *pLocus, Vector vecAngles, Vector* outVector )
 {
 	UTIL_MakeVectors( vecAngles );
-	return Convert( pLocus, gpGlobals->v_forward );
+	return Convert( pLocus, gpGlobals->v_forward, outVector );
 }
 
 
@@ -660,7 +695,7 @@ Vector CCalcSubVelocity::ConvertAngles( CBaseEntity *pLocus, Vector vecAngles )
 class CCalcVelocityPath : public CPointEntity
 {
 public:
-	Vector CalcVelocity( CBaseEntity *pLocus );
+	bool CalcVelocity( CBaseEntity *pLocus, Vector* outVector );
 
 	void Spawn();
 	virtual int Save( CSave &save );
@@ -685,22 +720,28 @@ void CCalcVelocityPath::Spawn()
 	pev->noise = iStringNull;
 }
 
-Vector CCalcVelocityPath::CalcVelocity( CBaseEntity *pLocus )
+bool CCalcVelocityPath::CalcVelocity( CBaseEntity *pLocus, Vector* outVector )
 {
-	Vector vecStart = CalcLocus_Position( this, pLocus, STRING(pev->target) );
+	Vector vecStart;
+	TryCalcLocus_Position( this, pLocus, STRING(pev->target), vecStart );
 //	ALERT(at_console, "vecStart %f %f %f\n", vecStart.x, vecStart.y, vecStart.z);
-	Vector vecOffs;
+	Vector vecOffs = g_vecZero;
 	float fFactor = 1;
-	if (m_iszFactor)
-		fFactor = CalcLocus_Ratio( pLocus, STRING(m_iszFactor) );
+	if (m_iszFactor) {
+		if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszFactor), fFactor ))
+			return false;
+	}
 
 	switch ((int)pev->armorvalue)
 	{
 	case 0:
-		vecOffs = CalcLocus_Position( this, pLocus, STRING(pev->netname) ) - vecStart;
+		if (!TryCalcLocus_Position( this, pLocus, STRING(pev->netname), vecOffs ))
+			return false;
+		vecOffs = vecOffs - vecStart;
 		break;
 	case 1:
-		vecOffs = CalcLocus_Velocity( this, pLocus, STRING(pev->netname) );
+		if (!TryCalcLocus_Velocity( this, pLocus, STRING(pev->netname), vecOffs ))
+			return false;
 		break;
 	}
 //	ALERT(at_console, "vecOffs %f %f %f\n", vecOffs.x, vecOffs.y, vecOffs.z);
@@ -751,7 +792,8 @@ Vector CCalcVelocityPath::CalcVelocity( CBaseEntity *pLocus )
 	}
 
 //	ALERT(at_console, "path: %f %f %f\n", vecOffs.x, vecOffs.y, vecOffs.z);
-	return vecOffs;
+	*outVector = vecOffs;
+	return true;
 }
 
 
@@ -759,7 +801,7 @@ Vector CCalcVelocityPath::CalcVelocity( CBaseEntity *pLocus )
 class CCalcVelocityPolar : public CPointEntity
 {
 public:
-	Vector CalcVelocity( CBaseEntity *pLocus );
+	bool CalcVelocity( CBaseEntity *pLocus, Vector* outResult );
 
 	void Spawn();
 	virtual int Save( CSave &save );
@@ -784,23 +826,29 @@ void CCalcVelocityPolar::Spawn()
 	pev->noise = iStringNull;
 }
 
-Vector CCalcVelocityPolar::CalcVelocity( CBaseEntity *pLocus )
+bool CCalcVelocityPolar::CalcVelocity( CBaseEntity *pLocus, Vector* outResult )
 {
-	Vector vecBasis = CalcLocus_Velocity( this, pLocus, STRING(pev->netname) );
+	Vector vecBasis = g_vecZero;
+	TryCalcLocus_Velocity( this, pLocus, STRING(pev->netname), vecBasis );
 	Vector vecAngles = UTIL_VecToAngles( vecBasis ) + pev->angles;
 	Vector vecOffset = g_vecZero;
-	if (pev->message)
-		vecOffset = CalcLocus_Velocity( this, pLocus, STRING(pev->message) );
+	if (pev->message) {
+		if (!TryCalcLocus_Velocity( this, pLocus, STRING(pev->message), vecOffset ))
+			return false;
+	}
 
 	float fFactor = 1;
-	if (m_iszFactor)
-		fFactor = CalcLocus_Ratio( pLocus, STRING(m_iszFactor) );
+	if (m_iszFactor) {
+		if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszFactor), fFactor ))
+			return false;
+	}
 
 	if (!(pev->spawnflags & SF_CALCVELOCITY_NORMALIZE))
 		fFactor = fFactor * vecBasis.Length();
 
 	UTIL_MakeVectors( vecAngles );
-	return (gpGlobals->v_forward * fFactor) + vecOffset;
+	*outResult = (gpGlobals->v_forward * fFactor) + vecOffset;
+	return true;
 }
 
 //=======================================================
@@ -809,8 +857,8 @@ Vector CCalcVelocityPolar::CalcVelocity( CBaseEntity *pLocus )
 class CMark : public CPointEntity
 {
 public:
-	Vector	CalcVelocity(CBaseEntity *pLocus) { return pev->movedir; }
-	float	CalcRatio(CBaseEntity *pLocus) { return pev->frags; }
+	bool	CalcVelocity(CBaseEntity *pLocus, Vector* outVector) { *outVector = pev->movedir; return true; }
+	bool	CalcRatio(CBaseEntity *pLocus, float* outResult) { *outResult = pev->frags; return true; }
 	void	Think( void ) { SUB_Remove(); }
 };
 
@@ -819,8 +867,8 @@ class CLocusVariable : public CPointEntity
 public:
 	void	Spawn( void );
 	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	Vector	CalcVelocity(CBaseEntity *pLocus) { return pev->movedir; }
-	float	CalcRatio(CBaseEntity *pLocus) { return pev->frags; }
+	bool	CalcVelocity(CBaseEntity *pLocus, Vector* outVector) { *outVector = pev->movedir; return true; }
+	bool	CalcRatio(CBaseEntity *pLocus, float* outResult) { *outResult = pev->frags; return true; }
 
 	void KeyValue( KeyValueData *pkvd );
 	virtual int		Save( CSave &save );
@@ -896,11 +944,11 @@ void CLocusVariable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	Vector vecDir = g_vecZero;
 	float fRatio = 0;
 	if (m_iszPosition)
-		vecPos = CalcLocus_Position(this, pActivator, STRING(m_iszPosition));
+		TryCalcLocus_Position(this, pActivator, STRING(m_iszPosition), vecPos);
 	if (m_iszVelocity)
-		vecDir = CalcLocus_Velocity(this, pActivator, STRING(m_iszVelocity));
+		TryCalcLocus_Velocity(this, pActivator, STRING(m_iszVelocity), vecDir);
 	if (m_iszRatio)
-		fRatio = CalcLocus_Ratio(pActivator, STRING(m_iszRatio));
+		TryCalcLocus_Ratio(pActivator, STRING(m_iszRatio), fRatio);
 
 	if (m_iszTargetName)
 	{

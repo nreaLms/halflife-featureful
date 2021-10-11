@@ -428,9 +428,7 @@ int CMonsterMaker::MakeMonster( void )
 		}
 		else
 		{
-			bool evaluated;
-			placePosition = CalcLocus_Position(this, m_hActivator, placeIdentifier, &evaluated);
-			if (!evaluated)
+			if (!TryCalcLocus_Position(this, m_hActivator, placeIdentifier, placePosition))
 				return MONSTERMAKER_BADPLACE;
 			CBaseEntity* tempPosEnt = CBaseEntity::Create("info_target", placePosition, pev->angles);
 			if (tempPosEnt)
