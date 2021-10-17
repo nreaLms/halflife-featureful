@@ -649,6 +649,8 @@ public:
 
 	inline BOOL HitLimit( void ) { return CountValue() == LimitValue(); }
 
+	bool CalcRatio( CBaseEntity *pLocus, float* outResult );
+
 private:
 
 	inline void SetCountValue( int value ) { pev->frags = value; }
@@ -696,6 +698,12 @@ void CGameCounter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 			ResetCount();
 		}
 	}
+}
+
+bool CGameCounter::CalcRatio( CBaseEntity *pLocus, float* outResult )
+{
+	*outResult = pev->frags;
+	return true;
 }
 
 //

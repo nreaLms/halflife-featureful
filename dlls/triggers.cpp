@@ -1370,6 +1370,7 @@ class CTriggerCounter : public CBaseTrigger
 {
 public:
 	void Spawn( void );
+	bool CalcNumber( CBaseEntity *pLocus, float* outResult );
 };
 
 LINK_ENTITY_TO_CLASS( trigger_counter, CTriggerCounter )
@@ -1383,6 +1384,12 @@ void CTriggerCounter::Spawn( void )
 	if( m_cTriggersLeft == 0 )
 		m_cTriggersLeft = 2;
 	SetUse( &CBaseTrigger::CounterUse );
+}
+
+bool CTriggerCounter::CalcNumber( CBaseEntity *pLocus, float* outResult )
+{
+	*outResult = static_cast<float>(m_cTriggersLeft);
+	return true;
 }
 
 // ====================== TRIGGER_CHANGELEVEL ================================
