@@ -3408,7 +3408,6 @@ void CEnvXenMaker::PlaySecondSound(edict_t* posEnt)
 }
 #endif
 
-#if FEATURE_DISPLACER || FEATURE_SHOCKBEAM || FEATURE_SPOREGRENADE
 
 #include "displacerball.h"
 #include "shockbeam.h"
@@ -3503,7 +3502,7 @@ void CBlowerCannon::Spawn(void)
 	Precache();
 	UTIL_SetSize( pev, Vector(-16, -16, -16), Vector( 16, 16, 16 ) );
 	pev->solid = SOLID_TRIGGER;
-	if (m_flDelay <= 0.0f)
+	if (m_flDelay <= 0.0f && m_iFireType != BLOWERCANNON_FIRE)
 		m_flDelay = 1.0f;
 	SetUse( &CBlowerCannon::BlowerCannonStart );
 }
@@ -3623,8 +3622,6 @@ void CBlowerCannon::BlowerCannonThink( void )
 
 	pev->nextthink = gpGlobals->time + m_flDelay;
 }
-
-#endif
 
 //==================================================================
 //LRC- Shockwave effect, like when a Houndeye attacks.
