@@ -365,6 +365,13 @@ int CWallCharger::OffStateFrame()
 	return 1;
 }
 
+bool CWallCharger::CalcRatio( CBaseEntity *pLocus, float* outResult )
+{
+	*outResult = m_iJuice / static_cast<float>(ChargerCapacity());
+	return true;
+}
+
+
 //-------------------------------------------------------------
 // Wall mounted health kit
 //-------------------------------------------------------------

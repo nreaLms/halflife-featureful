@@ -43,5 +43,7 @@ public:
 
 	int OnStateFrame();
 	int OffStateFrame();
+
+	bool CalcRatio( CBaseEntity *pLocus, float* outResult );
 };
 #endif
