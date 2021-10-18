@@ -722,8 +722,16 @@ void CCalcVelocityPath::Spawn()
 
 bool CCalcVelocityPath::CalcVelocity( CBaseEntity *pLocus, Vector* outVector )
 {
-	Vector vecStart;
-	TryCalcLocus_Position( this, pLocus, STRING(pev->target), vecStart );
+	Vector vecStart = pev->origin;
+	if ( !FStringNull(pev->target) )
+	{
+		if ( !TryCalcLocus_Position( this, pLocus, STRING(pev->target), vecStart ) )
+		{
+			//ALERT(at_console, "%s \"%s\" failed: bad LP \"%s\"\n", STRING(pev->classname), STRING(pev->targetname), STRING(pev->target));
+			return false;
+		}
+	}
+
 //	ALERT(at_console, "vecStart %f %f %f\n", vecStart.x, vecStart.y, vecStart.z);
 	Vector vecOffs = g_vecZero;
 	float fFactor = 1;
