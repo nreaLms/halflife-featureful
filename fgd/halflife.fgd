@@ -1893,6 +1893,7 @@
 		256: "Instant Crowbar" : 0
 		512: "Explosives only": 0
 		1024: "Op4Mortar only" : 0
+		2048: "Not solid" : 0
 	]
 	_minlight(string) : "Minimum light level"
 ]

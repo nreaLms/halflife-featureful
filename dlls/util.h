@@ -489,6 +489,7 @@ extern DLL_GLOBAL int			g_Language;
 #define SF_BREAK_CROWBAR		256// instant break if hit with crowbar
 #define SF_BREAK_EXPLOSIVES_ONLY		512// can be damaged only by DMG_BLAST
 #define SF_BREAK_OP4MORTAR_ONLY	1024 // can be damaged only by op4mortar rockets
+#define SF_BREAK_NOT_SOLID 2048 // breakable is not solid
 
 // func_pushable (it's also func_breakable, so don't collide with those flags)
 #define SF_PUSH_BREAKABLE		128
