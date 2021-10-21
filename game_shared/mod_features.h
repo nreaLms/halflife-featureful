@@ -121,6 +121,10 @@
 #define DEADHAZMODEL "models/player.mdl"
 #endif
 
+// Brush entities features
+// Open func_door_rotating in the direction of player's movement, not facing
+#define FEATURE_OPEN_ROTATING_DOOR_IN_MOVE_DIRECTION 0
+
 // Misc features
 #define FEATURE_SUIT_NO_SOUNDS (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_OPFOR_DECALS (0 || FEATURE_OPFOR_SPECIFIC)
