@@ -99,6 +99,7 @@ cvar_t keepinventory	= { "mp_keepinventory","0", FCVAR_SERVER }; // keep invento
 cvar_t *g_psv_gravity = NULL;
 cvar_t *g_psv_aim = NULL;
 cvar_t *g_footsteps = NULL;
+cvar_t *g_enable_cheats = NULL;
 
 cvar_t *g_psv_developer;
 
@@ -922,6 +923,8 @@ void GameDLLInit( void )
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
 
 	g_psv_developer = CVAR_GET_POINTER( "developer" );
+
+	g_enable_cheats = CVAR_GET_POINTER( "sv_cheats" );
 
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );

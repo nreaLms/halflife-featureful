@@ -7,6 +7,8 @@
 
 // Client side entity management functions
 
+#include <memory.h>
+
 #include "hud.h"
 #include "cl_util.h"
 #include "const.h"
@@ -589,6 +591,10 @@ void DLLEXPORT HUD_CreateEntities( void )
 	// Add in any game specific objects
 	Game_AddObjects();
 	CL_UpdateLaserSpot();
+
+#if USE_VGUI
+	GetClientVoiceMgr()->CreateEntities();
+#endif
 }
 
 /*
