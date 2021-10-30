@@ -1320,6 +1320,7 @@
 		8: "No Smoke" : 0
 		16: "No Decal" : 0
 		32: "No Sparks" : 0
+		64: "No Sound" : 0
 	]
 ]
 

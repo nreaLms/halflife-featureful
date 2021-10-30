@@ -192,6 +192,11 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		}
 	}
 
+	int explosionFlags = TE_EXPLFLAG_NONE;
+	if (FBitSet(pev->spawnflags, SF_ENVEXPLOSION_NOSOUND)) {
+		explosionFlags |= TE_EXPLFLAG_NOSOUND;
+	}
+
 	// draw fireball
 	if( !( pev->spawnflags & SF_ENVEXPLOSION_NOFIREBALL ) )
 	{
@@ -203,7 +208,7 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 			WRITE_SHORT( g_sModelIndexFireball );
 			WRITE_BYTE( (BYTE)m_spriteScale ); // scale * 10
 			WRITE_BYTE( 15 ); // framerate
-			WRITE_BYTE( TE_EXPLFLAG_NONE );
+			WRITE_BYTE( explosionFlags );
 		MESSAGE_END();
 	}
 	else
@@ -216,7 +221,7 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 			WRITE_SHORT( g_sModelIndexFireball );
 			WRITE_BYTE( 0 ); // no sprite
 			WRITE_BYTE( 15 ); // framerate
-			WRITE_BYTE( TE_EXPLFLAG_NONE );
+			WRITE_BYTE( explosionFlags );
 		MESSAGE_END();
 	}
 

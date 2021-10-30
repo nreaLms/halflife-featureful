@@ -21,7 +21,8 @@
 #define SF_ENVEXPLOSION_NOFIREBALL	( 1 << 2 ) // don't draw the fireball
 #define SF_ENVEXPLOSION_NOSMOKE		( 1 << 3 ) // don't draw the smoke
 #define SF_ENVEXPLOSION_NODECAL		( 1 << 4 ) // don't make a scorch mark
-#define SF_ENVEXPLOSION_NOSPARKS	( 1 << 5 ) // don't make a scorch mark
+#define SF_ENVEXPLOSION_NOSPARKS	( 1 << 5 ) // don't draw sparks
+#define SF_ENVEXPLOSION_NOSOUND		( 1 << 6 ) // don't make sound
 
 extern DLL_GLOBAL short g_sModelIndexFireball;
 extern DLL_GLOBAL short g_sModelIndexSmoke;
