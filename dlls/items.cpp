@@ -174,6 +174,7 @@ public:
 	int m_itemCount;
 
 	static bool IsAppropriateItemName(const char* name);
+	static bool IsNullItem(const char* name);
 
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -193,7 +194,12 @@ IMPLEMENT_SAVERESTORE( CItemRandom, CBaseEntity )
 
 bool CItemRandom::IsAppropriateItemName(const char *name)
 {
-	return FStrEq(name, "info_null") || (strncmp(name, "ammo_", 5) == 0) || (strncmp(name, "item_", 5) == 0) || (strncmp(name, "weapon_", 7) == 0);
+	return IsNullItem(name) || (strncmp(name, "ammo_", 5) == 0) || (strncmp(name, "item_", 5) == 0) || (strncmp(name, "weapon_", 7) == 0);
+}
+
+bool CItemRandom::IsNullItem(const char *name)
+{
+	return FStrEq(name, "info_null") || FStrEq(name, "null");
 }
 
 void CItemRandom::KeyValue(KeyValueData *pkvd)
@@ -251,6 +257,9 @@ void CItemRandom::SpawnItem(const Vector &origin, const Vector &angles, string_t
 		sum += m_itemProbabilities[i];
 		if (choice <= sum)
 		{
+			if (IsNullItem(STRING(m_itemNames[i])))
+				break;
+
 			CBaseEntity *pEntity = CBaseEntity::Create( STRING(m_itemNames[i]), origin, angles );
 			if (!pEntity)
 				ALERT(at_error, "Could not spawn random item %s\n", STRING(m_itemNames[i]));
