@@ -5100,7 +5100,7 @@ static bool ItemDropIsProhibited()
 //=========================================================
 void CBasePlayer::DropPlayerItem( char *pszItemName )
 {
-	if( ItemDropIsProhibited() ) {
+	if( !g_pGameRules->PlayerCanDropWeapon(this) ) {
 		return;
 	}
 
@@ -5127,7 +5127,7 @@ void CBasePlayer::DropPlayerItem( char *pszItemName )
 
 void CBasePlayer::DropPlayerItemById(int iId)
 {
-	if( ItemDropIsProhibited() ) {
+	if( !g_pGameRules->PlayerCanDropWeapon(this) ) {
 		return;
 	}
 

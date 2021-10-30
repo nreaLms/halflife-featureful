@@ -111,6 +111,7 @@ public:
 	// Weapon retrieval
 	virtual BOOL CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon );// The player is touching an CBasePlayerWeapon, do I give it to him?
 	virtual void PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon ) = 0;// Called each time a player picks up a weapon from the ground
+	virtual bool PlayerCanDropWeapon( CBasePlayer* player ) = 0;
 
 	// Weapon spawn/respawn control
 	virtual int WeaponShouldRespawn( CBasePlayerWeapon *pWeapon ) = 0;// should this weapon respawn?
@@ -230,6 +231,7 @@ public:
 	// Item retrieval
 	virtual BOOL CanHaveItem( CBasePlayer *pPlayer, CItem *pItem );
 	virtual void PlayerGotItem( CBasePlayer *pPlayer, CItem *pItem );
+	virtual bool PlayerCanDropWeapon( CBasePlayer* pPlayer );
 
 	// Item spawn/respawn control
 	virtual int ItemShouldRespawn( CItem *pItem );
@@ -319,6 +321,7 @@ public:
 	// Weapon retrieval
 	virtual void PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon );
 	virtual BOOL CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon );// The player is touching an CBasePlayerWeapon, do I give it to him?
+	virtual bool PlayerCanDropWeapon( CBasePlayer* pPlayer );
 
 	// Weapon spawn/respawn control
 	virtual int WeaponShouldRespawn( CBasePlayerWeapon *pWeapon );

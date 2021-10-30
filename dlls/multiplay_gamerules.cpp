@@ -1285,6 +1285,12 @@ void CHalfLifeMultiplay::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapo
 {
 }
 
+//
+bool CHalfLifeMultiplay::PlayerCanDropWeapon(CBasePlayer *pPlayer)
+{
+	return weaponstay.value == 0 && dropweapons.value > 0;
+}
+
 //=========================================================
 // FlWeaponRespawnTime - what is the time in the future
 // at which this weapon may spawn?

@@ -212,6 +212,12 @@ void CHalfLifeRules::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *p
 {
 }
 
+//
+bool CHalfLifeRules::PlayerCanDropWeapon(CBasePlayer *pPlayer)
+{
+	return false;
+}
+
 //=========================================================
 // FlWeaponRespawnTime - what is the time in the future
 // at which this weapon may spawn?

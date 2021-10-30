@@ -33,6 +33,7 @@ cvar_t timelimit	= { "mp_timelimit","0", FCVAR_SERVER };
 cvar_t friendlyfire	= { "mp_friendlyfire","0", FCVAR_SERVER };
 cvar_t falldamage	= { "mp_falldamage","0", FCVAR_SERVER };
 cvar_t weaponstay	= { "mp_weaponstay","0", FCVAR_SERVER };
+cvar_t dropweapons	= { "mp_dropweapons","1", FCVAR_SERVER };
 
 cvar_t weapon_respawndelay = { "mp_weapon_respawndelay","-2",FCVAR_SERVER };
 cvar_t ammo_respawndelay = { "mp_ammo_respawndelay","-2",FCVAR_SERVER };
@@ -958,6 +959,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &friendlyfire );
 	CVAR_REGISTER( &falldamage );
 	CVAR_REGISTER( &weaponstay );
+	CVAR_REGISTER( &dropweapons );
 
 	CVAR_REGISTER( &weapon_respawndelay );
 	CVAR_REGISTER( &ammo_respawndelay );
