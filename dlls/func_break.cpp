@@ -769,6 +769,8 @@ void CBreakable::Die( void )
 
 	// Don't fire something that could fire myself
 	pev->targetname = 0;
+	pev->effects |= EF_NODRAW;
+	pev->takedamage = DAMAGE_NO;
 
 	const int originalSolidity = pev->solid;
 	pev->solid = SOLID_NOT;
