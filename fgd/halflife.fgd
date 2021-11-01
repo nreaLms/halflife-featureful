@@ -2220,6 +2220,11 @@
 // game entities (requires Half-Life 1.0.0.9)
 //
 
+@PointClass base(Targetname) = game_autosave : "Point entity alternative to trigger_autosave"
+[
+	health(string) : "Minumum Hit Points" : : "Don't save when player has less than this many hitpoints."
+]
+
 @PointClass base(Targetname, Targetx) = game_counter : "Fires when it hits limit"
 [
 	spawnflags(flags) =
@@ -6283,6 +6288,7 @@
 @SolidClass base(Targetname) = trigger_autosave : "AutoSave Trigger"
 [
 	master(string) : "Master"
+	health(string) : "Minumum Hit Points" : : "Don't save when player has less than this many hitpoints."
 ]
 
 @PointClass base(Targetx, Targetname) iconsprite("sprites/trigger_camera.spr") = trigger_camera : "Trigger Camera"

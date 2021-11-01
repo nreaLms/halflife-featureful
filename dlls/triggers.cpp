@@ -2279,8 +2279,15 @@ void CTriggerSave::SaveTouch( CBaseEntity *pOther )
 	if( !pOther->IsPlayer() )
 		return;
 
+	const float minimumHealth = pev->health;
 	SetTouch( NULL );
 	UTIL_Remove( this );
+
+	if (minimumHealth > 0) {
+		if (minimumHealth > pOther->pev->health)
+			return;
+	}
+
 	SERVER_COMMAND( "autosave\n" );
 }
 

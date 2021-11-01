@@ -1120,3 +1120,34 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	if (!hadWeapons)
 		player->SwitchToBestWeapon();
 }
+
+
+class CGameAutosave : public CPointEntity
+{
+public:
+	void Spawn();
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+void CGameAutosave::Spawn()
+{
+	if( g_pGameRules->IsMultiplayer() )
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+	CPointEntity::Spawn();
+}
+
+void CGameAutosave::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (pev->health > 0) {
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (pPlayer != 0 && pev->health > pPlayer->pev->health)
+			return;
+	}
+
+	SERVER_COMMAND( "autosave\n" );
+}
+
+LINK_ENTITY_TO_CLASS( game_autosave, CGameAutosave )
