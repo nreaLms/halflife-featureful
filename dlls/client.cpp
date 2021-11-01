@@ -636,6 +636,20 @@ void ClientCommand( edict_t *pEntity )
 			ALERT(at_console, "Syntax: hud_color RRR GGG BBB\n");
 		}
 	}
+	else if ( FStrEq(pcmd, "buddha" ) )
+	{
+		if (g_enable_cheats->value != 0)
+		{
+			CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
+			if (pPlayer->m_buddha) {
+				pPlayer->m_buddha = FALSE;
+				ALERT(at_console, "Buddha Mode off\n");
+			} else {
+				pPlayer->m_buddha = TRUE;
+				ALERT(at_console, "Buddha Mode on\n");
+			}
+		}
+	}
 	else
 	{
 		// tell the user they entered an unknown command

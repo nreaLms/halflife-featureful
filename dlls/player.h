@@ -414,6 +414,7 @@ public:
 	bool SetClosestOriginOnRope(const Vector& vecPos);
 #endif
 	BOOL m_settingsLoaded;
+	BOOL m_buddha;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

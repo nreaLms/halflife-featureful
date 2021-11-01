@@ -127,6 +127,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_pRope, FIELD_CLASSPTR),
 #endif
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
+	DEFINE_FIELD(CBasePlayer, m_buddha, FIELD_BOOLEAN),
 
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
@@ -931,6 +932,11 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
 
 void CBasePlayer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
+	if (m_buddha && pev->health < 1) {
+		pev->health = 1;
+		return;
+	}
+
 	CSound *pSound;
 
 	// Holster weapon immediately, to allow it to cleanup
