@@ -2602,10 +2602,17 @@
 
 @PointClass base(Targetname, Angles) size(-16 -16 0, 16 16 48 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
 [
-    unlocked_target(target_destination) : "Unlocked target"
-    locked_target(target_destination) : "Locked target"
-    unlockersname(string) : "Unlockers name"
-    reset_delay(integer) : "Reset delay"
+	unlocked_target(target_destination) : "Unlocked target"
+	locked_target(target_destination) : "Locked target"
+	delay(string) : "Delay before trigger" : : "Delay before triggering unlocked or locked target"
+	unlockersname(string) : "Unlockers name"
+	noise(sound) : "Custom Granted Sound"
+	noise1(sound) : "Custom Denied Sound"
+	noise2(sound) : "Custom Beeping Sound"
+	granted_sentence(string) : "Granted sentence"
+	denied_sentence(string) : "Denied sentence"
+	sentence_delay(string) : "Sentence delay" : : "Delay between sound and sentence"
+	//reset_delay(integer) : "Reset delay"
 ]
 
 @PointClass base(Weapon, Targetx) size(-16 -16 0, 16 16 36) studio("models/nuke_case.mdl") = item_nuclearbomb : "Nuclear Bomb"

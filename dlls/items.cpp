@@ -932,22 +932,42 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	string_t unlockedTarget;
-	string_t lockedTarget;
-	string_t unlockerName;
+	const char* GrantedSound() {
+		return pev->noise ? STRING(pev->noise) : "buttons/blip2.wav";
+	}
+	const char* DeniedSound() {
+		return pev->noise1 ? STRING(pev->noise1) : "buttons/button11.wav";
+	}
+	const char* BeepSound() {
+		return pev->noise2 ? STRING(pev->noise2) : "buttons/blip1.wav";
+	}
+
+	string_t m_unlockedTarget;
+	string_t m_lockedTarget;
+	string_t m_unlockerName;
+	string_t m_grantedSentence;
+	string_t m_deniedSentence;
 	Activity m_Activity;
 	float m_fireTime;
-	BOOL willUnlock;
+	float m_playSentenceTime;
+	float m_sentenceDelay;
+	BOOL m_willUnlock;
+	BOOL m_wasUnlocked;
 };
 
 TYPEDESCRIPTION CEyeScanner::m_SaveData[] =
 {
-	DEFINE_FIELD( CEyeScanner, unlockedTarget, FIELD_STRING ),
-	DEFINE_FIELD( CEyeScanner, lockedTarget, FIELD_STRING ),
-	DEFINE_FIELD( CEyeScanner, unlockerName, FIELD_STRING ),
+	DEFINE_FIELD( CEyeScanner, m_unlockedTarget, FIELD_STRING ),
+	DEFINE_FIELD( CEyeScanner, m_lockedTarget, FIELD_STRING ),
+	DEFINE_FIELD( CEyeScanner, m_unlockerName, FIELD_STRING ),
+	DEFINE_FIELD( CEyeScanner, m_grantedSentence, FIELD_STRING ),
+	DEFINE_FIELD( CEyeScanner, m_deniedSentence, FIELD_STRING ),
 	DEFINE_FIELD( CEyeScanner, m_Activity, FIELD_INTEGER ),
 	DEFINE_FIELD( CEyeScanner, m_fireTime, FIELD_TIME ),
-	DEFINE_FIELD( CEyeScanner, willUnlock, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CEyeScanner, m_playSentenceTime, FIELD_TIME ),
+	DEFINE_FIELD( CEyeScanner, m_sentenceDelay, FIELD_FLOAT ),
+	DEFINE_FIELD( CEyeScanner, m_willUnlock, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CEyeScanner, m_wasUnlocked, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CEyeScanner, CBaseAnimating )
@@ -986,17 +1006,32 @@ void CEyeScanner::KeyValue(KeyValueData *pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "unlocked_target"))
 	{
-		unlockedTarget = ALLOC_STRING(pkvd->szValue);
+		m_unlockedTarget = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "locked_target"))
 	{
-		lockedTarget = ALLOC_STRING(pkvd->szValue);
+		m_lockedTarget = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "unlockersname"))
 	{
-		unlockerName = ALLOC_STRING(pkvd->szValue);
+		m_unlockerName = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "granted_sentence"))
+	{
+		m_grantedSentence = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "denied_sentence"))
+	{
+		m_deniedSentence = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "sentence_delay"))
+	{
+		m_sentenceDelay = atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "reset_delay")) // Dunno if it affects anything in PC version of Decay
@@ -1016,7 +1051,7 @@ void CEyeScanner::Spawn()
 	pev->takedamage = DAMAGE_NO;
 	pev->health = 1;
 	pev->weapons = 0;
-	willUnlock = false;
+	m_willUnlock = false;
 
 	SET_MODEL(ENT(pev), "models/EYE_SCANNER.mdl");
 	const float yCos = fabs(cos(pev->angles.y * M_PI_F / 180.0f));
@@ -1030,9 +1065,9 @@ void CEyeScanner::Spawn()
 void CEyeScanner::Precache()
 {
 	PRECACHE_MODEL("models/EYE_SCANNER.mdl");
-	PRECACHE_SOUND("buttons/blip1.wav");
-	PRECACHE_SOUND("buttons/blip2.wav");
-	PRECACHE_SOUND("buttons/button11.wav");
+	PRECACHE_SOUND(GrantedSound());
+	PRECACHE_SOUND(DeniedSound());
+	PRECACHE_SOUND(BeepSound());
 
 	SetActivity( m_Activity );
 }
@@ -1041,7 +1076,7 @@ void CEyeScanner::PlayBeep()
 {
 	pev->skin = pev->weapons % 3 + 1;
 	pev->weapons++;
-	EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/blip1.wav", 1, ATTN_NORM );
+	EMIT_SOUND( ENT(pev), CHAN_BODY, BeepSound(), 1, ATTN_NORM );
 }
 
 void CEyeScanner::WaitForSequenceEnd()
@@ -1066,22 +1101,38 @@ void CEyeScanner::Think()
 	}
 	if (m_fireTime != 0 && m_fireTime <= gpGlobals->time)
 	{
-		if (willUnlock) {
-			EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/blip2.wav", 1, ATTN_NORM );
-			FireTargets( STRING( unlockedTarget ), this, this, USE_TOGGLE, 0.0f );
+		m_wasUnlocked = m_willUnlock;
+		if (m_willUnlock) {
+			EMIT_SOUND( ENT(pev), CHAN_ITEM, GrantedSound(), 1.0f, ATTN_NORM );
+			DelayedUse( m_flDelay, this, this, USE_TOGGLE, m_unlockedTarget );
 		} else {
-			EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/button11.wav", 1, ATTN_NORM );
-			FireTargets( STRING( lockedTarget ), this, this, USE_TOGGLE, 0.0f );
+			EMIT_SOUND( ENT(pev), CHAN_ITEM, DeniedSound(), 1.0f, ATTN_NORM );
+			DelayedUse( m_flDelay, this, this, USE_TOGGLE, m_lockedTarget );
 		}
-		willUnlock = false;
+		m_playSentenceTime = gpGlobals->time + m_sentenceDelay;
+		m_willUnlock = false;
 		m_fireTime = 0;
 		pev->skin = 0;
 		pev->weapons = 0;
 		if (m_Activity == ACT_IDLE)
 			SetActivity(ACT_CROUCH);
 	}
+	if (m_playSentenceTime != 0 && m_playSentenceTime <= gpGlobals->time) {
+		if (m_wasUnlocked) {
+			if (!FStringNull(m_grantedSentence)) {
+				EMIT_SOUND( ENT(pev), CHAN_VOICE, STRING(m_grantedSentence), 1.0f, ATTN_NORM );
+			}
+		} else {
+			if (!FStringNull(m_deniedSentence)) {
+				EMIT_SOUND( ENT(pev), CHAN_VOICE, STRING(m_deniedSentence), 1.0f, ATTN_NORM );
+			}
+		}
+		m_playSentenceTime = 0;
+	}
 	pev->nextthink = gpGlobals->time + 0.11;
 }
+
+#define EYESCANNER_BASE_FIRE_DELAY 3.0f
 
 void CEyeScanner::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
@@ -1093,26 +1144,26 @@ void CEyeScanner::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 	pActivator = pActivator ? pActivator : pCaller;
 
-	if (!willUnlock)
+	if (!m_willUnlock)
 	{
-		if (FStringNull(unlockerName))
+		if (FStringNull(m_unlockerName))
 		{
 			if (!pActivator->IsPlayer())
 			{
-				willUnlock = true;
-				m_fireTime = gpGlobals->time + 3.0f;
+				m_willUnlock = true;
+				m_fireTime = gpGlobals->time + EYESCANNER_BASE_FIRE_DELAY;
 			}
 		}
-		else if ((!FStringNull(pActivator->pev->targetname) && FStrEq(STRING(unlockerName), STRING(pActivator->pev->targetname)))
-				 || FClassnameIs(pActivator->pev, STRING(unlockerName)))
+		else if ((!FStringNull(pActivator->pev->targetname) && FStrEq(STRING(m_unlockerName), STRING(pActivator->pev->targetname)))
+				 || FClassnameIs(pActivator->pev, STRING(m_unlockerName)))
 		{
-			willUnlock = true;
-			m_fireTime = gpGlobals->time + 3.0f;
+			m_willUnlock = true;
+			m_fireTime = gpGlobals->time + EYESCANNER_BASE_FIRE_DELAY;
 		}
 	}
 
 	if (m_Activity == ACT_CROUCHIDLE || m_Activity == ACT_CROUCH) {
-		m_fireTime = gpGlobals->time + 3.0f;
+		m_fireTime = gpGlobals->time + EYESCANNER_BASE_FIRE_DELAY;
 		SetActivity( ACT_STAND );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}

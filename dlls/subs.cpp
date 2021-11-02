@@ -241,32 +241,32 @@ void KillTargets(const char* targetName)
 
 LINK_ENTITY_TO_CLASS( DelayedUse, CBaseDelay )
 
-void CBaseDelay::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value )
+void CBaseDelay::DelayedUse(float delay, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, string_t target, string_t killTarget, float value)
 {
 	//
 	// exit immediatly if we don't have a target or kill target
 	//
-	if( FStringNull( pev->target ) && !m_iszKillTarget )
+	if( FStringNull( target ) && !killTarget )
 		return;
 
 	//
 	// check for a delay
 	//
-	if( m_flDelay != 0 )
+	if( delay != 0 )
 	{
 		// create a temp object to fire at a later time
 		CBaseDelay *pTemp = GetClassPtr( (CBaseDelay *)NULL );
 		pTemp->pev->classname = MAKE_STRING( "DelayedUse" );
 
-		pTemp->pev->nextthink = gpGlobals->time + m_flDelay;
+		pTemp->pev->nextthink = gpGlobals->time + delay;
 
 		pTemp->SetThink( &CBaseDelay::DelayThink );
 
 		// Save the useType
 		pTemp->pev->button = (int)useType;
-		pTemp->m_iszKillTarget = m_iszKillTarget;
+		pTemp->m_iszKillTarget = killTarget;
 		pTemp->m_flDelay = 0.0f; // prevent "recursion"
-		pTemp->pev->target = pev->target;
+		pTemp->pev->target = target;
 
 		pTemp->m_hActivator = pActivator;
 
@@ -276,19 +276,24 @@ void CBaseDelay::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, floa
 	//
 	// kill the killtargets
 	//
-	if( m_iszKillTarget )
+	if( killTarget )
 	{
-		ALERT( at_aiconsole, "KillTarget: %s\n", STRING( m_iszKillTarget ) );
-		KillTargets(STRING( m_iszKillTarget ));
+		ALERT( at_aiconsole, "KillTarget: %s\n", STRING( killTarget ) );
+		KillTargets(STRING( killTarget ));
 	}
 
 	//
 	// fire targets
 	//
-	if( !FStringNull( pev->target ) )
+	if( !FStringNull( target ) )
 	{
-		FireTargets( STRING( pev->target ), pActivator, this, useType, value );
+		FireTargets( STRING( target ), pActivator, pCaller, useType, value );
 	}
+}
+
+void CBaseDelay::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value )
+{
+	DelayedUse( m_flDelay, pActivator, this, useType, pev->target, m_iszKillTarget, value );
 }
 
 /*
