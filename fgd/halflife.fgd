@@ -6578,10 +6578,11 @@
 		8: "No clients" : 0
 		16:"FireClientOnly" : 0
 		32:"TouchClientOnly" : 0
+		64:"Affect non-moving NPC's" : 0 : "Uses entity's bounding box to find and hurt non-moving monsters. Will produce wrong results on non-cuboid brush shapes."
 	]
 	master(string) : "Master"
 	dmg(integer) : "Damage" : 10
-	delay(string) : "Delay before trigger" : "0"
+	delay(string) : "Delay before trigger"
 ]
 
 @PointClass base(Targetname, Target, DamageType) = trigger_hurt_remote : "Trigger Hurt (non-touch)"

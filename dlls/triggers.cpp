@@ -52,6 +52,7 @@
 #define	SF_TRIGGER_HURT_NO_CLIENTS	8//don't trigger on clients
 #define SF_TRIGGER_HURT_CLIENTONLYFIRE	16// trigger hurt will only fire its target if it is hurting a client
 #define SF_TRIGGER_HURT_CLIENTONLYTOUCH 32// only clients may touch this trigger.
+#define SF_TRIGGER_HURT_AFFECT_NON_MOVING_MONSTERS 64 // hack to affect non-moving monsters
 
 extern DLL_GLOBAL BOOL		g_fGameOver;
 
@@ -729,6 +730,8 @@ class CTriggerHurt : public CBaseTrigger
 public:
 	void Spawn( void );
 	void EXPORT RadiationThink( void );
+	void HurtNonMovingMonsters( void );
+	void EXPORT HurtNonMovingMonstersThink( void );
 };
 
 LINK_ENTITY_TO_CLASS( trigger_hurt, CTriggerHurt )
@@ -964,6 +967,11 @@ void CTriggerHurt::Spawn( void )
 		SetThink( &CTriggerHurt::RadiationThink );
 		pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.0, 0.5 );
 	}
+	else if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_AFFECT_NON_MOVING_MONSTERS))
+	{
+		SetThink( &CTriggerHurt::HurtNonMovingMonstersThink );
+		pev->nextthink = gpGlobals->time + 0.1f;
+	}
 
 	if( FBitSet( pev->spawnflags, SF_TRIGGER_HURT_START_OFF ) )// if flagged to Start Turned Off, make trigger nonsolid.
 		pev->solid = SOLID_NOT;
@@ -1024,6 +1032,37 @@ void CTriggerHurt::RadiationThink( void )
 	}
 
 	pev->nextthink = gpGlobals->time + 0.25f;
+}
+
+void CTriggerHurt::HurtNonMovingMonsters()
+{
+	if (pev->solid == SOLID_NOT || pev->dmgtime > gpGlobals->time) {
+		return;
+	}
+
+	CBaseEntity* pList[32];
+	const int count = UTIL_EntitiesInBox( pList, ARRAYSIZE(pList), pev->absmin, pev->absmax, FL_MONSTER );
+	for (int i=0; i<count; ++i) {
+		CBaseMonster* pMonster = pList[i]->MyMonsterPointer();
+		if (pMonster && pMonster->pev->takedamage && !pMonster->IsMoving()) {
+			const float flDmg = pev->dmg * 0.5f;
+			if (flDmg < 0)
+				pMonster->TakeHealth( this, -flDmg, m_bitsDamageInflict );
+			else
+				pMonster->TakeDamage( pev, pev, flDmg, m_bitsDamageInflict );
+		}
+	}
+}
+
+void CTriggerHurt::HurtNonMovingMonstersThink()
+{
+	if (pev->dmgtime > gpGlobals->time) {
+		pev->nextthink = Q_min(gpGlobals->time + 0.5f, pev->dmgtime);
+	} else {
+		pev->nextthink = gpGlobals->time + 0.5f;
+	}
+
+	HurtNonMovingMonsters();
 }
 
 //
