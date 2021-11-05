@@ -138,6 +138,8 @@ public:
 	CBeam* m_beam;
 	float m_currentYaw;
 	float m_goalYaw;
+	string_t m_triggerOnFirstUse;
+	string_t m_triggerOnEmpty;
 
 protected:
 	void SetMySequence(const char* sequence);
@@ -153,15 +155,27 @@ TYPEDESCRIPTION CRechargeDecay::m_SaveData[] =
 	DEFINE_FIELD( CRechargeDecay, m_goToOffTime, FIELD_TIME ),
 	DEFINE_FIELD( CRechargeDecay, m_goingToOff, FIELD_BOOLEAN),
 	DEFINE_FIELD( CRechargeDecay, m_playingChargeSound, FIELD_BOOLEAN),
+	DEFINE_FIELD( CRechargeDecay, m_triggerOnFirstUse, FIELD_STRING),
+	DEFINE_FIELD( CRechargeDecay, m_triggerOnEmpty, FIELD_STRING),
 };
 
 IMPLEMENT_SAVERESTORE( CRechargeDecay, CBaseAnimating )
 
 void CRechargeDecay::KeyValue( KeyValueData *pkvd )
 {
-	if( FStrEq( pkvd->szKeyName, "capacity" ) )
+	if( FStrEq( pkvd->szKeyName, "capacity" ) || FStrEq( pkvd->szKeyName, "CustomJuice" ) )
 	{
 		pev->health = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerOnEmpty" ) )
+	{
+		m_triggerOnEmpty = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerOnFirstUse" ) )
+	{
+		m_triggerOnFirstUse = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -303,14 +317,16 @@ void CRechargeDecay::SearchForPlayer()
 void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	// Make sure that we have a caller
-	if( !pActivator )
+	if( !pCaller )
 		return;
 	// if it's not a player, ignore
-	if( !pActivator->IsPlayer() )
+	if( !pCaller->IsPlayer() )
 		return;
 
+	CBaseEntity* pPlayer = pCaller;
+
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pActivator->pev->armorvalue >= MAX_NORMAL_BATTERY )
+	if( ( m_iJuice <= 0 ) || ( !( pPlayer->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) || pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
@@ -339,7 +355,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	if( m_flNextCharge >= gpGlobals->time )
 		return;
 
-	TurnChargeToPlayer(pActivator->pev->origin);
+	TurnChargeToPlayer(pPlayer->pev->origin);
 	switch (m_iState) {
 	case Idle:
 		m_flSoundTime = 0.56f + gpGlobals->time;
@@ -367,18 +383,29 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	// charge the player
-	if( pActivator->pev->armorvalue < MAX_NORMAL_BATTERY )
+	if( pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY )
 	{
+		if (m_triggerOnFirstUse)
+		{
+			FireTargets( STRING( m_triggerOnFirstUse ), pPlayer, this, USE_TOGGLE, 0 );
+			m_triggerOnFirstUse = iStringNull;
+		}
 		m_iJuice--;
 		if (m_iJuice <= 0)
+		{
 			pev->skin = 1;
-		pActivator->pev->armorvalue += 1;
+			if (m_triggerOnEmpty)
+			{
+				FireTargets( STRING( m_triggerOnEmpty ), pPlayer, this, USE_TOGGLE, 0 );
+			}
+		}
+		pPlayer->pev->armorvalue += 1;
 		const float boneControllerValue = (m_iJuice / (float)ChargerCapacity()) * 360;
 		SetBoneController(RECHARGER_COIL_CONTROLLER, 360 - boneControllerValue);
 		SetBoneController(RECHARGER_COIL_CONTROLLER2,  boneControllerValue);
 
-		if( pActivator->pev->armorvalue > MAX_NORMAL_BATTERY )
-			pActivator->pev->armorvalue = MAX_NORMAL_BATTERY;
+		if( pPlayer->pev->armorvalue > MAX_NORMAL_BATTERY )
+			pPlayer->pev->armorvalue = MAX_NORMAL_BATTERY;
 	}
 
 	// govern the rate of charge

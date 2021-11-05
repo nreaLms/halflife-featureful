@@ -504,6 +504,8 @@ public:
 	BOOL m_playingChargeSound;
 	float m_currentYaw;
 	float m_goalYaw;
+	string_t m_triggerOnFirstUse;
+	string_t m_triggerOnEmpty;
 
 protected:
 	void SetMySequence(const char* sequence);
@@ -518,15 +520,27 @@ TYPEDESCRIPTION CWallHealthDecay::m_SaveData[] =
 	DEFINE_FIELD( CWallHealthDecay, m_goToOffTime, FIELD_TIME ),
 	DEFINE_FIELD( CWallHealthDecay, m_goingToOff, FIELD_BOOLEAN),
 	DEFINE_FIELD( CWallHealthDecay, m_playingChargeSound, FIELD_BOOLEAN),
+	DEFINE_FIELD( CWallHealthDecay, m_triggerOnFirstUse, FIELD_STRING),
+	DEFINE_FIELD( CWallHealthDecay, m_triggerOnEmpty, FIELD_STRING),
 };
 
 IMPLEMENT_SAVERESTORE( CWallHealthDecay, CBaseAnimating )
 
 void CWallHealthDecay::KeyValue( KeyValueData *pkvd )
 {
-	if( FStrEq( pkvd->szKeyName, "capacity" ) )
+	if( FStrEq( pkvd->szKeyName, "capacity" ) || FStrEq( pkvd->szKeyName, "CustomJuice" ) )
 	{
 		pev->health = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerOnEmpty" ) )
+	{
+		m_triggerOnEmpty = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerOnFirstUse" ) )
+	{
+		m_triggerOnFirstUse = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -666,14 +680,16 @@ void CWallHealthDecay::SearchForPlayer()
 void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	// Make sure that we have a caller
-	if( !pActivator )
+	if( !pCaller )
 		return;
 	// if it's not a player, ignore
-	if( !pActivator->IsPlayer() )
+	if( !pCaller->IsPlayer() )
 		return;
 
+	CBaseEntity* pPlayer = pCaller;
+
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) )
+	if( ( m_iJuice <= 0 ) || ( !( pPlayer->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
@@ -703,7 +719,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		return;
 
 	int soundType = 0;
-	TurnNeedleToPlayer(pActivator->pev->origin);
+	TurnNeedleToPlayer(pPlayer->pev->origin);
 	switch (m_iState) {
 	case Idle:
 		m_flSoundTime = 0.56 + gpGlobals->time;
@@ -729,11 +745,22 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	}
 
 	// charge the player
-	if( pActivator->TakeHealth( this, 1, HEAL_CHARGE ) )
+	if( pPlayer->TakeHealth( this, 1, HEAL_CHARGE ) )
 	{
+		if (m_triggerOnFirstUse)
+		{
+			FireTargets( STRING( m_triggerOnFirstUse ), pPlayer, this, USE_TOGGLE, 0 );
+			m_triggerOnFirstUse = iStringNull;
+		}
 		m_iJuice--;
 		if (m_iJuice <= 0)
+		{
 			pev->skin = 1;
+			if (m_triggerOnEmpty)
+			{
+				FireTargets( STRING( m_triggerOnEmpty ), pPlayer, this, USE_TOGGLE, 0 );
+			}
+		}
 		UpdateJar();
 
 		if (soundType == 1)
