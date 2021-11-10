@@ -1432,6 +1432,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 				{
 					if (m_hTargetEnt != 0)
 					{
+						UTIL_SetOrigin( pev, m_hTargetEnt->pev->origin );
 						if (m_pCine->m_fTurnType == 0)
 							pev->angles.y = m_hTargetEnt->pev->angles.y;
 						else if (m_pCine->m_fTurnType == 1)
