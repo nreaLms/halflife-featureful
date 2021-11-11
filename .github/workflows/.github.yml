@@ -98,10 +98,10 @@ jobs:
       run: echo "##[set-output name=gamedir;]$(grep build/CMakeCache.txt -Ee 'GAMEDIR:STRING=[a-z]+' | cut -d '=' -f 2)"
       id: extract_gamedir
     - name: Copy fgd to dist dir
-      if: (startsWith(matrix.os, 'ubuntu') && startsWith(matrix.cc, 'gcc')) || startsWith(matrix.os, 'windows')
+      if: ${{ (startsWith(matrix.os, 'ubuntu') && startsWith(matrix.cc, 'gcc')) || startsWith(matrix.os, 'windows') }}
       run: |
-        cp fgd/halflife.fgd dist/halflife.fgd
-        cp fgd/halflife.fgd dist-vgui/halflife.fgd
+        cp fgd/halflife.fgd dist/${{ steps.extract_gamedir.outputs.gamedir }}/halflife.fgd
+        cp fgd/halflife.fgd dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/halflife.fgd
     - name: Upload linux artifact
       if: startsWith(matrix.os, 'ubuntu') && matrix.cc == 'gcc'
       uses: actions/upload-artifact@v2
