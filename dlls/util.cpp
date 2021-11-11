@@ -589,6 +589,11 @@ CBaseEntity *UTIL_FindEntityGeneric( const char *szWhatever, Vector &vecSrc, flo
 	return pEntity;
 }
 
+bool UTIL_HasClassnameOrTargetname(entvars_t *pevToucher, const char* name )
+{
+	return FClassnameIs(pevToucher, name) || (!FStringNull(pevToucher->targetname) && FStrEq(STRING(pevToucher->targetname), name));
+}
+
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
 // otherwise returns NULL
 // Index is 1 based

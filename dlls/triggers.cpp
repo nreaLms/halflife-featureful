@@ -645,7 +645,6 @@ class CBaseTrigger : public CBaseToggle
 public:
 	void KeyValue( KeyValueData *pkvd );
 	void EXPORT MultiTouch( CBaseEntity *pOther );
-	void EXPORT HurtTouch( CBaseEntity *pOther );
 	void EXPORT CDAudioTouch( CBaseEntity *pOther );
 	void ActivateMultiTrigger( CBaseEntity *pActivator );
 	void EXPORT MultiWaitOver( void );
@@ -694,9 +693,7 @@ bool CBaseTrigger::CanTouch(entvars_t *pevToucher)
 	else
 	{
 		// If netname is set, it's an entity-specific trigger; we ignore the spawnflags.
-		if (!FClassnameIs(pevToucher, STRING(pev->netname)) &&
-			(!pevToucher->targetname || !FStrEq(STRING(pevToucher->targetname), STRING(pev->netname))))
-			return false;
+		return UTIL_HasClassnameOrTargetname( pevToucher, STRING(pev->netname) );
 	}
 	return true;
 }
@@ -728,10 +725,13 @@ void CBaseTrigger::KeyValue( KeyValueData *pkvd )
 class CTriggerHurt : public CBaseTrigger
 {
 public:
+	void KeyValue( KeyValueData *pkvd );
 	void Spawn( void );
+	void EXPORT HurtTouch( CBaseEntity *pOther );
 	void EXPORT RadiationThink( void );
 	void HurtNonMovingMonsters( void );
 	void EXPORT HurtNonMovingMonstersThink( void );
+	bool CanHurt( CBaseEntity* pOther );
 };
 
 LINK_ENTITY_TO_CLASS( trigger_hurt, CTriggerHurt )
@@ -748,6 +748,7 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( trigger_monsterjump, CTriggerMonsterJump )
+
 
 void CTriggerMonsterJump::Spawn( void )
 {
@@ -948,10 +949,21 @@ void CTargetCDAudio::Play( void )
 //
 //int gfToggleState = 0; // used to determine when all radiation trigger hurts have called 'RadiationThink'
 
+void CTriggerHurt::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq( pkvd->szKeyName, "untouchable_ent_name" ) )
+	{
+		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseTrigger::KeyValue( pkvd );
+}
+
 void CTriggerHurt::Spawn( void )
 {
 	InitTrigger();
-	SetTouch( &CBaseTrigger::HurtTouch );
+	SetTouch( &CTriggerHurt::HurtTouch );
 
 	if( !FStringNull( pev->targetname ) )
 	{
@@ -1044,7 +1056,7 @@ void CTriggerHurt::HurtNonMovingMonsters()
 	const int count = UTIL_EntitiesInBox( pList, ARRAYSIZE(pList), pev->absmin, pev->absmax, FL_MONSTER );
 	for (int i=0; i<count; ++i) {
 		CBaseMonster* pMonster = pList[i]->MyMonsterPointer();
-		if (pMonster && pMonster->pev->takedamage && !pMonster->IsMoving()) {
+		if (pMonster && CanHurt(pMonster) && !pMonster->IsMoving()) {
 			const float flDmg = pev->dmg * 0.5f;
 			if (flDmg < 0)
 				pMonster->TakeHealth( this, -flDmg, m_bitsDamageInflict );
@@ -1086,21 +1098,33 @@ void CBaseTrigger::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 	UTIL_SetOrigin( pev, pev->origin );
 }
 
-// When touched, a hurt trigger does DMG points of damage each half-second
-void CBaseTrigger::HurtTouch( CBaseEntity *pOther )
+bool CTriggerHurt::CanHurt(CBaseEntity *pOther)
 {
-	float fldmg;
-
 	if( !pOther->pev->takedamage )
-		return;
+		return false;
 
 	if( ( pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYTOUCH ) && !pOther->IsPlayer() )
 	{
 		// this trigger is only allowed to touch clients, and this ain't a client.
-		return;
+		return false;
 	}
 
 	if( ( pev->spawnflags & SF_TRIGGER_HURT_NO_CLIENTS ) && pOther->IsPlayer() )
+		return false;
+
+	// ignore target with a specified name
+	if ( !FStringNull( pev->netname ) && UTIL_HasClassnameOrTargetname( pOther->pev, STRING(pev->netname) ) ) {
+		return false;
+	}
+	return true;
+}
+
+// When touched, a hurt trigger does DMG points of damage each half-second
+void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
+{
+	float fldmg;
+
+	if ( !CanHurt(pOther) )
 		return;
 
 	// HACKHACK -- In multiplayer, players touch this based on packet receipt.

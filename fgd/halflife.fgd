@@ -6583,6 +6583,7 @@
 	master(string) : "Master"
 	dmg(integer) : "Damage" : 10
 	delay(string) : "Delay before trigger"
+	untouchable_ent_name(string) : "Untouchable entity name" : : "Don't hurt targets with this classname or targetname"
 ]
 
 @PointClass base(Targetname, Target, DamageType) = trigger_hurt_remote : "Trigger Hurt (non-touch)"
