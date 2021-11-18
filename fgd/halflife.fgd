@@ -2225,7 +2225,7 @@
 	health(string) : "Minumum Hit Points" : : "Don't save when player has less than this many hitpoints."
 ]
 
-@PointClass base(Targetname, Targetx) = game_counter : "Fires when it hits limit"
+@PointClass base(Targetname, Target) = game_counter : "Fires when it hits limit"
 [
 	spawnflags(flags) =
 	[
