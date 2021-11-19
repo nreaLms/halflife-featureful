@@ -2931,7 +2931,7 @@ CBaseEntity *CBaseMonster::BestVisibleEnemy( void )
 
 	while( pNextEnt != NULL )
 	{
-		if( pNextEnt->IsAlive() )
+		if( pNextEnt->IsFullyAlive() )
 		{
 			const int relationship = IRelationship( pNextEnt);
 			if( relationship > iBestRelationship )
@@ -3727,7 +3727,7 @@ BOOL CBaseMonster::FCheckAITrigger( void )
 //=========================================================	
 int CBaseMonster::CanPlaySequence( BOOL fDisregardMonsterState, int interruptLevel )
 {
-	if( m_pCine || !IsAlive() || m_MonsterState == MONSTERSTATE_PRONE )
+	if( m_pCine || !IsFullyAlive() || m_MonsterState == MONSTERSTATE_PRONE )
 	{
 		// monster is already running a scripted sequence or dead!
 		return FALSE;
@@ -3908,7 +3908,7 @@ BOOL CBaseMonster::FCanActiveIdle( void )
 
 bool CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
 {
-	if( pszSentence && IsAlive() )
+	if( pszSentence && IsFullyAlive() )
 	{
 		if( pszSentence[0] == '!' )
 		{
@@ -4243,7 +4243,8 @@ int CBaseMonster::SizeForGrapple()
 
 bool CBaseMonster::IsFreeToManipulate()
 {
-	return m_IdealMonsterState != MONSTERSTATE_SCRIPT &&
+	return IsFullyAlive() && m_IdealMonsterState != MONSTERSTATE_SCRIPT &&
+			m_IdealMonsterState != MONSTERSTATE_PRONE &&
 				 (m_MonsterState == MONSTERSTATE_ALERT ||
 				  m_MonsterState == MONSTERSTATE_IDLE ||
 				  m_MonsterState == MONSTERSTATE_HUNT);

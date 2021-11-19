@@ -3369,7 +3369,7 @@ void CMedic::StartTask(Task_t *pTask)
 	case TASK_MEDIC_SAY_HEAL:
 		if (m_hTargetEnt == 0)
 			TaskFail("no target ent");
-		else if (!m_hTargetEnt->IsAlive())
+		else if (!m_hTargetEnt->IsFullyAlive())
 			TaskFail("target ent is dead");
 		else
 		{
@@ -3800,7 +3800,7 @@ void CMedic::StopHealing(bool clearTargetEnt)
 
 CBaseEntity* CMedic::HealTarget()
 {
-	if (m_hTargetEnt != 0 && m_hTargetEnt->IsAlive() && (m_hTargetEnt->pev->health < m_hTargetEnt->pev->max_health) &&
+	if (m_hTargetEnt != 0 && m_hTargetEnt->IsFullyAlive() && (m_hTargetEnt->pev->health < m_hTargetEnt->pev->max_health) &&
 			((m_hTargetEnt->MyMonsterPointer() && IRelationship(m_hTargetEnt) < R_DL) || m_hTargetEnt->IsPlayer())) {
 		return m_hTargetEnt;
 	}

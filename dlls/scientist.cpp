@@ -1136,7 +1136,7 @@ MONSTERSTATE CScientist::GetIdealState( void )
 
 BOOL CScientist::CanHeal( void )
 { 
-	if( ( m_healTime > gpGlobals->time ) || ( m_hTargetEnt == 0 ) || ( !m_hTargetEnt->IsAlive() ) ||
+	if( ( m_healTime > gpGlobals->time ) || ( m_hTargetEnt == 0 ) || ( !m_hTargetEnt->IsFullyAlive() ) ||
 			( m_hTargetEnt->IsPlayer() ? m_hTargetEnt->pev->health > ( m_hTargetEnt->pev->max_health * 0.5f ) :
 			  m_hTargetEnt->pev->health >= m_hTargetEnt->pev->max_health ) )
 		return FALSE;

@@ -378,7 +378,7 @@ BOOL CFollowingMonster::AbleToFollow()
 			return FALSE;
 	}
 
-	if( !IsAlive() )
+	if( !IsFullyAlive() )
 		return FALSE;
 	return TRUE;
 }
@@ -412,7 +412,7 @@ bool CFollowingMonster::InScriptedSentence()
 
 Schedule_t* CFollowingMonster::GetFollowingSchedule(bool ignoreEnemy)
 {
-	if( (ignoreEnemy || m_hEnemy == 0 || !m_hEnemy->IsAlive()) && IsFollowingPlayer() )
+	if( (ignoreEnemy || m_hEnemy == 0 || !m_hEnemy->IsFullyAlive()) && IsFollowingPlayer() )
 	{
 		if( !FollowedPlayer()->IsAlive() )
 		{

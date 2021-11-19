@@ -636,7 +636,7 @@ void CBigMomma::DeathNotice( entvars_t *pevChild )
 {
 	if( m_crabCount > 0 )		// Some babies may cross a transition, but we reset the count then
 		m_crabCount--;
-	if( IsAlive() )
+	if( IsFullyAlive() )
 	{
 		// Make the "my baby's dead" noise!
 		EMIT_SOUND_ARRAY_DYN( CHAN_WEAPON, pChildDieSounds );

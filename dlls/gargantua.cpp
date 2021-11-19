@@ -1863,7 +1863,7 @@ int CBabyGargantua::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, 
 
 void CBabyGargantua::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	if( !IsAlive() || pev->health <= 0.0 )
+	if( !IsFullyAlive() )
 	{
 		CFollowingMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 		return;

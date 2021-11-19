@@ -631,7 +631,7 @@ CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, const char* pszF
 
 	while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
 	{
-		if( pFriend == this || !pFriend->IsAlive() )
+		if( pFriend == this || !pFriend->IsFullyAlive() )
 			// don't talk to self or dead people
 			continue;
 		// has friend classname, but not friend really
@@ -767,7 +767,7 @@ void CTalkMonster::DeclineFollowing(CBaseEntity *pCaller)
 float CTalkMonster::TargetDistance( void )
 {
 	// If we lose the player, or he dies, return a really large distance
-	if( m_hTargetEnt == 0 || !m_hTargetEnt->IsAlive() )
+	if( m_hTargetEnt == 0 || !m_hTargetEnt->IsFullyAlive() )
 		return 1e6;
 
 	return ( m_hTargetEnt->pev->origin - pev->origin ).Length();
@@ -851,7 +851,7 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 		// for each friend in this bsp...
 		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
 		{
-			if( pFriend == this || !pFriend->IsAlive() )
+			if( pFriend == this || !pFriend->IsFullyAlive() )
 				// don't talk to self or dead people
 				continue;
 
@@ -1220,7 +1220,7 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			CBaseEntity *pFriend = FindNearestFriend( FALSE );
 
 			// only if not dead or dying!
-			if( pFriend && pFriend->IsAlive() )
+			if( pFriend && pFriend->IsFullyAlive() )
 			{
 				CBaseMonster* pMonster = pFriend->MyMonsterPointer();
 				if (pMonster)

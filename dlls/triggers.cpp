@@ -3404,7 +3404,7 @@ void CTriggerKillMonster::Spawn()
 void CTriggerKillMonster::KillMonster(CBaseEntity *pEntity)
 {
 	CBaseMonster* pMonster = pEntity->MyMonsterPointer();
-	if (pEntity->IsAlive() && pMonster)
+	if (pMonster && pMonster->IsFullyAlive())
 	{
 		switch (RANDOM_LONG(0,4)) {
 		case 0:

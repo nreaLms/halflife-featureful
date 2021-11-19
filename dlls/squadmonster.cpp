@@ -132,7 +132,7 @@ void CSquadMonster::OnDying()
 			if( pSquadMember && pSquadMember != this )
 			{
 				if (pSquadMember->m_IdealMonsterState == pSquadMember->m_MonsterState &&
-						pSquadMember->IsAlive() &&
+						pSquadMember->IsFullyAlive() &&
 						pSquadMember->m_hEnemy == 0 && (pSquadMember->m_MonsterState == MONSTERSTATE_IDLE ||
 									   pSquadMember->m_MonsterState == MONSTERSTATE_ALERT))
 				{
@@ -173,7 +173,7 @@ void CSquadMonster::SquadRemove( CSquadMonster *pRemove )
 		for( int i = 0; i < MAX_SQUAD_MEMBERS - 1; i++ )
 		{
 			CSquadMonster *pMember = MySquadMember( i );
-			if (pMember && pMember->IsAlive())
+			if (pMember && pMember->IsFullyAlive())
 			{
 				squadCountLeft++;
 
@@ -194,7 +194,7 @@ void CSquadMonster::SquadRemove( CSquadMonster *pRemove )
 				if ( pMember && pMember != newLeader )
 				{
 					pMember->m_hSquadLeader = newLeader;
-					if (pMember->IsAlive())
+					if (pMember->IsFullyAlive())
 						newLeader->SquadAdd(pMember);
 				}
 				m_hSquadMember[i] = NULL;
@@ -308,7 +308,7 @@ void CSquadMonster::SquadMakeEnemy( CBaseEntity *pEnemy )
 		return;
 	}
 
-	if ( !pEnemy->IsAlive() )
+	if ( !pEnemy->IsFullyAlive() )
 	{
 		ALERT( at_console, "ERROR: SquadMakeEnemy() - pEnemy is dead!\n" );
 		return;
@@ -408,7 +408,7 @@ int CSquadMonster::SquadRecruit( int searchRadius, int maxMembers )
 		{
 			CSquadMonster *pRecruit = pEntity->MySquadMonsterPointer();
 
-			if( pRecruit && pRecruit != this && pRecruit->IsAlive() && !pRecruit->m_pCine )
+			if( pRecruit && pRecruit != this && pRecruit->IsFullyAlive() && !pRecruit->m_pCine )
 			{
 				// Can we recruit this guy?
 				if( !pRecruit->InSquad() && pRecruit->Classify() == iMyClass &&

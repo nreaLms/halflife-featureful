@@ -1065,7 +1065,7 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 
 bool CISlave::IsValidHealTarget(CBaseEntity *pEntity)
 {
-	return pEntity != NULL && pEntity != this && pEntity->pev->deadflag != DEAD_DYING && pEntity->IsAlive() && IsVortWounded(pEntity);
+	return pEntity != NULL && pEntity != this && pEntity->IsFullyAlive() && IsVortWounded(pEntity);
 }
 
 //=========================================================
@@ -2090,7 +2090,7 @@ bool CISlave::CanRevive()
 int CISlave::HealOther(CBaseEntity *pEntity)
 {
 	int result = 0;
-	if (pEntity->IsAlive()) {
+	if (pEntity->IsFullyAlive()) {
 		result = pEntity->TakeHealth(this, HealPower(), DMG_GENERIC);
 		SpendEnergy(result);
 	}
