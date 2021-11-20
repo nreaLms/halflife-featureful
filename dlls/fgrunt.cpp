@@ -3527,6 +3527,12 @@ void CMedic::OnChangeSchedule( Schedule_t *pNewSchedule )
 	if (m_fHealing) {
 		StopHealing();
 	}
+	if (m_hTargetEnt == 0 && m_hLeadingPlayer != 0)
+	{
+		// Restore target ent if medic follows a player but did not play RestoreTargetEnt task, e.g. due to save-load.
+		m_hTargetEnt = m_hLeadingPlayer;
+		m_hLeadingPlayer = 0;
+	}
 	CHFGrunt::OnChangeSchedule( pNewSchedule );
 }
 
