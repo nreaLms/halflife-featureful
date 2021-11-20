@@ -997,6 +997,7 @@
 		4096: "Try once" : 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
 		8192: "Don't reset head turn" : 0 : "Don't reset head turn for talk monsters"
 		16384: "Force idle looping" : 0 : "Force idle animation looping. Use it when you want to loop an animation that does not have a loop flag"
+		32768: "Remove on cancel" : 0 : "Remove scripted sequence when it's getting cancelled or interrupted"
 	]
 	m_targetActivator(choices) : "Activator for targets" : : "Activator for Target, Fire after moving, Fire on Animation start" =
 	[

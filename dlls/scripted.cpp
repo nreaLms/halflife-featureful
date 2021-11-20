@@ -912,6 +912,12 @@ void ScriptEntityCancel( edict_t *pentCine )
 				pTarget->ClearSchedule();
 			}
 		}
+
+		if (FBitSet(pCineTarget->pev->spawnflags, SF_REMOVE_ON_CANCEL))
+		{
+			pCineTarget->SetThink(&CBaseEntity::SUB_Remove);
+			pCineTarget->pev->nextthink = gpGlobals->time;
+		}
 	}
 }
 
