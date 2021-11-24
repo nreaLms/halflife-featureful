@@ -772,7 +772,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	if( iWeaponRules == GR_PLR_DROP_GUN_NO && iAmmoRules == GR_PLR_DROP_AMMO_NO )
 	{
 		// nothing to pack. Remove the weapons and return. Don't call create on the box!
-		RemoveAllItems( STRIP_SUIT );
+		RemoveAllItems( STRIP_ALL_ITEMS );
 		return;
 	}
 
@@ -902,6 +902,10 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 	pev->viewmodel = 0;
 	pev->weaponmodel = 0;
 
+	if (FBitSet(stripFlags, STRIP_FLASHLIGHT) || !FBitSet(stripFlags, STRIP_DONT_TURNOFF_FLASHLIGHT)) {
+		FlashlightTurnOff(false);
+	}
+
 	pev->weapons &= ~WEAPON_ALLWEAPONS;
 	if( FBitSet(stripFlags, STRIP_SUIT) )
 		pev->weapons &= ~(1 << WEAPON_SUIT);
@@ -909,10 +913,6 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 	if ( FBitSet(stripFlags, STRIP_FLASHLIGHT) )
 		pev->weapons &= ~(1 << WEAPON_FLASHLIGHT);
 #endif
-
-	if (FBitSet(stripFlags, STRIP_FLASHLIGHT) || !FBitSet(stripFlags, STRIP_DONT_TURNOFF_FLASHLIGHT)) {
-		FlashlightTurnOff(false);
-	}
 
 	if (FBitSet(stripFlags, STRIP_LONGJUMP)) {
 		m_fLongJump = FALSE;
