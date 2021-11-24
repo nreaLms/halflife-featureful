@@ -6142,13 +6142,16 @@
 	]
 ]
 
-@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_weaponstrip : "Strips player's weapons"
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_weaponstrip : "Strips player's weapons and items"
 [
 	spawnflags(Flags) =
 	[
 		1 : "Remove suit" : 0
+		2 : "Remove flashlight" : 0 : "Remove flashlight item if it's a separate item from the suit."
+		4 : "Remove longjump" : 0
+		8 : "Don't turn off flashlight" : 0 : "By default in Half-Life any call to player_weaponstrip turns off the flashlight. Tick this flag to prevent such behavior. Flashlight is still getting turned off if suit or flashlight is removed."
 	]
-	noise(sound) : "Sound on trigger"
+	noise(sound) : "Sound on trigger" : : "This will be played on player's item sound channel"
 ]
 
 @PointClass base(Targetname, Targetx) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sentence : "Scripted Sentence"

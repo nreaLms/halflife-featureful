@@ -770,7 +770,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	if( iWeaponRules == GR_PLR_DROP_GUN_NO && iAmmoRules == GR_PLR_DROP_AMMO_NO )
 	{
 		// nothing to pack. Remove the weapons and return. Don't call create on the box!
-		RemoveAllItems( TRUE );
+		RemoveAllItems( STRIP_SUIT );
 		return;
 	}
 
@@ -867,10 +867,10 @@ void CBasePlayer::PackDeadPlayerItems( void )
 		iPW++;
 	}
 
-	RemoveAllItems( TRUE );// now strip off everything that wasn't handled by the code above.
+	RemoveAllItems( STRIP_ALL_ITEMS );// now strip off everything that wasn't handled by the code above.
 }
 
-void CBasePlayer::RemoveAllItems( BOOL removeSuit )
+void CBasePlayer::RemoveAllItems( int stripFlags )
 {
 	int i;
 
@@ -900,13 +900,22 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
 	pev->viewmodel = 0;
 	pev->weaponmodel = 0;
 
-	if( removeSuit )
-		pev->weapons = 0;
-	else
-		pev->weapons &= ~WEAPON_ALLWEAPONS;
+	pev->weapons &= ~WEAPON_ALLWEAPONS;
+	if( FBitSet(stripFlags, STRIP_SUIT) )
+		pev->weapons &= ~(1 << WEAPON_SUIT);
+#if FEATURE_FLASHLIGHT_ITEM
+	if ( FBitSet(stripFlags, STRIP_FLASHLIGHT) )
+		pev->weapons &= ~(1 << WEAPON_FLASHLIGHT);
+#endif
 
-	// Turn off flashlight
-	ClearBits( pev->effects, EF_DIMLIGHT );
+	if (FBitSet(stripFlags, STRIP_FLASHLIGHT) || !FBitSet(stripFlags, STRIP_DONT_TURNOFF_FLASHLIGHT)) {
+		FlashlightTurnOff(false);
+	}
+
+	if (FBitSet(stripFlags, STRIP_LONGJUMP)) {
+		m_fLongJump = FALSE;
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
+	}
 
 	for( i = 0; i < MAX_AMMO_SLOTS; i++ )
 		m_rgAmmo[i] = 0;
@@ -1549,7 +1558,7 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	MESSAGE_END();
 
 	// Remove all the player's stuff
-	RemoveAllItems( FALSE );
+	RemoveAllItems( STRIP_ALL_ITEMS );
 
 	// Move them to the new position
 	UTIL_SetOrigin( pev, vecPosition );
@@ -5414,7 +5423,6 @@ void CDeadHEV :: Spawn( void )
 	MonsterInitDead();
 }
 
-#define STRIP_SUIT 1
 class CStripWeapons : public CPointEntity
 {
 public:
@@ -5436,10 +5444,11 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	CBasePlayer *pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 
 	if( pPlayer ) {
-		const bool removeSuit = (pev->spawnflags & STRIP_SUIT) ? true : false;
-		pPlayer->RemoveAllItems( removeSuit );
-		if (removeSuit)
-			pPlayer->FlashlightTurnOff(false);
+		int stripFlags = pev->spawnflags;
+#if FEATURE_SUIT_FLASHLIGHT
+		stripFlags |= STRIP_FLASHLIGHT;
+#endif
+		pPlayer->RemoveAllItems( stripFlags );
 		if (!FStringNull(pev->noise))
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
 	}
@@ -5526,7 +5535,7 @@ void CRevertSaved::LoadSavedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		CBasePlayer *pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if (pPlayer) {
 			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_WEAPONSTRIP)) {
-				pPlayer->RemoveAllItems(FALSE);
+				pPlayer->RemoveAllItems(STRIP_WEAPONS_ONLY);
 			}
 
 			if (FBitSet(pev->spawnflags, SF_PLAYER_LOAD_SAVED_FREEZE)) {

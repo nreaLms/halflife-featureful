@@ -29,6 +29,13 @@
 #define PLAYER_MIN_BOUNCE_SPEED		200
 #define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
 
+#define STRIP_WEAPONS_ONLY 0
+#define STRIP_SUIT 1
+#define STRIP_FLASHLIGHT 2
+#define STRIP_LONGJUMP 4
+#define STRIP_DONT_TURNOFF_FLASHLIGHT 8
+#define STRIP_ALL_ITEMS (STRIP_SUIT | STRIP_FLASHLIGHT | STRIP_LONGJUMP)
+
 #define SF_DISPLACER_TARGET_DISABLED 1
 
 //
@@ -246,7 +253,7 @@ public:
 	virtual int		Restore( CRestore &restore );
 	void RenewItems(void);
 	void PackDeadPlayerItems( void );
-	void RemoveAllItems( BOOL removeSuit );
+	void RemoveAllItems( int stripFlags );
 	BOOL SwitchWeapon( CBasePlayerWeapon *pWeapon );
 	BOOL SwitchToBestWeapon();
 

@@ -262,7 +262,7 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 void CBasePlayer::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
 int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; }
 void CBasePlayer::PackDeadPlayerItems( void ) { }
-void CBasePlayer::RemoveAllItems( BOOL removeSuit ) { }
+void CBasePlayer::RemoveAllItems( int stripFlags ) { }
 void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim ) { }
 void CBasePlayer::WaterMove() { }
 BOOL CBasePlayer::IsOnLadder( void ) { return FALSE; }
