@@ -998,6 +998,26 @@ Schedule_t slTeleportToScript[] =
 	},
 };
 
+Task_t tlScriptedForcedTeleport[] =
+{
+	{ TASK_FORCED_PLANT_ON_SCRIPT,		(float)0		},
+	{ TASK_ENABLE_SCRIPT, (float)0 },
+	{ TASK_WAIT_FOR_SCRIPT,		(float)0		},
+	{ TASK_PLAY_SCRIPT,			(float)0		},
+	//{ TASK_END_SCRIPT,			(float)0		},
+};
+
+Schedule_t slForcedTeleportToScript[] =
+{
+	{
+		tlScriptedForcedTeleport,
+		ARRAYSIZE ( tlScriptedForcedTeleport ),
+		SCRIPT_BREAK_CONDITIONS,
+		0,
+		"Forced Teleport To Script"
+	},
+};
+
 //=========================================================
 // Cower - this is what is usually done when attempts
 // to escape danger fail.
@@ -1214,6 +1234,7 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slWaitScript,
 	slFaceScript,
 	slTeleportToScript,
+	slForcedTeleportToScript,
 	slCower,
 	slTakeCoverFromOrigin,
 	slTakeCoverFromBestSound,
@@ -1280,12 +1301,16 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 					return slWaitScript;
 				case SCRIPT_MOVE_WALK:
 				{
+					if (m_pCine->MoveFailAttemptsExceeded())
+						return slForcedTeleportToScript;
 					if (m_pCine->m_flMoveToRadius >= 1.0f)
 						return slWalkToScriptRadius;
 					return slWalkToScript;
 				}
 				case SCRIPT_MOVE_RUN:
 				{
+					if (m_pCine->MoveFailAttemptsExceeded())
+						return slForcedTeleportToScript;
 					if (m_pCine->m_flMoveToRadius >= 1.0f)
 						return slRunToScriptRadius;
 					return slRunToScript;

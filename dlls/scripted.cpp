@@ -119,6 +119,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_applySearchRadius = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "m_maxMoveFailAttempts" ) )
+	{
+		m_maxMoveFailAttempts = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -148,6 +153,8 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_flMoveToRadius, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_requiredFollowerState, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_applySearchRadius, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_maxMoveFailAttempts, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_moveFailCount, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -451,6 +458,7 @@ void CCineMonster::PossessEntity( void )
 		}
 		//ALERT( at_aiconsole, "\"%s\" found and used (INT: %s)\n", STRING( pTarget->pev->targetname ), FBitSet( pev->spawnflags, SF_SCRIPT_NOINTERRUPT )? "No" : "Yes" );
 
+		m_moveFailCount = 0;
 		pTarget->m_IdealMonsterState = MONSTERSTATE_SCRIPT;
 //		if( m_iszIdle )
 //		{
@@ -932,6 +940,16 @@ BOOL CBaseMonster::CineCleanup()
 	ClearBits( pev->spawnflags, SF_MONSTER_WAIT_FOR_SCRIPT );
 
 	return TRUE;
+}
+
+void CCineMonster::OnMoveFail() {
+	if (m_maxMoveFailAttempts > 0 && m_moveFailCount < m_maxMoveFailAttempts) {
+		m_moveFailCount++;
+	}
+}
+
+bool CCineMonster::MoveFailAttemptsExceeded() const {
+	return m_maxMoveFailAttempts > 0 && m_moveFailCount >= m_maxMoveFailAttempts;
 }
 
 class CScriptedSentence : public CBaseDelay

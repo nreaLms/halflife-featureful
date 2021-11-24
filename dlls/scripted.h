@@ -107,6 +107,8 @@ public:
 	void	AllowInterrupt( BOOL fAllow );
 	int		IgnoreConditions( void );
 	virtual bool	ShouldResetOnGroundFlag();
+	void OnMoveFail();
+	bool MoveFailAttemptsExceeded() const;
 
 	string_t m_iszIdle;		// string index for idle animation
 	string_t m_iszPlay;		// string index for scripted animation
@@ -130,6 +132,8 @@ public:
 	float m_flMoveToRadius;
 	short m_requiredFollowerState;
 	short m_applySearchRadius;
+	short m_maxMoveFailAttempts;
+	short m_moveFailCount;
 
 	bool m_cantFindReported; // no need to save
 	bool m_cantPlayReported;

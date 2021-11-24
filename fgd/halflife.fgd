@@ -911,6 +911,7 @@
 		0 : "Only to Class Name"
 		1 : "Always"
 	]
+	m_maxMoveFailAttempts(integer) : "Max move fail attempts" : : "When not zero, teleport the monster to the script position after this number of failed move attempts (for Walk and Run scripts)"
 ]
 
 //
