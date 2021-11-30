@@ -79,8 +79,6 @@ public:
 
 	int m_afMemory;
 
-	int m_iMaxHealth;// keeps track of monster's maximum health value (for re-healing, etc)
-
 	Vector m_vecEnemyLKP;// last known position of enemy. (enemy's origin)
 
 	int m_cAmmoLoaded;		// how much ammo is in the weapon (used to trigger reload anim sequences)
@@ -91,8 +89,6 @@ public:
 
 	int m_bitsDamageType;	// what types of damage has monster (player) taken
 	BYTE m_rgbTimeBasedDamage[CDMG_TIMEBASED];
-
-	int m_lastDamageAmount;// how much damage did monster (player) last take
 										// time based damage counters, decr. 1 per 2 seconds
 	int m_bloodColor;		// color of blood particless
 
