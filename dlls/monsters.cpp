@@ -130,6 +130,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_activeAfterCombat, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_huntActivitiesCount, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_flLastTimeObservedEnemy, FIELD_TIME ),
+	DEFINE_FIELD( CBaseMonster, m_sizeForGrapple, FIELD_SHORT ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
