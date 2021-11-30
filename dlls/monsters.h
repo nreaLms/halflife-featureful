@@ -146,6 +146,22 @@ enum
 		9 : "Hear Combat"
 */
 
+#define	COVER_CHECKS	5// how many checks are made
+#define COVER_DELTA		48// distance between checks
+
+#define FINDSPOTAWAY_WALK 0
+#define FINDSPOTAWAY_CHECK_SPOT 1
+#define FINDSPOTAWAY_RUN 2
+
+#define SUGGEST_SCHEDULE_FLAG_WALK ( 1 << 0 )
+#define SUGGEST_SCHEDULE_FLAG_RUN ( 1 << 1 )
+#define SUGGEST_SCHEDULE_FLAG_SPOT_IS_POSITION ( 1 << 2 )
+#define SUGGEST_SCHEDULE_FLAG_SPOT_IS_ENTITY ( 1 << 3 )
+
+// utility flags
+#define SUGGEST_SCHEDULE_FLAG_SPOT_IS_INVALID ( 1 << 24 )
+#define SUGGEST_SCHEDULE_FLAG_SPOT_ENTITY_IS_PROVIDED ( 1 << 25 )
+
 //
 // A gib is a chunk of a body, or a piece of wood/metal/rocks/etc.
 //

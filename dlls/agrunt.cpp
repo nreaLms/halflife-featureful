@@ -727,6 +727,7 @@ Schedule_t slAGruntStandoff[] =
 		bits_COND_CAN_MELEE_ATTACK1 |
 		bits_COND_SEE_ENEMY |
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_DANGER,
 		"Agrunt Standoff"
@@ -864,6 +865,7 @@ Schedule_t slAGruntVictoryDance[] =
 		tlAGruntVictoryDance,
 		ARRAYSIZE( tlAGruntVictoryDance ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
 		0,
@@ -886,6 +888,7 @@ Schedule_t slAGruntThreatDisplay[] =
 		tlAGruntThreatDisplay,
 		ARRAYSIZE( tlAGruntThreatDisplay ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
 		bits_SOUND_PLAYER |

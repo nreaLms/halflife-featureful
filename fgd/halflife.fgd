@@ -6155,6 +6155,33 @@
 	noise(sound) : "Sound on trigger" : : "This will be played on player's item sound channel"
 ]
 
+@PointClass base(Targetname) color(255 0 255) = scripted_schedule : "Scripted Schedule"
+[
+	entity(string) : "Affected Monster"
+	schedule(choices) : "Suggested Schedule" : 1 = 
+	[
+		0 : "Clear suggested schedule"
+		1 : "Move away from spot"
+		2 : "Cover or retreat from spot"
+		3 : "Investigate spot"
+	]
+	mindist(string) : "Min distance" : : "Minimum distance for schedule, when applicable. E.g. the minimum distance to go away from the spot. If not specified or zero, the schedule will use its default value"
+	maxdist(string) : "Max distance" : : "Maximum distance for schedule, when applicable. E.g. the maximum distance to go away from the spot. If not specified or zero, the schedule will use its default value"
+	spot_entity(string) : "Spot entity" : : "Entity used as a spot for schedule. The effect depends on the schedule. Can be left empty, then monster will use itself as a spot"
+	move_preference(choices) : "Move preference" : : "Automatic means that move preference depends on the schedule type" =
+	[
+		0 : "Auto"
+		1 : "Walk"
+		2 : "Run"
+	]
+	spot_preference(choices) : "Spot preference" : : "'Entity' requires entity presense at the time the schedule is played. 'Position' means to calculate position of spot entity once and save it as spot for the schedule." =
+	[
+		0 : "Auto"
+		1 : "Position"
+		2 : "Entity"
+	]
+]
+
 @PointClass base(Targetname, Targetx) size(-16 -16 0, 16 16 72) color(255 0 255) = scripted_sentence : "Scripted Sentence"
 [
 	spawnflags(Flags) =

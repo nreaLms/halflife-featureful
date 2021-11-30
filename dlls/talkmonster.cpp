@@ -100,6 +100,7 @@ Schedule_t slIdleResponse[] =
 		ARRAYSIZE( tlIdleResponse ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_HEAR_SOUND |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
 		bits_SOUND_DANGER,
@@ -124,6 +125,7 @@ Schedule_t slIdleSpeak[] =
 		ARRAYSIZE( tlIdleSpeak ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_CLIENT_PUSH |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
 		0,
@@ -146,6 +148,7 @@ Schedule_t slIdleSpeakWait[] =
 		ARRAYSIZE( tlIdleSpeakWait ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_CLIENT_PUSH |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
 		0,
@@ -177,6 +180,7 @@ Schedule_t slIdleHello[] =
 		ARRAYSIZE( tlIdleHello ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_CLIENT_PUSH |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND |
@@ -220,6 +224,7 @@ Schedule_t slFollowFallible[] =
 		tlFollowFallible,
 		ARRAYSIZE( tlFollowFallible ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND,
@@ -243,6 +248,7 @@ Schedule_t slIdleTlkStand[] =
 		tlIdleTlkStand,
 		ARRAYSIZE( tlIdleTlkStand ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND |
@@ -289,6 +295,7 @@ Schedule_t slTlkIdleWatchClient[] =
 		bits_COND_HEAR_SOUND |
 		bits_COND_SMELL |
 		bits_COND_CLIENT_PUSH |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_CLIENT_UNSEEN |
 		bits_COND_PROVOKED,
 		bits_SOUND_COMBAT |// sound flags - change these, and you'll break the talking code.
@@ -310,6 +317,7 @@ Schedule_t slTlkIdleWatchClient[] =
 		bits_COND_HEAR_SOUND |
 		bits_COND_SMELL |
 		bits_COND_CLIENT_PUSH |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_CLIENT_UNSEEN |
 		bits_COND_PROVOKED,
 		bits_SOUND_COMBAT |// sound flags - change these, and you'll break the talking code.
@@ -338,6 +346,7 @@ Schedule_t slTlkIdleEyecontact[] =
 		ARRAYSIZE( tlTlkIdleEyecontact ), 
 		bits_COND_NEW_ENEMY |
 		bits_COND_CLIENT_PUSH |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
 		0,

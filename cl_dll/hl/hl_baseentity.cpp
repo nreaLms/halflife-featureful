@@ -166,8 +166,6 @@ void CBaseMonster::StartMonster( void ) { }
 void CBaseMonster::MovementComplete( void ) { }
 int CBaseMonster::TaskIsRunning( void ) { return 0; }
 int CBaseMonster::IRelationship( CBaseEntity *pTarget ) { return 0; }
-BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist ) { return FALSE; }
-BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDist ) { return FALSE; }
 BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist ) { return FALSE; }
 CBaseEntity *CBaseMonster::BestVisibleEnemy( void ) { return NULL; }
 BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity ) { return FALSE; }
@@ -208,7 +206,6 @@ void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax) {}
 BOOL CBaseMonster::FCheckAITrigger( void ) { return FALSE; }
 BOOL CBaseMonster::FCheckAITrigger( short ) { return FALSE; }
 int CBaseMonster::CanPlaySequence( BOOL fDisregardMonsterState, int interruptLevel ) { return FALSE; }
-BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset ) { return FALSE; }
 Vector CBaseMonster::ShootAtEnemy( const Vector &shootOrigin ) { return g_vecZero; }
 BOOL CBaseMonster::FacingIdeal( void ) { return FALSE; }
 BOOL CBaseMonster::FCanActiveIdle( void ) { return FALSE; }

@@ -129,6 +129,13 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_huntActivitiesCount, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_flLastTimeObservedEnemy, FIELD_TIME ),
 	DEFINE_FIELD( CBaseMonster, m_sizeForGrapple, FIELD_SHORT ),
+
+	DEFINE_FIELD( CBaseMonster, m_suggestedSchedule, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleEntity, FIELD_EHANDLE ),
+	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleOrigin, FIELD_VECTOR ),
+	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleMinDist, FIELD_FLOAT ),
+	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleMaxDist, FIELD_FLOAT ),
+	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleFlags, FIELD_INTEGER ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
@@ -2271,10 +2278,12 @@ void CBaseMonster::Move( float flInterval )
 				}
 				else
 				{
+					m_lastMoveBlocker = pBlocker;
 					if (m_pCine) {
 						m_pCine->OnMoveFail();
 					}
 					TaskFail("failed to move");
+					ALERT(at_console, "Blocker is %s\n", STRING(pBlocker->pev->classname));
 					//ALERT( at_aiconsole, "%s Failed to move (%d)!\n", STRING( pev->classname ), HasMemory( bits_MEMORY_MOVE_FAILED ) );
 					//ALERT( at_aiconsole, "%f, %f, %f\n", pev->origin.z, ( pev->origin + ( vecDir * flCheckDist ) ).z, m_Route[m_iRouteIndex].vecLocation.z );
 				}
@@ -2646,7 +2655,7 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 
 //float CGraph::PathLength( int iStart, int iDest, int iHull, int afCapMask )
 
-BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist )
+BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags )
 {
 	int i;
 	int iMyHullIndex;
@@ -2716,7 +2725,7 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 				// ..and is also closer to me than the threat, or the same distance from myself and the threat the node is good.
 				if( ( iMyNode == iThreatNode ) || WorldGraph.PathLength( iMyNode, nodeNumber, iMyHullIndex, m_afCapability ) <= WorldGraph.PathLength( iThreatNode, nodeNumber, iMyHullIndex, m_afCapability ) )
 				{
-					if( FValidateCover( node.m_vecOrigin ) && MoveToLocation( ACT_RUN, 0, node.m_vecOrigin ) )
+					if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( node.m_vecOrigin )) && MoveToLocation( FBitSet(flags, FINDSPOTAWAY_RUN) ? ACT_RUN : ACT_WALK, 0, node.m_vecOrigin ) )
 					{
 						/*
 						MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
@@ -2742,7 +2751,12 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 	return FALSE;
 }
 
-BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDist )
+BOOL CBaseMonster::FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist)
+{
+	return FindCover( vecThreat, vecViewOffset, flMinDist, flMaxDist, FINDSPOTAWAY_RUN|FINDSPOTAWAY_CHECK_SPOT );
+}
+
+BOOL CBaseMonster::FindSpotAway( Vector vecThreat, float flMinDist, float flMaxDist, int flags )
 {
 	int i;
 	int iMyHullIndex;
@@ -2759,14 +2773,14 @@ BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDi
 	if( flMinDist > 0.5 * flMaxDist )
 	{
 #if _DEBUG
-		ALERT( at_console, "FindRunAway MinDist (%.0f) too close to MaxDist (%.0f)\n", flMinDist, flMaxDist );
+		ALERT( at_console, "FindSpotAway MinDist (%.0f) too close to MaxDist (%.0f)\n", flMinDist, flMaxDist );
 #endif
 		flMinDist = 0.5 * flMaxDist;
 	}
 
 	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
 	{
-		ALERT( at_aiconsole, "Graph not ready for findcover!\n" );
+		ALERT( at_aiconsole, "Graph not ready for findspot!\n" );
 		return FALSE;
 	}
 
@@ -2776,12 +2790,12 @@ BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDi
 
 	if( iMyNode == NO_NODE )
 	{
-		ALERT( at_aiconsole, "FindRunAway() - %s has no nearest node!\n", STRING( pev->classname ) );
+		ALERT( at_aiconsole, "FindSpotAway() - %s has no nearest node!\n", STRING( pev->classname ) );
 		return FALSE;
 	}
 	if( iThreatNode == NO_NODE )
 	{
-		// ALERT( at_aiconsole, "FindRunAway() - Threat has no nearest node!\n" );
+		// ALERT( at_aiconsole, "FindSpotAway() - Threat has no nearest node!\n" );
 		iThreatNode = iMyNode;
 		// return FALSE;
 	}
@@ -2803,7 +2817,7 @@ BOOL CBaseMonster::FindRunAway( Vector vecThreat, float flMinDist, float flMaxDi
 			// node is closer to me than the threat, or the same distance from myself and the threat the node is good.
 			if( ( iMyNode == iThreatNode ) || WorldGraph.PathLength( iMyNode, nodeNumber, iMyHullIndex, m_afCapability ) <= WorldGraph.PathLength( iThreatNode, nodeNumber, iMyHullIndex, m_afCapability ) )
 			{
-				if( FValidateCover( node.m_vecOrigin ) && MoveToLocation( ACT_RUN, 0, node.m_vecOrigin ) )
+				if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( node.m_vecOrigin )) && MoveToLocation( FBitSet(flags, FINDSPOTAWAY_RUN) ? ACT_RUN : ACT_WALK, 0, node.m_vecOrigin ) )
 				{
 					WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
 					return TRUE;
@@ -3741,38 +3755,83 @@ int CBaseMonster::CanPlaySequence( BOOL fDisregardMonsterState, int interruptLev
 // directly to the left or right of the caller that will
 // conceal them from view of pSightEnt
 //=========================================================
-#define	COVER_CHECKS	5// how many checks are made
-#define COVER_DELTA		48// distance between checks
 
-BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset )
+BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
 {
 	TraceResult tr;
-	Vector	vecBestOnLeft;
-	Vector	vecBestOnRight;
-	Vector	vecLeftTest;
-	Vector	vecRightTest;
-	Vector	vecStepRight;
-	int	i;
-
 	UTIL_MakeVectors( pev->angles );
-	vecStepRight = gpGlobals->v_right * COVER_DELTA;
-	vecStepRight.z = 0; 
+	Vector vecRight = gpGlobals->v_right;
+	vecRight.z = 0;
+	const Vector vecStepRight = vecRight * COVER_DELTA;
+	const Vector vecStart = pev->origin;
 
-	vecLeftTest = vecRightTest = pev->origin;
+	const Activity movementActivity = FBitSet(flags, FINDSPOTAWAY_RUN) ? ACT_RUN : ACT_WALK;
 
-	for( i = 0; i < COVER_CHECKS; i++ )
+	minDist = Q_max(minDist, COVER_DELTA);
+	maxDist = Q_max(maxDist, COVER_DELTA);
+	const Vector startOffset = vecRight * minDist;
+	const int coverChecks = (int)((maxDist - minDist) / COVER_DELTA) + 1; // at least one check
+
+	for( int i = 1; i <= coverChecks; i++ )
 	{
-		vecLeftTest = vecLeftTest - vecStepRight;
-		vecRightTest = vecRightTest + vecStepRight;
+		const Vector vecLeftTest = vecStart - startOffset - vecStepRight * ( coverChecks - i );
+		const Vector vecRightTest = vecStart + startOffset + vecStepRight * ( coverChecks - i );
+
+		if ((vecStart - vecLeftTest).Length() < (vecThreat - vecLeftTest).Length())
+		{
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) && CheckLocalMove( pev->origin, vecLeftTest, 0, 0 ) == LOCALMOVE_VALID )
+			{
+				if( MoveToLocation( movementActivity, 0, vecLeftTest ) )
+				{
+					return TRUE;
+				}
+			}
+		}
+
+		if ((vecStart - vecRightTest).Length() < (vecThreat - vecRightTest).Length())
+		{
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) && CheckLocalMove( pev->origin, vecRightTest, 0, 0 ) == LOCALMOVE_VALID )
+			{
+				if( MoveToLocation( movementActivity, 0, vecRightTest ) )
+				{
+					return TRUE;
+				}
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset, float minDist, float maxDist, int flags )
+{
+	TraceResult tr;
+	UTIL_MakeVectors( pev->angles );
+	Vector vecRight = gpGlobals->v_right;
+	vecRight.z = 0;
+	const Vector vecStepRight = vecRight * COVER_DELTA;
+	const Vector vecStart = pev->origin;
+
+	const Activity movementActivity = FBitSet(flags, FINDSPOTAWAY_RUN) ? ACT_RUN : ACT_WALK;
+
+	minDist = Q_max(minDist, COVER_DELTA);
+	maxDist = Q_max(maxDist, COVER_DELTA);
+	const Vector startOffset = vecRight * minDist;
+	const int coverChecks = (int)((maxDist - minDist) / COVER_DELTA) + 1; // at least one check
+
+	for( int i = 0; i < coverChecks; i++ )
+	{
+		const Vector vecLeftTest = vecStart - startOffset - vecStepRight * i;
+		const Vector vecRightTest = vecStart + startOffset + vecStepRight * i;
 
 		// it's faster to check the SightEnt's visibility to the potential spot than to check the local move, so we do that first.
 		UTIL_TraceLine( vecThreat + vecViewOffset, vecLeftTest + pev->view_ofs, ignore_monsters, ignore_glass, ENT( pev )/*pentIgnore*/, &tr );
 
 		if( tr.flFraction != 1.0f )
 		{
-			if( FValidateCover( vecLeftTest ) && CheckLocalMove( pev->origin, vecLeftTest, NULL, NULL ) == LOCALMOVE_VALID )
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) && CheckLocalMove( pev->origin, vecLeftTest, 0, 0 ) == LOCALMOVE_VALID )
 			{
-				if( MoveToLocation( ACT_RUN, 0, vecLeftTest ) )
+				if( MoveToLocation( movementActivity, 0, vecLeftTest ) )
 				{
 					return TRUE;
 				}
@@ -3784,9 +3843,9 @@ BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecV
 
 		if( tr.flFraction != 1.0f )
 		{
-			if( FValidateCover( vecRightTest ) && CheckLocalMove( pev->origin, vecRightTest, NULL, NULL ) == LOCALMOVE_VALID )
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) && CheckLocalMove( pev->origin, vecRightTest, 0, 0 ) == LOCALMOVE_VALID )
 			{
-				if( MoveToLocation( ACT_RUN, 0, vecRightTest ) )
+				if( MoveToLocation( movementActivity, 0, vecRightTest ) )
 				{
 					return TRUE;
 				}
@@ -3795,6 +3854,11 @@ BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecV
 	}
 
 	return FALSE;
+}
+
+BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset )
+{
+	return FindLateralCover( vecThreat, vecViewOffset, COVER_DELTA, COVER_DELTA * COVER_CHECKS, FINDSPOTAWAY_RUN|FINDSPOTAWAY_CHECK_SPOT );
 }
 
 Vector CBaseMonster::ShootAtEnemy( const Vector &shootOrigin )

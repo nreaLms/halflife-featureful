@@ -205,7 +205,7 @@ Schedule_t* CRecruit::GetSchedule()
 		}
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
 			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );	// Cower and panic from the scary sound!
-		return GetScheduleOfType( SCHED_RUN_AWAY_FROM_ENEMY );			// Run & Cower
+		return GetScheduleOfType( SCHED_RETREAT_FROM_ENEMY );			// Run & Cower
 	}
 		break;
 	default:

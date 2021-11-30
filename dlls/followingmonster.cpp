@@ -23,6 +23,7 @@ Schedule_t slFollow[] =
 		tlFollow,
 		ARRAYSIZE( tlFollow ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND |
@@ -46,6 +47,7 @@ Schedule_t slFaceTarget[] =
 		tlFaceTarget,
 		ARRAYSIZE( tlFaceTarget ),
 		bits_COND_CLIENT_PUSH |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_NEW_ENEMY |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
@@ -176,7 +178,19 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 		return slMoveAway;
 	case SCHED_MOVE_AWAY_FOLLOW:
 		return slMoveAwayFollow;
+	case SCHED_MOVE_SOMEWHERE_FAILED:
 	case SCHED_MOVE_AWAY_FAIL:
+		if (m_lastMoveBlocker != 0)
+		{
+			CBaseMonster* blockerMonster = m_lastMoveBlocker->MyMonsterPointer();
+			if (blockerMonster) {
+				CFollowingMonster* followingMonster = blockerMonster->MyFollowingMonsterPointer();
+				if (followingMonster && IDefaultRelationship(CLASS_PLAYER) == R_AL) {
+					followingMonster->SuggestSchedule(SCHED_MOVE_SOMEWHERE, this, 0.0f, 256.0f);
+				}
+			}
+			m_lastMoveBlocker = 0;
+		}
 		return slMoveAwayFail;
 	case SCHED_TARGET_FACE:
 	case SCHED_TARGET_REACHED:

@@ -1425,7 +1425,7 @@ Task_t tlSlaveCoverAndSummon[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_WAIT, (float)0.1 },
-	{ TASK_FIND_RUN_AWAY_FROM_ENEMY, (float)0 },
+	{ TASK_FIND_SPOT_AWAY_FROM_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
@@ -1548,7 +1548,7 @@ Schedule_t *CISlave::GetSchedule( void )
 		{
 			if( !HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 			{
-				const int sched = CanSpawnFamiliar() ? (int)SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR : (int)SCHED_RUN_AWAY_FROM_ENEMY;
+				const int sched = CanSpawnFamiliar() ? (int)SCHED_ISLAVE_COVER_AND_SUMMON_FAMILIAR : (int)SCHED_RETREAT_FROM_ENEMY;
 
 				if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 				{
@@ -1636,7 +1636,7 @@ Schedule_t *CISlave::GetScheduleOfType( int Type )
 		return slSlaveHealOrReviveAttack;
 	case SCHED_ISLAVE_GIVE_CHARGE:
 		return slSlaveGiveArmor;
-	case SCHED_RUN_AWAY_FROM_ENEMY_FAILED:
+	case SCHED_RETREAT_FROM_ENEMY_FAILED:
 		{
 			if ( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) && HasConditions( bits_COND_SEE_ENEMY ) )
 			{

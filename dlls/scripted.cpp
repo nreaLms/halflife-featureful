@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   This source code contains proprietary and confidential information of
@@ -190,7 +190,7 @@ void CCineMonster::Spawn( void )
 }
 
 //=========================================================
-// FCanOverrideState - returns FALSE, scripted sequences 
+// FCanOverrideState - returns FALSE, scripted sequences
 // cannot possess entities regardless of state.
 //=========================================================
 BOOL CCineMonster::FCanOverrideState( void )
@@ -278,15 +278,15 @@ void CCineMonster::Touch( CBaseEntity *pOther )
 /*
 	entvars_t *pevOther = VARS( gpGlobals->other );
 
-	if( !FBitSet( pevOther->flags, FL_MONSTER ) ) 
+	if( !FBitSet( pevOther->flags, FL_MONSTER ) )
 	{
 		// touched by a non-monster.
 		return;
 	}
 
 	pevOther->origin.z += 1;
-	
-	if( FBitSet( pevOther->flags, FL_ONGROUND ) ) 
+
+	if( FBitSet( pevOther->flags, FL_ONGROUND ) )
 	{
 		// clear the onground so physics don't bitch
 		pevOther->flags -= FL_ONGROUND;
@@ -427,15 +427,15 @@ void CCineMonster::PossessEntity( void )
 		switch( m_fMoveTo )
 		{
 		case SCRIPT_MOVE_NO:
-			pTarget->m_scriptState = SCRIPT_WAIT; 
+			pTarget->m_scriptState = SCRIPT_WAIT;
 			break;
 		case SCRIPT_MOVE_WALK:
-			pTarget->m_scriptState = SCRIPT_WALK_TO_MARK; 
-			DelayStart( 1 ); 
+			pTarget->m_scriptState = SCRIPT_WALK_TO_MARK;
+			DelayStart( 1 );
 			break;
 		case SCRIPT_MOVE_RUN:
-			pTarget->m_scriptState = SCRIPT_RUN_TO_MARK; 
-			DelayStart( 1 ); 
+			pTarget->m_scriptState = SCRIPT_RUN_TO_MARK;
+			DelayStart( 1 );
 			break;
 		case SCRIPT_MOVE_INSTANT:
 			UTIL_SetOrigin( pTarget->pev, pev->origin );
@@ -557,7 +557,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 	}
 #if 0
 	char *s;
-	if( pev->spawnflags & SF_SCRIPT_NOINTERRUPT ) 
+	if( pev->spawnflags & SF_SCRIPT_NOINTERRUPT )
 		s = "No";
 	else
 		s = "Yes";
@@ -574,7 +574,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 // sequence is done playing ( or when an AI Scripted Sequence
 // doesn't supply an animation sequence to play ). Expects
 // the CBaseMonster pointer to the monster that the sequence
-// possesses. 
+// possesses.
 //=========================================================
 void CCineMonster::SequenceDone( CBaseMonster *pMonster )
 {
@@ -611,9 +611,9 @@ void CCineMonster::SequenceDone( CBaseMonster *pMonster )
 }
 
 //=========================================================
-// When a monster finishes a scripted sequence, we have to 
-// fix up its state and schedule for it to return to a 
-// normal AI monster. 
+// When a monster finishes a scripted sequence, we have to
+// fix up its state and schedule for it to return to a
+// normal AI monster.
 //
 // AI Scripted sequences will, depending on what the level
 // designer selects:
@@ -964,7 +964,7 @@ public:
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
-	
+
 	static TYPEDESCRIPTION m_SaveData[];
 
 	CBaseMonster *FindEntity( void );
@@ -1271,7 +1271,7 @@ CBaseMonster *CScriptedSentence::FindEntity( void )
 			}
 		}
 	}
-	
+
 	return NULL;
 }
 
@@ -1363,7 +1363,7 @@ void CFurniture::Die( void )
 }
 
 //=========================================================
-// This used to have something to do with bees flying, but 
+// This used to have something to do with bees flying, but
 // now it only initializes moving furniture in scripted sequences
 //=========================================================
 void CFurniture::Spawn()
@@ -1395,3 +1395,159 @@ int CFurniture::DefaultClassify( void )
 {
 	return CLASS_NONE;
 }
+
+enum
+{
+	SCRIPTED_SCHEDULE_MOVE_AUTOMATIC = 0,
+	SCRIPTED_SCHEDULE_MOVE_WALK,
+	SCRIPTED_SCHEDULE_MOVE_RUN
+};
+
+enum
+{
+	SCRIPTED_SCHEDULE_SPOT_AUTOMATIC = 0,
+	SCRIPTED_SCHEDULE_SPOT_POSITION,
+	SCRIPTED_SCHEDULE_SPOT_ENTITY,
+};
+
+enum
+{
+	SCRIPTED_SCHEDULE_CLEAR = 0,
+	SCRIPTED_SCHEDULE_MOVE_AWAY,
+	SCRIPTED_SCHEDULE_MOVE_TO_COVER,
+	SCRIPTED_SCHEDULE_INVESTIGATE_SPOT,
+};
+
+class CScriptedSchedule : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	int KnownSchedule() const;
+	int ScheduleType() const;
+	float MinDist() const { return pev->health; }
+	float MaxDist() const { return pev->max_health; }
+	int MovePreference() const { return pev->impulse; }
+	int SpotPreference() const { return pev->button; }
+};
+
+int CScriptedSchedule::ScheduleType() const
+{
+	return pev->weapons;
+}
+
+int CScriptedSchedule::KnownSchedule() const
+{
+	switch (pev->weapons) {
+	case SCRIPTED_SCHEDULE_CLEAR:
+		return SCHED_NONE;
+	case SCRIPTED_SCHEDULE_MOVE_AWAY:
+		return SCHED_MOVE_SOMEWHERE;
+	case SCRIPTED_SCHEDULE_MOVE_TO_COVER:
+		return SCHED_TAKE_COVER_FROM_SPOT;
+	case SCRIPTED_SCHEDULE_INVESTIGATE_SPOT:
+		return SCHED_INVESTIGATE_SPOT;
+	default:
+		ALERT(at_aiconsole, "Unknown schedule type for scripted_schedule: %d\n", pev->weapons);
+		return SCHED_NONE;
+	}
+}
+
+void  CScriptedSchedule::KeyValue(KeyValueData *pkvd)
+{
+	if ( FStrEq( pkvd->szKeyName, "entity" ) )
+	{
+		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "schedule" ) )
+	{
+		pev->weapons = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "mindist" ) )
+	{
+		pev->health = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "maxdist" ) )
+	{
+		pev->max_health = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "spot_entity" ) )
+	{
+		pev->message = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "move_preference" ) )
+	{
+		pev->impulse = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "spot_preference" ) )
+	{
+		pev->button = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CScriptedSchedule::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (pev->netname) {
+		CBaseEntity* pSpotEntity = NULL;
+		if (pev->message) {
+			pSpotEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
+			if (!pSpotEntity) {
+				ALERT(at_aiconsole, "%s speficies \"%s\" as spot entity, but couldn't find it!\n", STRING(pev->classname), STRING(pev->message));
+				return;
+			}
+		}
+
+		int flags = 0;
+		switch (MovePreference()) {
+		case SCRIPTED_SCHEDULE_MOVE_WALK:
+			flags |= SUGGEST_SCHEDULE_FLAG_WALK;
+			break;
+		case SCRIPTED_SCHEDULE_MOVE_RUN:
+			flags |= SUGGEST_SCHEDULE_FLAG_RUN;
+			break;
+		default:
+			break;
+		}
+
+		switch (SpotPreference()) {
+		case SCRIPTED_SCHEDULE_SPOT_POSITION:
+			flags |= SUGGEST_SCHEDULE_FLAG_SPOT_IS_POSITION;
+			break;
+		case SCRIPTED_SCHEDULE_SPOT_ENTITY:
+			flags |= SUGGEST_SCHEDULE_FLAG_SPOT_IS_ENTITY;
+			break;
+		default:
+			break;
+		}
+
+		CBaseEntity* pEntity = 0;
+		while( (pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->netname))) )
+		{
+			CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+			if (pMonster) {
+				if (ScheduleType() == SCRIPTED_SCHEDULE_CLEAR) {
+					pMonster->m_suggestedSchedule = SCHED_NONE;
+					pMonster->ClearSuggestedSchedule();
+				} else {
+					const int knownSchedule = KnownSchedule();
+					if (knownSchedule != SCHED_NONE)
+						pMonster->SuggestSchedule( KnownSchedule(), pSpotEntity, MinDist(), MaxDist(), flags );
+				}
+			}
+		}
+	} else {
+		ALERT(at_aiconsole, "%s does not specify the affected monster!\n", STRING(pev->netname));
+	}
+}
+
+LINK_ENTITY_TO_CLASS( scripted_schedule, CScriptedSchedule )

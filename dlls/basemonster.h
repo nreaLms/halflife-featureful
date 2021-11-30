@@ -188,7 +188,7 @@ public:
 	BOOL FScheduleValid( void );
 	void ClearSchedule( void );
 	BOOL FScheduleDone( void );
-	void ChangeSchedule( Schedule_t *pNewSchedule );
+	void ChangeSchedule(Schedule_t *pNewSchedule , bool isSuggested = false);
 	virtual void OnChangeSchedule( Schedule_t *pNewSchedule ) {}
 	void NextScheduledTask( void );
 	Schedule_t *ScheduleInList( const char *pName, Schedule_t **pList, int listCount );
@@ -202,6 +202,14 @@ public:
 	virtual Schedule_t *GetScheduleOfType( int Type );
 	virtual Schedule_t *GetSchedule( void );
 	Schedule_t* GetFreeroamSchedule();
+	Schedule_t* GetSuggestedSchedule();
+	bool SuggestSchedule(int schedule, CBaseEntity *spotEntity = 0, float minDist = 0.0f, float maxDist = 0.0f, int flags = 0);
+	float SuggestedMinDist(float defaultValue) const;
+	float SuggestedMaxDist(float defaultValue) const;
+	bool CalcSuggestedSpot(Vector *outVec, Vector *viewOffset = NULL);
+	Activity GetSuggestedMovementActivity(Activity defaultActivity);
+	void ClearSuggestedSchedule();
+
 	virtual void ScheduleChange( void ) {}
 	// virtual int CanPlaySequence( void ) { return ((m_pCine == NULL) && (m_MonsterState == MONSTERSTATE_NONE || m_MonsterState == MONSTERSTATE_IDLE || m_IdealMonsterState == MONSTERSTATE_IDLE)); }
 	virtual int CanPlaySequence( BOOL fDisregardState, int interruptLevel );
@@ -248,9 +256,12 @@ public:
 	int RouteClassify( int iMoveFlag );
 	void InsertWaypoint( Vector vecLocation, int afMoveFlags );
 
+	BOOL FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset, float minDist, float maxDist, int flags );
 	BOOL FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset );
-	virtual BOOL FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist );
-	virtual BOOL FindRunAway( Vector vecThreat, float flMinDist, float flMaxDist );
+	BOOL FindLateralSpotAway( const Vector &vecThreat, float minDist, float maxDist, int flags );
+	BOOL FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags);
+	BOOL FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist);
+	BOOL FindSpotAway(Vector vecThreat, float flMinDist, float flMaxDist , int flags);
 	virtual BOOL FValidateCover( const Vector &vecCoverLocation ) { return TRUE; };
 	virtual float CoverRadius( void ) { return 784; } // Default cover radius
 
@@ -419,7 +430,16 @@ public:
 
 	short m_sizeForGrapple;
 
+	short m_suggestedSchedule;
+	EHANDLE m_suggestedScheduleEntity;
+	Vector m_suggestedScheduleOrigin;
+	float m_suggestedScheduleMinDist;
+	float m_suggestedScheduleMaxDist;
+	int m_suggestedScheduleFlags;
+
 	float m_flLastYawTime;
+
+	EHANDLE m_lastMoveBlocker;
 
 	const char* taskFailReason;
 };

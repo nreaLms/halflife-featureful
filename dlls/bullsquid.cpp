@@ -1203,6 +1203,7 @@ Schedule_t slSquidWallow[] =
 		ARRAYSIZE( tlSquidWallow ),
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_NEW_ENEMY,
 		// even though HEAR_SOUND/SMELL FOOD doesn't break this schedule, we need this mask
 		// here or the monster won't detect these sounds at ALL while running this schedule.

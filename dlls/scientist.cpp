@@ -170,6 +170,7 @@ Schedule_t slFollowScared[] =
 		tlFollowScared,
 		ARRAYSIZE( tlFollowScared ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_HEAR_SOUND |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE,
@@ -191,6 +192,7 @@ Schedule_t slFaceTargetScared[] =
 		tlFaceTargetScared,
 		ARRAYSIZE( tlFaceTargetScared ),
 		bits_COND_HEAR_SOUND |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_NEW_ENEMY,
 		bits_SOUND_DANGER,
 		"FaceTargetScared"
@@ -254,6 +256,7 @@ Schedule_t slSciFaceTarget[] =
 		ARRAYSIZE( tlSciFaceTarget ),
 		bits_COND_CLIENT_PUSH |
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_COMBAT |
 		bits_SOUND_DANGER,
@@ -295,6 +298,7 @@ Schedule_t slIdleSciStand[] =
 		tlIdleSciStand,
 		ARRAYSIZE( tlIdleSciStand ),
 		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND |
@@ -317,7 +321,7 @@ Task_t tlScientistCover[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_PANIC },		// If you fail, just panic!
 	{ TASK_STOP_MOVING, 0.0f },
-	{ TASK_FIND_RUN_AWAY_FROM_ENEMY, 0.0f },
+	{ TASK_FIND_SPOT_AWAY_FROM_ENEMY, 0.0f },
 	{ TASK_RUN_PATH_SCARED, 0.0f },
 	{ TASK_TURN_LEFT, 179.0f },
 	{ TASK_SET_SCHEDULE, (float)SCHED_HIDE },
