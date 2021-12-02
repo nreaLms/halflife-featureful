@@ -492,6 +492,8 @@ public:
 		return pev->origin + gpGlobals->v_forward * 36 + Vector(0,0,20);
 	}
 
+	bool CanSpawnBeams() const;
+
 	int m_iBravery;
 
 	CBeam *m_pBeam[ISLAVE_MAX_BEAMS];
@@ -827,20 +829,21 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				Vector vecSrc = pev->origin + gpGlobals->v_forward * 2;
 				MakeDynamicLight(vecSrc, 12, (int)(20/pev->framerate));
 			}
-			if( CanRevive() )
+			if (CanSpawnBeams())
 			{
-				WackBeam( ISLAVE_LEFT_ARM, m_hDead );
-				WackBeam( ISLAVE_RIGHT_ARM, m_hDead );
+				if( CanRevive() )
+				{
+					WackBeam( ISLAVE_LEFT_ARM, m_hDead );
+					WackBeam( ISLAVE_RIGHT_ARM, m_hDead );
+				}
+				else
+				{
+					ArmBeam( ISLAVE_LEFT_ARM );
+					ArmBeam( ISLAVE_RIGHT_ARM );
+					BeamGlow();
+				}
+				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100 + m_iBeams * 10 );
 			}
-			else
-			{
-				ArmBeam( ISLAVE_LEFT_ARM );
-				ArmBeam( ISLAVE_RIGHT_ARM );
-				BeamGlow();
-			}
-
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100 + m_iBeams * 10 );
-			pev->skin = m_iBeams / 2;
 		}
 			break;
 		case ISLAVE_AE_ZAP_SHOOT:
@@ -1071,7 +1074,7 @@ bool CISlave::IsValidHealTarget(CBaseEntity *pEntity)
 void CISlave::StartTask( Task_t *pTask )
 {
 	ClearBeams();
-	
+
 	switch(pTask->iTask)
 	{
 	case TASK_ISLAVE_SUMMON_FAMILIAR:
@@ -1868,7 +1871,6 @@ void CISlave::ClearBeams()
 		}
 	}
 	m_iBeams = 0;
-	pev->skin = 0;
 	
 	HandsGlowOff();
 	RemoveSummonBeams();
@@ -2129,6 +2131,12 @@ Vector CISlave::GetArmBeamColor(int &brightness)
 	return Vector(ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE);
 }
 
+bool CISlave::CanSpawnBeams() const
+{
+	// TODO: Not sure if this is good
+	return m_pSchedule == slSlaveAttack1 || m_pSchedule == slSlaveHealOrReviveAttack;
+}
+
 void CISlave::PlayUseSentence()
 {
 	SENTENCEG_PlayRndSz( ENT( pev ), "SLV_IDLE", 0.85, ATTN_NORM, 0, m_voicePitch );
@@ -2145,6 +2153,7 @@ void CISlave::ReportAIState(ALERT_TYPE level )
 #if FEATURE_ISLAVE_ENERGY
 	ALERT(level, "Free energy: %3.1f. ", (double)m_freeEnergy);
 #endif
+	ALERT(level, "Current number of beams: %d. ", m_iBeams);
 }
 
 #if FEATURE_ISLAVE_DEAD
