@@ -6662,6 +6662,15 @@
 	]
 ]
 
+@PointClass base(Targetname) = trigger_mp3audio : "Play mp3 audio"
+[
+	message(string) : "Track name"
+	spawnflags(flags) =
+	[
+		1: "Remove on fire" : 0
+	]
+]
+
 @SolidClass base(Trigger, TriggerCond) = trigger_multiple : "Trigger: Activate multiple"
 [
 	wait(integer) : "Delay before reset" : 10

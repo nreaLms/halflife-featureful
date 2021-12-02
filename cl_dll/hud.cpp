@@ -153,6 +153,33 @@ int __MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf )
 	return gHUD.MsgFunc_GameMode( pszName, iSize, pbuf );
 }
 
+int __MsgFunc_PlayMP3( const char *pszName, int iSize, void *pbuf )
+{
+	const char *pszSound;
+	char cmd[64];
+
+	BEGIN_READ( pbuf, iSize );
+	pszSound = READ_STRING();
+
+	if( !IsXashFWGS() && gEngfuncs.pfnGetCvarPointer( "gl_overbright" ) )
+	{
+		sprintf( cmd, "mp3 play %s\n", pszSound );
+		gEngfuncs.pfnClientCmd( cmd );
+	}
+	else
+		gEngfuncs.pfnPrimeMusicStream( pszSound, 0 );
+
+	return 1;
+}
+
+void __CmdFunc_StopMP3( void )
+{
+	if( !IsXashFWGS() && gEngfuncs.pfnGetCvarPointer( "gl_overbright" ) )
+		gEngfuncs.pfnClientCmd( "mp3 stop\n" );
+	else
+		gEngfuncs.pfnPrimeMusicStream( 0, 0 );
+}
+
 // TFFree Command Menu
 void __CmdFunc_OpenCommandMenu( void )
 {
@@ -382,6 +409,9 @@ void CHud::Init( void )
 
 	// VGUI Menus
 	HOOK_MESSAGE( VGUIMenu );
+
+	HOOK_MESSAGE( PlayMP3 );
+	HOOK_COMMAND( "stopaudio", StopMP3 );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round

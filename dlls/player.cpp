@@ -195,6 +195,7 @@ int gmsgShowMenu = 0;
 int gmsgGeigerRange = 0;
 int gmsgTeamNames = 0;
 int gmsgBhopcap = 0;
+int gmsgPlayMP3 = 0;
 int gmsgHUDColor = 0;
 
 int gmsgStatusText = 0;
@@ -258,6 +259,7 @@ void LinkUserMessages( void )
 	gmsgAmmoX = REG_USER_MSG( "AmmoX", 2 );
 	gmsgTeamNames = REG_USER_MSG( "TeamNames", -1 );
 	gmsgBhopcap = REG_USER_MSG( "Bhopcap", 1 );
+	gmsgPlayMP3 = REG_USER_MSG( "PlayMP3", -1 );
 	gmsgHUDColor = REG_USER_MSG( "HUDColor", 4 );
 
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
