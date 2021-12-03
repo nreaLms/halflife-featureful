@@ -1227,10 +1227,14 @@ Schedule_t slMoveSomewhere[] =
 
 Task_t tlFreeroam[] =
 {
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_WAIT_RANDOM, 0.5f },
 	{ TASK_GET_PATH_TO_FREEROAM_NODE, (float)0 },
-	{ TASK_FACE_ROUTE, (float)0 },
 	{ TASK_WALK_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_WAIT, 0.5f },
+	{ TASK_WAIT_RANDOM, 0.5f },
 	{ TASK_WAIT_PVS, (float)0 },
 };
 
