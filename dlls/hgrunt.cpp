@@ -357,11 +357,11 @@ BOOL CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
 	if( m_hEnemy != 0 )
 	{
 		pEnemy = m_hEnemy->MyMonsterPointer();
+	}
 
-		if( !pEnemy )
-		{
-			return FALSE;
-		}
+	if( !pEnemy )
+	{
+		return FALSE;
 	}
 
 	if( flDist <= 64.0f && flDot >= 0.7f &&
