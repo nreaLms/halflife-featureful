@@ -37,6 +37,7 @@ extern DLL_GLOBAL edict_t *g_pBodyQueueHead;
 
 Vector VecBModelOrigin( entvars_t *pevBModel );
 
+static bool gBuildingNodeGraph = false;
 CGraph WorldGraph;
 
 LINK_ENTITY_TO_CLASS( info_node, CNodeEnt )
@@ -238,6 +239,10 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 	if( FClassnameIs( pevLinkEnt, "func_door" ) || FClassnameIs( pevLinkEnt, "func_door_rotating" ) )
 	{
 		// ent is a door.
+		if (gBuildingNodeGraph) {
+			return TRUE;
+		}
+
 		pDoor = ( CBaseEntity::Instance( pevLinkEnt ) );
 
 		if( ( pevLinkEnt->spawnflags & SF_DOOR_USE_ONLY ) ) 
@@ -1639,8 +1644,10 @@ void CTestHull::CallBuildNodeGraph( void )
 {
 	// TOUCH HACK -- Don't allow this entity to call anyone's "touch" function
 	gTouchDisabled = TRUE;
+	gBuildingNodeGraph = true;
 	BuildNodeGraph();
 	gTouchDisabled = FALSE;
+	gBuildingNodeGraph = false;
 	// Undo TOUCH HACK
 }
 
