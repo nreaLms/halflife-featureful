@@ -349,6 +349,7 @@ public:
 	void FlameUpdate( void );
 	void FlameControls( float angleX, float angleY );
 	void FlameDestroy( void );
+	void FlameOffSound( void );
 	inline BOOL FlameIsOn( void ) { return m_pFlame[0] != NULL; }
 
 	void FlameDamage( Vector vecStart, Vector vecEnd, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType );
@@ -827,10 +828,7 @@ void CGargantua::FlameDamage( Vector vecStart, Vector vecEnd, entvars_t *pevInfl
 
 void CGargantua::FlameDestroy( void )
 {
-	int i;
-
-	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, pBeamAttackSounds[0], 1.0, ATTN_NORM, 0, PITCH_NORM );
-	for( i = 0; i < 4; i++ )
+	for( int i = 0; i < 4; i++ )
 	{
 		if( m_pFlame[i] )
 		{
@@ -838,6 +836,11 @@ void CGargantua::FlameDestroy( void )
 			m_pFlame[i] = NULL;
 		}
 	}
+}
+
+void CGargantua::FlameOffSound( void )
+{
+	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, pBeamAttackSounds[0], 1.0, ATTN_NORM, 0, PITCH_NORM );
 }
 
 void CGargantua::PrescheduleThink( void )
@@ -1205,8 +1208,10 @@ Schedule_t *CGargantua::GetSchedule()
 Schedule_t *CGargantua::GetScheduleOfType( int Type )
 {
 	// HACKHACK - turn off the flames if they are on and garg goes scripted / dead
-	if( FlameIsOn() )
+	if( FlameIsOn() ) {
+		FlameOffSound();
 		FlameDestroy();
+	}
 
 	switch( Type )
 	{
@@ -1329,6 +1334,7 @@ void CGargantua::RunTask( Task_t *pTask )
 	case TASK_FLAME_SWEEP:
 		if( gpGlobals->time > m_flWaitFinished )
 		{
+			FlameOffSound();
 			FlameDestroy();
 			TaskComplete();
 			FlameControls( 0, 0 );
