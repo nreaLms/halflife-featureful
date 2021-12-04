@@ -438,6 +438,10 @@ void CBaseDoor::Spawn()
 
 	m_toggle_state = TS_AT_BOTTOM;
 
+	if (m_fIgnoreTargetname) {
+		pev->spawnflags |= SF_DOOR_FORCETOUCHABLE;
+	}
+
 	// if the door is flagged for USE button activation only, use NULL touch function
 	if( FBitSet( pev->spawnflags, SF_DOOR_USE_ONLY ) &&
 			!IgnoreTargetname() )

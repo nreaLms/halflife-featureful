@@ -270,7 +270,7 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 			}
 			if( ( afCapMask & bits_CAP_OPEN_DOORS ) )
 			{
-				if (!FStringNull(pevLinkEnt->targetname))
+				if (!FStringNull(pevLinkEnt->targetname) && !FBitSet(pevLinkEnt->spawnflags, SF_DOOR_FORCETOUCHABLE))
 				{
 					return FALSE;
 				}
