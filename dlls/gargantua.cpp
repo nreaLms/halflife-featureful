@@ -1715,9 +1715,9 @@ const char *CBabyGargantua::pAlertSounds[] =
 
 const char *CBabyGargantua::pPainSounds[] =
 {
-	"garg/gar_pain1.wav",
-	"garg/gar_pain2.wav",
-	"garg/gar_pain3.wav",
+	"babygarg/gar_pain1.wav",
+	"babygarg/gar_pain2.wav",
+	"babygarg/gar_pain3.wav",
 };
 
 const char *CBabyGargantua::pDeathSounds[] =
