@@ -377,6 +377,7 @@ public:
 	virtual CBasePlayerWeapon* MyWeaponPointer() {return NULL;}
 
 	virtual bool IsAlienMonster() { return false; }
+	virtual void InputByMonster(CBaseMonster* pMonster) {}
 };
 
 // Ugly technique to override base member functions

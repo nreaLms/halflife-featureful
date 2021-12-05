@@ -225,13 +225,13 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 	{
 		// protect us in the case that the node graph isn't available
 		ALERT( at_aiconsole, "Graph not ready!\n" );
-		return FALSE;
+		return PROHIBIT;
 	}
 
 	if( FNullEnt( pevLinkEnt ) )
 	{
 		ALERT( at_aiconsole, "dead path ent!\n" );
-		return TRUE;
+		return PROHIBIT;
 	}
 	//pentWorld = NULL;
 
@@ -240,10 +240,16 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 	{
 		// ent is a door.
 		if (gBuildingNodeGraph) {
-			return TRUE;
+			return ALLOW;
 		}
 
 		pDoor = ( CBaseEntity::Instance( pevLinkEnt ) );
+
+		// monster should try for it if the door is open and looks as if it will stay that way
+		if( pDoor->GetToggleState() == TS_AT_TOP && ( pevLinkEnt->spawnflags & SF_DOOR_NO_AUTO_RETURN ) )
+		{
+			return ALLOW;
+		}
 
 		if( ( pevLinkEnt->spawnflags & SF_DOOR_USE_ONLY ) ) 
 		{
@@ -251,53 +257,39 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 			if( ( afCapMask & bits_CAP_OPEN_DOORS ) )
 			{
 				// let monster right through if he can open doors
-				return TRUE;
+				if (!( pevLinkEnt->spawnflags & SF_DOOR_NOMONSTERS ))
+					return NEEDS_INPUT;
 			}
-			else 
-			{
-				// monster should try for it if the door is open and looks as if it will stay that way
-				if( pDoor->GetToggleState()== TS_AT_TOP && ( pevLinkEnt->spawnflags & SF_DOOR_NO_AUTO_RETURN ) )
-				{
-					return TRUE;
-				}
-
-				return FALSE;
-			}
+			return PROHIBIT;
 		}
 		else 
 		{
 			// door must be opened with a button or trigger field.
-
-			// monster should try for it if the door is open and looks as if it will stay that way
-			if( pDoor->GetToggleState() == TS_AT_TOP && ( pevLinkEnt->spawnflags & SF_DOOR_NO_AUTO_RETURN ) )
-			{
-				return TRUE;
-			}
 			if( ( afCapMask & bits_CAP_OPEN_DOORS ) )
 			{
 				if (!FStringNull(pevLinkEnt->targetname) && !FBitSet(pevLinkEnt->spawnflags, SF_DOOR_FORCETOUCHABLE))
 				{
-					return FALSE;
+					return PROHIBIT;
 				}
 				if( !( pevLinkEnt->spawnflags & SF_DOOR_NOMONSTERS ) || queryType == NODEGRAPH_STATIC )
-					return TRUE;
+					return NEEDS_INPUT;
 			}
 
-			return FALSE;
+			return PROHIBIT;
 		}
 	}
 	// func_breakable
 	else if( FClassnameIs( pevLinkEnt, "func_breakable" ) && queryType == NODEGRAPH_STATIC )
 	{
-		return TRUE;
+		return ALLOW;
 	}
 	else
 	{
 		ALERT( at_aiconsole, "Unhandled Ent in Path %s\n", STRING( pevLinkEnt->classname ) );
-		return FALSE;
+		return PROHIBIT;
 	}
 
-	return FALSE;
+	return PROHIBIT;
 }
 
 #if 0

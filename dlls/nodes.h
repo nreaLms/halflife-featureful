@@ -181,6 +181,11 @@ public:
 	int		NextNodeInRoute( int iCurrentNode, int iDest, int iHull, int iCap );
 
 	enum NODEQUERY { NODEGRAPH_DYNAMIC, NODEGRAPH_STATIC };
+	enum NODE_LINKENT {
+		PROHIBIT = 0,
+		ALLOW,
+		NEEDS_INPUT
+	};
 	// A static query means we're asking about the possiblity of handling this entity at ANY time
 	// A dynamic query means we're asking about it RIGHT NOW.  So we should query the current state
 	int		HandleLinkEnt ( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODEQUERY queryType );

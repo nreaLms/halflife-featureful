@@ -1526,7 +1526,7 @@ float CBaseMonster::OpenDoorAndWait( entvars_t *pevDoor )
 	if( pcbeDoor && !pcbeDoor->IsLockedByMaster() )
 	{
 		//ALERT( at_aiconsole, "unlocked! " );
-		pcbeDoor->Use( this, this, USE_ON, 0.0 );
+		pcbeDoor->InputByMonster(this);
 		//ALERT( at_aiconsole, "pevDoor->nextthink = %d ms\n", (int)( 1000 * pevDoor->nextthink ) );
 		//ALERT( at_aiconsole, "pevDoor->ltime = %d ms\n", (int)( 1000 * pevDoor->ltime ) );
 		//ALERT( at_aiconsole, "pev-> nextthink = %d ms\n", (int)( 1000 * pev->nextthink ) );
@@ -1549,7 +1549,7 @@ float CBaseMonster::OpenDoorAndWait( entvars_t *pevDoor )
 					{
 						CBaseEntity *pDoor = Instance( pentTarget );
 						if( pDoor )
-							pDoor->Use( this, this, USE_ON, 0.0 );
+							pDoor->InputByMonster(this);
 					}
 				}
 			}
@@ -1598,7 +1598,7 @@ void CBaseMonster::AdvanceRoute( float distance )
 				if( iLink >= 0 && WorldGraph.m_pLinkPool[iLink].m_pLinkEnt != NULL )
 				{
 					//ALERT( at_aiconsole, "A link. " );
-					if( WorldGraph.HandleLinkEnt( iSrcNode, WorldGraph.m_pLinkPool[iLink].m_pLinkEnt, m_afCapability, CGraph::NODEGRAPH_DYNAMIC ) )
+					if( WorldGraph.HandleLinkEnt( iSrcNode, WorldGraph.m_pLinkPool[iLink].m_pLinkEnt, m_afCapability, CGraph::NODEGRAPH_DYNAMIC ) == CGraph::NEEDS_INPUT )
 					{
 						//ALERT( at_aiconsole, "usable." );
 						entvars_t *pevDoor = WorldGraph.m_pLinkPool[iLink].m_pLinkEnt;

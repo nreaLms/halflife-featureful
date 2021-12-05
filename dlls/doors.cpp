@@ -37,6 +37,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	virtual void KeyValue( KeyValueData *pkvd );
+	void InputByMonster(CBaseMonster* pMonster);
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual void Blocked( CBaseEntity *pOther );
 
@@ -747,6 +748,17 @@ void CBaseDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 
 	if( shouldActivate )
 		DoorActivate();
+}
+
+void CBaseDoor::InputByMonster(CBaseMonster *pMonster)
+{
+	if (FBitSet(pev->spawnflags, SF_DOOR_NOMONSTERS))
+		return;
+
+	short originalTriggerMode = m_iObeyTriggerMode;
+	m_iObeyTriggerMode = 2;
+	Use(pMonster, pMonster, USE_ON, 0.0f);
+	m_iObeyTriggerMode = originalTriggerMode;
 }
 
 //
