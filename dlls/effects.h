@@ -67,6 +67,7 @@ public:
 	}
 	void TurnOff( void );
 	void TurnOn( void );
+	void AttachToEntity();
 	inline float Frames( void )
 	{
 		return m_maxFrame;

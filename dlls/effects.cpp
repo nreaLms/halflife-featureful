@@ -1186,12 +1186,8 @@ void CSprite::Precache( void )
 
 void CSprite::Activate()
 {
-	if (pev->message)
-	{
-		CBaseEntity *pTemp = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
-		if (pTemp)
-			SetAttachment(pTemp->edict(), (int)pev->frags);
-	}
+	AttachToEntity();
+	CPointEntity::Activate();
 }
 
 void CSprite::SpriteInit( const char *pSpriteName, const Vector &origin )
@@ -1291,6 +1287,7 @@ void CSprite::TurnOff( void )
 void CSprite::TurnOn( void )
 {
 	pev->effects = 0;
+	AttachToEntity();
 	if( ( pev->framerate && m_maxFrame > 1.0f ) || FBitSet( pev->spawnflags, SF_SPRITE_ONCE|SF_SPRITE_ONCE_AND_REMOVE ) )
 	{
 		SetThink( &CSprite::AnimateThink );
@@ -1303,6 +1300,16 @@ void CSprite::TurnOn( void )
 		pev->frame = RANDOM_LONG(0, (int)m_maxFrame-1);
 	else
 		pev->frame = Q_min((int)m_maxFrame-1, pev->impulse);
+}
+
+void CSprite::AttachToEntity()
+{
+	if (pev->message)
+	{
+		CBaseEntity *pTemp = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
+		if (pTemp)
+			SetAttachment(pTemp->edict(), (int)pev->frags);
+	}
 }
 
 void CSprite::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
