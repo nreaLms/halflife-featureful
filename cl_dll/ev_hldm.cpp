@@ -726,11 +726,15 @@ void EV_SpinGauss( event_args_t *args )
 	VectorCopy( args->velocity, velocity );
 
 	pitch = args->iparam1;
+	int electroSound = args->iparam2;
 
-	iSoundState = args->bparam1 ? SND_CHANGE_PITCH : 0;
-	iSoundState = args->bparam2 ? SND_STOP : iSoundState;
-
-	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "ambience/pulsemachine.wav", 1.0, ATTN_NORM, iSoundState, pitch );
+	if (electroSound) {
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, pitch );
+	} else {
+		iSoundState = args->bparam1 ? SND_CHANGE_PITCH : 0;
+		iSoundState = args->bparam2 ? SND_STOP : iSoundState;
+		gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "ambience/pulsemachine.wav", 1.0, ATTN_NORM, iSoundState, pitch );
+	}
 }
 
 /*
