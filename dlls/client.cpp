@@ -39,6 +39,7 @@
 #include "usercmd.h"
 #include "netadr.h"
 #include "pm_shared.h"
+#include "nodes.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
@@ -793,6 +794,19 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 
 	// Link user messages here to make sure first client can get them...
 	LinkUserMessages();
+
+	// fix all of the node graph pointers before the game starts.
+	if( WorldGraph.m_fGraphPresent && !WorldGraph.m_fGraphPointersSet )
+	{
+		if( !WorldGraph.FSetGraphPointers() )
+		{
+			ALERT( at_console, "**Graph pointers were not set!\n" );
+		}
+		else
+		{
+			ALERT( at_console, "**Graph Pointers Set!\n" );
+		}
+	}
 }
 
 /*
