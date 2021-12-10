@@ -377,7 +377,8 @@ public:
 	virtual CBasePlayerWeapon* MyWeaponPointer() {return NULL;}
 
 	virtual bool IsAlienMonster() { return false; }
-	virtual void InputByMonster(CBaseMonster* pMonster) {}
+	virtual float InputByMonster(CBaseMonster* pMonster) { return 0.0f; }
+	virtual NODE_LINKENT HandleLinkEnt(int afCapMask, bool nodeQueryStatic) { return NLE_PROHIBIT; }
 };
 
 // Ugly technique to override base member functions
@@ -604,6 +605,8 @@ public:
 #define bits_CAP_USABLE			( 1 << 16 ) // can be used by player
 
 #define bits_CAP_DOORS_GROUP    (bits_CAP_USE | bits_CAP_AUTO_DOORS | bits_CAP_OPEN_DOORS)
+
+#define bits_CAP_MONSTERCLIPPED ( 1 << 31 )
 
 // used by suit voice to indicate damage sustained and repaired type to player
 

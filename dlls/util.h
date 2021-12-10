@@ -208,6 +208,12 @@ typedef enum
 	TS_GOING_DOWN
 } TOGGLE_STATE;
 
+typedef enum {
+	NLE_PROHIBIT = 0,
+	NLE_ALLOW,
+	NLE_NEEDS_INPUT
+} NODE_LINKENT;
+
 // Misc useful
 inline BOOL FStrEq(const char*sz1, const char*sz2)
 {

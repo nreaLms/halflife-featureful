@@ -37,7 +37,6 @@ extern DLL_GLOBAL edict_t *g_pBodyQueueHead;
 
 Vector VecBModelOrigin( entvars_t *pevBModel );
 
-static bool gBuildingNodeGraph = false;
 CGraph WorldGraph;
 
 LINK_ENTITY_TO_CLASS( info_node, CNodeEnt )
@@ -217,79 +216,24 @@ entvars_t *CGraph::LinkEntForLink( CLink *pLink, CNode *pNode )
 //=========================================================
 int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODEQUERY queryType )
 {
-	//edict_t *pentWorld;
-	CBaseEntity *pDoor;
-	TraceResult tr;
-
 	if( !m_fGraphPresent || !m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available
 		ALERT( at_aiconsole, "Graph not ready!\n" );
-		return PROHIBIT;
+		return NLE_PROHIBIT;
 	}
 
 	if( FNullEnt( pevLinkEnt ) )
 	{
 		ALERT( at_aiconsole, "dead path ent!\n" );
-		return PROHIBIT;
-	}
-	//pentWorld = NULL;
-
-	// func_door
-	if( FClassnameIs( pevLinkEnt, "func_door" ) || FClassnameIs( pevLinkEnt, "func_door_rotating" ) )
-	{
-		// ent is a door.
-		if (gBuildingNodeGraph) {
-			return ALLOW;
-		}
-
-		pDoor = ( CBaseEntity::Instance( pevLinkEnt ) );
-
-		// monster should try for it if the door is open and looks as if it will stay that way
-		if( pDoor->GetToggleState() == TS_AT_TOP && ( pevLinkEnt->spawnflags & SF_DOOR_NO_AUTO_RETURN ) )
-		{
-			return ALLOW;
-		}
-
-		if( ( pevLinkEnt->spawnflags & SF_DOOR_USE_ONLY ) ) 
-		{
-			// door is use only.
-			if( ( afCapMask & bits_CAP_OPEN_DOORS ) )
-			{
-				// let monster right through if he can open doors
-				if (!( pevLinkEnt->spawnflags & SF_DOOR_NOMONSTERS ))
-					return NEEDS_INPUT;
-			}
-			return PROHIBIT;
-		}
-		else 
-		{
-			// door must be opened with a button or trigger field.
-			if( ( afCapMask & bits_CAP_OPEN_DOORS ) )
-			{
-				if (!FStringNull(pevLinkEnt->targetname) && !FBitSet(pevLinkEnt->spawnflags, SF_DOOR_FORCETOUCHABLE))
-				{
-					return PROHIBIT;
-				}
-				if( !( pevLinkEnt->spawnflags & SF_DOOR_NOMONSTERS ) || queryType == NODEGRAPH_STATIC )
-					return NEEDS_INPUT;
-			}
-
-			return PROHIBIT;
-		}
-	}
-	// func_breakable
-	else if( FClassnameIs( pevLinkEnt, "func_breakable" ) && queryType == NODEGRAPH_STATIC )
-	{
-		return ALLOW;
-	}
-	else
-	{
-		ALERT( at_aiconsole, "Unhandled Ent in Path %s\n", STRING( pevLinkEnt->classname ) );
-		return PROHIBIT;
+		return NLE_PROHIBIT;
 	}
 
-	return PROHIBIT;
+	CBaseEntity *pObstacle = CBaseEntity::Instance( pevLinkEnt );
+	if (pObstacle)
+		return pObstacle->HandleLinkEnt(afCapMask, queryType == NODEGRAPH_STATIC);
+
+	return NLE_PROHIBIT;
 }
 
 #if 0
@@ -584,7 +528,7 @@ int CGraph::NextNodeInRoute( int iCurrentNode, int iDest, int iHull, int iCap )
 // find a path usable by a monster with those capabilities
 // returns the number of nodes copied into supplied array
 //=========================================================
-int CGraph::FindShortestPath( int *piPath, int iStart, int iDest, int iHull, int afCapMask )
+int CGraph::FindShortestPath(int *piPath, int iStart, int iDest, int iHull, int afCapMask , bool dynamic)
 {
 	int iVisitNode;
 	int iCurrentNode;
@@ -614,8 +558,9 @@ int CGraph::FindShortestPath( int *piPath, int iStart, int iDest, int iHull, int
 
 	// Is routing information present.
 	//
-	if( m_fRoutingComplete )
+	if( !dynamic && m_fRoutingComplete )
 	{
+		ALERT(at_aiconsole, "In m_fRoutingComplete\n");
 		int iCap = CapIndex( afCapMask );
 
 		iNumPathNodes = 0;
@@ -706,7 +651,7 @@ int CGraph::FindShortestPath( int *piPath, int iStart, int iDest, int iHull, int
 				if( m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt != NULL )
 				{
 					// there's a brush ent in the way! Don't mark this node or put it into the queue unless the monster can negotiate it
-					if( !HandleLinkEnt( iCurrentNode, m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt, afCapMask, NODEGRAPH_STATIC ) )
+					if( !HandleLinkEnt( iCurrentNode, m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt, afCapMask, dynamic ? NODEGRAPH_DYNAMIC : NODEGRAPH_STATIC ) )
 					{
 						// monster should not try to go this way.
 						continue;
@@ -1228,6 +1173,11 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 	// being generous enough.
 	cMaxInitialLinks = 0;
 
+	CBaseEntity* pMonsterclip = NULL;
+	while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
+		pMonsterclip->pev->flags = FL_WORLDBRUSH;
+	}
+
 	for( i = 0; i < m_cNodes; i++ )
 	{
 		cLinksThisNode = 0;// reset this count for each node.
@@ -1343,6 +1293,12 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 				ALERT( at_aiconsole, "**LinkVisibleNodes:\nNode %d has NodeLinks > MAX_NODE_INITIAL_LINKS", i );
 				fprintf( file, "** NODE %d HAS NodeLinks > MAX_NODE_INITIAL_LINKS **\n", i );
 				*piBadNode = i;
+
+				pMonsterclip = NULL;
+				while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
+					pMonsterclip->pev->flags = FL_MONSTERCLIP;
+				}
+
 				return FALSE;
 			}
 			else if( cTotalLinks > MAX_NODE_INITIAL_LINKS * m_cNodes )
@@ -1350,6 +1306,11 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 				// this is paranoia
 				ALERT( at_aiconsole, "**LinkVisibleNodes:\nTotalLinks > MAX_NODE_INITIAL_LINKS * NUMNODES" );
 				*piBadNode = i;
+
+				pMonsterclip = NULL;
+				while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
+					pMonsterclip->pev->flags = FL_MONSTERCLIP;
+				}
 				return FALSE;
 			}
 
@@ -1373,6 +1334,11 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 		{
 			fprintf( file, "----------------------------------------------------------------------------\n" );
 		}
+	}
+
+	pMonsterclip = NULL;
+	while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
+		pMonsterclip->pev->flags = FL_MONSTERCLIP;
 	}
 
 	fprintf( file, "\n%4d Total Initial Connections - %4d Maximum connections for a single node.\n", cTotalLinks, cMaxInitialLinks );
@@ -1636,10 +1602,8 @@ void CTestHull::CallBuildNodeGraph( void )
 {
 	// TOUCH HACK -- Don't allow this entity to call anyone's "touch" function
 	gTouchDisabled = TRUE;
-	gBuildingNodeGraph = true;
 	BuildNodeGraph();
 	gTouchDisabled = FALSE;
-	gBuildingNodeGraph = false;
 	// Undo TOUCH HACK
 }
 
@@ -2553,6 +2517,7 @@ int CGraph::FLoadGraph( const char *szMapName )
 			ALERT( at_aiconsole, "***WARNING***:Node graph was longer than expected by %d bytes.!\n", length );
 		}
 
+		ALERT(at_aiconsole, "Built graph successfully\n");
 		return TRUE;
 	}
 	else

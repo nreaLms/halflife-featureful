@@ -49,6 +49,7 @@ public:
 	void KeyValue( KeyValueData* pkvd);
 	void EXPORT BreakTouch( CBaseEntity *pOther );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	NODE_LINKENT HandleLinkEnt(int afCapMask, bool nodeQueryStatic);
 	void DamageSound( void );
 
 	// breakables use an overridden takedamage
