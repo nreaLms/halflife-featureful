@@ -2,41 +2,62 @@
 #define SPORE_H
 
 #include "mod_features.h"
-#include "basemonster.h"
 
 #if FEATURE_SPOREGRENADE
-class CSprite;
+#include "weapons.h"
 
-class CSporeGrenade : public CBaseMonster
+// Contact/Timed spore grenade
+class CSpore : public CGrenade
 {
 public:
-	virtual int		Save(CSave &save);
-	virtual int		Restore(CRestore &restore);
+	enum SporeType
+	{
+		ROCKET = 1,
+		GRENADE = 2
+	};
 
-	static	TYPEDESCRIPTION m_SaveData[];
+public:
+#ifndef CLIENT_DLL
+	int Save(CSave& save);
+	int Restore(CRestore& restore);
 
-	void Precache(void);
-	void Spawn(void);
+	static TYPEDESCRIPTION m_SaveData[];
+#endif
 
-	static CBaseEntity *ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, bool ai);
-	static CBaseEntity *ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
-
-	void Explode(TraceResult *pTrace);
-
-	void EXPORT BounceTouch(CBaseEntity *pOther);
-	void EXPORT ExplodeTouch(CBaseEntity *pOther);
-	void EXPORT DangerSoundThink(void);
-	void EXPORT Detonate(void);
-	void EXPORT TumbleThink(void);
-
-	void BounceSound(void);
-	void DangerSound();
-	static void SpawnTrailParticles(const Vector& origin, const Vector& direction, int modelindex, int count, float speed, float noise);
-	static void SpawnExplosionParticles(const Vector& origin, const Vector& direction, int modelindex, int count, float speed, float noise);
-
+	void Precache();
+	void Spawn();
 	void UpdateOnRemove();
 
-	CSprite* m_pSporeGlow;
+	void BounceSound();
+
+	void EXPORT IgniteThink();
+	void EXPORT FlyThink();
+	void EXPORT GibThink();
+	void EXPORT RocketTouch(CBaseEntity* pOther);
+	void EXPORT MyBounceTouch(CBaseEntity* pOther);
+
+	static CSpore* CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, const Vector &vecDirection, CBaseEntity* pOwner, SporeType sporeType, bool bIsAI, bool bPuked);
+	static CSpore* ShootContact(CBaseEntity *pOwner, const Vector& vecOrigin, const Vector &vecAngles , const Vector &vecVelocity);
+	static CSpore* ShootTimed(CBaseEntity *pOwner, const Vector &vecOrigin, const Vector& vecAngles, bool bIsAI = false);
+
+	static float SporeRocketSpeed() { return 1200.0f; }
+	static float SporeGrenadeSpeed() { return 800.0f; }
+
+private:
+	int m_iBlow;
+	int m_iBlowSmall;
+
+	int m_iSpitSprite;
+	int m_iTrail;
+
+	SporeType m_SporeType;
+
+	float m_flIgniteTime;
+	float m_flSoundDelay;
+
+	BOOL m_bIsAI;
+	EHANDLE m_hSprite;
+	BOOL m_bPuked;
 };
 #endif
 #endif

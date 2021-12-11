@@ -3452,7 +3452,7 @@ public:
 
 	short m_iWeapType;
 	short m_iFireType;
-	int m_iZOffSet;
+	int m_iZOffset;
 	string_t m_iszOwner;
 };
 
@@ -3462,7 +3462,7 @@ TYPEDESCRIPTION	CBlowerCannon::m_SaveData[] =
 {
 	DEFINE_FIELD(CBlowerCannon, m_iFireType, FIELD_SHORT),
 	DEFINE_FIELD(CBlowerCannon, m_iWeapType, FIELD_SHORT),
-	DEFINE_FIELD(CBlowerCannon, m_iZOffSet, FIELD_INTEGER),
+	DEFINE_FIELD(CBlowerCannon, m_iZOffset, FIELD_INTEGER),
 	DEFINE_FIELD(CBlowerCannon, m_iszOwner, FIELD_STRING),
 };
 IMPLEMENT_SAVERESTORE( CBlowerCannon, CBaseEntity )
@@ -3482,7 +3482,7 @@ void CBlowerCannon::KeyValue(KeyValueData *pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "zoffset"))
 	{
-		m_iZOffSet = (int)atoi(pkvd->szValue);
+		m_iZOffset = (int)atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "position"))
@@ -3557,29 +3557,57 @@ void CBlowerCannon::BlowerCannonStop( CBaseEntity *pActivator, CBaseEntity *pCal
 
 void CBlowerCannon::BlowerCannonThink( void )
 {
+	Vector position;
 	Vector direction;
+	Vector angles;
 	bool evaluated = true;
-	if (pev->netname)
+
+	if (pev->message)
 	{
-		evaluated = TryCalcLocus_Velocity(this, m_hActivator, STRING(pev->netname), direction);
+		evaluated = TryCalcLocus_Position(this, m_hActivator, STRING(pev->message), position);
 	}
 	else
 	{
-		CBaseEntity *pTarget = GetNextTarget();
-		direction = pTarget->pev->origin - pev->origin;
+		position = pev->origin;
 	}
 
 	if( evaluated )
 	{
-		direction.z += m_iZOffSet;
-
-		Vector angles = UTIL_VecToAngles( direction );
-		direction = direction.Normalize();
-
-		Vector position = pev->origin;
-		if (pev->message)
+		if (pev->netname)
 		{
-			evaluated = TryCalcLocus_Position(this, m_hActivator, STRING(pev->message), position);
+			evaluated = TryCalcLocus_Velocity(this, m_hActivator, STRING(pev->netname), direction);
+			if (evaluated)
+			{
+				direction.z += m_iZOffset;
+				direction = direction.Normalize();
+				angles = UTIL_VecToAngles( direction );
+				angles.z = -angles.z;
+			}
+		}
+		else
+		{
+			if (!FStringNull(pev->target))
+			{
+				CBaseEntity *pTarget = GetNextTarget();
+				if (pTarget)
+				{
+					direction = pTarget->Center() - position;
+					direction.z += m_iZOffset;
+					direction = direction.Normalize();
+					angles = UTIL_VecToAngles( direction );
+					angles.z = -angles.z;
+				}
+				else
+				{
+					evaluated = false;
+				}
+			}
+			else
+			{
+				angles = pev->angles;
+				UTIL_MakeVectors(angles);
+				direction = gpGlobals->v_forward;
+			}
 		}
 
 		if ( evaluated )
@@ -3599,10 +3627,10 @@ void CBlowerCannon::BlowerCannonThink( void )
 				break;
 #if FEATURE_SPOREGRENADE
 			case BLOWERCANNON_SPOREROCKET:
-				CSporeGrenade::ShootContact(owner->pev, position, direction * 1500);
+				CSpore::ShootContact(owner, position, angles, direction * CSpore::SporeRocketSpeed());
 				break;
 			case BLOWERCANNON_SPOREGRENADE:
-				CSporeGrenade::ShootTimed(owner->pev, position, direction * 700, false);
+				CSpore::ShootTimed(owner, position, angles);
 				break;
 #endif
 #if FEATURE_SHOCKBEAM

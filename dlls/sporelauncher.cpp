@@ -128,8 +128,8 @@ void CSporelauncher::PrimaryAttack()
 	Vector vecSrc = m_pPlayer->GetGunPosition( ) + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -8;
 
 #ifndef CLIENT_DLL
-		UTIL_MakeVectors( m_pPlayer->pev->v_angle );
-		CSporeGrenade::ShootContact( m_pPlayer->pev, vecSrc, gpGlobals->v_forward * 1500 );
+		Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+		CSpore::ShootContact( m_pPlayer, vecSrc, vecAngles, gpGlobals->v_forward * CSpore::SporeRocketSpeed() );
 #endif
 
 	PLAYBACK_EVENT_FULL(
@@ -192,8 +192,8 @@ void CSporelauncher::SecondaryAttack(void)
 	Vector vecSrc = m_pPlayer->GetGunPosition( ) + gpGlobals->v_forward * 16 + gpGlobals->v_right * 8 + gpGlobals->v_up * -8;
 
 #ifndef CLIENT_DLL
-		UTIL_MakeVectors( m_pPlayer->pev->v_angle );
-		CSporeGrenade::ShootTimed(m_pPlayer->pev, vecSrc, gpGlobals->v_forward * 1000, false);
+	Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+	CSpore::ShootTimed(m_pPlayer, vecSrc, vecAngles);
 #endif
 
 	PLAYBACK_EVENT_FULL(
