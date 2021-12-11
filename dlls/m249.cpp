@@ -238,15 +238,24 @@ void CM249::ItemPostFrame()
 	}
 	if ( m_fInSpecialReload )
 	{
-		m_iVisibleClip = m_iClip + Q_min( iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 		if (m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
 		{
+			int maxClip;
+	#ifndef CLIENT_DLL
+			maxClip = iMaxClip();
+	#else
+			ItemInfo itemInfo;
+			GetItemInfo( &itemInfo );
+			maxClip = itemInfo.iMaxClip;
+	#endif
+			m_iVisibleClip = m_iClip + Q_min( maxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] );
+
+			UpdateTape(m_iVisibleClip);
 			m_fInSpecialReload = FALSE;
 			SendWeaponAnim( M249_RELOAD1, UseDecrement(), pev->body );
 			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 2.4;
 		}
 	}
-	UpdateTape(m_iVisibleClip);
 
 	CBasePlayerWeapon::ItemPostFrame();
 }
