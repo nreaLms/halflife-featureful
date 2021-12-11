@@ -36,9 +36,9 @@ public:
 	void EXPORT RocketTouch(CBaseEntity* pOther);
 	void EXPORT MyBounceTouch(CBaseEntity* pOther);
 
-	static CSpore* CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, const Vector &vecDirection, CBaseEntity* pOwner, SporeType sporeType, bool bIsAI, bool bPuked);
+	static CSpore* CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, const Vector &vecDirection, CBaseEntity* pOwner, SporeType sporeType, bool bIsAI = false, bool bPuked = false);
 	static CSpore* ShootContact(CBaseEntity *pOwner, const Vector& vecOrigin, const Vector &vecAngles , const Vector &vecVelocity);
-	static CSpore* ShootTimed(CBaseEntity *pOwner, const Vector &vecOrigin, const Vector& vecAngles, bool bIsAI = false);
+	static CSpore* ShootTimed(CBaseEntity *pOwner, const Vector &vecOrigin, const Vector& vecAngles, const Vector &vecVelocity, bool bIsAI = false);
 
 	static float SporeRocketSpeed() { return 1200.0f; }
 	static float SporeGrenadeSpeed() { return 800.0f; }

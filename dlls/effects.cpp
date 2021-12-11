@@ -3623,24 +3623,24 @@ void CBlowerCannon::BlowerCannonThink( void )
 			switch (m_iWeapType)
 			{
 			case BLOWERCANNON_SQUIDSPIT:
-				CSquidSpit::Shoot(owner->pev, position, direction * 900);
+				CSquidSpit::Shoot(owner->pev, position, direction * CSquidSpit::SpitSpeed());
 				break;
 #if FEATURE_SPOREGRENADE
 			case BLOWERCANNON_SPOREROCKET:
 				CSpore::ShootContact(owner, position, angles, direction * CSpore::SporeRocketSpeed());
 				break;
 			case BLOWERCANNON_SPOREGRENADE:
-				CSpore::ShootTimed(owner, position, angles);
+				CSpore::ShootTimed(owner, position, angles, direction * CSpore::SporeGrenadeSpeed());
 				break;
 #endif
 #if FEATURE_SHOCKBEAM
 			case BLOWERCANNON_SHOCKBEAM:
-				CShock::Shoot(owner->pev, angles, position, direction * 2000);
+				CShock::Shoot(owner->pev, angles, position, direction * CShock::ShockSpeed());
 				break;
 #endif
 #if FEATURE_DISPLACER
 			case BLOWERCANNON_DISPLACERBALL:
-				CDisplacerBall::Shoot(owner->pev, position, direction * 500, angles);
+				CDisplacerBall::Shoot(owner->pev, position, direction * CDisplacerBall::BallSpeed(), angles);
 				break;
 #endif
 			default:

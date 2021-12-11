@@ -162,7 +162,7 @@ void CShockrifle::PrimaryAttack()
 	Vector vecSrc;
 	vecSrc = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 8 + gpGlobals->v_right * 12 + gpGlobals->v_up * -12;
 
-	CShock::Shoot(m_pPlayer->pev, anglesAim, vecSrc, gpGlobals->v_forward * 2000);
+	CShock::Shoot(m_pPlayer->pev, anglesAim, vecSrc, gpGlobals->v_forward * CShock::ShockSpeed());
 
 	m_flRechargeTime = gpGlobals->time + 1;
 #endif

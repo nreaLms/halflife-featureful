@@ -19,6 +19,7 @@ public:
 	void Precache();
 
 	static void Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity);
+	static float ShockSpeed() { return 2000.0f; }
 	void Touch(CBaseEntity *pOther);
 	void EXPORT FlyThink();
 

@@ -31,6 +31,7 @@ public:
 	void Precache();
 
 	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
+	static float SpitSpeed() { return 900.0f; }
 	void Touch(CBaseEntity *pOther);
 	void EXPORT Animate(void);
 

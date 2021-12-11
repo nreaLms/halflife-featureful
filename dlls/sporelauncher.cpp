@@ -193,7 +193,7 @@ void CSporelauncher::SecondaryAttack(void)
 
 #ifndef CLIENT_DLL
 	Vector vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
-	CSpore::ShootTimed(m_pPlayer, vecSrc, vecAngles);
+	CSpore::ShootTimed(m_pPlayer, vecSrc, vecAngles, m_pPlayer->pev->velocity + gpGlobals->v_forward * CSpore::SporeGrenadeSpeed());
 #endif
 
 	PLAYBACK_EVENT_FULL(

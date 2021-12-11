@@ -771,7 +771,7 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				if (bigSpit) {
 					CBigSquidSpit::Shoot(pev, vecSpitOffset, vecSpitDir * 600.0f);
 				} else {
-					CSquidSpit::Shoot( pev, vecSpitOffset, vecSpitDir * 900.0f );
+					CSquidSpit::Shoot( pev, vecSpitOffset, vecSpitDir * CSquidSpit::SpitSpeed() );
 				}
 			}
 			break;

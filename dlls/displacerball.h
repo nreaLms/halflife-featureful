@@ -16,6 +16,7 @@ public:
 	void Spawn( void );
 
 	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles);
+	static float BallSpeed() { return 500.0f; }
 	static void SelfCreate(entvars_t *pevOwner, Vector vecStart);
 
 	void Touch(CBaseEntity *pOther);

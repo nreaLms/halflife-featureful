@@ -346,7 +346,7 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 			vecGunAngles = UTIL_VecToAngles(vecShootDir);
 
-			CShock::Shoot(pev, vecGunAngles, vecShootOrigin, vecShootDir * 2000);
+			CShock::Shoot(pev, vecGunAngles, vecShootOrigin, vecShootDir * CShock::ShockSpeed());
 			m_cAmmoLoaded--;
 			SetBlending( 0, vecGunAngles.x );
 

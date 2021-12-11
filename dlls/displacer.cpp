@@ -536,7 +536,7 @@ void CDisplacer::Displace( void )
 	vecSrc = vecSrc + gpGlobals->v_right	* 8;
 	vecSrc = vecSrc + gpGlobals->v_up		* -12;
 
-	CDisplacerBall::Shoot( m_pPlayer->pev, vecSrc, gpGlobals->v_forward * 500, m_pPlayer->pev->v_angle );
+	CDisplacerBall::Shoot( m_pPlayer->pev, vecSrc, gpGlobals->v_forward * CDisplacerBall::BallSpeed(), m_pPlayer->pev->v_angle );
 
 	SetThink( NULL );
 #endif

@@ -286,16 +286,12 @@ CSpore* CSpore::CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, co
 
 CSpore* CSpore::ShootContact(CBaseEntity *pOwner, const Vector &vecOrigin, const Vector& vecAngles, const Vector& vecVelocity)
 {
-	CSpore* pSpore = CSpore::CreateSpore(vecOrigin, vecAngles, vecVelocity, pOwner, CSpore::ROCKET, false, false);
-	return pSpore;
+	return CSpore::CreateSpore(vecOrigin, vecAngles, vecVelocity, pOwner, CSpore::ROCKET);
 }
 
-CSpore* CSpore::ShootTimed(CBaseEntity *pOwner, const Vector &vecOrigin, const Vector &vecAngles, bool bIsAI)
+CSpore* CSpore::ShootTimed(CBaseEntity *pOwner, const Vector &vecOrigin, const Vector &vecAngles, const Vector& vecVelocity, bool bIsAI)
 {
-	UTIL_MakeVectors(vecAngles);
-	const Vector vecVelocity = (pOwner ? pOwner->pev->velocity : g_vecZero) + CSpore::SporeGrenadeSpeed() * gpGlobals->v_forward;
-	CSpore* pSpore = CSpore::CreateSpore(vecOrigin, vecAngles, vecVelocity, pOwner, CSpore::GRENADE, bIsAI, false);
-	return pSpore;
+	return CSpore::CreateSpore(vecOrigin, vecAngles, vecVelocity, pOwner, CSpore::GRENADE, bIsAI, false);
 }
 
 void CSpore::UpdateOnRemove()
