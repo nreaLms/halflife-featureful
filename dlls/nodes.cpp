@@ -682,6 +682,10 @@ int CGraph::FindShortestPath(int *piPath, int iStart, int iDest, int iHull, int 
 		while( iCurrentNode != iStart )
 		{
 			iNumPathNodes++;
+			if (iNumPathNodes >= MAX_PATH_SIZE) {
+				ALERT(at_aiconsole, "Path has too many nodes!\n");
+				return 0;
+			}
 			iCurrentNode = m_pNodes[iCurrentNode].m_iPreviousNode;
 		}
 
