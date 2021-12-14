@@ -86,6 +86,7 @@ class CFuncWallToggle : public CFuncWall
 public:
 	void Spawn( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	NODE_LINKENT HandleLinkEnt(int afCapMask, bool nodeQueryStatic);
 	void TurnOff( void );
 	void TurnOn( void );
 	BOOL IsOn( void );
@@ -132,6 +133,17 @@ void CFuncWallToggle::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		else
 			TurnOn();
 	}
+}
+
+NODE_LINKENT CFuncWallToggle::HandleLinkEnt(int afCapMask, bool nodeQueryStatic)
+{
+	if (nodeQueryStatic) {
+		return NLE_ALLOW;
+	}
+	if (IsOn()) {
+		return NLE_ALLOW;
+	}
+	return NLE_PROHIBIT;
 }
 
 #define SF_CONVEYOR_VISUAL	0x0001

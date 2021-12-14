@@ -231,7 +231,14 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 
 	CBaseEntity *pObstacle = CBaseEntity::Instance( pevLinkEnt );
 	if (pObstacle)
+	{
 		return pObstacle->HandleLinkEnt(afCapMask, queryType == NODEGRAPH_STATIC);
+	}
+	else
+	{
+		// This should never happen as link ents are set to null on UpdateOnRemove
+		ALERT( at_aiconsole, "Graph link has non-null pevLinkEnt, but could not get the instance! (was deleted?)" );
+	}
 
 	return NLE_PROHIBIT;
 }
@@ -641,23 +648,25 @@ int CGraph::FindShortestPath(int *piPath, int iStart, int iDest, int iHull, int 
 			{
 				// run through all of this node's neighbors
 				iVisitNode = INodeLink( iCurrentNode, i );
-				if( ( m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_afLinkInfo & iHullMask ) != iHullMask )
+
+				const int iLink = m_pNodes[iCurrentNode].m_iFirstLink + i;
+				if( ( m_pLinkPool[iLink].m_afLinkInfo & iHullMask ) != iHullMask )
 				{
 					// monster is too large to walk this connection
-					//ALERT( at_aiconsole, "fat ass %d/%d\n",m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_afLinkInfo, iMonsterHull );
+					//ALERT( at_aiconsole, "fat ass %d/%d\n",m_pLinkPool[iLink].m_afLinkInfo, iMonsterHull );
 					continue;
 				}
 				// check the connection from the current node to the node we're about to mark visited and push into the queue				
-				if( m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt != NULL )
+				if( m_pLinkPool[iLink].m_pLinkEnt != NULL )
 				{
 					// there's a brush ent in the way! Don't mark this node or put it into the queue unless the monster can negotiate it
-					if( !HandleLinkEnt( iCurrentNode, m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_pLinkEnt, afCapMask, dynamic ? NODEGRAPH_DYNAMIC : NODEGRAPH_STATIC ) )
+					if( !HandleLinkEnt( iCurrentNode, m_pLinkPool[iLink].m_pLinkEnt, afCapMask, dynamic ? NODEGRAPH_DYNAMIC : NODEGRAPH_STATIC ) )
 					{
 						// monster should not try to go this way.
 						continue;
 					}
 				}
-				float flOurDistance = flCurrentDistance + m_pLinkPool[m_pNodes[iCurrentNode].m_iFirstLink + i].m_flWeight;
+				float flOurDistance = flCurrentDistance + m_pLinkPool[iLink].m_flWeight;
 				if(  m_pNodes[iVisitNode].m_flClosestSoFar < -0.5f
 				   || flOurDistance < m_pNodes[iVisitNode].m_flClosestSoFar - 0.001f )
 				{
@@ -1795,6 +1804,11 @@ void CTestHull::BuildNodeGraph( void )
 	fprintf( file, "----------------------------------------------------------------------------\n" );
 	fprintf( file, "Walk Rejection:\n");	
 
+	CBaseEntity* pWallToggle = NULL;
+	while ( (pWallToggle = UTIL_FindEntityByClassname(pWallToggle, "func_wall_toggle")) != 0 ) {
+		pWallToggle->pev->flags = 0;
+	}
+
 	for( i = 0; i < WorldGraph.m_cNodes; i++ )
 	{
 		pSrcNode = &WorldGraph.m_pNodes[i];
@@ -1854,6 +1868,11 @@ void CTestHull::BuildNodeGraph( void )
 					{
 						// close the file
 						fclose( file );
+					}
+
+					pWallToggle = NULL;
+					while ( (pWallToggle = UTIL_FindEntityByClassname(pWallToggle, "func_wall_toggle")) != 0 ) {
+						pWallToggle->pev->flags = FL_WORLDBRUSH;
 					}
 					return;
 				}
@@ -1954,6 +1973,11 @@ void CTestHull::BuildNodeGraph( void )
 		}
 	}
 	fprintf( file, "-------------------------------------------------------------------------------\n\n\n" );
+
+	pWallToggle = NULL;
+	while ( (pWallToggle = UTIL_FindEntityByClassname(pWallToggle, "func_wall_toggle")) != 0 ) {
+		pWallToggle->pev->flags = FL_WORLDBRUSH;
+	}
 
 	cPoolLinks -= WorldGraph.RejectInlineLinks( pTempPool, file );
 
