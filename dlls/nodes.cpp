@@ -1136,6 +1136,15 @@ void CGraph::ShowNodeConnections( int iNode )
 	}
 }
 
+static void ResetMonsterclip()
+{
+	CBaseEntity* pMonsterclip = NULL;
+	while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
+		SetBits(pMonsterclip->pev->flags, FL_MONSTERCLIP);
+		ClearBits(pMonsterclip->pev->flags, FL_WORLDBRUSH);
+	}
+}
+
 //=========================================================
 // CGraph - LinkVisibleNodes - the first, most basic
 // function of node graph creation, this connects every
@@ -1188,7 +1197,8 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 
 	CBaseEntity* pMonsterclip = NULL;
 	while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
-		pMonsterclip->pev->flags = FL_WORLDBRUSH;
+		ClearBits(pMonsterclip->pev->flags, FL_MONSTERCLIP);
+		SetBits(pMonsterclip->pev->flags, FL_WORLDBRUSH);
 	}
 
 	for( i = 0; i < m_cNodes; i++ )
@@ -1307,11 +1317,7 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 				fprintf( file, "** NODE %d HAS NodeLinks > MAX_NODE_INITIAL_LINKS **\n", i );
 				*piBadNode = i;
 
-				pMonsterclip = NULL;
-				while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
-					pMonsterclip->pev->flags = FL_MONSTERCLIP;
-				}
-
+				ResetMonsterclip();
 				return FALSE;
 			}
 			else if( cTotalLinks > MAX_NODE_INITIAL_LINKS * m_cNodes )
@@ -1320,10 +1326,7 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 				ALERT( at_aiconsole, "**LinkVisibleNodes:\nTotalLinks > MAX_NODE_INITIAL_LINKS * NUMNODES" );
 				*piBadNode = i;
 
-				pMonsterclip = NULL;
-				while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
-					pMonsterclip->pev->flags = FL_MONSTERCLIP;
-				}
+				ResetMonsterclip();
 				return FALSE;
 			}
 
@@ -1349,10 +1352,7 @@ int CGraph::LinkVisibleNodes( CLink *pLinkPool, FILE *file, int *piBadNode )
 		}
 	}
 
-	pMonsterclip = NULL;
-	while ( (pMonsterclip = UTIL_FindEntityByClassname(pMonsterclip, "func_monsterclip")) != 0 ) {
-		pMonsterclip->pev->flags = FL_MONSTERCLIP;
-	}
+	ResetMonsterclip();
 
 	fprintf( file, "\n%4d Total Initial Connections - %4d Maximum connections for a single node.\n", cTotalLinks, cMaxInitialLinks );
 	fprintf( file, "----------------------------------------------------------------------------\n\n\n" );
@@ -1620,6 +1620,14 @@ void CTestHull::CallBuildNodeGraph( void )
 	// Undo TOUCH HACK
 }
 
+static void ResetWallToggle()
+{
+	CBaseEntity* pWallToggle = NULL;
+	while ( (pWallToggle = UTIL_FindEntityByClassname(pWallToggle, "func_wall_toggle")) != 0 ) {
+		SetBits(pWallToggle->pev->flags, FL_WORLDBRUSH);
+	}
+}
+
 //=========================================================
 // BuildNodeGraph - think function called by the empty walk
 // hull that is spawned by the first node to spawn. This
@@ -1806,7 +1814,7 @@ void CTestHull::BuildNodeGraph( void )
 
 	CBaseEntity* pWallToggle = NULL;
 	while ( (pWallToggle = UTIL_FindEntityByClassname(pWallToggle, "func_wall_toggle")) != 0 ) {
-		pWallToggle->pev->flags = 0;
+		ClearBits(pWallToggle->pev->flags, FL_WORLDBRUSH);
 	}
 
 	for( i = 0; i < WorldGraph.m_cNodes; i++ )
@@ -1870,10 +1878,7 @@ void CTestHull::BuildNodeGraph( void )
 						fclose( file );
 					}
 
-					pWallToggle = NULL;
-					while ( (pWallToggle = UTIL_FindEntityByClassname(pWallToggle, "func_wall_toggle")) != 0 ) {
-						pWallToggle->pev->flags = FL_WORLDBRUSH;
-					}
+					ResetWallToggle();
 					return;
 				}
 				
@@ -1974,10 +1979,7 @@ void CTestHull::BuildNodeGraph( void )
 	}
 	fprintf( file, "-------------------------------------------------------------------------------\n\n\n" );
 
-	pWallToggle = NULL;
-	while ( (pWallToggle = UTIL_FindEntityByClassname(pWallToggle, "func_wall_toggle")) != 0 ) {
-		pWallToggle->pev->flags = FL_WORLDBRUSH;
-	}
+	ResetWallToggle();
 
 	cPoolLinks -= WorldGraph.RejectInlineLinks( pTempPool, file );
 
