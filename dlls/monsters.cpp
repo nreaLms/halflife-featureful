@@ -2627,7 +2627,7 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 	/*PLAYERALLY*/	{ R_NO	,R_DL	,R_AL	,R_AL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_AL,	R_NO,	R_NO,	R_DL,	R_DL,	R_OA,	R_DL,	R_HT,	R_DL},
 	/*PBIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL},
 	/*ABIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_AL},
-	/*XPREDATOR*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_PA	,R_NO	,R_AX	,R_DL	,R_DL	,R_NO	,R_NO,	R_NO,	R_NO,	R_AL,	R_AL,	R_DL,	R_DL,	R_NO,	R_PA},
+	/*XPREDATOR*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_PA	,R_NO	,R_AX	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_DL,	R_DL,	R_NO,	R_PA},
 	/*XSHOCK*/		{ R_NO	,R_DL	,R_DL	,R_DL	,R_HT	,R_XA	,R_NO	,R_AX	,R_AX	,R_AX	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_HT,	R_HT,	R_NO,	R_XA},
 	/*PLRALLYMIL*/	{ R_NO	,R_DL	,R_AL	,R_OA	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_OA,	R_NO,	R_NO,	R_DL,	R_HT,	R_AL,	R_DL,	R_HT,	R_HT},
 	/*BLACKOPS*/	{ R_NO	,R_DL	,R_HT	,R_DL	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_HT,	R_NO,	R_NO,	R_HT,	R_HT,	R_DL,	R_AL,	R_HT,	R_HT},
