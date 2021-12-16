@@ -965,7 +965,8 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 {
 	char command[64];
 
-	if( !pActivator->IsPlayer()) // activator should be a player
+	CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+	if( !pPlayer->IsNetClient())
 		return;
 
 	if( !FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING) ) // if we're not playing, start playing!
@@ -976,14 +977,14 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	{
 		// if we're already playing, stop the mp3
 		ClearBits(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING);
-		CLIENT_COMMAND( pActivator->edict(), "stopaudio\n" );
+		CLIENT_COMMAND( pPlayer->edict(), "stopaudio\n" );
 		return;
 	}
 
 	// issue the play/loop command
-	sprintf( command, "playaudio %s\n", STRING( pev->message ) );
+	sprintf( command, "playaudio \"%s\"\n", STRING( pev->message ) );
 
-	CLIENT_COMMAND( pActivator->edict(), command );
+	CLIENT_COMMAND( pPlayer->edict(), command );
 
 	// remove if set
 	if( FBitSet( pev->spawnflags, SF_TRIGGER_MP3_AUDIO_REMOVE_ON_FIRE ) )

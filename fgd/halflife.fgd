@@ -6691,7 +6691,7 @@
 
 @PointClass base(Targetname) = trigger_mp3audio : "Play mp3 audio"
 [
-	message(string) : "Track name"
+	message(script) : "Track name"
 	spawnflags(flags) =
 	[
 		1: "Remove on fire" : 0
