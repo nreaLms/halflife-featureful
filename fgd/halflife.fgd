@@ -5563,6 +5563,39 @@
 	]
 ]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/w_squeak.mdl") = monster_snark : "Armed Snark" []
+
+@BaseClass color(0 200 200) base(Targetname) size(-16 -16 -16, 16 16 16) = MonsterTarget
+[
+	frags(choices) : "When active, count as:" : 11 =
+	[
+		0 : "Ignored"
+		1 : "Machine"
+		3 : "Human passive"
+		4 : "Human military"
+		5 : "Alien military"
+		6 : "Alien passive"
+		7 : "Alien monster"
+		8 : "Alien prey"
+		9 : "Alien predator"
+		10 : "Insect"
+		11 : "Player ally"
+		12 : "Player bioweapon"
+		13 : "Alien bioweapon"
+		14 : "Race X predator"
+		15 : "Race X shock"
+		16 : "Opfor ally"
+		17 : "Blackops"
+		18 : "Snark"
+		19 : "Gargantua"
+	]
+	spawnflags(Flags) =
+	[
+		1: "Start inactive" : 0
+	]
+]
+@PointClass base(MonsterTarget) = monster_target : "Target for monsters to attack" []
+@PointClass base(MonsterTarget) = monster_bullseye : "Target for monsters to attack" []
+
 @PointClass base(Monster, Sequence) size(-32 -32 0, 32 32 64) studio("models/tentacle2.mdl") = monster_tentacle : "Tentacle Arm"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =

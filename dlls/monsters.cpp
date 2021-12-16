@@ -4359,3 +4359,35 @@ int CSkeleton::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float
 	return CDeadMonster::TakeDamage(pevInflictor, pevAttacker, 0.0, bitsDamageType);
 }
 #endif
+
+//LRC - an entity for monsters to shoot at.
+#define SF_MONSTERTARGET_OFF 1
+class CMonsterTarget : public CBaseEntity
+{
+public:
+	void Spawn( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	int Classify( void ) { return pev->frags; };
+};
+LINK_ENTITY_TO_CLASS( monster_target, CMonsterTarget );
+LINK_ENTITY_TO_CLASS( monster_bullseye, CMonsterTarget ); // for parity with npc_bullseye from Source games
+
+void CMonsterTarget :: Spawn ( void )
+{
+	if (pev->spawnflags & SF_MONSTERTARGET_OFF)
+		pev->health = 0;
+	else
+		pev->health = 1; // Don't ignore me, I'm not dead. I'm quite well really. I think I'll go for a walk...
+	SetBits (pev->flags, FL_MONSTER);
+}
+
+void CMonsterTarget::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if (ShouldToggle( useType, pev->health > 0.0f ))
+	{
+		if (pev->health)
+			pev->health = 0;
+		else
+			pev->health = 1;
+	}
+}
