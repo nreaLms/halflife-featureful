@@ -140,7 +140,7 @@ NODE_LINKENT CFuncWallToggle::HandleLinkEnt(int afCapMask, bool nodeQueryStatic)
 	if (nodeQueryStatic) {
 		return NLE_ALLOW;
 	}
-	if (IsOn()) {
+	if (!IsOn()) {
 		return NLE_ALLOW;
 	}
 	return NLE_PROHIBIT;
