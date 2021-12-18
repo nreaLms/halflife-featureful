@@ -535,7 +535,7 @@ int CGraph::NextNodeInRoute( int iCurrentNode, int iDest, int iHull, int iCap )
 // find a path usable by a monster with those capabilities
 // returns the number of nodes copied into supplied array
 //=========================================================
-int CGraph::FindShortestPath(int *piPath, int iStart, int iDest, int iHull, int afCapMask , bool dynamic)
+int CGraph::FindShortestPath(int *piPath, int pathSize, int iStart, int iDest, int iHull, int afCapMask , bool dynamic)
 {
 	int iVisitNode;
 	int iCurrentNode;
@@ -691,7 +691,7 @@ int CGraph::FindShortestPath(int *piPath, int iStart, int iDest, int iHull, int 
 		while( iCurrentNode != iStart )
 		{
 			iNumPathNodes++;
-			if (iNumPathNodes >= MAX_PATH_SIZE) {
+			if (iNumPathNodes >= pathSize) {
 				ALERT(at_aiconsole, "Path has too many nodes!\n");
 				return 0;
 			}
@@ -2128,7 +2128,7 @@ void CTestHull::PathFind( void )
 		return;
 	}
 
-	iPathSize = WorldGraph.FindShortestPath( iPath, 0, 19, 0, 0 ); // UNDONE use hull constant
+	iPathSize = WorldGraph.FindShortestPath( iPath, ARRAYSIZE(iPath), 0, 19, 0, 0 ); // UNDONE use hull constant
 
 	if( !iPathSize )
 	{
@@ -3169,7 +3169,7 @@ void CGraph::ComputeStaticRoutingTables( void )
 						if( Routes[FROM_TO( iFrom, iTo )] != -1 )
 							continue;
 
-						int cPathSize = FindShortestPath( pMyPath, iFrom, iTo, iHull, iCapMask );
+						int cPathSize = FindShortestPath( pMyPath, m_cNodes, iFrom, iTo, iHull, iCapMask );
 
 						// Use the computed path to update the routing table.
 						//
@@ -3457,9 +3457,9 @@ void CGraph::TestRoutingTables( void )
 					for( int iTo = 0; iTo < m_cNodes; iTo++ )
 					{
 						m_fRoutingComplete = FALSE;
-						int cPathSize1 = FindShortestPath( pMyPath, iFrom, iTo, iHull, iCapMask );
+						int cPathSize1 = FindShortestPath( pMyPath, m_cNodes, iFrom, iTo, iHull, iCapMask );
 						m_fRoutingComplete = TRUE;
-						int cPathSize2 = FindShortestPath( pMyPath2, iFrom, iTo, iHull, iCapMask );
+						int cPathSize2 = FindShortestPath( pMyPath2, m_cNodes, iFrom, iTo, iHull, iCapMask );
 
 						// Unless we can look at the entire path, we can verify that it's correct.
 						//
@@ -3537,9 +3537,9 @@ void CGraph::TestRoutingTables( void )
 							}
 							ALERT( at_aiconsole, "\n" );
 							m_fRoutingComplete = FALSE;
-							cPathSize1 = FindShortestPath( pMyPath, iFrom, iTo, iHull, iCapMask );
+							cPathSize1 = FindShortestPath( pMyPath, m_cNodes, iFrom, iTo, iHull, iCapMask );
 							m_fRoutingComplete = TRUE;
-							cPathSize2 = FindShortestPath( pMyPath2, iFrom, iTo, iHull, iCapMask );
+							cPathSize2 = FindShortestPath( pMyPath2, m_cNodes, iFrom, iTo, iHull, iCapMask );
 							goto EnoughSaid;
 						}
 					}

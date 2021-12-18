@@ -3270,7 +3270,7 @@ BOOL CBaseMonster::FGetNodeRoute( Vector vecDest )
 	int iNodeHull = WorldGraph.HullIndex( this ); // make this a monster virtual function
 
 	const int afCapMask = m_afCapability | (FBitSet(pev->flags, FL_MONSTERCLIP) ? bits_CAP_MONSTERCLIPPED : 0);
-	iResult = WorldGraph.FindShortestPath( iPath, iSrcNode, iDestNode, iNodeHull, afCapMask, true );
+	iResult = WorldGraph.FindShortestPath( iPath, MAX_PATH_SIZE, iSrcNode, iDestNode, iNodeHull, afCapMask, true );
 
 	if( !iResult )
 	{
