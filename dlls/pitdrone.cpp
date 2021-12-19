@@ -647,7 +647,7 @@ void CPitdrone::Spawn()
 	SetMyHealth( gSkillData.pitdroneHealth );
 	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
-	m_afCapability		= bits_CAP_SQUAD | bits_CAP_DOORS_GROUP;
+	m_afCapability		= bits_CAP_SQUAD;
 
 	m_flNextSpitTime = gpGlobals->time;
 
