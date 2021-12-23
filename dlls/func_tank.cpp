@@ -891,6 +891,8 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 	virtual void StopFire( void );
 
+	void UpdateOnRemove();
+
 private:
 	CLaser *m_pLaser;
 	float m_laserTime;
@@ -933,6 +935,9 @@ void CFuncTankLaser::KeyValue( KeyValueData *pkvd )
 
 CLaser *CFuncTankLaser::GetLaser( void )
 {
+	if (FBitSet(pev->flags, FL_KILLME))
+		return NULL;
+
 	if( m_pLaser )
 		return m_pLaser;
 
@@ -1005,6 +1010,12 @@ void CFuncTankLaser::StopFire( void )
 {
 	if( m_pLaser )
 		m_pLaser->TurnOff();
+}
+
+void CFuncTankLaser::UpdateOnRemove()
+{
+	CFuncTank::UpdateOnRemove();
+	m_pLaser = NULL;
 }
 
 class CFuncTankRocket : public CFuncTank
