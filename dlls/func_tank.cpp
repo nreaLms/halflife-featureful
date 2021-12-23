@@ -439,7 +439,7 @@ void CFuncTank::UpdateSpot( void )
 {
 	if ( pev->spawnflags & SF_TANK_LASERSPOT )
 	{
-		if (!m_pSpot)
+		if (!m_pSpot && !FBitSet(pev->flags, FL_KILLME))
 		{
 			m_pSpot = CLaserSpot::CreateSpot();
 		}
@@ -462,6 +462,10 @@ void CFuncTank::UpdateOnRemove()
 {
 	StopControl();
 	CBaseEntity::UpdateOnRemove();
+	if (m_pSpot) {
+		UTIL_Remove(m_pSpot);
+		m_pSpot = NULL;
+	}
 }
 
 // Called each frame by the player's ItemPostFrame
