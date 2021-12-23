@@ -3249,6 +3249,12 @@ BOOL CBaseMonster::FGetNodeRoute( Vector vecDest )
 	int i;
 	int iNumToCopy;
 
+	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
+	{
+		ALERT( at_aiconsole, "FGetNodeRoute: Graph not ready!\n" );
+		return FALSE;
+	}
+
 	iSrcNode = WorldGraph.FindNearestNode( pev->origin, this );
 	iDestNode = WorldGraph.FindNearestNode( vecDest, this );
 

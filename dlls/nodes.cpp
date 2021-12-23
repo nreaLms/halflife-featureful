@@ -219,7 +219,7 @@ int CGraph::HandleLinkEnt( int iNode, entvars_t *pevLinkEnt, int afCapMask, NODE
 	if( !m_fGraphPresent || !m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available
-		ALERT( at_aiconsole, "Graph not ready!\n" );
+		ALERT( at_aiconsole, "HandleLinkEnt: Graph not ready!\n" );
 		return NLE_PROHIBIT;
 	}
 
@@ -545,7 +545,7 @@ int CGraph::FindShortestPath(int *piPath, int pathSize, int iStart, int iDest, i
 	if( !m_fGraphPresent || !m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available or built
-		ALERT( at_aiconsole, "Graph not ready!\n" );
+		ALERT( at_aiconsole, "FindShortestPath: Graph not ready!\n" );
 		return FALSE;
 	}
 
@@ -839,7 +839,7 @@ int CGraph::FindNearestNode( const Vector &vecOrigin, int afNodeTypes )
 	if( !m_fGraphPresent || !m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available
-		ALERT( at_aiconsole, "Graph not ready!\n" );
+		ALERT( at_aiconsole, "FindNearestNode: Graph not ready!\n" );
 		return -1;
 	}
 
@@ -1096,7 +1096,7 @@ void CGraph::ShowNodeConnections( int iNode )
 	if( !m_fGraphPresent || !m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available or built
-		ALERT( at_aiconsole, "Graph not ready!\n" );
+		ALERT( at_aiconsole, "ShowNodeConnections: Graph not ready!\n" );
 		return;
 	}
 
@@ -1860,7 +1860,7 @@ void CTestHull::BuildNodeGraph( void )
 
 				if( !FBitSet( pev->flags, FL_ONGROUND ) )
 				{
-					ALERT( at_aiconsole, "OFFGROUND!\n" );
+					ALERT( at_aiconsole, "Hull %d, Node %d, link %d: OFFGROUND! z: %.4f\n", hull, i, j, pSrcNode->m_vecOrigin.z );
 				}
 
 				// now build a yaw that points to the dest node, and get the distance.
@@ -2124,7 +2124,7 @@ void CTestHull::PathFind( void )
 	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available
-		ALERT( at_aiconsole, "Graph not ready!\n" );
+		ALERT( at_aiconsole, "PathFind: Graph not ready!\n" );
 		return;
 	}
 
@@ -2577,7 +2577,7 @@ int CGraph::FSaveGraph( const char *szMapName )
 	if( !m_fGraphPresent || !m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available or built
-		ALERT( at_aiconsole, "Graph not ready!\n" );
+		ALERT( at_aiconsole, "FSaveGraph: Graph not ready!\n" );
 		return FALSE;
 	}
 
@@ -2767,6 +2767,11 @@ void CGraph::HashInsert( int iSrcNode, int iDestNode, int iKey )
 
 void CGraph::HashSearch( int iSrcNode, int iDestNode, int &iKey )
 {
+	if (iSrcNode == NO_NODE || iDestNode == NO_NODE)
+	{
+		ALERT( at_aiconsole, "HashSearch: Source or destination node is not valid!\n" );
+	}
+
 	struct tagNodePair np;
 
 	np.iSrc = iSrcNode;
@@ -3591,7 +3596,7 @@ void CNodeViewer::Spawn()
 	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
 	{
 		// protect us in the case that the node graph isn't available or built
-		ALERT( at_console, "Graph not ready!\n" );
+		ALERT( at_console, "CNodeViewer: Graph not ready!\n" );
 		UTIL_Remove( this );
 		return;
 	}
