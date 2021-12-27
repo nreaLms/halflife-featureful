@@ -588,14 +588,17 @@ void CTalkMonster::RunTask( Task_t *pTask )
 
 void CTalkMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
+	const int toleranceLevel = MyToleranceLevel();
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
-	if( MyToleranceLevel() < TOLERANCE_ABSOLUTE_NO_ALERTS
+	if( toleranceLevel < TOLERANCE_ABSOLUTE_NO_ALERTS
 			&& ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE
-			&& IsFriendWithPlayerBeforeProvoked() // no point in alerting friends if player is already foe
-			&& !HasMemory( bits_MEMORY_KILLED ) ) // corpses don't alert friends upon gibbing
+			&& !HasMemory( bits_MEMORY_KILLED ) // corpses don't alert friends upon gibbing
+			&& IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
 	{
-		AlertFriends();
-		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
+		if (toleranceLevel < TOLERANCE_HIGH || m_hEnemy == 0) {
+			AlertFriends();
+			LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
+		}
 	}
 	CFollowingMonster::Killed( pevInflictor, pevAttacker, iGib );
 }
@@ -668,7 +671,7 @@ void CTalkMonster::AlertFriends( void )
 		while( ( pFriend = EnumFriends( pFriend, i, TRUE ) ) != NULL )
 		{
 			CBaseMonster *pMonster = pFriend->MyMonsterPointer();
-			if( pMonster && pMonster->IsAlive() )
+			if( pMonster && pMonster->IsFullyAlive() )
 			{
 				// don't provoke a friend that's playing a death animation. They're a goner
 				pMonster->m_afMemory |= bits_MEMORY_PROVOKED;
