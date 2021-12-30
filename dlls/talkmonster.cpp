@@ -211,29 +211,6 @@ Schedule_t slIdleStopShooting[] =
 	},
 };
 
-Task_t	tlFollowFallible[] =
-{
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_CANT_FOLLOW },	// If you fail, bail out of follow
-	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128.0f },	// Move within 128 of target ent (client)
-	//{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_FACE },
-};
-
-Schedule_t slFollowFallible[] =
-{
-	{
-		tlFollowFallible,
-		ARRAYSIZE( tlFollowFallible ),
-		bits_COND_NEW_ENEMY |
-		bits_COND_SCHEDULE_SUGGESTED |
-		bits_COND_LIGHT_DAMAGE |
-		bits_COND_HEAVY_DAMAGE |
-		bits_COND_HEAR_SOUND,
-		bits_SOUND_COMBAT |
-		bits_SOUND_DANGER,
-		"Follow (Fallible)"
-	},
-};
-
 Task_t tlIdleTlkStand[] =
 {
 	{ TASK_STOP_MOVING, 0 },
@@ -361,7 +338,6 @@ DEFINE_CUSTOM_SCHEDULES( CTalkMonster )
 	slIdleHello,
 	slIdleSpeakWait,
 	slIdleStopShooting,
-	slFollowFallible,
 	slIdleTlkStand,
 	slTlkIdleWatchClient,
 	&slTlkIdleWatchClient[1],
@@ -1431,11 +1407,6 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			// NOTE - caller must first CTalkMonster::GetScheduleOfType, 
 			// then check result and decide what to return ie: if sci gets back
 			// slIdleStand, return slIdleSciStand
-		}
-		break;
-	case SCHED_FOLLOW_FALLIBLE:
-		{
-			return slFollowFallible;
 		}
 		break;
 	case SCHED_TARGET_REACHED:

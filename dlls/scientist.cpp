@@ -115,6 +115,13 @@ public:
 	Schedule_t *GetSchedule( void );
 	MONSTERSTATE GetIdealState( void );
 
+	virtual FOLLOW_FAIL_POLICY DefaultFollowFailPolicy() {
+		if (FBitSet(pev->spawnflags, SF_SCI_DONT_STOP_FOLLOWING))
+			return FOLLOW_FAIL_REGULAR;
+		else
+			return FOLLOW_FAIL_STOP;
+	}
+
 	void DeathSound( void );
 	void PainSound( void );
 
@@ -196,22 +203,6 @@ Schedule_t slFaceTargetScared[] =
 		bits_COND_NEW_ENEMY,
 		bits_SOUND_DANGER,
 		"FaceTargetScared"
-	},
-};
-
-Task_t tlStopFollowing[] =
-{
-	{ TASK_CANT_FOLLOW, 0.0f },
-};
-
-Schedule_t slStopFollowing[] =
-{
-	{
-		tlStopFollowing,
-		ARRAYSIZE( tlStopFollowing ),
-		0,
-		0,
-		"StopFollowing"
 	},
 };
 
@@ -434,7 +425,6 @@ DEFINE_CUSTOM_SCHEDULES( CScientist )
 	slScientistHide,
 	slScientistStartle,
 	slHeal,
-	slStopFollowing,
 	slSciPanic,
 	slFollowScared,
 	slFaceTargetScared,
@@ -912,13 +902,6 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 	// Hook these to make a looping schedule
 	case SCHED_TARGET_FACE:
 		return slSciFaceTarget;
-	case SCHED_TARGET_CHASE:
-		if (FBitSet(pev->spawnflags, SF_SCI_DONT_STOP_FOLLOWING))
-			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW);
-		else
-			return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW_FALLIBLE);
-	case SCHED_CANT_FOLLOW:
-		return slStopFollowing;
 	case SCHED_PANIC:
 		return slSciPanic;
 	case SCHED_TARGET_CHASE_SCARED:

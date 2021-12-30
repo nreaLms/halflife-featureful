@@ -360,6 +360,13 @@
 @BaseClass base() = FollowingMonster
 [
 	master(string) : "Master" : : "Decline following if locked by master (for player ally monsters)"
+	followfailpolicy(choices) : "Follow fail policy" : : "What to do when couldn't reach the target" = 
+	[
+		0 : "Default for monster"
+		1 : "Regular fail"
+		2 : "Stop following"
+		3 : "Try nearest path"
+	]
 ]
 
 @BaseClass base(CustomSentences, FollowingMonster) = TalkMonster

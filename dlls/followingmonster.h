@@ -12,6 +12,9 @@ enum
 	SCHED_MOVE_AWAY_FOLLOW,	// same, but follow afterward
 	SCHED_MOVE_AWAY_FAIL,	// Turn back toward player
 	SCHED_TARGET_REACHED, // Schedule to set after reaching a followed target, gives a chance to do something else besides facing a target again
+	SCHED_FOLLOW_FAILED,
+	SCHED_FOLLOW_NEAREST,
+	SCHED_CANT_FOLLOW,
 
 	LAST_FOLLOWINGMONSTER_SCHEDULE		// MUST be last
 };
@@ -21,6 +24,8 @@ enum
 	TASK_MOVE_AWAY_PATH = LAST_COMMON_TASK + 1,
 	TASK_WALK_PATH_FOR_UNITS,
 	TASK_FACE_PLAYER,		// Face the player
+	TASK_GET_NEAREST_PATH_TO_TARGET, // Find path to the nearest node to target
+	TASK_CANT_FOLLOW,
 
 	LAST_FOLLOWINGMONSTER_TASK			// MUST be last
 };
@@ -36,7 +41,13 @@ enum
 	FOLLOWING_DISCARDED,
 };
 
-class CTalkMonster;
+typedef enum
+{
+	FOLLOW_FAIL_DEFAULT = 0,
+	FOLLOW_FAIL_REGULAR,
+	FOLLOW_FAIL_STOP,
+	FOLLOW_FAIL_TRY_NEAREST,
+} FOLLOW_FAIL_POLICY;
 
 class CFollowingMonster : public CSquadMonster
 {
@@ -46,6 +57,7 @@ public:
 	void Touch(	CBaseEntity *pOther );
 	void OnDying();
 	int ObjectCaps( void );
+	void KeyValue( KeyValueData *pkvd );
 
 	// AI functions
 	Schedule_t *GetScheduleOfType ( int Type );
@@ -75,6 +87,12 @@ public:
 	void EXPORT FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int DoFollowerUse(CBaseEntity* pCaller, bool saySentence, USE_TYPE useType, bool ignoreScriptedSentence = false);
 	bool ShouldDeclineFollowing();
+	virtual FOLLOW_FAIL_POLICY DefaultFollowFailPolicy() {
+		return FOLLOW_FAIL_REGULAR;
+	}
+	FOLLOW_FAIL_POLICY FollowFailPolicy() {
+		return m_followFailPolicy > 0 ? (FOLLOW_FAIL_POLICY)m_followFailPolicy : DefaultFollowFailPolicy();
+	}
 
 	virtual void PlayUseSentence() {}
 	virtual void PlayUnUseSentence() {}
@@ -83,6 +101,12 @@ public:
 	void StopScript();
 
 	void ReportAIState(ALERT_TYPE level);
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	short m_followFailPolicy;
 
 	CUSTOM_SCHEDULES
 };

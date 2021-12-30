@@ -11,8 +11,16 @@
 #include "soundent.h"
 #include "gamerules.h"
 
+TYPEDESCRIPTION	CFollowingMonster::m_SaveData[] =
+{
+	DEFINE_FIELD( CFollowingMonster, m_followFailPolicy, FIELD_SHORT ),
+};
+
+IMPLEMENT_SAVERESTORE( CFollowingMonster, CSquadMonster )
+
 Task_t tlFollow[] =
 {
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_FOLLOW_FAILED },
 	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128.0f },	// Move within 128 of target ent (client)
 	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_REACHED },
 };
@@ -30,6 +38,29 @@ Schedule_t slFollow[] =
 		bits_COND_PROVOKED,
 		bits_SOUND_DANGER,
 		"Follow"
+	},
+};
+
+Task_t tlFollowTargetNearest[] =
+{
+	{ TASK_GET_NEAREST_PATH_TO_TARGET, 64.0f },
+	{ TASK_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+};
+
+Schedule_t slFollowTargetNearest[] =
+{
+	{
+		tlFollowTargetNearest,
+		ARRAYSIZE( tlFollowTargetNearest ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND |
+		bits_COND_PROVOKED,
+		bits_SOUND_DANGER,
+		"FollowTargetNearest"
 	},
 };
 
@@ -117,13 +148,31 @@ Schedule_t slMoveAwayFollow[] =
 	},
 };
 
+Task_t tlStopFollowing[] =
+{
+	{ TASK_CANT_FOLLOW, 0.0f },
+};
+
+Schedule_t slStopFollowing[] =
+{
+	{
+		tlStopFollowing,
+		ARRAYSIZE( tlStopFollowing ),
+		0,
+		0,
+		"StopFollowing"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES( CFollowingMonster )
 {
 	slFollow,
+	slFollowTargetNearest,
 	slFaceTarget,
 	slMoveAway,
 	slMoveAwayFollow,
 	slMoveAwayFail,
+	slStopFollowing,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CFollowingMonster, CSquadMonster )
@@ -170,6 +219,17 @@ int CFollowingMonster::ObjectCaps()
 	return caps;
 }
 
+void CFollowingMonster::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "followfailpolicy" ) )
+	{
+		m_followFailPolicy = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CSquadMonster::KeyValue( pkvd );
+}
+
 Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 {
 	switch( Type )
@@ -198,6 +258,28 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 	case SCHED_TARGET_CHASE:
 	case SCHED_FOLLOW:
 		return slFollow;
+	case SCHED_FOLLOW_NEAREST:
+		return slFollowTargetNearest;
+	case SCHED_FOLLOW_FAILED:
+	{
+		FOLLOW_FAIL_POLICY failPolicy = FollowFailPolicy();
+		if (failPolicy == FOLLOW_FAIL_STOP)
+		{
+			return GetScheduleOfType(SCHED_CANT_FOLLOW);
+		}
+		else if (failPolicy == FOLLOW_FAIL_TRY_NEAREST)
+		{
+			return GetScheduleOfType(SCHED_FOLLOW_NEAREST);
+		}
+		else
+		{
+			return CSquadMonster::GetScheduleOfType(SCHED_FAIL);
+		}
+	}
+	case SCHED_CANT_FOLLOW:
+	{
+		return slStopFollowing;
+	}
 	default:
 		return CSquadMonster::GetScheduleOfType(Type);
 	}
@@ -237,6 +319,25 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 				TaskFail("can't move away");
 			}
 		}
+		break;
+	case TASK_GET_NEAREST_PATH_TO_TARGET:
+		{
+			CBaseEntity* pTarget = m_hTargetEnt;
+			if (pTarget == 0)
+				TaskFail("no target ent");
+			else if( BuildNearestRoute( pTarget->pev->origin, pev->view_ofs, pTask->flData, ( pTarget->pev->origin - pev->origin ).Length2D() ) )
+			{
+				TaskComplete();
+			}
+			else
+			{
+				TaskFail("can't build nearest route to target");
+			}
+		}
+		break;
+	case TASK_CANT_FOLLOW:
+		StopFollowing( FALSE, false );
+		TaskComplete();
 		break;
 	default:
 		CSquadMonster::StartTask( pTask );
@@ -535,4 +636,16 @@ void CFollowingMonster::ReportAIState(ALERT_TYPE level)
 	CSquadMonster::ReportAIState(level);
 	if (IsFollowingPlayer())
 		ALERT(level, "Following a player. ");
+	ALERT(level, "Follow fail policy: ");
+	switch (FollowFailPolicy()) {
+	case FOLLOW_FAIL_STOP:
+		ALERT(level, "Stop on fail. ");
+		break;
+	case FOLLOW_FAIL_TRY_NEAREST:
+		ALERT(level, "Try nearest node on fail. ");
+		break;
+	default:
+		ALERT(level, "Regular. ");
+		break;
+	}
 }
