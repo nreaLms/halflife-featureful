@@ -2615,6 +2615,11 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		mypkvd.szKeyName = STRING(pev->netname);
 		mypkvd.szValue = STRING(m_iszNewValue);
 		mypkvd.fHandled = FALSE;
+
+		EntvarsKeyvalue( pTarget->pev, &mypkvd );
+		if ( mypkvd.fHandled )
+			return;
+
 		pTarget->KeyValue(&mypkvd);
 	}
 
