@@ -41,6 +41,29 @@ Schedule_t slFollow[] =
 	},
 };
 
+Task_t tlFollowCautious[] =
+{
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_FOLLOW_FAILED },
+	{ TASK_MOVE_NEAREST_TO_TARGET_RANGE, (float)128.0f },	// Move within 128 of target ent (client)
+};
+
+Schedule_t slFollowCautious[] =
+{
+	{
+		tlFollowCautious,
+		ARRAYSIZE( tlFollowCautious ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND |
+		bits_COND_PROVOKED,
+		bits_SOUND_COMBAT |
+		bits_SOUND_DANGER,
+		"Follow (Cautious)"
+	},
+};
+
 Task_t tlFollowTargetNearest[] =
 {
 	{ TASK_GET_NEAREST_PATH_TO_TARGET, 64.0f },
@@ -168,6 +191,7 @@ DEFINE_CUSTOM_SCHEDULES( CFollowingMonster )
 {
 	slFollow,
 	slFollowTargetNearest,
+	slFollowCautious,
 	slFaceTarget,
 	slMoveAway,
 	slMoveAwayFollow,
@@ -258,6 +282,8 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 	case SCHED_TARGET_CHASE:
 	case SCHED_FOLLOW:
 		return slFollow;
+	case SCHED_FOLLOW_CAUTIOUS:
+		return slFollowCautious;
 	case SCHED_FOLLOW_NEAREST:
 		return slFollowTargetNearest;
 	case SCHED_FOLLOW_FAILED:

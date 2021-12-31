@@ -904,6 +904,8 @@ Schedule_t *CScientist::GetScheduleOfType( int Type )
 		return slSciFaceTarget;
 	case SCHED_PANIC:
 		return slSciPanic;
+	case SCHED_TARGET_CHASE:
+		return CTalkMonster::GetScheduleOfType(SCHED_FOLLOW_CAUTIOUS);
 	case SCHED_TARGET_CHASE_SCARED:
 		return slFollowScared;
 	case SCHED_TARGET_FACE_SCARED:
