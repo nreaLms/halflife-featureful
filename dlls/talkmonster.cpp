@@ -1503,6 +1503,7 @@ bool CTalkMonster::FindAndCallMedic()
 		if (!IsTalking())
 			PlayCallForMedic();
 
+		Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
 		ALERT( at_aiconsole, "Injured %s called for %s\n", STRING(pev->classname), STRING(foundMedic->pev->classname) );
 		foundMedic->StartFollowingHealTarget(this);
 
