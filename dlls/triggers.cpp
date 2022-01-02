@@ -728,6 +728,7 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Spawn( void );
 	void EXPORT HurtTouch( CBaseEntity *pOther );
+	void EXPORT HurtToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT RadiationThink( void );
 	void HurtNonMovingMonsters( void );
 	void EXPORT HurtNonMovingMonstersThink( void );
@@ -1015,7 +1016,7 @@ void CTriggerHurt::Spawn( void )
 
 	if( !FStringNull( pev->targetname ) )
 	{
-		SetUse( &CBaseTrigger::ToggleUse );
+		SetUse( &CTriggerHurt::HurtToggleUse );
 	}
 	else
 	{
@@ -1123,6 +1124,15 @@ void CTriggerHurt::HurtNonMovingMonstersThink()
 	}
 
 	HurtNonMovingMonsters();
+}
+
+void CTriggerHurt::HurtToggleUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	ToggleUse(pActivator, pCaller, useType, value);
+	if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_AFFECT_NON_MOVING_MONSTERS))
+	{
+		pev->nextthink = gpGlobals->time;
+	}
 }
 
 //
