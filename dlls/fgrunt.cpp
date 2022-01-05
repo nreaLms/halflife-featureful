@@ -1943,7 +1943,7 @@ void CHFGrunt :: Precache()
 	case FG_HEAD_SHOTGUN:
 	case FG_HEAD_SAW_BLACK:
 	case FG_HEAD_BERET_BLACK:
-		m_voicePitch = 90;
+		m_voicePitch = 98;
 		break;
 	default:
 		m_voicePitch = 100;
@@ -3615,7 +3615,7 @@ void CMedic::Precache()
 	PrecacheHelper();
 	TalkInit();
 	if (m_iHead == MEDIC_HEAD_BLACK)
-		m_voicePitch = 95;
+		m_voicePitch = 100;
 	else
 		m_voicePitch = 105;
 	CTalkMonster::Precache();
