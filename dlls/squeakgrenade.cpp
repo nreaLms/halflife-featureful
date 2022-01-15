@@ -363,7 +363,7 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 
 				pev->dmg += AdditionalExplosionDamage(); // add more explosion damage
 				if (MaximumExplosionDamage()) {
-					pev->dmg = Q_max(pev->dmg, MaximumExplosionDamage());
+					pev->dmg = Q_min(pev->dmg, MaximumExplosionDamage());
 				}
 				// m_flDie += 2.0f; // add more life
 
