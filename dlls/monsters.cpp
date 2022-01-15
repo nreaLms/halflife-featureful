@@ -2283,7 +2283,7 @@ void CBaseMonster::Move( float flInterval )
 						m_pCine->OnMoveFail();
 					}
 					TaskFail("failed to move");
-					ALERT(at_console, "Blocker is %s\n", STRING(pBlocker->pev->classname));
+					//ALERT( at_aiconsole, "Blocker is %s\n", STRING(pBlocker->pev->classname) );
 					//ALERT( at_aiconsole, "%s Failed to move (%d)!\n", STRING( pev->classname ), HasMemory( bits_MEMORY_MOVE_FAILED ) );
 					//ALERT( at_aiconsole, "%f, %f, %f\n", pev->origin.z, ( pev->origin + ( vecDir * flCheckDist ) ).z, m_Route[m_iRouteIndex].vecLocation.z );
 				}
