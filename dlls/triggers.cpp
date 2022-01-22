@@ -967,7 +967,7 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	char command[64];
 
 	CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
-	if( !pPlayer->IsNetClient())
+	if( !pPlayer || !pPlayer->IsNetClient())
 		return;
 
 	if( !FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING) ) // if we're not playing, start playing!

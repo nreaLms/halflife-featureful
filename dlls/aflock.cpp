@@ -46,8 +46,6 @@ public:
 	// Sounds are shared by the flock
 	static void PrecacheFlockSounds( void );
 
-	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
-
 	int m_cFlockSize;
 	float m_flFlockRadius;
 };
@@ -79,7 +77,7 @@ public:
 	void AlertFlock( void );
 	void SpreadFlock( void );
 	void SpreadFlock2( void );
-	void Killed( entvars_t *pevAttacker, int iGib );
+	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void Poop ( void );
 	BOOL FPathBlocked( void );
 	//void KeyValue( KeyValueData *pkvd );
@@ -278,7 +276,7 @@ void CFlockingFlyer::MakeSound( void )
 
 //=========================================================
 //=========================================================
-void CFlockingFlyer::Killed( entvars_t *pevAttacker, int iGib )
+void CFlockingFlyer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
 	CFlockingFlyer *pSquad;
 
