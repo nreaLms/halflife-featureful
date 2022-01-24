@@ -441,7 +441,6 @@ public:
 	void DrawCSNVG(float flTime);
 	void DrawOpforNVG(float flTime);
 	void RemoveCSdlight();
-	void UserCmd_ToggleNVGStyle();
 	void UserCmd_NVGAdjustDown();
 	void UserCmd_NVGAdjustUp();
 

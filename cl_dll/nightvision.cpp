@@ -28,11 +28,11 @@
 #include <string.h>
 #include <stdio.h>
 
-DECLARE_MESSAGE( m_Nightvision, Nightvision )
-
 #if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
-DECLARE_COMMAND( m_Nightvision, ToggleNVGStyle )
+extern cvar_t *cl_nvgstyle;
 #endif
+
+DECLARE_MESSAGE( m_Nightvision, Nightvision )
 
 #define NIGHTVISION_SPRITE_NAME "sprites/of_nv_b.spr"
 
@@ -46,11 +46,6 @@ int CHudNightvision::Init(void)
 
 #if FEATURE_CS_NIGHTVISION
 	m_pLight = 0;
-#endif
-
-#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
-	m_nvgStyle = false;
-	HOOK_COMMAND( "togglenvgstyle", ToggleNVGStyle );
 #endif
 
 	gHUD.AddHudElem(this);
@@ -107,7 +102,7 @@ int CHudNightvision::Draw(float flTime)
 
 	if (m_fOn) {
 #if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
-	if (m_nvgStyle) {
+	if (!cl_nvgstyle || cl_nvgstyle->value == 0) {
 		RemoveCSdlight();
 		DrawOpforNVG(flTime);
 	} else {
@@ -196,12 +191,5 @@ void CHudNightvision::RemoveCSdlight()
 		m_pLight->die = 0;
 		m_pLight = NULL;
 	}
-#endif
-}
-
-void CHudNightvision::UserCmd_ToggleNVGStyle()
-{
-#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
-	m_nvgStyle = !m_nvgStyle;
 #endif
 }
