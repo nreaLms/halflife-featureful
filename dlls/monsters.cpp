@@ -2631,7 +2631,7 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 	/*XSHOCK*/		{ R_NO	,R_DL	,R_DL	,R_DL	,R_HT	,R_XA	,R_NO	,R_AX	,R_AX	,R_AX	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_HT,	R_HT,	R_NO,	R_XA},
 	/*PLRALLYMIL*/	{ R_NO	,R_DL	,R_AL	,R_OA	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_OA,	R_NO,	R_NO,	R_DL,	R_HT,	R_AL,	R_DL,	R_HT,	R_HT},
 	/*BLACKOPS*/	{ R_NO	,R_DL	,R_HT	,R_DL	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_HT,	R_NO,	R_NO,	R_HT,	R_HT,	R_DL,	R_AL,	R_HT,	R_HT},
-	/*SNARK*/		{ R_NO	,R_NO	,R_HT	,R_DL	,R_HT	,R_NO	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_NO,	R_NO,	R_HT,	R_HT,	R_NO,	R_DL},
+	/*SNARK*/		{ R_NO	,R_NO	,R_HT	,R_DL	,R_HT	,R_NO	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_HT,	R_HT,	R_NO,	R_DL},
 	/*GARGANTUA*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_PA,	R_XA,	R_DL,	R_DL,	R_NO,	R_AL},
 	};
 	if (classify1 >= CLASS_NUMBER_OF_CLASSES || classify1 < 0 || classify2 >= CLASS_NUMBER_OF_CLASSES || classify2 < 0 )
