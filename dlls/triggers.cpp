@@ -2295,6 +2295,11 @@ bool CTriggerTeleport::TeleportTouchImpl( CBaseEntity *pOther )
 	if( pOther->IsPlayer() )
 	{
 		tmp.z -= pOther->pev->mins.z;// make origin adjustments in case the teleportee is a player. (origin in center, not at feet)
+#if FEATURE_ROPE
+		CBasePlayer* pPlayer = (CBasePlayer*)pOther;
+		if( (pPlayer->m_afPhysicsFlags & PFLAG_ONROPE) )
+			pPlayer->LetGoRope();
+#endif
 	}
 
 	tmp.z++;

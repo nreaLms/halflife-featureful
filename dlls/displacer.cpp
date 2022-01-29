@@ -573,6 +573,11 @@ void CDisplacer::Teleport( void )
 
 	if( pTarget && /*HACK*/( tmp != Vector( 0, 0, 0 )/*HACK*/ ) )
 	{
+#if FEATURE_ROPE
+		if( (m_pPlayer->m_afPhysicsFlags & PFLAG_ONROPE) )
+			m_pPlayer->LetGoRope();
+#endif
+
 		// UTIL_ScreenFade( m_pPlayer, Vector( 0, 200, 0 ), 0.5, 0.5, 255, FFADE_IN );
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase();
 
