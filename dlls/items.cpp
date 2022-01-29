@@ -737,7 +737,7 @@ class CItemFlashlight : public CItem
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING(pev->classname) );
 		MESSAGE_END();
-		EMIT_SOUND_SUIT( pPlayer->edict(), "items/gunpickup2.wav" );
+		EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
 		return TRUE;
 	}
 };
