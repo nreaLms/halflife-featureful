@@ -10,6 +10,8 @@
 #include	"skill.h"
 #include	"spore.h"
 
+#define FEATURE_SPORE_AMMO_CEILING_LIGHT 1
+
 #if FEATURE_SPOREGRENADE
 LINK_ENTITY_TO_CLASS(spore, CSpore)
 
@@ -368,7 +370,11 @@ void CSporeAmmo :: Spawn( void )
 	UTIL_SetOrigin( pev, pev->origin );
 
 	pev->angles.x -= 90;// :3
-
+#if FEATURE_SPORE_AMMO_CEILING_LIGHT
+	if (fabs(pev->angles.x - 180.0f) < 5.0f) {
+		pev->effects |= EF_INVLIGHT;
+	}
+#endif
 	SetThink (&CSporeAmmo::IdleThink);
 	SetTouch (&CSporeAmmo::AmmoTouch);
 
