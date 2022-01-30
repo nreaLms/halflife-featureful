@@ -193,9 +193,10 @@ void CSquadMonster::SquadRemove( CSquadMonster *pRemove )
 				CSquadMonster *pMember = MySquadMember( i );
 				if ( pMember && pMember != newLeader )
 				{
-					pMember->m_hSquadLeader = newLeader;
-					if (pMember->IsFullyAlive())
+					if (pMember->IsFullyAlive()) {
+						pMember->m_hSquadLeader = NULL;
 						newLeader->SquadAdd(pMember);
+					}
 				}
 				m_hSquadMember[i] = NULL;
 			}

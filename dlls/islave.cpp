@@ -1204,9 +1204,10 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 	}
 	if (CanSpawnAtPosition(origin, hullType, edict())) {
 		CBaseEntity *pNew = Create( entityName, origin, pev->angles, edict() );
-		CBaseMonster *pNewMonster = pNew->MyMonsterPointer( );
 
 		if(pNew) {
+			CBaseMonster *pNewMonster = pNew->MyMonsterPointer( );
+
 			Remember(bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE);
 			CSprite *pSpr = CSprite::SpriteCreate( "sprites/bexplo.spr", origin, TRUE );
 			pSpr->AnimateAndDie( 20 );
