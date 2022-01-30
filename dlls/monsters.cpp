@@ -3430,7 +3430,11 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	static const char *pStateNames[] = { "None", "Idle", "Combat", "Alert", "Hunt", "Prone", "Scripted", "PlayDead", "Dead" };
 	static const char *pDeadNames[] = {"No", "Dying", "Dead", "Respawnable", "DiscardBody"};
 
-	ALERT( level, "%s: ", STRING(pev->classname) );
+	if (FStringNull(pev->targetname)) {
+		ALERT( level, "%s: ", STRING(pev->classname) );
+	} else {
+		ALERT( level, "%s (%s): ", STRING(pev->classname), STRING(pev->targetname) );
+	}
 	const int classify = Classify();
 	ALERT( level, "Classify: %s (%d), ", ClassifyDisplayName(classify), classify );
 
