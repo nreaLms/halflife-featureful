@@ -102,6 +102,11 @@ jobs:
       run: |
         cp fgd/halflife.fgd dist/${{ steps.extract_gamedir.outputs.gamedir }}/halflife.fgd
         cp fgd/halflife.fgd dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/halflife.fgd
+    - name: Delete .lib files from dist
+      if: startsWith(matrix.os, 'windows')
+      run: |
+        del /f dist/${{ steps.extract_gamedir.outputs.gamedir }}/cl_dlls/client.lib
+        del /f dist/${{ steps.extract_gamedir.outputs.gamedir }}/dlls/hl.lib
     - name: Upload linux artifact
       if: startsWith(matrix.os, 'ubuntu') && matrix.cc == 'gcc'
       uses: actions/upload-artifact@v2
