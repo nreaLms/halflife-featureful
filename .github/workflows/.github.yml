@@ -105,8 +105,10 @@ jobs:
     - name: Delete .lib files from dist
       if: startsWith(matrix.os, 'windows')
       run: |
-        del /f dist/${{ steps.extract_gamedir.outputs.gamedir }}/cl_dlls/client.lib
-        del /f dist/${{ steps.extract_gamedir.outputs.gamedir }}/dlls/hl.lib
+        Remove-Item -Force -Path dist/${{ steps.extract_gamedir.outputs.gamedir }}/cl_dlls/client.lib
+        Remove-Item -Force -Path dist/${{ steps.extract_gamedir.outputs.gamedir }}/dlls/hl.lib
+        Remove-Item -Force -Path dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/cl_dlls/client.lib
+        Remove-Item -Force -Path dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/dlls/hl.lib
     - name: Upload linux artifact
       if: startsWith(matrix.os, 'ubuntu') && matrix.cc == 'gcc'
       uses: actions/upload-artifact@v2
