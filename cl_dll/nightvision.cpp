@@ -216,3 +216,8 @@ float CHudNightvision::CSNvgRadius()
 	return radius;
 }
 #endif
+
+bool CHudNightvision::IsOn()
+{
+	return m_fOn;
+}

@@ -230,6 +230,8 @@ int CHud::Redraw( float flTime, int intermission )
 
 void ScaleColors( int &r, int &g, int &b, int a )
 {
+	a = Q_min(a, 255);
+
 	float x = (float)a / 255;
 	r = (int)( r * x );
 	g = (int)( g * x );
@@ -443,4 +445,26 @@ void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
 	FillRGBA( x, y, 1, tall - 1, 255, 140, 0, 255 );
 	FillRGBA( x + wide - 1, y + 1, 1, tall - 1, 255, 140, 0, 255 );
 	FillRGBA( x, y + tall - 1, wide - 1, 1, 255, 140, 0, 255 );
+}
+
+int CHud::HUDColor()
+{
+	int result = m_iHUDColor;
+#if FEATURE_NIGHTVISION && FEATURE_NIGHTVISION_WHITE_HUD
+	if (this == &gHUD && gHUD.m_Nightvision.IsOn()) {
+		result = 0x00FFFFFF;
+	}
+#endif
+	return result;
+}
+
+int CHud::MinHUDAlpha()
+{
+	int result = MIN_ALPHA;
+#if FEATURE_NIGHTVISION && FEATURE_NIGHTVISION_WHITE_HUD
+	if (this == &gHUD && gHUD.m_Nightvision.IsOn()) {
+		result = 192;
+	}
+#endif
+	return result;
 }

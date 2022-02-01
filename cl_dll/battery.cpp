@@ -80,7 +80,7 @@ int CHudBattery::Draw( float flTime )
 	rc = *m_prc2;
 	rc.top  += m_iHeight * ( (float)( 100 - ( Q_min( 100, m_iBat ) ) ) * 0.01f );	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 
-	UnpackRGB( r, g, b, gHUD.m_iHUDColor );
+	UnpackRGB( r, g, b, gHUD.HUDColor() );
 
 	if( !( gHUD.m_iWeaponBits & ( 1 << ( WEAPON_SUIT ) ) ) )
 		return 1;
@@ -99,10 +99,10 @@ int CHudBattery::Draw( float flTime )
 		}
 
 		// Fade the health number back to dim
-		a = MIN_ALPHA + ( m_fFade / FADE_TIME ) * 128;
+		a = gHUD.MinHUDAlpha() + ( m_fFade / FADE_TIME ) * 128;
 	}
 	else
-		a = MIN_ALPHA;
+		a = gHUD.MinHUDAlpha();
 
 	ScaleColors( r, g, b, a );
 

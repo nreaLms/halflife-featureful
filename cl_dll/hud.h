@@ -446,6 +446,8 @@ public:
 #if FEATURE_CS_NIGHTVISION
 	float CSNvgRadius();
 #endif
+
+	bool IsOn();
 private:
 	int m_fOn;
 #if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
@@ -653,8 +655,10 @@ public:
 	int DrawHudStringLen( const char *szIt );
 	void DrawDarkRectangle( int x, int y, int wide, int tall );
 
+	int HUDColor();
 	int m_iHUDColor;
 
+	int MinHUDAlpha();
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()

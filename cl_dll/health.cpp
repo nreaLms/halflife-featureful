@@ -166,7 +166,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #else
 	if( m_iHealth > 25 )
 	{
-		UnpackRGB( r, g, b, gHUD.m_iHUDColor );
+		UnpackRGB( r, g, b, gHUD.HUDColor() );
 	}
 	else
 	{
@@ -195,15 +195,15 @@ int CHudHealth::Draw( float flTime )
 		m_fFade -= ( (float)gHUD.m_flTimeDelta * 20.0f );
 		if( m_fFade <= 0 )
 		{
-			a = MIN_ALPHA;
+			a = gHUD.MinHUDAlpha();
 			m_fFade = 0;
 		}
 
 		// Fade the health number back to dim
-		a = MIN_ALPHA + ( m_fFade / FADE_TIME ) * 128;
+		a = gHUD.MinHUDAlpha() + ( m_fFade / FADE_TIME ) * 128;
 	}
 	else
-		a = MIN_ALPHA;
+		a = gHUD.MinHUDAlpha();
 
 	// If health is getting low, make it bright red
 	if( m_iHealth <= 15 )
@@ -232,7 +232,7 @@ int CHudHealth::Draw( float flTime )
 
 		int iHeight = gHUD.m_iFontHeight;
 		int iWidth = HealthWidth / 10;
-		UnpackRGB( r, g, b, gHUD.m_iHUDColor );
+		UnpackRGB( r, g, b, gHUD.HUDColor() );
 		FillRGBA( x, y, iWidth, iHeight, r, g, b, a );
 	}
 
@@ -381,7 +381,7 @@ int CHudHealth::DrawDamage( float flTime )
 	if( !m_bitsDamage )
 		return 1;
 
-	UnpackRGB( r, g, b, gHUD.m_iHUDColor );
+	UnpackRGB( r, g, b, gHUD.HUDColor() );
 
 	a = (int)( fabs( sin( flTime * 2.0f ) ) * 256.0f );
 
