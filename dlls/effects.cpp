@@ -1712,7 +1712,6 @@ void CGibShooter::ShootThink( void )
 		pev->nextthink = gpGlobals->time + m_flDelay;
 	}
 
-	bool evaluated;
 	float flGibVelocity;
 	Vector baseShootDir;
 
@@ -3861,7 +3860,6 @@ void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	else
 		iTexture = pev->skin; // custom texture
 
-	bool evaluated;
 	Vector vecPos;
 	if (!FStringNull(pev->target))
 	{

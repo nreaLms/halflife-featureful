@@ -537,7 +537,6 @@ void CDisplacer::Displace( void )
 //=========================================================
 void CDisplacer::Teleport( void )
 {
-	const char *pszName;
 	ClearBeams();
 	ClearSpin();
 #ifndef CLIENT_DLL
@@ -550,6 +549,7 @@ void CDisplacer::Teleport( void )
 	}
 	else
 	{
+		const char *pszName;
 		if( !m_pPlayer->m_fInXen )
 			pszName = "info_displacer_xen_target";
 		else
