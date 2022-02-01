@@ -926,14 +926,22 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				CoilBeam();
 				Remember(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL);
 
-				float flAdjustedDamage = gSkillData.slaveDmgZap*3;
 				CBaseEntity *pEntity = NULL;
 				while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, ISLAVE_COIL_ATTACK_RADIUS ) ) != NULL )
 				{
+					float flAdjustedDamage = gSkillData.slaveDmgZap*2.5;
 					if( pEntity != this && pEntity->pev->takedamage != DAMAGE_NO && pEntity->MyMonsterPointer() != NULL ) {
 						if (IRelationship(pEntity) >= R_DL) {
 							if( !FVisible( pEntity ) ) {
-								flAdjustedDamage *= 0.5;
+								if( pEntity->IsPlayer() )
+								{
+									// Restrict it to clients so that monsters in other parts of the level don't take the damage and get pissed.
+									flAdjustedDamage *= 0.5f;
+								}
+								else
+								{
+									flAdjustedDamage = 0;
+								}
 							}
 
 							if( flAdjustedDamage > 0 ) {
