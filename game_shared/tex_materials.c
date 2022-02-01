@@ -10,44 +10,44 @@ int GetTextureMaterialProperties(char chTextureType, float* fvol, float* fvolbar
 	{
 	default:
 	case CHAR_TEX_CONCRETE:
-		*fvol = 0.9;
-		*fvolbar = 0.6;
+		*fvol = 0.9f;
+		*fvolbar = 0.6f;
 		rgsz[0] = "player/pl_step1.wav";
 		rgsz[1] = "player/pl_step2.wav";
 		*cnt = 2;
 		break;
 	case CHAR_TEX_METAL:
-		*fvol = 0.9;
-		*fvolbar = 0.3;
+		*fvol = 0.9f;
+		*fvolbar = 0.3f;
 		rgsz[0] = "player/pl_metal1.wav";
 		rgsz[1] = "player/pl_metal2.wav";
 		*cnt = 2;
 		break;
 	case CHAR_TEX_DIRT:
-		*fvol = 0.9;
-		*fvolbar = 0.1;
+		*fvol = 0.9f;
+		*fvolbar = 0.1f;
 		rgsz[0] = "player/pl_dirt1.wav";
 		rgsz[1] = "player/pl_dirt2.wav";
 		rgsz[2] = "player/pl_dirt3.wav";
 		*cnt = 3;
 		break;
 	case CHAR_TEX_VENT:
-		*fvol = 0.5;
-		*fvolbar = 0.3;
+		*fvol = 0.5f;
+		*fvolbar = 0.3f;
 		rgsz[0] = "player/pl_duct1.wav";
 		rgsz[1] = "player/pl_duct1.wav";
 		*cnt = 2;
 		break;
 	case CHAR_TEX_GRATE:
-		*fvol = 0.9;
-		*fvolbar = 0.5;
+		*fvol = 0.9f;
+		*fvolbar = 0.5f;
 		rgsz[0] = "player/pl_grate1.wav";
 		rgsz[1] = "player/pl_grate4.wav";
 		*cnt = 2;
 		break;
 	case CHAR_TEX_TILE:
-		*fvol = 0.8;
-		*fvolbar = 0.2;
+		*fvol = 0.8f;
+		*fvolbar = 0.2f;
 		rgsz[0] = "player/pl_tile1.wav";
 		rgsz[1] = "player/pl_tile3.wav";
 		rgsz[2] = "player/pl_tile2.wav";
@@ -55,7 +55,7 @@ int GetTextureMaterialProperties(char chTextureType, float* fvol, float* fvolbar
 		*cnt = 4;
 		break;
 	case CHAR_TEX_SLOSH:
-		*fvol = 0.9;
+		*fvol = 0.9f;
 		*fvolbar = 0.0;
 		rgsz[0] = "player/pl_slosh1.wav";
 		rgsz[1] = "player/pl_slosh3.wav";
@@ -64,8 +64,8 @@ int GetTextureMaterialProperties(char chTextureType, float* fvol, float* fvolbar
 		*cnt = 4;
 		break;
 	case CHAR_TEX_WOOD:
-		*fvol = 0.9;
-		*fvolbar = 0.2;
+		*fvol = 0.9f;
+		*fvolbar = 0.2f;
 		rgsz[0] = "debris/wood1.wav";
 		rgsz[1] = "debris/wood2.wav";
 		rgsz[2] = "debris/wood3.wav";
@@ -73,8 +73,8 @@ int GetTextureMaterialProperties(char chTextureType, float* fvol, float* fvolbar
 		break;
 	case CHAR_TEX_GLASS:
 	case CHAR_TEX_COMPUTER:
-		*fvol = 0.8;
-		*fvolbar = 0.2;
+		*fvol = 0.8f;
+		*fvolbar = 0.2f;
 		rgsz[0] = "debris/glass1.wav";
 		rgsz[1] = "debris/glass2.wav";
 		rgsz[2] = "debris/glass3.wav";
@@ -83,11 +83,11 @@ int GetTextureMaterialProperties(char chTextureType, float* fvol, float* fvolbar
 	case CHAR_TEX_FLESH:
 		if( iBulletType == BULLET_PLAYER_CROWBAR )
 			return 0; // crowbar already makes this sound
-		*fvol = 1.0;
-		*fvolbar = 0.2;
+		*fvol = 1.0f;
+		*fvolbar = 0.2f;
 		rgsz[0] = "weapons/bullet_hit1.wav";
 		rgsz[1] = "weapons/bullet_hit2.wav";
-		*fattn = 1.0;
+		*fattn = 1.0f;
 		*cnt = 2;
 		break;
 	}
