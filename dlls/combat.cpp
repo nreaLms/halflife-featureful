@@ -1131,6 +1131,11 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		return 0;
 	}
 
+	if ( pev->health <= 1 && FBitSet(bitsDamageType, DMG_NONLETHAL) && IsPlayer() ) {
+		pev->health = 1;
+		return 1;
+	}
+
 	if( pev->health <= 0 )
 	{
 		if( bitsDamageType & DMG_ALWAYSGIB )

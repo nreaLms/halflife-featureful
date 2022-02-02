@@ -2624,7 +2624,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				bDuration = NERVEGAS_DURATION;
 				break;
 			case itbd_Poison:
-				TakeDamage( pev, pev, POISON_DAMAGE, DMG_GENERIC );
+				TakeDamage( pev, pev, POISON_DAMAGE, FBitSet(m_bitsDamageType, DMG_TIMEDNONLETHAL) ? DMG_NONLETHAL : DMG_GENERIC );
 				bDuration = POISON_DURATION;
 				break;
 			case itbd_Radiation:

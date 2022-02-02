@@ -29,7 +29,14 @@
 #define DMG_ACID			(1 << 20)	// toxic chemicals or acid burns
 #define DMG_SLOWBURN		(1 << 21)	// in an oven
 #define DMG_SLOWFREEZE		(1 << 22)	// in a subzero freezer
+
+// it's not time-based!
 #define DMG_MORTAR			(1 << 23)	// Hit by air raid (done to distinguish grenade from mortar)
+
+// additional flags
+// TODO: make into another set of flags?
+#define DMG_NONLETHAL		(1 << 24) // this damage shouldn't kill player
+#define DMG_TIMEDNONLETHAL	(1 << 25) // timed damage, e.g. poison, shouldn't kill player completely
 
 #define HEAL_GENERIC 0
 #define HEAL_CHARGE (1<<0) // Charge my portable medkit
