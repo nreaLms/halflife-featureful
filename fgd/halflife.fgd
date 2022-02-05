@@ -3578,6 +3578,13 @@
 		20 : "hstruggle"
 	]
 ]
+@PointClass base(DeadMonster) studio("models/headcrab.mdl") = monster_headcrab_dead : "Dead Head Crab"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 7 =
+	[
+		7 : "dieback"
+	]
+]
 @PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/player.mdl") = monster_hevsuit_dead : "Dead HEV Suit"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 73 =
@@ -5155,6 +5162,14 @@
 	[
 		0 : "On Stomach"
 		1 : "On Back"
+	]
+]
+
+@PointClass base(DeadMonster) studio("models/w_shock_rifle.mdl") = monster_shockroach_dead : "Dead Shock Roach"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 7 =
+	[
+		7 : "dieback"
 	]
 ]
 

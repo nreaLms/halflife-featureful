@@ -513,6 +513,26 @@ Schedule_t *CHeadCrab::GetScheduleOfType( int Type )
 	return CBaseMonster::GetScheduleOfType( Type );
 }
 
+class CDeadHeadCrab : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_PREY; }
+
+	const char* getPos(int pos) const {
+		return "dieback";
+	}
+};
+
+LINK_ENTITY_TO_CLASS( monster_headcrab_dead, CDeadHeadCrab )
+
+void CDeadHeadCrab::Spawn( )
+{
+	SpawnHelper("models/headcrab.mdl", BLOOD_COLOR_YELLOW);
+	MonsterInitDead();
+	pev->frame = 255;
+}
+
 class CBabyCrab : public CHeadCrab
 {
 public:
@@ -824,4 +844,25 @@ int CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	// Skip headcrab's TakeDamage to avoid unwanted immunity to friendly acid.
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
+
+class CDeadShockRoach : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_PREY; }
+
+	const char* getPos(int pos) const {
+		return "dieback";
+	}
+};
+
+LINK_ENTITY_TO_CLASS( monster_shockroach_dead, CDeadShockRoach )
+
+void CDeadShockRoach::Spawn( )
+{
+	SpawnHelper("models/w_shock_rifle.mdl", BLOOD_COLOR_YELLOW);
+	MonsterInitDead();
+	pev->frame = 255;
+}
+
 #endif
