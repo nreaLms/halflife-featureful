@@ -58,6 +58,10 @@ class CSatchelCharge : public CGrenade
 
 public:
 	void Deactivate( void );
+#if !CLIENT_DLL
+	int ObjectCaps( void );
+	void EXPORT SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+#endif
 };
 
 LINK_ENTITY_TO_CLASS( monster_satchel, CSatchelCharge )
@@ -85,7 +89,9 @@ void CSatchelCharge::Spawn( void )
 	UTIL_SetOrigin( pev, pev->origin );
 
 	SetTouch( &CSatchelCharge::SatchelSlide );
-	SetUse( &CGrenade::DetonateUse );
+#if !CLIENT_DLL
+	SetUse( &CSatchelCharge::SatchelUse );
+#endif
 	SetThink( &CSatchelCharge::SatchelThink );
 	pev->nextthink = gpGlobals->time + 0.1f;
 
@@ -182,6 +188,60 @@ void CSatchelCharge::BounceSound( void )
 		break;
 	}
 }
+
+#if !CLIENT_DLL
+void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+#if FEATURE_PICKABLE_SATCHELS
+	if (useType == USE_SET && pActivator && pActivator->edict() == pev->owner)
+	{
+		if (pActivator->IsPlayer())
+		{
+			CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
+
+			CSatchel* pSatchelWeapon = (CSatchel*)pPlayer->WeaponById(WEAPON_SATCHEL);
+			if (pSatchelWeapon) {
+				if (pPlayer->GiveAmmo(1, "Satchel Charge") > 0)
+				{
+					bool anySatchelsLeft = false;
+					CBaseEntity* pSatchel = NULL;
+					while ( ( pSatchel = UTIL_FindEntityByClassname(pSatchel, "monster_satchel") ) )
+					{
+						if ( pSatchel != this && pSatchel->pev->owner == pActivator->edict() )
+						{
+							anySatchelsLeft = true;
+							break;
+						}
+					}
+					if (!anySatchelsLeft) {
+						pSatchelWeapon->DrawSatchel();
+					}
+
+					SetThink(&CBaseEntity::SUB_Remove);
+					pev->nextthink = gpGlobals->time;
+				}
+			}
+		}
+	}
+	else
+#endif
+	{
+		CGrenade::DetonateUse(pActivator, pCaller, useType, value);
+	}
+}
+
+int CSatchelCharge::ObjectCaps()
+{
+	int caps = CBaseEntity::ObjectCaps();
+#if FEATURE_PICKABLE_SATCHELS
+	if (pev->owner)
+	{
+		caps |= FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
+	}
+#endif
+	return caps;
+}
+#endif
 
 LINK_ENTITY_TO_CLASS( weapon_satchel, CSatchel )
 
@@ -436,6 +496,14 @@ void CSatchel::WeaponIdle( void )
 			return;
 		}
 
+		DrawSatchel();
+		break;
+	}
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );// how long till we do this again.
+}
+
+void CSatchel::DrawSatchel()
+{
 #if !CLIENT_DLL
 		m_pPlayer->pev->viewmodel = MAKE_STRING( "models/v_satchel.mdl" );
 		m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel.mdl" );
@@ -450,9 +518,6 @@ void CSatchel::WeaponIdle( void )
 		m_flNextPrimaryAttack = GetNextAttackDelay( 0.5f );
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5f;
 		m_chargeReady = SATCHEL_IDLE;
-		break;
-	}
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );// how long till we do this again.
 }
 
 //=========================================================
