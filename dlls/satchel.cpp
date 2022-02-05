@@ -203,6 +203,8 @@ void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 			if (pSatchelWeapon) {
 				if (pPlayer->GiveAmmo(1, "Satchel Charge") > 0)
 				{
+					EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
+
 					bool anySatchelsLeft = false;
 					CBaseEntity* pSatchel = NULL;
 					while ( ( pSatchel = UTIL_FindEntityByClassname(pSatchel, "monster_satchel") ) )
@@ -214,7 +216,11 @@ void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 						}
 					}
 					if (!anySatchelsLeft) {
-						pSatchelWeapon->DrawSatchel();
+						if (pPlayer->m_pActiveItem == pSatchelWeapon) {
+							pSatchelWeapon->DrawSatchel();
+						}
+						else
+							pSatchelWeapon->m_chargeReady = SATCHEL_IDLE;
 					}
 
 					SetThink(&CBaseEntity::SUB_Remove);
