@@ -409,12 +409,9 @@ void CSatchel::PrimaryAttack()
 
 			while( ( pSatchel = UTIL_FindEntityInSphere( pSatchel, m_pPlayer->pev->origin, 4096 ) ) != NULL )
 			{
-				if( FClassnameIs( pSatchel->pev, "monster_satchel" ) )
+				if( pSatchel->pev->owner == pPlayer && FClassnameIs( pSatchel->pev, "monster_satchel" ) )
 				{
-					if( pSatchel->pev->owner == pPlayer )
-					{
-						pSatchel->Use( m_pPlayer, m_pPlayer, USE_ON, 0 );
-					}
+					pSatchel->Use( m_pPlayer, m_pPlayer, USE_ON, 0 );
 				}
 			}
 
