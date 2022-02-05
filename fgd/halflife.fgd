@@ -1814,7 +1814,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Global, Targetname, Target, RenderFields, Angles, ZHLT, BaseLockable) = func_button : "Button"
+@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable) = func_button : "Button"
 [
 	speed(integer) : "Speed" : 5
 	health(integer) : "Health (shootable if > 0)"
@@ -1838,7 +1838,6 @@
 	]
 	noise(sound) : "Sound Override"
 	wait(integer) : "delay before reset (-1 stay)" : 3
-	delay(string) : "Delay before trigger" : "0"
 	spawnflags(flags) =
 	[
 		1: "Don't move" : 1
