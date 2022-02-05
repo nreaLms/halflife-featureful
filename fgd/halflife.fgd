@@ -3281,6 +3281,11 @@
 	[
 		17 : "die1"
 	]
+	skin(Choices) : "Eye state" =
+	[
+		0 : "Open"
+		1 : "Closed"
+	]
 ]
 
 @PointClass base(Monster, Sequence) size(-3 -3 0, 3 3 3) studio("models/roach.mdl") = monster_cockroach : "Cockroach"
