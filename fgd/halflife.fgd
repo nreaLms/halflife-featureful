@@ -5957,7 +5957,6 @@
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
 		4096 : "Align to player" : 0 : "Spawned monsters will be aligned to the closest player increasing the chance of seeing the player right after the spawn."
 		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
-		16384 : "Monster is activator (deprecated)" : 0 : "Pass spawned monster as activator triggering Target on Release. Deprecated. Use Target's Activator instead."
 		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
 		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
 		1048576: "Act in non-PVS" : 0 : "The spawned monster will act as usual even if there're no players in the PVS"

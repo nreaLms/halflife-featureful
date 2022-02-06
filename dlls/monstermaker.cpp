@@ -39,7 +39,6 @@
 #define SF_MONSTERMAKER_NO_GROUND_CHECK 2048 // don't check if something on ground prevents a monster to fall on spawn
 #define SF_MONSTERMAKER_ALIGN_TO_PLAYER 4096 // Align to closest player on spawn
 #define SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED 8192
-#define SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR 16384 // DEPRECATED. Use the spawned monster as activator to fire target
 #define SF_MONSTERMAKER_SPECIAL_FLAG		( 1 << 15 )
 #define SF_MONSTERMAKER_NONSOLID_CORPSE		( 1 << 16 )
 #define SF_MONSTERMAKER_ACT_IN_NON_PVS		( 1 << 20 )
@@ -224,11 +223,6 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 
 void CMonsterMaker::Spawn()
 {
-	if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR))
-	{
-		ALERT(at_console, "%s: Usage of 'Pass monster as activator' flag is deprecated! Use Target's Activator instead\n", STRING(pev->classname));
-	}
-
 	pev->solid = SOLID_NOT;
 
 	if (FStringNull(m_iszPlacePosition))
@@ -653,10 +647,6 @@ int CMonsterMaker::MakeMonster( void )
 		// NOTE: in Spirit activator is monster.
 		// We keep original Half-Life behavior by default, but it can be configured.
 		CBaseEntity* pActivator = this;
-		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR))
-		{
-			pActivator = createdMonster;
-		}
 		switch (m_targetActivator) {
 		case MMA_NO:
 			pActivator = NULL;
