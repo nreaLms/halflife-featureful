@@ -307,7 +307,7 @@ void CPitWorm::Spawn()
 
 	pev->view_ofs = PITWORM_EYE_OFFSET;
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
-	m_flFieldOfView = 0.5;
+	SetMyFieldOfView( 0.5f );
 
 	pev->sequence = 0;
 	ResetSequenceInfo();

@@ -3499,8 +3499,9 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 		ALERT( level, ". " );
 	}
 
-	ALERT( level, "Yaw speed: %3.1f, Current Yaw: %3.1f, Ideal Yaw: %3.1f, Health: %3.1f / %3.1f. ",
-		   (double)pev->yaw_speed, (double)UTIL_AngleMod( pev->angles.y ), (double)pev->ideal_yaw, (double)pev->health, (double)pev->max_health );
+	ALERT( level, "Yaw speed: %3.1f, Current Yaw: %3.1f, Ideal Yaw: %3.1f, ", pev->yaw_speed, UTIL_AngleMod( pev->angles.y ), pev->ideal_yaw );
+	ALERT( level, "Health: %3.1f / %3.1f, ", pev->health, pev->max_health );
+	ALERT( level, "Field of View: %3.1f. ", m_flFieldOfView );
 	if( pev->spawnflags & SF_MONSTER_PRISONER )
 		ALERT( level, " PRISONER! " );
 	if( pev->spawnflags & SF_MONSTER_PREDISASTER )
@@ -3552,6 +3553,15 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 			m_bloodColor = BLOOD_COLOR_RED;
 		else if (m_bloodColor == 2)
 			m_bloodColor = BLOOD_COLOR_YELLOW;
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "field_of_view" ) )
+	{
+		m_flFieldOfView = atof( pkvd->szValue );
+		if (m_flFieldOfView < -1.0f || m_flFieldOfView >= 1.0f) {
+			ALERT(at_warning, "Invalid field of view for monster %s: %3.1f\n", STRING(pev->classname), m_flFieldOfView);
+			m_flFieldOfView = 0.0f;
+		}
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "classify" ) )
@@ -4197,6 +4207,13 @@ void CBaseMonster::SetMyBloodColor(int bloodColor)
 {
 	if (!m_bloodColor) {
 		m_bloodColor = bloodColor;
+	}
+}
+
+void CBaseMonster::SetMyFieldOfView(const float defaultFieldOfView)
+{
+	if (!m_flFieldOfView) {
+		m_flFieldOfView = defaultFieldOfView;
 	}
 }
 

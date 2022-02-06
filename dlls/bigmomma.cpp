@@ -671,7 +671,7 @@ void CBigMomma::Spawn()
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	SetMyHealth( 150.0f * gSkillData.bigmommaHealthFactor );
 	pev->view_ofs = Vector( 0.0f, 0.0f, 128.0f );// position of the eyes relative to monster's origin.
-	m_flFieldOfView = 0.3f;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.3f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
 	MonsterInit();

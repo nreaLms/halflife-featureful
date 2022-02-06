@@ -81,7 +81,7 @@ void CRat::Spawn()
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	SetMyHealth( 8 );
 	pev->view_ofs = Vector( 0, 0, 6 );// position of the eyes relative to monster's origin.
-	m_flFieldOfView = 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
 	MonsterInit();

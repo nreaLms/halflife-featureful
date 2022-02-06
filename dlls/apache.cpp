@@ -150,7 +150,7 @@ void CApache::SpawnImpl(const char *modelName)
 	pev->takedamage = DAMAGE_AIM;
 	SetMyHealth( gSkillData.apacheHealth );
 
-	m_flFieldOfView = -0.707f; // 270 degrees
+	SetMyFieldOfView(-0.707f); // 270 degrees
 
 	pev->sequence = 0;
 	ResetSequenceInfo();

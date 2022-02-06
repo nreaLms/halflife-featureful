@@ -367,7 +367,7 @@ void CBarney::SpawnImpl(const char* modelName, float health)
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	SetMyHealth( health );
 	pev->view_ofs = Vector ( 0.0f, 0.0f, 50.0f );// position of the eyes relative to monster's origin.
-	m_flFieldOfView = VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
+	SetMyFieldOfView(VIEW_FIELD_WIDE); // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_HackedGunPos = Vector ( 0, 0, 55 );
 

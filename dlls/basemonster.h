@@ -371,6 +371,7 @@ public:
 	void SetMyModel( const char* model );
 	void PrecacheMyModel( const char* model );
 	void SetMyBloodColor( int bloodColor );
+	void SetMyFieldOfView(const float defaultFieldOfView );
 
 	int Classify();
 	virtual int DefaultClassify();

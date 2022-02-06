@@ -953,7 +953,7 @@ void CHGrunt::SpawnHelper(const char* modelName, int health, int bloodColor)
 	SetMyBloodColor( bloodColor );
 	pev->effects		= 0;
 	SetMyHealth( health );
-	m_flFieldOfView		= 0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck	= gpGlobals->time + 1;
 	m_flNextPainTime	= gpGlobals->time;
@@ -2386,6 +2386,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pGrunt->m_iClass = m_iClass;
 	pGrunt->m_reverseRelationship = m_reverseRelationship;
 	pGrunt->SetMyBloodColor(m_bloodColor);
+	pGrunt->SetMyFieldOfView(m_flFieldOfView);
 	pGrunt->m_gibModel = m_gibModel;
 	pGrunt->m_iszTriggerTarget = m_iszTriggerTarget;
 	pGrunt->m_iTriggerCondition = m_iTriggerCondition;

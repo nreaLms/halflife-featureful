@@ -910,7 +910,7 @@ void CGargantua::Spawn()
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	SetMyHealth( DefaultHealth() );
 	//pev->view_ofs		= Vector ( 0, 0, 96 );// taken from mdl file
-	m_flFieldOfView		= -0.2;// width of forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(-0.2f);// width of forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 
 	FollowingMonsterInit();

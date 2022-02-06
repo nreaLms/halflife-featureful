@@ -607,7 +607,7 @@ void CAGrunt::Spawn()
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	pev->effects = 0;
 	SetMyHealth( gSkillData.agruntHealth );
-	m_flFieldOfView = 0.2f;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.2f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_afCapability = 0;
 	m_afCapability |= bits_CAP_SQUAD;

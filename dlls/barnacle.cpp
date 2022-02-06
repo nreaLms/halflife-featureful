@@ -127,7 +127,7 @@ void CBarnacle::Spawn()
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	pev->effects = EF_INVLIGHT; // take light from the ceiling 
 	SetMyHealth( gSkillData.barnacleHealth );
-	m_flFieldOfView = 0.5f;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_flKillVictimTime = 0.0f;
 	m_flCachedLength = 32.0f;	// mins.z

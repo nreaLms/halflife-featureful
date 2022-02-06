@@ -127,7 +127,7 @@ void CSqueakGrenade::SpawnImpl(const char* modelName , float damage)
 
 	m_flDie = gpGlobals->time + SQUEEK_DETONATE_DELAY;
 
-	m_flFieldOfView = 0.0f; // 180 degrees
+	SetMyFieldOfView(0.0f); // 180 degrees
 
 	if( pev->owner )
 		m_hOwner = Instance( pev->owner );

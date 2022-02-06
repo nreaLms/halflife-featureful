@@ -1897,7 +1897,7 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 	SetMyBloodColor( BLOOD_COLOR_RED );
 	SetMyHealth( defaultHealth );
 	pev->view_ofs		= Vector ( 0, 0, 50 );// position of the eyes relative to monster's origin.
-	m_flFieldOfView		= VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
+	SetMyFieldOfView(VIEW_FIELD_WIDE); // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck = gpGlobals->time + 1;
 	m_flNextPainTime	= gpGlobals->time;

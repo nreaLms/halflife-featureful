@@ -187,7 +187,7 @@ void CLeech::Spawn( void )
 	SetBits( pev->flags, FL_SWIM );
 	SetMyHealth( gSkillData.leechHealth );
 
-	m_flFieldOfView = -0.5;	// 180 degree FOV
+	SetMyFieldOfView(-0.5);
 	m_flDistLook = 750;
 	MonsterInit();
 	SetThink( &CLeech::SwimThink );

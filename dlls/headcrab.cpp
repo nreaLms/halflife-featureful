@@ -316,7 +316,7 @@ void CHeadCrab::SpawnHelper(const char *modelName, float health)
 	SetMyHealth( health );
 	pev->view_ofs		= Vector( 0, 0, 20 );// position of the eyes relative to monster's origin.
 	pev->yaw_speed		= 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
-	m_flFieldOfView		= 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 }
 
@@ -697,7 +697,7 @@ void CShockRoach::Spawn()
 	SetMyHealth( gSkillData.sroachHealth );
 	pev->view_ofs = Vector(0, 0, 20);// position of the eyes relative to monster's origin.
 	pev->yaw_speed = 5;//!!! should we put this in the monster's changeanim function since turn rates may vary with state/anim?
-	m_flFieldOfView = 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
 	m_fRoachSolid = 0;

@@ -195,7 +195,7 @@ void COsprey::SpawnImpl(const char* modelName, const float defaultHealth)
 	m_flLeftHealth = 200;
 	SetMyHealth( defaultHealth );
 
-	m_flFieldOfView = 0; // 180 degrees
+	SetMyFieldOfView(0); // 180 degrees
 
 	pev->sequence = 0;
 	ResetSequenceInfo();

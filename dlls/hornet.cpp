@@ -76,7 +76,7 @@ void CHornet::Spawn( void )
 		m_flStopAttack	= gpGlobals->time + 5.0f;
 	}
 
-	m_flFieldOfView = 0.9f; // +- 25 degrees
+	SetMyFieldOfView(0.9f); // +- 25 degrees
 
 	if( RANDOM_LONG( 1, 5 ) <= 2 )
 	{

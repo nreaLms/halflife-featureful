@@ -3413,7 +3413,7 @@ void CBasePlayer::Spawn( void )
 
 	m_flTimeStepSound = 0;
 	m_iStepLeft = 0;
-	m_flFieldOfView = 0.5f;// some monsters use this to determine whether or not the player is looking at them.
+	SetMyFieldOfView(0.5f);// some monsters use this to determine whether or not the player is looking at them.
 
 	m_bloodColor = BLOOD_COLOR_RED;
 	m_flNextAttack = UTIL_WeaponTimeBase();

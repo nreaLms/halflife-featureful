@@ -292,7 +292,7 @@ void CNihilanth::Spawn( void )
 	pev->health		= gSkillData.nihilanthHealth;
 	pev->view_ofs		= Vector( 0, 0, 300 );
 
-	m_flFieldOfView = -1; // 360 degrees
+	SetMyFieldOfView(-1.0f); // 360 degrees
 
 	pev->sequence = 0;
 	ResetSequenceInfo();

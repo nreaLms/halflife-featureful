@@ -334,7 +334,7 @@ void CFlockingFlyer::SpawnCommonCode()
 	pev->health = 1;
 
 	m_fPathBlocked	= FALSE;// obstacles will be detected
-	m_flFieldOfView	= 0.2f;
+	SetMyFieldOfView(0.2f);
 
 	//SET_MODEL( ENT( pev ), "models/aflock.mdl" );
 	SET_MODEL( ENT( pev ), "models/boid.mdl" );

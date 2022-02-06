@@ -476,7 +476,7 @@ void CIchthyosaur::Spawn()
 	SetMyBloodColor( BLOOD_COLOR_GREEN );
 	SetMyHealth( gSkillData.ichthyosaurHealth );
 	pev->view_ofs		= Vector( 0, 0, 16 );
-	m_flFieldOfView		= VIEW_FIELD_WIDE;
+	SetMyFieldOfView(VIEW_FIELD_WIDE);
 	m_MonsterState		= MONSTERSTATE_NONE;
 	SetBits(pev->flags, FL_SWIM);
 	SetFlyingSpeed( ICHTHYOSAUR_SPEED );

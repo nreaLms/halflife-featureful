@@ -129,7 +129,7 @@ void CGMan::Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	SetMyBloodColor( DONT_BLEED );
 	SetMyHealth( 100 );
-	m_flFieldOfView		= 0.5;// indicates the width of this monster's forward view cone ( as a dotproduct result )
+	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 
 	MonsterInit();

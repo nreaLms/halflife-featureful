@@ -268,7 +268,22 @@
 	]
 ]
 
-@BaseClass base(Target, Targetname, RenderFields, Angles, Classification, BloodColor, PrisonerTo, MonsterSoundMask) flags(Angle) color(0 200 200) = Monster
+@BaseClass = FielfOfView
+[
+	field_of_view(choices) : "Custom Field Of View" : : "Monster's field of view, in range of [-1.0, 1)" =
+	[
+		0 : "Default"
+		-1 : "Full (alien controllers)"
+		-0.7 : "Wide (humans, vortigaunts)"
+		-0.2 : "Broad (Gargantua)"
+		0.2 : "Average (bullsquids, alien grunts)"
+		0.5 : "Tunnel (houndeyes, headcrabs)"
+		0.7 : "Narrow"
+		0.9 : "Ultra narrow"
+	]
+]
+
+@BaseClass base(Target, Targetname, RenderFields, Angles, Classification, BloodColor, FielfOfView, PrisonerTo, MonsterSoundMask) flags(Angle) color(0 200 200) = Monster
 [
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
@@ -5937,7 +5952,7 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles, Classification, BloodColor, PrisonerTo, MonsterSoundMask) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
+@BaseClass base(Targetname, Angles, Classification, BloodColor, FielfOfView, PrisonerTo, MonsterSoundMask) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
 	target(target_destination) : "Target On Release" : : "Targets which are fired whenever a monster is spawned."
 	monstertype(string) : "Monster Type" : "monster_headcrab" : "Spawned monster's classname"
