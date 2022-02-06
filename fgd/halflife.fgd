@@ -6489,8 +6489,9 @@
 	netname(string) : "Command String"
 ]
 
-@PointClass base(Targetname, Target, CustomSentences) = trigger_configure_monster : "Change some monster's parameters and flags"
+@PointClass base(Targetname, CustomSentences) = trigger_configure_monster : "Change some monster's parameters and flags"
 [
+	target(string) : "Entity to affect"
 	gag_flag(choices) : "Gag flag" =
 	[
 		-1 : "Remove flag"
