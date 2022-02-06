@@ -309,6 +309,7 @@
 		8192: "No yellow blobs" : 0 : "When engine thinks that monster is stuck, don't draw yellow particles around it"
 		16384 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'No Dyn collision' flag"
 		65536: "Non-solid corpse" : 0 : "Become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
+		1048576: "Act in non-PVS" : 0 : "Act as usual even if there're no players in the PVS"
 	]
 	is_player_ally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
 	[
@@ -5959,6 +5960,7 @@
 		16384 : "Monster is activator (deprecated)" : 0 : "Pass spawned monster as activator triggering Target on Release. Deprecated. Use Target's Activator instead."
 		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
 		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
+		1048576: "Act in non-PVS" : 0 : "The spawned monster will act as usual even if there're no players in the PVS"
 	]
 
 	monstercount(integer) : "Number of Monsters" : 1 : "How many monsters the monstermaker can create (-1 = unlimited)"
@@ -6498,6 +6500,12 @@
 		1 : "Add flag"
 	]
 	dont_drop_gun_flag(choices) : "Don't Drop Gun flag" =
+	[
+		-1 : "Remove flag"
+		0 : "No change"
+		1 : "Add flag"
+	]
+	act_in_non_pvs(choices) : "Act in non-PVS flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"

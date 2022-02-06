@@ -3506,7 +3506,9 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	if( pev->spawnflags & SF_MONSTER_PREDISASTER )
 		ALERT( level, " Pre-Disaster! " );
 	if ( pev->flags & FL_MONSTERCLIP )
-		ALERT( level, "Monsterclip " );
+		ALERT( level, "Monsterclip. " );
+	if ( pev->spawnflags & SF_MONSTER_ACT_IN_NON_PVS )
+		ALERT( level, "Acts in non-PVS of client. " );
 
 	if (HasConditions(bits_COND_CAN_MELEE_ATTACK1))
 		ALERT( level, "Can melee attack 1; " );

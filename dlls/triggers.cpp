@@ -4923,6 +4923,7 @@ public:
 	short m_monsterClipFlag;
 	short m_predisasterFlag;
 	short m_dontDropGunFlag;
+	short m_actInNonPVS;
 	int m_iClass;
 	int m_soundMask;
 	short m_iTriggerCondition;
@@ -4945,6 +4946,7 @@ TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
 	DEFINE_FIELD( CTriggerConfigureMonster, m_monsterClipFlag, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_predisasterFlag, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_dontDropGunFlag, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_actInNonPVS, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iClass, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_soundMask, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerCondition, FIELD_SHORT ),
@@ -4979,6 +4981,11 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "dont_drop_gun_flag"))
 	{
 		m_dontDropGunFlag = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "act_in_non_pvs"))
+	{
+		m_actInNonPVS = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "soundmask"))
@@ -5086,6 +5093,11 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_DONT_DROP_GUN);
 	else if (m_dontDropGunFlag > 0)
 		SetBits(pMonster->pev->spawnflags, SF_MONSTER_DONT_DROP_GUN);
+
+	if (m_actInNonPVS < 0)
+		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_ACT_IN_NON_PVS);
+	else if (m_actInNonPVS > 0)
+		SetBits(pMonster->pev->spawnflags, SF_MONSTER_ACT_IN_NON_PVS);
 
 	if (m_iClass == -2)
 		pMonster->m_iClass = 0;

@@ -55,9 +55,11 @@
 #define SF_MONSTER_PREDISASTER			256	//this is a predisaster scientist or barney. Influences how they speak.
 #define SF_MONSTER_FADECORPSE			512 // Fade out corpse after death
 #define SF_MONSTER_DONT_DROP_GUN		1024
-#define SF_MONSTER_NO_YELLOW_BLOBS		8192
-#define SF_MONSTER_SPECIAL_FLAG			32768
-#define SF_MONSTER_NONSOLID_CORPSE		65536
+#define SF_MONSTER_NO_YELLOW_BLOBS		( 1 << 13 )
+#define SF_MONSTER_SPECIAL_FLAG			( 1 << 15 )
+#define SF_MONSTER_NONSOLID_CORPSE		( 1 << 16 )
+#define SF_MONSTER_ACT_IN_NON_PVS		( 1 << 20 )
+
 #define SF_MONSTER_FALL_TO_GROUND		0x80000000
 
 #define SF_DEADMONSTER_DONT_DROP 2 // dead corpse don't fall on the ground

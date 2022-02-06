@@ -40,8 +40,9 @@
 #define SF_MONSTERMAKER_ALIGN_TO_PLAYER 4096 // Align to closest player on spawn
 #define SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED 8192
 #define SF_MONSTERMAKER_PASS_MONSTER_AS_ACTIVATOR 16384 // DEPRECATED. Use the spawned monster as activator to fire target
-#define SF_MONSTERMAKER_SPECIAL_FLAG		32768
-#define SF_MONSTERMAKER_NONSOLID_CORPSE		65536
+#define SF_MONSTERMAKER_SPECIAL_FLAG		( 1 << 15 )
+#define SF_MONSTERMAKER_NONSOLID_CORPSE		( 1 << 16 )
+#define SF_MONSTERMAKER_ACT_IN_NON_PVS		( 1 << 20 )
 
 enum
 {
@@ -521,18 +522,20 @@ int CMonsterMaker::MakeMonster( void )
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_MONSTERCLIP ))
 			SetBits( pevCreate->spawnflags, SF_MONSTER_HITMONSTERCLIP );
 
-		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PRISONER ))
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PRISONER ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_PRISONER );
-		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PREDISASTER ))
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_PREDISASTER ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_PREDISASTER );
-		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_DONT_DROP_GUN))
-			SetBits(pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GUN);
-		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED ))
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_DONT_DROP_GUN ) )
+			SetBits( pevCreate->spawnflags, SF_MONSTER_DONT_DROP_GUN);
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_WAIT_UNTIL_PROVOKED );
-		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_SPECIAL_FLAG ))
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_SPECIAL_FLAG ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_SPECIAL_FLAG );
-		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_NONSOLID_CORPSE ))
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_NONSOLID_CORPSE ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_NONSOLID_CORPSE );
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_ACT_IN_NON_PVS ) )
+			SetBits( pevCreate->spawnflags, SF_MONSTER_ACT_IN_NON_PVS );
 		if (m_gag > 0)
 			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
 		pevCreate->weapons = pev->weapons;
