@@ -529,7 +529,7 @@ int CMonsterMaker::MakeMonster( void )
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_NONSOLID_CORPSE ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_NONSOLID_CORPSE );
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_ACT_IN_NON_PVS ) )
-			SetBits( pevCreate->spawnflags, SF_MONSTER_ACT_IN_NON_PVS );
+			SetBits( pevCreate->spawnflags, SF_MONSTER_ACT_OUT_OF_PVS );
 		if (m_gag > 0)
 			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
 		pevCreate->weapons = pev->weapons;
