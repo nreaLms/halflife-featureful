@@ -412,10 +412,6 @@
 
 @BaseClass base(TalkMonster) = ScaredGuy
 [
-	spawnflags(Flags) =
-	[
-		32768 : "Don't stop following" : 0 : "By default scientists stop following when they run into an obstacle they can't bypass. This flag prevents such behavior making scientists continue trying to follow the player"
-	]
 ]
 
 @BaseClass base(Monster) = Apache

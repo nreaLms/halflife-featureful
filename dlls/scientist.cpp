@@ -36,7 +36,6 @@
 #define		NUM_SCIENTIST_BODIES 4
 #endif
 
-#define SF_SCI_DONT_STOP_FOLLOWING SF_MONSTER_SPECIAL_FLAG
 #define SF_SCI_SITTING_DONT_DROP SF_MONSTER_SPECIAL_FLAG // Don't drop to the floor. We can re-use the same value as sitting scientists can't follow
 
 enum
@@ -116,10 +115,7 @@ public:
 	MONSTERSTATE GetIdealState( void );
 
 	virtual FOLLOW_FAIL_POLICY DefaultFollowFailPolicy() {
-		if (FBitSet(pev->spawnflags, SF_SCI_DONT_STOP_FOLLOWING))
-			return FOLLOW_FAIL_REGULAR;
-		else
-			return FOLLOW_FAIL_STOP;
+		return FOLLOW_FAIL_STOP;
 	}
 
 	void DeathSound( void );
