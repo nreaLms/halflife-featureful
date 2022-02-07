@@ -1209,10 +1209,11 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 						pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
 				}
 			}
+
+			if ( ret > 0 && IsFullyAlive() ) {
+				ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+			}
 		}
-	}
-	if ( ret > 0 && IsFullyAlive() ) {
-		ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 	}
 	return ret;
 }
