@@ -283,7 +283,40 @@
 	]
 ]
 
-@BaseClass base(Target, Targetname, RenderFields, Angles, Classification, BloodColor, FielfOfView, PrisonerTo, MonsterSoundMask) flags(Angle) color(0 200 200) = Monster
+@BaseClass = FreeRoaming
+[
+	freeroam(Choices) : "Monster Roaming (nodes)" =
+	[
+		0 : "Map Default"
+		1 : "Never"
+		2 : "Always"
+	]
+]
+
+@BaseClass = ActiveAfterAlert
+[
+	active_alert(Choices) : "Active alert after combat" : : "Whether monster will walk around a bit and investigate sounds after the combat is over" =
+	[
+		0 : "Default (by cvar or code)"
+		1 : "Never"
+		2 : "Always"
+	]
+]
+
+@BaseClass = SizeForGrapple
+[
+	size_for_grapple(Choices) : "Size For Grapple" =
+	[
+		-1 : "Not a Target"
+		0 : "Monster's Default"
+		1 : "Small"
+		2 : "Medium"
+		3 : "Large"
+		4 : "Fixed"
+	]
+]
+
+@BaseClass base(Target, Targetname, RenderFields, Angles) = MonsterBase
 [
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
@@ -312,6 +345,25 @@
 		10: "See Player Unconditional"
 		11: "See Player, Not In Combat"
 	]
+	model(studio) : "Custom Model"
+]
+
+@BaseClass = MonsterExtraBase
+[
+	health(string) : "Custom Health"
+	scale(string) : "Scale (1.0 = normal size)"
+	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
+	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
+	gibmodel(studio) : "Custom gib model"
+]
+
+@BaseClass base(MonsterExtraBase, Classification, BloodColor, FielfOfView, FreeRoaming, ActiveAfterAlert, SizeForGrapple, PrisonerTo, MonsterSoundMask) = MonsterExtra
+[
+	displayname(string) : "In-game Name" : : "Name that's displayed when player looks at the monster if mp_allowmonsterinfo is enabled"
+]
+
+@BaseClass base(MonsterBase, MonsterExtra) flags(Angle) color(0 200 200) = Monster
+[
 	spawnflags(Flags) =
 	[
 		1 : "WaitTillSeen" 	: 0
@@ -330,34 +382,6 @@
 	[
 		0 : "No"
 		1 : "Yes"
-	]
-	scale(string) : "Scale (1.0 = normal size)"
-	health(string) : "Custom Health"
-	model(studio) : "Custom Model"
-	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
-	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
-	gibmodel(studio) : "Custom gib model"
-	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
-	freeroam(Choices) : "Monster Roaming (nodes)" =
-	[
-		0 : "Map Default"
-		1 : "Never"
-		2 : "Always"
-	]
-	active_alert(Choices) : "Active alert after combat" : : "Whether monster will walk around a bit and investigate sounds after the combat is over" =
-	[
-		0 : "Default (by cvar or code)"
-		1 : "Never"
-		2 : "Always"
-	]
-	size_for_grapple(Choices) : "Size For Grapple" =
-	[
-		-1 : "Not a Target"
-		0 : "Monster's Default"
-		1 : "Small"
-		2 : "Medium"
-		3 : "Large"
-		4 : "Fixed"
 	]
 ]
 
@@ -5948,46 +5972,38 @@
 	]
 ]
 
-@BaseClass base(Targetname, Angles, Classification, BloodColor, FielfOfView, PrisonerTo, MonsterSoundMask) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
+@BaseClass base(Targetname, Angles) = MonsterMakerBase
 [
 	target(target_destination) : "Target On Release" : : "Targets which are fired whenever a monster is spawned."
 	monstertype(string) : "Monster Type" : "monster_headcrab" : "Spawned monster's classname"
 	netname(target_source) : "Childrens' Name" : : "The spawned monster will receive it as its targetname."
-	spawnflags(Flags) =
-	[
-		1 : "Start ON" 	: 0 : "Enabled on map start. Note that if the entity does not have a name it acts as Start ON no matter what."
-	// 	2 : "PVS On/Off" : 0  // not implemented
-		4 : "Cyclic" : 0 : "With this flag set, the entity will spawn one time every time it is fired."
-		8 : "MonsterClip" : 0 : "Monsters spawned by a squadmaker with this flag set will be blocked by the func_monsterclip brush entity."
-		16 : "Prisoner" : 0 : "The spawned monster won't attack its enemies and will be ignored by its enemies."
-		32 : "Auto size BBox" : 1 : "When checking if the area is free to spawn, use the monster specific hull size instead of large one provided by default."
-		64: "Cyclic backlog" : 0 : "Used with 'Cyclic' flag. Keep track of number of monsters who could not be spawned, e.g. because of blocking. Try to spawn them later. Useful when you want to ensure that the specific number of monsters will spawn."
-		128 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Wait for script' flag"
-		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
-		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
-		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
-		4096 : "Align to player" : 0 : "Spawned monsters will be aligned to the closest player increasing the chance of seeing the player right after the spawn."
-		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
-		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
-		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
-		1048576: "Act out of PVS" : 0 : "The spawned monster will act as usual even if there're no players in the PVS"
-	]
 
 	monstercount(integer) : "Number of Monsters" : 1 : "How many monsters the monstermaker can create (-1 = unlimited)"
-
 	delay(string) : "Frequency" : "5" : "How often (seconds) a new monster will be made"
-
 	m_imaxlivechildren(integer) : "Max live children" : 5 : "Maximum number of live children allowed at one time. (New ones will not be made until one dies, -1 = no limit)"
+
 	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
-	new_model(studio) : "Custom model"
-	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
-	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
-	scale(string) : "Scale (1.0 = normal size)"
-	health(integer) : "Custom health"
-	body(integer) : "Body"
-	skin(integer) : "Skin"
-	pose(integer) : "Pose (Only for dead monsters)" : : "Dead pose index. Should match the one in the spawned entity."
-	gibmodel(studio) : "Custom gib model"
+	impulse(choices) : "Warp at monster's..." : : "If using warpball template, spawn warpball at this monster position" =
+	[
+		0 : "Origin (default)"
+		1 : "Eyes"
+		3 : "Center"
+		5 : "Attachment point 0"
+		6 : "Attachment point 1"
+		7 : "Attachment point 2"
+		8 : "Attachment point 3"
+	]
+
+	spawnorigin(string) : "Position to place monster at [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
+	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
+	[
+		-1 : "Don't pass activator"
+		0 : "Default (Monstermaker)"
+		1 : "Monstermaker"
+		2 : "Spawned monster"
+		3 : "Forward my activator"
+	]
+	yawdeviation(integer) : "Max yaw deviation" : : "Maximum value for random yaw deviation, from 0 to the specified value, on both sides."
 	weapons(Choices) : "Grunt/Assassin Weapons" =
 	[
 		0 : "Default"
@@ -5999,12 +6015,6 @@
 		16 : "Saw"
 		18 : "Saw + HG"
 	]
-	gag(Choices) : "Gag" =
-	[
-		0 : "No"
-		1 : "Yes"
-	]
-	head(integer) : "Head" : : "Settable head. Available only for monsters which have a separate body group for heads. The number must match the numbers used in specific monster"
 	trigger_target(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	trigger_condition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
 	[
@@ -6032,52 +6042,43 @@
 		10: "See Player Unconditional"
 		11: "See Player, Not In Combat"
 	]
-	respawn_as_playerally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
+	new_model(studio) : "Custom model"
+]
+
+@BaseClass base(MonsterMakerBase, MonsterExtra) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
+[
+	spawnflags(Flags) =
+	[
+		1 : "Start ON" 	: 0 : "Enabled on map start. Note that if the entity does not have a name it acts as Start ON no matter what."
+	// 	2 : "PVS On/Off" : 0  // not implemented
+		4 : "Cyclic" : 0 : "With this flag set, the entity will spawn one time every time it is fired."
+		8 : "MonsterClip" : 0 : "Monsters spawned by a squadmaker with this flag set will be blocked by the func_monsterclip brush entity."
+		16 : "Prisoner" : 0 : "The spawned monster won't attack its enemies and will be ignored by its enemies."
+		32 : "Auto size BBox" : 1 : "When checking if the area is free to spawn, use the monster specific hull size instead of large one provided by default."
+		64: "Cyclic backlog" : 0 : "Used with 'Cyclic' flag. Keep track of number of monsters who could not be spawned, e.g. because of blocking. Try to spawn them later. Useful when you want to ensure that the specific number of monsters will spawn."
+		128 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Wait for script' flag"
+		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
+		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
+		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
+		4096 : "Align to player" : 0 : "Spawned monsters will be aligned to the closest player increasing the chance of seeing the player right after the spawn."
+		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
+		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
+		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
+		1048576: "Act out of PVS" : 0 : "The spawned monster will act as usual even if there're no players in the PVS"
+	]
+	body(integer) : "Body"
+	skin(integer) : "Skin"
+	pose(integer) : "Pose (Only for dead monsters)" : : "Dead pose index. Should match the one in the spawned entity."
+	gag(Choices) : "Gag" =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-	displayname(string) : "In-game Name" : : "Display name when mp_allowmonsterinfo is enabled"
-	impulse(choices) : "Warp at monster's..." : : "If using warpball template, spawn warpball at this monster position" =
+	head(integer) : "Head" : : "Settable head. Available only for monsters which have a separate body group for heads. The number must match the numbers used in specific monster"
+	respawn_as_playerally(choices) : "Reverse Relationship" : : "Set inverted relationship with players. Sven Co-op compatible parameter. Simple alternative to custom classify." =
 	[
-		0 : "Origin (default)"
-		1 : "Eyes"
-		3 : "Center"
-		5 : "Attachment point 0"
-		6 : "Attachment point 1"
-		7 : "Attachment point 2"
-		8 : "Attachment point 3"
-	]
-	spawnorigin(string) : "Position to place monster at [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
-	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
-	[
-		-1 : "Don't pass activator"
-		0 : "Default (Monstermaker)"
-		1 : "Monstermaker"
-		2 : "Spawned monster"
-		3 : "Forward my activator"
-	]
-	yawdeviation(integer) : "Max yaw deviation" : : "Maximum value for random yaw deviation, from 0 to the specified value, on both sides."
-	freeroam(Choices) : "Monster Roaming (nodes)" =
-	[
-		0 : "Map Default"
-		1 : "Never"
-		2 : "Always"
-	]
-	active_alert(Choices) : "Active alert after combat" : : "Whether monster will walk around a bit and investigate sounds after the combat is over" =
-	[
-		0 : "Default (by cvar or code)"
-		1 : "Never"
-		2 : "Always"
-	]
-	size_for_grapple(Choices) : "Size For Grapple" =
-	[
-		-1 : "Not a Target"
-		0 : "Monster's Default"
-		1 : "Small"
-		2 : "Medium"
-		3 : "Large"
-		4 : "Fixed"
+		0 : "No"
+		1 : "Yes"
 	]
 ]
 @PointClass base(MonsterMaker) = monstermaker : "Monster Maker" []
