@@ -3450,6 +3450,10 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 
 	if ( HasMemory( bits_MEMORY_KILLED ) )
 		ALERT(level, "Has MEMORY_KILLED, ");
+	if ( HasMemory( bits_MEMORY_PROVOKED ) )
+		ALERT(level, "Has MEMORY_PROVOKED, ");
+	else if ( HasMemory( bits_MEMORY_SUSPICIOUS ) )
+		ALERT(level, "Has MEMORY_SUSPICIOUS");
 
 	int i = 0;
 	while( activity_map[i].type != 0 )

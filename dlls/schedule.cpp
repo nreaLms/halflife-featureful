@@ -54,6 +54,8 @@ void CBaseMonster::ClearSchedule( void )
 	m_iTaskStatus = TASKSTATUS_NEW;
 	m_pSchedule = NULL;
 	m_iScheduleIndex = 0;
+
+	Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
 }
 
 //=========================================================
