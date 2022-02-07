@@ -3263,7 +3263,7 @@ enum
 Task_t	tlMedicHeal[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE,				(float)SCHED_MEDIC_RESTORE_TARGET },
-	{ TASK_CATCH_WITH_TARGET_RANGE,			(float)50		},	// Move within 50 of target ent
+	{ TASK_CATCH_WITH_TARGET_RANGE,			(float)64		},	// Move within 64 of target ent
 	{ TASK_FACE_IDEAL,						(float)0		},
 	{ TASK_MEDIC_SAY_HEAL,					(float)0		},
 	{ TASK_MEDIC_DRAW_NEEDLE,				(float)0		},	// Whip out the needle
