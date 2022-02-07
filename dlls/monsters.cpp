@@ -3448,6 +3448,9 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	else
 		ALERT( level, "Dead flag: %d, ", pev->deadflag );
 
+	if ( HasMemory( bits_MEMORY_KILLED ) )
+		ALERT(level, "Has MEMORY_KILLED, ");
+
 	int i = 0;
 	while( activity_map[i].type != 0 )
 	{
@@ -4148,6 +4151,11 @@ CBaseEntity *CBaseMonster::DropItem( const char *pszItemName, const Vector &vecP
 		ALERT( at_console, "DropItem() - Didn't create!\n" );
 		return NULL;
 	}
+}
+
+bool CBaseMonster::IsFullyAlive()
+{
+	return !HasMemory(bits_MEMORY_KILLED) && CBaseToggle::IsFullyAlive();
 }
 
 BOOL CBaseMonster::ShouldFadeOnDeath( void )

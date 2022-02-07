@@ -228,7 +228,7 @@ void CFollowingMonster::Touch( CBaseEntity *pOther )
 
 void CFollowingMonster::OnDying()
 {
-	m_hTargetEnt = 0;
+	ClearFollowedPlayer();
 	SetUse( NULL );
 	CSquadMonster::OnDying();
 }

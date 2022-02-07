@@ -137,6 +137,7 @@ public:
 	void Listen( void );
 
 	virtual BOOL IsAlive( void ) { return ( pev->deadflag != DEAD_DEAD ); }
+	virtual bool IsFullyAlive( void );
 	virtual BOOL ShouldFadeOnDeath( void );
 
 	// Basic Monster AI functions

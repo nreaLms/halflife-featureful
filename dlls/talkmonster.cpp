@@ -1190,7 +1190,7 @@ bool CTalkMonster::SetAnswerQuestion( CTalkMonster *pSpeaker )
 int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	int ret = CFollowingMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
-	if( ret && IsAlive() )
+	if( IsAlive() )
 	{
 		// if player damaged this entity, have other friends talk about it
 		if( pevAttacker && m_MonsterState != MONSTERSTATE_PRONE && FBitSet( pevAttacker->flags, FL_CLIENT ) 
@@ -1209,8 +1209,10 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 						pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
 				}
 			}
-			ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 		}
+	}
+	if ( ret > 0 && IsFullyAlive() ) {
+		ReactToPlayerHit(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 	}
 	return ret;
 }

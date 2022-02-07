@@ -258,7 +258,6 @@ public:
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
 	void GibMonster();
-	void OnDying();
 
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
@@ -3699,12 +3698,6 @@ void CMedic::GibMonster()
 		DropMyItems(TRUE);
 	}
 	CTalkMonster::GibMonster();
-}
-
-void CMedic::OnDying()
-{
-	m_hLeadingPlayer = 0;
-	CHFGrunt::OnDying();
 }
 
 void CMedic::DropMyItems(BOOL isGibbed)
