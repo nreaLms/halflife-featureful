@@ -59,6 +59,7 @@ set SOURCES=../dlls/weapons_shared.cpp ^
 	hud_msg.cpp ^
 	hud_redraw.cpp ^
 	hud_spectator.cpp ^
+	hud_sprite.cpp ^
 	hud_update.cpp ^
 	in_camera.cpp ^
 	input.cpp ^

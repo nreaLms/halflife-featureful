@@ -29,6 +29,8 @@
 
 #include "mobility_int.h"
 
+#include "hud_sprite.h"
+
 DECLARE_MESSAGE( m_Health, Health )
 DECLARE_MESSAGE( m_Health, Damage )
 
@@ -228,11 +230,11 @@ int CHudHealth::Draw( float flTime )
 		HealthWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
 		int CrossWidth = gHUD.GetSpriteRect( m_HUD_cross ).right - gHUD.GetSpriteRect( m_HUD_cross ).left;
 
-		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+		y = ScaledRenderer::Instance().ScreenHeightScaled() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 		x = CrossWidth / 2;
 
-		SPR_Set( gHUD.GetSprite( m_HUD_cross ), r, g, b );
-		SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
+		ScaledRenderer::Instance().SPR_Set( gHUD.GetSprite( m_HUD_cross ), r, g, b );
+		ScaledRenderer::Instance().SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
 
 		x = CrossWidth + HealthWidth / 2;
 
@@ -243,7 +245,7 @@ int CHudHealth::Draw( float flTime )
 		int iHeight = gHUD.m_iFontHeight;
 		int iWidth = HealthWidth / 10;
 		UnpackRGB( r, g, b, gHUD.HUDColor() );
-		FillRGBA( x, y, iWidth, iHeight, r, g, b, a );
+		ScaledRenderer::Instance().FillRGBA( x, y, iWidth, iHeight, r, g, b, a );
 	}
 
 	DrawDamage( flTime );
@@ -405,8 +407,8 @@ int CHudHealth::DrawDamage( float flTime )
 			pdmg = &m_dmg[i];
 
 			// Draw all the items
-			SPR_Set( gHUD.GetSprite( m_HUD_dmg_bio + i ), r, g, b );
-			SPR_DrawAdditive( 0, pdmg->x, pdmg->y, &gHUD.GetSpriteRect( m_HUD_dmg_bio + i ) );
+			ScaledRenderer::Instance().SPR_Set( gHUD.GetSprite( m_HUD_dmg_bio + i ), r, g, b );
+			ScaledRenderer::Instance().SPR_DrawAdditive( 0, pdmg->x, pdmg->y, &gHUD.GetSpriteRect( m_HUD_dmg_bio + i ) );
 
 			pdmg->fExpire = Q_min( flTime + DMG_IMAGE_LIFE, pdmg->fExpire );
 
@@ -459,7 +461,7 @@ void CHudHealth::UpdateTiles( float flTime, long bitsDamage )
 		{
 			// put this one at the bottom
 			pdmg->x = giDmgWidth / 8;
-			pdmg->y = ScreenHeight - giDmgHeight * 2;
+			pdmg->y = ScaledRenderer::Instance().ScreenHeightScaled() - giDmgHeight * 2;
 			pdmg->fExpire=flTime + DMG_IMAGE_LIFE;
 
 			// move everyone else up

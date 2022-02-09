@@ -57,6 +57,8 @@ extern "C"
 
 extern engine_studio_api_t IEngineStudio;
 
+#include "hud_sprite.h"
+
 #ifdef CLDLL_FOG
 GLAPI_glEnable GL_glEnable = NULL;
 GLAPI_glDisable GL_glDisable = NULL;
@@ -393,6 +395,8 @@ int DLLEXPORT HUD_VidInit( void )
 	}
 #endif
 
+	ScaledRenderer::Instance().HUD_VidInit();
+
 	return 1;
 }
 
@@ -417,6 +421,8 @@ void DLLEXPORT HUD_Init( void )
 	HOOK_MESSAGE( UseSound );
 
 	HookFXMessages();
+
+	ScaledRenderer::Instance().HUD_Init();
 }
 
 /*
@@ -490,6 +496,8 @@ void DLLEXPORT HUD_Frame( double time )
 #else
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
+
+	ScaledRenderer::Instance().HUD_Frame(time);
 }
 
 /*

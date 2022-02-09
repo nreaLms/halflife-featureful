@@ -43,6 +43,8 @@
 #include "ammo.h"
 #include "dlight.h"
 
+#include "hud_sprite.h"
+
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
 #define DHN_3DIGITS  4
@@ -147,6 +149,10 @@ public:
 	void _cdecl UserCmd_Close( void );
 	void _cdecl UserCmd_NextWeapon( void );
 	void _cdecl UserCmd_PrevWeapon( void );
+
+	WEAPON *GetWeapon() {
+		return m_pWeapon;
+	}
 
 private:
 	float m_fFade;
@@ -1008,6 +1014,8 @@ public:
 	int wallPuffCount;
 
 	bool m_bFlashlight;
+
+	bool hasHudScaleInEngine;
 
 	static bool ShouldUseConsoleFont();
 	static unsigned int SplitIntoWordBoundaries(WordBoundary* boundaries, const char* message);

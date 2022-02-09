@@ -254,6 +254,10 @@ cvar_t* cl_flashlight_fade_distance = NULL;
 
 cvar_t *cl_subtitles = NULL;
 
+cvar_t *hud_renderer = NULL;
+cvar_t *hud_scale = NULL;
+cvar_t *hud_sprite_offset = NULL;
+
 void ShutdownInput( void );
 
 //DECLARE_MESSAGE( m_Logo, Logo )
@@ -649,6 +653,15 @@ void CHud::Init( void )
 	CreateIntegerCvarConditionally(cl_flashlight_fade_distance, "cl_flashlight_fade_distance", clientFeatures.flashlight.fade_distance);
 
 	cl_subtitles = CVAR_CREATE( "cl_subtitles", "1", FCVAR_ARCHIVE );
+
+	hasHudScaleInEngine = gEngfuncs.pfnGetCvarPointer( "hud_scale" ) != NULL;
+
+	if (!hasHudScaleInEngine)
+	{
+		hud_renderer = CVAR_CREATE("hud_renderer", "1.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+		hud_scale = CVAR_CREATE("hud_scale", "0.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+		hud_sprite_offset = CVAR_CREATE("hud_sprite_offset", "0.5", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+	}
 
 	m_pSpriteList = NULL;
 
@@ -1618,10 +1631,10 @@ int CHudMoveMode::Draw(float flTime)
 	const wrect_t rc = *prc;
 	int width = rc.right - rc.left;
 	y = ( rc.bottom - rc.top ) * 2;
-	x = ScreenWidth - width - width / 2;
+	x = ScaledRenderer::Instance().ScreenWidthScaled() - width - width / 2;
 
-	SPR_Set( sprite, r, g, b );
-	SPR_DrawAdditive( 0,  x, y, &rc );
+	ScaledRenderer::Instance().SPR_Set( sprite, r, g, b );
+	ScaledRenderer::Instance().SPR_DrawAdditive( 0,  x, y, &rc );
 	return 1;
 }
 
