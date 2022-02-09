@@ -414,6 +414,19 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 			if (medAmmo >= 0 && medAmmo < pPlayerMedkit->iMaxAmmo1()) {
 				const int toAdd = Q_min(rest, pPlayerMedkit->iMaxAmmo1() - medAmmo);
 				m_rgAmmo[medAmmoIndex] += toAdd;
+
+				if (flHealth > 1)
+				{
+					MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
+						WRITE_BYTE( medAmmoIndex );		// ammo ID
+						WRITE_BYTE( toAdd );		// amount
+					MESSAGE_END();
+
+					if (healed == 0) {
+						EMIT_SOUND( ENT( pev ), CHAN_ITEM, AMMO_PICKUP_SOUND, 1, ATTN_NORM );
+					}
+				}
+
 				return healed + toAdd;
 			}
 		}

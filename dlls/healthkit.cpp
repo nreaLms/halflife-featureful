@@ -71,13 +71,16 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 		return FALSE;
 	}
 
+	const bool healed = pPlayer->pev->health < pPlayer->pev->max_health;
 	if( pPlayer->TakeHealth( this, gSkillData.healthkitCapacity, HEAL_CHARGE ) )
 	{
-		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-			WRITE_STRING( STRING( pev->classname ) );
-		MESSAGE_END();
+		if (healed) {
+			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
+				WRITE_STRING( STRING( pev->classname ) );
+			MESSAGE_END();
 
-		EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/smallmedkit1.wav", 1, ATTN_NORM );
+			EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/smallmedkit1.wav", 1, ATTN_NORM );
+		}
 
 		return TRUE;
 	}
