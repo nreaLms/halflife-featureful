@@ -454,7 +454,6 @@ private:
 #endif
 #if FEATURE_OPFOR_NIGHTVISION
 	HSPRITE m_hSprite;
-	wrect_t *m_prc;
 	int m_iFrame, m_nFrameCount;
 #endif
 };

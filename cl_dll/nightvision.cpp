@@ -63,8 +63,6 @@ int CHudNightvision::VidInit(void)
 #if FEATURE_OPFOR_NIGHTVISION
 	m_hSprite = LoadSprite(NIGHTVISION_SPRITE_NAME);
 
-	m_prc = &gHUD.GetSpriteRect(m_hSprite);
-
 	// Get the number of frames available in this sprite.
 	m_nFrameCount = SPR_Frames(m_hSprite);
 
@@ -160,15 +158,21 @@ void CHudNightvision::DrawOpforNVG(float flTime)
 	if (m_iFrame >= m_nFrameCount)
 		m_iFrame = 0;
 
+	const int nvgSpriteWidth = SPR_Width(m_hSprite, 0);
+	const int nvgSpriteHeight = SPR_Height(m_hSprite, 0);
+
+	const int colCount = (int)ceil(ScreenWidth / (float)nvgSpriteWidth);
+	const int rowCount = (int)ceil(ScreenHeight / (float)nvgSpriteHeight);
+
 	//
 	// draw nightvision scanlines sprite.
 	//
 	SPR_Set(m_hSprite, r, g, b);
 
 	int i, j;
-	for (i = 0; i < 8; ++i) // height
+	for (i = 0; i < rowCount; ++i) // height
 	{
-		for (j = 0; j < 16; ++j) // width
+		for (j = 0; j < colCount; ++j) // width
 		{
 			// Nightvision sprites are 256 x 256. So draw 128 -> (8 * 16) instances to cover
 			// the entire screen. It's cheap but does the work.
