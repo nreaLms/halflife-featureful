@@ -23,6 +23,7 @@
 #define SF_ENVEXPLOSION_NODECAL		( 1 << 4 ) // don't make a scorch mark
 #define SF_ENVEXPLOSION_NOSPARKS	( 1 << 5 ) // don't draw sparks
 #define SF_ENVEXPLOSION_NOSOUND		( 1 << 6 ) // don't make sound
+#define SF_ENVEXPLOSION_ACTIVATOR_IS_ATTACKER ( 1 << 7 ) // use activator as attacker for explosion damage
 
 extern DLL_GLOBAL short g_sModelIndexFireball;
 extern DLL_GLOBAL short g_sModelIndexSmoke;

@@ -228,7 +228,11 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	// do damage
 	if( !( pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE ) )
 	{
-		RadiusDamage( pev, pCaller ? pCaller->pev : pev, m_iMagnitude, CLASS_NONE, DMG_BLAST );
+		entvars_t* pevAttacker = pev;
+		if (FBitSet(pev->spawnflags, SF_ENVEXPLOSION_ACTIVATOR_IS_ATTACKER) && pActivator) {
+			pevAttacker = pActivator->pev;
+		}
+		RadiusDamage( pev, pevAttacker, m_iMagnitude, CLASS_NONE, DMG_BLAST );
 	}
 
 	SetThink( &CEnvExplosion::Smoke );
@@ -281,6 +285,10 @@ void ExplosionCreate(const Vector &center, const Vector &angles, edict_t *pOwner
 	if( !doDamage )
 		pExplosion->pev->spawnflags |= SF_ENVEXPLOSION_NODAMAGE;
 
+	if (pevAttacker) {
+		pExplosion->pev->spawnflags |= SF_ENVEXPLOSION_ACTIVATOR_IS_ATTACKER;
+	}
+
 	pExplosion->Spawn();
-	pExplosion->Use( NULL, pevAttacker ? CBaseEntity::Instance(pevAttacker) : NULL, USE_TOGGLE, 0 );
+	pExplosion->Use( pevAttacker ? CBaseEntity::Instance(pevAttacker) : NULL, NULL, USE_TOGGLE, 0 );
 }
