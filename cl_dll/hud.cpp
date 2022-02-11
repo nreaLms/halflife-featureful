@@ -1632,3 +1632,38 @@ int CHudMoveMode::MsgFunc_MoveMode(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 #endif
+
+bool CHud::ShouldUseConsoleFont()
+{
+	return true;
+}
+
+unsigned int CHud::SplitIntoWordBoundaries(WordBoundary* boundaries, const char *message)
+{
+	unsigned int wordCount = 0;
+
+	const unsigned int len = strlen(message);
+
+	bool searchingForWordStart = true;
+	for (unsigned int i = 0; i<len; ++i)
+	{
+		if (searchingForWordStart && !IsSpaceCharacter(message[i]))
+		{
+			boundaries[wordCount].wordStart = i;
+			searchingForWordStart = false;
+		}
+
+		if (!searchingForWordStart && IsSpaceCharacter(message[i]))
+		{
+			boundaries[wordCount].wordEnd = i;
+			wordCount++;
+			searchingForWordStart = true;
+		}
+	}
+	if (!searchingForWordStart) {
+		boundaries[wordCount].wordEnd = len;
+		wordCount++;
+	}
+
+	return wordCount;
+}

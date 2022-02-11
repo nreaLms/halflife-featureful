@@ -276,6 +276,12 @@ struct Subtitle_t
 #define CAPTION_PROFILES_MAX 32
 #define CAPTIONS_MAX 256
 
+struct WordBoundary
+{
+	unsigned int wordStart;
+	unsigned int wordEnd;
+};
+
 class CHudCaption : public CHudBase
 {
 public:
@@ -993,6 +999,9 @@ public:
 	int wallPuffCount;
 
 	bool m_bFlashlight;
+
+	static bool ShouldUseConsoleFont();
+	static unsigned int SplitIntoWordBoundaries(WordBoundary* boundaries, const char* message);
 };
 
 extern CHud gHUD;

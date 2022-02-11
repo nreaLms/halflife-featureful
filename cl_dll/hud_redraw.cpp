@@ -254,7 +254,7 @@ const unsigned char colors[8][3] =
 {240, 180,  24}
 };
 
-int CHud::DrawHudString(int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b , int length)
+int CHud::DrawHudString(int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b, int length)
 {
 	// xash3d: reset unicode state
 	TextMessageDrawChar( 0, 0, 0, 0, 0, 0 );
