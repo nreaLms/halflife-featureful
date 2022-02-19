@@ -37,6 +37,10 @@ jobs:
         cp dlls/hl.dll oldwindows/dlls/
         cp cl_dll/client.dll oldwindows/cl_dlls/
         cp fgd/halflife.fgd oldwindows/halflife.fgd
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/} | tr '/' '_')"
+      id: extract_branch
     - name: Upload old msvc artifact
       uses: actions/upload-artifact@v2
       with:
