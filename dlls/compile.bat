@@ -1,8 +1,8 @@
 @echo off
 echo Setting environment for minimal Visual C++ 6
-set INCLUDE=%MSVCDir%\VC98\Include
-set LIB=%MSVCDir%\VC98\Lib
-set PATH=%MSVCDir%\VC98\Bin;%MSVCDir%\Common\MSDev98\Bin\;%PATH%
+set INCLUDE=%MSVCDir%\include
+set LIB=%MSVCDir%\lib
+set PATH=%MSVCDir%\bin;%PATH%
 
 echo -- Compiler is MSVC6
 
@@ -141,9 +141,8 @@ set SOURCES=agrunt.cpp ^
 set DEFINES=/DCLIENT_WEAPONS /Dsnprintf=_snprintf /DNO_VOICEGAMEMGR
 set LIBS=user32.lib
 set OUTNAME=hl.dll
-set DEBUG=/debug
 
-cl %DEFINES% %LIBS% %SOURCES% %INCLUDES% -o %OUTNAME% /link /dll /out:%OUTNAME% %DEBUG% /def:".\hl.def"
+cl %DEFINES% %LIBS% %SOURCES% %INCLUDES% -o %OUTNAME% /link /dll /out:%OUTNAME% /release /def:".\hl.def"
 
 echo -- Compile done. Cleaning...
 

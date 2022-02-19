@@ -1,8 +1,8 @@
 @echo off
 echo Setting environment for minimal Visual C++ 6
-set INCLUDE=%MSVCDir%\VC98\Include
-set LIB=%MSVCDir%\VC98\Lib
-set PATH=%MSVCDir%\VC98\Bin;%MSVCDir%\Common\MSDev98\Bin\;%PATH%
+set INCLUDE=%MSVCDir%\include
+set LIB=%MSVCDir%\lib
+set PATH=%MSVCDir%\bin;%PATH%
 
 echo -- Compiler is MSVC6
 
@@ -86,9 +86,8 @@ set SOURCES=../dlls/crossbow.cpp ^
 set DEFINES=/DCLIENT_DLL /DCLIENT_WEAPONS /Dsnprintf=_snprintf /DNO_VOICEGAMEMGR /DGOLDSOURCE_SUPPORT
 set LIBS=user32.lib Winmm.lib
 set OUTNAME=client.dll
-set DEBUG=/debug
 
-cl %DEFINES% %LIBS% %SOURCES% %INCLUDES% -o %OUTNAME% /link /dll /out:%OUTNAME% %DEBUG%
+cl %DEFINES% %LIBS% %SOURCES% %INCLUDES% -o %OUTNAME% /link /dll /out:%OUTNAME% /release
 
 echo -- Compile done. Cleaning...
 
