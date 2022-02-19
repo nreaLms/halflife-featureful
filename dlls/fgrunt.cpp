@@ -2867,6 +2867,8 @@ public:
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	BOOL CheckRangeAttack2(float flDot, float flDist);
 	void GibMonster();
+	void OnDying();
+	void UpdateOnRemove();
 	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void PrescheduleThink();
 
@@ -2881,13 +2883,16 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	CBeam *m_pBeam;
+	BOOL m_torchActive;
+	BOOL m_gasTankExploded;
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_torch_ally, CTorch )
 
 TYPEDESCRIPTION	CTorch::m_SaveData[] =
 {
-	DEFINE_FIELD( CTorch, m_pBeam, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CTorch, m_torchActive, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CTorch, m_gasTankExploded, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CTorch, CHFGrunt )
@@ -2946,12 +2951,12 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 		break;
 
 	case TORCH_AE_ONGAS:
-		MakeGas ();
-		UpdateGas ();
+		MakeGas();
+		UpdateGas();
 		break;
 
 	case TORCH_AE_OFFGAS:
-		KillGas ();
+		KillGas();
 		break;
 	case HGRUNT_ALLY_AE_DROP_GUN:
 		if ( FBitSet( pev->weapons, TORCH_EAGLE ) )
@@ -3017,7 +3022,20 @@ void CTorch::GibMonster()
 	{// throw a gun if the grunt has one
 		DropMyItems(TRUE);
 	}
+	KillGas();
 	CTalkMonster::GibMonster();
+}
+
+void CTorch::OnDying()
+{
+	KillGas();
+	CHFGrunt::OnDying();
+}
+
+void CTorch::UpdateOnRemove()
+{
+	KillGas();
+	CHFGrunt::UpdateOnRemove();
 }
 
 void CTorch::DropMyItems(BOOL isGibbed)
@@ -3041,8 +3059,10 @@ void CTorch::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, 
 	{
 		if (bitsDamageType & (DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB))
 		{
-			if (g_pGameRules->FMonsterCanTakeDamage(this, CBaseEntity::Instance(pevAttacker)))
+			if (!m_gasTankExploded && g_pGameRules->FMonsterCanTakeDamage(this, CBaseEntity::Instance(pevAttacker)))
 			{
+				m_gasTankExploded = TRUE;
+
 				bitsDamageType = (DMG_ALWAYSGIB | DMG_BLAST);
 				flDamage = pev->health + 1;
 				UTIL_Ricochet( ptr->vecEndPos, 1.0 );
@@ -3066,7 +3086,7 @@ void CTorch::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, 
 
 void CTorch::PrescheduleThink()
 {
-	if (m_pBeam)
+	if (m_torchActive)
 	{
 		UpdateGas();
 	}
@@ -3080,6 +3100,10 @@ void CTorch::UpdateGas( void )
 {
 	TraceResult tr;
 	Vector			posGun, angleGun;
+
+	if (m_torchActive && !m_pBeam) {
+		MakeGas();
+	}
 
 	if ( m_pBeam )
 	{
@@ -3148,35 +3172,36 @@ void CTorch::MakeGas( void )
 	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 7 );
 
 	if ( m_pBeam )
-		{
-			GetAttachment( 4, posGun, angleGun );
-			GetAttachment( 3, posGun, angleGun );
-			UTIL_Sparks( posGun );
-			Vector vecEnd = (gpGlobals->v_forward * 5) + posGun;
-			UTIL_TraceLine( posGun, vecEnd, dont_ignore_monsters, edict(), &tr );
+	{
+		GetAttachment( 4, posGun, angleGun );
+		GetAttachment( 3, posGun, angleGun );
+		UTIL_Sparks( posGun );
+		Vector vecEnd = (gpGlobals->v_forward * 5) + posGun;
+		UTIL_TraceLine( posGun, vecEnd, dont_ignore_monsters, edict(), &tr );
 
-			m_pBeam->EntsInit( entindex(), entindex() );
-			m_pBeam->SetColor( 24, 121, 239 );
-			m_pBeam->SetBrightness( 190 );
-			m_pBeam->SetScrollRate( 20 );
-			m_pBeam->SetStartAttachment( 4 );
-			m_pBeam->SetEndAttachment( 3 );
-			m_pBeam->DoSparks( tr.vecEndPos, posGun );
-			m_pBeam->SetFlags( BEAM_FSHADEIN );
-			m_pBeam->pev->spawnflags = SF_BEAM_SPARKSTART | SF_BEAM_TEMPORARY;
-			UTIL_Sparks( tr.vecEndPos );
-		}
-	return;
+		m_pBeam->EntsInit( entindex(), entindex() );
+		m_pBeam->SetColor( 24, 121, 239 );
+		m_pBeam->SetBrightness( 190 );
+		m_pBeam->SetScrollRate( 20 );
+		m_pBeam->SetStartAttachment( 4 );
+		m_pBeam->SetEndAttachment( 3 );
+		m_pBeam->DoSparks( tr.vecEndPos, posGun );
+		m_pBeam->SetFlags( BEAM_FSHADEIN );
+		m_pBeam->pev->spawnflags = SF_BEAM_SPARKSTART | SF_BEAM_TEMPORARY;
+		UTIL_Sparks( tr.vecEndPos );
+	}
+
+	m_torchActive = TRUE;
 }
 
-void CTorch :: KillGas( void )
+void CTorch::KillGas( void )
 {
+	m_torchActive = FALSE;
 	if ( m_pBeam )
 	{
 		UTIL_Remove( m_pBeam );
 		m_pBeam = NULL;
 	}
-	return;
 }
 
 //=========================================================
