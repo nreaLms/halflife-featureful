@@ -149,6 +149,10 @@ struct skilldata_t
 	float otisHealth;
 #endif
 
+#if FEATURE_KATE
+	float kateHealth;
+#endif
+
 #if FEATURE_ROBOGRUNT
 	float rgruntExplode;
 #endif

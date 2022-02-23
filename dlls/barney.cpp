@@ -85,11 +85,12 @@ public:
 
 	int bodystate;
 	CUSTOM_SCHEDULES
-	
+
 protected:
 	void SpawnImpl(const char* modelName, float health);
 	void PrecacheImpl( const char* modelName );
 	void TraceAttackImpl( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet);
+	virtual bool PrioritizeMeleeAttack() { return false; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_barney, CBarney )
@@ -635,6 +636,9 @@ Schedule_t *CBarney::GetSchedule()
 
 			if( HasConditions( bits_COND_HEAVY_DAMAGE ) )
 				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+
+			if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) && PrioritizeMeleeAttack() )
+				return GetScheduleOfType( SCHED_MELEE_ATTACK1 );
 		}
 		break;
 	case MONSTERSTATE_ALERT:	
@@ -907,5 +911,480 @@ void CDeadOtis::KeyValue( KeyValueData *pkvd )
 	}
 	else 
 		CDeadBarney::KeyValue( pkvd );
+}
+#endif
+
+#if FEATURE_BARNIEL
+class CBarniel : public CBarney
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	void TalkInit( void );
+	const char* DefaultDisplayName() { return "Barniel"; }
+	const char* ReverseRelationshipModel() { return NULL; }
+	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	void AlertSound( void );
+	void DeathSound( void );
+	void PainSound( void );
+	void PlayKillSentence();
+
+	void OnDying();
+};
+
+LINK_ENTITY_TO_CLASS( monster_barniel, CBarniel )
+
+void CBarniel::Spawn()
+{
+	Precache();
+	SpawnImpl("models/barniel.mdl", gSkillData.barneyHealth);
+
+	if (bodystate == -1) {
+		bodystate = RANDOM_LONG(0,1);
+	}
+	SetBodygroup(1, bodystate);
+	m_fGunDrawn = FALSE;
+	if (bodystate == BARNEY_BODY_GUNDRAWN) {
+		m_fGunDrawn = TRUE;
+	}
+}
+
+void CBarniel::Precache()
+{
+	PrecacheImpl("models/barniel.mdl");
+	PRECACHE_SOUND( "barniel/bn_attack1.wav" );
+	PRECACHE_SOUND( "barniel/bn_attack2.wav" );
+
+	PRECACHE_SOUND( "barniel/bn_pain1.wav" );
+	PRECACHE_SOUND( "barniel/bn_die1.wav" );
+
+	TalkInit();
+	CTalkMonster::Precache();
+}
+
+void CBarniel::TalkInit()
+{
+	CTalkMonster::TalkInit();
+
+	m_szGrp[TLK_ANSWER] = "BN_ANSWER";
+	m_szGrp[TLK_QUESTION] =	"BN_QUESTION";
+	m_szGrp[TLK_IDLE] = "BN_IDLE";
+	m_szGrp[TLK_STARE] = "BN_STARE";
+	m_szGrp[TLK_USE] = "BN_OK";
+	m_szGrp[TLK_UNUSE] = "BN_WAIT";
+	m_szGrp[TLK_DECLINE] = "BN_POK";
+	m_szGrp[TLK_STOP] = "BN_STOP";
+
+	m_szGrp[TLK_NOSHOOT] = "BN_SCARED";
+	m_szGrp[TLK_HELLO] = "BN_HELLO";
+
+	m_szGrp[TLK_PLHURT1] = "!BN_CUREA";
+	m_szGrp[TLK_PLHURT2] = "!BN_CUREB";
+	m_szGrp[TLK_PLHURT3] = "!BN_CUREC";
+
+	m_szGrp[TLK_PHELLO] = "BN_PHELLO";
+	m_szGrp[TLK_PIDLE] = "BN_PIDLE";
+	m_szGrp[TLK_PQUESTION] = "BN_PQUEST";
+
+	m_szGrp[TLK_SMELL] = "BN_SMELL";
+
+	m_szGrp[TLK_WOUND] = "BN_WOUND";
+	m_szGrp[TLK_MORTAL] = "BN_MORTAL";
+
+	m_szGrp[TLK_SHOT] = "BN_SHOT";
+	m_szGrp[TLK_MAD] = "BN_MAD";
+
+	m_voicePitch = 100;
+}
+
+void CBarniel::HandleAnimEvent( MonsterEvent_t *pEvent )
+{
+	switch( pEvent->event )
+	{
+	case BARNEY_AE_SHOOT:
+		BarneyFirePistol("barniel/bn_attack2.wav", BULLET_MONSTER_9MM);
+		break;
+	default:
+		CBarney::HandleAnimEvent( pEvent );
+	}
+}
+
+void CBarniel::AlertSound()
+{
+	if( m_hEnemy != 0 )
+	{
+		if( FOkToSpeak(SPEAK_DISREGARD_ENEMY) && !m_hEnemy->IsPlayer() )
+		{
+			PlaySentence( "BN_ATTACK", RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+		}
+	}
+}
+
+void CBarniel::DeathSound( void )
+{
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barniel/bn_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+}
+
+void CBarniel::PainSound()
+{
+	if( gpGlobals->time < m_painTime )
+		return;
+
+	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barniel/bn_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+}
+
+void CBarniel::PlayKillSentence()
+{
+	PlaySentence( "BN_KILL", 4, VOL_NORM, ATTN_NORM );
+}
+
+void CBarniel::OnDying()
+{
+	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && pev->body < BARNEY_BODY_GUNGONE )
+	{
+		Vector vecGunPos;
+		Vector vecGunAngles;
+
+		pev->body = BARNEY_BODY_GUNGONE;
+		GetAttachment( 0, vecGunPos, vecGunAngles );
+
+		DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+	}
+	CTalkMonster::OnDying();
+}
+
+class CDeadBarniel : public CDeadBarney
+{
+public:
+	void Spawn( void );
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[3];
+};
+
+const char *CDeadBarniel::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach" };
+
+const char* CDeadBarniel::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_barniel_dead, CDeadBarniel )
+
+void CDeadBarniel::Spawn( )
+{
+	SpawnHelper("models/barniel.mdl");
+	MonsterInitDead();
+}
+#endif
+
+#if FEATURE_KATE
+#define		KATE_AE_KICK		( 6 )
+#define KATE_LIMP_HEALTH 40
+
+class CKate : public CBarney
+{
+public:
+	void Spawn( void );
+	void Precache( void );
+	void TalkInit( void );
+	const char* DefaultDisplayName() { return "Kate"; }
+	const char* ReverseRelationshipModel() { return NULL; }
+	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	int LookupActivity(int activity);
+	int DefaultToleranceLevel() { return TOLERANCE_AVERAGE; }
+	BOOL CheckMeleeAttack1( float flDot, float flDist );
+	void AlertSound( void );
+	void DeathSound( void );
+	void PainSound( void );
+	void PlayKillSentence();
+
+	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	void OnDying();
+
+protected:
+	CBaseEntity* FindKickTarget();
+	bool PrioritizeMeleeAttack() { return true; }
+	float LimpHealth();
+
+	int m_iCombatState;
+};
+
+LINK_ENTITY_TO_CLASS( monster_kate, CKate )
+
+void CKate::Spawn()
+{
+	Precache();
+	SpawnImpl("models/kate.mdl", gSkillData.kateHealth);
+	m_iCombatState = -1;
+
+	if (bodystate == -1) {
+		bodystate = RANDOM_LONG(0,1);
+	}
+	SetBodygroup(1, bodystate);
+	m_fGunDrawn = FALSE;
+	if (bodystate == BARNEY_BODY_GUNDRAWN) {
+		m_fGunDrawn = TRUE;
+	}
+}
+
+void CKate::Precache()
+{
+	PrecacheImpl("models/kate.mdl");
+	PRECACHE_SOUND( "kate/ka_attack1.wav" );
+	PRECACHE_SOUND( "kate/ka_attack2.wav" );
+
+	PRECACHE_SOUND( "kate/ka_pain1.wav" );
+	PRECACHE_SOUND( "kate/ka_pain2.wav" );
+	PRECACHE_SOUND( "kate/ka_die1.wav" );
+
+	PRECACHE_SOUND( "zombie/claw_miss1.wav" );
+	PRECACHE_SOUND( "zombie/claw_miss2.wav" );
+	PRECACHE_SOUND( "common/kick.wav" );
+	PRECACHE_SOUND( "common/punch.wav" );
+
+	TalkInit();
+	CTalkMonster::Precache();
+}
+
+void CKate::TalkInit()
+{
+	CTalkMonster::TalkInit();
+
+	m_szGrp[TLK_ANSWER] = "KA_ANSWER";
+	m_szGrp[TLK_QUESTION] =	"KA_QUESTION";
+	m_szGrp[TLK_IDLE] = "KA_IDLE";
+	m_szGrp[TLK_STARE] = "KA_STARE";
+	m_szGrp[TLK_USE] = "KA_OK";
+	m_szGrp[TLK_UNUSE] = "KA_WAIT";
+	m_szGrp[TLK_DECLINE] = "KA_POK";
+	m_szGrp[TLK_STOP] = "KA_STOP";
+
+	m_szGrp[TLK_NOSHOOT] = "KA_SCARED";
+	m_szGrp[TLK_HELLO] = "KA_HELLO";
+
+	m_szGrp[TLK_PLHURT1] = "!KA_CUREA";
+	m_szGrp[TLK_PLHURT2] = "!KA_CUREB";
+	m_szGrp[TLK_PLHURT3] = "!KA_CUREC";
+
+	m_szGrp[TLK_PHELLO] = "KA_PHELLO";
+	m_szGrp[TLK_PIDLE] = "KA_PIDLE";
+	m_szGrp[TLK_PQUESTION] = "KA_PQUEST";
+
+	m_szGrp[TLK_SMELL] = "KA_SMELL";
+
+	m_szGrp[TLK_WOUND] = "KA_WOUND";
+	m_szGrp[TLK_MORTAL] = "KA_MORTAL";
+
+	m_szGrp[TLK_SHOT] = "KA_SHOT";
+	m_szGrp[TLK_MAD] = "KA_MAD";
+
+	m_voicePitch = 100;
+}
+
+void CKate::HandleAnimEvent( MonsterEvent_t *pEvent )
+{
+	switch( pEvent->event )
+	{
+	case BARNEY_AE_SHOOT:
+		BarneyFirePistol("kate/ka_attack2.wav", BULLET_MONSTER_9MM);
+		break;
+	case KATE_AE_KICK:
+	{
+		CBaseEntity *pHurt = FindKickTarget();
+		if( pHurt )
+		{
+			const char *pszSound;
+			if( m_iCombatState == -1 )
+			{
+				pszSound = "common/kick.wav";
+			}
+			else
+			{
+				++m_iCombatState;
+				if( m_iCombatState == 3 )
+					pszSound = "common/kick.wav";
+				else
+					pszSound = "common/punch.wav";
+			}
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, pszSound, 1, ATTN_NORM, 0, PITCH_NORM );
+			UTIL_MakeVectors( pev->angles );
+
+			pHurt->pev->punchangle.x = 5;
+			pHurt->pev->velocity = pHurt->pev->velocity - gpGlobals->v_forward * 100 + gpGlobals->v_up * 50;
+			pHurt->TakeDamage( pev, pev, gSkillData.hgruntDmgKick, DMG_CLUB );
+		}
+	}
+		break;
+	default:
+		CBarney::HandleAnimEvent( pEvent );
+	}
+}
+
+int CKate::LookupActivity(int activity)
+{
+	switch (activity)
+	{
+	case ACT_RUN:
+		if( pev->health <= LimpHealth() )
+		{
+			// limp!
+			return CBarney::LookupActivity( ACT_RUN_HURT );
+		}
+		else
+		{
+			return CBarney::LookupActivity( activity );
+		}
+	case ACT_WALK:
+		if( pev->health <= LimpHealth() )
+		{
+			// limp!
+			return CBarney::LookupActivity( ACT_WALK_HURT );
+		}
+		else
+		{
+			return CBarney::LookupActivity( activity );
+		}
+	case ACT_MELEE_ATTACK1:
+		if( RANDOM_LONG( 0, 2 ) )
+		{
+			m_iCombatState = -1;
+			return LookupSequence( "karate_hit" );
+		}
+		else
+		{
+			m_iCombatState = 0;
+			return LookupSequence( "karate_bighit" );
+		}
+		break;
+	default:
+		return CBarney::LookupActivity( activity );
+	}
+}
+
+BOOL CKate::CheckMeleeAttack1(float flDot, float flDist)
+{
+	CBaseMonster *pEnemy = 0;
+	if( m_hEnemy != 0 )
+		pEnemy = m_hEnemy->MyMonsterPointer();
+
+	if( !pEnemy )
+		return FALSE;
+
+	const int enemyClassify = pEnemy->DefaultClassify();
+	if( flDist <= 64.0f && flDot >= 0.7f &&
+		 enemyClassify != CLASS_ALIEN_BIOWEAPON &&
+		 enemyClassify != CLASS_PLAYER_BIOWEAPON )
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void CKate::AlertSound()
+{
+	if( m_hEnemy != 0 )
+	{
+		if( FOkToSpeak(SPEAK_DISREGARD_ENEMY) && !m_hEnemy->IsPlayer() )
+		{
+			PlaySentence( "KA_ATTACK", RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+		}
+	}
+}
+
+void CKate::DeathSound( void )
+{
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "kate/ka_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+}
+
+void CKate::PainSound()
+{
+	if( gpGlobals->time < m_painTime )
+		return;
+
+	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
+
+	switch( RANDOM_LONG( 0, 1 ) )
+	{
+	case 0:
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "kate/ka_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		break;
+	case 1:
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "kate/ka_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		break;
+	}
+}
+
+void CKate::PlayKillSentence()
+{
+	PlaySentence( "KA_KILL", 4, VOL_NORM, ATTN_NORM );
+}
+
+void CKate::OnDying()
+{
+	if( g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && pev->body < BARNEY_BODY_GUNGONE )
+	{
+		Vector vecGunPos;
+		Vector vecGunAngles;
+
+		pev->body = BARNEY_BODY_GUNGONE;
+		GetAttachment( 0, vecGunPos, vecGunAngles );
+
+		DropItem( "weapon_9mmhandgun", vecGunPos, vecGunAngles );
+	}
+	CTalkMonster::OnDying();
+}
+
+void CKate::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+{
+	TraceAttackImpl( pevAttacker, flDamage, vecDir, ptr, bitsDamageType, false);
+}
+
+CBaseEntity* CKate::FindKickTarget()
+{
+	TraceResult tr;
+
+	UTIL_MakeVectors( pev->angles );
+	Vector vecStart = pev->origin;
+	vecStart.z += pev->size.z * 0.5f;
+	Vector vecEnd = vecStart + ( gpGlobals->v_forward * 70 );
+
+	UTIL_TraceHull( vecStart, vecEnd, dont_ignore_monsters, head_hull, ENT( pev ), &tr );
+
+	if( tr.pHit )
+	{
+		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
+		if (pEntity && IRelationship(pEntity) != R_AL)
+			return pEntity;
+	}
+	return NULL;
+}
+
+float CKate::LimpHealth()
+{
+	return Q_min(pev->max_health/2.0f, KATE_LIMP_HEALTH);
+}
+
+class CDeadKate : public CDeadBarney
+{
+public:
+	void Spawn( void );
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[3];
+};
+
+const char *CDeadKate::m_szPoses[] = { "lying_on_back", "lying_on_side", "lying_on_stomach" };
+
+const char* CDeadKate::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_kate_dead, CDeadKate )
+
+void CDeadKate::Spawn( )
+{
+	SpawnHelper("models/kate.mdl");
+	MonsterInitDead();
 }
 #endif

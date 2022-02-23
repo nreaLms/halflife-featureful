@@ -406,6 +406,13 @@ cvar_t	sk_otis_health2	= {"sk_otis_health2","0"};
 cvar_t	sk_otis_health3	= {"sk_otis_health3","0"};
 #endif
 
+#if FEATURE_KATE
+// Kate
+cvar_t	sk_kate_health1	= {"sk_kate_health1","0"};
+cvar_t	sk_kate_health2	= {"sk_kate_health2","0"};
+cvar_t	sk_kate_health3	= {"sk_kate_health3","0"};
+#endif
+
 #if FEATURE_PITDRONE
 // Pitdrone
 cvar_t	sk_pitdrone_health1 = { "sk_pitdrone_health1", "0" };
@@ -1293,6 +1300,13 @@ void GameDLLInit( void )
 	CVAR_REGISTER ( &sk_otis_health1 );// {"sk_barney_health1","0"};
 	CVAR_REGISTER ( &sk_otis_health2 );// {"sk_barney_health2","0"};
 	CVAR_REGISTER ( &sk_otis_health3 );// {"sk_barney_health3","0"};
+#endif
+
+#if FEATURE_KATE
+	// Kate
+	CVAR_REGISTER ( &sk_kate_health1 );
+	CVAR_REGISTER ( &sk_kate_health2 );
+	CVAR_REGISTER ( &sk_kate_health3 );
 #endif
 
 #if FEATURE_PITDRONE
