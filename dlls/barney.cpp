@@ -441,9 +441,9 @@ void CBarney::TalkInit()
 	m_szGrp[TLK_PLHURT2] = "!BA_CUREB"; 
 	m_szGrp[TLK_PLHURT3] = "!BA_CUREC";
 
-	m_szGrp[TLK_PHELLO] = NULL;	//"BA_PHELLO";		// UNDONE
-	m_szGrp[TLK_PIDLE] = NULL;	//"BA_PIDLE";			// UNDONE
-	m_szGrp[TLK_PQUESTION] = "BA_PQUEST";		// UNDONE
+	m_szGrp[TLK_PHELLO] = "BA_PHELLO";
+	m_szGrp[TLK_PIDLE] = "BA_PIDLE";
+	m_szGrp[TLK_PQUESTION] = "BA_PQUEST";
 
 	m_szGrp[TLK_SMELL] = "BA_SMELL";
 	
@@ -775,9 +775,9 @@ void COtis::TalkInit()
 	m_szGrp[TLK_PLHURT2] =	"!OT_CUREB"; 
 	m_szGrp[TLK_PLHURT3] =	"!OT_CUREC";
 	
-	m_szGrp[TLK_PHELLO] =	NULL;	//"BA_PHELLO";		// UNDONE
-	m_szGrp[TLK_PIDLE] =	NULL;	//"BA_PIDLE";			// UNDONE
-	m_szGrp[TLK_PQUESTION] = "OT_PQUEST";		// UNDONE
+	m_szGrp[TLK_PHELLO] =	"OT_PHELLO";
+	m_szGrp[TLK_PIDLE] =	"OT_PIDLE";
+	m_szGrp[TLK_PQUESTION] = "OT_PQUEST";
 	
 	m_szGrp[TLK_SMELL] =	"OT_SMELL";
 	
