@@ -67,6 +67,7 @@ public:
 
 	void DeathSound( void );
 	void PainSound( void );
+	virtual void PlayKillSentence();
 
 	void TalkInit( void );
 
@@ -89,7 +90,6 @@ protected:
 	void SpawnImpl(const char* modelName, float health);
 	void PrecacheImpl( const char* modelName );
 	void TraceAttackImpl( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet);
-	Schedule_t *GetScheduleImpl(const char *sentenceKill);
 };
 
 LINK_ENTITY_TO_CLASS( monster_barney, CBarney )
@@ -492,6 +492,11 @@ void CBarney::PainSound( void )
 	}
 }
 
+void CBarney::PlayKillSentence()
+{
+	PlaySentence( "BA_KILL", 4, VOL_NORM, ATTN_NORM );
+}
+
 //=========================================================
 // DeathSound 
 //=========================================================
@@ -593,7 +598,7 @@ Schedule_t *CBarney::GetScheduleOfType( int Type )
 // monster's member function to get a pointer to a schedule
 // of the proper type.
 //=========================================================
-Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
+Schedule_t *CBarney::GetSchedule()
 {
 	if( HasConditions( bits_COND_HEAR_SOUND ) )
 	{
@@ -606,7 +611,7 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 	}
 	if( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 	{
-		PlaySentence( sentenceKill, 4, VOL_NORM, ATTN_NORM );
+		PlayKillSentence();
 	}
 
 	switch( m_MonsterState )
@@ -655,11 +660,6 @@ Schedule_t *CBarney::GetScheduleImpl(const char *sentenceKill)
 	}
 
 	return CTalkMonster::GetSchedule();
-}
-
-Schedule_t *CBarney :: GetSchedule ( void )
-{
-	return GetScheduleImpl("BA_KILL");
 }
 
 //=========================================================
@@ -714,11 +714,10 @@ public:
 	const char* DefaultDisplayName() { return "Otis"; }
 	const char* ReverseRelationshipModel() { return "models/otisf.mdl"; }
 	void AlertSound( void );
-	
+	void PlayKillSentence();
+
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
-
-	Schedule_t *GetSchedule ( void );
 	
 	void KeyValue( KeyValueData *pkvd );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -802,14 +801,14 @@ void COtis :: AlertSound( void )
 	}
 }
 
+void COtis::PlayKillSentence()
+{
+	PlaySentence( "OT_KILL", 4, VOL_NORM, ATTN_NORM );
+}
+
 void COtis::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	TraceAttackImpl( pevAttacker, flDamage, vecDir, ptr, bitsDamageType, false);
-}
-
-Schedule_t* COtis :: GetSchedule ( void )
-{
-	return GetScheduleImpl("OT_KILL");
 }
 
 void COtis::KeyValue( KeyValueData *pkvd )
