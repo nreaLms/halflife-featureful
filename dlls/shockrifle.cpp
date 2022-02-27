@@ -156,15 +156,19 @@ void CShockrifle::PrimaryAttack()
 
 #ifndef CLIENT_DLL
 	Vector anglesAim = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
-	anglesAim.x = -anglesAim.x;
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
 
-	Vector vecSrc;
-	vecSrc = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 8 + gpGlobals->v_right * 12 + gpGlobals->v_up * -12;
+	UTIL_MakeVectors(anglesAim);
+	anglesAim.x = -anglesAim.x;
+
+	const Vector vecSrc =
+		m_pPlayer->GetGunPosition() +
+		gpGlobals->v_forward * 8 +
+		gpGlobals->v_right * 9 +
+		gpGlobals->v_up * -7;
 
 	CShock::Shoot(m_pPlayer->pev, anglesAim, vecSrc, gpGlobals->v_forward * CShock::ShockSpeed());
 
-	m_flRechargeTime = gpGlobals->time + 1;
+	m_flRechargeTime = gpGlobals->time + 1.0f;
 #endif
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
