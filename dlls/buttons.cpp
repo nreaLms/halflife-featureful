@@ -495,9 +495,14 @@ void CMultiSource::Register( void )
 
 int CBaseButton::ObjectCaps( void )
 {
-	return (CBaseToggle:: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) |
-			((pev->takedamage || FBitSet(pev->spawnflags,SF_BUTTON_PLAYER_CANT_USE))?0:FCAP_IMPULSE_USE) |
-			(FBitSet(pev->spawnflags, SF_BUTTON_ONLYDIRECT)?FCAP_ONLYDIRECT_USE:0);
+	int objectCaps = (CBaseToggle:: ObjectCaps() & ~FCAP_ACROSS_TRANSITION);
+	if (!pev->takedamage && !FBitSet(pev->spawnflags,SF_BUTTON_PLAYER_CANT_USE))
+		objectCaps |= FCAP_IMPULSE_USE;
+	if (FBitSet(pev->spawnflags, SF_BUTTON_ONLYDIRECT) || m_iDirectUse == PLAYER_USE_POLICY_DIRECT)
+		objectCaps |= FCAP_ONLYDIRECT_USE;
+	if (m_iDirectUse == PLAYER_USE_POLICY_VISIBLE)
+		objectCaps |= FCAP_ONLYVISIBLE_USE;
+	return objectCaps;
 }
 
 // CBaseButton
@@ -519,6 +524,7 @@ TYPEDESCRIPTION CBaseButton::m_SaveData[] =
 	DEFINE_FIELD( CBaseButton, m_unlockedSoundOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_lockedSentenceOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_unlockedSentenceOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_iDirectUse, FIELD_SHORT ),
 };
 	
 IMPLEMENT_SAVERESTORE( CBaseButton, CBaseToggle )
@@ -703,6 +709,11 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence_override" ) )
 	{
 		m_unlockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "directuse"))
+	{
+		m_iDirectUse = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else 

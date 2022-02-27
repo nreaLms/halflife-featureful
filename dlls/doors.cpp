@@ -43,12 +43,16 @@ public:
 	virtual void Blocked( CBaseEntity *pOther );
 
 	virtual int ObjectCaps( void ) 
-	{ 
-		if( pev->spawnflags & SF_ITEM_USE_ONLY )
-			return ( CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_IMPULSE_USE |
-					(m_iDirectUse ? FCAP_ONLYDIRECT_USE : 0);
-		else
-			return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION);
+	{
+		int objectCaps = ( CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION );
+		if( pev->spawnflags & SF_ITEM_USE_ONLY ) {
+			objectCaps |= FCAP_IMPULSE_USE;
+			if (m_iDirectUse == PLAYER_USE_POLICY_DIRECT)
+				objectCaps |= FCAP_ONLYDIRECT_USE;
+			else if (m_iDirectUse == PLAYER_USE_POLICY_VISIBLE)
+				objectCaps |= FCAP_ONLYVISIBLE_USE;
+		}
+		return objectCaps;
 	};
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -78,7 +82,7 @@ public:
 	BYTE m_bUnlockedSound;	
 	BYTE m_bUnlockedSentence;
 
-	BOOL	m_iDirectUse;
+	short	m_iDirectUse;
 	BOOL	m_fIgnoreTargetname;
 	short	m_iObeyTriggerMode;
 
@@ -119,7 +123,7 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_bUnlockedSound, FIELD_CHARACTER ),
 	DEFINE_FIELD( CBaseDoor, m_bUnlockedSentence, FIELD_CHARACTER ),
 
-	DEFINE_FIELD( CBaseDoor, m_iDirectUse, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CBaseDoor, m_iDirectUse, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseDoor, m_fIgnoreTargetname, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBaseDoor, m_iObeyTriggerMode, FIELD_SHORT ),
 
@@ -285,7 +289,7 @@ void CBaseDoor::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "directuse"))
 	{
-		m_iDirectUse = atoi(pkvd->szValue) != 0;
+		m_iDirectUse = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fIgnoreTargetname"))

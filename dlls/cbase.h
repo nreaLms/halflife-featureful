@@ -50,6 +50,13 @@ CBaseEntity
 // UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 #define		FCAP_FORCE_TRANSITION		0x00000080		// ALWAYS goes across transitions
 
+enum
+{
+	PLAYER_USE_POLICY_DEFAULT = 0,
+	PLAYER_USE_POLICY_DIRECT,
+	PLAYER_USE_POLICY_VISIBLE,
+};
+
 #include "saverestore.h"
 #include "schedule.h"
 
@@ -723,6 +730,8 @@ public:
 	string_t m_unlockedSoundOverride;
 	string_t m_lockedSentenceOverride;
 	string_t m_unlockedSentenceOverride;
+
+	short m_iDirectUse;
 };
 
 //

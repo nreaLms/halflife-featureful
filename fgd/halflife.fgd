@@ -1878,14 +1878,20 @@
 	spawnflags(flags) =
 	[
 		1: "Don't move" : 1
-		16: "Direct use only": 0
+		16: "Direct use only (spirit compat)": 0
 		32: "Toggle" : 0
 		64: "Sparks" : 0
 		256:"Touch Activates": 0
 		512:"Player Can't Use": 0
 	]
-	_minlight(string) : "Minimum light level"
 	target_on_locked(target_destination) : "Target on locked" : : "Trigger if used when locked"
+	directuse(choices) : "Player use policy" =
+	[
+		0 : "No"
+		1 : "Direct only"
+		2 : "Visible only"
+	]
+	_minlight(string) : "Minimum light level"
 ]
 
 @SolidClass base(Global,RenderFields, Targetname, Angles, ZHLT) = func_conveyor : "Conveyor Belt"
@@ -1901,19 +1907,21 @@
 
 @SolidClass base(Door, ZHLT) = func_door : "Basic door"
 [
-	directuse(choices) : "Direct use only" =
+	directuse(choices) : "Player use policy" =
 	[
 		0 : "No"
-		1 : "Yes"
+		1 : "Direct only"
+		2 : "Visible only"
 	]
 ]
 
 @SolidClass base(Door, ZHLT) = func_door_rotating : "Rotating door"
 [
-	directuse(choices) : "Direct use only" =
+	directuse(choices) : "Player use policy" =
 	[
 		0 : "No"
-		1 : "Yes"
+		1 : "Direct only"
+		2 : "Visible only"
 	]
 	spawnflags(flags) =
 	[
@@ -2067,12 +2075,18 @@
 	[
 		1 : "Not solid" : 0
 		2 : "Reverse Dir" : 0
-		16: "Direct use only": 0
+		16: "Direct use only (spirit compat)": 0
 		32: "Toggle" : 0
 		64: "X Axis" : 0
 		128: "Y Axis" : 0
 		256:"Touch Activates": 0
 		512:"Player Can't Use": 0
+	]
+	directuse(choices) : "Player use policy" =
+	[
+		0 : "No"
+		1 : "Direct only"
+		2 : "Visible only"
 	]
 	_minlight(string) : "Minimum light level"
 ]
