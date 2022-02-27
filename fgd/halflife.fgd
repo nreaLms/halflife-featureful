@@ -1356,6 +1356,7 @@
 [
 	target(string) : "Initial position (blank = here) [LP]"
 	iMagnitude(Integer) : "Magnitude" : 100
+	iRadius(Integer) : "Custom impact radius" : : "By default explosion impact radius equals its magnitude multiplied by 2.5. This parameter allows to configure the effective radius"
 	spawnflags(flags) =
 	[
 		1: "No Damage" : 0

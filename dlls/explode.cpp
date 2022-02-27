@@ -25,6 +25,7 @@
 #include "decals.h"
 #include "explode.h"
 #include "locus.h"
+#include "weapons.h"
 
 // Spark Shower
 class CShower : public CBaseEntity
@@ -95,12 +96,14 @@ public:
 
 	int m_iMagnitude;// how large is the fireball? how much damage?
 	int m_spriteScale; // what's the exact fireball sprite scale? 
+	int m_iRadius;
 };
 
 TYPEDESCRIPTION	CEnvExplosion::m_SaveData[] =
 {
 	DEFINE_FIELD( CEnvExplosion, m_iMagnitude, FIELD_INTEGER ),
 	DEFINE_FIELD( CEnvExplosion, m_spriteScale, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvExplosion, m_iRadius, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvExplosion, CBaseMonster )
@@ -111,6 +114,11 @@ void CEnvExplosion::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "iMagnitude" ) )
 	{
 		m_iMagnitude = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "iRadius" ) )
+	{
+		m_iRadius = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -232,7 +240,10 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		if (FBitSet(pev->spawnflags, SF_ENVEXPLOSION_ACTIVATOR_IS_ATTACKER) && pActivator) {
 			pevAttacker = pActivator->pev;
 		}
-		RadiusDamage( pev, pevAttacker, m_iMagnitude, CLASS_NONE, DMG_BLAST );
+		if (m_iRadius <= 0)
+			RadiusDamage( pev, pevAttacker, m_iMagnitude, CLASS_NONE, DMG_BLAST );
+		else
+			::RadiusDamage( pev->origin, pev, pevAttacker, m_iMagnitude, m_iRadius, CLASS_NONE, DMG_BLAST );
 	}
 
 	SetThink( &CEnvExplosion::Smoke );
