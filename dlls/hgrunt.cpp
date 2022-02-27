@@ -2397,6 +2397,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pGrunt->m_freeRoam = m_freeRoam;
 	pGrunt->m_activeAfterCombat = m_activeAfterCombat;
 	pGrunt->m_sizeForGrapple = m_sizeForGrapple;
+	pGrunt->m_gibPolicy = m_gibPolicy;
 	PrepareBeforeSpawn(pEntity);
 	DispatchSpawn(pEntity->edict());
 	pGrunt->pev->movetype = MOVETYPE_FLY;

@@ -357,7 +357,17 @@
 	gibmodel(studio) : "Custom gib model"
 ]
 
-@BaseClass base(MonsterExtraBase, Classification, BloodColor, FielfOfView, FreeRoaming, ActiveAfterAlert, SizeForGrapple, PrisonerTo, MonsterSoundMask) = MonsterExtra
+@BaseClass = MonsterGibPolicy
+[
+	gib_policy(choices) : "Gibbing policy" =
+	[
+		0 : "Default"
+		1 : "Prefer gibbing"
+		2 : "Prefer not to gib"
+	]
+]
+
+@BaseClass base(MonsterExtraBase, Classification, BloodColor, FielfOfView, FreeRoaming, ActiveAfterAlert, SizeForGrapple, PrisonerTo, MonsterSoundMask, MonsterGibPolicy) = MonsterExtra
 [
 	displayname(string) : "In-game Name" : : "Name that's displayed when player looks at the monster if mp_allowmonsterinfo is enabled"
 ]

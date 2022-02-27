@@ -558,6 +558,7 @@ int CMonsterMaker::MakeMonster( void )
 		createdMonster->m_freeRoam = m_freeRoam;
 		createdMonster->m_activeAfterCombat = m_activeAfterCombat;
 		createdMonster->m_sizeForGrapple = m_sizeForGrapple;
+		createdMonster->m_gibPolicy = m_gibPolicy;
 
 		createdMonster->SetHead(m_iHead);
 

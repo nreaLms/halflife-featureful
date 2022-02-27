@@ -682,6 +682,11 @@ void CBaseMonster::BecomeDead( void )
 
 BOOL CBaseMonster::ShouldGibMonster( int iGib )
 {
+	if ( iGib != GIB_NEVER && m_gibPolicy == GIBBING_POLICY_PREFER_GIB )
+		return TRUE;
+	if ( iGib != GIB_ALWAYS && m_gibPolicy == GIBBING_POLICY_PREFER_NOGIB )
+		return FALSE;
+
 	if( ( iGib == GIB_NORMAL && pev->health < GIB_HEALTH_VALUE ) || ( iGib == GIB_ALWAYS ) )
 		return TRUE;
 

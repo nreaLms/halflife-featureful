@@ -164,6 +164,13 @@ enum
 #define SUGGEST_SCHEDULE_FLAG_SPOT_IS_INVALID ( 1 << 24 )
 #define SUGGEST_SCHEDULE_FLAG_SPOT_ENTITY_IS_PROVIDED ( 1 << 25 )
 
+enum
+{
+	GIBBING_POLICY_DEFAULT = 0,
+	GIBBING_POLICY_PREFER_GIB,
+	GIBBING_POLICY_PREFER_NOGIB,
+};
+
 //
 // A gib is a chunk of a body, or a piece of wood/metal/rocks/etc.
 //

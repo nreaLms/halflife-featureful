@@ -439,6 +439,8 @@ public:
 	float m_suggestedScheduleMaxDist;
 	int m_suggestedScheduleFlags;
 
+	short m_gibPolicy;
+
 	float m_flLastYawTime;
 
 	EHANDLE m_lastMoveBlocker;

@@ -136,6 +136,8 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleMinDist, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleMaxDist, FIELD_FLOAT ),
 	DEFINE_FIELD( CBaseMonster, m_suggestedScheduleFlags, FIELD_INTEGER ),
+
+	DEFINE_FIELD( CBaseMonster, m_gibPolicy, FIELD_SHORT ),
 };
 
 //IMPLEMENT_SAVERESTORE( CBaseMonster, CBaseToggle )
@@ -3624,6 +3626,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "size_for_grapple" ) )
 	{
 		m_sizeForGrapple = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "gib_policy" ) )
+	{
+		m_gibPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
