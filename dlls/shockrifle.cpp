@@ -166,6 +166,8 @@ void CShockrifle::PrimaryAttack()
 		gpGlobals->v_right * 9 +
 		gpGlobals->v_up * -7;
 
+	m_pPlayer->GetAutoaimVectorFromPoint(vecSrc, AUTOAIM_10DEGREES);
+
 	CShock::Shoot(m_pPlayer->pev, anglesAim, vecSrc, gpGlobals->v_forward * CShock::ShockSpeed());
 
 	m_flRechargeTime = gpGlobals->time + 1.0f;
@@ -230,6 +232,8 @@ void CShockrifle::Reload(void)
 void CShockrifle::WeaponIdle(void)
 {
 	Reload();
+
+	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;

@@ -4854,7 +4854,12 @@ void CBasePlayer::EnableControl( BOOL fControl )
 // Autoaim
 // set crosshair position to point to enemey
 //=========================================================
-Vector CBasePlayer::GetAutoaimVector( float flDelta )
+Vector CBasePlayer::GetAutoaimVector(float flDelta)
+{
+	return GetAutoaimVectorFromPoint(GetGunPosition(), flDelta);
+}
+
+Vector CBasePlayer::GetAutoaimVectorFromPoint( const Vector& vecSrc, float flDelta )
 {
 	if( g_iSkillLevel == SKILL_HARD )
 	{
@@ -4862,7 +4867,6 @@ Vector CBasePlayer::GetAutoaimVector( float flDelta )
 		return gpGlobals->v_forward;
 	}
 
-	Vector vecSrc = GetGunPosition();
 	float flDist = 8192.0f;
 
 	// always use non-sticky autoaim
@@ -4933,7 +4937,7 @@ Vector CBasePlayer::GetAutoaimVector( float flDelta )
 	return gpGlobals->v_forward;
 }
 
-Vector CBasePlayer::AutoaimDeflection( Vector &vecSrc, float flDist, float flDelta )
+Vector CBasePlayer::AutoaimDeflection( const Vector &vecSrc, float flDist, float flDelta )
 {
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex( 1 );
 	CBaseEntity *pEntity;
