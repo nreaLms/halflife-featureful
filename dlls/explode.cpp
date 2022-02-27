@@ -82,7 +82,7 @@ void CShower::Touch( CBaseEntity *pOther )
 		pev->speed = 0.0f;
 }
 
-class CEnvExplosion : public CBaseMonster
+class CEnvExplosion : public CBaseEntity
 {
 public:
 	void Spawn();
@@ -106,7 +106,7 @@ TYPEDESCRIPTION	CEnvExplosion::m_SaveData[] =
 	DEFINE_FIELD( CEnvExplosion, m_iRadius, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CEnvExplosion, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CEnvExplosion, CBaseEntity )
 LINK_ENTITY_TO_CLASS( env_explosion, CEnvExplosion )
 
 void CEnvExplosion::KeyValue( KeyValueData *pkvd )
@@ -240,10 +240,8 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		if (FBitSet(pev->spawnflags, SF_ENVEXPLOSION_ACTIVATOR_IS_ATTACKER) && pActivator) {
 			pevAttacker = pActivator->pev;
 		}
-		if (m_iRadius <= 0)
-			RadiusDamage( pev, pevAttacker, m_iMagnitude, CLASS_NONE, DMG_BLAST );
-		else
-			::RadiusDamage( pev->origin, pev, pevAttacker, m_iMagnitude, m_iRadius, CLASS_NONE, DMG_BLAST );
+		const float radius = m_iRadius > 0 ? m_iRadius : m_iMagnitude * DEFAULT_EXPLOSTION_RADIUS_MULTIPLIER;
+		::RadiusDamage( pev->origin, pev, pevAttacker, m_iMagnitude, radius, CLASS_NONE, DMG_BLAST );
 	}
 
 	SetThink( &CEnvExplosion::Smoke );
