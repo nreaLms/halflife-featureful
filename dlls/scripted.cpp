@@ -999,6 +999,7 @@ private:
 #define SF_SENTENCE_INTERRUPT	0x0004	// force talking except when dead
 #define SF_SENTENCE_CONCURRENT	0x0008	// allow other people to keep talking
 #define SF_SENTENCE_REQUIRE_LISTENER 0x0010 // require presense of the listener
+#define SF_SENTENCE_TRY_ONCE 0x1000 // try finding monster once, don't go into the loop
 
 enum
 {
@@ -1164,7 +1165,8 @@ void CScriptedSentence::FindThink( void )
 	else
 	{
 		//ALERT( at_console, "%s: can't find monster %s\n", STRING( m_iszSentence ), STRING( m_iszEntity ) );
-		pev->nextthink = gpGlobals->time + m_flRepeat + 0.5f;
+		if (!FBitSet(pev->spawnflags, SF_SENTENCE_TRY_ONCE))
+			pev->nextthink = gpGlobals->time + m_flRepeat + 0.5f;
 	}
 }
 
