@@ -60,7 +60,7 @@ int CHudCaption::MsgFunc_Caption(const char *pszName, int iSize, void *pbuf)
 	Subtitle_t sub;
 	memset(&sub, 0, sizeof(sub));
 
-	int holdTime = READ_BYTE();
+	float holdTime = READ_BYTE();
 	int radio = READ_BYTE();
 
 	const char* captionName = READ_STRING();
@@ -79,7 +79,16 @@ int CHudCaption::MsgFunc_Caption(const char *pszName, int iSize, void *pbuf)
 
 	if (holdTime <= 0)
 	{
-		holdTime = 2 + strlen(caption->message)/20;
+		int perceivedLength = 0;
+		const char* ptr = caption->message;
+		while(*ptr != '\0') {
+			if (*ptr >= 0 && *ptr <= 127)
+				perceivedLength += 2;
+			else
+				perceivedLength ++;
+			++ptr;
+		}
+		holdTime = 2 + perceivedLength/32.0f;
 	}
 	sub.timeLeft = holdTime;
 	gEngfuncs.Con_DPrintf("New caption: Hold time: %f. Current time: %f\n", sub.timeLeft, gHUD.m_flTime);
