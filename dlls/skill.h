@@ -99,6 +99,7 @@ struct skilldata_t
 	float slaveDmgClawrake;
 	float slaveDmgZap;
 	float slaveZapRate;
+	float slaveRevival;
 
 	float ichthyosaurHealth;
 	float ichthyosaurDmgShake;

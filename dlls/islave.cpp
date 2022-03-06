@@ -1022,7 +1022,7 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 {
 	if (m_nextHealTargetCheck >= gpGlobals->time)
 	{
-		return m_hDead != 0 || m_hWounded != 0;
+		return (m_hDead != 0 && gSkillData.slaveRevival > 0) || m_hWounded != 0;
 	}
 
 	m_nextHealTargetCheck = gpGlobals->time + 1;
@@ -1041,7 +1041,7 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 		if( (mustSee && (tr.flFraction == 1.0f || tr.pHit == pEntity->edict())) || (!mustSee && (pEntity->pev->origin -pev->origin).Length() < flDist ) )
 		{
 #if FEATURE_ISLAVE_REVIVE
-			if( CanBeRevived(pEntity) )
+			if( gSkillData.slaveRevival > 0 && CanBeRevived(pEntity) )
 			{
 				float d = ( pev->origin - pEntity->pev->origin ).Length();
 				if( d < flDist )
@@ -2083,7 +2083,7 @@ bool CISlave::HasFreeEnergy()
 bool CISlave::CanRevive()
 {
 #if FEATURE_ISLAVE_REVIVE
-	return m_hDead != 0 && HasFreeEnergy();
+	return m_hDead != 0 && gSkillData.slaveRevival > 0 && HasFreeEnergy();
 #else
 	return false;
 #endif
