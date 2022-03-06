@@ -1277,13 +1277,6 @@ void CISlave::Spawn()
 	HandsGlowOff();
 #endif
 
-
-#if FEATURE_ISLAVE_FAMILIAR
-	if (!pev->weapons) {
-		pev->weapons = ISLAVE_SNARKS;
-	}
-#endif
-
 	FollowingMonsterInit();
 
 	m_originalMaxHealth = pev->max_health;
