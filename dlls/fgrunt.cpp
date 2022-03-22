@@ -3552,7 +3552,7 @@ void CMedic::OnChangeSchedule( Schedule_t *pNewSchedule )
 	if (m_fHealing) {
 		StopHealing();
 	}
-	if (m_hTargetEnt == 0 && m_hLeadingPlayer != 0)
+	if (m_hLeadingPlayer != 0 && (m_hTargetEnt == 0 || !m_hTargetEnt->IsFullyAlive()))
 	{
 		// Restore target ent if medic follows a player but did not play RestoreTargetEnt task, e.g. due to save-load.
 		m_hTargetEnt = m_hLeadingPlayer;
@@ -3818,9 +3818,10 @@ void CMedic::StopHealing(bool clearTargetEnt)
 
 CBaseEntity* CMedic::HealTarget()
 {
-	if (m_hTargetEnt != 0 && m_hTargetEnt->IsFullyAlive() && (m_hTargetEnt->pev->health < m_hTargetEnt->pev->max_health) &&
-			((m_hTargetEnt->MyMonsterPointer() && IRelationship(m_hTargetEnt) < R_DL) || m_hTargetEnt->IsPlayer())) {
-		return m_hTargetEnt;
+	CBaseEntity* pTargetEnt = m_hTargetEnt;
+	if (pTargetEnt != 0 && pTargetEnt->IsFullyAlive() && (pTargetEnt->pev->health < pTargetEnt->pev->max_health) &&
+			pTargetEnt->MyMonsterPointer() && IRelationship(pTargetEnt) < R_DL) {
+		return pTargetEnt;
 	}
 	return 0;
 }
