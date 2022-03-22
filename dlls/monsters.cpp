@@ -1322,7 +1322,7 @@ BOOL CBaseMonster::PopEnemy()
 	{
 		if( m_hOldEnemy[i] != 0 )
 		{
-			if( m_hOldEnemy[i]->IsAlive()) // cheat and know when they die
+			if( m_hOldEnemy[i]->IsFullyAlive()) // cheat and know when they die
 			{
 				m_hEnemy = m_hOldEnemy[i];
 				m_vecEnemyLKP = m_vecOldEnemy[i];
