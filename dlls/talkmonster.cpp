@@ -440,7 +440,8 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		break;
 	case TASK_TLK_HEADRESET:
 		// reset head position after looking at something
-		m_hTalkTarget = NULL;
+		if (!InScriptedSentence())
+			m_hTalkTarget = NULL;
 		TaskComplete();
 		break;
 	case TASK_TLK_STOPSHOOTING:
