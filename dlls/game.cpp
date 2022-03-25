@@ -916,7 +916,7 @@ cvar_t	sk_player_leg3	= { "sk_player_leg3","1" };
 // flashlight settings
 
 cvar_t	sk_flashlight_drain_time1	= { "sk_flashlight_drain_time1","120" };
-cvar_t	sk_flashlight_drain_time2	= { "sk_flashlight_drain_time2","1020" };
+cvar_t	sk_flashlight_drain_time2	= { "sk_flashlight_drain_time2","120" };
 cvar_t	sk_flashlight_drain_time3	= { "sk_flashlight_drain_time3","120" };
 
 cvar_t	sk_flashlight_charge_time1	= { "sk_flashlight_charge_time1","20" };
