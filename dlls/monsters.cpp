@@ -4392,6 +4392,17 @@ bool CBaseMonster::IsFreeToManipulate()
 				  m_MonsterState == MONSTERSTATE_HUNT);
 }
 
+bool CBaseMonster::HandleDoorBlockage(CBaseEntity *pDoor)
+{
+#if FEATURE_DOOR_BLOCKED_FADE_CORPSES
+	if (pev->deadflag == DEAD_DEAD && pev->movetype == MOVETYPE_TOSS && pev->takedamage == DAMAGE_YES) {
+		SUB_StartFadeOut();
+		return true;
+	}
+#endif
+	return false;
+}
+
 void CBaseMonster::GlowShellOn( Vector color, float flDuration )
 {
 	if (!m_glowShellUpdate)

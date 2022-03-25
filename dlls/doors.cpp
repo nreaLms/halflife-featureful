@@ -1056,15 +1056,21 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 	CBaseDoor *pDoor = NULL;
 
 	// Hurt the blocker a little.
-	if( pev->dmg )
+	bool shouldProceed = false;
+	if( pev->dmg ) {
 		pOther->TakeDamage( pev, pev, pev->dmg, DMG_CRUSH );
-
-	if( satchelfix.value )
-	{
-		// Detonate satchels
-		if( !strcmp( "monster_satchel", STRING( pOther->pev->classname ) ) )
-			( (CSatchel*)pOther )->Use( this, this, USE_ON, 0 );
+#if FEATURE_DOOR_BLOCKED_RECHECK
+		// Entity became unsolid or killed
+		if (pOther->pev->solid == SOLID_NOT || FBitSet(pev->flags, FL_KILLME))
+			shouldProceed = true;
+#endif
 	}
+
+	if (!shouldProceed)
+		shouldProceed = pOther->HandleDoorBlockage(this);
+
+	if (shouldProceed)
+		return;
 
 	// if a door has a negative wait, it would never come back if blocked,
 	// so let it just squash the object to death real fast

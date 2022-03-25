@@ -403,6 +403,7 @@ public:
 	virtual NODE_LINKENT HandleLinkEnt(int afCapMask, bool nodeQueryStatic) { return NLE_PROHIBIT; }
 
 	virtual void SendMessages(CBaseEntity* pClient) {}
+	virtual bool HandleDoorBlockage(CBaseEntity* pDoor) { return false; }
 };
 
 // Ugly technique to override base member functions

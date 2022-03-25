@@ -21,7 +21,9 @@
 #include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
+#if !CLIENT_DLL
 #include "game.h"
+#endif
 
 enum satchel_state
 {
@@ -49,6 +51,7 @@ enum satchel_radio_e
 
 class CSatchelCharge : public CGrenade
 {
+public:
 	Vector m_lastBounceOrigin;	// Used to fix a bug in engine: when object isn't moving, but its speed isn't 0 and on ground isn't set
 	void Spawn( void );
 	void Precache( void );
@@ -57,7 +60,8 @@ class CSatchelCharge : public CGrenade
 	void EXPORT SatchelSlide( CBaseEntity *pOther );
 	void EXPORT SatchelThink( void );
 
-public:
+	bool HandleDoorBlockage(CBaseEntity* pDoor);
+
 	void Deactivate( void );
 #if !CLIENT_DLL
 	int ObjectCaps( void );
@@ -188,6 +192,19 @@ void CSatchelCharge::BounceSound( void )
 		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/g_bounce3.wav", 1, ATTN_NORM );
 		break;
 	}
+}
+
+bool CSatchelCharge::HandleDoorBlockage(CBaseEntity *pDoor)
+{
+#if !CLIENT_DLL
+	if( satchelfix.value )
+	{
+		// Detonate satchels
+		Use( pDoor, pDoor, USE_ON, 0 );
+		return true;
+	}
+#endif
+	return false;
 }
 
 #if !CLIENT_DLL

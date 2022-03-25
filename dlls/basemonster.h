@@ -414,6 +414,8 @@ public:
 
 	virtual bool CanRoamAfterCombat() { return true; }
 
+	bool HandleDoorBlockage(CBaseEntity* pDoor);
+
 	//
 	// Glowshell effects
 	//
