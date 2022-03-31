@@ -612,6 +612,11 @@ public:
 	const char* DefaultDisplayName() { return "Shock Roach"; }
 	virtual float GetDamageAmount( void ) { return gSkillData.sroachDmgBite; }
 	void EXPORT LeapTouch(CBaseEntity *pOther);
+	bool TryGiveAsWeapon(CBaseEntity* pOther);
+	void EXPORT RoachUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	int ObjectCaps() {
+		return CBaseMonster::ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
+	}
 	void PainSound(void);
 	void DeathSound(void);
 	void IdleSound(void);
@@ -704,6 +709,8 @@ void CShockRoach::Spawn()
 	m_flBirthTime = gpGlobals->time;
 
 	MonsterInit();
+
+	SetUse(&CShockRoach::RoachUse);
 }
 
 //=========================================================
@@ -743,21 +750,34 @@ void CShockRoach::LeapTouch(CBaseEntity *pOther)
 	if (!FBitSet(pev->flags, FL_ONGROUND))
 	{
 		EMIT_SOUND_DYN(edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
-
-#if FEATURE_SHOCKRIFLE
-		// Give the shockrifle weapon to the player, if not already in possession.
-		if (pOther->IsPlayer() && pOther->IsAlive() && !(pOther->pev->weapons & (1 << WEAPON_SHOCKRIFLE))) {
-			CBasePlayer* pPlayer = (CBasePlayer*)(pOther);
-			pPlayer->GiveNamedItem("weapon_shockrifle");
-			pPlayer->pev->weapons |= (1 << WEAPON_SHOCKRIFLE);
-			UTIL_Remove(this);
-			return;
-		}
-#endif
-		pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
+		if (!TryGiveAsWeapon( pOther ))
+			pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
 	}
 
 	SetTouch(NULL);
+}
+
+bool CShockRoach::TryGiveAsWeapon(CBaseEntity *pOther)
+{
+#if FEATURE_SHOCKRIFLE
+	// Give the shockrifle weapon to the player, if not already in possession.
+	if (pOther->IsPlayer() && pOther->IsAlive() && !(pOther->pev->weapons & (1 << WEAPON_SHOCKRIFLE))) {
+		CBasePlayer* pPlayer = (CBasePlayer*)(pOther);
+		pPlayer->GiveNamedItem("weapon_shockrifle");
+		pPlayer->pev->weapons |= (1 << WEAPON_SHOCKRIFLE);
+		UTIL_Remove(this);
+		return true;
+	}
+#endif
+	return false;
+}
+
+void CShockRoach::RoachUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (TryGiveAsWeapon(pCaller)) {
+		SetTouch(NULL);
+		SetUse(NULL);
+	}
 }
 //=========================================================
 // PrescheduleThink
