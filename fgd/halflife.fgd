@@ -2387,6 +2387,7 @@
 
 @PointClass base(Targetname) = game_player_settings : "Initial player setting in singleplayer"
 [
+	target(target_destination) : "Fire on equip" : : "Fire after (and if) player got equipped."
 	spawnflags(flags) =
 	[
 		1: "Give Medkit" : 0

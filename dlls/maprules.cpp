@@ -1131,6 +1131,8 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 
 	if (!hadWeapons)
 		player->SwitchToBestWeapon();
+
+	SUB_UseTargets(pPlayer, USE_TOGGLE, 0.0f);
 }
 
 
