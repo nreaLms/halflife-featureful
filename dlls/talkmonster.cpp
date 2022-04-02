@@ -32,7 +32,7 @@ float CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: u
 
 #define SF_TALKMONSTER_DONTGREET_PLAYER (1 << 17)
 #define SF_TALKMONSTER_DONT_TALK_TO_PLAYER (1 << 18)
-#define SF_TALKMONSTER_IGNORE_PUSHING (1 << 19)
+#define SF_TALKMONSTER_IGNORE_PUSHING SF_MONSTER_IGNORE_PUSHING
 
 #define CALL_MEDIC_DELAY				5 // Wait before calling for medic again.
 

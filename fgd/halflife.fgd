@@ -6336,7 +6336,7 @@
 	new_model(studio) : "Custom model"
 ]
 
-@BaseClass base(MonsterMakerBase, MonsterExtra) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
+@BaseClass base(MonsterMakerBase, MonsterExtra, CustomSentences) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
 	spawnflags(Flags) =
 	[
@@ -6355,6 +6355,7 @@
 		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
 		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
 		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
+		524288 : "Ignore player pushing" : 0 : "Don't move away when player tries to push me (for talk monsters)"
 		1048576: "Act out of PVS" : 0 : "The spawned monster will act as usual even if there're no players in the PVS"
 	]
 	body(integer) : "Body"

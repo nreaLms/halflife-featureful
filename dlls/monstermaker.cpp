@@ -23,6 +23,7 @@
 #include "monsters.h"
 #include "saverestore.h"
 #include "locus.h"
+#include "talkmonster.h"
 
 #define MONSTERMAKER_START_ON_FIX 1
 
@@ -41,6 +42,7 @@
 #define SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED 8192
 #define SF_MONSTERMAKER_SPECIAL_FLAG		( 1 << 15 )
 #define SF_MONSTERMAKER_NONSOLID_CORPSE		( 1 << 16 )
+#define SF_MONSTERMAKER_IGNORE_PLAYER_PUSHING ( 1 << 19 )
 #define SF_MONSTERMAKER_ACT_IN_NON_PVS		( 1 << 20 )
 
 enum
@@ -104,6 +106,10 @@ public:
 	short m_iMaxYawDeviation;
 	Vector m_defaultMinHullSize;
 	Vector m_defaultMaxHullSize;
+
+	string_t m_iszUse;
+	string_t m_iszUnUse;
+	string_t m_iszDecline;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -131,6 +137,9 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iMaxYawDeviation, FIELD_SHORT ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMinHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMaxHullSize, FIELD_VECTOR ),
+	DEFINE_FIELD( CMonsterMaker, m_iszUse, FIELD_STRING ),
+	DEFINE_FIELD( CMonsterMaker, m_iszUnUse, FIELD_STRING ),
+	DEFINE_FIELD( CMonsterMaker, m_iszDecline, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -215,6 +224,21 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "yawdeviation" ) )
 	{
 		m_iMaxYawDeviation = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "UseSentence" ) )
+	{
+		m_iszUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "UnUseSentence" ) )
+	{
+		m_iszUnUse = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq( pkvd->szKeyName, "RefusalSentence" ))
+	{
+		m_iszDecline = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -530,6 +554,8 @@ int CMonsterMaker::MakeMonster( void )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_NONSOLID_CORPSE );
 		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_ACT_IN_NON_PVS ) )
 			SetBits( pevCreate->spawnflags, SF_MONSTER_ACT_OUT_OF_PVS );
+		if( FBitSet( pev->spawnflags, SF_MONSTERMAKER_IGNORE_PLAYER_PUSHING ) )
+			SetBits( pevCreate->spawnflags, SF_MONSTER_IGNORE_PUSHING );
 		if (m_gag > 0)
 			SetBits(pevCreate->spawnflags, SF_MONSTER_GAG);
 		pevCreate->weapons = pev->weapons;
@@ -566,6 +592,28 @@ int CMonsterMaker::MakeMonster( void )
 		if (deadMonster)
 		{
 			deadMonster->m_iPose = m_iPose;
+		}
+
+		CTalkMonster* pTalkMonster = createdMonster->MyTalkMonsterPointer();
+		if (pTalkMonster)
+		{
+			if (!FStringNull(m_iszUse))
+			{
+				pTalkMonster->m_iszUse = m_iszUse;
+				pTalkMonster->m_szGrp[TLK_USE] = CTalkMonster::GetRedefinedSentence(m_iszUse);
+			}
+
+			if (!FStringNull(m_iszUnUse))
+			{
+				pTalkMonster->m_iszUnUse = m_iszUnUse;
+				pTalkMonster->m_szGrp[TLK_UNUSE] = CTalkMonster::GetRedefinedSentence(m_iszUnUse);
+			}
+
+			if (!FStringNull(m_iszDecline))
+			{
+				pTalkMonster->m_iszDecline = m_iszDecline;
+				pTalkMonster->m_szGrp[TLK_DECLINE] = CTalkMonster::GetRedefinedSentence(m_iszDecline);
+			}
 		}
 	}
 
