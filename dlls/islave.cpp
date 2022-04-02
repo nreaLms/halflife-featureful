@@ -926,6 +926,8 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				CoilBeam();
 				Remember(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL);
 
+				UTIL_ScreenShake( pev->origin, 3.0, 40.0, 1.0, ISLAVE_COIL_ATTACK_RADIUS );
+
 				CBaseEntity *pEntity = NULL;
 				while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, ISLAVE_COIL_ATTACK_RADIUS ) ) != NULL )
 				{
