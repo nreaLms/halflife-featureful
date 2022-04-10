@@ -2688,10 +2688,10 @@
 	CustomJuice(integer) : "Custom Juice Amount"
 ]
 
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
-@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, Global) studio("models/health_charger_body.mdl") = item_healthcharger : "Wall Health Kit" []
+@PointClass size(-12 -16 0, 12 16 36) base(ItemRecharger, Global) studio("models/hev.mdl") = item_recharge : "Wall Recharger" []
 
-@PointClass base(Targetname, Angles) size(-16 -16 0, 16 16 48 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
+@PointClass base(Targetname, Global, Angles) size(-16 -16 0, 16 16 48 ) studio("models/EYE_SCANNER.mdl") = item_eyescanner : "Retinal Scanner"
 [
 	unlocked_target(target_destination) : "Unlocked target"
 	locked_target(target_destination) : "Locked target"
