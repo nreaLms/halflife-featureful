@@ -527,6 +527,7 @@ TYPEDESCRIPTION CBaseButton::m_SaveData[] =
 	DEFINE_FIELD( CBaseButton, m_lockedSentenceOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_unlockedSentenceOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_iDirectUse, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseButton, m_fNonMoving, FIELD_BOOLEAN ),
 };
 	
 IMPLEMENT_SAVERESTORE( CBaseButton, CBaseToggle )
@@ -837,6 +838,9 @@ void CBaseButton::Spawn()
 	if( ( ( m_vecPosition2 - m_vecPosition1 ).Length() < 1.0f ) || ( pev->spawnflags & SF_BUTTON_DONTMOVE ) )
 		m_vecPosition2 = m_vecPosition1;
 
+	if ( FBitSet( pev->spawnflags, SF_BUTTON_DONTMOVE ) )
+		m_fNonMoving = TRUE;
+
 	m_fStayPushed = m_flWait == -1.0f ? TRUE : FALSE;
 	m_fRotating = FALSE;
 
@@ -1086,11 +1090,18 @@ void CBaseButton::ButtonActivate()
 	ASSERT( m_toggle_state == TS_AT_BOTTOM );
 	m_toggle_state = TS_GOING_UP;
 	
-	SetMoveDone( &CBaseButton::TriggerAndWait );
-	if( !m_fRotating )
-		LinearMove( m_vecPosition2, pev->speed );
+	if (m_fNonMoving)
+	{
+		TriggerAndWait();
+	}
 	else
-		AngularMove( m_vecAngle2, pev->speed );
+	{
+		SetMoveDone( &CBaseButton::TriggerAndWait );
+		if( !m_fRotating )
+			LinearMove( m_vecPosition2, pev->speed );
+		else
+			AngularMove( m_vecAngle2, pev->speed );
+	}
 }
 
 void CBaseButton::OnLocked()
@@ -1148,11 +1159,18 @@ void CBaseButton::ButtonReturn( void )
 	ASSERT( m_toggle_state == TS_AT_TOP );
 	m_toggle_state = TS_GOING_DOWN;
 
-	SetMoveDone( &CBaseButton::ButtonBackHome );
-	if( !m_fRotating )
-		LinearMove( m_vecPosition1, pev->speed );
+	if (m_fNonMoving)
+	{
+		ButtonBackHome();
+	}
 	else
-		AngularMove( m_vecAngle1, pev->speed );
+	{
+		SetMoveDone( &CBaseButton::ButtonBackHome );
+		if( !m_fRotating )
+			LinearMove( m_vecPosition1, pev->speed );
+		else
+			AngularMove( m_vecAngle1, pev->speed );
+	}
 
 	pev->frame = 0;			// use normal textures
 }
