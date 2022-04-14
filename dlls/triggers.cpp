@@ -588,6 +588,58 @@ void CMultiTrigger::Spawn( void )
 	pev->classname = MAKE_STRING("multi_manager");
 }
 
+class CMultiSequence : public CMultiTrigger
+{
+public:
+	void Spawn( void );
+};
+
+LINK_ENTITY_TO_CLASS( multi_sequence, CMultiSequence )
+
+void CMultiSequence::Spawn()
+{
+	for (int i=0; i<MAX_MULTI_TARGETS; ++i)
+	{
+		if (!m_iTargetName[i])
+		{
+			for (int j=i+1; j<MAX_MULTI_TARGETS; ++j)
+			{
+				if (m_iTargetName[j])
+				{
+					m_iTargetName[i] = m_iTargetName[j];
+					m_flTargetDelay[i] = m_flTargetDelay[j];
+					m_iTargetUseType[i] = m_iTargetUseType[j];
+					m_iTargetName[j] = iStringNull;
+					break;
+				}
+			}
+		}
+		if (m_iTargetName[i])
+			m_cTargets = i+1;
+		else
+			break;
+	}
+
+	// Adjust delays so they work as in multi_manager
+	for (int i=1; i<m_cTargets; ++i)
+	{
+		m_flTargetDelay[i] += m_flTargetDelay[i-1];
+	}
+
+	pev->solid = SOLID_NOT;
+	SetUse( &CMultiManager::ManagerUse );
+	SetThink( &CMultiManager::ManagerThink );
+
+	//for (int i=0; i<m_cTargets; ++i) {
+	//	ALERT(at_console, "Target: %s. Adjusted delay: %f\n", STRING(m_iTargetName[i]), m_flTargetDelay[i]);
+	//}
+
+	/* Set multi_manager classname so multisource will check this entity too
+	 * This should be ok, since save/restore data is the same.
+	 */
+	pev->classname = MAKE_STRING("multi_manager");
+}
+
 //***********************************************************
 //
 // Render parameters trigger

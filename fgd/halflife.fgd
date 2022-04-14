@@ -6494,7 +6494,7 @@
 
 @PointClass base(Targetname, MultiManagerFlags) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager. Use type of targets can be configured by adding #0 (Off), #1 (On) or #2 (Kill) to their delay values." []
 
-@PointClass base(Targetname, MultiManagerFlags) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_trigger : "MultiTarget Trigger. Use this entity instead of multi_manager so JACK could draw connections to its targets."
+@BaseClass = MultiTarget
 [
 	target1(target_destination) : "Target 1"
 	delay1(string) : "Delay 1"
@@ -6529,6 +6529,10 @@
 	target16(target_destination) : "Target 16"
 	delay16(string) : "Delay 16"
 ]
+
+@PointClass base(Targetname, MultiManagerFlags, MultiTarget) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_trigger : "MultiTarget Trigger. Use this entity instead of multi_manager so JACK could draw connections to its targets." []
+
+@PointClass base(Targetname, MultiManagerFlags, MultiTarget) color(170 85 0) = multi_sequence : "Same as multi_trigger, but delays are relative between adjacent targets." []
 
 @PointClass base(Targetname, Target) color(128 255 128) iconsprite("sprites/multisource.spr") = multisource : "Multisource"
 [
