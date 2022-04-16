@@ -648,7 +648,6 @@ public:
 	void EXPORT CDAudioTouch( CBaseEntity *pOther );
 	void ActivateMultiTrigger( CBaseEntity *pActivator );
 	void EXPORT MultiWaitOver( void );
-	void EXPORT CounterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void InitTrigger( void );
 	bool CanTouch( entvars_t *pevToucher );
@@ -706,11 +705,6 @@ void CBaseTrigger::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "damage" ) )
 	{
 		pev->dmg = atof( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
-	else if( FStrEq( pkvd->szKeyName, "count" ) )
-	{
-		m_cTriggersLeft = (int)atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "damagetype" ) )
@@ -1435,52 +1429,6 @@ void CBaseTrigger::MultiWaitOver( void )
 
 // ========================= COUNTING TRIGGER =====================================
 
-//
-// GLOBALS ASSUMED SET:  g_eoActivator
-//
-void CBaseTrigger::CounterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-{
-	m_cTriggersLeft--;
-	m_hActivator = pActivator;
-
-	if( m_cTriggersLeft < 0 )
-		return;
-
-	BOOL fTellActivator =
-		( m_hActivator != 0 ) &&
-		m_hActivator->IsPlayer() &&
-		!FBitSet( pev->spawnflags, SPAWNFLAG_NOMESSAGE );
-	if( m_cTriggersLeft != 0 )
-	{
-		if( fTellActivator )
-		{
-			// UNDONE: I don't think we want these Quakesque messages
-			switch( m_cTriggersLeft )
-			{
-			case 1:
-				ALERT( at_console, "Only 1 more to go..." );
-				break;
-			case 2:
-				ALERT( at_console, "Only 2 more to go..." );
-				break;
-			case 3:
-				ALERT( at_console, "Only 3 more to go..." );
-				break;
-			default:
-				ALERT( at_console, "There are more to go..." );
-				break;
-			}
-		}
-		return;
-	}
-
-	// !!!UNDONE: I don't think we want these Quakesque messages
-	if( fTellActivator )
-		ALERT( at_console, "Sequence completed!" );
-
-	ActivateMultiTrigger( m_hActivator );
-}
-
 /*QUAKED trigger_counter (.5 .5 .5) ? nomessage
 Acts as an intermediary for an action that takes multiple inputs.
 If nomessage is not set, it will print "1 more.. " etc when triggered and
@@ -1491,10 +1439,26 @@ class CTriggerCounter : public CBaseTrigger
 {
 public:
 	void Spawn( void );
+	void KeyValue( KeyValueData *pkvd );
 	bool CalcNumber( CBaseEntity *pLocus, float* outResult );
+	void EXPORT CounterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+
+	static	TYPEDESCRIPTION m_SaveData[];
+
+	int m_cTriggersLeft; // trigger_counter only, # of activations remaining
 };
 
 LINK_ENTITY_TO_CLASS( trigger_counter, CTriggerCounter )
+
+TYPEDESCRIPTION	CTriggerCounter::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerCounter, m_cTriggersLeft, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerCounter, CBaseTrigger )
 
 void CTriggerCounter::Spawn( void )
 {
@@ -1502,15 +1466,39 @@ void CTriggerCounter::Spawn( void )
 	// (but of course it needs cTriggersLeft "uses" before that happens).
 	m_flWait = -1;
 
-	if( m_cTriggersLeft == 0 )
+	if( m_cTriggersLeft <= 0 )
 		m_cTriggersLeft = 2;
-	SetUse( &CBaseTrigger::CounterUse );
+	SetUse( &CTriggerCounter::CounterUse );
+}
+
+void CTriggerCounter::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "count" ) )
+	{
+		m_cTriggersLeft = (int)atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseTrigger::KeyValue( pkvd );
 }
 
 bool CTriggerCounter::CalcNumber( CBaseEntity *pLocus, float* outResult )
 {
 	*outResult = static_cast<float>(m_cTriggersLeft);
 	return true;
+}
+
+void CTriggerCounter::CounterUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( m_cTriggersLeft <= 0 )
+		return;
+
+	m_cTriggersLeft--;
+	if ( m_cTriggersLeft != 0 )
+		return;
+
+	m_hActivator = pActivator;
+	ActivateMultiTrigger( m_hActivator );
 }
 
 // ====================== TRIGGER_CHANGELEVEL ================================

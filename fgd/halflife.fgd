@@ -6886,12 +6886,8 @@
 	]
 ]
 
-@SolidClass base(Trigger, Targetname) = trigger_counter : "Trigger counter"
+@SolidClass base(Trigger) = trigger_counter : "Trigger counter"
 [
-	spawnflags(flags) =
-	[
-		1 : "No Message" : 0
-	]
 	master(string) : "Master"
 	count(integer) : "Count before activation" : 2
 ]
