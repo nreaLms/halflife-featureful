@@ -251,13 +251,14 @@ struct CaptionProfile_t
 	int r, g, b;
 };
 
-#define CAPTION_SIZE 320
+#define CAPTION_SIZE 600
 
 struct Caption_t
 {
 	char name[32];
 	CaptionProfile_t* profile;
 	char message[CAPTION_SIZE];
+	float delay;
 };
 
 #define SUB_MAX_LINES 5
@@ -269,6 +270,7 @@ struct Subtitle_t
 	int lineEndOffsets[SUB_MAX_LINES];
 	int r, g, b;
 	float timeLeft;
+	float timeBeforeStart;
 	int lineCount;
 	bool radio;
 };

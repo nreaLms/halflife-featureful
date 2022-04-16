@@ -182,7 +182,7 @@ void CGenericMonster::Precache()
 void CGenericMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
 {
 	m_talkTime = gpGlobals->time + duration;
-	PlaySentence( pszSentence, duration, volume, attenuation );
+	PlaySentence( pszSentence, duration, volume, attenuation, true );
 
 	m_hTalkTarget = pListener;
 }

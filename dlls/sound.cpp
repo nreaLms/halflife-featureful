@@ -1421,7 +1421,7 @@ int SENTENCEG_PlayRndI( edict_t *entity, int isentenceg, float volume, float att
 
 // same as above, but takes sentence group name instead of index
 
-int SENTENCEG_PlayRndSz( edict_t *entity, const char *szgroupname, float volume, float attenuation, int flags, int pitch )
+static int SENTENCEG_PlayRndSzImpl( edict_t *entity, const char *szgroupname, float volume, float attenuation, int flags, int pitch, bool subtitle = false, int holdTime = 0 )
 {
 	char name[64];
 	int ipick;
@@ -1444,10 +1444,23 @@ int SENTENCEG_PlayRndSz( edict_t *entity, const char *szgroupname, float volume,
 	if( ipick >= 0 && name[0] )
 	{
 		ClearBits(flags, SND_DONT_REPORT_MISSING);
-		EMIT_SOUND_DYN( entity, CHAN_VOICE, name, volume, attenuation, flags, pitch );
+		if (subtitle)
+			EMIT_SOUND_DYN_SUB( entity, CHAN_VOICE, name, volume, attenuation, flags, pitch, holdTime );
+		else
+			EMIT_SOUND_DYN( entity, CHAN_VOICE, name, volume, attenuation, flags, pitch );
 	}
 
 	return ipick;
+}
+
+int SENTENCEG_PlayRndSz( edict_t *entity, const char *szgroupname, float volume, float attenuation, int flags, int pitch )
+{
+	return SENTENCEG_PlayRndSzImpl(entity, szgroupname, volume, attenuation, flags, pitch);
+}
+
+int SENTENCEG_PlayRndSzSub( edict_t *entity, const char *szgroupname, float volume, float attenuation, int flags, int pitch, int holdTime )
+{
+	return SENTENCEG_PlayRndSzImpl(entity, szgroupname, volume, attenuation, flags, pitch, true, holdTime);
 }
 
 // play sentences in sequential order from sentence group.  Reset after last sentence.
@@ -1636,13 +1649,15 @@ int SENTENCEG_Lookup( const char *sample, char *sentencenum )
 	return -1;
 }
 
-bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch )
+static bool EMIT_SOUND_DYN_IMPL(edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch, bool subtitle = false, int holdTime = 0)
 {
 	if( sample && *sample == '!' )
 	{
 		char name[32];
 		if( SENTENCEG_Lookup( sample, name ) >= 0 )
 		{
+			if (subtitle)
+				UTIL_ShowCaption(sample, holdTime, false);
 			EMIT_SOUND_DYN2( entity, channel, name, volume, attenuation, flags, pitch );
 			return true;
 		}
@@ -1657,6 +1672,16 @@ bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float vol
 		EMIT_SOUND_DYN2( entity, channel, sample, volume, attenuation, flags, pitch );
 		return true;
 	}
+}
+
+bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch )
+{
+	return EMIT_SOUND_DYN_IMPL(entity, channel, sample, volume, attenuation, flags, pitch);
+}
+
+bool EMIT_SOUND_DYN_SUB(edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch , int holdTime)
+{
+	return EMIT_SOUND_DYN_IMPL(entity, channel, sample, volume, attenuation, flags, pitch, true, holdTime);
 }
 
 // play a specific sentence over the HEV suit speaker - just pass player entity, and !sentencename

@@ -1140,12 +1140,12 @@ void CTalkMonster::PlayScriptedSentence( const char *pszSentence, float duration
 
 	ClearConditions( bits_COND_CLIENT_PUSH );	// Forget about moving!  I've got something to say!
 	m_flStopLookTime = m_useTime = gpGlobals->time + duration;
-	PlaySentence( pszSentence, duration, volume, attenuation );
+	PlaySentence( pszSentence, duration, volume, attenuation, true );
 
 	m_hTalkTarget = pListener;
 }
 
-bool CTalkMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
+bool CTalkMonster::PlaySentence(const char *pszSentence, float duration, float volume, float attenuation , bool subtitle)
 {
 	if( !pszSentence )
 		return false;
@@ -1154,9 +1154,19 @@ bool CTalkMonster::PlaySentence( const char *pszSentence, float duration, float 
 
 	bool status = false;
 	if( pszSentence[0] == '!' )
-		status = EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, GetVoicePitch() );
+	{
+		if (subtitle)
+			status = EMIT_SOUND_DYN_SUB( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, GetVoicePitch(), ceil(duration)+1 );
+		else
+			status = EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, GetVoicePitch() );
+	}
 	else
-		status = SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, GetVoicePitch() ) >= 0;
+	{
+		if (subtitle)
+			status = SENTENCEG_PlayRndSzSub( edict(), pszSentence, volume, attenuation, 0, GetVoicePitch(), ceil(duration)+1 ) >= 0;
+		else
+			status = SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, GetVoicePitch() ) >= 0;
+	}
 
 	if (status)
 		CTalkMonster::g_talkWaitTime = gpGlobals->time + duration + 2.0f;

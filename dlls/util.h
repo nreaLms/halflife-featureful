@@ -525,6 +525,7 @@ void SENTENCEG_Init();
 void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick);
 int SENTENCEG_PlayRndI(edict_t *entity, int isentenceg, float volume, float attenuation, int flags, int pitch);
 int SENTENCEG_PlayRndSz(edict_t *entity, const char *szrootname, float volume, float attenuation, int flags, int pitch);
+int SENTENCEG_PlayRndSzSub(edict_t *entity, const char *szrootname, float volume, float attenuation, int flags, int pitch, int holdTime);
 int SENTENCEG_PlaySequentialSz(edict_t *entity, const char *szrootname, float volume, float attenuation, int flags, int pitch, int ipick, int freset);
 int SENTENCEG_GetIndex(const char *szrootname);
 int SENTENCEG_Lookup(const char *sample, char *sentencenum);
@@ -542,6 +543,8 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr,  Vector vecSrc, Vector vecEnd, int
 bool EMIT_SOUND_DYN(edict_t *entity, int channel, const char *sample, float volume, float attenuation,
 						   int flags, int pitch);
 
+bool EMIT_SOUND_DYN_SUB(edict_t *entity, int channel, const char *sample, float volume, float attenuation,
+						   int flags, int pitch, int holdTime);
 
 inline void EMIT_SOUND(edict_t *entity, int channel, const char *sample, float volume, float attenuation)
 {

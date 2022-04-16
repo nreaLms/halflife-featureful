@@ -130,7 +130,7 @@ public:
 	int				IRelationship ( CBaseEntity *pTarget );
 	bool			IsFriendWithPlayerBeforeProvoked();
 	virtual int		CanPlaySentence( BOOL fDisregardState );
-	virtual bool	PlaySentence( const char *pszSentence, float duration, float volume, float attenuation );
+	virtual bool PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle = false );
 	void			PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
 	void			KeyValue( KeyValueData *pkvd );
 
