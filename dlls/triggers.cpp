@@ -2372,7 +2372,6 @@ void CTriggerTeleportPlayer::TeleportPlayerUse(CBaseEntity *pActivator, CBaseEnt
 {
 	CBaseEntity* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 	if (pPlayer) {
-		ALERT(at_console, "Calling TeleportTouchImpl\n");
 		TeleportTouchImpl(pPlayer);
 	}
 }
