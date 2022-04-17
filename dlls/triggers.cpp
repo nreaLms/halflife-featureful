@@ -653,6 +653,7 @@ public:
 	bool CanTouch( entvars_t *pevToucher );
 
 	virtual int ObjectCaps( void ) { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	virtual USE_TYPE UseType() { return USE_TOGGLE; }
 };
 
 LINK_ENTITY_TO_CLASS( trigger, CBaseTrigger )
@@ -1296,10 +1297,20 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 }
 
 // trigger_multiple
+enum
+{
+	TRIGGER_USE_OFF = -1,
+	TRIGGER_USE_TOGGLE = 0,
+	TRIGGER_USE_ON = 1,
+};
+
 class CTriggerMultiple : public CBaseTrigger
 {
 public:
 	void Spawn( void );
+	void KeyValue( KeyValueData *pkvd );
+
+	USE_TYPE UseType();
 };
 
 LINK_ENTITY_TO_CLASS( trigger_multiple, CTriggerMultiple )
@@ -1313,6 +1324,27 @@ void CTriggerMultiple::Spawn( void )
 
 	ASSERTSZ( pev->health == 0, "trigger_multiple with health" );
 	SetTouch( &CBaseTrigger::MultiTouch );
+}
+
+void CTriggerMultiple::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "usetype" ) )
+	{
+		pev->impulse = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseTrigger::KeyValue( pkvd );
+}
+
+USE_TYPE CTriggerMultiple::UseType()
+{
+	if (pev->impulse < 0)
+		return USE_OFF;
+	else if (pev->impulse > 0)
+		return USE_ON;
+	else
+		return USE_TOGGLE;
 }
 
 /*QUAKED trigger_once (.5 .5 .5) ? notouch
@@ -1392,7 +1424,7 @@ void CBaseTrigger::ActivateMultiTrigger( CBaseEntity *pActivator )
 	// pev->takedamage = DAMAGE_NO;
 
 	m_hActivator = pActivator;
-	SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 );
+	SUB_UseTargets( m_hActivator, UseType(), 0 );
 
 	if( pev->message && pActivator->IsPlayer() )
 	{

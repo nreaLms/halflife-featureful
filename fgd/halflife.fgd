@@ -7053,12 +7053,22 @@
 	]
 ]
 
-@SolidClass base(Trigger, TriggerCond) = trigger_multiple : "Trigger: Activate multiple"
+@BaseClass = TriggerUseType
+[
+	usetype(choices) : "Use type" =
+	[
+		-1 : "Off"
+		0 : "Toggle"
+		1 : "On"
+	]
+]
+
+@SolidClass base(Trigger, TriggerCond, TriggerUseType) = trigger_multiple : "Trigger: Activate multiple"
 [
 	wait(integer) : "Delay before reset" : 10
 ]
 
-@SolidClass base(Trigger, TriggerCond) = trigger_once : "Trigger: Activate once" []
+@SolidClass base(Trigger, TriggerCond, TriggerUseType) = trigger_once : "Trigger: Activate once" []
 
 @SolidClass base(Targetname,Target) = trigger_geneworm_hit : "Trigger GeneWorm Hit"
 [
