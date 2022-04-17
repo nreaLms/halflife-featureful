@@ -756,6 +756,7 @@
 	]
 	noise1(sound) : "Move Sound Override"
 	noise2(sound) : "Stop Sound Override"
+	return_speed(integer) : "Return speed"
 	_minlight(string) : "Minimum light level"
 ]
 

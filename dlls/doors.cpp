@@ -102,6 +102,8 @@ public:
 	string_t m_lockedSentenceOverride;
 	string_t m_unlockedSentenceOverride;
 
+	float m_returnSpeed;
+
 	float SoundAttenuation() const
 	{
 		return ::SoundAttenuation(m_soundRadius);
@@ -143,6 +145,8 @@ TYPEDESCRIPTION	CBaseDoor::m_SaveData[] =
 	DEFINE_FIELD( CBaseDoor, m_unlockedSoundOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseDoor, m_lockedSentenceOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseDoor, m_unlockedSentenceOverride, FIELD_STRING ),
+
+	DEFINE_FIELD( CBaseDoor, m_returnSpeed, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CBaseDoor, CBaseToggle )
@@ -365,6 +369,11 @@ void CBaseDoor::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence_override" ) )
 	{
 		m_unlockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "return_speed") )
+	{
+		m_returnSpeed = atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -978,9 +987,9 @@ void CBaseDoor::DoorGoDown( void )
 
 	SetMoveDone( &CBaseDoor::DoorHitBottom );
 	if( FClassnameIs( pev, "func_door_rotating" ) )//rotating door
-		AngularMove( m_vecAngle1, pev->speed );
+		AngularMove( m_vecAngle1, m_returnSpeed <= 0.0f ? pev->speed : m_returnSpeed );
 	else
-		LinearMove( m_vecPosition1, pev->speed );
+		LinearMove( m_vecPosition1, m_returnSpeed <= 0.0f ? pev->speed : m_returnSpeed );
 
 	if ( pev->spawnflags & SF_DOOR_START_OPEN )
 	{
