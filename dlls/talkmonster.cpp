@@ -455,7 +455,9 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		TaskComplete();
 		break;
 	case TASK_PLAY_SCRIPT:
-		m_hTalkTarget = NULL;
+		if ( !m_pCine || !FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_DONT_RESET_HEAD) ) {
+			m_hTalkTarget = NULL;
+		}
 		CFollowingMonster::StartTask( pTask );
 		break;
 	default:
