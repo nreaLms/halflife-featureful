@@ -674,6 +674,15 @@ class CSound;
 
 const char *ButtonSound( int sound );				// get string of button sound number
 
+enum
+{
+	BUTTON_USE_OFF = -1,
+	BUTTON_USE_TOGGLE = 0,
+	BUTTON_USE_ON = 1,
+	BUTTON_USE_ON_OFF = 2,
+	BUTTON_USE_OFF_ON = 3,
+};
+
 //
 // Generic Button
 //
@@ -704,6 +713,7 @@ public:
 	BUTTON_CODE ButtonResponseToTouch( void );
 	void OnLocked();
 	bool IsSparkingButton();
+	USE_TYPE UseType(bool returning);
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 	// Buttons that don't take damage can be IMPULSE used

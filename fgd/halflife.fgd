@@ -1887,7 +1887,28 @@
 	]
 ]
 
-@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable) = func_button : "Button"
+@BaseClass = ButtonUseType
+[
+	usetype(choices) : "Use Type" : : "Note: This parameter is not compatible with Sven Co-op and has a different name!" =
+	[
+		-1 : "Off"
+		0 : "Toggle"
+		1 : "On"
+		2 : "On/Off (for Toggle buttons)"
+		3 : "Off/On (for Toggle buttons)"
+	]
+]
+@BaseClass = ButtonUsePolicy
+[
+	directuse(choices) : "Player use policy" =
+	[
+		0 : "Default"
+		1 : "Direct only"
+		2 : "Visible only"
+	]
+]
+
+@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy) = func_button : "Button"
 [
 	speed(integer) : "Speed" : 5
 	health(integer) : "Health (shootable if > 0)"
@@ -1921,12 +1942,6 @@
 		512:"Player Can't Use": 0
 	]
 	target_on_locked(target_destination) : "Target on locked" : : "Trigger if used when locked"
-	directuse(choices) : "Player use policy" =
-	[
-		0 : "Default"
-		1 : "Direct only"
-		2 : "Visible only"
-	]
 	_minlight(string) : "Minimum light level"
 ]
 
@@ -2084,7 +2099,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable) = func_rot_button : "RotatingButton"
+@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy) = func_rot_button : "RotatingButton"
 [
 	target(target_destination) : "Targetted object"
 	// changetarget will change the button's target's TARGET field to the button's changetarget.
@@ -2117,12 +2132,6 @@
 		128: "Y Axis" : 0
 		256:"Touch Activates": 0
 		512:"Player Can't Use": 0
-	]
-	directuse(choices) : "Player use policy" =
-	[
-		0 : "No"
-		1 : "Direct only"
-		2 : "Visible only"
 	]
 	_minlight(string) : "Minimum light level"
 ]

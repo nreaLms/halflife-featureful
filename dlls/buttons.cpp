@@ -716,6 +716,11 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 		m_iDirectUse = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	if( FStrEq( pkvd->szKeyName, "usetype" ) )
+	{
+		pev->impulse = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else 
 		CBaseToggle::KeyValue( pkvd );
 }
@@ -742,7 +747,7 @@ int CBaseButton::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 
 		// Toggle buttons fire when they get back to their "home" position
 		if( !( pev->spawnflags & SF_BUTTON_TOGGLE ) )
-			SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 );
+			SUB_UseTargets( m_hActivator, UseType(true), 0 );
 		ButtonReturn();
 	}
 	else // code == BUTTON_ACTIVATE
@@ -985,7 +990,6 @@ void CBaseButton::ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		{
 			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noise ), 1.0f, ATTN_NORM );
 
-			//SUB_UseTargets( m_eoActivator );
 			ButtonReturn();
 		}
 	}
@@ -1050,7 +1054,7 @@ void CBaseButton::ButtonTouch( CBaseEntity *pOther )
 	if( code == BUTTON_RETURN )
 	{
 		EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noise ), 1, ATTN_NORM );
-		SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 );
+		SUB_UseTargets( m_hActivator, UseType(true), 0 );
 		ButtonReturn();
 	}
 	else	// code == BUTTON_ACTIVATE
@@ -1131,7 +1135,7 @@ void CBaseButton::TriggerAndWait( void )
 
 	pev->frame = 1;			// use alternate textures
 
-	SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 );
+	SUB_UseTargets( m_hActivator, UseType(false), 0 );
 }
 
 //
@@ -1163,7 +1167,7 @@ void CBaseButton::ButtonBackHome( void )
 	{
 		//EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noise ), 1, ATTN_NORM );
 		
-		SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 );
+		SUB_UseTargets( m_hActivator, UseType(true), 0 );
 	}
 
 	if( !FStringNull( pev->target ) )
@@ -1206,6 +1210,36 @@ bool CBaseButton::IsSparkingButton()
 {
 	return FBitSet( pev->spawnflags, SF_BUTTON_SPARK_IF_OFF )
 			&& !FClassnameIs(pev, "func_rot_button"); // there's a clash in flags, don't enable sparking for rotating buttons
+}
+
+USE_TYPE CBaseButton::UseType(bool returning)
+{
+	if (pev->impulse == BUTTON_USE_ON)
+	{
+		return USE_ON;
+	}
+	else if (pev->impulse == BUTTON_USE_OFF)
+	{
+		return USE_OFF;
+	}
+	if ( FBitSet(pev->spawnflags, SF_BUTTON_TOGGLE) )
+	{
+		if (pev->impulse == BUTTON_USE_ON_OFF)
+		{
+			if (returning)
+				return USE_OFF;
+			else
+				return USE_ON;
+		}
+		else if (pev->impulse == BUTTON_USE_OFF_ON)
+		{
+			if (returning)
+				return USE_ON;
+			else
+				return USE_OFF;
+		}
+	}
+	return USE_TOGGLE;
 }
 
 //
