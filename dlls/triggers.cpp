@@ -2961,15 +2961,13 @@ void CTriggerCamera::Move()
 #define SF_TRIGGER_RANDOM_UNIQUE 16
 #define SF_TRIGGER_RANDOM_DONT_REPEAT 32
 
-class CTriggerRandom : public CBaseEntity
+class CTriggerRandom : public CPointEntity
 {
 public:
 	void Spawn();
 	void KeyValue( KeyValueData *pkvd );
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	void EXPORT TimedThink();
-
-	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -2987,6 +2985,7 @@ public:
 	float m_minDelay;
 	float m_maxDelay;
 	string_t m_lastTarget;
+	string_t m_triggerOnLimit;
 
 	inline bool IsActive() { return pev->spawnflags & SF_TRIGGER_RANDOM_START_ON; }
 	inline void SetActive(bool active)
@@ -3018,9 +3017,10 @@ TYPEDESCRIPTION	CTriggerRandom::m_SaveData[] =
 	DEFINE_FIELD( CTriggerRandom, m_minDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerRandom, m_maxDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerRandom, m_lastTarget, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerRandom, m_triggerOnLimit, FIELD_STRING ),
 };
 
-IMPLEMENT_SAVERESTORE( CTriggerRandom, CBaseEntity )
+IMPLEMENT_SAVERESTORE( CTriggerRandom, CPointEntity )
 
 void CTriggerRandom::KeyValue( KeyValueData *pkvd )
 {
@@ -3064,6 +3064,9 @@ void CTriggerRandom::KeyValue( KeyValueData *pkvd )
 		if (pkvd->fHandled == FALSE) {
 			CBaseEntity::KeyValue( pkvd );
 		}
+	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_limit") ) {
+		m_triggerOnLimit = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
 	} else {
 		CBaseEntity::KeyValue( pkvd );
 	}
@@ -3129,6 +3132,9 @@ void CTriggerRandom::TimedThink()
 				if (m_triggerCounter >= m_triggerNumberLimit) {
 					SetActive(false);
 					m_triggerCounter = 0;
+
+					if (!FStringNull(m_triggerOnLimit))
+						FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
 				}
 			}
 		}
@@ -3569,15 +3575,13 @@ void CTriggerKillMonster::OldUse()
 #define SF_TRIGGER_TIMER_START_ON 1
 #define SF_TRIGGER_TIMER_NO_FIRST_DELAY 32
 
-class CTriggerTimer : public CBaseEntity
+class CTriggerTimer : public CPointEntity
 {
 public:
 	void Spawn();
 	void KeyValue( KeyValueData *pkvd );
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
-	void Think();
-
-	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	void EXPORT TimerThink();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -3591,6 +3595,7 @@ public:
 	float m_minDelay;
 	float m_maxDelay;
 	BOOL m_active;
+	string_t m_triggerOnLimit;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_timer, CTriggerTimer )
@@ -3602,9 +3607,10 @@ TYPEDESCRIPTION	CTriggerTimer::m_SaveData[] =
 	DEFINE_FIELD( CTriggerTimer, m_minDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerTimer, m_maxDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerTimer, m_active, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CTriggerTimer, m_triggerOnLimit, FIELD_STRING ),
 };
 
-IMPLEMENT_SAVERESTORE( CTriggerTimer, CBaseEntity )
+IMPLEMENT_SAVERESTORE( CTriggerTimer, CPointEntity )
 
 void CTriggerTimer::KeyValue( KeyValueData *pkvd )
 {
@@ -3626,6 +3632,9 @@ void CTriggerTimer::KeyValue( KeyValueData *pkvd )
 			m_triggerNumberLimit = 0;
 		}
 		pkvd->fHandled = TRUE;
+	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_limit") ) {
+		m_triggerOnLimit = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
 	} else {
 		CBaseEntity::KeyValue( pkvd );
 	}
@@ -3635,6 +3644,8 @@ void CTriggerTimer::Spawn()
 {
 	m_triggerCounter = 0;
 	m_active = FALSE;
+	SetThink(&CTriggerTimer::TimerThink);
+
 	if (pev->spawnflags & SF_TRIGGER_TIMER_START_ON) {
 		SetActive(TRUE);
 		pev->nextthink += 0.1; // some little delay of spawn
@@ -3656,7 +3667,7 @@ void CTriggerTimer::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 }
 
-void CTriggerTimer::Think()
+void CTriggerTimer::TimerThink()
 {
 	if (m_active) {
 		if (!FStringNull(pev->target)) {
@@ -3665,6 +3676,8 @@ void CTriggerTimer::Think()
 				m_triggerCounter++;
 				if (m_triggerCounter >= m_triggerNumberLimit) {
 					SetActive(FALSE);
+					if (!FStringNull(m_triggerOnLimit))
+						FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
 					return;
 				}
 			}
