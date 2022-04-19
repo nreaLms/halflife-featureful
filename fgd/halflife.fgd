@@ -107,6 +107,10 @@
 [
 	target(target_destination) : "Target" : : "When an entity is activated, it triggers the entity with the name specified by Target."
 ]
+@BaseClass = Scalable
+[
+	scale(string) : "Scale (1.0 = normal size)"
+]
 @BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles) = Weapon []
 @BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles) = Item
 [
@@ -351,7 +355,6 @@
 @BaseClass = MonsterExtraBase
 [
 	health(string) : "Custom Health"
-	scale(string) : "Scale (1.0 = normal size)"
 	minhullsize(string) : "Custom Min Hull Size (X Y Z)"
 	maxhullsize(string) : "Custom Max Hull Size (X Y Z)"
 	gibmodel(studio) : "Custom gib model"
@@ -367,7 +370,7 @@
 	]
 ]
 
-@BaseClass base(MonsterExtraBase, Classification, BloodColor, FielfOfView, FreeRoaming, ActiveAfterAlert, SizeForGrapple, PrisonerTo, MonsterSoundMask, MonsterGibPolicy) = MonsterExtra
+@BaseClass base(MonsterExtraBase, Scalable, Classification, BloodColor, FielfOfView, FreeRoaming, ActiveAfterAlert, SizeForGrapple, PrisonerTo, MonsterSoundMask, MonsterGibPolicy) = MonsterExtra
 [
 	displayname(string) : "In-game Name" : : "Name that's displayed when player looks at the monster if mp_allowmonsterinfo is enabled"
 ]
@@ -1920,7 +1923,7 @@
 	target_on_locked(target_destination) : "Target on locked" : : "Trigger if used when locked"
 	directuse(choices) : "Player use policy" =
 	[
-		0 : "No"
+		0 : "Default"
 		1 : "Direct only"
 		2 : "Visible only"
 	]
@@ -2617,15 +2620,15 @@
 //
 
 @PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
 [
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_battery.mdl") = item_battery : "HEV battery"
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_battery.mdl") = item_battery : "HEV battery"
 [
 	health(integer) : "Charge Supplied"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/barney_vest.mdl") = item_armorvest : "Armor vest"
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/barney_vest.mdl") = item_armorvest : "Armor vest"
 [
 	sequence(choices) : "Placement" : 0 =
 	[
@@ -2635,7 +2638,7 @@
 		3 : "Reclining"
 	]
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/barney_helmet.mdl") = item_helmet : "Helmet"
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/barney_helmet.mdl") = item_helmet : "Helmet"
 [
 	sequence(choices) : "Placement" : 0 =
 	[
@@ -2644,16 +2647,16 @@
 		2 : "Lying upside-down"
 	]
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_flashlight.mdl") = item_flashlight : "Flashlight" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx) studio("models/w_security.mdl") = item_security : "Security card"
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_flashlight.mdl") = item_flashlight : "Flashlight" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_security.mdl") = item_security : "Security card"
 [
 	message(string) : "Message" : : "Message from titles.txt to show on pickup"
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
 	hudname(string) : "Hud name" : : "Custom name from hud.txt to show on pickup. The default is item_security"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_suit.mdl") = item_suit : "HEV Suit"
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_suit.mdl") = item_suit : "HEV Suit"
 [
 	spawnflags(Flags) =
 	[
@@ -2668,13 +2671,12 @@
 	template(string) : "info_item_random entity"
 ]
 
-@PointClass base(Weapon, Targetx, RenderFields) studio() = item_generic : "Generic scenery item"
+@PointClass base(Weapon, Targetx, RenderFields, Scalable) studio() = item_generic : "Generic scenery item"
 [
 	model(studio) : "Model" : "models/w_security.mdl"
 	sequencename(string) : "Sequence Name"
 	skin(integer) : "Skin"
 	body(integer) : "Body"
-	scale(string) : "Scale (1.0 = normal size)"
 	spawnflags(Flags) =
 	[
 		1 : "Drop to floor" : 0
