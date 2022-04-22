@@ -954,7 +954,7 @@ int CTalkMonster::FOkToSpeak(int speakFlags )
 		return FALSE;
 
 	// if player is not in pvs, don't speak
-	if( !IsAlive() || FNullEnt(FIND_CLIENT_IN_PVS( edict() ) ) )
+	if( !IsFullyAlive() || FNullEnt(FIND_CLIENT_IN_PVS( edict() ) ) )
 		return FALSE;
 
 	// don't talk if you're in combat
