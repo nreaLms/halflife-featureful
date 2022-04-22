@@ -27,6 +27,8 @@
 #include	"soundent.h"
 #include	"mod_features.h"
 
+#define FEATURE_SCIENTIST_PLFEAR 0
+
 #define		NUM_SCIENTIST_HEADS		4 // four heads available for scientist model, used when randoming a scientist head
 
 // used for body change when scientist uses the needle
@@ -804,7 +806,11 @@ void CScientist::TalkInit()
 	m_szGrp[TLK_MORTAL] = "SC_MORTAL";
 
 	m_szGrp[TLK_SHOT] = NULL;
+#if FEATURE_SCIENTIST_PLFEAR
+	m_szGrp[TLK_MAD] = "SC_PLFEAR";
+#else
 	m_szGrp[TLK_MAD] = NULL;
+#endif
 
 	// get voice for head
 	switch( pev->body % NUM_SCIENTIST_BODIES )
@@ -1659,7 +1665,11 @@ void CRosenberg::TalkInit()
 	m_szGrp[TLK_MORTAL] = "RO_MORTAL";
 
 	m_szGrp[TLK_SHOT] = NULL;
+#if FEATURE_SCIENTIST_PLFEAR
+	m_szGrp[TLK_MAD] = "RO_PLFEAR";
+#else
 	m_szGrp[TLK_MAD] = NULL;
+#endif
 
 	m_voicePitch = 100;
 }
@@ -1883,7 +1893,7 @@ void CKeller::TalkInit()
 	m_szGrp[TLK_WOUND] = NULL;
 	m_szGrp[TLK_MORTAL] = NULL;
 
-	m_szGrp[TLK_SHOT] = NULL;
+	m_szGrp[TLK_SHOT] = "DK_PLFEAR";
 	m_szGrp[TLK_MAD] = NULL;
 
 	m_voicePitch = 100;
