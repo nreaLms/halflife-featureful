@@ -266,6 +266,7 @@ void CTriggerRelay::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 #define SF_MULTIMAN_CLONE		0x80000000
 #define SF_MULTIMAN_THREAD		0x00000001
+#define SF_MULTIMAN_ONLYONCE	0x00000008
 
 enum
 {
@@ -277,7 +278,6 @@ enum
 
 static void ParseMMDelay(const char* value, float& delay, short& mmUseType)
 {
-	int i = 0;
 	char* endPtr;
 	delay = (float)strtod(value, &endPtr);
 	mmUseType = MM_USE_TOGGLE;
@@ -459,7 +459,7 @@ void CMultiManager::ManagerThink( void )
 	if( m_index >= m_cTargets )// have we fired all targets?
 	{
 		SetThink( NULL );
-		if( IsClone() )
+		if( IsClone() || FBitSet(pev->spawnflags, SF_MULTIMAN_ONLYONCE) )
 		{
 			UTIL_Remove( this );
 			return;

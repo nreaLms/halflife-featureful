@@ -6403,15 +6403,18 @@
 	]
 ]
 
-@PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager. Use type of targets can be configured by adding #0 (Off), #1 (On) or #2 (Kill) to their delay values."
+@BaseClass = MultiManagerFlags
 [
 	spawnflags(Flags) =
 	[
-		1 : "multithreaded" : 0
+		1 : "Multi-threaded" : 0
+		8 : "Once only" : 0
 	]
 ]
 
-@PointClass base(Targetname) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_trigger : "MultiTarget Trigger. Use this entity instead of multi_manager so JACK could draw connections to its targets."
+@PointClass base(Targetname, MultiManagerFlags) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager. Use type of targets can be configured by adding #0 (Off), #1 (On) or #2 (Kill) to their delay values." []
+
+@PointClass base(Targetname, MultiManagerFlags) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_trigger : "MultiTarget Trigger. Use this entity instead of multi_manager so JACK could draw connections to its targets."
 [
 	target1(target_destination) : "Target 1"
 	delay1(string) : "Delay 1"
@@ -6445,10 +6448,6 @@
 	delay15(string) : "Delay 15"
 	target16(target_destination) : "Target 16"
 	delay16(string) : "Delay 16"
-	spawnflags(Flags) =
-	[
-		1 : "multithreaded" : 0
-	]
 ]
 
 @PointClass base(Targetname, Target) color(128 255 128) iconsprite("sprites/multisource.spr") = multisource : "Multisource"
