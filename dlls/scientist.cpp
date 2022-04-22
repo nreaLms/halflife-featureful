@@ -120,6 +120,7 @@ public:
 
 	void DeathSound( void );
 	void PainSound( void );
+	virtual void PlayPainSound();
 
 	void TalkInit( void );
 
@@ -851,6 +852,11 @@ void CScientist::PainSound( void )
 
 	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
 
+	PlayPainSound();
+}
+
+void CScientist::PlayPainSound()
+{
 	switch( RANDOM_LONG( 0, 4 ) )
 	{
 	case 0:
@@ -876,7 +882,7 @@ void CScientist::PainSound( void )
 //=========================================================
 void CScientist::DeathSound( void )
 {
-	PainSound();
+	PlayPainSound();
 }
 
 void CScientist::SetActivity( Activity newActivity )
@@ -1581,7 +1587,7 @@ public:
 	const char* ScreamSentence() { return "RO_SCREAM"; }
 	const char* FearSentence() { return "RO_FEAR"; }
 	const char* PlayerFearSentence() { return "RO_PLFEAR"; }
-	void PainSound();
+	void PlayPainSound();
 
 #if FEATURE_ROSENBERG_DECAY
 	BOOL CanHeal() { return false; }
@@ -1658,13 +1664,8 @@ void CRosenberg::TalkInit()
 	m_voicePitch = 100;
 }
 
-void CRosenberg::PainSound()
+void CRosenberg::PlayPainSound()
 {
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
-
 	const char* painSound = NULL;
 	switch( RANDOM_LONG( 0, 8 ) )
 	{
@@ -1801,12 +1802,39 @@ public:
 	const char* FearSentence() { return "DK_FEAR"; }
 	const char* PlayerFearSentence() { return "DK_PLFEAR"; }
 	void PainSound();
+	void DeathSound();
 
 	BOOL CanHeal() { return false; }
 	bool ReadyToHeal() {return false; }
+
+protected:
+	static const char* pPainSounds[];
+	static const char* pDeathSounds[];
 };
 
 LINK_ENTITY_TO_CLASS( monster_wheelchair, CKeller )
+
+const char* CKeller::pPainSounds[] =
+{
+	"keller/dk_pain1.wav",
+	"keller/dk_pain2.wav",
+	"keller/dk_pain3.wav",
+	"keller/dk_pain4.wav",
+	"keller/dk_pain5.wav",
+	"keller/dk_pain6.wav",
+	"keller/dk_pain7.wav",
+};
+
+const char* CKeller::pDeathSounds[] =
+{
+	"keller/dk_die1.wav",
+	"keller/dk_die2.wav",
+	"keller/dk_die3.wav",
+	"keller/dk_die4.wav",
+	"keller/dk_die5.wav",
+	"keller/dk_die6.wav",
+	"keller/dk_die7.wav",
+};
 
 void CKeller::Spawn()
 {
@@ -1817,13 +1845,8 @@ void CKeller::Spawn()
 void CKeller::Precache()
 {
 	PrecacheMyModel("models/wheelchair_sci.mdl");
-	PRECACHE_SOUND( "keller/dk_pain1.wav" );
-	PRECACHE_SOUND( "keller/dk_pain2.wav" );
-	PRECACHE_SOUND( "keller/dk_pain3.wav" );
-	PRECACHE_SOUND( "keller/dk_pain4.wav" );
-	PRECACHE_SOUND( "keller/dk_pain5.wav" );
-	PRECACHE_SOUND( "keller/dk_pain6.wav" );
-	PRECACHE_SOUND( "keller/dk_pain7.wav" );
+	PRECACHE_SOUND_ARRAY( pPainSounds );
+	PRECACHE_SOUND_ARRAY( pDeathSounds );
 
 	PRECACHE_SOUND( "wheelchair/wheelchair_jog.wav" );
 	PRECACHE_SOUND( "wheelchair/wheelchair_run.wav" );
@@ -1873,31 +1896,11 @@ void CKeller::PainSound()
 
 	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
 
-	const char* painSound = NULL;
-	switch( RANDOM_LONG( 1, 7 ) )
-	{
-	case 1:
-		painSound ="keller/dk_pain1.wav";
-		break;
-	case 2:
-		painSound ="keller/dk_pain2.wav";
-		break;
-	case 3:
-		painSound ="keller/dk_pain3.wav";
-		break;
-	case 4:
-		painSound ="keller/dk_pain4.wav";
-		break;
-	case 5:
-		painSound ="keller/dk_pain5.wav";
-		break;
-	case 6:
-		painSound ="keller/dk_pain6.wav";
-		break;
-	case 7:
-		painSound ="keller/dk_pain7.wav";
-		break;
-	}
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, painSound, 1, ATTN_NORM, 0, GetVoicePitch() );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1, ATTN_NORM, 0, GetVoicePitch() );
+}
+
+void CKeller::DeathSound()
+{
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1, ATTN_NORM, 0, GetVoicePitch() );
 }
 #endif
