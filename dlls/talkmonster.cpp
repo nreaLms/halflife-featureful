@@ -1242,9 +1242,11 @@ static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
 
 void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
+	CBaseEntity* pAttacker = pevAttacker ? CBaseEntity::Instance(pevAttacker) : NULL;
 	const int myTolerance = MyToleranceLevel();
 	if ( myTolerance <= TOLERANCE_ZERO )
 	{
+		m_hTalkTarget = pAttacker;
 		PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
 		Remember( bits_MEMORY_PROVOKED );
 		StopFollowing( TRUE );
@@ -1276,6 +1278,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 		if( getMad )
 		{
 			// Alright, now I'm pissed!
+			m_hTalkTarget = pAttacker;
 			PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
 
 			Remember( bits_MEMORY_PROVOKED );
@@ -1291,6 +1294,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 			// Hey, be careful with that
 			if (myTolerance < TOLERANCE_ABSOLUTE || !IsTalking())
 			{
+				m_hTalkTarget = pAttacker;
 				PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
 			}
 			Remember( bits_MEMORY_SUSPICIOUS );
@@ -1298,6 +1302,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 	}
 	else if( !( m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO )
 	{
+		m_hTalkTarget = pAttacker;
 		PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
 	}
 }
