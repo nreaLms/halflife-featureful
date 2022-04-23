@@ -109,6 +109,17 @@ dynpitchvol_t rgdpvpreset[CDPVPRESETMAX] =
 {27,128,	 90,	10,		10,		10,		1,		20,		40,		1,		5,		10,		20,		0,		0,0,0,0,0,0,0,0,0,0}
 };
 
+enum
+{
+	AMBIENT_SOUND_RADIUS_DEFAULT,
+	AMBIENT_SOUND_RADIUS_SMALL,
+	AMBIENT_SOUND_RADIUS_MEDIUM,
+	AMBIENT_SOUND_RADIUS_LARGE,
+	AMBIENT_SOUND_RADIUS_HUGE,
+	AMBIENT_SOUND_RADIUS_ENORMOUS,
+	AMBIENT_SOUND_RADIUS_EVERYWHERE,
+};
+
 class CAmbientGeneric : public CBaseEntity
 {
 public:
@@ -168,26 +179,50 @@ void CAmbientGeneric::Spawn( void )
 		125 : "Medium Radius"
 		80  : "Large Radius"
 */
-	if( FBitSet( pev->spawnflags, AMBIENT_SOUND_EVERYWHERE ) )
+	// if the designer didn't set a sound attenuation, default to one.
+	m_flAttenuation = ATTN_STATIC;
+
+	if (pev->impulse == AMBIENT_SOUND_RADIUS_DEFAULT)
 	{
-		m_flAttenuation = ATTN_NONE;
-	}
-	else if( FBitSet( pev->spawnflags, AMBIENT_SOUND_SMALLRADIUS ) )
-	{
-		m_flAttenuation = ATTN_IDLE;
-	}
-	else if( FBitSet( pev->spawnflags, AMBIENT_SOUND_MEDIUMRADIUS ) )
-	{
-		m_flAttenuation = ATTN_STATIC;
-	}
-	else if( FBitSet( pev->spawnflags, AMBIENT_SOUND_LARGERADIUS ) )
-	{
-		m_flAttenuation = ATTN_NORM;
-	}
-	else 
-	{
-		// if the designer didn't set a sound attenuation, default to one.
-		m_flAttenuation = ATTN_STATIC;
+		if( FBitSet( pev->spawnflags, AMBIENT_SOUND_EVERYWHERE ) )
+		{
+			m_flAttenuation = ATTN_NONE;
+		}
+		else if( FBitSet( pev->spawnflags, AMBIENT_SOUND_SMALLRADIUS ) )
+		{
+			m_flAttenuation = ATTN_IDLE;
+		}
+		else if( FBitSet( pev->spawnflags, AMBIENT_SOUND_MEDIUMRADIUS ) )
+		{
+			m_flAttenuation = ATTN_STATIC;
+		}
+		else if( FBitSet( pev->spawnflags, AMBIENT_SOUND_LARGERADIUS ) )
+		{
+			m_flAttenuation = ATTN_NORM;
+		}
+	} else {
+		switch (pev->impulse) {
+		case AMBIENT_SOUND_RADIUS_SMALL:
+			m_flAttenuation = ATTN_IDLE;
+			break;
+		case AMBIENT_SOUND_RADIUS_MEDIUM:
+			m_flAttenuation = ATTN_STATIC;
+			break;
+		case AMBIENT_SOUND_RADIUS_LARGE:
+			m_flAttenuation = ATTN_NORM;
+			break;
+		case AMBIENT_SOUND_RADIUS_HUGE:
+			m_flAttenuation = 0.5f;
+			break;
+		case AMBIENT_SOUND_RADIUS_ENORMOUS:
+			m_flAttenuation = 0.25f;
+			break;
+		case AMBIENT_SOUND_RADIUS_EVERYWHERE:
+			m_flAttenuation = ATTN_NONE;
+			break;
+		default:
+			break;
+		}
 	}
 
 	const char *szSoundFile = STRING( pev->message );
@@ -895,6 +930,11 @@ void CAmbientGeneric::KeyValue( KeyValueData *pkvd )
 		if( m_dpv.cspinup < 0 )
 			m_dpv.cspinup = 0;
 
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "attenuation" ) )
+	{
+		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

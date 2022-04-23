@@ -1045,6 +1045,16 @@
 		16 : "Start Silent":0
 		32 : "Not Toggled":0
 	]
+	attenuation(Choices) : "Sound Radius" =
+	[
+		0 : "From Spawn Flags"
+		1 : "Small Radius"
+		2 : "Medium Radius"
+		3 : "Large  Radius"
+		4 : "Huge Radius"
+		5 : "Enormous Radius"
+		6 : "Play Everywhere"
+	]
 ]
 
 @PointClass base(Ambient) = ambient_generic : "Universal Ambient" []
