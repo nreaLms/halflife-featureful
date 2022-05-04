@@ -65,6 +65,13 @@ enum
 	SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS = 1
 };
 
+enum
+{
+	SCRIPT_INTERRUPTION_POLICY_ANY_DAMAGE = 0,
+	SCRIPT_INTERRUPTION_POLICY_NO_INTERRUPTIONS = 1,
+	SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH = 2,
+};
+
 // when a monster finishes an AI scripted sequence, we can choose
 // a schedule to place them in. These defines are the aliases to
 // resolve worldcraft input to real schedules (sjb)
@@ -104,7 +111,9 @@ public:
 	virtual BOOL FCanOverrideState ( void );
 	void SequenceDone ( CBaseMonster *pMonster );
 	virtual void FixScriptMonsterSchedule( CBaseMonster *pMonster );
+	bool ForcedNoInterruptions();
 	BOOL	CanInterrupt( void );
+	bool	CanInterruptByPlayerCall();
 	void	AllowInterrupt( BOOL fAllow );
 	int		IgnoreConditions( void );
 	virtual bool	ShouldResetOnGroundFlag();
@@ -138,6 +147,8 @@ public:
 	short m_applySearchRadius;
 	short m_maxMoveFailAttempts;
 	short m_moveFailCount;
+
+	short m_interruptionPolicy;
 
 	bool m_cantFindReported; // no need to save
 	bool m_cantPlayReported;

@@ -135,6 +135,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_fRepeatFrame = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "m_interruptionPolicy" ) )
+	{
+		m_interruptionPolicy = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -170,6 +175,8 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_iRepeats, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_iRepeatsLeft, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_fRepeatFrame, FIELD_FLOAT ),
+
+	DEFINE_FIELD( CCineMonster, m_interruptionPolicy, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -198,7 +205,7 @@ void CCineMonster::Spawn( void )
 		if( pev->targetname )
 			m_startTime = gpGlobals->time + (float)1E6;
 	}
-	if( pev->spawnflags & SF_SCRIPT_NOINTERRUPT )
+	if( ForcedNoInterruptions() )
 		m_interruptable = FALSE;
 	else
 		m_interruptable = TRUE;
@@ -678,9 +685,14 @@ BOOL CBaseMonster::ExitScriptedSequence()
 	return TRUE;
 }
 
+bool CCineMonster::ForcedNoInterruptions()
+{
+	return (pev->spawnflags & SF_SCRIPT_NOINTERRUPT) || m_interruptionPolicy == SCRIPT_INTERRUPTION_POLICY_NO_INTERRUPTIONS;
+}
+
 void CCineMonster::AllowInterrupt( BOOL fAllow )
 {
-	if( pev->spawnflags & SF_SCRIPT_NOINTERRUPT )
+	if( ForcedNoInterruptions() )
 		return;
 	m_interruptable = fAllow;
 }
@@ -696,6 +708,11 @@ BOOL CCineMonster::CanInterrupt( void )
 		return TRUE;
 
 	return FALSE;
+}
+
+bool CCineMonster::CanInterruptByPlayerCall()
+{
+	return m_interruptionPolicy != SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH && CanInterrupt();
 }
 
 int CCineMonster::IgnoreConditions( void )

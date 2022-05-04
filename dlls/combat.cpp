@@ -32,6 +32,7 @@
 #include "func_break.h"
 #include "player.h"
 #include "gamerules.h"
+#include "scripted.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -1131,7 +1132,12 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
 	if( m_MonsterState == MONSTERSTATE_SCRIPT )
 	{
-		if (flDamage > 0)
+		if ( m_pCine && m_pCine->m_interruptionPolicy == SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH )
+		{
+			if (pev->health <= 0.0f)
+				SetConditions( bits_COND_HEAVY_DAMAGE );
+		}
+		else if (flDamage > 0)
 			SetConditions( bits_COND_LIGHT_DAMAGE );
 		return 0;
 	}

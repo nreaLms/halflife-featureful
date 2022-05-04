@@ -501,7 +501,7 @@ BOOL CFollowingMonster::AbleToFollow()
 	{
 		if( !m_pCine )
 			return FALSE;
-		if( !m_pCine->CanInterrupt() )
+		if( !m_pCine->CanInterruptByPlayerCall() )
 			return FALSE;
 	}
 
