@@ -595,7 +595,16 @@ void CBaseMonster::RunTask( Task_t *pTask )
 		{
 			if( m_fSequenceFinished )
 			{
-				m_pCine->SequenceDone( this );
+				if( m_pCine->m_iRepeatsLeft > 0 )
+				{
+					m_pCine->m_iRepeatsLeft--;
+					pev->frame = m_pCine->m_fRepeatFrame;
+					ResetSequenceInfo();
+				}
+				else
+				{
+					m_pCine->SequenceDone( this );
+				}
 			}
 			break;
 		}

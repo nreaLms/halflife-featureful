@@ -916,7 +916,6 @@
 	m_iszIdle(string) : "Idle Animation"
 	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_flRadius(integer) : "Search Radius" : 512
-	m_flRepeat(integer) : "Repeat Rate ms" : 0
 	m_fMoveTo(choices) : "Move to Position" : 0 =
 	[
 		0 : "No"
@@ -969,6 +968,8 @@
 		0 : "Only to Class Name"
 		1 : "Always"
 	]
+	m_iRepeats(integer) : "Repeat action X more times"
+	m_fRepeatFrame(string) : "Repeat from frame"
 	m_maxMoveFailAttempts(integer) : "Max move fail attempts" : : "When not zero, teleport the monster to the script position after this number of failed move attempts (for Walk and Run scripts)"
 ]
 

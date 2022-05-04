@@ -74,11 +74,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_fMoveTo = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if( FStrEq( pkvd->szKeyName, "m_flRepeat" ) )
+	/*else if( FStrEq( pkvd->szKeyName, "m_flRepeat" ) )
 	{
 		m_flRepeat = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
-	}
+	}*/
 	else if( FStrEq( pkvd->szKeyName, "m_flRadius" ) )
 	{
 		m_flRadius = atof( pkvd->szValue );
@@ -124,6 +124,17 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_maxMoveFailAttempts = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_iRepeats"))
+	{
+		m_iRepeats = atoi( pkvd->szValue );
+		m_iRepeatsLeft = m_iRepeats;
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_fRepeatFrame"))
+	{
+		m_fRepeatFrame = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -136,7 +147,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_iszPlay, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_iszEntity, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_fMoveTo, FIELD_INTEGER ),
-	DEFINE_FIELD( CCineMonster, m_flRepeat, FIELD_FLOAT ),
+	//DEFINE_FIELD( CCineMonster, m_flRepeat, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_flRadius, FIELD_FLOAT ),
 
 	DEFINE_FIELD( CCineMonster, m_iDelay, FIELD_INTEGER ),
@@ -155,6 +166,10 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_applySearchRadius, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_maxMoveFailAttempts, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_moveFailCount, FIELD_SHORT ),
+
+	DEFINE_FIELD( CCineMonster, m_iRepeats, FIELD_INTEGER ),
+	DEFINE_FIELD( CCineMonster, m_iRepeatsLeft, FIELD_INTEGER ),
+	DEFINE_FIELD( CCineMonster, m_fRepeatFrame, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -579,6 +594,8 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 void CCineMonster::SequenceDone( CBaseMonster *pMonster )
 {
 	//ALERT( at_aiconsole, "Sequence %s finished\n", STRING( m_pCine->m_iszPlay ) );
+
+	m_iRepeatsLeft = m_iRepeats;
 
 	if( !( pev->spawnflags & SF_SCRIPT_REPEATABLE ) )
 	{
