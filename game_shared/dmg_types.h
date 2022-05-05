@@ -37,6 +37,7 @@
 // TODO: make into another set of flags?
 #define DMG_NONLETHAL		(1 << 24) // this damage shouldn't kill player
 #define DMG_TIMEDNONLETHAL	(1 << 25) // timed damage, e.g. poison, shouldn't kill player completely
+#define DMG_DONTBLEED		(1 << 26) // used in TraceAttack. Force not to bleed.
 
 #define HEAL_GENERIC 0
 #define HEAL_CHARGE (1<<0) // Charge my portable medkit

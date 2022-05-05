@@ -256,14 +256,12 @@ static void AgruntTraceAttack( CBaseMonster* self, entvars_t *pevAttacker, float
 		flDamage -= 20.0f;
 		if( flDamage <= 0.0f )
 			flDamage = 0.1f;// don't hurt the monster much, but allow bits_COND_LIGHT_DAMAGE to be generated
-	}
-	else
-	{
-		SpawnBlood( ptr->vecEndPos, self->BloodColor(), flDamage );// a little surface blood.
-		self->TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
+
+		ptr->iHitgroup = HITGROUP_GENERIC;
+		bitsDamageType |= DMG_DONTBLEED;
 	}
 
-	AddMultiDamage( pevAttacker, self, flDamage, bitsDamageType );
+	self->CBaseMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
 void CAGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )

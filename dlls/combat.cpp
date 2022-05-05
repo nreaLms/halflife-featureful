@@ -1586,8 +1586,11 @@ void CBaseMonster::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 			break;
 		}
 
-		SpawnBlood( ptr->vecEndPos, BloodColor(), flDamage );// a little surface blood.
-		TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
+		if (!FBitSet(bitsDamageType, DMG_DONTBLEED))
+		{
+			SpawnBlood( ptr->vecEndPos, BloodColor(), flDamage );// a little surface blood.
+			TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
+		}
 		AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
 	}
 }
