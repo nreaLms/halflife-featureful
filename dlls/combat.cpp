@@ -1555,6 +1555,11 @@ void CBaseMonster::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 //=========================================================
 // TraceAttack
 //=========================================================
+float CBaseMonster::HeadHitGroupDamageMultiplier()
+{
+	return gSkillData.monHead;
+}
+
 void CBaseMonster::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
 	if( pev->takedamage )
@@ -1566,7 +1571,7 @@ void CBaseMonster::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 		case HITGROUP_GENERIC:
 			break;
 		case HITGROUP_HEAD:
-			flDamage *= gSkillData.monHead;
+			flDamage *= HeadHitGroupDamageMultiplier();
 			break;
 		case HITGROUP_CHEST:
 			flDamage *= gSkillData.monChest;

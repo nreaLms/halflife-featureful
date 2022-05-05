@@ -318,6 +318,7 @@ public:
 
 	BOOL GetEnemy( bool forcePopping );
 	void MakeDamageBloodDecal( int cCount, float flNoise, TraceResult *ptr, const Vector &vecDir );
+	virtual float HeadHitGroupDamageMultiplier();
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
 	// combat functions
