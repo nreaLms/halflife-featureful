@@ -4961,6 +4961,8 @@ public:
 	string_t m_iszDecline;
 	short m_provokedState;
 	short m_iTolerance;
+
+	short m_ignorePushFlag;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_configure_monster, CTriggerConfigureMonster )
@@ -4982,6 +4984,7 @@ TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iszDecline, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_provokedState, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTolerance, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_ignorePushFlag, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CTriggerConfigureMonster, CPointEntity )
@@ -5061,6 +5064,11 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "tolerance"))
 	{
 		m_iTolerance = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "ignore_push_flag"))
+	{
+		m_ignorePushFlag = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -5151,6 +5159,11 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		else
 			pMonster->m_iszTriggerTarget = m_iszTriggerTarget;
 	}
+
+	if (m_ignorePushFlag < 0)
+		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH);
+	else if (m_ignorePushFlag > 0)
+		SetBits(pMonster->pev->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH);
 
 	CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
 	if (pTalkMonster)

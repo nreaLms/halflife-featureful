@@ -420,6 +420,10 @@
 		2 : "Stop following"
 		3 : "Try nearest path"
 	]
+	spawnflags(Flags) =
+	[
+		524288 : "Ignore player push" : 0 : "Don't move away when player tries to push me"
+	]
 ]
 
 @BaseClass base(CustomSentences, FollowingMonster) = TalkMonster
@@ -443,7 +447,6 @@
 	[
 		131072 : "Don't greet player" : 0 : "Don't say hello to player upon seeing him"
 		262144 : "Don't idle talk to player" : 0 : "Don't forward idle statements to player, still talk to other allies and answer to player's usage"
-		524288 : "Ignore player pushing" : 0 : "Don't move away when player tries to push me"
 	]
 ]
 
@@ -6919,6 +6922,12 @@
 		4 : "High" : "Get provoked by some hits, but tends to forgive after some time"
 		5 : "Absolute" : "Never get provoked"
 		6 : "Absolute, don't alert friends" : "Never get provoked, don't alert friends upon death"
+	]
+	ignore_push_flag(choices) : "Ignore Player Push flag" =
+	[
+		-1 : "Remove flag"
+		0 : "No change"
+		1 : "Add flag"
 	]
 ]
 

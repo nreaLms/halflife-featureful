@@ -204,7 +204,7 @@ IMPLEMENT_CUSTOM_SCHEDULES( CFollowingMonster, CSquadMonster )
 bool CFollowingMonster::CanBePushedByClient(CBaseEntity *pOther)
 {
 	// Ignore if pissed at player
-	return IRelationship(pOther) == R_AL;
+	return !FBitSet(pev->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH) && IRelationship(pOther) == R_AL;
 }
 
 void CFollowingMonster::Touch( CBaseEntity *pOther )
