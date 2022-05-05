@@ -48,7 +48,7 @@ int CHudNightvision::Init(void)
 	m_pLight = 0;
 #endif
 
-	gHUD.AddHudElem(this);
+	//gHUD.AddHudElem(this);
 
 	return 1;
 }
