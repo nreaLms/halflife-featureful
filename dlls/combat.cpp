@@ -1804,7 +1804,7 @@ void CBaseEntity::TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, i
 	if( BloodColor() == DONT_BLEED )
 		return;
 
-	if( flDamage == 0 )
+	if( (int)flDamage == 0 )
 		return;
 
 	if( !( bitsDamageType & ( DMG_CRUSH | DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB | DMG_MORTAR ) ) )
