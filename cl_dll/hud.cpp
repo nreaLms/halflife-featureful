@@ -105,6 +105,10 @@ cvar_t *cl_rollangle = NULL;
 cvar_t *cl_nvgstyle = NULL;
 #endif
 
+#if FEATURE_CS_NIGHTVISION
+cvar_t *cl_nvgradius = NULL;
+#endif
+
 void ShutdownInput( void );
 
 //DECLARE_MESSAGE( m_Logo, Logo )
@@ -439,6 +443,10 @@ void CHud::Init( void )
 
 #if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
 	cl_nvgstyle = CVAR_CREATE( "cl_nvgstyle", "0", FCVAR_ARCHIVE );
+#endif
+
+#if FEATURE_CS_NIGHTVISION
+	cl_nvgradius = CVAR_CREATE( "cl_nvgradius", "775", FCVAR_ARCHIVE );
 #endif
 
 	m_pSpriteList = NULL;
