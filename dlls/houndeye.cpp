@@ -634,7 +634,7 @@ void CHoundeye::SonicAttack( void )
 	{
 		if( pEntity->pev->takedamage != DAMAGE_NO )
 		{
-			if( !FClassnameIs( pEntity->pev, "monster_houndeye" ) )
+			if( !(FClassnameIs( pEntity->pev, "monster_houndeye" ) && IRelationship(pEntity) < R_DL ) )
 			{
 				// houndeyes don't hurt other houndeyes with their attack
 				// houndeyes do FULL damage if the ent in question is visible. Half damage otherwise.
