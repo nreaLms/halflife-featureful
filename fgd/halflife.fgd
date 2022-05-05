@@ -977,6 +977,12 @@
 		1 : "No Interruptions (same as flag)"
 		2 : "By Death Only"
 	]
+	m_searchPolicy(choices) : "Search policy" : : "Search target monster by targetname or classname" =
+	[
+		0 : "Targetname, classname"
+		1 : "Targetname only"
+		2 : "Classname only"
+	]
 ]
 
 //

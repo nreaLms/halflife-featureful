@@ -140,6 +140,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_interruptionPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "m_searchPolicy" ) )
+	{
+		m_searchPolicy = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -177,6 +182,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_fRepeatFrame, FIELD_FLOAT ),
 
 	DEFINE_FIELD( CCineMonster, m_interruptionPolicy, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_searchPolicy, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -362,38 +368,44 @@ CBaseMonster *CCineMonster::FindEntity( void )
 	pentTarget = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_iszEntity ) );
 	pTarget = NULL;
 
-	while( !FNullEnt( pentTarget ) )
+	if ( m_searchPolicy != SCRIPT_SEARCH_POLICY_CLASSNAME_ONLY )
 	{
-		if( FBitSet( VARS( pentTarget )->flags, FL_MONSTER ) )
+		while( !FNullEnt( pentTarget ) )
 		{
-			pTarget = GetMonsterPointer( pentTarget );
-
-			if (IsAppropriateTarget(pTarget, SS_INTERRUPT_BY_NAME, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
-				return pTarget;
-			if (!m_cantPlayReported)
+			if( FBitSet( VARS( pentTarget )->flags, FL_MONSTER ) )
 			{
-				ALERT( at_console, "Found %s, but can't play! (busy or too far)\n", STRING( m_iszEntity ) );
-				if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
-					m_cantPlayReported = true;
+				pTarget = GetMonsterPointer( pentTarget );
+
+				if (IsAppropriateTarget(pTarget, SS_INTERRUPT_BY_NAME, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
+					return pTarget;
+				if (!m_cantPlayReported)
+				{
+					ALERT( at_console, "Found %s, but can't play! (busy or too far)\n", STRING( m_iszEntity ) );
+					if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
+						m_cantPlayReported = true;
+				}
 			}
+			pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
+			pTarget = NULL;
 		}
-		pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
-		pTarget = NULL;
 	}
 
 	if( !pTarget )
 	{
-		CBaseEntity *pEntity = NULL;
-		while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, m_flRadius ) ) != NULL )
+		if ( m_searchPolicy != SCRIPT_SEARCH_POLICY_TARGETNAME_ONLY )
 		{
-			if( FClassnameIs( pEntity->pev, STRING( m_iszEntity ) ) )
+			CBaseEntity *pEntity = NULL;
+			while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, m_flRadius ) ) != NULL )
 			{
-				if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
+				if( FClassnameIs( pEntity->pev, STRING( m_iszEntity ) ) )
 				{
-					pTarget = pEntity->MyMonsterPointer();
-					if (IsAppropriateTarget(pTarget, SS_INTERRUPT_IDLE, false))
+					if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
 					{
-						return pTarget;
+						pTarget = pEntity->MyMonsterPointer();
+						if (IsAppropriateTarget(pTarget, SS_INTERRUPT_IDLE, false))
+						{
+							return pTarget;
+						}
 					}
 				}
 			}
