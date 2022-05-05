@@ -1038,6 +1038,8 @@ private:
 	short m_followAction;
 	short m_targetActivator;
 	float m_flListenerRadius;
+
+	short m_searchPolicy;
 };
 
 #define SF_SENTENCE_ONCE	0x0001
@@ -1069,6 +1071,7 @@ TYPEDESCRIPTION	CScriptedSentence::m_SaveData[] =
 	DEFINE_FIELD( CScriptedSentence, m_followAction, FIELD_SHORT ),
 	DEFINE_FIELD( CScriptedSentence, m_targetActivator, FIELD_SHORT ),
 	DEFINE_FIELD( CScriptedSentence, m_flListenerRadius, FIELD_FLOAT ),
+	DEFINE_FIELD( CScriptedSentence, m_searchPolicy, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CScriptedSentence, CBaseDelay )
@@ -1135,6 +1138,11 @@ void CScriptedSentence::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "listener_radius" ) )
 	{
 		m_flListenerRadius = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "m_searchPolicy" ) )
+	{
+		m_searchPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1294,28 +1302,34 @@ CBaseMonster *CScriptedSentence::FindEntity( void )
 	pentTarget = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_iszEntity ) );
 	pMonster = NULL;
 
-	while( !FNullEnt( pentTarget ) )
+	if ( m_searchPolicy != SCRIPT_SEARCH_POLICY_CLASSNAME_ONLY )
 	{
-		pMonster = GetMonsterPointer( pentTarget );
-		if( pMonster != NULL )
+		while( !FNullEnt( pentTarget ) )
 		{
-			if( AcceptableSpeaker( pMonster ) )
-				return pMonster;
-			//ALERT( at_console, "%s (%s), not acceptable\n", STRING( pMonster->pev->classname ), STRING( pMonster->pev->targetname ) );
-		}
-		pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
-	}
-
-	CBaseEntity *pEntity = NULL;
-	while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, SpeakerSearchRadius() ) ) != NULL )
-	{
-		if( FClassnameIs( pEntity->pev, STRING( m_iszEntity ) ) )
-		{
-			if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
+			pMonster = GetMonsterPointer( pentTarget );
+			if( pMonster != NULL )
 			{
-				pMonster = pEntity->MyMonsterPointer();
 				if( AcceptableSpeaker( pMonster ) )
 					return pMonster;
+				//ALERT( at_console, "%s (%s), not acceptable\n", STRING( pMonster->pev->classname ), STRING( pMonster->pev->targetname ) );
+			}
+			pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
+		}
+	}
+
+	if ( m_searchPolicy != SCRIPT_SEARCH_POLICY_TARGETNAME_ONLY )
+	{
+		CBaseEntity *pEntity = NULL;
+		while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, SpeakerSearchRadius() ) ) != NULL )
+		{
+			if( FClassnameIs( pEntity->pev, STRING( m_iszEntity ) ) )
+			{
+				if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
+				{
+					pMonster = pEntity->MyMonsterPointer();
+					if( AcceptableSpeaker( pMonster ) )
+						return pMonster;
+				}
 			}
 		}
 	}

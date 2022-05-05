@@ -6621,6 +6621,12 @@
 		2 : "Speaking monster"
 		3 : "Forward my activator"
 	]
+	m_searchPolicy(choices) : "Search policy" : : "Search speaker monster by targetname or classname" =
+	[
+		0 : "Targetname, classname"
+		1 : "Targetname only"
+		2 : "Classname only"
+	]
 ]
 
 @PointClass base(ScriptedSequence) = scripted_sequence : "Scripted Sequence"
