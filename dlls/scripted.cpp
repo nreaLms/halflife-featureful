@@ -1047,6 +1047,8 @@ private:
 #define SF_SENTENCE_INTERRUPT	0x0004	// force talking except when dead
 #define SF_SENTENCE_CONCURRENT	0x0008	// allow other people to keep talking
 #define SF_SENTENCE_REQUIRE_LISTENER 0x0010 // require presense of the listener
+#define SF_SENTENCE_SPEAKER_TURNS_TO_LISTENER 0x0100
+#define SF_SENTENCE_LISTENER_TURNS_TO_SPEAKER 0x0200
 #define SF_SENTENCE_TRY_ONCE 0x1000 // try finding monster once, don't go into the loop
 
 enum
@@ -1398,6 +1400,20 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 		pActivator = m_hActivator;
 	}
 	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
+
+	if (pListener)
+	{
+		if (FBitSet(pev->spawnflags, SF_SENTENCE_SPEAKER_TURNS_TO_LISTENER)) {
+			pTarget->SuggestSchedule(SCHED_IDLE_FACE, pListener);
+		}
+		if (FBitSet(pev->spawnflags, SF_SENTENCE_LISTENER_TURNS_TO_SPEAKER)) {
+			CBaseMonster* pMonsterListener = pListener->MyMonsterPointer();
+			if (pMonsterListener) {
+				pMonsterListener->SuggestSchedule(SCHED_IDLE_FACE, pTarget);
+			}
+		}
+	}
+
 	return TRUE;
 }
 

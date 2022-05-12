@@ -6582,6 +6582,8 @@
 		4 : "Interrupt Speech"	: 1
 		8 : "Concurrent"	: 0
 		16 : "Require listener"	: 0 : "Play sentence only if listener is present"
+		256 : "Speaker turns to listener"	: 0
+		512 : "Listener turns to speaker"	: 0
 		4096 : "Try once"	: 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
 	]
 	sentence(string) : "Sentence Name" : ""
