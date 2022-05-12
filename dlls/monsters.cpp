@@ -3823,12 +3823,14 @@ BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 	const Vector startOffset = vecRight * minDist;
 	const int coverChecks = (int)((maxDist - minDist) / COVER_DELTA) + 1; // at least one check
 
+	const bool threatIsMyself = vecThreat == vecStart;
+
 	for( int i = 1; i <= coverChecks; i++ )
 	{
 		const Vector vecLeftTest = vecStart - startOffset - vecStepRight * ( coverChecks - i );
 		const Vector vecRightTest = vecStart + startOffset + vecStepRight * ( coverChecks - i );
 
-		if ((vecStart - vecLeftTest).Length() < (vecThreat - vecLeftTest).Length())
+		if (threatIsMyself || (vecStart - vecLeftTest).Length() < (vecThreat - vecLeftTest).Length())
 		{
 			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) && CheckLocalMove( pev->origin, vecLeftTest, 0, 0 ) == LOCALMOVE_VALID )
 			{
@@ -3839,7 +3841,7 @@ BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 			}
 		}
 
-		if ((vecStart - vecRightTest).Length() < (vecThreat - vecRightTest).Length())
+		if (threatIsMyself || (vecStart - vecRightTest).Length() < (vecThreat - vecRightTest).Length())
 		{
 			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) && CheckLocalMove( pev->origin, vecRightTest, 0, 0 ) == LOCALMOVE_VALID )
 			{

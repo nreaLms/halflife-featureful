@@ -1291,6 +1291,30 @@ Schedule_t slMoveToEnemyLKP[] =
 	},
 };
 
+Task_t tlIdleFace[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_FACE_SCHEDULED, (float)0 },
+};
+
+Schedule_t slIdleFace[] =
+{
+	{
+		tlIdleFace,
+		ARRAYSIZE( tlIdleFace ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SEE_FEAR |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND |
+		bits_COND_PROVOKED,
+		bits_SOUND_DANGER,
+		"Idle Face"
+	},
+};
+
 Schedule_t *CBaseMonster::m_scheduleList[] =
 {
 	slIdleStand,
@@ -1341,6 +1365,7 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slMoveToEnemyLKP,
 	slRetreatFromEnemy,
 	slMoveSomewhere,
+	slIdleFace,
 	slFail
 };
 
@@ -1598,6 +1623,10 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_MOVE_SOMEWHERE_FAILED:
 		{
 			return GetScheduleOfType(SCHED_FAIL);
+		}
+	case SCHED_IDLE_FACE:
+		{
+			return slIdleFace;
 		}
 	default:
 		{

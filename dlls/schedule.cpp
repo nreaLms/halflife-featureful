@@ -397,6 +397,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 	case TASK_FACE_TARGET:
 	case TASK_FACE_IDEAL:
 	case TASK_FACE_ROUTE:
+	case TASK_FACE_SCHEDULED:
 		{
 			ChangeYaw( pev->yaw_speed );
 
@@ -997,6 +998,16 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		{
 			MakeIdealYaw( m_vecEnemyLKP );
 			SetTurnActivity(); 
+			break;
+		}
+	case TASK_FACE_SCHEDULED:
+		{
+			Vector vecSpot;
+			if (CalcSuggestedSpot(&vecSpot))
+			{
+				MakeIdealYaw(vecSpot);
+			}
+			SetTurnActivity();
 			break;
 		}
 	case TASK_FACE_IDEAL:

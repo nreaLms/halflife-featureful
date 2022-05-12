@@ -6554,10 +6554,11 @@
 		1 : "Move away from spot"
 		2 : "Cover or retreat from spot"
 		3 : "Investigate spot"
+		4 : "Turn to spot"
 	]
 	mindist(string) : "Min distance" : : "Minimum distance for schedule, when applicable. E.g. the minimum distance to go away from the spot. If not specified or zero, the schedule will use its default value"
 	maxdist(string) : "Max distance" : : "Maximum distance for schedule, when applicable. E.g. the maximum distance to go away from the spot. If not specified or zero, the schedule will use its default value"
-	spot_entity(string) : "Spot entity" : : "Entity used as a spot for schedule. The effect depends on the schedule. Can be left empty, then monster will use itself as a spot"
+	spot_entity(string) : "Spot entity" : : "Entity used as a spot for schedule. The effect depends on the schedule. Can be left empty, then monster will use itself as a spot or this scripted_schedule if Suggested Schedule is to Investigate spot or Turn to spot"
 	move_preference(choices) : "Move preference" : : "Automatic means that move preference depends on the schedule type" =
 	[
 		0 : "Auto"

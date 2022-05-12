@@ -1478,6 +1478,7 @@ enum
 	SCRIPTED_SCHEDULE_MOVE_AWAY,
 	SCRIPTED_SCHEDULE_MOVE_TO_COVER,
 	SCRIPTED_SCHEDULE_INVESTIGATE_SPOT,
+	SCRIPTED_SCHEDULE_TURN_TO_SPOT,
 };
 
 class CScriptedSchedule : public CPointEntity
@@ -1510,6 +1511,8 @@ int CScriptedSchedule::KnownSchedule() const
 		return SCHED_TAKE_COVER_FROM_SPOT;
 	case SCRIPTED_SCHEDULE_INVESTIGATE_SPOT:
 		return SCHED_INVESTIGATE_SPOT;
+	case SCRIPTED_SCHEDULE_TURN_TO_SPOT:
+		return SCHED_IDLE_FACE;
 	default:
 		ALERT(at_aiconsole, "Unknown schedule type for scripted_schedule: %d\n", pev->weapons);
 		return SCHED_NONE;
@@ -1567,6 +1570,10 @@ void CScriptedSchedule::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 				ALERT(at_aiconsole, "%s speficies \"%s\" as spot entity, but couldn't find it!\n", STRING(pev->classname), STRING(pev->message));
 				return;
 			}
+		} else {
+			const int scheduleType = ScheduleType();
+			if (scheduleType == SCRIPTED_SCHEDULE_INVESTIGATE_SPOT || scheduleType == SCRIPTED_SCHEDULE_TURN_TO_SPOT)
+				pSpotEntity = this;
 		}
 
 		int flags = 0;
