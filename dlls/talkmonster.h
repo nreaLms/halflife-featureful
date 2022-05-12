@@ -225,6 +225,8 @@ public:
 	float m_flLastHitByPlayer;
 	int m_iPlayerHits;
 
+	float m_flStopLookTime;
+
 	CUSTOM_SCHEDULES
 };
 

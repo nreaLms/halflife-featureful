@@ -57,6 +57,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_iTolerance, FIELD_SHORT ),
 	DEFINE_FIELD( CTalkMonster, m_flLastHitByPlayer, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_iPlayerHits, FIELD_INTEGER ),
+	DEFINE_FIELD( CTalkMonster, m_flStopLookTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CFollowingMonster )
@@ -439,7 +440,7 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		break;
 	case TASK_TLK_HEADRESET:
 		// reset head position after looking at something
-		if (!InScriptedSentence())
+		if (m_flStopLookTime <= gpGlobals->time)
 			m_hTalkTarget = NULL;
 		TaskComplete();
 		break;
@@ -553,7 +554,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 			IdleHeadTurn( pev->origin );
 		break;
 	default:
-		if( IsTalking() && m_hTalkTarget != 0 )
+		if( (IsTalking() || m_flStopLookTime > gpGlobals->time) && m_hTalkTarget != 0 )
 		{
 			IdleHeadTurn( m_hTalkTarget->pev->origin );
 		}
@@ -1134,7 +1135,7 @@ void CTalkMonster::PlayScriptedSentence( const char *pszSentence, float duration
 		ShutUpFriends();
 
 	ClearConditions( bits_COND_CLIENT_PUSH );	// Forget about moving!  I've got something to say!
-	m_useTime = gpGlobals->time + duration;
+	m_flStopLookTime = m_useTime = gpGlobals->time + duration;
 	PlaySentence( pszSentence, duration, volume, attenuation );
 
 	m_hTalkTarget = pListener;
