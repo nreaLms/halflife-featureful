@@ -281,6 +281,9 @@ struct WayPoint_t
 #define MOVEGOAL_NODE				(bits_MF_TO_NODE)
 #define MOVEGOAL_TARGETENT_NEAREST	(bits_MF_TO_TARGETENT|bits_MF_NEAREST_PATH)
 
+#define BUILDROUTE_NO_NODEROUTE ( 1 << 0 )
+#define BUILDROUTE_NODEROUTE_ONLY ( 1 << 1 )
+
 // these bits represent conditions that may befall the monster, of which some are allowed 
 // to interrupt certain schedules. 
 #define bits_COND_NO_AMMO_LOADED		( 1 << 0 ) // weapon needs to be reloaded!

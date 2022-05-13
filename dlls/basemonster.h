@@ -244,7 +244,7 @@ public:
 	inline int MovementIsComplete( void ) { return ( m_movementGoal == MOVEGOAL_NONE ); }
 
 	int IScheduleFlags( void );
-	BOOL FRefreshRoute( void );
+	BOOL FRefreshRoute( int buildRouteFlags = 0 );
 	BOOL FRouteClear( void );
 	void RouteSimplify( CBaseEntity *pTargetEnt );
 	void AdvanceRoute( float distance );
@@ -252,7 +252,7 @@ public:
 	Vector FTriangulateToNearest(const Vector &vecStart , const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector& apex);
 	void MakeIdealYaw( Vector vecTarget );
 	virtual void SetYawSpeed( void ) { return; };// allows different yaw_speeds for each activity
-	BOOL BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget );
+	BOOL BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget, int buildRouteFlags = 0 );
 	virtual BOOL BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist );
 	int RouteClassify( int iMoveFlag );
 	void InsertWaypoint( Vector vecLocation, int afMoveFlags );
@@ -283,7 +283,7 @@ public:
 
 	BOOL MoveToNode( Activity movementAct, float waitTime, const Vector &goal );
 	BOOL MoveToTarget( Activity movementAct, float waitTime, bool closest = false );
-	BOOL MoveToLocation( Activity movementAct, float waitTime, const Vector &goal );
+	BOOL MoveToLocation( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags = 0 );
 	BOOL MoveToEnemy( Activity movementAct, float waitTime );
 
 	// Returns the time when the door will be open

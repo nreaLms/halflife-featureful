@@ -329,20 +329,28 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 
 			UTIL_MakeVectorsPrivate( dir, move, NULL, NULL );
 			dir = pev->origin + move * pTask->flData;
-			if( MoveToLocation( ACT_WALK, 2, dir ) )
+			if( MoveToLocation( ACT_WALK, 2, dir, BUILDROUTE_NO_NODEROUTE ) )
 			{
-				TaskComplete();
-			}
-			else if( FindCover( pev->origin, pev->view_ofs, 0, CoverRadius() ) )
-			{
-				// then try for plain ole cover
-				m_flMoveWaitFinished = gpGlobals->time + 2.0f;
 				TaskComplete();
 			}
 			else
 			{
-				// nowhere to go?
-				TaskFail("can't move away");
+				dir = pev->origin + move * pTask->flData * 0.5f;
+				if( MoveToLocation( ACT_WALK, 2, dir, BUILDROUTE_NO_NODEROUTE ) )
+				{
+					TaskComplete();
+				}
+				else if( FindCover( pev->origin, pev->view_ofs, 0, CoverRadius() ) )
+				{
+					// then try for plain ole cover
+					m_flMoveWaitFinished = gpGlobals->time + 2.0f;
+					TaskComplete();
+				}
+				else
+				{
+					// nowhere to go?
+					TaskFail("can't move away");
+				}
 			}
 		}
 		break;

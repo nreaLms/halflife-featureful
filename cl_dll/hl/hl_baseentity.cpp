@@ -129,9 +129,9 @@ int CBaseMonster::IgnoreConditions( void ) { return 0; }
 void CBaseMonster::RouteClear( void ) { }
 void CBaseMonster::RouteNew( void ) { }
 BOOL CBaseMonster::FRouteClear( void ) { return FALSE; }
-BOOL CBaseMonster::FRefreshRoute( void ) { return 0; }
+BOOL CBaseMonster::FRefreshRoute( int buildRouteFlags ) { return 0; }
 BOOL CBaseMonster::MoveToEnemy( Activity movementAct, float waitTime ) { return FALSE; }
-BOOL CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const Vector &goal ) { return FALSE; }
+BOOL CBaseMonster::MoveToLocation(Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags) { return FALSE; }
 BOOL CBaseMonster::MoveToTarget(Activity movementAct, float waitTime , bool closest) { return FALSE; }
 BOOL CBaseMonster::MoveToNode( Activity movementAct, float waitTime, const Vector &goal ) { return FALSE; }
 int ShouldSimplify( int routeType ) { return TRUE; }
@@ -153,10 +153,10 @@ int CBaseMonster::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, 
 float CBaseMonster::OpenDoorAndWait( entvars_t *pevDoor ) { return 0.0; }
 void CBaseMonster::AdvanceRoute( float distance ) { }
 int CBaseMonster::RouteClassify( int iMoveFlag ) { return 0; }
-BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget ) { return FALSE; }
+BOOL CBaseMonster::BuildRoute(const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget, int buildRouteFlags) { return FALSE; }
 void CBaseMonster::InsertWaypoint( Vector vecLocation, int afMoveFlags ) { }
-int CBaseMonster::FTriangulate(const Vector &vecStart , const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector *pApexes, int n , int tries, bool recursive) { return FALSE; }
-Vector CBaseMonster::FTriangulateToNearest(const Vector &vecStart , const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector &apex) { return Vector(0,0,0); }
+int CBaseMonster::FTriangulate(const Vector &vecStart, const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector *pApexes, int n, int tries, bool recursive) { return FALSE; }
+Vector CBaseMonster::FTriangulateToNearest(const Vector &vecStart, const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector &apex) { return Vector(0,0,0); }
 void CBaseMonster::Move( float flInterval ) { }
 BOOL CBaseMonster::ShouldAdvanceRoute( float flWaypointDist ) { return FALSE; }
 void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval ) { }

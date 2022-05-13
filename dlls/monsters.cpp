@@ -689,7 +689,7 @@ BOOL CBaseMonster::FRouteClear( void )
 //=========================================================
 extern cvar_t npc_patrol;
 
-BOOL CBaseMonster::FRefreshRoute( void )
+BOOL CBaseMonster::FRefreshRoute( int buildRouteFlags )
 {
 	CBaseEntity	*pPathCorner;
 	int		i;
@@ -710,7 +710,7 @@ BOOL CBaseMonster::FRefreshRoute( void )
 				{
 					if (pPathCorner)
 					{
-						returnCode = BuildRoute( pPathCorner->pev->origin, bits_MF_TO_PATHCORNER, NULL );
+						returnCode = BuildRoute( pPathCorner->pev->origin, bits_MF_TO_PATHCORNER, NULL, buildRouteFlags );
 					}
 				}
 				else
@@ -733,16 +733,16 @@ BOOL CBaseMonster::FRefreshRoute( void )
 			}
 			break;
 		case MOVEGOAL_ENEMY:
-			returnCode = BuildRoute( m_vecEnemyLKP, bits_MF_TO_ENEMY, m_hEnemy );
+			returnCode = BuildRoute( m_vecEnemyLKP, bits_MF_TO_ENEMY, m_hEnemy, buildRouteFlags );
 			break;
 		case MOVEGOAL_LOCATION:
-			returnCode = BuildRoute( m_vecMoveGoal, bits_MF_TO_LOCATION, NULL );
+			returnCode = BuildRoute( m_vecMoveGoal, bits_MF_TO_LOCATION, NULL, buildRouteFlags );
 			break;
 		case MOVEGOAL_TARGETENT:
 		case MOVEGOAL_TARGETENT_NEAREST:
 			if( m_hTargetEnt != 0 )
 			{
-				returnCode = BuildRoute( m_hTargetEnt->pev->origin, m_movementGoal, m_hTargetEnt );
+				returnCode = BuildRoute( m_hTargetEnt->pev->origin, m_movementGoal, m_hTargetEnt, buildRouteFlags );
 			}
 			break;
 		case MOVEGOAL_NODE:
@@ -764,14 +764,14 @@ BOOL CBaseMonster::MoveToEnemy( Activity movementAct, float waitTime )
 	return FRefreshRoute();
 }
 
-BOOL CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const Vector &goal )
+BOOL CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags )
 {
 	m_movementActivity = movementAct;
 	m_moveWaitTime = waitTime;
 
 	m_movementGoal = MOVEGOAL_LOCATION;
 	m_vecMoveGoal = goal;
-	return FRefreshRoute();
+	return FRefreshRoute(buildRouteFlags);
 }
 
 BOOL CBaseMonster::MoveToTarget( Activity movementAct, float waitTime, bool closest )
@@ -1658,7 +1658,7 @@ int CBaseMonster::RouteClassify( int iMoveFlag )
 //=========================================================
 // BuildRoute
 //=========================================================
-BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget )
+BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget, int buildRouteFlags )
 {
 	float flDist;
 	Vector vecApexes[3];
@@ -1698,38 +1698,41 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 	m_Route[0].vecLocation = vecGoal;
 	m_Route[0].iType = iMoveFlag | bits_MF_IS_GOAL;
 
-	// check simple local move
-	iLocalMove = CheckLocalMove( pev->origin, vecGoal, pTarget, &flDist );
-
-	if( iLocalMove == LOCALMOVE_VALID )
+	if (!FBitSet(buildRouteFlags, BUILDROUTE_NODEROUTE_ONLY))
 	{
-		// monster can walk straight there!
-		return TRUE;
-	}
+		// check simple local move
+		iLocalMove = CheckLocalMove( pev->origin, vecGoal, pTarget, &flDist );
 
-	// try to triangulate around any obstacles.
-	else if( iLocalMove != LOCALMOVE_INVALID_DONT_TRIANGULATE )
-	{
-		int result = FTriangulate( pev->origin, vecGoal, flDist, pTarget, vecApexes, triangDepth );
-		if (result)
+		if( iLocalMove == LOCALMOVE_VALID )
 		{
-			//ALERT(at_aiconsole, "Triangulated %d times\n", result);
-			// there is a slightly more complicated path that allows the monster to reach vecGoal
-			for (int i=0; i<result; ++i)
-			{
-				m_Route[i].vecLocation = vecApexes[i];
-				m_Route[i].iType = (iMoveFlag | bits_MF_TO_DETOUR);
-			}
-			m_Route[result].vecLocation = vecGoal;
-			m_Route[result].iType = iMoveFlag | bits_MF_IS_GOAL;
-
-			RouteSimplify( pTarget );
+			// monster can walk straight there!
 			return TRUE;
+		}
+
+		// try to triangulate around any obstacles.
+		else if( iLocalMove != LOCALMOVE_INVALID_DONT_TRIANGULATE )
+		{
+			int result = FTriangulate( pev->origin, vecGoal, flDist, pTarget, vecApexes, triangDepth );
+			if (result)
+			{
+				//ALERT(at_aiconsole, "Triangulated %d times\n", result);
+				// there is a slightly more complicated path that allows the monster to reach vecGoal
+				for (int i=0; i<result; ++i)
+				{
+					m_Route[i].vecLocation = vecApexes[i];
+					m_Route[i].iType = (iMoveFlag | bits_MF_TO_DETOUR);
+				}
+				m_Route[result].vecLocation = vecGoal;
+				m_Route[result].iType = iMoveFlag | bits_MF_IS_GOAL;
+
+				RouteSimplify( pTarget );
+				return TRUE;
+			}
 		}
 	}
 
 	// last ditch, try nodes
-	if( FGetNodeRoute( vecGoal ) )
+	if( !FBitSet(buildRouteFlags, BUILDROUTE_NO_NODEROUTE) && FGetNodeRoute( vecGoal ) )
 	{
 		//ALERT( at_console, "Can get there on nodes\n" );
 		m_vecMoveGoal = vecGoal;
@@ -1737,7 +1740,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 		return TRUE;
 	}
 
-	if (nearest)
+	if (nearest && !FBitSet(buildRouteFlags, BUILDROUTE_NODEROUTE_ONLY))
 	{
 		SetBits(iMoveFlag, bits_MF_NEAREST_PATH);
 
