@@ -157,6 +157,7 @@ public:
 
 	short m_interruptionPolicy;
 	short m_searchPolicy;
+	short m_requiredState;
 
 	bool m_cantFindReported; // no need to save
 	bool m_cantPlayReported;

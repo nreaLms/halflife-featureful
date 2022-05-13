@@ -37,6 +37,33 @@
 #include "defaultai.h"
 #include "talkmonster.h"
 
+enum
+{
+	REQUIRED_STATE_ANY = 0,
+	REQUIRED_STATE_IDLE,
+	REQUIRED_STATE_COMBAT,
+	REQUIRED_STATE_ALERT,
+	REQUIRED_STATE_IDLE_OR_ALERT,
+};
+
+static bool MatchingMonsterState(MONSTERSTATE state, int requiredState)
+{
+	switch (requiredState) {
+	case REQUIRED_STATE_ANY:
+		return true;
+	case REQUIRED_STATE_IDLE:
+		return state == MONSTERSTATE_IDLE;
+	case REQUIRED_STATE_COMBAT:
+		return state == MONSTERSTATE_COMBAT;
+	case REQUIRED_STATE_ALERT:
+		return state == MONSTERSTATE_ALERT || state == MONSTERSTATE_HUNT;
+	case REQUIRED_STATE_IDLE_OR_ALERT:
+		return state == MONSTERSTATE_IDLE || state == MONSTERSTATE_ALERT || state == MONSTERSTATE_HUNT;
+	default:
+		return false;
+	}
+}
+
 /*
 classname "scripted_sequence"
 targetname "me" - there can be more than one with the same name, and they act in concert
@@ -145,6 +172,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_searchPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "required_state" ) )
+	{
+		m_requiredState = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseMonster::KeyValue( pkvd );
@@ -183,6 +215,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 
 	DEFINE_FIELD( CCineMonster, m_interruptionPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_searchPolicy, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_requiredState, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
@@ -380,7 +413,7 @@ CBaseMonster *CCineMonster::FindEntity( void )
 					return pTarget;
 				if (!m_cantPlayReported)
 				{
-					ALERT( at_console, "Found %s, but can't play! (busy or too far)\n", STRING( m_iszEntity ) );
+					ALERT( at_console, "Found %s, but can't play! (busy or not in proper state or too far)\n", STRING( m_iszEntity ) );
 					if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
 						m_cantPlayReported = true;
 				}
@@ -536,7 +569,7 @@ bool CCineMonster::TryFindAndPossessEntity()
 bool CCineMonster::IsAppropriateTarget(CBaseMonster *pTarget, int interruptLevel, bool shouldCheckRadius)
 {
 	return pTarget && pTarget->CanPlaySequence( FCanOverrideState(), interruptLevel ) &&
-			AcceptedFollowingState(pTarget) &&
+			MatchingMonsterState(pTarget->m_MonsterState, m_requiredState) && AcceptedFollowingState(pTarget) &&
 			(!shouldCheckRadius || (pev->origin - pTarget->pev->origin).Length() <= m_flRadius);
 }
 
@@ -1235,39 +1268,12 @@ void CScriptedSentence::DelayThink( void )
 	SetThink( &CScriptedSentence::FindThink );
 }
 
-enum
-{
-	REQUIRED_STATE_ANY = 0,
-	REQUIRED_STATE_IDLE,
-	REQUIRED_STATE_COMBAT,
-	REQUIRED_STATE_ALERT,
-	REQUIRED_STATE_IDLE_OR_ALERT,
-};
-
 BOOL CScriptedSentence::AcceptableSpeaker( CBaseMonster *pMonster )
 {
 	if( pMonster )
 	{
-		switch (m_requiredState) {
-		case REQUIRED_STATE_IDLE:
-			if (pMonster->m_MonsterState != MONSTERSTATE_IDLE)
-				return FALSE;
-			break;
-		case REQUIRED_STATE_COMBAT:
-			if (pMonster->m_MonsterState != MONSTERSTATE_COMBAT)
-				return FALSE;
-			break;
-		case REQUIRED_STATE_ALERT:
-			if (pMonster->m_MonsterState != MONSTERSTATE_ALERT && pMonster->m_MonsterState != MONSTERSTATE_HUNT)
-				return FALSE;
-			break;
-		case REQUIRED_STATE_IDLE_OR_ALERT:
-			if (pMonster->m_MonsterState != MONSTERSTATE_IDLE && pMonster->m_MonsterState != MONSTERSTATE_ALERT && pMonster->m_MonsterState != MONSTERSTATE_HUNT)
-				return FALSE;
-			break;
-		default:
-			break;
-		}
+		if (!MatchingMonsterState(pMonster->m_MonsterState, m_requiredState))
+			return FALSE;
 		if( pev->spawnflags & SF_SENTENCE_FOLLOWERS )
 		{
 			if( pMonster->m_hTargetEnt == 0 || !pMonster->m_hTargetEnt->IsPlayer() )

@@ -960,6 +960,14 @@
 		1 : "Turn to face"
 		2 : "Don't Turn"
 	]
+	required_state(choices) : "Required MonsterState" =
+	[
+		0 : "Any"
+		1 : "Idle"
+		2 : "Combat"
+		3 : "Alert"
+		4 : "Idle or Alert"
+	]
 	m_requiredFollowerState(choices) : "Required follower state" =
 	[
 		0 : "Not specified"
