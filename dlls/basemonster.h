@@ -260,9 +260,10 @@ public:
 	BOOL FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset, float minDist, float maxDist, int flags );
 	BOOL FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset );
 	BOOL FindLateralSpotAway( const Vector &vecThreat, float minDist, float maxDist, int flags );
+	BOOL FindStraightSpotAway( const Vector &vecThreat, float minDist, float maxDist, int flags );
 	BOOL FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags);
 	BOOL FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist);
-	BOOL FindSpotAway(Vector vecThreat, float flMinDist, float flMaxDist , int flags);
+	BOOL FindSpotAway(Vector vecThreat, float flMinDist, float flMaxDist, int flags);
 	virtual BOOL FValidateCover( const Vector &vecCoverLocation ) { return TRUE; };
 	virtual float CoverRadius( void ) { return 784; } // Default cover radius
 
@@ -398,6 +399,7 @@ public:
 
 	// Allows to set a head via monstermaker before spawn
 	virtual void SetHead(int head) {}
+	virtual void HandleBlocker(CBaseEntity* pBlocker, bool duringMovement) {}
 
 	bool IsFreeToManipulate();
 
@@ -443,8 +445,6 @@ public:
 	short m_gibPolicy;
 
 	float m_flLastYawTime;
-
-	EHANDLE m_lastMoveBlocker;
 
 	const char* taskFailReason;
 };

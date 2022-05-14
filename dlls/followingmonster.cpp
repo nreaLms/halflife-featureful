@@ -127,7 +127,8 @@ Schedule_t slMoveAway[] =
 	{
 		tlMoveAway,
 		ARRAYSIZE( tlMoveAway ),
-		0,
+		bits_COND_LIGHT_DAMAGE|
+		bits_COND_HEAVY_DAMAGE,
 		0,
 		"MoveAway"
 	},
@@ -165,7 +166,8 @@ Schedule_t slMoveAwayFollow[] =
 	{
 		tlMoveAwayFollow,
 		ARRAYSIZE( tlMoveAwayFollow ),
-		0,
+		bits_COND_LIGHT_DAMAGE|
+		bits_COND_HEAVY_DAMAGE,
 		0,
 		"MoveAwayFollow"
 	},
@@ -201,10 +203,10 @@ DEFINE_CUSTOM_SCHEDULES( CFollowingMonster )
 
 IMPLEMENT_CUSTOM_SCHEDULES( CFollowingMonster, CSquadMonster )
 
-bool CFollowingMonster::CanBePushedByClient(CBaseEntity *pOther)
+bool CFollowingMonster::CanBePushed(CBaseEntity *pPusher)
 {
 	// Ignore if pissed at player
-	return !FBitSet(pev->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH) && IRelationship(pOther) == R_AL;
+	return !FBitSet(pev->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH) && IRelationship(pPusher) == R_AL;
 }
 
 void CFollowingMonster::Touch( CBaseEntity *pOther )
@@ -212,7 +214,7 @@ void CFollowingMonster::Touch( CBaseEntity *pOther )
 	// Did the player touch me?
 	if( pOther->IsPlayer() )
 	{
-		if( !CanBePushedByClient(pOther) )
+		if( !CanBePushed(pOther) )
 			return;
 
 		// Heuristic for determining if the player is pushing me away
@@ -269,13 +271,16 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 			CBaseMonster* blockerMonster = m_lastMoveBlocker->MyMonsterPointer();
 			if (blockerMonster) {
 				CFollowingMonster* followingMonster = blockerMonster->MyFollowingMonsterPointer();
-				if (followingMonster && IDefaultRelationship(CLASS_PLAYER) == R_AL) {
+				if (followingMonster && followingMonster->CanBePushed(this)) {
 					followingMonster->SuggestSchedule(SCHED_MOVE_SOMEWHERE, this, 0.0f, 256.0f);
 				}
 			}
 			m_lastMoveBlocker = 0;
 		}
-		return slMoveAwayFail;
+		if (Type == SCHED_MOVE_AWAY_FAIL)
+			return slMoveAwayFail;
+		else
+			return CSquadMonster::GetScheduleOfType(Type);
 	case SCHED_TARGET_FACE:
 	case SCHED_TARGET_REACHED:
 		return slFaceTarget;
@@ -325,22 +330,45 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 		{
 			Vector dir = pev->angles;
 			dir.y = pev->ideal_yaw + 180;
-			Vector move;
+			Vector vecBackward;
+			Vector vecLeft;
 
-			UTIL_MakeVectorsPrivate( dir, move, NULL, NULL );
-			dir = pev->origin + move * pTask->flData;
-			if( MoveToLocation( ACT_WALK, 2, dir, BUILDROUTE_NO_NODEROUTE ) )
+			m_lastMoveBlocker = 0;
+
+			UTIL_MakeVectorsPrivate( dir, vecBackward, vecLeft, NULL );
+			if( MoveToLocation( ACT_WALK, 2, pev->origin + vecBackward * pTask->flData, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
+			{
+				TaskComplete();
+			}
+			if( !TaskIsComplete() && MoveToLocation( ACT_WALK, 2, pev->origin + vecBackward * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 			{
 				TaskComplete();
 			}
 			else
 			{
-				dir = pev->origin + move * pTask->flData * 0.5f;
-				if( MoveToLocation( ACT_WALK, 2, dir, BUILDROUTE_NO_NODEROUTE ) )
+				HandleBlocker(CBaseEntity::Instance( gpGlobals->trace_ent ), false);
+			}
+
+			if (!TaskIsComplete())
+			{
+				if( MoveToLocation( ACT_WALK, 2, pev->origin + vecLeft * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
 					TaskComplete();
 				}
-				else if( FindCover( pev->origin, pev->view_ofs, 0, CoverRadius() ) )
+				if( !TaskIsComplete() && MoveToLocation( ACT_WALK, 2, pev->origin - vecLeft * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
+				{
+					TaskComplete();
+				}
+				else
+				{
+					if (m_lastMoveBlocker == 0)
+						HandleBlocker(CBaseEntity::Instance( gpGlobals->trace_ent ), false);
+				}
+			}
+
+			if( !TaskIsComplete() )
+			{
+				if ( FindSpotAway( pev->origin, 0, Q_max(256.0f, pTask->flData), FINDSPOTAWAY_WALK ) )
 				{
 					// then try for plain ole cover
 					m_flMoveWaitFinished = gpGlobals->time + 2.0f;
@@ -351,6 +379,50 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 					// nowhere to go?
 					TaskFail("can't move away");
 				}
+			}
+		}
+		break;
+	case TASK_FIND_MOVE_AWAY:
+		// The task is not used now. It's for future improvements
+		{
+			Vector vecSpot;
+
+			float minDist = COVER_DELTA;
+			float maxDist = 140.0f;
+
+			CalcSuggestedSpot(&vecSpot);
+
+			if (vecSpot == pev->origin)
+			{
+				Vector dir = pev->angles;
+				dir.y = pev->ideal_yaw + 180;
+				Vector move;
+				UTIL_MakeVectorsPrivate( dir, move, NULL, NULL );
+
+				vecSpot = pev->origin - move;
+
+				maxDist = 100.0f;
+			}
+
+			const int moveFlag = FBitSet(m_suggestedScheduleFlags, SUGGEST_SCHEDULE_FLAG_RUN) ? FINDSPOTAWAY_RUN : FINDSPOTAWAY_WALK;
+			if ( FindStraightSpotAway( vecSpot, SuggestedMinDist(minDist), SuggestedMaxDist(maxDist), moveFlag ) )
+			{
+				m_flMoveWaitFinished = gpGlobals->time;
+				TaskComplete();
+			}
+			else if( FindLateralSpotAway( vecSpot, SuggestedMinDist(minDist), SuggestedMaxDist(maxDist), moveFlag ) )
+			{
+				m_flMoveWaitFinished = gpGlobals->time;
+				TaskComplete();
+			}
+			else if ( FindSpotAway( vecSpot, SuggestedMinDist(minDist), SuggestedMaxDist(maxDist), moveFlag ) )
+			{
+				m_flMoveWaitFinished = gpGlobals->time;
+				TaskComplete();
+			}
+			else
+			{
+				TaskFail("can't move away");
 			}
 		}
 		break;
@@ -681,5 +753,22 @@ void CFollowingMonster::ReportAIState(ALERT_TYPE level)
 	default:
 		ALERT(level, "Regular. ");
 		break;
+	}
+}
+
+void CFollowingMonster::HandleBlocker(CBaseEntity* pBlocker, bool duringMovement)
+{
+	if (!pBlocker)
+		return;
+
+	//ALERT(at_console, "%s's blocker is %s\n", STRING(pev->classname), STRING(pBlocker->pev->classname));
+
+	CBaseMonster* blockerMonster = pBlocker->MyMonsterPointer();
+	if (blockerMonster) {
+		CFollowingMonster* followingMonster = blockerMonster->MyFollowingMonsterPointer();
+		if (followingMonster && followingMonster->CanBePushed(this)) {
+			//ALERT(at_console, "%s sets %s as blocker\n", STRING(pev->classname), STRING(pBlocker->pev->classname));
+			m_lastMoveBlocker = pBlocker;
+		}
 	}
 }

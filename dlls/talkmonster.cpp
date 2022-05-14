@@ -878,10 +878,10 @@ int CTalkMonster::GetVoicePitch( void )
 	return m_voicePitch + RANDOM_LONG( 0, 3 );
 }
 
-bool CTalkMonster::CanBePushedByClient(CBaseEntity *pOther)
+bool CTalkMonster::CanBePushed(CBaseEntity *pPusher)
 {
 	// Stay put during speech
-	return CFollowingMonster::CanBePushedByClient(pOther) && !IsTalking();
+	return CFollowingMonster::CanBePushed(pPusher) && !IsTalking();
 }
 
 //=========================================================

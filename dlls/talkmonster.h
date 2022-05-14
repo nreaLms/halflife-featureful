@@ -121,7 +121,7 @@ public:
 	void			Precache( void );
 	int 			TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int 			TakeHealth(CBaseEntity* pHealer, float flHealth, int bitsDamageType);
-	bool			CanBePushedByClient(CBaseEntity *pOther);
+	bool			CanBePushed(CBaseEntity *pPusher);
 	void			Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void			OnDying();
 	void			StartMonster( void );

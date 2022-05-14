@@ -1699,19 +1699,29 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			if (CalcSuggestedSpot(&vecSpot))
 			{
 				const int moveFlag = FBitSet(m_suggestedScheduleFlags, SUGGEST_SCHEDULE_FLAG_RUN) ? FINDSPOTAWAY_RUN : FINDSPOTAWAY_WALK;
-				if ( FindSpotAway( vecSpot, SuggestedMinDist(64), SuggestedMaxDist(784), moveFlag ) )
-				{
-					m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
-					TaskComplete();
-				}
-				else if( FindLateralSpotAway( vecSpot, SuggestedMinDist(COVER_DELTA), SuggestedMaxDist(COVER_DELTA * COVER_CHECKS), moveFlag ) )
+				if ( FindStraightSpotAway( vecSpot, SuggestedMinDist(COVER_DELTA), SuggestedMaxDist(COVER_DELTA * COVER_CHECKS), moveFlag ) )
 				{
 					m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
 					TaskComplete();
 				}
 				else
 				{
-					TaskFail("no spot found");
+					HandleBlocker(CBaseEntity::Instance( gpGlobals->trace_ent ), false);
+
+					if( FindLateralSpotAway( vecSpot, SuggestedMinDist(COVER_DELTA), SuggestedMaxDist(COVER_DELTA * COVER_CHECKS), moveFlag ) )
+					{
+						m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
+						TaskComplete();
+					}
+					else if ( FindSpotAway( vecSpot, SuggestedMinDist(64), SuggestedMaxDist(784), moveFlag ) )
+					{
+						m_flMoveWaitFinished = gpGlobals->time + pTask->flData;
+						TaskComplete();
+					}
+					else
+					{
+						TaskFail("no spot found");
+					}
 				}
 			}
 			else

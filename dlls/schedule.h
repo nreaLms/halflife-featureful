@@ -283,6 +283,7 @@ struct WayPoint_t
 
 #define BUILDROUTE_NO_NODEROUTE ( 1 << 0 )
 #define BUILDROUTE_NODEROUTE_ONLY ( 1 << 1 )
+#define BUILDROUTE_NO_TRIANGULATION ( 1 << 2 )
 
 // these bits represent conditions that may befall the monster, of which some are allowed 
 // to interrupt certain schedules. 

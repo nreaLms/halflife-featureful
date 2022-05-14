@@ -1710,7 +1710,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 		}
 
 		// try to triangulate around any obstacles.
-		else if( iLocalMove != LOCALMOVE_INVALID_DONT_TRIANGULATE )
+		else if( iLocalMove != LOCALMOVE_INVALID_DONT_TRIANGULATE && !FBitSet(buildRouteFlags, BUILDROUTE_NO_TRIANGULATION) )
 		{
 			int result = FTriangulate( pev->origin, vecGoal, flDist, pTarget, vecApexes, triangDepth );
 			if (result)
@@ -2296,7 +2296,7 @@ void CBaseMonster::Move( float flInterval )
 				}
 				else
 				{
-					m_lastMoveBlocker = pBlocker;
+					HandleBlocker(pBlocker, true);
 					if (m_pCine) {
 						m_pCine->OnMoveFail();
 					}
@@ -3812,7 +3812,6 @@ int CBaseMonster::CanPlaySequence( BOOL fDisregardMonsterState, int interruptLev
 
 BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
 {
-	TraceResult tr;
 	UTIL_MakeVectors( pev->angles );
 	Vector vecRight = gpGlobals->v_right;
 	vecRight.z = 0;
@@ -3835,9 +3834,9 @@ BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 
 		if (threatIsMyself || (vecStart - vecLeftTest).Length() < (vecThreat - vecLeftTest).Length())
 		{
-			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) && CheckLocalMove( pev->origin, vecLeftTest, 0, 0 ) == LOCALMOVE_VALID )
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) )
 			{
-				if( MoveToLocation( movementActivity, 0, vecLeftTest ) )
+				if( MoveToLocation( movementActivity, 0, vecLeftTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
 					return TRUE;
 				}
@@ -3846,12 +3845,49 @@ BOOL CBaseMonster::FindLateralSpotAway( const Vector& vecThreat, float minDist, 
 
 		if (threatIsMyself || (vecStart - vecRightTest).Length() < (vecThreat - vecRightTest).Length())
 		{
-			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) && CheckLocalMove( pev->origin, vecRightTest, 0, 0 ) == LOCALMOVE_VALID )
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) )
 			{
-				if( MoveToLocation( movementActivity, 0, vecRightTest ) )
+				if( MoveToLocation( movementActivity, 0, vecRightTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
 					return TRUE;
 				}
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+BOOL CBaseMonster::FindStraightSpotAway( const Vector& vecThreat, float minDist, float maxDist, int flags )
+{
+	const Vector vecStart = pev->origin;
+
+	Vector vecDiff = pev->origin - vecThreat;
+	vecDiff.z = 0;
+
+	if (vecDiff == g_vecZero)
+		return FALSE;
+
+	const Vector vecDirection = vecDiff.Normalize();
+	const Vector vecStep = vecDirection * COVER_DELTA;
+
+	const Activity movementActivity = FBitSet(flags, FINDSPOTAWAY_RUN) ? ACT_RUN : ACT_WALK;
+
+	minDist = Q_max(minDist, COVER_DELTA);
+	maxDist = Q_max(maxDist, COVER_DELTA);
+	const Vector startOffset = vecDirection * minDist;
+	const int coverChecks = (int)((maxDist - minDist) / COVER_DELTA) + 1; // at least one check
+
+	for( int i = 1; i <= coverChecks; i++ )
+	{
+		const Vector move = startOffset + vecStep * ( coverChecks - i );
+		const Vector vecTest = vecStart + move;
+
+		if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecTest )) )
+		{
+			if( MoveToLocation( movementActivity, 0, vecTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
+			{
+				return TRUE;
 			}
 		}
 	}
@@ -3885,9 +3921,9 @@ BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecV
 
 		if( tr.flFraction != 1.0f )
 		{
-			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) && CheckLocalMove( pev->origin, vecLeftTest, 0, 0 ) == LOCALMOVE_VALID )
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecLeftTest )) )
 			{
-				if( MoveToLocation( movementActivity, 0, vecLeftTest ) )
+				if( MoveToLocation( movementActivity, 0, vecLeftTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
 					return TRUE;
 				}
@@ -3899,9 +3935,9 @@ BOOL CBaseMonster::FindLateralCover( const Vector &vecThreat, const Vector &vecV
 
 		if( tr.flFraction != 1.0f )
 		{
-			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) && CheckLocalMove( pev->origin, vecRightTest, 0, 0 ) == LOCALMOVE_VALID )
+			if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( vecRightTest )) )
 			{
-				if( MoveToLocation( movementActivity, 0, vecRightTest ) )
+				if( MoveToLocation( movementActivity, 0, vecRightTest, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
 					return TRUE;
 				}

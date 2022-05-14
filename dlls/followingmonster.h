@@ -24,6 +24,7 @@ enum
 {
 	TASK_MOVE_AWAY_PATH = LAST_COMMON_TASK + 1,
 	TASK_WALK_PATH_FOR_UNITS,
+	TASK_FIND_MOVE_AWAY,
 	TASK_FACE_PLAYER,		// Face the player
 	TASK_GET_NEAREST_PATH_TO_TARGET, // Find path to the nearest node to target
 	TASK_CANT_FOLLOW,
@@ -54,7 +55,7 @@ class CFollowingMonster : public CSquadMonster
 {
 public:
 	// Base Monster functions
-	virtual bool CanBePushedByClient(CBaseEntity* pOther);
+	virtual bool CanBePushed(CBaseEntity* pPusher);
 	void Touch(	CBaseEntity *pOther );
 	void OnDying();
 	int ObjectCaps( void );
@@ -103,11 +104,15 @@ public:
 
 	void ReportAIState(ALERT_TYPE level);
 
+	void HandleBlocker(CBaseEntity* pBlocker, bool duringMovement);
+
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	short m_followFailPolicy;
+
+	EHANDLE m_lastMoveBlocker;
 
 	CUSTOM_SCHEDULES
 };
