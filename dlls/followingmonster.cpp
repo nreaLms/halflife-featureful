@@ -264,7 +264,7 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 		return slMoveAway;
 	case SCHED_MOVE_AWAY_FOLLOW:
 		return slMoveAwayFollow;
-	case SCHED_MOVE_SOMEWHERE_FAILED:
+	case SCHED_RETREAT_FROM_SPOT_FAILED:
 	case SCHED_MOVE_AWAY_FAIL:
 		if (m_lastMoveBlocker != 0)
 		{
@@ -272,7 +272,7 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 			if (blockerMonster) {
 				CFollowingMonster* followingMonster = blockerMonster->MyFollowingMonsterPointer();
 				if (followingMonster && followingMonster->CanBePushed(this)) {
-					followingMonster->SuggestSchedule(SCHED_MOVE_SOMEWHERE, this, 0.0f, 256.0f);
+					followingMonster->SuggestSchedule(SCHED_RETREAT_FROM_SPOT, this, 0.0f, 256.0f);
 				}
 			}
 			m_lastMoveBlocker = 0;

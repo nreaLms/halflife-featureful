@@ -1200,9 +1200,9 @@ Schedule_t slRetreatFromEnemy[] =
 	},
 };
 
-Task_t tlMoveAwaySomewhere[] =
+Task_t tlRetreatFromSpot[] =
 {
-	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_MOVE_SOMEWHERE_FAILED },
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RETREAT_FROM_SPOT_FAILED },
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_WAIT, (float)0.1 },
 	{ TASK_FIND_SPOT_AWAY, (float)0 },
@@ -1210,18 +1210,18 @@ Task_t tlMoveAwaySomewhere[] =
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 };
 
-Schedule_t slMoveSomewhere[] =
+Schedule_t slRetreatFromSpot[] =
 {
 	{
-		tlMoveAwaySomewhere,
-		ARRAYSIZE( tlMoveAwaySomewhere ),
+		tlRetreatFromSpot,
+		ARRAYSIZE( tlRetreatFromSpot ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_DANGER,
-		"Move Away Somewhere"
+		"Move Away From Spot"
 	},
 };
 
@@ -1364,7 +1364,7 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slFreeroamAlert,
 	slMoveToEnemyLKP,
 	slRetreatFromEnemy,
-	slMoveSomewhere,
+	slRetreatFromSpot,
 	slIdleFace,
 	slFail
 };
@@ -1616,11 +1616,11 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 		{
 			return GetScheduleOfType(SCHED_FAIL);
 		}
-	case SCHED_MOVE_SOMEWHERE:
+	case SCHED_RETREAT_FROM_SPOT:
 		{
-			return slMoveSomewhere;
+			return slRetreatFromSpot;
 		}
-	case SCHED_MOVE_SOMEWHERE_FAILED:
+	case SCHED_RETREAT_FROM_SPOT_FAILED:
 		{
 			return GetScheduleOfType(SCHED_FAIL);
 		}
