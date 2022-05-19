@@ -531,8 +531,8 @@ CGameRules *InstallGameRules( void )
 int TridepthValue()
 {
 #if FEATURE_TRIDEPTH_CVAR
-	extern cvar_t tridepth;
-	return (int)tridepth.value;
+	extern cvar_t npc_tridepth;
+	return (int)npc_tridepth.value;
 #else
 	return 1;
 #endif
@@ -541,8 +541,8 @@ int TridepthValue()
 bool TridepthForAll()
 {
 #if FEATURE_TRIDEPTH_ALL_CVAR
-	extern cvar_t tridepth_all;
-	return tridepth_all.value > 0;
+	extern cvar_t npc_tridepth_all;
+	return npc_tridepth_all.value > 0;
 #else
 	return 0;
 #endif
