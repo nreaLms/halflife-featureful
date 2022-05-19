@@ -1566,11 +1566,13 @@
 		10 : "Lava Splash"
 		11 : "Teleport Splash"
 		12 : "Explosion"
+		14 : "Implosion"
 		122 : "Particle Burst"
 	]
 	frags(integer) : "Particle Burst: color number" : 70
-	armortype(integer) : "Particle Burst: radius" : 300
-	health(string) : "Particle Burst: duration" : "1.0"
+	armortype(integer) : "Implosion/Particle Burst: radius" : 250
+	health(string) : "Implosion/Particle Burst: duration" : "1.0"
+	armorvalue(integer) : "Implosion tracer count" : 10
 	spawnflags(flags) =
 	[
 		1: "Repeatable" : 0

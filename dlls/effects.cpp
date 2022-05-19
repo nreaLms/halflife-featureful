@@ -2580,6 +2580,12 @@ void CEnvQuakeFx::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 			WRITE_BYTE( 0 ); // colour
 			WRITE_BYTE( 1 ); // number of colours
 		}
+		else if (pev->impulse == TE_IMPLOSION)
+		{
+			WRITE_BYTE( pev->armortype );  // radius
+			WRITE_BYTE( pev->armorvalue );  // count
+			WRITE_BYTE( pev->health * 10 ); // duration
+		}
 	MESSAGE_END();
 
 	if (!(pev->spawnflags & SF_QUAKEFX_REPEATABLE))
