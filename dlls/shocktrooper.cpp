@@ -72,7 +72,7 @@
 //=========================================================
 // shocktrooper
 //=========================================================
-class CStrooper : public CHGrunt
+class CShockTrooper : public CHGrunt
 {
 public:
 	void Spawn(void);
@@ -84,11 +84,6 @@ public:
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	BOOL CheckRangeAttack2(float flDot, float flDist);
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
-	void SetObjectCollisionBox( void )
-	{
-		pev->absmin = pev->origin + Vector( -24, -24, 0 );
-		pev->absmax = pev->origin + Vector( 24, 24, 72 );
-	}
 
 	void DeathSound(void);
 	void PainSound(void);
@@ -135,21 +130,21 @@ protected:
 	virtual int* GruntQuestionVar();
 };
 
-LINK_ENTITY_TO_CLASS(monster_shocktrooper, CStrooper)
+LINK_ENTITY_TO_CLASS(monster_shocktrooper, CShockTrooper)
 
-int CStrooper::iStrooperMuzzleFlash = 0;
+int CShockTrooper::iStrooperMuzzleFlash = 0;
 
-TYPEDESCRIPTION	CStrooper::m_SaveData[] =
+TYPEDESCRIPTION	CShockTrooper::m_SaveData[] =
 {
-	DEFINE_FIELD(CStrooper, m_bRightClaw, FIELD_BOOLEAN),
-	DEFINE_FIELD(CStrooper, m_rechargeTime, FIELD_TIME),
-	DEFINE_FIELD(CStrooper, m_blinkTime, FIELD_TIME),
-	DEFINE_FIELD(CStrooper, m_eyeChangeTime, FIELD_TIME),
+	DEFINE_FIELD(CShockTrooper, m_bRightClaw, FIELD_BOOLEAN),
+	DEFINE_FIELD(CShockTrooper, m_rechargeTime, FIELD_TIME),
+	DEFINE_FIELD(CShockTrooper, m_blinkTime, FIELD_TIME),
+	DEFINE_FIELD(CShockTrooper, m_eyeChangeTime, FIELD_TIME),
 };
 
-IMPLEMENT_SAVERESTORE(CStrooper, CHGrunt)
+IMPLEMENT_SAVERESTORE(CShockTrooper, CHGrunt)
 
-const char *CStrooper::pTrooperSentences[] =
+const char *CShockTrooper::pTrooperSentences[] =
 {
 	"ST_GREN",		// grenade scared grunt
 	"ST_ALERT",		// sees player
@@ -165,18 +160,18 @@ const char *CStrooper::pTrooperSentences[] =
 	"ST_ANSWER",
 };
 
-const char* CStrooper::SentenceByNumber(int sentence)
+const char* CShockTrooper::SentenceByNumber(int sentence)
 {
 	return pTrooperSentences[sentence];
 }
 
-int* CStrooper::GruntQuestionVar()
+int* CShockTrooper::GruntQuestionVar()
 {
 	static int g_fStrooperQuestion = 0;
 	return &g_fStrooperQuestion;
 }
 
-Schedule_t* CStrooper::ScheduleOnRangeAttack1()
+Schedule_t* CShockTrooper::ScheduleOnRangeAttack1()
 {
 	if( InSquad() )
 	{
@@ -220,7 +215,7 @@ Schedule_t* CStrooper::ScheduleOnRangeAttack1()
 	return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
 }
 
-int CStrooper::GetRangeAttack1Sequence()
+int CShockTrooper::GetRangeAttack1Sequence()
 {
 	if (m_fStanding)
 	{
@@ -234,17 +229,17 @@ int CStrooper::GetRangeAttack1Sequence()
 	}
 }
 
-int CStrooper::GetRangeAttack2Sequence()
+int CShockTrooper::GetRangeAttack2Sequence()
 {
 	return LookupSequence("throwgrenade");
 }
 
-float CStrooper::SentenceVolume()
+float CShockTrooper::SentenceVolume()
 {
 	return STROOPER_SENTENCE_VOLUME;
 }
 
-float CStrooper::SentenceAttn()
+float CShockTrooper::SentenceAttn()
 {
 	return STROOPER_ATTN;
 }
@@ -253,7 +248,7 @@ float CStrooper::SentenceAttn()
 //=========================================================
 // GibMonster - make gun fly through the air.
 //=========================================================
-void CStrooper::GibMonster(void)
+void CShockTrooper::GibMonster(void)
 {
 	if (GetBodygroup(STROOPER_GUN_GROUP) != STROOPER_GUN_NONE)
 	{
@@ -267,17 +262,17 @@ void CStrooper::GibMonster(void)
 // Classify - indicates this monster's place in the
 // relationship table.
 //=========================================================
-int	CStrooper::DefaultClassify(void)
+int	CShockTrooper::DefaultClassify(void)
 {
 	return CLASS_RACEX_SHOCK;
 }
 
-BOOL CStrooper::CheckRangeAttack1(float flDot, float flDist)
+BOOL CShockTrooper::CheckRangeAttack1(float flDot, float flDist)
 {
 	return m_cAmmoLoaded >= 1 && CHGrunt::CheckRangeAttack1(flDot, flDist);
 }
 
-BOOL CStrooper::CheckRangeAttack2( float flDot, float flDist )
+BOOL CShockTrooper::CheckRangeAttack2( float flDot, float flDist )
 {
 	if( !FBitSet( pev->weapons, STROOPER_HANDGRENADE ) )
 	{
@@ -290,7 +285,7 @@ BOOL CStrooper::CheckRangeAttack2( float flDot, float flDist )
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //=========================================================
-void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
+void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 {
 	switch (pEvent->event)
 	{
@@ -390,7 +385,7 @@ void CStrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 //=========================================================
 // Spawn
 //=========================================================
-void CStrooper::Spawn()
+void CShockTrooper::Spawn()
 {
 	Precache();
 
@@ -416,7 +411,7 @@ void CStrooper::Spawn()
 	FollowingMonsterInit();
 }
 
-void CStrooper::MonsterThink()
+void CShockTrooper::MonsterThink()
 {
 	if (m_cAmmoLoaded < m_cClipSize)
 	{
@@ -446,7 +441,7 @@ void CStrooper::MonsterThink()
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
-void CStrooper::Precache()
+void CShockTrooper::Precache()
 {
 	PrecacheMyModel("models/strooper.mdl");
 	PRECACHE_MODEL("models/strooper_gibs.mdl");
@@ -485,7 +480,7 @@ void CStrooper::Precache()
 //=========================================================
 // PainSound
 //=========================================================
-void CStrooper::PainSound(void)
+void CShockTrooper::PainSound(void)
 {
 	if (gpGlobals->time > m_flNextPainTime)
 	{
@@ -515,7 +510,7 @@ void CStrooper::PainSound(void)
 //=========================================================
 // DeathSound
 //=========================================================
-void CStrooper::DeathSound(void)
+void CShockTrooper::DeathSound(void)
 {
 	switch (RANDOM_LONG(0, 3))
 	{
@@ -537,17 +532,17 @@ void CStrooper::DeathSound(void)
 //=========================================================
 // TraceAttack - reimplemented in shock trooper because they never have helmets
 //=========================================================
-void CStrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+void CShockTrooper::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	CFollowingMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
-bool CStrooper::CanDropGrenade() const
+bool CShockTrooper::CanDropGrenade() const
 {
 	return false;
 }
 
-void CStrooper::DropShockRoach(bool gibbed)
+void CShockTrooper::DropShockRoach(bool gibbed)
 {
 	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
@@ -585,13 +580,13 @@ void CStrooper::DropShockRoach(bool gibbed)
 	}
 }
 
-void CStrooper::PlayUseSentence()
+void CShockTrooper::PlayUseSentence()
 {
 	SENTENCEG_PlayRndSz( ENT( pev ), "ST_IDLE", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
 	JustSpoke();
 }
 
-void CStrooper::PlayUnUseSentence()
+void CShockTrooper::PlayUnUseSentence()
 {
 	SENTENCEG_PlayRndSz( ENT( pev ), "ST_ALERT", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
 	JustSpoke();
