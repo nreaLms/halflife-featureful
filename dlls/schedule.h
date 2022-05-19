@@ -267,7 +267,6 @@ struct WayPoint_t
 #define bits_MF_IS_GOAL				( 1 << 7 ) // this waypoint is the goal of the whole move.
 #define bits_MF_DONT_SIMPLIFY		( 1 << 8 ) // Don't let the route code simplify this waypoint
 #define bits_MF_NEAREST_PATH		( 1 << 9 )
-#define bits_MF_NO_TRIDEPTH			( 1 << 10 ) // make tridepth always equal 1
 
 // If you define any flags that aren't _TO_ flags, add them here so we can mask
 // them off when doing compares.
@@ -284,6 +283,7 @@ struct WayPoint_t
 #define BUILDROUTE_NO_NODEROUTE ( 1 << 0 )
 #define BUILDROUTE_NODEROUTE_ONLY ( 1 << 1 )
 #define BUILDROUTE_NO_TRIANGULATION ( 1 << 2 )
+#define BUILDROUTE_NO_TRIDEPTH ( 1 << 3 )
 
 // these bits represent conditions that may befall the monster, of which some are allowed 
 // to interrupt certain schedules. 

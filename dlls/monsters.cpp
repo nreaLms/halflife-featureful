@@ -1666,11 +1666,7 @@ BOOL CBaseMonster::BuildRoute( const Vector &vecGoal, int iMoveFlag, CBaseEntity
 
 	int triangDepth = 1;
 
-	if (FBitSet(iMoveFlag, bits_MF_NO_TRIDEPTH))
-	{
-		ClearBits(iMoveFlag, bits_MF_NO_TRIDEPTH);
-	}
-	else
+	if (!FBitSet(buildRouteFlags, BUILDROUTE_NO_TRIDEPTH))
 	{
 		bool shouldApplyTridepth = TridepthForAll() || (m_MonsterState == MONSTERSTATE_SCRIPT);
 		if (!shouldApplyTridepth)
@@ -2916,7 +2912,7 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 				if( tr.flFraction == 1.0f )
 				{
 					// try to actually get there
-					if( BuildRoute( node.m_vecOrigin, bits_MF_TO_LOCATION | bits_MF_NO_TRIDEPTH, NULL ) )
+					if( BuildRoute( node.m_vecOrigin, bits_MF_TO_LOCATION, NULL, BUILDROUTE_NO_TRIDEPTH ) )
 					{
 						// flMaxDist = flDist;
 						m_vecMoveGoal = node.m_vecOrigin;
