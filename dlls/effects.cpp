@@ -2539,6 +2539,57 @@ void CEnvFunnel::KeyValue( KeyValueData *pkvd )
 }
 
 //=========================================================
+// LRC -  All the particle effects from Quake 1
+//=========================================================
+#define SF_QUAKEFX_REPEATABLE 1
+class CEnvQuakeFx : public CPointEntity
+{
+public:
+	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+LINK_ENTITY_TO_CLASS( env_quakefx, CEnvQuakeFx );
+
+void CEnvQuakeFx::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	Vector vecPos;
+	if (pev->message)
+	{
+		if (!TryCalcLocus_Position( this, pActivator, STRING(pev->message), vecPos )) {
+			return;
+		}
+	}
+	else
+		vecPos = pev->origin;
+
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( pev->impulse );
+		WRITE_COORD( vecPos.x );
+		WRITE_COORD( vecPos.y );
+		WRITE_COORD( vecPos.z );
+		if (pev->impulse == TE_PARTICLEBURST)
+		{
+			WRITE_SHORT( pev->armortype );  // radius
+			WRITE_BYTE( pev->frags );		// particle colour
+			WRITE_BYTE( pev->health * 10 ); // duration
+		}
+		else if (pev->impulse == TE_EXPLOSION2)
+		{
+			// these fields seem to have no effect - except that it
+			// crashes when I send "0" for the number of colours..
+			WRITE_BYTE( 0 ); // colour
+			WRITE_BYTE( 1 ); // number of colours
+		}
+	MESSAGE_END();
+
+	if (!(pev->spawnflags & SF_QUAKEFX_REPEATABLE))
+	{
+		SetThink(&CEnvQuakeFx::SUB_Remove );
+		pev->nextthink = gpGlobals->time;
+	}
+}
+
+//=========================================================
 // Beverage Dispenser
 // overloaded pev->frags, is now a flag for whether or not a can is stuck in the dispenser. 
 // overloaded pev->health, is now how many cans remain in the machine.

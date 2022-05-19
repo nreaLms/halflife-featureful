@@ -1557,6 +1557,26 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_quakefx : "Quake 1 particle effects"
+[
+	message(string) : "Position (blank = here) [LP]"
+	impulse(choices) : "Effect type" : 4 =
+	[
+		4 : "Tar Explosion"
+		10 : "Lava Splash"
+		11 : "Teleport Splash"
+		12 : "Explosion"
+		122 : "Particle Burst"
+	]
+	frags(integer) : "Particle Burst: color number" : 70
+	armortype(integer) : "Particle Burst: radius" : 300
+	health(string) : "Particle Burst: duration" : "1.0"
+	spawnflags(flags) =
+	[
+		1: "Repeatable" : 0
+	]
+]
+
 @PointClass base(Targetname, Target, RenderFields) size(-16 -16 -16, 16 16 16) color(100 100 0) = env_render : "Render Controls"
 [
 	spawnflags(flags) =
