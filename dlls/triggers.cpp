@@ -728,6 +728,17 @@ public:
 	void HurtNonMovingMonsters( void );
 	void EXPORT HurtNonMovingMonstersThink( void );
 	bool CanHurt( CBaseEntity* pOther );
+
+	int DmgGibFlag() {
+		switch (pev->impulse) {
+		case 1:
+			return DMG_ALWAYSGIB;
+		case 2:
+			return DMG_NEVERGIB;
+		default:
+			return 0;
+		}
+	}
 };
 
 LINK_ENTITY_TO_CLASS( trigger_hurt, CTriggerHurt )
@@ -1000,6 +1011,11 @@ void CTriggerHurt::KeyValue(KeyValueData *pkvd)
 		pev->netname = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "gib_policy" ) )
+	{
+		pev->impulse = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseTrigger::KeyValue( pkvd );
 }
@@ -1105,7 +1121,7 @@ void CTriggerHurt::HurtNonMovingMonsters()
 			if (flDmg < 0)
 				pMonster->TakeHealth( this, -flDmg, m_bitsDamageInflict );
 			else
-				pMonster->TakeDamage( pev, pev, flDmg, m_bitsDamageInflict );
+				pMonster->TakeDamage( pev, pev, flDmg, m_bitsDamageInflict|DmgGibFlag() );
 		}
 	}
 }
@@ -1270,7 +1286,7 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 	if( fldmg < 0 )
 		pOther->TakeHealth( this, -fldmg, m_bitsDamageInflict );
 	else
-		pOther->TakeDamage( pev, pev, fldmg, m_bitsDamageInflict );
+		pOther->TakeDamage( pev, pev, fldmg, m_bitsDamageInflict|DmgGibFlag() );
 
 	// Store pain time so we can get all of the other entities on this frame
 	pev->pain_finished = gpGlobals->time;
@@ -4643,7 +4659,20 @@ protected:
 	void DoDamage();
 	void DoDamage(CBaseEntity* pTarget);
 	string_t TargetClass() const { return pev->netname; }
-	int DamageType() const { return pev->weapons; }
+	int DamageType() const {
+		int damageType = pev->weapons;
+		switch (pev->impulse) {
+		case 1:
+			damageType |= DMG_ALWAYSGIB;
+			break;
+		case 2:
+			damageType |= DMG_NEVERGIB;
+			break;
+		default:
+			break;
+		}
+		return damageType;
+	}
 	float Delay() const { return pev->frags ? pev->frags : 0.1; }
 	bool IsActive() const { return FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_STARTON); }
 };
@@ -4672,6 +4701,11 @@ void CTriggerHurtRemote::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "damagetype"))
 	{
 		pev->weapons = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "gib_policy" ) )
+	{
+		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

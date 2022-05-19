@@ -7019,7 +7019,17 @@
 	]
 ]
 
-@SolidClass base(Targetname,Target,DamageType) = trigger_hurt : "Trigger player hurt"
+@BaseClass = GibbingPolicy
+[
+	gib_policy(choices) : "Gibbing policy" =
+	[
+		0 : "Default"
+		1 : "Always gib"
+		2 : "Never gib"
+	]
+]
+
+@SolidClass base(Targetname, Target, DamageType, GibbingPolicy) = trigger_hurt : "Trigger player hurt"
 [
 	spawnflags(flags) =
 	[
@@ -7036,7 +7046,7 @@
 	untouchable_ent_name(string) : "Untouchable entity name" : : "Don't hurt targets with this classname or targetname"
 ]
 
-@PointClass base(Targetname, Target, DamageType) = trigger_hurt_remote : "Trigger Hurt (non-touch)"
+@PointClass base(Targetname, Target, DamageType, GibbingPolicy) = trigger_hurt_remote : "Trigger Hurt (non-touch)"
 [
 	spawnflags(Flags) =
 	[
