@@ -1242,6 +1242,10 @@ static BOOL IsFacing( entvars_t *pevTest, const Vector &reference )
 
 void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
+	// don't say anything if already provoked
+	if (HasMemory(bits_MEMORY_PROVOKED))
+		return;
+
 	CBaseEntity* pAttacker = pevAttacker ? CBaseEntity::Instance(pevAttacker) : NULL;
 	const int myTolerance = MyToleranceLevel();
 	if ( myTolerance <= TOLERANCE_ZERO )
@@ -1300,7 +1304,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 			Remember( bits_MEMORY_SUSPICIOUS );
 		}
 	}
-	else if( !( m_hEnemy->IsPlayer()) && pev->deadflag == DEAD_NO )
+	else if( !m_hEnemy->IsPlayer() && pev->deadflag == DEAD_NO )
 	{
 		m_hTalkTarget = pAttacker;
 		PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );

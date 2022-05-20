@@ -2613,6 +2613,12 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_HUNT:
 	{
+		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+		{
+			// flinch if hurt
+			return GetScheduleOfType( SCHED_SMALL_FLINCH );
+		}
+
 		Schedule_t* reloadSched = GetReloadSchedule();
 		if (reloadSched)
 			return reloadSched;
