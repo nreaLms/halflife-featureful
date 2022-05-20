@@ -86,6 +86,9 @@ cvar_t npc_fix_melee_distance = { "npc_fix_melee_distance", "0", FCVAR_SERVER };
 #if FEATURE_NPC_ACTIVE_AFTER_COMBAT_CVAR
 cvar_t npc_active_after_combat = { "npc_active_after_combat", "0", FCVAR_SERVER };
 #endif
+#if FEATURE_NPC_FOLLOW_OUT_OF_PVS_CVAR
+cvar_t npc_follow_out_of_pvs = { "npc_follow_out_of_pvs", "0", FCVAR_SERVER };
+#endif
 cvar_t npc_patrol = { "npc_patrol", "1", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
@@ -963,6 +966,9 @@ void GameDLLInit( void )
 #endif
 #if FEATURE_NPC_ACTIVE_AFTER_COMBAT_CVAR
 	CVAR_REGISTER( &npc_active_after_combat );
+#endif
+#if FEATURE_NPC_FOLLOW_OUT_OF_PVS_CVAR
+	CVAR_REGISTER( &npc_follow_out_of_pvs );
 #endif
 	CVAR_REGISTER( &npc_patrol );
 

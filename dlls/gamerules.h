@@ -390,6 +390,7 @@ bool NeedUseToTake();
 bool NpcFollowNearest();
 float NpcForgetEnemyTime();
 bool NpcActiveAfterCombat();
+bool NpcFollowOutOfPvs();
 bool NpcFixMeleeDistance();
 bool AllowGrenadeJump();
 

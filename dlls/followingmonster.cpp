@@ -66,6 +66,7 @@ Schedule_t slFollowCautious[] =
 
 Task_t tlFollowTargetNearest[] =
 {
+	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_FAIL_PVS_INDEPENDENT },
 	{ TASK_GET_NEAREST_PATH_TO_TARGET, 64.0f },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
@@ -189,6 +190,25 @@ Schedule_t slStopFollowing[] =
 	},
 };
 
+// Like regular fail, but without waiting for PVS
+Task_t tlPVSIndependentFail[] =
+{
+	{ TASK_STOP_MOVING, 0 },
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
+	{ TASK_WAIT, (float)2 },
+};
+
+Schedule_t slPVSIndependentFail[] =
+{
+	{
+		tlPVSIndependentFail,
+		ARRAYSIZE( tlPVSIndependentFail ),
+		bits_COND_CAN_ATTACK,
+		0,
+		"PVS Independent Fail"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES( CFollowingMonster )
 {
 	slFollow,
@@ -199,6 +219,7 @@ DEFINE_CUSTOM_SCHEDULES( CFollowingMonster )
 	slMoveAwayFollow,
 	slMoveAwayFail,
 	slStopFollowing,
+	slPVSIndependentFail,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES( CFollowingMonster, CSquadMonster )
@@ -304,12 +325,19 @@ Schedule_t *CFollowingMonster::GetScheduleOfType( int Type )
 		}
 		else
 		{
-			return CSquadMonster::GetScheduleOfType(SCHED_FAIL);
+			return GetScheduleOfType(SCHED_FAIL_PVS_INDEPENDENT);
 		}
 	}
 	case SCHED_CANT_FOLLOW:
 	{
 		return slStopFollowing;
+	}
+	case SCHED_FAIL_PVS_INDEPENDENT:
+	{
+		if (NpcFollowOutOfPvs()) {
+			return slPVSIndependentFail;
+		}
+		return GetScheduleOfType(SCHED_FAIL);
 	}
 	default:
 		return CSquadMonster::GetScheduleOfType(Type);

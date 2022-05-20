@@ -598,6 +598,16 @@ bool NpcActiveAfterCombat()
 #endif
 }
 
+bool NpcFollowOutOfPvs()
+{
+#if FEATURE_NPC_FOLLOW_OUT_OF_PVS_CVAR
+	extern cvar_t npc_follow_out_of_pvs;
+	return npc_follow_out_of_pvs.value != 0;
+#else
+	return false;
+#endif
+}
+
 bool NpcFixMeleeDistance()
 {
 #if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
