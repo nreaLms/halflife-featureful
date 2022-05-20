@@ -213,7 +213,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.slaveDmgClawrake = GetSkillCvar( "sk_islave_dmg_clawrake" );
 	gSkillData.slaveDmgZap = GetSkillCvar( "sk_islave_dmg_zap" );
 	gSkillData.slaveZapRate = GetSkillCvar( "sk_islave_zap_rate" );
-	gSkillData.slaveRevival = GetSkillCvar( "sk_islave_revival" );
+	gSkillData.slaveRevival = GetSkillCvar( "sk_islave_revival", 0, true );
 
 	// Icthyosaur
 	gSkillData.ichthyosaurHealth = GetSkillCvar( "sk_ichthyosaur_health" );
