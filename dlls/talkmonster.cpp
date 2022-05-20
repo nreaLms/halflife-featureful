@@ -35,6 +35,8 @@ float CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: u
 
 #define CALL_MEDIC_DELAY				5 // Wait before calling for medic again.
 
+#define FLINCH_DELAY 2
+
 // NOTE: m_voicePitch & m_szGrp should be fixed up by precache each save/restore
 
 TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
@@ -58,6 +60,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_flLastHitByPlayer, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_iPlayerHits, FIELD_INTEGER ),
 	DEFINE_FIELD( CTalkMonster, m_flStopLookTime, FIELD_TIME ),
+	DEFINE_FIELD( CTalkMonster, m_flNextFlinch, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CFollowingMonster )
@@ -458,6 +461,10 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		if ( !m_pCine || !FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_DONT_RESET_HEAD) ) {
 			m_hTalkTarget = NULL;
 		}
+		CFollowingMonster::StartTask( pTask );
+		break;
+	case TASK_SMALL_FLINCH:
+		m_flNextFlinch = gpGlobals->time + FLINCH_DELAY;
 		CFollowingMonster::StartTask( pTask );
 		break;
 	default:

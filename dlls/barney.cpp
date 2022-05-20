@@ -645,7 +645,7 @@ Schedule_t *CBarney::GetSchedule()
 	case MONSTERSTATE_IDLE:
 	case MONSTERSTATE_HUNT:
 	{
-		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) && CanIdleFlinch() )
 		{
 			// flinch if hurt
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
