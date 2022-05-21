@@ -660,9 +660,7 @@ void CLeech::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 
 	//ALERT(at_aiconsole, "Leech: killed\n");
 	// tell owner ( if any ) that we're dead.This is mostly for MonsterMaker functionality.
-	CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );
-	if( pOwner )
-		pOwner->DeathNotice( pev );
+	OnDying();
 
 	// When we hit the ground, play the "death_end" activity
 	if( pev->waterlevel )
@@ -680,7 +678,7 @@ void CLeech::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 	}
 	else
 		SetActivity( ACT_DIEFORWARD );
-	
+
 	pev->movetype = MOVETYPE_TOSS;
 	pev->takedamage = DAMAGE_NO;
 	SetThink( &CLeech::DeadThink );
