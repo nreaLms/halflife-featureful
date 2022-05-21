@@ -788,8 +788,15 @@ void CMonsterMaker::CyclicBacklogThink()
 void CMonsterMaker::DeathNotice( entvars_t *pevChild )
 {
 	// ok, we've gotten the deathnotice from our child, now clear out its owner if we don't want it to fade.
-	m_cLiveChildren--;
-	ALERT(at_aiconsole, "Monstermaker DeathNotice: %d live children left\n", m_cLiveChildren);
+	if (m_cLiveChildren > 0)
+	{
+		m_cLiveChildren--;
+		ALERT(at_aiconsole, "%s DeathNotice: %d live children left\n", STRING(pev->classname), m_cLiveChildren);
+	}
+	else
+	{
+		ALERT(at_aiconsole, "Impossible situation: %s got DeathNotice when live children count is 0!\n", STRING(pev->classname));
+	}
 
 	if( !m_fFadeChildren )
 	{

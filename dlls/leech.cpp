@@ -401,6 +401,11 @@ void CLeech::DeadThink( void )
 		{
 			SetThink( NULL );
 			StopAnimation();
+
+			if( ShouldFadeOnDeath() )
+			{
+				SUB_StartFadeOut();
+			}
 			return;
 		}
 		else if( pev->flags & FL_ONGROUND )
