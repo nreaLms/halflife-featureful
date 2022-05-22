@@ -387,7 +387,7 @@
 		256: "Pre-Disaster" 	: 0
 		512: "Fade Corpse"	: 0
 		8192: "No yellow blobs" : 0 : "When engine thinks that monster is stuck, don't draw yellow particles around it"
-		16384 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'No Dyn collision' flag"
+		16384 : "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'No Dyn collision' flag"
 		65536: "Non-solid corpse" : 0 : "Become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
 		1048576: "Act out of PVS" : 0 : "Act as usual even if there're no players in the PVS"
 	]
@@ -1915,6 +1915,9 @@
 		1 : "Only Trigger" : 0
 		2 : "Touch"	   : 0
 		4 : "Pressure"     : 0
+		8: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Repairable' flag"
+		32: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Show HUD Info' flag"
+		64: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Immune To Clients' flag"
 		256: "Instant Crowbar" : 0
 		512: "Explosives only": 0
 		1024: "Op4Mortar only" : 0
@@ -2143,7 +2146,10 @@
 	]
 	spawnflags(flags) =
 	[
+		8: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Repairable' flag"
+		32: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Show HUD Info' flag"
 		128: "Breakable" : 0
+		512: "Explosives only": 0
 	]
 	friction(integer) : "Friction (0-400)" : 50
 	buoyancy(integer) : "Buoyancy" : 20
@@ -6404,7 +6410,7 @@
 		16 : "Prisoner" : 0 : "The spawned monster won't attack its enemies and will be ignored by its enemies."
 		32 : "Auto size BBox" : 1 : "When checking if the area is free to spawn, use the monster specific hull size instead of large one provided by default."
 		64: "Cyclic backlog" : 0 : "Used with 'Cyclic' flag. Keep track of number of monsters who could not be spawned, e.g. because of blocking. Try to spawn them later. Useful when you want to ensure that the specific number of monsters will spawn."
-		128 : "Reserved (don't use)" : 0 : "Reserved space for Sven Co-op 'Wait for script' flag"
+		128 : "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Wait for script' flag"
 		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
 		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
 		2048 : "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"
@@ -6412,7 +6418,7 @@
 		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
 		32768 : "Monster special flag" : 0 : "Set spawnflag 32768 for spawned monster"
 		65536 : "Non-solid corpse" : 0 : "The spawned monster will become non-solid upon dying. Helps preventing dead corpses get into the way of moving entities like doors"
-		524288 : "Ignore player pushing" : 0 : "Don't move away when player tries to push me (for talk monsters)"
+		524288 : "Ignore player pushing" : 0 : "Don't move away when player tries to push me (for following monsters)"
 		1048576: "Act out of PVS" : 0 : "The spawned monster will act as usual even if there're no players in the PVS"
 	]
 	body(integer) : "Body"
@@ -6464,7 +6470,10 @@
 	spawnflags(Flags) =
 	[
 		1 : "Multi-threaded" : 0
+		4 : "Reserved (don't use)" : 0 : "Reserved for Spirit 'Loop' flag"
 		8 : "Once only" : 0
+		16 : "Reserved (don't use)" : 0 : "Reserved for Spirit 'Start on' flag"
+		32 : "Reserved (don't use)" : 0 : "Reserved for Spirit 'Debug mode' flag"
 	]
 ]
 
@@ -6616,7 +6625,6 @@
 		256 : "Speaker turns to listener"	: 0
 		512 : "Listener turns to speaker"	: 0
 		4096 : "Try once"	: 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
-		8192 : "Listener looks at speaker" : 0 : "Make sentence's listener look at sentence's speaker if possible"
 	]
 	sentence(string) : "Sentence Name" : ""
 	entity(string) : "Speaker Type [LE]"
@@ -6853,19 +6861,19 @@
 @PointClass base(Targetname, CustomSentences) = trigger_configure_monster : "Change some monster's parameters and flags"
 [
 	target(string) : "Entity to affect"
-	gag_flag(choices) : "Gag flag" =
+	gag_flag(choices) : "'Gag' flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"
 		1 : "Add flag"
 	]
-	monsterclip_flag(choices) : "Monsterclip flag" =
+	monsterclip_flag(choices) : "'Monsterclip' flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"
 		1 : "Add flag"
 	]
-	predisaster_flag(choices) : "Pre-Disaster flag" =
+	predisaster_flag(choices) : "'Pre-Disaster' flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"
@@ -6877,7 +6885,7 @@
 		0 : "No change"
 		1 : "Add flag"
 	]
-	act_out_of_pvs(choices) : "Act out of PVS flag" =
+	act_out_of_pvs(choices) : "'Act out of PVS' flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"
@@ -6964,7 +6972,7 @@
 		5 : "Absolute" : "Never get provoked"
 		6 : "Absolute, don't alert friends" : "Never get provoked, don't alert friends upon death"
 	]
-	ignore_push_flag(choices) : "Ignore Player Push flag" =
+	ignore_push_flag(choices) : "'Ignore Player Push' flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"
@@ -7413,6 +7421,7 @@
 	spawnflags(Flags) =
 	[
 		2 : "Drop to Floor" : 0
+		4 : "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Face Randomly' flag"
 	]
 ]
 
