@@ -36,6 +36,9 @@ extern cvar_t *cl_nvgstyle;
 extern cvar_t *cl_nvgradius;
 #endif
 
+#define CS_NVG_MIN_DISTANCE 400
+#define CS_NVG_MAX_DISTANCE 1000
+
 DECLARE_MESSAGE( m_Nightvision, Nightvision )
 
 #define NIGHTVISION_SPRITE_NAME "sprites/of_nv_b.spr"
@@ -137,9 +140,8 @@ void CHudNightvision::DrawCSNVG(float flTime)
 	// just update origin
 	if( m_pLight )
 	{
-		const float radius = cl_nvgradius && cl_nvgradius->value > 0.0f ? cl_nvgradius->value : 775;
 		m_pLight->origin = gHUD.m_vecOrigin;
-		m_pLight->radius = Q_min(radius, 1000.0f);
+		m_pLight->radius = CSNvgRadius();
 	}
 #endif
 }
@@ -201,4 +203,14 @@ void CHudNightvision::RemoveCSdlight()
 		m_pLight = NULL;
 	}
 #endif
+}
+
+float CHudNightvision::CSNvgRadius()
+{
+	float radius = cl_nvgradius && cl_nvgradius->value > 0.0f ? cl_nvgradius->value : 775;
+	if (radius < CS_NVG_MIN_DISTANCE)
+		return CS_NVG_MIN_DISTANCE;
+	else if (radius > CS_NVG_MAX_DISTANCE)
+		return CS_NVG_MAX_DISTANCE;
+	return radius;
 }

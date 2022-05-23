@@ -443,6 +443,7 @@ public:
 	void RemoveCSdlight();
 	void UserCmd_NVGAdjustDown();
 	void UserCmd_NVGAdjustUp();
+	float CSNvgRadius();
 
 private:
 	int m_fOn;
