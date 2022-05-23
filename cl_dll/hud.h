@@ -443,8 +443,9 @@ public:
 	void RemoveCSdlight();
 	void UserCmd_NVGAdjustDown();
 	void UserCmd_NVGAdjustUp();
+#if FEATURE_CS_NIGHTVISION
 	float CSNvgRadius();
-
+#endif
 private:
 	int m_fOn;
 #if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION

@@ -205,6 +205,7 @@ void CHudNightvision::RemoveCSdlight()
 #endif
 }
 
+#if FEATURE_CS_NIGHTVISION
 float CHudNightvision::CSNvgRadius()
 {
 	float radius = cl_nvgradius && cl_nvgradius->value > 0.0f ? cl_nvgradius->value : 775;
@@ -214,3 +215,4 @@ float CHudNightvision::CSNvgRadius()
 		return CS_NVG_MAX_DISTANCE;
 	return radius;
 }
+#endif
