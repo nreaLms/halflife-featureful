@@ -30,6 +30,8 @@
 #include	"weapons.h"
 #include	"mod_features.h"
 
+#define FEATURE_VOLGITOGRE_LESSER_SIZE 0
+
 #if FEATURE_VOLTIFORE
 #define		VOLTIGORE_SPRINT_DIST	256 // how close the voltigore has to get before starting to sprint and refusing to swerve
 
@@ -349,8 +351,20 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
-	Vector DefaultMinHullSize() { return Vector( -80.0f, -80.0f, 0.0f ); }
-	Vector DefaultMaxHullSize() { return Vector( 80.0f, 80.0f, 90.0f ); }
+	Vector DefaultMinHullSize() {
+#if FEATURE_VOLGITOGRE_LESSER_SIZE
+		return Vector( -40.0f, -40.0f, 0.0f );
+#else
+		return Vector( -80.0f, -80.0f, 0.0f );
+#endif
+	}
+	Vector DefaultMaxHullSize() {
+#if FEATURE_VOLGITOGRE_LESSER_SIZE
+		return Vector( 40.0f, 40.0f, 85.0f );
+#else
+		return Vector( 80.0f, 80.0f, 90.0f );
+#endif
+	}
 
 	float m_flNextBeamAttackCheck; // next time the voltigore can use the spit attack.
 	BOOL m_fShouldUpdateBeam;
