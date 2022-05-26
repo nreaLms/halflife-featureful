@@ -918,6 +918,7 @@ void CFuncTankLaser::Activate( void )
 	}
 	else
 	{
+		ClearBits(pev->flags, FL_ALWAYSTHINK);
 		m_pLaser->TurnOff();
 	}
 }
@@ -961,8 +962,10 @@ CLaser *CFuncTankLaser::GetLaser( void )
 
 void CFuncTankLaser::Think( void )
 {
-	if( m_pLaser && (gpGlobals->time > m_laserTime) )
+	if( m_pLaser && (gpGlobals->time > m_laserTime) && m_pLaser->IsOn() ) {
+		ClearBits(pev->flags, FL_ALWAYSTHINK);
 		m_pLaser->TurnOff();
+	}
 
 	CFuncTank::Think();
 }
@@ -992,6 +995,8 @@ void CFuncTankLaser::Fire( const Vector &barrelEnd, const Vector &forward, entva
 
 				m_laserTime = gpGlobals->time;
 				m_pLaser->TurnOn();
+				if (pev->solid != SOLID_NOT)
+					SetBits(pev->flags, FL_ALWAYSTHINK);
 				m_pLaser->pev->dmgtime = gpGlobals->time - 1.0f;
 				m_pLaser->FireAtPoint( tr, pevAttacker );
 				m_pLaser->pev->nextthink = 0;
