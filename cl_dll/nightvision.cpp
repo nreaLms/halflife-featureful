@@ -28,7 +28,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
+#if FEATURE_NIGHTVISION_STYLES
 extern cvar_t *cl_nvgstyle;
 #endif
 
@@ -44,6 +44,10 @@ extern cvar_t *cl_nvgradius_of;
 #define CS_NVG_DLIGHT_RADIUS 775
 #define NVG_DLIGHT_MIN_RADIUS 400
 #define NVG_DLIGHT_MAX_RADIUS 1000
+
+#if FEATURE_FILTER_NIGHTVISION
+extern cvar_t *cl_nvgfilterbrightness;
+#endif
 
 DECLARE_MESSAGE( m_Nightvision, Nightvision )
 
@@ -73,6 +77,7 @@ int CHudNightvision::Init(void)
 void CHudNightvision::Reset(void)
 {
 	m_fOn = 0;
+	ResetFilterMode();
 }
 
 int CHudNightvision::VidInit(void)
@@ -95,6 +100,7 @@ int CHudNightvision::MsgFunc_Nightvision(const char *pszName, int iSize, void *p
 	BEGIN_READ( pbuf, iSize );
 	m_fOn = READ_BYTE();
 	if (!m_fOn) {
+		ResetFilterMode();
 		RemoveCSdlight();
 		RemoveOFdlight();
 	}
@@ -117,21 +123,41 @@ int CHudNightvision::Draw(float flTime)
 		return 1;
 
 	if (m_fOn) {
-#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
-	if (!cl_nvgstyle || cl_nvgstyle->value == 0) {
-		RemoveCSdlight();
-		DrawOpforNVG(flTime);
-	} else {
-		RemoveOFdlight();
-		DrawCSNVG(flTime);
-	}
-#elif FEATURE_CS_NIGHTVISION
+#if FEATURE_NIGHTVISION_STYLES
+		if (cl_nvgstyle)
+		{
+			if (cl_nvgstyle->value < 1) {
+#if FEATURE_OPFOR_NIGHTVISION
+				RemoveCSdlight();
+				ResetFilterMode();
+				DrawOpforNVG(flTime);
+				return 1;
+#endif
+			}
+			if (cl_nvgstyle->value < 2) {
+#if FEATURE_CS_NIGHTVISION
+				RemoveOFdlight();
+				ResetFilterMode();
+				DrawCSNVG(flTime);
+				return 1;
+#endif
+			}
+#if FEATURE_FILTER_NIGHTVISION
+			RemoveCSdlight();
+			RemoveOFdlight();
+			SetFilterMode();
+			return 1;
+#endif
+		}
+#endif
+#if FEATURE_CS_NIGHTVISION
 	DrawCSNVG(flTime);
 #elif FEATURE_OPFOR_NIGHTVISION
 	DrawOpforNVG(flTime);
+#elif FEATURE_FILTER_NIGHTVISION
+	SetFilterMode();
 #endif
 	}
-
 	return 1;
 }
 
@@ -245,6 +271,29 @@ void CHudNightvision::RemoveOFdlight()
 #endif
 }
 
+void CHudNightvision::SetFilterMode()
+{
+#if FEATURE_FILTER_NIGHTVISION
+	if (!m_filterModeSet) {
+		m_filterModeSet = true;
+
+		gEngfuncs.pfnSetFilterMode(1);
+		gEngfuncs.pfnSetFilterColor(0.2f, 0.9f, 0.2f);
+	}
+	gEngfuncs.pfnSetFilterBrightness(FilterBrightness());
+#endif
+}
+
+void CHudNightvision::ResetFilterMode()
+{
+#if FEATURE_FILTER_NIGHTVISION
+	if (m_filterModeSet) {
+		m_filterModeSet = false;
+		gEngfuncs.pfnSetFilterMode(0);
+	}
+#endif
+}
+
 #if FEATURE_CS_NIGHTVISION
 float CHudNightvision::CSNvgRadius()
 {
@@ -273,3 +322,16 @@ bool CHudNightvision::IsOn()
 {
 	return m_fOn;
 }
+
+#if FEATURE_FILTER_NIGHTVISION
+float CHudNightvision::FilterBrightness()
+{
+	if (cl_nvgfilterbrightness) {
+		float brightness = cl_nvgfilterbrightness->value;
+		if (brightness >= 0.1f || brightness <= 1.0f) {
+			return brightness;
+		}
+	}
+	return 0.6f;
+}
+#endif

@@ -101,7 +101,7 @@ cvar_t *cl_viewroll = NULL;
 cvar_t *cl_rollspeed = NULL;
 cvar_t *cl_rollangle = NULL;
 
-#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
+#if FEATURE_NIGHTVISION_STYLES
 cvar_t *cl_nvgstyle = NULL;
 #endif
 
@@ -111,6 +111,10 @@ cvar_t *cl_nvgradius_cs = NULL;
 
 #if FEATURE_OPFOR_NIGHTVISION_DLIGHT
 cvar_t *cl_nvgradius_of = NULL;
+#endif
+
+#if FEATURE_FILTER_NIGHTVISION
+cvar_t *cl_nvgfilterbrightness = NULL;
 #endif
 
 void ShutdownInput( void );
@@ -445,7 +449,7 @@ void CHud::Init( void )
 	cl_rollangle = gEngfuncs.pfnRegisterVariable ( "cl_rollangle", "0.65", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "300", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
-#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
+#if FEATURE_NIGHTVISION_STYLES
 	cl_nvgstyle = CVAR_CREATE( "cl_nvgstyle", "0", FCVAR_ARCHIVE );
 #endif
 
@@ -455,6 +459,10 @@ void CHud::Init( void )
 
 #if FEATURE_OPFOR_NIGHTVISION_DLIGHT
 	cl_nvgradius_of = CVAR_CREATE( "cl_nvgradius_of", "400", FCVAR_ARCHIVE );
+#endif
+
+#if FEATURE_FILTER_NIGHTVISION
+	cl_nvgfilterbrightness = CVAR_CREATE( "cl_nvgfilterbrightness", "0.6", FCVAR_ARCHIVE );
 #endif
 
 	m_pSpriteList = NULL;

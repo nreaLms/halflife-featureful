@@ -444,6 +444,8 @@ public:
 	void UpdateDynLight(dlight_t* dynLight, float radius, const Vector &origin);
 	void RemoveCSdlight();
 	void RemoveOFdlight();
+	void SetFilterMode();
+	void ResetFilterMode();
 	void UserCmd_NVGAdjustDown();
 	void UserCmd_NVGAdjustUp();
 #if FEATURE_CS_NIGHTVISION
@@ -452,7 +454,9 @@ public:
 #if FEATURE_OPFOR_NIGHTVISION_DLIGHT
 	float OpforNvgRadius();
 #endif
-
+#if FEATURE_FILTER_NIGHTVISION
+	float FilterBrightness();
+#endif
 	bool IsOn();
 private:
 	int m_fOn;
@@ -466,6 +470,7 @@ private:
 	HSPRITE m_hSprite;
 	int m_iFrame, m_nFrameCount;
 #endif
+	bool m_filterModeSet;
 };
 //
 //-----------------------------------------------------
