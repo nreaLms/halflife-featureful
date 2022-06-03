@@ -440,21 +440,27 @@ public:
 	int MsgFunc_Nightvision( const char *pszName, int iSize, void *pbuf );
 	void DrawCSNVG(float flTime);
 	void DrawOpforNVG(float flTime);
+	dlight_t* MakeDynLight(float flTime, int r, int g, int b);
+	void UpdateDynLight(dlight_t* dynLight, float radius, const Vector &origin);
 	void RemoveCSdlight();
+	void RemoveOFdlight();
 	void UserCmd_NVGAdjustDown();
 	void UserCmd_NVGAdjustUp();
 #if FEATURE_CS_NIGHTVISION
 	float CSNvgRadius();
 #endif
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+	float OpforNvgRadius();
+#endif
 
 	bool IsOn();
 private:
 	int m_fOn;
-#if FEATURE_CS_NIGHTVISION && FEATURE_OPFOR_NIGHTVISION
-	bool m_nvgStyle;
-#endif
 #if FEATURE_CS_NIGHTVISION
-	dlight_t* m_pLight;
+	dlight_t* m_pLightCS;
+#endif
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+	dlight_t* m_pLightOF;
 #endif
 #if FEATURE_OPFOR_NIGHTVISION
 	HSPRITE m_hSprite;

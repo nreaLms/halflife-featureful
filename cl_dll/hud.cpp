@@ -106,7 +106,11 @@ cvar_t *cl_nvgstyle = NULL;
 #endif
 
 #if FEATURE_CS_NIGHTVISION
-cvar_t *cl_nvgradius = NULL;
+cvar_t *cl_nvgradius_cs = NULL;
+#endif
+
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+cvar_t *cl_nvgradius_of = NULL;
 #endif
 
 void ShutdownInput( void );
@@ -446,7 +450,11 @@ void CHud::Init( void )
 #endif
 
 #if FEATURE_CS_NIGHTVISION
-	cl_nvgradius = CVAR_CREATE( "cl_nvgradius", "775", FCVAR_ARCHIVE );
+	cl_nvgradius_cs = CVAR_CREATE( "cl_nvgradius_cs", "775", FCVAR_ARCHIVE );
+#endif
+
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+	cl_nvgradius_of = CVAR_CREATE( "cl_nvgradius_of", "400", FCVAR_ARCHIVE );
 #endif
 
 	m_pSpriteList = NULL;

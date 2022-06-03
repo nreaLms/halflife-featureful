@@ -33,11 +33,17 @@ extern cvar_t *cl_nvgstyle;
 #endif
 
 #if FEATURE_CS_NIGHTVISION
-extern cvar_t *cl_nvgradius;
+extern cvar_t *cl_nvgradius_cs;
 #endif
 
-#define CS_NVG_MIN_DISTANCE 400
-#define CS_NVG_MAX_DISTANCE 1000
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+extern cvar_t *cl_nvgradius_of;
+#endif
+
+#define OF_NVG_DLIGHT_RADIUS 400
+#define CS_NVG_DLIGHT_RADIUS 775
+#define NVG_DLIGHT_MIN_RADIUS 400
+#define NVG_DLIGHT_MAX_RADIUS 1000
 
 DECLARE_MESSAGE( m_Nightvision, Nightvision )
 
@@ -52,7 +58,11 @@ int CHudNightvision::Init(void)
 	m_iFlags |= HUD_ACTIVE;
 
 #if FEATURE_CS_NIGHTVISION
-	m_pLight = 0;
+	m_pLightCS = 0;
+#endif
+
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+	m_pLightOF = 0;
 #endif
 
 	//gHUD.AddHudElem(this);
@@ -86,6 +96,7 @@ int CHudNightvision::MsgFunc_Nightvision(const char *pszName, int iSize, void *p
 	m_fOn = READ_BYTE();
 	if (!m_fOn) {
 		RemoveCSdlight();
+		RemoveOFdlight();
 	}
 
 	return 1;
@@ -111,6 +122,7 @@ int CHudNightvision::Draw(float flTime)
 		RemoveCSdlight();
 		DrawOpforNVG(flTime);
 	} else {
+		RemoveOFdlight();
 		DrawCSNVG(flTime);
 	}
 #elif FEATURE_CS_NIGHTVISION
@@ -127,22 +139,12 @@ void CHudNightvision::DrawCSNVG(float flTime)
 {
 #if FEATURE_CS_NIGHTVISION
 	gEngfuncs.pfnFillRGBABlend(0, 0, ScreenWidth, ScreenHeight, 50, 225, 50, 110);
-	if( !m_pLight || m_pLight->die < flTime )
-	{
-		m_pLight = gEngfuncs.pEfxAPI->CL_AllocDlight( 0 );
 
-		// I hope no one is crazy so much to keep NVG for 9999 seconds
-		m_pLight->die = flTime + 9999.0f;
-		m_pLight->color.r = 50;
-		m_pLight->color.g = 255;
-		m_pLight->color.b = 50;
-	}
-	// just update origin
-	if( m_pLight )
+	if( !m_pLightCS || m_pLightCS->die < flTime )
 	{
-		m_pLight->origin = gHUD.m_vecOrigin;
-		m_pLight->radius = CSNvgRadius();
+		m_pLightCS = MakeDynLight(flTime, 50, 255, 50);
 	}
+	UpdateDynLight( m_pLightCS, CSNvgRadius(), gHUD.m_vecOrigin );
 #endif
 }
 
@@ -181,26 +183,64 @@ void CHudNightvision::DrawOpforNVG(float flTime)
 	{
 		for (j = 0; j < colCount; ++j) // width
 		{
-			// Nightvision sprites are 256 x 256. So draw 128 -> (8 * 16) instances to cover
-			// the entire screen. It's cheap but does the work.
-			//
-			// Keep in mind this is used until we find a better solution.
 			SPR_DrawAdditive(m_iFrame, x + (j * 256), y + (i * 256), NULL);
 		}
 	}
 
 	// Increase sprite frame.
 	m_iFrame++;
+
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+	if( !m_pLightOF || m_pLightOF->die < flTime )
+	{
+		m_pLightOF = MakeDynLight(flTime, 250, 250, 250);
+	}
+	UpdateDynLight( m_pLightOF, OpforNvgRadius(), gHUD.m_vecOrigin + Vector(0.0f, 0.0f, 32.0f ) );
 #endif
+
+#endif
+}
+
+dlight_t* CHudNightvision::MakeDynLight(float flTime, int r, int g, int b)
+{
+	dlight_t* dLight = gEngfuncs.pEfxAPI->CL_AllocDlight( 0 );
+
+	// I hope no one is crazy so much to keep NVG for 9999 seconds
+	dLight->die = flTime + 9999.0f;
+	dLight->color.r = r;
+	dLight->color.g = g;
+	dLight->color.b = b;
+
+	return dLight;
+}
+
+void CHudNightvision::UpdateDynLight(dlight_t *dynLight, float radius, const Vector &origin)
+{
+	if( dynLight )
+	{
+		dynLight->origin = origin;
+		dynLight->radius = radius;
+	}
 }
 
 void CHudNightvision::RemoveCSdlight()
 {
 #if FEATURE_CS_NIGHTVISION
-	if( m_pLight )
+	if( m_pLightCS )
 	{
-		m_pLight->die = 0;
-		m_pLight = NULL;
+		m_pLightCS->die = 0;
+		m_pLightCS = NULL;
+	}
+#endif
+}
+
+void CHudNightvision::RemoveOFdlight()
+{
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+	if( m_pLightOF )
+	{
+		m_pLightOF->die = 0;
+		m_pLightOF = NULL;
 	}
 #endif
 }
@@ -208,11 +248,23 @@ void CHudNightvision::RemoveCSdlight()
 #if FEATURE_CS_NIGHTVISION
 float CHudNightvision::CSNvgRadius()
 {
-	float radius = cl_nvgradius && cl_nvgradius->value > 0.0f ? cl_nvgradius->value : 775;
-	if (radius < CS_NVG_MIN_DISTANCE)
-		return CS_NVG_MIN_DISTANCE;
-	else if (radius > CS_NVG_MAX_DISTANCE)
-		return CS_NVG_MAX_DISTANCE;
+	float radius = cl_nvgradius_cs && cl_nvgradius_cs->value > 0.0f ? cl_nvgradius_cs->value : CS_NVG_DLIGHT_RADIUS;
+	if (radius < NVG_DLIGHT_MIN_RADIUS)
+		return NVG_DLIGHT_MIN_RADIUS;
+	else if (radius > NVG_DLIGHT_MAX_RADIUS)
+		return NVG_DLIGHT_MAX_RADIUS;
+	return radius;
+}
+#endif
+
+#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+float CHudNightvision::OpforNvgRadius()
+{
+	float radius = cl_nvgradius_of && cl_nvgradius_of->value > 0.0f ? cl_nvgradius_of->value : OF_NVG_DLIGHT_RADIUS;
+	if (radius < NVG_DLIGHT_MIN_RADIUS)
+		return NVG_DLIGHT_MIN_RADIUS;
+	else if (radius > NVG_DLIGHT_MAX_RADIUS)
+		return NVG_DLIGHT_MAX_RADIUS;
 	return radius;
 }
 #endif
