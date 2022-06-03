@@ -608,6 +608,8 @@ Schedule_t *CBabyCrab::GetScheduleOfType( int Type )
 }
 
 #if FEATURE_SHOCKTROOPER
+#define bits_MEMORY_SHOCKTROOPER_IS_OWNER bits_MEMORY_CUSTOM1
+
 class CShockRoach : public CHeadCrab
 {
 public:
@@ -627,7 +629,11 @@ public:
 	void AlertSound(void);
 	void MonsterThink(void);
 	void StartTask(Task_t* pTask);
+	BOOL ShouldFadeOnDeath();
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+
+	Vector DefaultMinHullSize() { return Vector( -12.0f, -12.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 12.0f, 12.0f, 4.0f ); }
 
 	virtual int		Save(CSave &save);
 	virtual int		Restore(CRestore &restore);
@@ -697,7 +703,7 @@ void CShockRoach::Spawn()
 	Precache();
 
 	SetMyModel("models/w_shock_rifle.mdl");
-	UTIL_SetOrigin(pev, pev->origin);
+	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_FLY;
@@ -709,10 +715,14 @@ void CShockRoach::Spawn()
 	SetMyFieldOfView(0.5f);// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
 
-	m_fRoachSolid = 0;
+	m_fRoachSolid = FALSE;
 	m_flBirthTime = gpGlobals->time;
 
 	MonsterInit();
+
+	if (pev->owner && FClassnameIs(pev->owner, "monster_shocktrooper")) {
+		Remember(bits_MEMORY_SHOCKTROOPER_IS_OWNER);
+	}
 
 	SetUse(&CShockRoach::RoachUse);
 }
@@ -750,12 +760,13 @@ void CShockRoach::LeapTouch(CBaseEntity *pOther)
 		return;
 	}
 
-	// Don't hit if back on ground
-	if (!FBitSet(pev->flags, FL_ONGROUND))
+	if (!TryGiveAsWeapon(pOther))
 	{
-		EMIT_SOUND_DYN(edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
-		if (!TryGiveAsWeapon( pOther ))
+		if (!FBitSet(pev->flags, FL_ONGROUND))
+		{
+			EMIT_SOUND_DYN(edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 			pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
+		}
 	}
 
 	SetTouch(NULL);
@@ -768,7 +779,6 @@ bool CShockRoach::TryGiveAsWeapon(CBaseEntity *pOther)
 	if (pOther->IsPlayer() && pOther->IsAlive() && !(pOther->pev->weapons & (1 << WEAPON_SHOCKRIFLE))) {
 		CBasePlayer* pPlayer = (CBasePlayer*)(pOther);
 		pPlayer->GiveNamedItem("weapon_shockrifle");
-		pPlayer->pev->weapons |= (1 << WEAPON_SHOCKRIFLE);
 		UTIL_Remove(this);
 		return true;
 	}
@@ -795,7 +805,7 @@ void CShockRoach::MonsterThink(void)
 	}
 	if (!m_fRoachSolid && lifeTime >= 2.0) {
 		m_fRoachSolid = TRUE;
-		SetMySize(Vector(-12, -12, 0), Vector(12, 12, 24));
+		SetMySize(DefaultMinHullSize(), DefaultMaxHullSize());
 	}
 	// die when ready
 	if (lifeTime >= gSkillData.sroachLifespan)
@@ -854,6 +864,13 @@ void CShockRoach::StartTask(Task_t *pTask)
 	default:
 		CHeadCrab::StartTask(pTask);
 	}
+}
+
+BOOL CShockRoach::ShouldFadeOnDeath()
+{
+	if( ( pev->spawnflags & SF_MONSTER_FADECORPSE ) || (!FNullEnt( pev->owner ) && !HasMemory(bits_MEMORY_SHOCKTROOPER_IS_OWNER)) )
+		return TRUE;
+	return FALSE;
 }
 
 void CShockRoach::AttackSound()

@@ -547,16 +547,18 @@ void CShockTrooper::DropShockRoach(bool gibbed)
 	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		Vector	vecGunPos;
-		Vector	vecGunAngles;
+		Vector	vecGunAngles = g_vecZero;
 
 		GetAttachment(0, vecGunPos, vecGunAngles);
 		SetBodygroup(STROOPER_GUN_GROUP, STROOPER_GUN_NONE);
 
-		Vector vecDropGunAngles = pev->angles;
+		Vector vecDropGunAngles = vecGunAngles;//pev->angles;
 		vecDropGunAngles.x = vecDropGunAngles.z = 0;
 
+		Vector vecDropGunPos = gibbed ? (vecGunPos + Vector(0, 0, 32)) : (pev->origin + Vector(0, 0, 48));
+
 		// now spawn a shockroach.
-		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecGunPos, pev->angles );
+		CBaseEntity* pRoach = CBaseEntity::Create( "monster_shockroach", vecDropGunPos, vecDropGunAngles, edict() );
 		if (pRoach)
 		{
 			if (gibbed)
