@@ -39,7 +39,9 @@ extern cvar_t hevcharger_rechargetime;
 
 extern cvar_t selfgauss;
 extern cvar_t satchelfix;
+extern cvar_t explosionfix;
 extern cvar_t monsteryawspeedfix;
+extern cvar_t corpsephysics;
 extern cvar_t forcerespawn;
 extern cvar_t respawndelay;
 extern cvar_t flashlight;

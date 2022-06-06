@@ -43,7 +43,9 @@ cvar_t hevcharger_rechargetime = { "mp_hevcharger_rechargetime","-2",FCVAR_SERVE
 
 cvar_t selfgauss	= { "selfgauss", "1", FCVAR_SERVER };
 cvar_t satchelfix	= { "satchelfix", "0", FCVAR_SERVER };
+cvar_t explosionfix	= { "explosionfix", "0", FCVAR_SERVER };
 cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "1", FCVAR_SERVER };
+cvar_t corpsephysics = { "corpsephysics", "0", FCVAR_SERVER };
 cvar_t forcerespawn	= { "mp_forcerespawn","1", FCVAR_SERVER };
 cvar_t respawndelay	= { "mp_respawndelay","0", FCVAR_SERVER };
 cvar_t flashlight	= { "mp_flashlight","0", FCVAR_SERVER };
@@ -992,8 +994,9 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &selfgauss );
 	CVAR_REGISTER( &satchelfix );
-
+	CVAR_REGISTER( &explosionfix );
 	CVAR_REGISTER( &monsteryawspeedfix );
+	CVAR_REGISTER( &corpsephysics );
 	CVAR_REGISTER( &forcerespawn );
 	CVAR_REGISTER( &respawndelay );
 	CVAR_REGISTER( &flashlight );
