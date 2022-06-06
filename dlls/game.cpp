@@ -41,9 +41,9 @@ cvar_t item_respawndelay = { "mp_item_respawndelay","-2",FCVAR_SERVER };
 cvar_t healthcharger_rechargetime = { "mp_healthcharger_rechargetime","-2",FCVAR_SERVER };
 cvar_t hevcharger_rechargetime = { "mp_hevcharger_rechargetime","-2",FCVAR_SERVER };
 
-cvar_t selfgauss	= { "selfgauss", "1", FCVAR_SERVER };
-cvar_t satchelfix	= { "satchelfix", "0", FCVAR_SERVER };
-cvar_t explosionfix	= { "explosionfix", "0", FCVAR_SERVER };
+cvar_t selfgauss	= { "selfgauss", "0", FCVAR_SERVER };
+cvar_t satchelfix	= { "satchelfix", "1", FCVAR_SERVER };
+cvar_t explosionfix	= { "explosionfix", "1", FCVAR_SERVER };
 cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "1", FCVAR_SERVER };
 cvar_t corpsephysics = { "corpsephysics", "0", FCVAR_SERVER };
 cvar_t forcerespawn	= { "mp_forcerespawn","1", FCVAR_SERVER };
