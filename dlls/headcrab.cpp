@@ -457,9 +457,13 @@ int CHeadCrab::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 	// Don't take ally acid damage -- BigMomma's mortar is acid
 	if( ( bitsDamageType & DMG_ACID ) && pevAttacker)
 	{
-		const int rel = IRelationship( Instance( pevAttacker ) );
-		if (rel < R_DL && rel != R_FR)
-			return 0;
+		CBaseEntity* pAttacker = Instance( pevAttacker );
+		if (pAttacker)
+		{
+			const int rel = IRelationship( pAttacker );
+			if (rel < R_DL && rel != R_FR)
+				return 0;
+		}
 	}
 
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );

@@ -2595,6 +2595,10 @@ int CBaseMonster::IRelationship( CBaseEntity *pTarget )
 
 int CBaseMonster::IDefaultRelationship(CBaseEntity *pTarget)
 {
+	if (!pTarget) {
+		ALERT(at_warning, "%s got null target in IRelationship!\n", STRING(pev->classname));
+		return R_NO;
+	}
 	return IDefaultRelationship(Classify(), pTarget->Classify());
 }
 

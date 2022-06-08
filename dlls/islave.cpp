@@ -615,7 +615,7 @@ int CISlave::DefaultClassify( void )
 
 int CISlave::IRelationship( CBaseEntity *pTarget )
 {
-	if( ( pTarget->IsPlayer() ) )
+	if( ( pTarget && pTarget->IsPlayer() ) )
 		if( ( pev->spawnflags & SF_MONSTER_WAIT_UNTIL_PROVOKED ) && ! ( m_afMemory & bits_MEMORY_ISLAVE_PROVOKED ) )
 			return R_NO;
 	return CBaseMonster::IRelationship( pTarget );
@@ -1361,8 +1361,11 @@ void CISlave::UpdateOnRemove()
 int CISlave::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	// don't slash one of your own
-	if( ( bitsDamageType & DMG_SLASH ) && pevAttacker && IRelationship( Instance( pevAttacker ) ) == R_AL )
-		return 0;
+	if( ( bitsDamageType & DMG_SLASH ) && pevAttacker ) {
+		CBaseEntity* pAttacker = Instance( pevAttacker );
+		if (pAttacker && IRelationship( pAttacker ) == R_AL)
+			return 0;
+	}
 
 	m_afMemory |= bits_MEMORY_ISLAVE_PROVOKED;
 	return CFollowingMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
@@ -1370,8 +1373,13 @@ int CISlave::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 
 void CISlave::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	if( (bitsDamageType & DMG_SHOCK) && (!pevAttacker || IRelationship(Instance(pevAttacker)) == R_AL) )
-		return;
+	if( (bitsDamageType & DMG_SHOCK)) {
+		if (!pevAttacker)
+			return;
+		CBaseEntity* pAttacker = Instance( pevAttacker );
+		if (pAttacker && IRelationship( pAttacker ) == R_AL)
+			return;
+	}
 
 	CFollowingMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
