@@ -21,7 +21,8 @@ def configure(conf):
 
 def build(bld):
 	source = bld.path.parent.ant_glob([
-		'pm_shared/*.c'
+		'pm_shared/*.c',
+		'game_shared/tex_materials.c',
 	])
 	source += bld.path.ant_glob([
 		'hl/*.cpp'
@@ -40,7 +41,18 @@ def build(bld):
 		'dlls/satchel.cpp',
 		'dlls/shotgun.cpp',
 		'dlls/squeakgrenade.cpp',
-		'dlls/tripmine.cpp'
+		'dlls/tripmine.cpp',
+		'dlls/eagle.cpp',
+		'dlls/pipewrench.cpp',
+		'dlls/knife.cpp',
+		'dlls/grapple.cpp',
+		'dlls/sniperrifle.cpp',
+		'dlls/m249.cpp',
+		'dlls/displacer.cpp',
+		'dlls/shockrifle.cpp',
+		'dlls/sporelauncher.cpp',
+		'dlls/medkit.cpp',
+		'dlls/uzi.cpp',
 	])
 	source += [
 		'GameStudioModelRenderer.cpp',
@@ -73,6 +85,7 @@ def build(bld):
 		'input_xash3d.cpp',
 		'menu.cpp',
 		'message.cpp',
+		'nightvision.cpp',
 		'overview.cpp',
 		'parsemsg.cpp',
 		'saytext.cpp',
