@@ -3440,20 +3440,14 @@ void CTriggerPlayerFreeze::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 #if FEATURE_TRIGGER_KILL_MONSTER
 
 #define SF_KILLMONSTER_FIREONCE 1
-#define SF_KILLMONSTER_KILL_BY_TARGETNAME 2
-#define SF_KILLMONSTER_KILL_BY_CLASSNAME 4
-#define SF_KILLMONSTER_KILL_BY_SQUADNAME 8
 #define SF_KILLMONSTER_GIBALWAYS 16
 
-class CTriggerKillMonster : public CBaseEntity
+class CTriggerKillMonster : public CPointEntity
 {
 public:
 	void Spawn( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-
-	void OldUse();
 protected:
 	void KillMonster(CBaseEntity* pEntity);
 	bool CheckTarget(CBaseEntity* pEntity);
@@ -3463,6 +3457,7 @@ LINK_ENTITY_TO_CLASS( trigger_killmonster, CTriggerKillMonster )
 
 void CTriggerKillMonster::Spawn()
 {
+	CPointEntity::Spawn();
 	pev->effects |= EF_NODRAW;
 }
 
@@ -3487,11 +3482,11 @@ void CTriggerKillMonster::KillMonster(CBaseEntity *pEntity)
 		default:
 			break;
 		}
-		pEntity->pev->health = 0;
+		pMonster->pev->health = 0;
 		int damageType = DMG_GENERIC;
 		if (pev->spawnflags & SF_KILLMONSTER_GIBALWAYS)
 			damageType |= DMG_ALWAYSGIB;
-		pEntity->TakeDamage(pev, pev, 1, damageType );
+		pMonster->TakeDamage(pev, pev, 1, damageType );
 	}
 }
 
@@ -3526,73 +3521,34 @@ bool CTriggerKillMonster::CheckTarget(CBaseEntity *pEntity)
 
 void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	if (FBitSet(pev->spawnflags, SF_KILLMONSTER_KILL_BY_TARGETNAME|SF_KILLMONSTER_KILL_BY_CLASSNAME|SF_KILLMONSTER_KILL_BY_SQUADNAME))
+	CBaseEntity* pEntity = NULL;
+	if (!FStringNull(pev->target))
 	{
-		ALERT(at_console, "Using old trigger_killmonster behavior\n");
-		OldUse();
-	}
-	else
-	{
-		CBaseEntity* pEntity = NULL;
-		if (!FStringNull(pev->target))
-		{
-			while((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->target))) != NULL)
-			{
-				if (CheckTarget(pEntity))
-					KillMonster(pEntity);
-			}
-		}
-		else if (!FStringNull(pev->message))
-		{
-			while((pEntity = UTIL_FindEntityByClassname(pEntity, STRING(pev->message))) != NULL)
-			{
-				if (CheckTarget(pEntity))
-					KillMonster(pEntity);
-			}
-		}
-		else if (!FStringNull(pev->netname))
-		{
-			while((pEntity = UTIL_FindEntityByString(pEntity, "netname", STRING(pev->netname))) != NULL)
-			{
-				if (CheckTarget(pEntity))
-					KillMonster(pEntity);
-			}
-		}
-	}
-
-	if( pev->spawnflags & SF_RELAY_FIREONCE )
-		UTIL_Remove( this );
-}
-
-void CTriggerKillMonster::OldUse()
-{
-	CBaseEntity* pEntity;
-	if ( pev->spawnflags & SF_KILLMONSTER_KILL_BY_TARGETNAME )
-	{
-		pEntity = NULL;
 		while((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->target))) != NULL)
 		{
-			KillMonster(pEntity);
+			if (CheckTarget(pEntity))
+				KillMonster(pEntity);
+		}
+	}
+	else if (!FStringNull(pev->message))
+	{
+		while((pEntity = UTIL_FindEntityByClassname(pEntity, STRING(pev->message))) != NULL)
+		{
+			if (CheckTarget(pEntity))
+				KillMonster(pEntity);
+		}
+	}
+	else if (!FStringNull(pev->netname))
+	{
+		while((pEntity = UTIL_FindEntityByString(pEntity, "netname", STRING(pev->netname))) != NULL)
+		{
+			if (CheckTarget(pEntity))
+				KillMonster(pEntity);
 		}
 	}
 
-	if ( pev->spawnflags & SF_KILLMONSTER_KILL_BY_CLASSNAME )
-	{
-		pEntity = NULL;
-		while((pEntity = UTIL_FindEntityByClassname(pEntity, STRING(pev->target))) != NULL)
-		{
-			KillMonster(pEntity);
-		}
-	}
-
-	if ( pev->spawnflags & SF_KILLMONSTER_KILL_BY_SQUADNAME )
-	{
-		pEntity = NULL;
-		while((pEntity = UTIL_FindEntityByString(pEntity, "netname", STRING(pev->target))) != NULL)
-		{
-			KillMonster(pEntity);
-		}
-	}
+	if( pev->spawnflags & SF_KILLMONSTER_FIREONCE )
+		UTIL_Remove( this );
 }
 #endif
 

@@ -7097,9 +7097,6 @@
 	spawnflags(flags) =
 	[
 		1: "Remove On fire" : 1
-		2: "Kill by target name (deprecated)" : 0
-		4: "Kill by class name (deprecated)" : 0
-		8: "Kill by squad name (deprecated)" : 0
 		16: "Always gib" : 0
 	]
 	target(target_destination) : "Monster's Name" : : "Kill all monsters with such targetname, given they also are of specific class and squad (if set)"
