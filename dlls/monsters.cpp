@@ -1124,7 +1124,9 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	else
 		ClearConditions( bits_COND_ENEMY_OCCLUDED );
 
-	if( !pEnemy->IsAlive() )
+	const bool enemyIsDead = FEATURE_STOP_ATTACKING_DYING_MONSTERS ? !pEnemy->IsFullyAlive() : !pEnemy->IsAlive();
+
+	if( enemyIsDead )
 	{
 		SetConditions( bits_COND_ENEMY_DEAD );
 		ClearConditions( bits_COND_SEE_ENEMY | bits_COND_ENEMY_OCCLUDED );

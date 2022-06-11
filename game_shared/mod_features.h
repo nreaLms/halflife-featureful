@@ -77,6 +77,8 @@
 
 #define FEATURE_DYING_MONSTERS_DONT_COLLIDE_WITH_PLAYER 0
 
+#define FEATURE_STOP_ATTACKING_DYING_MONSTERS 0
+
 /* Whether a new squad leader gets chosen if the original one dies.
  * This prevents squad dissolving */
 #define FEATURE_DELEGATE_SQUAD_LEADERSHIP 1
