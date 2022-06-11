@@ -200,6 +200,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_saved_effects, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_iFinishSchedule, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_interruptable, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CCineMonster, m_firedOnAnimStart, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CCineMonster, m_iszFireOnAnimStart, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_targetActivator, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_fTurnType, FIELD_SHORT ),
@@ -526,6 +527,7 @@ void CCineMonster::PossessEntity( void )
 		//ALERT( at_aiconsole, "\"%s\" found and used (INT: %s)\n", STRING( pTarget->pev->targetname ), FBitSet( pev->spawnflags, SF_SCRIPT_NOINTERRUPT )? "No" : "Yes" );
 
 		m_moveFailCount = 0;
+		m_firedOnAnimStart = FALSE;
 		pTarget->m_IdealMonsterState = MONSTERSTATE_SCRIPT;
 //		if( m_iszIdle )
 //		{
@@ -596,7 +598,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 
 	if ( m_iszPlay != 0 && iszSeq == m_iszPlay )
 	{
-		if( !FStringNull( m_iszFireOnAnimStart ) )
+		if( !m_firedOnAnimStart && !FStringNull( m_iszFireOnAnimStart ) )
 		{
 			CBaseEntity* pActivator = NULL;
 			if (m_targetActivator == STA_SCRIPT)
@@ -613,6 +615,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 			}
 			FireTargets( STRING( m_iszFireOnAnimStart ), pActivator, this, USE_TOGGLE, 0 );
 		}
+		m_firedOnAnimStart = TRUE;
 	}
 
 	pTarget->pev->sequence = pTarget->LookupSequence( STRING( iszSeq ) );
@@ -899,6 +902,7 @@ BOOL CBaseMonster::CineCleanup()
 	{
 		// okay, reset me to what it thought I was before
 		m_pCine->m_hTargetEnt = NULL;
+		m_pCine->m_firedOnAnimStart = FALSE;
 		pev->movetype = m_pCine->m_saved_movetype;
 		pev->solid = m_pCine->m_saved_solid;
 		pev->effects = m_pCine->m_saved_effects;

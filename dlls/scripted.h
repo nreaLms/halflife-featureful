@@ -146,6 +146,7 @@ public:
 	int m_saved_effects;
 	//Vector m_vecOrigOrigin;
 	BOOL m_interruptable;
+	BOOL m_firedOnAnimStart;
 	string_t m_iszFireOnAnimStart;
 	short m_targetActivator;
 	short m_fTurnType;
