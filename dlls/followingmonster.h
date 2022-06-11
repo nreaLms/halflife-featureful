@@ -107,6 +107,8 @@ public:
 
 	void HandleBlocker(CBaseEntity* pBlocker, bool duringMovement);
 
+	virtual bool CanRoamAfterCombat();
+
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];

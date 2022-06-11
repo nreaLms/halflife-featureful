@@ -800,3 +800,10 @@ void CFollowingMonster::HandleBlocker(CBaseEntity* pBlocker, bool duringMovement
 		}
 	}
 }
+
+bool CFollowingMonster::CanRoamAfterCombat()
+{
+	if (IsFollowingPlayer())
+		return false;
+	return CSquadMonster::CanRoamAfterCombat();
+}

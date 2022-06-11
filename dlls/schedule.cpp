@@ -1962,7 +1962,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 			{
 				if( HasConditions ( bits_COND_HEAR_SOUND ) )
 				{
-					if (HasMemory(bits_MEMORY_ALERT_AFTER_COMBAT))
+					if (HasMemory(bits_MEMORY_ACTIVE_AFTER_COMBAT))
 					{
 						CSound *pSound = PBestSound();
 						if (pSound)

@@ -403,6 +403,8 @@ public:
 
 	bool IsFreeToManipulate();
 
+	virtual bool CanRoamAfterCombat() { return true; }
+
 	//
 	// Glowshell effects
 	//

@@ -52,17 +52,16 @@ void CBaseMonster::SetState( MONSTERSTATE State )
 	case MONSTERSTATE_ALERT:
 		if (m_MonsterState == MONSTERSTATE_COMBAT)
 		{
-			Remember(bits_MEMORY_ALERT_AFTER_COMBAT);
+			Remember(bits_MEMORY_ACTIVE_AFTER_COMBAT);
 			// Don't roam after fight if was following the player
-			CFollowingMonster* pFollowingMonster = MyFollowingMonsterPointer();
-			if (!pFollowingMonster || !pFollowingMonster->IsFollowingPlayer())
+			if (CanRoamAfterCombat())
 			{
 				Remember(bits_MEMORY_SHOULD_ROAM_IN_ALERT);
 			}
 		}
 		break;
 	case MONSTERSTATE_COMBAT:
-		Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT|bits_MEMORY_ALERT_AFTER_COMBAT);
+		Forget(bits_MEMORY_SHOULD_ROAM_IN_ALERT|bits_MEMORY_ACTIVE_AFTER_COMBAT);
 		break;
 	case MONSTERSTATE_HUNT:
 		if (m_MonsterState != State)
