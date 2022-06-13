@@ -3024,6 +3024,13 @@
 		18 : "die1"
 	]
 ]
+@PointClass base(DeadMonster) studio("models/controller.mdl") = monster_alien_controller_dead : "Dead Controller"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 18 =
+	[
+		18 : "die1"
+	]
+]
 @PointClass base(Monster, FollowingMonster, Sequence) size(-32 -32 0, 32 32 64) studio("models/agrunt.mdl") = monster_alien_grunt : "Alien Grunt"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =

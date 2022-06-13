@@ -1102,6 +1102,29 @@ void CController::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, fl
 	UTIL_MoveToOrigin( ENT( pev ), pev->origin + m_velocity, m_velocity.Length() * flInterval, MOVE_STRAFE );	
 }
 
+class CControllerDead : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
+
+	const char* getPos(int pos) const;
+};
+
+const char* CControllerDead::getPos(int pos) const
+{
+	return "die1";
+}
+
+LINK_ENTITY_TO_CLASS( monster_alien_controller_dead, CControllerDead )
+
+void CControllerDead :: Spawn( )
+{
+	SpawnHelper("models/controller.mdl", BLOOD_COLOR_YELLOW, gSkillData.controllerHealth/2);
+	MonsterInitDead();
+	pev->frame = 255;
+}
+
 //=========================================================
 // Controller bouncy ball attack
 //=========================================================
