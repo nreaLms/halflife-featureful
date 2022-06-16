@@ -41,6 +41,9 @@ void CSporelauncher::Spawn()
 
 	m_iDefaultAmmo = SPORELAUNCHER_DEFAULT_GIVE;
 
+	pev->animtime = gpGlobals->time;
+	pev->framerate = 1.0f;
+
 	FallInit();// get ready to fall
 }
 
