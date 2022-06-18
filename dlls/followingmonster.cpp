@@ -693,9 +693,6 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 		if (rel >= R_DL || rel == R_FR)
 			return FOLLOWING_DISCARDED;
 
-		if (!AbleToFollow())
-			return FOLLOWING_NOTALLOWED;
-
 		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...
 		if (ShouldDeclineFollowing())
 		{
@@ -703,6 +700,9 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 				DeclineFollowing(pCaller);
 			return FOLLOWING_DECLINED;
 		}
+
+		if (!AbleToFollow())
+			return FOLLOWING_NOTALLOWED;
 
 		const bool isFollowing = IsFollowingPlayer();
 		if (isFollowing && useType == USE_ON)
