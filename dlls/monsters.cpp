@@ -4000,7 +4000,7 @@ BOOL CBaseMonster::FCanActiveIdle( void )
 
 bool CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
 {
-	if( pszSentence && IsFullyAlive() )
+	if( pszSentence && IsAlive() )
 	{
 		if( pszSentence[0] == '!' )
 		{
