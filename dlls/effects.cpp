@@ -3647,7 +3647,7 @@ void CBlowerCannon::BlowerCannonThink( void )
 				CBaseEntity *pTarget = GetNextTarget();
 				if (pTarget)
 				{
-					direction = pTarget->Center() - position;
+					direction = pTarget->pev->origin - position;
 					direction.z += m_iZOffset;
 					direction = direction.Normalize();
 					angles = UTIL_VecToAngles( direction );
