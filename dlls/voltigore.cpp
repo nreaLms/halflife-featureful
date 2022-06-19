@@ -334,7 +334,6 @@ public:
 	virtual void GibMonster();
 	Schedule_t *GetSchedule(void);
 	Schedule_t *GetScheduleOfType(int Type);
-	virtual int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	virtual void Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib);
 	void UpdateOnRemove();
 	const char* DefaultGibModel() {
@@ -480,35 +479,6 @@ const char* CVoltigore::pGruntSounds[] =
 	"voltigore/voltigore_run_grunt1.wav",
 	"voltigore/voltigore_run_grunt2.wav",
 };
-
-//=========================================================
-// TakeDamage - overridden for voltigore so we can keep track
-// of how much time has passed since it was last injured
-//=========================================================
-int CVoltigore::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
-{
-	float flDist;
-	Vector vecApex;
-
-	// if the voltigore is running, has an enemy, was hurt by the enemy, hasn't been hurt in the last 3 seconds, and isn't too close to the enemy,
-	// it will swerve. (whew).
-	if (m_hEnemy != 0 && IsMoving() && pevAttacker == m_hEnemy->pev)
-	{
-		flDist = (pev->origin - m_hEnemy->pev->origin).Length2D();
-
-		if (flDist > VOLTIGORE_SPRINT_DIST)
-		{
-			flDist = (pev->origin - m_Route[m_iRouteIndex].vecLocation).Length2D();// reusing flDist. 
-
-			if (FTriangulate(pev->origin, m_Route[m_iRouteIndex].vecLocation, flDist * 0.5, m_hEnemy, &vecApex))
-			{
-				InsertWaypoint(vecApex, bits_MF_TO_DETOUR | bits_MF_DONT_SIMPLIFY);
-			}
-		}
-	}
-
-	return CSquadMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
-}
 
 //=========================================================
 // CheckRangeAttack1
