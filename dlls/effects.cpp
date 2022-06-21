@@ -3521,7 +3521,7 @@ TYPEDESCRIPTION	CBlowerCannon::m_SaveData[] =
 	DEFINE_FIELD(CBlowerCannon, m_iZOffset, FIELD_INTEGER),
 	DEFINE_FIELD(CBlowerCannon, m_iszOwner, FIELD_STRING),
 };
-IMPLEMENT_SAVERESTORE( CBlowerCannon, CBaseEntity )
+IMPLEMENT_SAVERESTORE( CBlowerCannon, CBaseDelay )
 
 
 void CBlowerCannon::KeyValue(KeyValueData *pkvd)
@@ -3563,8 +3563,6 @@ void CBlowerCannon::KeyValue(KeyValueData *pkvd)
 void CBlowerCannon::Spawn(void)
 {
 	Precache();
-	UTIL_SetSize( pev, Vector(-16, -16, -16), Vector( 16, 16, 16 ) );
-	pev->solid = SOLID_TRIGGER;
 	if (m_flDelay <= 0.0f && m_iFireType != BLOWERCANNON_FIRE)
 		m_flDelay = 1.0f;
 	SetUse( &CBlowerCannon::BlowerCannonStart );
