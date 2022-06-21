@@ -41,7 +41,7 @@ void CShock::Spawn(void)
 		pev->dmg = gSkillData.plrDmgShockroachM;
 	else
 		pev->dmg = gSkillData.plrDmgShockroach;
-	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4));
 
 	CreateEffects();
 	SetThink( &CShock::FlyThink );
