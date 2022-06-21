@@ -568,7 +568,7 @@ int CGraph::FindShortestPath(int *piPath, int pathSize, int iStart, int iDest, i
 	//
 	if( !dynamic && m_fRoutingComplete )
 	{
-		ALERT(at_aiconsole, "In m_fRoutingComplete\n");
+		//ALERT(at_aiconsole, "In m_fRoutingComplete\n");
 		int iCap = CapIndex( afCapMask );
 
 		iNumPathNodes = 0;
@@ -692,17 +692,14 @@ int CGraph::FindShortestPath(int *piPath, int pathSize, int iStart, int iDest, i
 		while( iCurrentNode != iStart )
 		{
 			iNumPathNodes++;
-			if (iNumPathNodes >= pathSize) {
-				ALERT(at_aiconsole, "Path has too many nodes!\n");
-				return 0;
-			}
 			iCurrentNode = m_pNodes[iCurrentNode].m_iPreviousNode;
 		}
 
 		iCurrentNode = iDest;
 		for( i = iNumPathNodes - 1; i >= 0; i-- )
 		{
-			piPath[i] = iCurrentNode;
+			if ( i < pathSize)
+				piPath[i] = iCurrentNode;
 			iCurrentNode = m_pNodes[iCurrentNode].m_iPreviousNode;
 		}
 	}
