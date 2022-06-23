@@ -163,6 +163,7 @@ public:
 	static const char *pAttackMissSounds[];
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
+	bool IsDisplaceable() { return true; }
 	Vector DefaultMinHullSize() { return VEC_HUMAN_HULL_MIN; }
 	Vector DefaultMaxHullSize() { return VEC_HUMAN_HULL_MAX; }
 protected:

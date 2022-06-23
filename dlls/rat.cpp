@@ -34,6 +34,7 @@ public:
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
+	bool IsDisplaceable() { return true; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_rat, CRat )

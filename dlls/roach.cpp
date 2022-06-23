@@ -55,6 +55,7 @@ public:
 	Vector DefaultMaxHullSize() { return  Vector( 1, 1, 2 ); }
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
+	bool IsDisplaceable() { return true; }
 
 	// UNDONE: These don't necessarily need to be save/restored, but if we add more data, it may
 	BOOL m_fLightHacked;

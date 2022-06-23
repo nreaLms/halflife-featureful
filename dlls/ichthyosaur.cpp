@@ -89,6 +89,7 @@ public:
 	float ChangePitch( int speed );
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
+	bool IsDisplaceable() { return true; }
 	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, -32.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 32.0f ); }
 

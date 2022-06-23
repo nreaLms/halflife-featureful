@@ -350,6 +350,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
+	bool IsDisplaceable() { return true; }
 	Vector DefaultMinHullSize() {
 #if FEATURE_VOLGITOGRE_LESSER_SIZE
 		return Vector( -40.0f, -40.0f, 0.0f );

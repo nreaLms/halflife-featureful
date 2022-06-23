@@ -1404,7 +1404,6 @@ public:
 
 	const char* MyWModel() { return "models/w_displacer.mdl"; }
 
-	void UseAmmo(int count);
 	BOOL CanFireDisplacer( int count ) const;
 
 	enum DISPLACER_FIREMODE { FIREMODE_FORWARD = 1, FIREMODE_BACKWARD };

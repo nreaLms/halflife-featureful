@@ -53,6 +53,7 @@ public:
 	virtual float MaximumExplosionDamage();
 
 	virtual int SizeForGrapple() { return GRAPPLE_SMALL; }
+	bool IsDisplaceable() { return true; }
 	Vector DefaultMinHullSize() { return Vector( -4.0f, -4.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 4.0f, 4.0f, 8.0f ); }
 

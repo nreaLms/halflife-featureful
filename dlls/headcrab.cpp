@@ -108,6 +108,7 @@ public:
 	CUSTOM_SCHEDULES
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
+	bool IsDisplaceable() { return true; }
 	Vector DefaultMinHullSize() { return Vector( -12.0f, -12.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 12.0f, 12.0f, 24.0f ); }
 

@@ -66,6 +66,7 @@ set (SVDLL_SOURCES
 	crowbar.cpp
 	defaultai.cpp
 	displacer.cpp
+	displacerball.cpp
 	doors.cpp
 	drillsergeant.cpp
 	eagle.cpp

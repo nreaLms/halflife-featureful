@@ -382,6 +382,7 @@ public:
 	virtual void AddFloatPoints( float score, BOOL bAllowNegativeScore ) {}
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_NOT_A_TARGET; }
 	virtual int SizeForGrapple() { return DefaultSizeForGrapple(); }
+	virtual bool IsDisplaceable() { return false; }
 	virtual CBasePlayerWeapon* MyWeaponPointer() {return NULL;}
 
 	virtual bool IsAlienMonster() { return false; }
