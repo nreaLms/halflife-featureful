@@ -28,10 +28,6 @@ LINK_ENTITY_TO_CLASS( weapon_9mmAR, CMP5 )
 
 //=========================================================
 //=========================================================
-int CMP5::SecondaryAmmoIndex( void )
-{
-	return m_iSecondaryAmmoType;
-}
 
 void CMP5::Spawn()
 {
