@@ -89,7 +89,7 @@ BOOL CHandGrenade::CanHolster( void )
 	return ( m_flStartThrow == 0 );
 }
 
-void CHandGrenade::Holster( int skiplocal /* = 0 */ )
+void CHandGrenade::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5f;
 

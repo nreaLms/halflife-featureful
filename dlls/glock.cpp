@@ -82,7 +82,7 @@ int CGlock::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CGlock::Deploy()
 {
 	// pev->body = 1;
-	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded", /*UseDecrement() ? 1 : 0*/ 0 );
+	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded" );
 }
 
 void CGlock::SecondaryAttack( void )

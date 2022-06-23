@@ -122,7 +122,7 @@ BOOL CShockrifle::Deploy()
 	return DefaultDeploy("models/v_shock.mdl", "models/p_shock.mdl", SHOCK_DRAW, "bow");
 }
 
-void CShockrifle::Holster(int skiplocal /* = 0 */)
+void CShockrifle::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 	SendWeaponAnim(SHOCK_HOLSTER);

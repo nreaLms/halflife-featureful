@@ -100,13 +100,13 @@ BOOL CM249::Deploy()
 {
 	m_fInSpecialReload = FALSE;
 	UpdateTape();
-	return DefaultDeploy("models/v_saw.mdl", "models/p_saw.mdl", M249_DEPLOY, "mp5", UseDecrement(), pev->body);
+	return DefaultDeploy("models/v_saw.mdl", "models/p_saw.mdl", M249_DEPLOY, "mp5", pev->body);
 }
 
-void CM249::Holster(int skiplocal)
+void CM249::Holster()
 {
 	m_fInSpecialReload = FALSE;
-	CBasePlayerWeapon::Holster(skiplocal);
+	CBasePlayerWeapon::Holster();
 }
 
 void CM249::PrimaryAttack()
@@ -252,7 +252,7 @@ void CM249::ItemPostFrame()
 
 			UpdateTape(m_iVisibleClip);
 			m_fInSpecialReload = FALSE;
-			SendWeaponAnim( M249_RELOAD1, UseDecrement(), pev->body );
+			SendWeaponAnim( M249_RELOAD1, pev->body );
 			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 2.4;
 		}
 	}
@@ -281,7 +281,7 @@ void CM249::WeaponIdle(void)
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 155.0/25.0;
 	}
 
-	SendWeaponAnim(iAnim, UseDecrement(), pev->body);
+	SendWeaponAnim(iAnim, pev->body);
 }
 
 void CM249::UpdateTape()

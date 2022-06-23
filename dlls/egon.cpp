@@ -81,7 +81,7 @@ int CEgon::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-void CEgon::Holster( int skiplocal /* = 0 */ )
+void CEgon::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5f;
 	SendWeaponAnim( EGON_HOLSTER );

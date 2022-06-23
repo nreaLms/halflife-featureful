@@ -413,7 +413,7 @@ BOOL CTripmine::Deploy()
 	return DefaultDeploy( "models/v_tripmine.mdl", "models/p_tripmine.mdl", TRIPMINE_DRAW, "trip" );
 }
 
-void CTripmine::Holster( int skiplocal /* = 0 */ )
+void CTripmine::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5f;
 

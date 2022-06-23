@@ -88,7 +88,7 @@ BOOL CKnife::Deploy()
 	return DefaultDeploy("models/v_knife.mdl", "models/p_knife.mdl", KNIFE_DRAW, "crowbar");
 }
 
-void CKnife::Holster(int skiplocal /* = 0 */)
+void CKnife::Holster()
 {
 	m_iSwingMode = 0;
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;

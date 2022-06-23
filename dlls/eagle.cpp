@@ -79,10 +79,10 @@ int CEagle::GetItemInfo(ItemInfo *p)
 
 BOOL CEagle::Deploy( )
 {
-	return DefaultDeploy( "models/v_desert_eagle.mdl", "models/p_desert_eagle.mdl", EAGLE_DRAW, "onehanded", 0 );
+	return DefaultDeploy( "models/v_desert_eagle.mdl", "models/p_desert_eagle.mdl", EAGLE_DRAW, "onehanded" );
 }
 
-void CEagle::Holster( int skiplocal /* = 0 */ )
+void CEagle::Holster()
 {
 	m_fInReload = FALSE;// cancel any reload in progress.
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
@@ -292,7 +292,7 @@ void CEagle::WeaponIdle( void )
 				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.63f;
 			}
 		}
-		SendWeaponAnim( iAnim, UseDecrement() ? 1 : 0 );
+		SendWeaponAnim( iAnim );
 	}
 }
 #endif

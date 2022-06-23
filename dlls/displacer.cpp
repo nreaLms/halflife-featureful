@@ -374,13 +374,13 @@ void CDisplacer::Precache(void)
 //=========================================================
 BOOL CDisplacer::Deploy()
 {
-	return DefaultDeploy("models/v_displacer.mdl", "models/p_displacer.mdl", DISPLACER_DRAW, "egon", UseDecrement());
+	return DefaultDeploy("models/v_displacer.mdl", "models/p_displacer.mdl", DISPLACER_DRAW, "egon");
 }
 
 //=========================================================
 // Purpose:
 //=========================================================
-void CDisplacer::Holster(int skiplocal /* = 0 */)
+void CDisplacer::Holster()
 {
 	m_fInReload = FALSE;// cancel any reload in progress.
 
@@ -457,7 +457,7 @@ void CDisplacer::WeaponIdle(void)
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3.0f;
 	}
 
-	SendWeaponAnim(iAnim, UseDecrement());
+	SendWeaponAnim(iAnim);
 }
 
 //=========================================================
@@ -482,7 +482,7 @@ void CDisplacer::ClearSpin( void )
 //=========================================================
 void CDisplacer::SpinUp( void )
 {
-	SendWeaponAnim( DISPLACER_SPINUP, UseDecrement());
+	SendWeaponAnim( DISPLACER_SPINUP );
 
 	LightningEffect();
 
@@ -508,7 +508,7 @@ void CDisplacer::Displace( void )
 	ClearBeams();
 	ClearSpin();
 
-	SendWeaponAnim( DISPLACER_FIRE, UseDecrement());
+	SendWeaponAnim( DISPLACER_FIRE );
 	EMIT_SOUND( edict(), CHAN_WEAPON, "weapons/displacer_fire.wav", 1, ATTN_NORM );
 
 	// player "shoot" animation

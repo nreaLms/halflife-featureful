@@ -430,7 +430,7 @@ BOOL CRpg::CanHolster( void )
 	return TRUE;
 }
 
-void CRpg::Holster( int skiplocal /* = 0 */ )
+void CRpg::Holster()
 {
 	m_fInReload = FALSE;// cancel any reload in progress.
 

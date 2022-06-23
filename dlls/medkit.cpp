@@ -137,7 +137,7 @@ BOOL CMedkit::Deploy()
 	return DefaultDeploy("models/v_tfc_medkit.mdl", "models/p_medkit.mdl", MEDKIT_DRAW, "trip");
 }
 
-void CMedkit::Holster(int skiplocal /*= 0*/)
+void CMedkit::Holster()
 {
 	m_flSoundDelay = 0;
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;

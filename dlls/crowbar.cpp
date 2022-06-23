@@ -79,7 +79,7 @@ BOOL CCrowbar::Deploy()
 	return DefaultDeploy( "models/v_crowbar.mdl", "models/p_crowbar.mdl", CROWBAR_DRAW, "crowbar" );
 }
 
-void CCrowbar::Holster( int skiplocal /* = 0 */ )
+void CCrowbar::Holster()
 {
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5f;
 	SendWeaponAnim( CROWBAR_HOLSTER );

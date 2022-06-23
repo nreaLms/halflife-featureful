@@ -88,7 +88,7 @@ int CSniperrifle::AddToPlayer( CBasePlayer *pPlayer )
 	return AddToPlayerDefault(pPlayer);
 }
 
-void CSniperrifle::Holster( int skiplocal )
+void CSniperrifle::Holster()
 {
 	m_fInReload = FALSE;// cancel any reload in progress.
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;

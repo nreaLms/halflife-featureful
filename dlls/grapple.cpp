@@ -300,7 +300,7 @@ BOOL CBarnacleGrapple::Deploy()
 	return r;
 }
 
-void CBarnacleGrapple::Holster( int skiplocal /* = 0 */ )
+void CBarnacleGrapple::Holster()
 {
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
 
