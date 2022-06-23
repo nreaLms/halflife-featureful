@@ -70,6 +70,8 @@ enum
 
 extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
 extern "C" EXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
+extern "C" EXPORT int GetNewDLLFunctions( NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion );
+
 // TODO: replace this by actual definitions from physint.h
 typedef void *server_physics_api_t;
 typedef void *physics_interface_t;

@@ -97,6 +97,30 @@ static DLL_FUNCTIONS gFunctionTable =
 	AllowLagCompensation,		//pfnAllowLagCompensation
 };
 
+void OnFreeEntPrivateData(edict_s* pEdict)
+{
+}
+
+void GameDLLShutdown()
+{
+}
+
+int ShouldCollide(edict_t *pentTouched, edict_t *pentOther)
+{
+	//if ((pentTouched->v.deadflag == DEAD_DEAD) && FStrEq(STRING(pentOther->v.classname), "func_pushable"))
+	//	return 0;
+	return 1;
+}
+
+NEW_DLL_FUNCTIONS gNewDLLFunctions =
+{
+	OnFreeEntPrivateData,
+	GameDLLShutdown,
+	ShouldCollide,
+	0,
+	0
+};
+
 static void SetObjectCollisionBox( entvars_t *pev );
 
 #if !XASH_WIN32
@@ -126,11 +150,26 @@ int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
 	return TRUE;
 }
 
+int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
+{
+	if (!pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION)
+	{
+		ALERT(at_console, "Couldn't set new functions!\n");
+		*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
+		return 0;
+	}
+
+	ALERT(at_console, "Set new functions!\n");
+	memcpy(pFunctionTable, &gNewDLLFunctions, sizeof(gNewDLLFunctions));
+	return 1;
+}
+
 int Server_GetPhysicsInterface( int version, server_physics_api_t *api, physics_interface_t *interface )
 {
 	g_fIsXash3D = true;
 	return FALSE; // do not tell engine to init physics interface, as we're not using it
 }
+
 #if !XASH_WIN32
 }
 #endif
