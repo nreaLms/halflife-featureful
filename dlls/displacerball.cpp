@@ -9,6 +9,7 @@
 #include "displacerball.h"
 #include "scripted.h"
 
+#if FEATURE_DISPLACER
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
 LINK_ENTITY_TO_CLASS(displacer_ball, CDisplacerBall)
@@ -291,3 +292,4 @@ void CDisplacerBall::ClearBeams( void )
 		}
 	}
 }
+#endif
