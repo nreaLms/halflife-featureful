@@ -771,7 +771,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	int iWeaponRules;
 	int iAmmoRules;
 	int i;
-	CBasePlayerWeapon *rgpPackWeapons[32] = {0};
+	CBasePlayerWeapon *rgpPackWeapons[MAX_WEAPONS] = {0};
 	memset(rgpPackWeapons, 0, sizeof(rgpPackWeapons));
 	AmmoCountInfo iPackAmmo[MAX_AMMO_SLOTS];
 	int iPW = 0;// index into packweapons array

@@ -21,7 +21,7 @@
 #define CDLL_DLL_H
 #include "mod_features.h"
 
-#define MAX_WEAPONS		32		// ???
+#define MAX_WEAPONS		32
 
 #if FEATURE_OPFOR_WEAPON_SLOTS
 #define MAX_WEAPON_SLOTS		7
