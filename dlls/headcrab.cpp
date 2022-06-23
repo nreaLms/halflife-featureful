@@ -621,7 +621,10 @@ public:
 	bool TryGiveAsWeapon(CBaseEntity* pOther);
 	void EXPORT RoachUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int ObjectCaps() {
-		return CBaseMonster::ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
+		if (IsFullyAlive())
+			return CBaseMonster::ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
+		else
+			return CBaseMonster::ObjectCaps();
 	}
 	void PainSound(void);
 	void DeathSound(void);
@@ -631,6 +634,7 @@ public:
 	void StartTask(Task_t* pTask);
 	BOOL ShouldFadeOnDeath();
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	void OnDying();
 
 	Vector DefaultMinHullSize() { return Vector( -12.0f, -12.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 12.0f, 12.0f, 4.0f ); }
@@ -884,6 +888,11 @@ int CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 		flDamage = 0.0;
 	// Skip headcrab's TakeDamage to avoid unwanted immunity to friendly acid.
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+}
+
+void CShockRoach::OnDying()
+{
+	SetUse(NULL);
 }
 
 class CDeadShockRoach : public CDeadMonster
