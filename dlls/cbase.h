@@ -524,6 +524,7 @@ public:
 	float m_flLastEventCheck;	// last time the event list was checked
 	BOOL m_fSequenceFinished;// flag set when StudioAdvanceFrame moves across a frame boundry
 	BOOL m_fSequenceLoops;	// true if the sequence loops
+	int m_minAnimEventFrame;
 };
 
 //

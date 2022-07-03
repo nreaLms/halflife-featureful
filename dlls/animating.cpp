@@ -115,6 +115,7 @@ void CBaseAnimating::ResetSequenceInfo()
 	pev->framerate = 1.0;
 	m_fSequenceFinished = FALSE;
 	m_flLastEventCheck = gpGlobals->time;
+	m_minAnimEventFrame = 0;
 }
 
 //=========================================================
@@ -131,6 +132,8 @@ BOOL CBaseAnimating::GetSequenceFlags()
 //=========================================================
 void CBaseAnimating::DispatchAnimEvents( float flInterval )
 {
+	extern cvar_t animeventfix;
+
 	MonsterEvent_t	event;
 
 	void *pmodel = GET_MODEL_PTR( ENT( pev ) );
@@ -155,10 +158,17 @@ void CBaseAnimating::DispatchAnimEvents( float flInterval )
 
 	int index = 0;
 
-	while( ( index = GetAnimationEvent( pmodel, pev, &event, flStart, flEnd, index ) ) != 0 )
+	int latestAnimEventFrame = 0;
+	bool handledEvent = false;
+	while( ( index = GetAnimationEvent( pmodel, pev, &event, flStart, flEnd, index, latestAnimEventFrame, m_minAnimEventFrame ) ) != 0 )
 	{
+		handledEvent = true;
 		HandleAnimEvent( &event );
 	}
+	if (m_fSequenceLoops)
+		m_minAnimEventFrame = 0;
+	else if (handledEvent && animeventfix.value)
+		m_minAnimEventFrame = latestAnimEventFrame + 1;
 }
 
 //=========================================================

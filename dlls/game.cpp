@@ -45,6 +45,7 @@ cvar_t selfgauss	= { "selfgauss", "0", FCVAR_SERVER };
 cvar_t satchelfix	= { "satchelfix", "1", FCVAR_SERVER };
 cvar_t explosionfix	= { "explosionfix", "1", FCVAR_SERVER };
 cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "1", FCVAR_SERVER };
+cvar_t animeventfix = {"animeventfix", "0", FCVAR_SERVER };
 cvar_t corpsephysics = { "corpsephysics", "0", FCVAR_SERVER };
 cvar_t forcerespawn	= { "mp_forcerespawn","1", FCVAR_SERVER };
 cvar_t respawndelay	= { "mp_respawndelay","0", FCVAR_SERVER };
@@ -996,6 +997,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &satchelfix );
 	CVAR_REGISTER( &explosionfix );
 	CVAR_REGISTER( &monsteryawspeedfix );
+	CVAR_REGISTER( &animeventfix );
 	CVAR_REGISTER( &corpsephysics );
 	CVAR_REGISTER( &forcerespawn );
 	CVAR_REGISTER( &respawndelay );
