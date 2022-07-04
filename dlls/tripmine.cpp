@@ -69,7 +69,8 @@ TYPEDESCRIPTION	CTripmineGrenade::m_SaveData[] =
 	DEFINE_FIELD( CTripmineGrenade, m_vecEnd, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( CTripmineGrenade, m_flBeamLength, FIELD_FLOAT ),
 	DEFINE_FIELD( CTripmineGrenade, m_hOwner, FIELD_EHANDLE ),
-	DEFINE_FIELD( CTripmineGrenade, m_pBeam, FIELD_CLASSPTR ),
+	//Don't save, recreate.
+	//DEFINE_FIELD( CTripmineGrenade, m_pBeam, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CTripmineGrenade, m_posOwner, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( CTripmineGrenade, m_angleOwner, FIELD_VECTOR ),
 	DEFINE_FIELD( CTripmineGrenade, m_pRealOwner, FIELD_EDICT ),
@@ -251,6 +252,8 @@ void CTripmineGrenade::MakeBeam( void )
 	Vector vecTmpEnd = pev->origin + m_vecDir * 2048.0f * m_flBeamLength;
 
 	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
+	//Mark as temporary so the beam will be recreated on save game load and level transitions.
+	m_pBeam->pev->spawnflags |= SF_BEAM_TEMPORARY;
 	m_pBeam->PointEntInit( vecTmpEnd, entindex() );
 	m_pBeam->SetColor( 0, 214, 198 );
 	m_pBeam->SetScrollRate( 255 );
