@@ -1,4 +1,4 @@
-/***
+﻿/***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
@@ -486,6 +486,8 @@ void CTripmine::PrimaryAttack( void )
 
 void CTripmine::WeaponIdle( void )
 {
+	pev->body = 0;
+
 	if( m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
 		return;
 
