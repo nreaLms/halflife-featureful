@@ -806,7 +806,7 @@ Schedule_t slAGruntHiddenRangeAttack[] =
 Task_t tlAGruntTakeCoverFromEnemy[] =
 {
 	{ TASK_STOP_MOVING, 0.0f },
-	{ TASK_WAIT, 0.2f },
+	{ TASK_WAIT, 0.1f },
 	{ TASK_FIND_COVER_FROM_ENEMY, 0.0f },
 	{ TASK_RUN_PATH, 0.0f },
 	{ TASK_WAIT_FOR_MOVEMENT, 0.0f },

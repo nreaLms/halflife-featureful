@@ -764,14 +764,14 @@ Schedule_t slChaseEnemy[] =
 Task_t tlChaseEnemyFailed[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_WAIT, (float)0.2 },
+	{ TASK_WAIT, (float)0.1 },
 	{ TASK_FIND_SPOT_AWAY_FROM_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
 	//{ TASK_TURN_LEFT, (float)179 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_WAIT, (float)1 },
+	{ TASK_WAIT, (float)0.5 },
 };
 
 Schedule_t slChaseEnemyFailed[] =
@@ -1183,14 +1183,14 @@ Schedule_t slTakeCoverFromBestSound[] =
 Task_t tlTakeCoverFromEnemy[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_WAIT, (float)0.2 },
+	{ TASK_WAIT, (float)0.1 },
 	{ TASK_FIND_COVER_FROM_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
 	//{ TASK_TURN_LEFT, (float)179 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_WAIT, (float)1 },
+	{ TASK_WAIT, (float)0.5 },
 };
 
 Schedule_t slTakeCoverFromEnemy[] =
@@ -1207,12 +1207,12 @@ Task_t tlRetreaFromEnemy[] =
 {
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RETREAT_FROM_ENEMY_FAILED },
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_WAIT, (float)0.2 },
+	{ TASK_WAIT, (float)0.1 },
 	{ TASK_FIND_SPOT_AWAY_FROM_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_FACE_ENEMY, (float)0 },
-	{ TASK_WAIT, (float)1 },
+	{ TASK_WAIT, (float)0.5 },
 };
 
 Schedule_t slRetreatFromEnemy[] =

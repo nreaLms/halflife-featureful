@@ -475,7 +475,7 @@ Schedule_t slAssassinExposed[] =
 Task_t	tlAssassinTakeCoverFromEnemy[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_WAIT, (float)0.2 },
+	{ TASK_WAIT, (float)0.1 },
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RANGE_ATTACK1 },
 	{ TASK_FIND_COVER_FROM_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
@@ -504,7 +504,7 @@ Schedule_t slAssassinTakeCoverFromEnemy[] =
 Task_t tlAssassinTakeCoverFromEnemy2[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
-	{ TASK_WAIT, (float)0.2 },
+	{ TASK_WAIT, (float)0.1 },
 	{ TASK_FACE_ENEMY, (float)0 },
 	{ TASK_RANGE_ATTACK1, (float)0 },
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_RANGE_ATTACK2 },

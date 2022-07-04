@@ -705,7 +705,7 @@ Task_t	tlFGruntTakeCover1[] =
 {
 	{ TASK_STOP_MOVING,				(float)0							},
 	{ TASK_SET_FAIL_SCHEDULE,		(float)SCHED_HGRUNT_ALLY_TAKECOVER_FAILED	},
-	{ TASK_WAIT,					(float)0.2							},
+	{ TASK_WAIT,					(float)0.1							},
 	{ TASK_FIND_COVER_FROM_ENEMY,	(float)0							},
 	{ TASK_HGRUNT_ALLY_SPEAK_SENTENCE,	(float)0								},
 	{ TASK_RUN_PATH,				(float)0							},
