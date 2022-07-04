@@ -601,10 +601,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	weapon_data_t nulldata = {0}, *pfrom, *pto;
 	static int lasthealth;
 
-	HUD_InitClientWeapons();
-
 	// Get current clock
-	gpGlobals->time = time;
+	gpGlobals->time = gEngfuncs.GetClientTime();
 
 	// Fill in data based on selected weapon
 	// FIXME, make this a method in each weapon?  where you pass in an entity_state_t *?
@@ -1060,6 +1058,9 @@ be ignored
 void _DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed )
 {
 	g_runfuncs = runfuncs;
+
+	//Event code depends on this stuff, so always initialize it.
+	HUD_InitClientWeapons();
 
 #if CLIENT_WEAPONS
 	if( cl_lw && cl_lw->value )
