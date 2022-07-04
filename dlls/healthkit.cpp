@@ -37,6 +37,8 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 */
+protected:
+	virtual int DefaultCapacity() { return gSkillData.healthkitCapacity; }
 };
 
 LINK_ENTITY_TO_CLASS( item_healthkit, CHealthKit )
@@ -72,7 +74,7 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 	}
 
 	const bool healed = pPlayer->pev->health < pPlayer->pev->max_health;
-	if( pPlayer->TakeHealth( this, gSkillData.healthkitCapacity, HEAL_CHARGE ) )
+	if( pPlayer->TakeHealth( this, pev->health > 0 ? pev->health : DefaultCapacity(), HEAL_CHARGE ) )
 	{
 		if (healed) {
 			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );

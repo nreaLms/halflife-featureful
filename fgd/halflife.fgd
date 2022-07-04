@@ -2720,7 +2720,10 @@
 	]
 ]
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_flashlight.mdl") = item_flashlight : "Flashlight" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit"
+[
+	health(integer) : "Health Supplied"
+]
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []
 @PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_security.mdl") = item_security : "Security card"
 [
