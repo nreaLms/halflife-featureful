@@ -25,13 +25,7 @@ project (CLDLL)
 
 set (CLDLL_LIBRARY client)
 
-include(CheckIncludeFile)
-check_include_file("tgmath.h" HAVE_TGMATH_H)
-if(HAVE_TGMATH_H)
-	add_definitions(-DHAVE_TGMATH_H)
-endif()
-
-add_definitions(-DCLIENT_WEAPONS -DCLIENT_DLL)
+add_definitions(-DCLIENT_DLL)
 
 if(NOT MSVC)
 	add_compile_options(-fno-exceptions) # GCC/Clang flag
@@ -175,8 +169,8 @@ include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_
 
 if (USE_VGUI)
 	SET(CMAKE_SKIP_RPATH TRUE)
-	link_directories(${CMAKE_SOURCE_DIR}/vgui-dev/lib)
-	include_directories(../vgui-dev/include)
+	link_directories(${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib)
+	include_directories(../vgui_support/vgui-dev/include)
 else()
 	include_directories(../utils/false_vgui/include)
 endif()
@@ -197,11 +191,11 @@ endif()
 if (USE_VGUI)
 	if (WIN32)
 		add_library(vgui SHARED IMPORTED)
-		set_property(TARGET vgui PROPERTY IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/vgui-dev/lib/win32_vc6/vgui.dll")
-		set_property(TARGET vgui PROPERTY IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/vgui-dev/lib/win32_vc6/vgui.lib")
+		set_property(TARGET vgui PROPERTY IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib/win32_vc6/vgui.dll")
+		set_property(TARGET vgui PROPERTY IMPORTED_IMPLIB "${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib/win32_vc6/vgui.lib")
 		target_link_libraries(${CLDLL_LIBRARY} vgui)
 	elseif(APPLE)
-		target_link_libraries(${CLDLL_LIBRARY} "-Wl,--no-undefined -L${CMAKE_SOURCE_DIR}/vgui-dev/lib vgui.dylib")
+		target_link_libraries(${CLDLL_LIBRARY} "-Wl,--no-undefined -L${CMAKE_SOURCE_DIR}/vgui_support/vgui-dev/lib vgui.dylib")
 	else()
 		target_link_libraries(${CLDLL_LIBRARY} :vgui.so)
 	endif()
@@ -217,7 +211,7 @@ endif()
 set_target_properties (${CLDLL_LIBRARY} PROPERTIES
 	POSITION_INDEPENDENT_CODE 1)
 
-if(APPLE OR WIN32 OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Android")
 	set(CLDLL_NAME "client")
 	set_target_properties(${CLDLL_LIBRARY} PROPERTIES
 		OUTPUT_NAME ${CLDLL_NAME}
