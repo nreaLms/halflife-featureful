@@ -139,7 +139,7 @@ set SOURCES=agrunt.cpp ^
 	xen.cpp ^
 	zombie.cpp ^
 	../pm_shared/pm_debug.c ../pm_shared/pm_math.c ../pm_shared/pm_shared.c ../game_shared/tex_materials.c
-set DEFINES=/DCLIENT_WEAPONS /Dsnprintf=_snprintf /DNO_VOICEGAMEMGR
+set DEFINES=/DCLIENT_WEAPONS /Dsnprintf=_snprintf /DNO_VOICEGAMEMGR /DNDEBUG
 set LIBS=user32.lib
 set OUTNAME=hl.dll
 

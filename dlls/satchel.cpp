@@ -371,7 +371,6 @@ BOOL CSatchel::Deploy()
 	{
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
 	}
-	
 	return result;
 }
 

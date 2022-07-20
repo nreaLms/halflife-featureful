@@ -527,7 +527,7 @@ BOOL CSqueak::Deploy()
 	const BOOL result = DefaultDeploy( VModel(), PModel(), SQUEAK_UP, "squeak" );
 	if (result)
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.7;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.7f;
 	}
 	return result;
 }

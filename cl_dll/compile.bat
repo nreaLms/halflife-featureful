@@ -83,7 +83,7 @@ set SOURCES=../dlls/crossbow.cpp ^
 	view.cpp ^
 	scoreboard.cpp ^
 	MOTD.cpp
-set DEFINES=/DCLIENT_DLL /DCLIENT_WEAPONS /Dsnprintf=_snprintf /DNO_VOICEGAMEMGR /DGOLDSOURCE_SUPPORT
+set DEFINES=/DCLIENT_DLL /DCLIENT_WEAPONS /Dsnprintf=_snprintf /DNO_VOICEGAMEMGR /DGOLDSOURCE_SUPPORT /DNDEBUG
 set LIBS=user32.lib Winmm.lib
 set OUTNAME=client.dll
 
