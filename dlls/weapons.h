@@ -570,9 +570,7 @@ public:
 	int Swing( int fFirst );
 	BOOL Deploy( void );
 	void Holster();
-#if FEATURE_CROWBAR_IDLE_ANIM
 	void WeaponIdle();
-#endif
 	int m_iSwing;
 	TraceResult m_trHit;
 
