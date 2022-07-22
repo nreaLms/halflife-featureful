@@ -420,6 +420,9 @@ public:
 	// hle time creep vars
 	float	m_flPrevPrimaryAttack;
 	float	m_flLastFireTime;
+
+	//Hack so deploy animations work when weapon prediction is enabled.
+	bool m_ForceSendAnimations;
 };
 
 extern DLL_GLOBAL	short	g_sModelIndexLaser;// holds the index for the laser beam
