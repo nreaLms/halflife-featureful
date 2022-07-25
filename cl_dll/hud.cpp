@@ -308,18 +308,22 @@ int __MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf )
 int __MsgFunc_PlayMP3( const char *pszName, int iSize, void *pbuf )
 {
 	const char *pszSound;
-	char cmd[64];
 
 	BEGIN_READ( pbuf, iSize );
 	pszSound = READ_STRING();
+	const int loop = READ_BYTE();
 
 	if( !IsXashFWGS() && gEngfuncs.pfnGetCvarPointer( "gl_overbright" ) )
 	{
+		char cmd[256];
+
 		sprintf( cmd, "mp3 play \"%s\"\n", pszSound );
 		gEngfuncs.pfnClientCmd( cmd );
+		if (loop)
+			gEngfuncs.pfnPrimeMusicStream( pszSound, loop );
 	}
 	else
-		gEngfuncs.pfnPrimeMusicStream( pszSound, 0 );
+		gEngfuncs.pfnPrimeMusicStream( pszSound, loop );
 
 	return 1;
 }

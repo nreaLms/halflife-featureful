@@ -126,6 +126,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBasePlayer, m_buddha, FIELD_BOOLEAN),
 
+	DEFINE_FIELD(CBasePlayer, m_loopedMp3, FIELD_STRING),
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -3256,6 +3258,15 @@ pt_end:
 	// Track button info so we can detect 'pressed' and 'released' buttons next frame
 	m_afButtonLast = pev->button;
 
+	if (!m_fInitHUD && !m_sendMp3 && (gpGlobals->time - m_precacheTime) > 1.0f && !FStringNull(m_loopedMp3) && gmsgPlayMP3)
+	{
+		m_sendMp3 = true;
+		MESSAGE_BEGIN( MSG_ONE, gmsgPlayMP3, NULL, pev );
+			WRITE_STRING( STRING( m_loopedMp3 ) );
+			WRITE_BYTE( 1 );
+		MESSAGE_END();
+	}
+
 #if CLIENT_WEAPONS
 	// Decay timers on weapons
 	// go through all of the weapons and make a list of the ones to pack
@@ -3574,6 +3585,8 @@ void CBasePlayer::Precache( void )
 #if FEATURE_MOVE_MODE
 	m_movementState = MovementStand;
 #endif
+
+	m_precacheTime = gpGlobals->time;
 }
 
 int CBasePlayer::Save( CSave &save )
@@ -5615,6 +5628,11 @@ void CBasePlayer::SetLongjump(bool enabled)
 		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "1" );
 	else
 		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
+}
+
+void CBasePlayer::SetLoopedMp3(string_t loopedMp3)
+{
+	m_loopedMp3 = loopedMp3;
 }
 
 //=========================================================

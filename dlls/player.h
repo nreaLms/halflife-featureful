@@ -468,6 +468,12 @@ public:
 
 	BOOL m_settingsLoaded;
 	BOOL m_buddha;
+
+
+	void SetLoopedMp3(string_t loopedMp3);
+	string_t m_loopedMp3;
+	bool m_sendMp3;
+	float m_precacheTime;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

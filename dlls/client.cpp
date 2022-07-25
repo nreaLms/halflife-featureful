@@ -508,6 +508,7 @@ void ClientCommand( edict_t *pEntity )
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgPlayMP3, NULL, ENT( pev ) );
 			WRITE_STRING( (char *)CMD_ARGV( 1 ) );
+			WRITE_BYTE( 0 );
 		MESSAGE_END();
 	}
 	else if( FStrEq(pcmd, "give" ) )

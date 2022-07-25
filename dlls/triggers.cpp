@@ -1188,7 +1188,8 @@ void CTargetCDAudio::Play( void )
 	UTIL_Remove( this );
 }
 
-#define SF_TRIGGER_MP3_AUDIO_REMOVE_ON_FIRE 1
+#define SF_TRIGGER_MP3_AUDIO_REMOVE_ON_FIRE (1 << 0)
+#define SF_TRIGGER_MP3_AUDIO_LOOPED (1 << 1)
 #define SF_TRIGGER_MP3_AUDIO_PLAYING (1 << 24)
 
 class CTriggerMp3Audio : public CPointEntity
@@ -1196,6 +1197,9 @@ class CTriggerMp3Audio : public CPointEntity
 public:
 	void Spawn( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+protected:
+	void StopMp3(CBasePlayer* pPlayer);
 };
 
 LINK_ENTITY_TO_CLASS( trigger_mp3audio, CTriggerMp3Audio )
@@ -1214,6 +1218,12 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	if( !pPlayer || !pPlayer->IsNetClient())
 		return;
 
+	if (FStringNull(pev->message))
+	{
+		StopMp3(pPlayer);
+		return;
+	}
+
 	if( !FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING) ) // if we're not playing, start playing!
 	{
 		SetBits(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING);
@@ -1222,18 +1232,36 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	{
 		// if we're already playing, stop the mp3
 		ClearBits(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING);
-		CLIENT_COMMAND( pPlayer->edict(), "stopaudio\n" );
+		StopMp3(pPlayer);
 		return;
 	}
 
-	// issue the play/loop command
-	sprintf( command, "playaudio \"%s\"\n", STRING( pev->message ) );
+	extern int gmsgPlayMP3;
+	if (gmsgPlayMP3)
+	{
+		const int looped = FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_LOOPED);
 
-	CLIENT_COMMAND( pPlayer->edict(), command );
+		// issue the play/loop command
+		MESSAGE_BEGIN( MSG_ONE, gmsgPlayMP3, NULL, pPlayer->edict() );
+			WRITE_STRING( STRING( pev->message ) );
+			WRITE_BYTE( looped );
+		MESSAGE_END();
+
+		if (looped)
+			pPlayer->SetLoopedMp3(pev->message);
+		else
+			pPlayer->SetLoopedMp3(iStringNull);
+	}
 
 	// remove if set
 	if( FBitSet( pev->spawnflags, SF_TRIGGER_MP3_AUDIO_REMOVE_ON_FIRE ) )
 		UTIL_Remove( this );
+}
+
+void CTriggerMp3Audio::StopMp3(CBasePlayer *pPlayer)
+{
+	CLIENT_COMMAND( pPlayer->edict(), "stopaudio\n" );
+	pPlayer->SetLoopedMp3(iStringNull);
 }
 
 //=====================================
