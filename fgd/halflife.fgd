@@ -8043,6 +8043,26 @@
 	target(target_destination) : "Destination point" : : "Name of the entity which the player is teleported to. If omitted trigger_player_teleport acts as a teleport position itself."
 ]
 
+@PointClass base(Targetname) color(85 255 255) = trigger_skill_test : "Compare skill level to the number"
+[
+	testtype(choices) : "Test type" : 0 =
+	[
+		0 : "Equal"
+		1 : "Greater or equal"
+		2 : "Greater"
+		3 : "Less or equal"
+		4 : "Less"
+	]
+	comparand(choices) : "Compare skill to" : 3 =
+	[
+		1 : "Easy"
+		2 : "Medium"
+		3 : "Hard"
+	]
+	target(target_destination) : "Fire on success"
+	target_on_fail(target_destination) : "Fire on fail"
+]
+
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []
 
 @SolidClass base(TriggerTeleport) = trigger_xen_return : "Return To Earth" []

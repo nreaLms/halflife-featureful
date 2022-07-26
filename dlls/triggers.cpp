@@ -6157,3 +6157,86 @@ TYPEDESCRIPTION	CTriggerCompare::m_SaveData[] =
 	DEFINE_FIELD( CTriggerCompare, m_compareValueIsNumber, FIELD_CHARACTER ),
 };
 IMPLEMENT_SAVERESTORE( CTriggerCompare, CPointEntity )
+
+enum
+{
+	SKILL_TEST_EQUAL = 0,
+	SKILL_TEST_GTE,
+	SKILL_TEST_GREATER,
+	SKILL_TEST_LTE,
+	SKILL_TEST_LESS,
+};
+
+class CTriggerSkillTest : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	bool CalcRatio(CBaseEntity *pLocus, float *outResult) {
+		*outResult = g_iSkillLevel;
+		return true;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( trigger_skill_test, CTriggerSkillTest )
+
+void CTriggerSkillTest::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq( pkvd->szKeyName, "testtype" ) )
+	{
+		pev->impulse = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "comparand" ) )
+	{
+		pev->button = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "target_on_fail" ) )
+	{
+		pev->message = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CTriggerSkillTest::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+	if (!pPlayer)
+		return;
+
+	const int testValue = g_iSkillLevel;
+	const int comparand = pev->button;
+
+	bool success = false;
+
+	switch (pev->impulse) {
+	case SKILL_TEST_EQUAL:
+		success = testValue == comparand;
+		break;
+	case SKILL_TEST_GREATER:
+		success = testValue > comparand;
+		break;
+	case SKILL_TEST_GTE:
+		success = testValue >= comparand;
+		break;
+	case SKILL_TEST_LESS:
+		success = testValue < comparand;
+		break;
+	case SKILL_TEST_LTE:
+		success = testValue <= comparand;
+		break;
+	default:
+		ALERT(at_error, "Unknown test type in %s: %d\n", STRING(pev->classname), pev->impulse);
+		return;
+	}
+
+	if (success && pev->target) {
+		FireTargets(STRING(pev->target), pActivator, this, USE_TOGGLE, 0.0f);
+	}
+	if (!success && pev->message) {
+		FireTargets(STRING(pev->message), pActivator, this, USE_TOGGLE, 0.0f);
+	}
+}
