@@ -813,7 +813,7 @@ void CScientist::TalkInit()
 #endif
 
 	// get voice for head
-	switch( pev->body % NUM_SCIENTIST_BODIES )
+	switch( pev->body % NUM_SCIENTIST_HEADS )
 	{
 	default:
 	case HEAD_GLASSES:

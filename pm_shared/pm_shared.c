@@ -123,7 +123,7 @@ static char grgchTextureType[CTEXTURESMAX];
 
 int g_onladder = 0;
 
-static inline void PM_InitTrace( trace_t *trace, const vec3_t end )
+static void PM_InitTrace( trace_t *trace, const vec3_t end )
 {
 	memset( trace, 0, sizeof( *trace ));
 	VectorCopy( end, trace->endpos );
