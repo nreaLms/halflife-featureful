@@ -172,10 +172,12 @@ void CShock::CreateEffects()
 	//m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
 	//m_pSprite->pev->flags |= FL_SKIPLOCALHOST;
 
-	m_pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
+	m_pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 60 );
 
 	if (m_pBeam)
 	{
+		UTIL_SetOrigin(m_pBeam->pev, pev->origin);
+
 		m_pBeam->EntsInit( entindex(), entindex() );
 		m_pBeam->SetStartAttachment( 1 );
 		m_pBeam->SetEndAttachment( 2 );
@@ -183,19 +185,20 @@ void CShock::CreateEffects()
 		m_pBeam->SetScrollRate( 10 );
 		m_pBeam->SetNoise( 0 );
 		m_pBeam->SetFlags( BEAM_FSHADEOUT );
-		m_pBeam->SetColor( 0, 255, 255 );
-		//m_pBeam->pev->spawnflags = SF_BEAM_TEMPORARY;
-		m_pBeam->RelinkBeam();
+		m_pBeam->SetColor( 0, 253, 253 );
+		//m_pBeam->RelinkBeam();
 	}
 	else
 	{
 		ALERT(at_console, "Could no create shockbeam beam!\n");
 	}
 
-	m_pNoise = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
+	m_pNoise = CBeam::BeamCreate( "sprites/lgtning.spr", 20 );
 
 	if (m_pNoise)
 	{
+		UTIL_SetOrigin(m_pNoise->pev, pev->origin);
+
 		m_pNoise->EntsInit( entindex(), entindex() );
 		m_pNoise->SetStartAttachment( 1 );
 		m_pNoise->SetEndAttachment( 2 );
@@ -203,9 +206,8 @@ void CShock::CreateEffects()
 		m_pNoise->SetScrollRate( 30 );
 		m_pNoise->SetNoise( 30 );
 		m_pNoise->SetFlags( BEAM_FSHADEOUT );
-		m_pNoise->SetColor( 255, 255, 173 );
-		//m_pNoise->pev->spawnflags = SF_BEAM_TEMPORARY;
-		m_pNoise->RelinkBeam();
+		m_pNoise->SetColor( 255, 255, 157 );
+		//m_pNoise->RelinkBeam();
 	}
 	else
 	{
