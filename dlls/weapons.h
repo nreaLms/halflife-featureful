@@ -1221,6 +1221,8 @@ public:
 	float	m_flRechargeTime;
 	BOOL	m_secondaryAttack;
 
+protected:
+	bool CanRecharge();
 private:
 	unsigned short m_usMedkitFire;
 };
