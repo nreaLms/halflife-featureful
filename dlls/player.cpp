@@ -5343,7 +5343,10 @@ BOOL CBasePlayer::SwitchWeapon(CBasePlayerWeapon *pWeapon )
 	}
 
 	m_pActiveItem = pWeapon;
+
+	pWeapon->m_ForceSendAnimations = true;
 	pWeapon->Deploy();
+	pWeapon->m_ForceSendAnimations = false;
 
 	return TRUE;
 }
