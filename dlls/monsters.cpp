@@ -2515,7 +2515,7 @@ void CBaseMonster::StartMonster( void )
 			{
 				ALERT( at_error, "Monster %s stuck in wall--level design error\n", STRING( pev->classname ) );
 				if( g_psv_developer && g_psv_developer->value )
-					pev->effects = EF_BRIGHTFIELD;
+					pev->effects |= EF_BRIGHTFIELD;
 			}
 		}
 	}

@@ -459,7 +459,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 				vecDirToEnemy = gpGlobals->v_forward;
 			}
 
-			pev->effects = EF_MUZZLEFLASH;
+			pev->effects |= EF_MUZZLEFLASH;
 
 			// make angles +-180
 			if( angDir.x > 180.0f )

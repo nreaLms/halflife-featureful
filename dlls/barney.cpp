@@ -295,7 +295,7 @@ void CBarney::BarneyFirePistol( const char* shotSound, Bullet bullet )
 
 	Vector angDir = UTIL_VecToAngles( vecShootDir );
 	SetBlending( 0, angDir.x );
-	pev->effects = EF_MUZZLEFLASH;
+	pev->effects |= EF_MUZZLEFLASH;
 
 	FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, bullet );
 
