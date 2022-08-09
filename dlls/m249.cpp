@@ -214,7 +214,7 @@ void CM249::PrimaryAttack()
 	if (m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat(m_pPlayer->random_seed, 10, 15);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.2f;
 }
 
 
@@ -292,12 +292,22 @@ void CM249::UpdateTape()
 
 void CM249::UpdateTape(int clip)
 {
+	pev->body = BodyFromClip(clip);
+}
+
+int CM249::BodyFromClip()
+{
+	return BodyFromClip(m_iVisibleClip);
+}
+
+int CM249::BodyFromClip(int clip)
+{
 	if (clip == 0) {
-		pev->body = 8;
+		return 8;
 	} else if (clip > 0 && clip < 8) {
-		pev->body = 9 - clip;
+		return 9 - clip;
 	} else {
-		pev->body = 0;
+		return 0;
 	}
 }
 
