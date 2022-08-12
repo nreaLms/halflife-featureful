@@ -279,6 +279,7 @@ void CRoach::MonsterThink( void )
 			if( GETENTITYILLUM( ENT( pev ) ) <= m_flLastLightLevel )
 			{
 				SetActivity( ACT_IDLE );
+				m_iMode = ROACH_IDLE;
 				m_flLastLightLevel = GETENTITYILLUM( ENT( pev ) );// make this our new light level.
 			}
 			break;
