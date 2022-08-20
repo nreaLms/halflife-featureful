@@ -5567,3 +5567,129 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		MaySetResettableValue(pTalkMonster->m_iTolerance, m_iTolerance);
 	}
 }
+
+#define SF_TRIGGERLOOK_FIREONCE 1
+
+class CTriggerLook : public CBaseDelay
+{
+public:
+	void KeyValue(KeyValueData *pkvd);
+	void Spawn();
+	void Touch(CBaseEntity* pOther);
+
+	EHANDLE m_hLookTarget;
+	float m_flFieldOfView;
+	float m_flLookTime;
+	float m_flLookTimeTotal;
+	float m_flLookTimeLast;
+	string_t m_sMaster;
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+};
+
+LINK_ENTITY_TO_CLASS( trigger_look, CTriggerLook )
+
+TYPEDESCRIPTION	CTriggerLook::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerLook, m_hLookTarget, FIELD_EHANDLE ),
+	DEFINE_FIELD( CTriggerLook, m_flFieldOfView, FIELD_FLOAT ),
+	DEFINE_FIELD( CTriggerLook, m_flLookTime, FIELD_FLOAT ),
+	DEFINE_FIELD( CTriggerLook, m_flLookTimeTotal, FIELD_FLOAT ),
+	DEFINE_FIELD( CTriggerLook, m_flLookTimeLast, FIELD_TIME ),
+	DEFINE_FIELD( CTriggerLook, m_sMaster, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CTriggerLook, CBaseDelay )
+
+void CTriggerLook::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq( pkvd->szKeyName, "field_of_view" ) )
+	{
+		m_flFieldOfView = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "look_time" ) )
+	{
+		m_flLookTime = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "master" ) )
+	{
+		m_sMaster = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseDelay::KeyValue(pkvd);
+}
+
+void CTriggerLook::Spawn()
+{
+	pev->solid = SOLID_TRIGGER;
+	pev->movetype = MOVETYPE_NONE;
+	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+
+	m_flLookTimeTotal = -1.0f;
+}
+
+void CTriggerLook::Touch(CBaseEntity *pOther)
+{
+	if (!pOther->IsPlayer() || FStringNull(pev->netname))
+	{
+		return;
+	}
+	if( !FStringNull(m_sMaster) && !UTIL_IsMasterTriggered( m_sMaster, pOther ) )
+	{
+		return;
+	}
+
+	if (m_hLookTarget == 0)
+	{
+		m_hLookTarget = UTIL_FindEntityByTargetname(0, STRING(pev->netname));
+		if (m_hLookTarget == 0)
+		{
+			return;
+		}
+	}
+
+	if (m_flLookTimeLast && gpGlobals->time - m_flLookTimeLast >= 0.5f )
+	{
+		// haven't been touched for a while
+		m_flLookTimeTotal = -1.0f;
+	}
+
+	UTIL_MakeVectors( pOther->pev->v_angle );
+	const Vector vLookDir = gpGlobals->v_forward;
+	const Vector vTargetDir = (m_hLookTarget->pev->origin - pOther->EyePosition()).Normalize();
+
+	const float fDotPr = DotProduct(vLookDir, vTargetDir);
+	if (fDotPr > m_flFieldOfView)
+	{
+		if (m_flLookTimeTotal == -1.0f)
+		{
+			m_flLookTimeLast = gpGlobals->time;
+			m_flLookTimeTotal = 0;
+		}
+		else
+		{
+			m_flLookTimeTotal += gpGlobals->time - m_flLookTimeLast;
+			m_flLookTimeLast = gpGlobals->time;
+		}
+
+		if (m_flLookTimeTotal >= m_flLookTime)
+		{
+			SUB_UseTargets(pOther, USE_TOGGLE, 0.0f);
+			m_flLookTimeTotal = -1.0f;
+			if (FBitSet(pev->spawnflags, SF_TRIGGERLOOK_FIREONCE))
+			{
+				SetThink(&CBaseEntity::SUB_Remove);
+				pev->nextthink = gpGlobals->time;
+			}
+		}
+	}
+	else
+	{
+		m_flLookTimeTotal = -1.0f;
+	}
+}

@@ -7328,6 +7328,21 @@
 	netname(string) : "Monster's Squad name" : : "Kill all monsters with such squad name, given they also are of specific name and class (if set)"
 ]
 
+@SolidClass base(Targetname) = trigger_look : "Trigger something when the player looks at something"
+[
+	spawnflags(flags) =
+	[
+		1: "Remove On Fire" : 1
+	]
+	netname(target_destination) : "Look Target"
+	look_time(string) : "Look Time" : 1 : "The time, in seconds, that the player must look the target before firing the output. Resets if player leaves trigger, or looks outside the Field of View threshold."
+	field_of_view(string) : "Field Of View" : 0.7 : "How close the player has to be looking at the target. 1.0 = straight ahead\n 0.0 = +/- 90 degrees\n -1.0 = all directions)."
+	target(target_destination) : "Trigger on look"
+	killtarget(target_destination) : "Kill target"
+	delay(string) : "Delay before trigger"
+	master(string) : "Master"
+]
+
 @SolidClass base(Angles) = trigger_monsterjump : "Trigger monster jump"
 [
 	master(string) : "Master"
