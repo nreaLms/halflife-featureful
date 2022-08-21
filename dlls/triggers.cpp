@@ -4226,7 +4226,8 @@ public:
 		FACEMODE_DIRECTION = 0,
 		FACEMODE_ROTATE,
 		FACEMODE_ROTATE_BY_VALUES,
-		FACEMODE_SETAVEL,
+		FACEMODE_SET_ANGULAR_VELOCITY,
+		FACEMODE_SET_VELOCITY,
 	};
 };
 LINK_ENTITY_TO_CLASS( motion_thread, CMotionThread )
@@ -4365,13 +4366,13 @@ void CMotionThread::MotionThink( void )
 			if (debug)
 				Motion_PrintVectors("DEBUG: Rotate angles", vecOld, m_hTarget->pev->angles);
 			break;
-		case FACEMODE_SETAVEL: // set avelocity
+		case FACEMODE_SET_ANGULAR_VELOCITY: // set avelocity
 			UTIL_StringToRandomVector( vecTemp, STRING(m_iszFacing) );
 			if (debug)
 				Motion_PrintVectors("DEBUG: Set avelocity", m_hTarget->pev->avelocity, vecTemp);
 			UTIL_SetAvelocity(m_hTarget, vecTemp);
 			break;
-		case 4:
+		case FACEMODE_SET_VELOCITY:
 		{
 			CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, STRING(m_iszFacing), m_hLocus);
 			if (pCalc != NULL)
