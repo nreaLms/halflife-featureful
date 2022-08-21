@@ -81,6 +81,9 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define ClientCmd ( *gEngfuncs.pfnClientCmd )
 #define SetCrosshair ( *gEngfuncs.pfnSetCrosshair )
 #define AngleVectors ( *gEngfuncs.pfnAngleVectors )
+#define Com_RandomLong (*gEngfuncs.pfnRandomLong)
+#define Com_RandomFloat (*gEngfuncs.pfnRandomFloat)
+
 extern cvar_t *hud_textmode;
 extern float g_hud_text_color[3];
 inline void DrawSetTextColor( float r, float g, float b )

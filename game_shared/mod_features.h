@@ -155,6 +155,9 @@
 // enable/disable opengl fog and env_fog
 #define FEATURE_FOG 0
 
+// Counter Strike effects
+#define FEATURE_WALLPUFF_CS 0
+
 // Experimental Cvars
 #define FEATURE_EXPERIMENTAL_CVARS 1
 

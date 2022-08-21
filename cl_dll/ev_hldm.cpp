@@ -66,7 +66,7 @@ extern cvar_t *cl_lw;
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
 // returns volume of strike instrument (crowbar) to play
-float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType )
+char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType )
 {
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
@@ -114,7 +114,24 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 
 	// play material hit sound
 	gEngfuncs.pEventAPI->EV_PlaySound( 0, ptr->endpos, CHAN_STATIC, rgsz[gEngfuncs.pfnRandomLong( 0, cnt - 1 )], fvol, fattn, 0, 96 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
-	return fvolbar;
+	return chTextureType;
+}
+
+void EV_SmokeColorFromTextureType(char cTextureType, int& r_smoke, int& g_smoke, int& b_smoke)
+{
+	switch (cTextureType) {
+	case CHAR_TEX_CONCRETE:
+		r_smoke = g_smoke = b_smoke = 65;
+		break;
+	case CHAR_TEX_WOOD:
+		r_smoke = 75;
+		g_smoke = 42;
+		b_smoke = 15;
+		break;
+	default:
+		r_smoke = g_smoke = b_smoke = 40;
+		break;
+	}
 }
 
 char *EV_HLDM_DamageDecal( physent_t *pe )
@@ -183,7 +200,157 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 	}
 }
 
-void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType )
+void EV_WallPuff_Wind( struct tempent_s *te, float frametime, float currenttime )
+{
+	static bool xWindDirection = true;
+	static bool yWindDirection = true;
+	static float xWindMagnitude;
+	static float yWindMagnitude;
+
+	if ( te->entity.curstate.frame > 7.0 )
+	{
+		te->entity.baseline.origin.x = 0.97 * te->entity.baseline.origin.x;
+		te->entity.baseline.origin.y = 0.97 * te->entity.baseline.origin.y;
+		te->entity.baseline.origin.z = 0.97 * te->entity.baseline.origin.z + 0.7;
+		if ( te->entity.baseline.origin.z > 70.0 )
+			te->entity.baseline.origin.z = 70.0;
+	}
+
+	if ( te->entity.curstate.frame > 6.0 )
+	{
+		xWindMagnitude += 0.075;
+		if ( xWindMagnitude > 5.0 )
+			xWindMagnitude = 5.0;
+
+		yWindMagnitude += 0.075;
+		if ( yWindMagnitude > 5.0 )
+			yWindMagnitude = 5.0;
+
+		if( xWindDirection )
+			te->entity.baseline.origin.x += xWindMagnitude;
+		else
+			te->entity.baseline.origin.x -= xWindMagnitude;
+
+		if( yWindDirection )
+			te->entity.baseline.origin.y += yWindMagnitude;
+		else
+			te->entity.baseline.origin.y -= yWindMagnitude;
+
+		if ( !Com_RandomLong(0, 10) && yWindMagnitude > 3.0 )
+		{
+			yWindMagnitude = 0;
+			yWindDirection = !yWindDirection;
+		}
+		if ( !Com_RandomLong(0, 10) && xWindMagnitude > 3.0 )
+		{
+			xWindMagnitude = 0;
+			xWindDirection = !xWindDirection;
+		}
+	}
+}
+
+void EV_SmokeRise( struct tempent_s *te, float frametime, float currenttime )
+{
+	if ( te->entity.curstate.frame > 7.0 )
+	{
+		te->entity.baseline.origin = 0.97f * te->entity.baseline.origin;
+		te->entity.baseline.origin.z += 0.7f;
+
+		if( te->entity.baseline.origin.z > 70.0f )
+			te->entity.baseline.origin.z = 70.0f;
+	}
+}
+
+void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
+{
+	Vector norm = te->entity.baseline.origin.Normalize();
+	float len = te->entity.baseline.origin.Length();
+
+	Vector v(
+		ptr->plane.normal.y * norm.x - norm.y * ptr->plane.normal.x,
+		ptr->plane.normal.x * norm.z - norm.x * ptr->plane.normal.z,
+		ptr->plane.normal.z * norm.y - norm.z * ptr->plane.normal.y
+	);
+	Vector v2(
+		ptr->plane.normal.y * v.z - v.y * ptr->plane.normal.x,
+		ptr->plane.normal.x * v.x - v.z * ptr->plane.normal.z,
+		ptr->plane.normal.z * v.y - v.x * ptr->plane.normal.y
+	);
+
+	if( len <= 2000.0f )
+		len *= 1.5;
+	else len = 3000.0f;
+
+	te->entity.baseline.origin.x = v2.z * len * 1.5;
+	te->entity.baseline.origin.y = v2.y * len * 1.5;
+	te->entity.baseline.origin.z = v2.x * len * 1.5;
+}
+
+void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float scale, int r, int g, int b , bool wind, Vector velocity = Vector(0,0,0), int framerate = 35 )
+{
+	TEMPENTITY *te = NULL;
+	void ( *callback )( struct tempent_s *ent, float frametime, float currenttime ) = NULL;
+	char path[64];
+
+	switch( type )
+	{
+	case SMOKE_WALLPUFF:
+#if FEATURE_WALLPUFF_CS
+		strcpy( path, "sprites/wall_puff1.spr" );
+		path[17] += Com_RandomLong(0, 3); // randomize a bit
+#else
+		strcpy(path, "sprites/stmbal1.spr");
+#endif
+		break;
+	case SMOKE_RIFLE:
+		strcpy( path, "sprites/rifle_smoke1.spr" );
+		path[19] += Com_RandomLong(0, 2); // randomize a bit
+		break;
+	case SMOKE_PISTOL:
+		strcpy( path, "sprites/pistol_smoke1.spr" );
+		path[20] += Com_RandomLong(0, 1);  // randomize a bit
+		break;
+	case SMOKE_BLACK:
+		strcpy( path, "sprites/black_smoke1.spr" );
+		path[19] += Com_RandomLong(0, 3); // randomize a bit
+		break;
+	default:
+		gEngfuncs.Con_DPrintf("Unknown smoketype %d\n", type);
+		return;
+	}
+
+	if( wind )
+		callback = EV_WallPuff_Wind;
+	else
+		callback = EV_SmokeRise;
+
+
+	te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin, gEngfuncs.pEventAPI->EV_FindModelIndex( path ), framerate );
+
+	if( te )
+	{
+		te->callback = callback;
+		te->hitcallback = EV_HugWalls;
+		te->flags |= FTENT_COLLIDEALL | FTENT_CLIENTCUSTOM;
+		te->entity.curstate.rendermode = kRenderTransAdd;
+		te->entity.curstate.rendercolor.r = r;
+		te->entity.curstate.rendercolor.g = g;
+		te->entity.curstate.rendercolor.b = b;
+		te->entity.curstate.renderamt = gEngfuncs.pfnRandomLong( 100, 180 );
+		te->entity.curstate.scale = scale;
+		te->entity.baseline.origin = speed * dir;
+
+		if( velocity != Vector(0,0,0) )
+		{
+			velocity.x *= 0.5;
+			velocity.y *= 0.5;
+			velocity.z *= 0.9;
+			te->entity.baseline.origin = te->entity.baseline.origin + velocity;
+		}
+	}
+}
+
+void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType, char cTextureType )
 {
 	physent_t *pe;
 
@@ -191,25 +358,22 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType )
 
 	if( pe && ( pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP ) )
 	{
-		switch( iBulletType )
+		EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ) );
+
+		if( cl_weapon_sparks && cl_weapon_sparks->value )
 		{
-		case BULLET_PLAYER_9MM:
-		case BULLET_MONSTER_9MM:
-		case BULLET_PLAYER_MP5:
-		case BULLET_MONSTER_MP5:
-		case BULLET_PLAYER_BUCKSHOT:
-		case BULLET_PLAYER_357:
-		case BULLET_PLAYER_EAGLE:
-		case BULLET_MONSTER_357:
-		case BULLET_PLAYER_556:
-		case BULLET_MONSTER_556:
-		case BULLET_PLAYER_762:
-		case BULLET_MONSTER_762:
-		case BULLET_PLAYER_UZI:
-		default:
-			// smoke and decal
-			EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ) );
-			break;
+			Vector dir = pTrace->plane.normal;
+			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
+			dir.y = dir.y * dir.y * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
+			dir.z = dir.z * dir.z * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
+			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
+		}
+
+		if (cTextureType && cl_weapon_wallpuff && cl_weapon_wallpuff->value)
+		{
+			int r_smoke, g_smoke, b_smoke;
+			EV_SmokeColorFromTextureType(cTextureType, r_smoke, g_smoke, b_smoke);
+			EV_CreateShotSmoke( SMOKE_WALLPUFF, pTrace->endpos, pTrace->plane.normal, 25, 0.5f, r_smoke, g_smoke, b_smoke, true );
 		}
 	}
 }
@@ -322,30 +486,32 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 		// do damage, paint decals
 		if( tr.fraction != 1.0f )
 		{
+			int cTextureType = 0;
+
 			switch( iBulletType )
 			{
 			default:
 			case BULLET_PLAYER_9MM:
-				EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
-				EV_HLDM_DecalGunshot( &tr, iBulletType );
+				cTextureType = EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
+				EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType );
 				break;
 			case BULLET_PLAYER_MP5:
 			case BULLET_PLAYER_556:
 			case BULLET_PLAYER_UZI:
 				if( !tracer )
 				{
-					EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
-					EV_HLDM_DecalGunshot( &tr, iBulletType );
+					cTextureType = EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
+					EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType );
 				}
 				break;
 			case BULLET_PLAYER_BUCKSHOT:
-				EV_HLDM_DecalGunshot( &tr, iBulletType );
+				EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType );
 				break;
 			case BULLET_PLAYER_357:
 			case BULLET_PLAYER_EAGLE:
 			case BULLET_PLAYER_762:
-				EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
-				EV_HLDM_DecalGunshot( &tr, iBulletType );
+				cTextureType = EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType );
+				EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType );
 				break;
 			}
 		}

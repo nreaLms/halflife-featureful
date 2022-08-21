@@ -65,6 +65,9 @@ typedef struct
 
 typedef struct cvar_s cvar_t;
 
+extern cvar_t* cl_weapon_sparks;
+extern cvar_t* cl_weapon_wallpuff;
+
 #define HUD_ACTIVE	1
 #define HUD_INTERMISSION 2
 

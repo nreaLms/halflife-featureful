@@ -101,6 +101,9 @@ cvar_t *cl_viewroll = NULL;
 cvar_t *cl_rollspeed = NULL;
 cvar_t *cl_rollangle = NULL;
 
+cvar_t* cl_weapon_sparks = NULL;
+cvar_t* cl_weapon_wallpuff = NULL;
+
 #if FEATURE_NIGHTVISION_STYLES
 cvar_t *cl_nvgstyle = NULL;
 #endif
@@ -448,6 +451,9 @@ void CHud::Init( void )
 	cl_viewroll = CVAR_CREATE( "cl_viewroll", "0", FCVAR_ARCHIVE );
 	cl_rollangle = gEngfuncs.pfnRegisterVariable ( "cl_rollangle", "0.65", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "300", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+
+	cl_weapon_sparks = gEngfuncs.pfnRegisterVariable( "cl_weapon_sparks", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	cl_weapon_wallpuff = gEngfuncs.pfnRegisterVariable( "cl_weapon_wallpuff", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 #if FEATURE_NIGHTVISION_STYLES
 	cl_nvgstyle = CVAR_CREATE( "cl_nvgstyle", "0", FCVAR_ARCHIVE );

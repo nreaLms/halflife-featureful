@@ -537,6 +537,15 @@ void CWorld::Precache( void )
 	PRECACHE_SOUND( "weapons/ric4.wav" );
 	PRECACHE_SOUND( "weapons/ric5.wav" );
 
+#if FEATURE_WALLPUFF_CS
+	PRECACHE_MODEL( "sprites/wall_puff1.spr" );
+	PRECACHE_MODEL( "sprites/wall_puff2.spr" );
+	PRECACHE_MODEL( "sprites/wall_puff3.spr" );
+	PRECACHE_MODEL( "sprites/wall_puff4.spr" );
+#else
+	PRECACHE_MODEL( "sprites/stmbal1.spr" );
+#endif
+
 	//
 	// Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
 	//
