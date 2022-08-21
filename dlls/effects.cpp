@@ -2831,7 +2831,6 @@ class CEnvWarpBall : public CBaseEntity
 public:
 	void Precache( void );
 	void Spawn( void ) { Precache(); }
-	void Think( void );
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
@@ -2920,7 +2919,6 @@ public:
 		return pev->framerate ? pev->framerate : 12;
 	}
 
-	Vector vecOrigin;
 	int m_beamTexture;
 };
 
@@ -3003,13 +3001,47 @@ void CEnvWarpBall::Precache( void )
 	else
 		PRECACHE_SOUND( WARPBALL_SOUND2 );
 #endif
+
+	UTIL_PrecacheOther("warpball_hurt");
+}
+
+class CWarpballHurt : public CPointEntity
+{
+public:
+	void Think();
+	static void SelfCreate(const Vector& vecOrigin, float dmg, int radius, float delay, edict_t* pOwner = 0);
+};
+
+LINK_ENTITY_TO_CLASS( warpball_hurt, CWarpballHurt )
+
+void CWarpballHurt::Think()
+{
+	::RadiusDamage(pev->origin, pev, pev, pev->dmg, pev->button, CLASS_NONE, DMG_SHOCK);
+	UTIL_Remove(this);
+}
+
+void CWarpballHurt::SelfCreate(const Vector& vecOrigin, float dmg, int radius, float delay, edict_t* pOwner)
+{
+	CWarpballHurt *pWarpballHurt = GetClassPtr((CWarpballHurt *)0);
+	if (pWarpballHurt)
+	{
+		pWarpballHurt->Spawn();
+		pWarpballHurt->pev->classname = MAKE_STRING("warpball_hurt");
+		UTIL_SetOrigin(pWarpballHurt->pev, vecOrigin);
+		pWarpballHurt->pev->dmg = dmg;
+		pWarpballHurt->pev->button = radius;
+		pWarpballHurt->pev->owner = pOwner;
+		pWarpballHurt->pev->nextthink = gpGlobals->time + delay;
+	}
 }
 
 void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	Vector vecOrigin;
 	edict_t* playSoundEnt = NULL;
 	bool playSoundOnMyself = false;
 	string_t warpTarget = WarpTarget();
+	int inflictedRadius = 48;
 
 	if (useType == USE_SET && pev->dmg_inflictor != NULL)
 	{
@@ -3119,26 +3151,25 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	beamParams.alpha = 220;
 	DrawChaoticBeams(vecOrigin, ENT(pev), Radius(), beamParams, iBeams);
 
-	pev->nextthink = gpGlobals->time + DamageDelay();
-}
-
-void CEnvWarpBall::Think( void )
-{
 	SUB_UseTargets( this, USE_TOGGLE, 0 );
 
 	if( pev->spawnflags & SF_KILL_CENTER )
 	{
-		CBaseEntity *pMonster = NULL;
-
-		while( ( pMonster = UTIL_FindEntityInSphere( pMonster, vecOrigin, 72 ) ) != NULL )
+		const float damageDelay = DamageDelay();
+		if (damageDelay == 0)
 		{
-			if( FBitSet( pMonster->pev->flags, FL_MONSTER ) || FClassnameIs( pMonster->pev, "player" ) )
-				pMonster->TakeDamage ( pev, pev, 100, DMG_GENERIC );
+			::RadiusDamage(pev->origin, pev, pev, 300.0f, inflictedRadius, CLASS_NONE, DMG_SHOCK);
+		}
+		else
+		{
+			CWarpballHurt::SelfCreate(vecOrigin, 300.0f, inflictedRadius, damageDelay, edict());
 		}
 	}
+
 	if( pev->spawnflags & SF_REMOVE_ON_FIRE )
 		UTIL_Remove( this );
 }
+
 #endif
 //=========================================================
 // env_xenmaker
