@@ -348,9 +348,7 @@ static float MakerGroundLevel(const Vector& position, entvars_t* pev)
 //=========================================================
 int CMonsterMaker::MakeMonster( void )
 {
-	edict_t	*pent;
-	entvars_t *pevCreate;
-	edict_t *posEnt = NULL;
+	edict_t *warpballSoundEnt = NULL;
 
 	if( m_iMaxLiveChildren > 0 && m_cLiveChildren >= m_iMaxLiveChildren )
 	{
@@ -374,11 +372,11 @@ int CMonsterMaker::MakeMonster( void )
 
 		if (m_maxHullSize != g_vecZero)
 		{
-			maxHullSize = Vector( m_maxHullSize.x, m_maxHullSize.y, 0 );
+			maxHullSize = m_maxHullSize;
 		}
 		else if (m_defaultMaxHullSize != g_vecZero)
 		{
-			maxHullSize = Vector( m_defaultMaxHullSize.x, m_defaultMaxHullSize.y, 0 );
+			maxHullSize = m_defaultMaxHullSize;
 		}
 	}
 
@@ -405,7 +403,9 @@ int CMonsterMaker::MakeMonster( void )
 
 			mins = pCandidate->pev->origin + minHullSize;
 			maxs = pCandidate->pev->origin + maxHullSize;
-			maxs.z = pCandidate->pev->origin.z;
+
+			if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_AUTOSIZEBBOX))
+				maxs.z = pCandidate->pev->origin.z;
 
 			if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
 			{
@@ -425,7 +425,7 @@ int CMonsterMaker::MakeMonster( void )
 		{
 			placePosition = pChosenSpot->pev->origin;
 			placeAngles = pChosenSpot->pev->angles;
-			posEnt = pChosenSpot->edict();
+			warpballSoundEnt = pChosenSpot->edict();
 		}
 		else
 		{
@@ -443,7 +443,7 @@ int CMonsterMaker::MakeMonster( void )
 		if (FStringNull(m_iszPlacePosition))
 		{
 			placePosition = pev->origin;
-			posEnt = edict();
+			warpballSoundEnt = edict();
 		}
 		else
 		{
@@ -454,7 +454,7 @@ int CMonsterMaker::MakeMonster( void )
 			{
 				tempPosEnt->SetThink(&CBaseEntity::SUB_Remove);
 				tempPosEnt->pev->nextthink = gpGlobals->time + 0.1;
-				posEnt = tempPosEnt->edict();
+				warpballSoundEnt = tempPosEnt->edict();
 			}
 		}
 
@@ -471,7 +471,8 @@ int CMonsterMaker::MakeMonster( void )
 		mins = placePosition + minHullSize;
 		maxs = placePosition + maxHullSize;
 
-		maxs.z = placePosition.z;
+		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_AUTOSIZEBBOX))
+			maxs.z = placePosition.z;
 		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK))
 			mins.z = m_flGround;
 
@@ -514,15 +515,14 @@ int CMonsterMaker::MakeMonster( void )
 		placeAngles.y = UTIL_AngleMod(placeAngles.y);
 	}
 
-	pent = CREATE_NAMED_ENTITY( m_iszMonsterClassname );
-
+	edict_t *pent = CREATE_NAMED_ENTITY( m_iszMonsterClassname );
 	if( FNullEnt( pent ) )
 	{
 		ALERT ( at_console, "NULL Ent in MonsterMaker!\n" );
 		return MONSTERMAKER_NULLENTITY;
 	}
 
-	pevCreate = VARS( pent );
+	entvars_t *pevCreate = VARS( pent );
 	pevCreate->origin = placePosition;
 	pevCreate->angles = placeAngles;
 	SetBits( pevCreate->spawnflags, SF_MONSTER_FALL_TO_GROUND );
@@ -663,7 +663,7 @@ int CMonsterMaker::MakeMonster( void )
 			}
 
 			foundEntity->pev->vuser1 = vecPosition;
-			foundEntity->pev->dmg_inflictor = posEnt;
+			foundEntity->pev->dmg_inflictor = warpballSoundEnt;
 			foundEntity->Use(this, this, USE_SET, 0.0f);
 			foundEntity->pev->vuser1 = g_vecZero;
 			foundEntity->pev->dmg_inflictor = NULL;
