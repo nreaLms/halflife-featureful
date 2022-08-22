@@ -6359,6 +6359,7 @@
 	]
 
 	spawnorigin(string) : "Position to place monster at [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
+	spawndelay(string) : "Delay before spawn" : : "If larger then zero, the monster spawn will be delayed by specified amount of time (in seconds). The hull is created in place of the future monster's spawn to make sure that monster will have enough place to spawn. Recommended to use with 'Auto size BBox' flag and 'Warpball template'. Does not work well with 'Warp at monster's...'"
 	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
 	[
 		-1 : "Don't pass activator"
