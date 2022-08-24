@@ -436,7 +436,7 @@ DECLARE_SKILL_VALUE(sk_plr_762_bullet, "0")
 
 #if FEATURE_MEDKIT
 // Medkit
-DECLARE_SKILL_VALUE(sk_plr_medkitshot, "0")
+DECLARE_SKILL_VALUE(sk_plr_medkitshot, "10")
 
 DECLARE_SKILL_VALUE3(sk_plr_medkittime, "3", "5", "0")
 #endif
