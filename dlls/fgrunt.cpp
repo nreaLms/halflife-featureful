@@ -216,7 +216,7 @@ public:
 	CUSTOM_SCHEDULES
 
 protected:
-	void KickImpl(float kickDamage);
+	void PerformKick(float kickDamage);
 	void PrecacheHelper();
 	void SpawnHelper(const char* defaultModel, float defaultHealth);
 	const char* SentenceByNumber(int sentence) {
@@ -1579,7 +1579,7 @@ CBaseEntity *CHFGrunt :: Kick( void )
 	return NULL;
 }
 
-void CHFGrunt::KickImpl(float kickDamage)
+void CHFGrunt::PerformKick(float kickDamage)
 {
 	CBaseEntity *pHurt = Kick();
 
@@ -1794,7 +1794,7 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_ALLY_AE_KICK:
 		{
-			KickImpl(gSkillData.fgruntDmgKick);
+			PerformKick(gSkillData.fgruntDmgKick);
 		}
 		break;
 
@@ -3001,7 +3001,7 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 		break;
 	case HGRUNT_ALLY_AE_KICK:
 	{
-		KickImpl(gSkillData.torchDmgKick);
+		PerformKick(gSkillData.torchDmgKick);
 	}
 	break;
 	default:
@@ -3701,7 +3701,7 @@ void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
 		break;
 	case HGRUNT_ALLY_AE_KICK:
 	{
-		KickImpl(gSkillData.medicDmgKick);
+		PerformKick(gSkillData.medicDmgKick);
 	}
 	break;
 	default:

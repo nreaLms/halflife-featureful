@@ -359,7 +359,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case STROOPER_AE_KICK:
 	{
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "zombie/claw_miss2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM + RANDOM_LONG( -5, 5 ) );
-		KickImpl(gSkillData.strooperDmgKick, (m_bRightClaw) ? -10 : 10);
+		PerformKick(gSkillData.strooperDmgKick, (m_bRightClaw) ? -10 : 10);
 
 		m_bRightClaw = !m_bRightClaw;
 	}

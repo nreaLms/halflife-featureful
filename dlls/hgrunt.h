@@ -86,7 +86,7 @@ public:
 	int Restore( CRestore &restore );
 
 	CBaseEntity *Kick( void );
-	void KickImpl(float damage, float zpunch = 0);
+	void PerformKick(float damage, float zpunch = 0);
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType( int Type );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);

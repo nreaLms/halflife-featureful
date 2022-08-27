@@ -252,7 +252,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 	case MASSN_AE_KICK:
 	{
-		KickImpl(gSkillData.massnDmgKick);
+		PerformKick(gSkillData.massnDmgKick);
 	}
 	break;
 

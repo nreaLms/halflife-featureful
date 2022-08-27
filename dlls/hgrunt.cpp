@@ -760,7 +760,7 @@ CBaseEntity *CHGrunt::Kick( void )
 	return NULL;
 }
 
-void CHGrunt::KickImpl(float damage, float zpunch)
+void CHGrunt::PerformKick(float damage, float zpunch)
 {
 	CBaseEntity* pHurt = Kick();
 	if (pHurt)
@@ -919,7 +919,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			break;
 		case HGRUNT_AE_KICK:
 		{
-			KickImpl(gSkillData.hgruntDmgKick);
+			PerformKick(gSkillData.hgruntDmgKick);
 		}
 			break;
 		case HGRUNT_AE_CAUGHT_ENEMY:
