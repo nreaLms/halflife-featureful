@@ -120,6 +120,8 @@ cvar_t *cl_nvgradius_of = NULL;
 cvar_t *cl_nvgfilterbrightness = NULL;
 #endif
 
+cvar_t* cl_flashlight_custom = NULL;
+
 void ShutdownInput( void );
 
 //DECLARE_MESSAGE( m_Logo, Logo )
@@ -476,6 +478,8 @@ void CHud::Init( void )
 #if FEATURE_FILTER_NIGHTVISION
 	cl_nvgfilterbrightness = CVAR_CREATE( "cl_nvgfilterbrightness", "0.6", FCVAR_ARCHIVE );
 #endif
+
+	cl_flashlight_custom = CVAR_CREATE( "cl_flashlight_custom", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 	m_pSpriteList = NULL;
 
