@@ -249,14 +249,15 @@ void CStomp::Think( void )
 		spriteScale *= 1.8;
 		maxNumOfSprites = 6;
 	}
-	const int freeEnts = NUMBER_OF_ENTITIES() - gpGlobals->maxEntities;
+	const int freeEnts = gpGlobals->maxEntities - NUMBER_OF_ENTITIES();
 	maxNumOfSprites = Q_min(maxNumOfSprites, freeEnts);
 
+	// TODO: make it into clint side effects?
 	// Move and spawn trails
 	while( gpGlobals->time - pev->dmgtime > stompInterval )
 	{
 		pev->origin = pev->origin + pev->movedir * pev->speed * stompInterval;
-		for( int i = 0; i < numOfSprites && maxNumOfSprites; i++ )
+		for( int i = 0; i < numOfSprites && maxNumOfSprites > 0; i++ )
 		{
 			maxNumOfSprites--;
 			CSprite *pSprite = CSprite::SpriteCreate( STRING(pev->model), pev->origin, TRUE );
