@@ -473,6 +473,7 @@ Schedule_t	slFGruntCombatFail[] =
 Task_t	tlFGruntVictoryDance[] =
 {
 	{ TASK_STOP_MOVING,						(float)0					},
+	{ TASK_SET_ACTIVITY, (float)ACT_IDLE },
 	{ TASK_FACE_ENEMY,						(float)0					},
 	{ TASK_WAIT,							1.5f					},
 	{ TASK_GET_PATH_TO_ENEMY_CORPSE,		64.0f					},
@@ -1156,9 +1157,6 @@ void CHFGrunt :: RunTask( Task_t *pTask )
 //=========================================================
 void CHFGrunt :: GibMonster ( void )
 {
-	Vector	vecGunPos;
-	Vector	vecGunAngles;
-
 	if ( GetBodygroup( FG_GUN_GROUP ) != FG_GUN_NONE )
 	{// throw a gun if the grunt has one
 		DropMyItems(TRUE);
@@ -2012,7 +2010,7 @@ void CHFGrunt::AlertSound()
 {
 	if (m_hEnemy !=0 && FOkToSpeak())
 	{
-		SENTENCEG_PlayRndSz( ENT(pev), "FG_ATTACK", FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
+		PlaySentence("FG_ATTACK", RandomSentenceDuraion(), VOL_NORM, ATTN_NORM);
 	}
 }
 
