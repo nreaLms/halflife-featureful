@@ -12,8 +12,6 @@
 
 #if defined (_WIN32)
 
-#include "in_defs.h"
-
 #else // _WIN32
 
 #define APIENTRY // __stdcall ?

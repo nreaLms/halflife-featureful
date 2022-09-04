@@ -18,11 +18,13 @@
 // this implementation handles the linking of the engine to the DLL
 //
 
+#include "windows_lean.h"
+#include "gl_dynamic.h"
+
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
 #include "parsemsg.h"
-#include "gl_dynamic.h"
 
 #include "r_efx.h"
 #include "r_studioint.h"

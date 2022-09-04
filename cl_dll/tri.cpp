@@ -7,6 +7,9 @@
 
 // Triangle rendering, if any
 
+#include "windows_lean.h"
+#include "gl_dynamic.h"
+
 #include "hud.h"
 #include "cl_util.h"
 
@@ -16,7 +19,6 @@
 #include "entity_state.h"
 #include "cl_entity.h"
 #include "triangleapi.h"
-#include "gl_dynamic.h"
 
 extern int g_iWaterLevel;
 

@@ -41,6 +41,7 @@
 #define NOSERVICE
 #define NOMCX
 #define NOIME
+#define NOMINMAX
 #define HSPRITE HSPRITE_win32
 #include <windows.h>
 #undef HSPRITE
