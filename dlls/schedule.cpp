@@ -617,10 +617,10 @@ void CBaseMonster::RunTask( Task_t *pTask )
 			}
 			break;
 		}
-	case TASK_RUN_TO_TARGET_RADIUS:
-	case TASK_WALK_TO_TARGET_RADIUS:
+	case TASK_RUN_TO_SCRIPT_RADIUS:
+	case TASK_WALK_TO_SCRIPT_RADIUS:
 		{
-			if( m_hTargetEnt == 0 )
+			if( m_pGoalEnt == 0 )
 				TaskFail("no target ent");
 			else
 			{
@@ -630,7 +630,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					checkDistance = m_pCine->m_flMoveToRadius;
 				}
 
-				float distance = ( m_hTargetEnt->pev->origin - pev->origin ).Length2D();
+				float distance = ( m_pGoalEnt->pev->origin - pev->origin ).Length2D();
 
 				if( distance <= checkDistance )
 				{
@@ -642,7 +642,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					TaskFail("completed movement before reaching the radius");
 					RouteClear();
 				}
-				else if ( pTask->iTask == TASK_RUN_TO_TARGET_RADIUS )
+				else if ( pTask->iTask == TASK_RUN_TO_SCRIPT_RADIUS )
 					m_movementActivity = ACT_RUN;
 				else
 					m_movementActivity = ACT_WALK;
@@ -1120,8 +1120,8 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			TaskComplete();
 			break;
 		}
-	case TASK_RUN_TO_TARGET_RADIUS:
-	case TASK_WALK_TO_TARGET_RADIUS:
+	case TASK_RUN_TO_SCRIPT_RADIUS:
+	case TASK_WALK_TO_SCRIPT_RADIUS:
 		{
 			float radius = pTask->flData;
 			if (m_pCine != 0 && m_pCine->m_flMoveToRadius >= 1.0f)
@@ -1133,13 +1133,13 @@ void CBaseMonster::StartTask( Task_t *pTask )
 
 			Activity newActivity;
 
-			if ( m_hTargetEnt == 0 )
-				TaskFail("no target ent");
-			else if( ( m_hTargetEnt->pev->origin - pev->origin ).Length() < radius )
+			if ( m_pGoalEnt == 0 )
+				TaskFail("no move target ent");
+			else if( ( m_pGoalEnt->pev->origin - pev->origin ).Length2D() <= radius )
 				TaskComplete();
 			else
 			{
-				if( pTask->iTask == TASK_RUN_TO_TARGET_RADIUS )
+				if( pTask->iTask == TASK_RUN_TO_SCRIPT_RADIUS )
 					newActivity = ACT_WALK;
 				else
 					newActivity = ACT_RUN;
@@ -1149,9 +1149,9 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					TaskComplete();
 				else
 				{
-					if( m_hTargetEnt == 0 || !MoveToTarget( newActivity, 2, true ) )
+					if( m_pGoalEnt == 0 || !MoveToLocationClosest( newActivity, 2, m_pGoalEnt->pev->origin ) )
 					{
-						TaskFail("failed to reach target ent");
+						TaskFail("failed to reach move target ent");
 						RouteClear();
 					}
 				}

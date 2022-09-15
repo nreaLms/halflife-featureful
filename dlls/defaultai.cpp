@@ -918,7 +918,7 @@ Schedule_t slWalkToScript[] =
 
 Task_t tlScriptedWalkToRadius[] =
 {
-	{ TASK_WALK_TO_TARGET_RADIUS, (float)0 },
+	{ TASK_WALK_TO_SCRIPT_RADIUS, (float)0 },
 	{ TASK_FACE_SCRIPT, (float)0 },
 	{ TASK_FACE_IDEAL, (float)0 },
 	{ TASK_ENABLE_SCRIPT, (float)0 },
@@ -962,7 +962,7 @@ Schedule_t slRunToScript[] =
 
 Task_t tlScriptedRunToRadius[] =
 {
-	{ TASK_RUN_TO_TARGET_RADIUS, (float)0 },
+	{ TASK_RUN_TO_SCRIPT_RADIUS, (float)0 },
 	{ TASK_FACE_SCRIPT, (float)0 },
 	{ TASK_FACE_IDEAL, (float)0 },
 	{ TASK_ENABLE_SCRIPT, (float)0 },

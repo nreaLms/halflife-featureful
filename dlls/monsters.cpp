@@ -736,7 +736,8 @@ BOOL CBaseMonster::FRefreshRoute( int buildRouteFlags )
 			returnCode = BuildRoute( m_vecEnemyLKP, bits_MF_TO_ENEMY, m_hEnemy, buildRouteFlags );
 			break;
 		case MOVEGOAL_LOCATION:
-			returnCode = BuildRoute( m_vecMoveGoal, bits_MF_TO_LOCATION, NULL, buildRouteFlags );
+		case MOVEGOAL_LOCATION_NEAREST:
+			returnCode = BuildRoute( m_vecMoveGoal, m_movementGoal, NULL, buildRouteFlags );
 			break;
 		case MOVEGOAL_TARGETENT:
 		case MOVEGOAL_TARGETENT_NEAREST:
@@ -770,6 +771,16 @@ BOOL CBaseMonster::MoveToLocation( Activity movementAct, float waitTime, const V
 	m_moveWaitTime = waitTime;
 
 	m_movementGoal = MOVEGOAL_LOCATION;
+	m_vecMoveGoal = goal;
+	return FRefreshRoute(buildRouteFlags);
+}
+
+BOOL CBaseMonster::MoveToLocationClosest( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags )
+{
+	m_movementActivity = movementAct;
+	m_moveWaitTime = waitTime;
+
+	m_movementGoal = MOVEGOAL_LOCATION_NEAREST;
 	m_vecMoveGoal = goal;
 	return FRefreshRoute(buildRouteFlags);
 }
@@ -1652,7 +1663,11 @@ int CBaseMonster::RouteClassify( int iMoveFlag )
 	else if( iMoveFlag & bits_MF_TO_NODE )
 		movementGoal = MOVEGOAL_NODE;
 	else if( iMoveFlag & bits_MF_TO_LOCATION )
+	{
 		movementGoal = MOVEGOAL_LOCATION;
+		if( iMoveFlag & bits_MF_NEAREST_PATH )
+			movementGoal = MOVEGOAL_LOCATION_NEAREST;
+	}
 
 	return movementGoal;
 }

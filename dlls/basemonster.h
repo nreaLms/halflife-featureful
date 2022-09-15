@@ -285,6 +285,7 @@ public:
 	BOOL MoveToNode( Activity movementAct, float waitTime, const Vector &goal );
 	BOOL MoveToTarget( Activity movementAct, float waitTime, bool closest = false );
 	BOOL MoveToLocation( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags = 0 );
+	BOOL MoveToLocationClosest( Activity movementAct, float waitTime, const Vector &goal, int buildRouteFlags = 0 );
 	BOOL MoveToEnemy( Activity movementAct, float waitTime );
 
 	// Returns the time when the door will be open
