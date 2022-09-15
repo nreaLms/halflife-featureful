@@ -249,12 +249,12 @@ void CCineMonster::Spawn( void )
 		m_fMoveTo = 4;
 #endif
 	// if no targetname, start now
-	if( FStringNull( pev->targetname ) || !FStringNull( m_iszIdle ) )
+	if( IsAutoSearch() || !FStringNull( m_iszIdle ) )
 	{
 		SetThink( &CCineMonster::CineThink );
 		pev->nextthink = gpGlobals->time + 1.0f;
 		// Wait to be used?
-		if( pev->targetname )
+		if( !IsAutoSearch() )
 			m_startTime = gpGlobals->time + (float)1E6;
 	}
 	if( ForcedNoInterruptions() )
@@ -609,7 +609,7 @@ bool CCineMonster::TryFindAndPossessEntity()
 	else
 	{
 		CancelScript();
-		if (!m_cantFindReported && pev->targetname)
+		if (!m_cantFindReported && !IsAutoSearch())
 		{
 			ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\" (busy or too far)\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
 			m_cantFindReported = true;
@@ -1097,6 +1097,11 @@ void CCineMonster::OnMoveFail() {
 
 bool CCineMonster::MoveFailAttemptsExceeded() const {
 	return m_maxMoveFailAttempts > 0 && m_moveFailCount >= m_maxMoveFailAttempts;
+}
+
+bool CCineMonster::IsAutoSearch() const
+{
+	return FStringNull(pev->targetname) || FBitSet(pev->spawnflags, SF_SCRIPT_AUTOSEARCH);
 }
 
 class CScriptedSentence : public CBaseDelay

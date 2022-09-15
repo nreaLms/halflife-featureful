@@ -32,6 +32,7 @@
 #define SF_SCRIPT_NOSCRIPTMOVEMENT	128
 #define SF_SCRIPT_CONTINUOUS		256
 #define SF_SCRIPT_APPLYNEWANGLES		512
+#define SF_SCRIPT_AUTOSEARCH		1024
 #define SF_SCRIPT_FORCE_IDLE_LOOPING 2048
 #define SF_SCRIPT_TRY_ONCE	4096
 #define SF_SCRIPT_DONT_RESET_HEAD	8192
@@ -127,6 +128,7 @@ public:
 	virtual bool	ShouldResetOnGroundFlag();
 	void OnMoveFail();
 	bool MoveFailAttemptsExceeded() const;
+	bool IsAutoSearch() const;
 
 	string_t m_iszIdle;		// string index for idle animation
 	string_t m_iszPlay;		// string index for scripted animation
