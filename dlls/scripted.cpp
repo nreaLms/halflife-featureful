@@ -943,6 +943,20 @@ void CCineMonster::Activate( void )
 	}
 }
 
+void CCineMonster::UpdateOnRemove()
+{
+	CBaseEntity* pEntity = m_hTargetEnt;
+	if (pEntity)
+	{
+		CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+		if (pMonster && pMonster->m_pCine == this)
+		{
+			ALERT(at_aiconsole, "%s %s is removed. Calling CineCleanup on %s\n", STRING(pev->classname), STRING(pev->targetname), STRING(pMonster->pev->classname));
+			pMonster->CineCleanup();
+		}
+	}
+}
+
 BOOL CBaseMonster::CineCleanup()
 {
 	CCineMonster *pOldCine = m_pCine;

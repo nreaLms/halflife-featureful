@@ -95,6 +95,7 @@ public:
 	virtual void Touch( CBaseEntity *pOther );
 	virtual int	 ObjectCaps( void ) { return (CBaseMonster :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 	virtual void Activate( void );
+	virtual void UpdateOnRemove();
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );

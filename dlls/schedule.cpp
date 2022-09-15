@@ -576,19 +576,22 @@ void CBaseMonster::RunTask( Task_t *pTask )
 		break;
 	case TASK_WAIT_FOR_SCRIPT:
 		{
-			if( m_pCine->m_iDelay <= 0 && gpGlobals->time >= m_pCine->m_startTime )
+			if (m_pCine)
 			{
-				TaskComplete();
-				m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, TRUE );
-				if( m_fSequenceFinished )
-					ClearSchedule();
-				pev->framerate = 1.0;
-				//ALERT( at_aiconsole, "Script %s has begun for %s\n", STRING( m_pCine->m_iszPlay ), STRING( pev->classname ) );
-			}
-			else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING) && !FStringNull( m_pCine->m_iszIdle) )
-			{
-				if ( m_fSequenceFinished )
-					m_pCine->StartSequence( this, m_pCine->m_iszIdle, FALSE );
+				if( m_pCine->m_iDelay <= 0 && gpGlobals->time >= m_pCine->m_startTime )
+				{
+					TaskComplete();
+					m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, TRUE );
+					if( m_fSequenceFinished )
+						ClearSchedule();
+					pev->framerate = 1.0;
+					//ALERT( at_aiconsole, "Script %s has begun for %s\n", STRING( m_pCine->m_iszPlay ), STRING( pev->classname ) );
+				}
+				else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING) && !FStringNull( m_pCine->m_iszIdle) )
+				{
+					if ( m_fSequenceFinished )
+						m_pCine->StartSequence( this, m_pCine->m_iszIdle, FALSE );
+				}
 			}
 			break;
 		}
@@ -596,16 +599,21 @@ void CBaseMonster::RunTask( Task_t *pTask )
 		{
 			if( m_fSequenceFinished )
 			{
-				if( m_pCine->m_iRepeatsLeft > 0 )
+				if (m_pCine)
 				{
-					m_pCine->m_iRepeatsLeft--;
-					pev->frame = m_pCine->m_fRepeatFrame;
-					ResetSequenceInfo();
+					if( m_pCine->m_iRepeatsLeft > 0 )
+					{
+						m_pCine->m_iRepeatsLeft--;
+						pev->frame = m_pCine->m_fRepeatFrame;
+						ResetSequenceInfo();
+					}
+					else
+					{
+						m_pCine->SequenceDone( this );
+					}
 				}
 				else
-				{
-					m_pCine->SequenceDone( this );
-				}
+					TaskComplete();
 			}
 			break;
 		}
@@ -1512,7 +1520,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_WAIT_FOR_SCRIPT:
 		{
-			if( m_pCine->m_iszIdle )
+			if( m_pCine && m_pCine->m_iszIdle )
 			{
 				m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszIdle, FALSE );
 				if( FStrEq( STRING( m_pCine->m_iszIdle ), STRING( m_pCine->m_iszPlay ) ) )
@@ -1533,7 +1541,8 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_ENABLE_SCRIPT:
 		{
-			m_pCine->DelayStart( 0 );
+			if (m_pCine)
+				m_pCine->DelayStart( 0 );
 			TaskComplete();
 			break;
 		}
@@ -2116,7 +2125,6 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 		}
 	case MONSTERSTATE_SCRIPT:
 		{
-			ASSERT( m_pCine != NULL );
 			if( !m_pCine )
 			{
 				ALERT( at_aiconsole, "Script failed for %s\n", STRING( pev->classname ) );
