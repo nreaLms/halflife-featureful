@@ -1069,18 +1069,18 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			}
 			break;
 		}
-	case TASK_RUN_TO_TARGET:
-	case TASK_WALK_TO_TARGET:
+	case TASK_RUN_TO_SCRIPT:
+	case TASK_WALK_TO_SCRIPT:
 		{
 			Activity newActivity;
 
-			if ( m_hTargetEnt == 0 )
-				TaskFail("no target ent");
-			else if( ( m_hTargetEnt->pev->origin - pev->origin ).Length() < 1 )
+			if ( m_pGoalEnt == 0 )
+				TaskFail("no move target ent");
+			else if( ( m_pGoalEnt->pev->origin - pev->origin ).Length() < 1 )
 				TaskComplete();
 			else
 			{
-				if( pTask->iTask == TASK_WALK_TO_TARGET )
+				if( pTask->iTask == TASK_WALK_TO_SCRIPT )
 					newActivity = ACT_WALK;
 				else
 					newActivity = ACT_RUN;
@@ -1090,17 +1090,21 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					TaskComplete();
 				else 
 				{
-					if (m_hTargetEnt == 0)
+					if (m_pGoalEnt != 0)
 					{
-						TaskFail("no target ent");
-						RouteClear();
-					}
-					else if( !MoveToTarget( newActivity, 2 ) )
-					{
-						if (m_pCine) {
-							m_pCine->OnMoveFail();
+						const Vector vecDest = m_pGoalEnt->pev->origin;
+						if( !MoveToLocation( newActivity, 2, vecDest ) )
+						{
+							if (m_pCine) {
+								m_pCine->OnMoveFail();
+							}
+							TaskFail("failed to reach script");
+							RouteClear();
 						}
-						TaskFail("failed to reach target ent");
+					}
+					else
+					{
+						TaskFail("no move target ent");
 						RouteClear();
 					}
 				}
@@ -1554,9 +1558,9 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					}
 				}
 			}
-			if( m_hTargetEnt != 0 )
+			if( m_pGoalEnt != 0 )
 			{
-				pev->origin = m_hTargetEnt->pev->origin;	// Plant on target
+				pev->origin = m_pGoalEnt->pev->origin;
 			}
 
 			TaskComplete();
@@ -1568,8 +1572,6 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			{
 				if (m_hTargetEnt != 0)
 				{
-					ALERT(at_aiconsole, "Forcibly teleporting the monster to script after %d attempts\n", m_pCine->m_moveFailCount );
-					UTIL_SetOrigin( pev, m_hTargetEnt->pev->origin );
 					if (m_pCine->m_fTurnType == 0)
 						pev->angles.y = m_hTargetEnt->pev->angles.y;
 					else if (m_pCine->m_fTurnType == 1)
@@ -1579,6 +1581,11 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					pev->avelocity = Vector( 0, 0, 0 );
 					pev->velocity = Vector( 0, 0, 0 );
 					pev->effects |= EF_NOINTERP;
+				}
+				if( m_pGoalEnt != 0 )
+				{
+					ALERT(at_aiconsole, "Forcibly teleporting the monster to script after %d attempts\n", m_pCine->m_moveFailCount );
+					UTIL_SetOrigin( pev, m_pGoalEnt->pev->origin );
 				}
 				m_pCine->m_moveFailCount = 0;
 			}

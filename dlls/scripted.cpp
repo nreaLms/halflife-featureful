@@ -96,6 +96,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_iszEntity = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszMoveTarget"))
+	{
+		m_iszMoveTarget = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "m_fMoveTo" ) )
 	{
 		m_fMoveTo = atoi( pkvd->szValue );
@@ -189,6 +194,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_iszPlay, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_iszEntity, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_fMoveTo, FIELD_INTEGER ),
+	DEFINE_FIELD( CCineMonster, m_iszMoveTarget, FIELD_STRING ), //LRC
 	//DEFINE_FIELD( CCineMonster, m_flRepeat, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_flRadius, FIELD_FLOAT ),
 
@@ -486,6 +492,18 @@ void CCineMonster::PossessEntity( void )
 		pTarget->m_pGoalEnt = this;
 		pTarget->m_pCine = this;
 		pTarget->m_hTargetEnt = this;
+
+		if (m_iszMoveTarget)
+		{
+			// anything with that name?
+			CBaseEntity* pGoalEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszMoveTarget), m_hActivator);
+			if( pGoalEnt == 0 )
+			{	// nothing. Oh well.
+				ALERT(at_console,"%s %s has a missing \"move target\": %s\n",STRING(pev->classname),STRING(pev->targetname),STRING(m_iszMoveTarget));
+			} else {
+				pTarget->m_pGoalEnt = pGoalEnt;
+			}
+		}
 
 		m_saved_movetype = pTarget->pev->movetype;
 		m_saved_solid = pTarget->pev->solid;

@@ -895,7 +895,7 @@ Schedule_t slError[] =
 
 Task_t tlScriptedWalk[] =
 {
-	{ TASK_WALK_TO_TARGET, (float)TARGET_MOVE_SCRIPTED },
+	{ TASK_WALK_TO_SCRIPT, (float)TARGET_MOVE_SCRIPTED },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_PLANT_ON_SCRIPT, (float)0 },
 	{ TASK_FACE_SCRIPT, (float)0 },
@@ -939,7 +939,7 @@ Schedule_t slWalkToScriptRadius[] =
 
 Task_t tlScriptedRun[] =
 {
-	{ TASK_RUN_TO_TARGET, (float)TARGET_MOVE_SCRIPTED },
+	{ TASK_RUN_TO_SCRIPT, (float)TARGET_MOVE_SCRIPTED },
 	{ TASK_WAIT_FOR_MOVEMENT,(float)0 },
 	{ TASK_PLANT_ON_SCRIPT, (float)0 },
 	{ TASK_FACE_SCRIPT, (float)0 },

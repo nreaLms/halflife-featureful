@@ -919,6 +919,7 @@
 	m_iszIdle(string) : "Idle Animation"
 	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_flRadius(integer) : "Search Radius" : 512
+	m_iszMoveTarget(string) : "Move target (blank = this) [LE]"
 	m_fMoveTo(choices) : "Move to Position" : 0 =
 	[
 		0 : "No"
