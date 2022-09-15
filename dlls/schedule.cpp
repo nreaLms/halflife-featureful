@@ -1602,7 +1602,10 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					pev->ideal_yaw = UTIL_AngleMod( m_pCine->pev->angles.y );
 					break;
 				case 1:
-					MakeIdealYaw ( m_pCine->pev->origin );
+					if (m_hTargetEnt)
+						MakeIdealYaw ( m_hTargetEnt->pev->origin );
+					else
+						MakeIdealYaw ( m_pCine->pev->origin );
 					break;
 				}
 			}

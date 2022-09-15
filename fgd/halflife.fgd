@@ -955,6 +955,7 @@
 		3 : "Forward my activator"
 	]
 	moveto_radius(string) : "Move to radius"
+	m_iszAttack(string) : "Turn target (blank = this) [LE]"
 	m_fTurnType(choices) : "Turn mode" =
 	[
 		0 : "Match Angle"

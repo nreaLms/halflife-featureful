@@ -96,6 +96,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_iszEntity = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszAttack"))
+	{
+		m_iszAttack = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszMoveTarget"))
 	{
 		m_iszMoveTarget = ALLOC_STRING( pkvd->szValue );
@@ -194,6 +199,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_iszPlay, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_iszEntity, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_fMoveTo, FIELD_INTEGER ),
+	DEFINE_FIELD( CCineMonster, m_iszAttack, FIELD_STRING ), //LRC
 	DEFINE_FIELD( CCineMonster, m_iszMoveTarget, FIELD_STRING ), //LRC
 	//DEFINE_FIELD( CCineMonster, m_flRepeat, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_flRadius, FIELD_FLOAT ),
@@ -492,6 +498,32 @@ void CCineMonster::PossessEntity( void )
 		pTarget->m_pGoalEnt = this;
 		pTarget->m_pCine = this;
 		pTarget->m_hTargetEnt = this;
+
+		if (m_iszAttack)
+		{
+			// anything with that name?
+			CBaseEntity* pTurnTargetEnt = UTIL_FindEntityByTargetname(NULL, STRING(m_iszAttack), m_hActivator);
+			if( pTurnTargetEnt == 0 )
+			{	// nothing. Anything with that classname?
+				CBaseEntity* pFoundEnt = NULL;
+				while ((pFoundEnt = UTIL_FindEntityInSphere( pFoundEnt, pev->origin, m_flRadius )) != NULL)
+				{
+					if (pFoundEnt != pTarget && FClassnameIs( pFoundEnt->pev, STRING(m_iszAttack)))
+					{
+						pTurnTargetEnt = pFoundEnt;
+						break;
+					}
+				}
+			}
+			if (pTurnTargetEnt == 0)
+			{	// nothing. Oh well.
+				ALERT(at_console,"%s %s has a missing \"turn target\": %s\n",STRING(pev->classname),STRING(pev->targetname),STRING(m_iszAttack));
+			}
+			else
+			{
+				pTarget->m_hTargetEnt = pTurnTargetEnt;
+			}
+		}
 
 		if (m_iszMoveTarget)
 		{
