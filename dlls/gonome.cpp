@@ -25,6 +25,7 @@
 #include	"player.h"
 #include	"bullsquid.h"
 #include	"decals.h"
+#include	"scripted.h"
 #include	"animation.h"
 #include	"studio.h"
 #include	"mod_features.h"
@@ -487,7 +488,11 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 			Vector	vecSpitDir;
 
 			Vector vecEnemyPosition;
-			if (m_hEnemy != 0)
+			if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
+			{
+				vecEnemyPosition = m_hTargetEnt->pev->origin;
+			}
+			else if (m_hEnemy != 0)
 				vecEnemyPosition = (m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs);
 			else
 				vecEnemyPosition = m_vecEnemyLKP;

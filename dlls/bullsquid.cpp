@@ -25,6 +25,7 @@
 #include	"effects.h"
 #include	"decals.h"
 #include	"soundent.h"
+#include	"scripted.h"
 #include	"game.h"
 #include	"bullsquid.h"
 
@@ -725,7 +726,11 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				Vector vecSpitOffset = ( gpGlobals->v_right * 8.0f + gpGlobals->v_forward * 37.0f + gpGlobals->v_up * 23.0f );
 				vecSpitOffset = ( pev->origin + vecSpitOffset );
 				Vector vecEnemyPosition;
-				if (m_hEnemy != 0)
+				if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
+				{
+					vecEnemyPosition = m_hTargetEnt->pev->origin;
+				}
+				else if (m_hEnemy != 0)
 					vecEnemyPosition = m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs / 2;
 				else
 					vecEnemyPosition = m_vecEnemyLKP;

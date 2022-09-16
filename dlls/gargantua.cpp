@@ -29,6 +29,7 @@
 #include	"decals.h"
 #include	"explode.h"
 #include	"func_break.h"
+#include	"scripted.h"
 #include	"followingmonster.h"
 #include	"gamerules.h"
 #include	"mod_features.h"
@@ -1244,6 +1245,19 @@ void CGargantua::StartTask( Task_t *pTask )
 		if( RANDOM_LONG( 0, 100 ) < 30 )
 			AttackSound();
 		TaskComplete();
+		break;
+	// allow a scripted_action to make gargantua shoot flames.
+	case TASK_PLAY_SCRIPT:
+		if ( m_pCine->IsAction() && m_pCine->m_fAction == 3)
+		{
+			FlameCreate();
+			m_flWaitFinished = gpGlobals->time + 4.5f;
+			m_flameTime = gpGlobals->time + 6.0f;
+			m_flameX = 0;
+			m_flameY = 0;
+		}
+		else
+			CBaseMonster::StartTask( pTask );
 		break;
 	case TASK_DIE:
 		m_flWaitFinished = gpGlobals->time + 1.6f;

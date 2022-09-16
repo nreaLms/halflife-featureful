@@ -146,6 +146,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_fTurnType = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_fAction"))
+	{
+		m_fAction = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if ( FStrEq( pkvd->szKeyName, "m_requiredFollowerState" ) )
 	{
 		m_requiredFollowerState = (short)atoi( pkvd->szValue );
@@ -216,6 +221,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_iszFireOnAnimStart, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_targetActivator, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_fTurnType, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_fAction, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_flMoveToRadius, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_requiredFollowerState, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_applySearchRadius, FIELD_SHORT ),
@@ -234,6 +240,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
 
 LINK_ENTITY_TO_CLASS( scripted_sequence, CCineMonster )
+LINK_ENTITY_TO_CLASS( scripted_action, CCineMonster ) //LRC
 
 LINK_ENTITY_TO_CLASS( aiscripted_sequence, CCineAI )
 
@@ -823,7 +830,7 @@ int CCineMonster::IgnoreConditions( void )
 void ScriptEntityCancel( edict_t *pentCine )
 {
 	// make sure they are a scripted_sequence
-	if( FClassnameIs( pentCine, "scripted_sequence" ) )
+	if( FClassnameIs( pentCine, "scripted_sequence" ) || FClassnameIs( pentCine, "scripted_action" ) )
 	{
 		CCineMonster *pCineTarget = GetClassPtr( (CCineMonster *)VARS( pentCine ) );
 
@@ -874,7 +881,7 @@ void CCineMonster::DelayStart( int state )
 
 	while( !FNullEnt( pentCine ) )
 	{
-		if( FClassnameIs( pentCine, "scripted_sequence" ) )
+		if( FClassnameIs( pentCine, "scripted_sequence" ) || FClassnameIs( pentCine, "scripted_action" ) )
 		{
 			CCineMonster *pTarget = GetClassPtr( ( CCineMonster *)VARS( pentCine ) );
 			if( state )

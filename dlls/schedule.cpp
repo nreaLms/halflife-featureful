@@ -581,13 +581,46 @@ void CBaseMonster::RunTask( Task_t *pTask )
 				if( m_pCine->m_iDelay <= 0 && gpGlobals->time >= m_pCine->m_startTime )
 				{
 					TaskComplete();
-					m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, TRUE );
-					if( m_fSequenceFinished )
-						ClearSchedule();
+					if (m_pCine->IsAction())
+					{
+						switch( m_pCine->m_fAction )
+						{
+						case SCRIPT_ACT_RANGE_ATTACK:
+							m_IdealActivity = ACT_RANGE_ATTACK1;
+							break;
+						case SCRIPT_ACT_RANGE_ATTACK2:
+							m_IdealActivity = ACT_RANGE_ATTACK2;
+							break;
+						case SCRIPT_ACT_MELEE_ATTACK:
+							m_IdealActivity = ACT_MELEE_ATTACK1;
+							break;
+						case SCRIPT_ACT_MELEE_ATTACK2:
+							m_IdealActivity = ACT_MELEE_ATTACK2;
+							break;
+						case SCRIPT_ACT_SPECIAL_ATTACK:
+							m_IdealActivity = ACT_SPECIAL_ATTACK1;
+							break;
+						case SCRIPT_ACT_SPECIAL_ATTACK2:
+							m_IdealActivity = ACT_SPECIAL_ATTACK2;
+							break;
+						case SCRIPT_ACT_RELOAD:
+							m_IdealActivity = ACT_RELOAD;
+							break;
+						case SCRIPT_ACT_JUMP:
+							m_IdealActivity = ACT_HOP;
+							break;
+						}
+					}
+					else
+					{
+						m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, TRUE );
+						if( m_fSequenceFinished )
+							ClearSchedule();
+					}
 					pev->framerate = 1.0;
 					//ALERT( at_aiconsole, "Script %s has begun for %s\n", STRING( m_pCine->m_iszPlay ), STRING( pev->classname ) );
 				}
-				else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING) && !FStringNull( m_pCine->m_iszIdle) )
+				else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING) && !FStringNull( m_pCine->m_iszIdle) && !m_pCine->IsAction() )
 				{
 					if ( m_fSequenceFinished )
 						m_pCine->StartSequence( this, m_pCine->m_iszIdle, FALSE );
@@ -1520,7 +1553,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_WAIT_FOR_SCRIPT:
 		{
-			if( m_pCine && m_pCine->m_iszIdle )
+			if( m_pCine && m_pCine->m_iszIdle && !m_pCine->IsAction() )
 			{
 				m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszIdle, FALSE );
 				if( FStrEq( STRING( m_pCine->m_iszIdle ), STRING( m_pCine->m_iszPlay ) ) )
@@ -1555,9 +1588,9 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					if (m_hTargetEnt != 0)
 					{
 						UTIL_SetOrigin( pev, m_hTargetEnt->pev->origin );
-						if (m_pCine->m_fTurnType == 0)
+						if (m_pCine->m_fTurnType == SCRIPT_TURN_MATCH_ANGLE)
 							pev->angles.y = m_hTargetEnt->pev->angles.y;
-						else if (m_pCine->m_fTurnType == 1)
+						else if (m_pCine->m_fTurnType == SCRIPT_TURN_FACE)
 							pev->angles.y = UTIL_VecToYaw(m_hTargetEnt->pev->origin - pev->origin);
 						pev->ideal_yaw = pev->angles.y;
 
@@ -1581,9 +1614,9 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			{
 				if (m_hTargetEnt != 0)
 				{
-					if (m_pCine->m_fTurnType == 0)
+					if (m_pCine->m_fTurnType == SCRIPT_TURN_MATCH_ANGLE)
 						pev->angles.y = m_hTargetEnt->pev->angles.y;
-					else if (m_pCine->m_fTurnType == 1)
+					else if (m_pCine->m_fTurnType == SCRIPT_TURN_FACE)
 						pev->angles.y = UTIL_VecToYaw(m_hTargetEnt->pev->origin - pev->origin);
 					pev->ideal_yaw = pev->angles.y;
 
@@ -1603,14 +1636,14 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		}
 	case TASK_FACE_SCRIPT:
 		{
-			if ( m_pCine != 0 && m_pCine->m_fMoveTo != 0)
+			if ( m_pCine != 0 && m_pCine->m_fMoveTo != SCRIPT_MOVE_NO)
 			{
 				switch (m_pCine->m_fTurnType)
 				{
-				case 0:
+				case SCRIPT_TURN_MATCH_ANGLE:
 					pev->ideal_yaw = UTIL_AngleMod( m_pCine->pev->angles.y );
 					break;
-				case 1:
+				case SCRIPT_TURN_FACE:
 					if (m_hTargetEnt)
 						MakeIdealYaw ( m_hTargetEnt->pev->origin );
 					else

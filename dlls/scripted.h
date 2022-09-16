@@ -49,6 +49,26 @@ enum SCRIPT_MOVE_TYPE
 	SCRIPT_MOVE_TELEPORT = 7,
 };
 
+enum SCRIPT_TURN_TYPE
+{
+	SCRIPT_TURN_MATCH_ANGLE = 0,
+	SCRIPT_TURN_FACE,
+	SCRIPT_TURN_NO
+};
+
+enum SCRIPT_ACTION
+{
+	SCRIPT_ACT_RANGE_ATTACK = 0,
+	SCRIPT_ACT_RANGE_ATTACK2,
+	SCRIPT_ACT_MELEE_ATTACK,
+	SCRIPT_ACT_MELEE_ATTACK2,
+	SCRIPT_ACT_SPECIAL_ATTACK,
+	SCRIPT_ACT_SPECIAL_ATTACK2,
+	SCRIPT_ACT_RELOAD,
+	SCRIPT_ACT_JUMP,
+	SCRIPT_ACT_NO_ACTION,
+};
+
 enum SS_INTERRUPT
 {
 	SS_INTERRUPT_IDLE = 0,
@@ -114,6 +134,21 @@ public:
 	bool AcceptedFollowingState(CBaseMonster* pMonster);
 	virtual void PossessEntity( void );
 
+	inline bool IsAction( void ) { return FClassnameIs(pev, "scripted_action"); }; //LRC
+
+	//LRC: Should the monster do a precise attack for this scripted_action?
+	// (Do a precise attack if we'll be turning to face the target, but we haven't just walked to the target.)
+	bool PreciseAttack( void )
+	{
+	//	if (m_fTurnType != 1) { ALERT(at_console,"preciseattack fails check 1\n"); return FALSE; }
+	//	if (m_fMoveTo == 0) { ALERT(at_console,"preciseattack fails check 2\n"); return FALSE; }
+	//	if (m_fMoveTo != 5 && m_iszAttack == 0) { ALERT(at_console,"preciseattack fails check 3\n"); return FALSE; }
+	//	ALERT(at_console,"preciseattack passes!\n");
+	//	return TRUE;
+		return m_fTurnType == SCRIPT_TURN_FACE && ( m_fMoveTo == SCRIPT_MOVE_FACE || (m_fMoveTo != SCRIPT_MOVE_NO && !FStrEq(STRING(m_iszAttack), STRING(m_iszMoveTarget)) ));
+	};
+
+
 	void ReleaseEntity( CBaseMonster *pEntity );
 	void CancelScript( void );
 	virtual BOOL StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty );
@@ -155,6 +190,7 @@ public:
 	string_t m_iszFireOnAnimStart;
 	short m_targetActivator;
 	short m_fTurnType;
+	short m_fAction;
 	float m_flMoveToRadius;
 	short m_requiredFollowerState;
 	short m_applySearchRadius;

@@ -22,6 +22,7 @@
 #include	"effects.h"
 #include	"decals.h"
 #include	"soundent.h"
+#include	"scripted.h"
 #include	"game.h"
 #include	"weapons.h"
 #include	"followingmonster.h"
@@ -578,7 +579,11 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 		vecSpitOffset = (pev->origin + vecSpitOffset);
 		//vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
 		Vector vecEnemyPosition;
-		if (m_hEnemy != 0)
+		if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
+		{
+			vecEnemyPosition = m_hTargetEnt->pev->origin;
+		}
+		else if (m_hEnemy != 0)
 			vecEnemyPosition = m_hEnemy->BodyTarget(pev->origin);
 		else
 			vecEnemyPosition = m_vecEnemyLKP;

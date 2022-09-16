@@ -25,6 +25,7 @@
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"hornet.h"
+#include	"scripted.h"
 
 //=========================================================
 // monster-specific schedule types
@@ -502,7 +503,10 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			if( pHornetMonster )
 			{
-				pHornetMonster->m_hEnemy = m_hEnemy;
+				if (m_pCine && m_pCine->PreciseAttack()) //LRC- are we doing a scripted action?
+					pHornetMonster->m_hEnemy = m_hTargetEnt;
+				else
+					pHornetMonster->m_hEnemy = m_hEnemy;
 				pHornetMonster->m_iClass = m_iClass;
 				pHornetMonster->m_reverseRelationship = m_reverseRelationship;
 			}

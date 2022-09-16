@@ -3974,7 +3974,11 @@ Vector CBaseMonster::ShootAtEnemy( const Vector &shootOrigin )
 {
 	CBaseEntity *pEnemy = m_hEnemy;
 
-	if( pEnemy )
+	if (m_pCine != 0 && m_hTargetEnt != 0 && (m_pCine->m_fTurnType == SCRIPT_TURN_FACE))
+	{
+		return ( m_hTargetEnt->Center() - shootOrigin ).Normalize();
+	}
+	else if( pEnemy )
 	{
 		return( ( pEnemy->BodyTarget( shootOrigin ) - pEnemy->pev->origin ) + m_vecEnemyLKP - shootOrigin ).Normalize();
 	}

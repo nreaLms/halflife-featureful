@@ -25,6 +25,7 @@
 #include	"effects.h"
 #include	"decals.h"
 #include	"soundent.h"
+#include	"scripted.h"
 #include	"game.h"
 #include	"squadmonster.h"
 #include	"weapons.h"
@@ -624,7 +625,11 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		GetAttachment(3, vecBoltOrigin, vecAngles);
 
 		Vector vecEnemyPosition;
-		if (m_hEnemy != 0)
+		if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
+		{
+			vecEnemyPosition = m_hTargetEnt->pev->origin;
+		}
+		else if (m_hEnemy != 0)
 		{
 			if (HasConditions(bits_COND_ENEMY_OCCLUDED))
 			{

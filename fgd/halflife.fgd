@@ -6695,6 +6695,27 @@
 	]
 ]
 
+@PointClass base(ScriptedSequence) = scripted_action : "Scripted action"
+[
+	m_iszAttack(string) : "Entity to attack (blank = this) [LE]"
+	m_fAction(choices) : "Action to perform" : 0 =
+	[
+		0 : "Ranged Attack"
+		1 : "Ranged Attack 2"
+		2 : "Melee Attack"
+		3 : "Melee Attack 2"
+		4 : "Special Attack"
+		5 : "Special Attack 2"
+		6 : "Reload"
+		7 : "Jump"
+		8 : "No action"
+	]
+	spawnflags(Flags) =
+	[
+		64: "Override AI"	: 0
+	]
+]
+
 @PointClass iconsprite("sprites/speaker.spr") base(Targetname) = speaker : "Announcement Speaker"
 [
 	preset(choices) :"Announcement Presets" : 0 =

@@ -25,6 +25,7 @@
 #include	"schedule.h"
 #include	"weapons.h"
 #include	"squadmonster.h"
+#include	"scripted.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -312,7 +313,14 @@ void CController::HandleAnimEvent( MonsterEvent_t *pEvent )
 			CBaseMonster *pBall = (CBaseMonster*)Create( "controller_head_ball", vecStart, pev->angles, edict() );
 
 			pBall->pev->velocity = Vector( 0.0f, 0.0f, 32.0f );
-			pBall->m_hEnemy = m_hEnemy;
+			if (m_pCine)
+			{
+				pBall->m_hEnemy = m_hTargetEnt;
+			}
+			else
+			{
+				pBall->m_hEnemy = m_hEnemy;
+			}
 
 			m_iBall[0] = 0;
 			m_iBall[1] = 0;
@@ -632,17 +640,32 @@ void CController::RunTask( Task_t *pTask )
 			Vector vecSrc = vecHand + pev->velocity * ( m_flShootTime - gpGlobals->time );
 			Vector vecDir;
 
-			if( m_hEnemy != 0 )
+			if( m_pCine != 0 || m_hEnemy != 0 )
 			{
-				if( HasConditions( bits_COND_SEE_ENEMY ) )
+				if (m_pCine != 0) // LRC- is this a script that's telling it to fire?
 				{
-					m_vecEstVelocity = m_vecEstVelocity * 0.5f + m_hEnemy->pev->velocity * 0.5f;
+					if (m_hTargetEnt != 0 && m_pCine->PreciseAttack())
+					{
+						vecDir = (m_hTargetEnt->pev->origin - pev->origin).Normalize() * gSkillData.controllerSpeedBall;
+					}
+					else
+					{
+						UTIL_MakeVectors(pev->angles);
+						vecDir = gpGlobals->v_forward * gSkillData.controllerSpeedBall;
+					}
 				}
-				else
+				else if (m_hEnemy != 0)
 				{
-					m_vecEstVelocity = m_vecEstVelocity * 0.8f;
+					if( HasConditions( bits_COND_SEE_ENEMY ) )
+					{
+						m_vecEstVelocity = m_vecEstVelocity * 0.5f + m_hEnemy->pev->velocity * 0.5f;
+					}
+					else
+					{
+						m_vecEstVelocity = m_vecEstVelocity * 0.8f;
+					}
+					vecDir = Intersect( vecSrc, m_hEnemy->BodyTarget( pev->origin ), m_vecEstVelocity, gSkillData.controllerSpeedBall );
 				}
-				vecDir = Intersect( vecSrc, m_hEnemy->BodyTarget( pev->origin ), m_vecEstVelocity, gSkillData.controllerSpeedBall );
 				float delta = 0.03490f; // +-2 degree
 				vecDir = vecDir + Vector( RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ) ) * gSkillData.controllerSpeedBall;
 
