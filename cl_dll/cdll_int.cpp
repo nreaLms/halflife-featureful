@@ -24,6 +24,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
+#include "interface.h"
 #include "parsemsg.h"
 
 #include "r_efx.h"
@@ -43,8 +44,8 @@
 #if USE_PARTICLEMAN
 #include "interface.h"
 #include "particleman.h"
+#include "CBaseParticle.h"
 
-CSysModule *g_hParticleManModule = NULL;
 IParticleMan *g_pParticleMan = NULL;
 
 void CL_LoadParticleMan( void );
@@ -592,43 +593,21 @@ void TestParticlesCmd()
 
 void CL_UnloadParticleMan( void )
 {
-	Sys_UnloadModule( g_hParticleManModule );
-
 	g_pParticleMan = NULL;
-	g_hParticleManModule = NULL;
 }
 
 void CL_LoadParticleMan( void )
 {
-	char szPDir[512];
+	//Now implemented in the client library.
+	auto particleManFactory = Sys_GetFactoryThis();
 
-	if ( gEngfuncs.COM_ExpandFilename( PARTICLEMAN_DLLNAME, szPDir, sizeof( szPDir ) ) == FALSE )
+	g_pParticleMan = (IParticleMan*)particleManFactory(PARTICLEMAN_INTERFACE, nullptr);
+
+	if (g_pParticleMan)
 	{
-		g_pParticleMan = NULL;
-		g_hParticleManModule = NULL;
-		return;
-	}
+		g_pParticleMan->SetUp(&gEngfuncs);
 
-	g_hParticleManModule = Sys_LoadModule( szPDir );
-	CreateInterfaceFn particleManFactory = Sys_GetFactory( g_hParticleManModule );
-
-	if ( particleManFactory == NULL )
-	{
-		g_pParticleMan = NULL;
-		g_hParticleManModule = NULL;
-		return;
-	}
-
-	g_pParticleMan = (IParticleMan *)particleManFactory( PARTICLEMAN_INTERFACE, NULL);
-
-	if ( g_pParticleMan )
-	{
-		 g_pParticleMan->SetUp( &gEngfuncs );
-
-		 // Add custom particle classes here BEFORE calling anything else or you will die.
-		 g_pParticleMan->AddCustomParticleClassSize ( sizeof ( CBaseParticle ) );
-
-		 gEngfuncs.pfnAddCommand("test_particles", &TestParticlesCmd);
+		gEngfuncs.pfnAddCommand("test_particles", &TestParticlesCmd);
 	}
 }
 #endif

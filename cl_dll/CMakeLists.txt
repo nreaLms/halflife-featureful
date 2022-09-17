@@ -184,10 +184,10 @@ else()
 endif()
 
 if (USE_PARTICLEMAN)
-	list(APPEND CLDLL_SOURCES ../public/interface.cpp)
+	list(APPEND CLDLL_SOURCES ../public/interface.cpp particleman/CBaseParticle.cpp particleman/CFrustum.cpp particleman/CMiniMem.cpp particleman/IParticleMan_Active.cpp)
 endif()
 
-include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public)
+include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public particleman/)
 
 if (USE_VGUI)
 	SET(CMAKE_SKIP_RPATH TRUE)
