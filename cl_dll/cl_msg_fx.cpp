@@ -13,6 +13,10 @@
 
 #include "r_studioint.h"
 
+#if USE_PARTICLEMAN
+#include "particleman.h"
+#endif
+
 extern engine_studio_api_t IEngineStudio;
 
 void GibHitCallback( TEMPENTITY* ent, pmtrace_t* pmtrace )
@@ -490,6 +494,78 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int __MsgFunc_Particle( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	const float x = READ_COORD();
+	const float y = READ_COORD();
+	const float z = READ_COORD();
+
+	const float velX = READ_COORD();
+	const float velY = READ_COORD();
+	const float velZ = READ_COORD();
+
+	const int renderMode = READ_BYTE();
+	const float particleLife = READ_BYTE() / 10.0f;
+	const float particleSize = READ_SHORT() / 10.0f;
+	const int red = READ_BYTE();
+	const int green = READ_BYTE();
+	const int blue = READ_BYTE();
+	const int brightness = READ_BYTE();
+	const float gravity = READ_BYTE() / 100.0f;
+	const float fadeSpeed = READ_BYTE() / 10.0f;
+	const float scaleSpeed = READ_BYTE() / 10.0f;
+	const int frameRate = READ_BYTE();
+	const int flags = READ_BYTE();
+	const int modelIndex = READ_SHORT();
+
+#if USE_PARTICLEMAN
+	if (g_pParticleMan)
+	{
+		const float clTime = gEngfuncs.GetClientTime();
+
+		model_t* sprite = gEngfuncs.pfnGetModelByIndex(modelIndex);
+		if (sprite)
+		{
+			CBaseParticle *particle = g_pParticleMan->CreateParticle(Vector(x,y,z), Vector(0.0f, 0.0f, 0.0f), sprite, particleSize > 0 ? particleSize : 16, brightness, "particle");
+			if (particle)
+			{
+				particle->SetLightFlag(LIGHT_NONE);
+				particle->SetCullFlag(CULL_PVS);
+				particle->SetRenderFlag(RENDER_FACEPLAYER);
+
+				particle->m_vVelocity = Vector(velX, velY, velZ);
+				particle->m_iRendermode = renderMode;
+				particle->m_vColor = Vector(red, green, blue);
+				particle->m_flGravity = gravity;
+				if (fadeSpeed > 0)
+					particle->m_flFadeSpeed = fadeSpeed;
+				particle->m_flScaleSpeed = scaleSpeed;
+				if (flags & 16)
+				{
+					particle->m_iFramerate = frameRate > 0 ? frameRate : 10;
+					particle->m_iNumFrames = sprite->numframes;
+				}
+
+				if (flags & 2)
+					particle->SetCollisionFlags(TRI_SPIRAL);
+				if (flags & 4)
+					particle->SetCollisionFlags(TRI_COLLIDEWORLD);
+				if (flags & 8)
+					particle->m_bAffectedByForce = true;
+				if (flags & 64)
+					particle->SetCollisionFlags(TRI_COLLIDEKILL);
+
+				particle->m_flDieTime = clTime + particleLife;
+			}
+		}
+	}
+#endif
+
+	return 1;
+}
+
 void HookFXMessages()
 {
 	HOOK_MESSAGE( RandomGibs );
@@ -498,4 +574,5 @@ void HookFXMessages()
 	HOOK_MESSAGE( SpriteTrail );
 	HOOK_MESSAGE( Streaks );
 	HOOK_MESSAGE( Smoke );
+	HOOK_MESSAGE( Particle );
 }

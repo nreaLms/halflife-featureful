@@ -6988,6 +6988,58 @@
 	globalstate(string) : "Global State Master"
 ]
 
+@PointClass base(Target, Targetname) color(255 255 128) = particle_shooter : "Particle Shooter" 
+[
+	//group_id(integer) : "Group Id" : 1
+	num_particles(integer) : "Number of Particles ( -1 = infinite )" : 10
+	fire_delay(string) : "Delay between shots" : "0.2"
+
+	particle_life(string) : "particle life" : "4.0"
+
+	particle_speed(string) : "Particle Velocity" : "200"
+	vel_variance(string) : "Velocity Variance" : "12"
+	//spin_speed(integer) : "spin ( degrees per sec )" : 0
+	gravity(string) : "Gravity" : "0.0"
+	//damping_time(string) : "damping time" : "0.0"
+	//damping_vel(string) : "damping velocity" : "0.0"
+
+	spawnflags(Flags) = 
+	[
+		1 : "Repeatable" 	: 0
+		2 : "Spiral" : 0
+		4 : "Collide with world" : 0
+		//8 : "Affected by force" : 0
+		16 : "Animate" : 0
+		32 : "Start on" : 0
+		64 : "Kill on collide" : 0
+		128 : "Ripple when hitting water" : 0
+	]
+
+	model(sprite) : "Sprite" : "sprites/xsmoke1.spr"
+	particle_size(string) : "particle size" : "16.0"
+
+	//colour_red(integer) : "colour: red ( 0 - 255 )" : 255
+	//colour_green(integer) : "colour: green ( 0 - 255 )" : 255
+	//colour_blue(integer) : "colour: blue ( 0 - 255 )" : 255
+	//brightness(string) : "brightness" : "190"
+
+	fade_speed(string) : "Fade Speed" : "0.0"
+	scale_speed(string) : "Scale Speed" : "1.0"
+	framerate(string) : "Framerate" : "0"
+
+	rendermode(choices) : "Render Mode" : 5 =
+	[
+		0: "Normal"
+		1: "Color"
+		2: "Texture"
+		3: "Glow"
+		4: "Solid"
+		5: "Additive"
+	]
+	renderamt(integer) : "FX Amount (1 - 255)" : "190"
+	rendercolor(color255) : "FX Color (R G B)" : "255 255 255"
+]
+
 @PointClass base(Targetname, Angles) flags(Path) size(16 16 16) color(247 181 82) = path_corner : "Moving platform stop"
 [
 	spawnflags(Flags) =

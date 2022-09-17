@@ -4702,3 +4702,238 @@ void CEnvBeamTrail::Spawn( void )
 		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 }
+
+
+#define SF_PARTICLESHOOTER_REPEATABLE 1
+#define SF_PARTICLESHOOTER_SPIRAL 2
+#define SF_PARTICLESHOOTER_COLLIDE_WITH_WORLD 4
+#define SF_PARTICLESHOOTER_AFFECTED_BY_FORCE 8
+#define SF_PARTICLESHOOTER_ANIMATED 16
+#define SF_PARTICLESHOOTER_STARTON 32
+#define SF_PARTICLESHOOTER_KILLED_ON_COLLIDE 64
+#define SF_PARTICLESHOOTER_RIPPLE_WHEN_HITTING_WATER 128
+
+class CParticleShooter : public CPointEntity
+{
+public:
+	void Precache();
+	void Spawn();
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void EXPORT ShootParticle();
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	int m_particleCount;
+	int m_particleCountLeft;
+	float m_fireDelay;
+
+	float m_particleLife;
+	float m_particleSpeed;
+
+	float m_velVariance;
+
+	float m_fadeSpeed;
+	float m_scaleSpeed;
+
+	int m_iSprite;
+};
+
+LINK_ENTITY_TO_CLASS( particle_shooter, CParticleShooter )
+
+TYPEDESCRIPTION	CParticleShooter::m_SaveData[] =
+{
+	DEFINE_FIELD( CParticleShooter, m_particleCount, FIELD_INTEGER ),
+	DEFINE_FIELD( CParticleShooter, m_particleCountLeft, FIELD_STRING ),
+	DEFINE_FIELD( CParticleShooter, m_fireDelay, FIELD_FLOAT ),
+	DEFINE_FIELD( CParticleShooter, m_particleLife, FIELD_FLOAT ),
+	DEFINE_FIELD( CParticleShooter, m_particleSpeed, FIELD_FLOAT ),
+	DEFINE_FIELD( CParticleShooter, m_velVariance, FIELD_FLOAT ),
+	DEFINE_FIELD( CParticleShooter, m_fadeSpeed, FIELD_FLOAT ),
+	DEFINE_FIELD( CParticleShooter, m_scaleSpeed, FIELD_FLOAT ),
+};
+
+IMPLEMENT_SAVERESTORE( CParticleShooter, CPointEntity )
+
+void CParticleShooter::Spawn()
+{
+	Precache();
+	CPointEntity::Spawn();
+
+	m_particleCountLeft = m_particleCount;
+
+	if (m_fireDelay <= 0.0f)
+		m_fireDelay = 0.1f;
+
+	if (FBitSet(pev->spawnflags, SF_PARTICLESHOOTER_STARTON))
+	{
+		SetThink(&CParticleShooter::ShootParticle);
+		pev->nextthink = gpGlobals->time + 0.2f;
+	}
+}
+
+void CParticleShooter::Precache()
+{
+	m_iSprite = PRECACHE_MODEL(STRING(pev->model));
+}
+
+void CParticleShooter::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq( pkvd->szKeyName, "num_particles" ) )
+	{
+		m_particleCount = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "fire_delay" ) )
+	{
+		m_fireDelay = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "particle_life" ) )
+	{
+		m_particleLife = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "particle_speed" ) )
+	{
+		pev->speed = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "vel_variance" ) )
+	{
+		m_velVariance = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "particle_size" ) )
+	{
+		pev->scale = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "colour_red" ) )
+	{
+		pev->rendercolor.x = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "colour_green" ) )
+	{
+		pev->rendercolor.y = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "colour_blue" ) )
+	{
+		pev->rendercolor.z = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "brightness" ) )
+	{
+		pev->renderamt = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "fade_speed" ) )
+	{
+		m_fadeSpeed = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "scale_speed" ) )
+	{
+		m_scaleSpeed = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue(pkvd);
+}
+
+void CParticleShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	const bool active = FBitSet(pev->spawnflags, SF_PARTICLESHOOTER_STARTON);
+	if (ShouldToggle(useType, active))
+	{
+		if (active)
+		{
+			ClearBits(pev->spawnflags, SF_PARTICLESHOOTER_STARTON);
+			SetThink(NULL);
+		}
+		else
+		{
+			SetBits(pev->spawnflags, SF_PARTICLESHOOTER_STARTON);
+			SetThink(&CParticleShooter::ShootParticle);
+			pev->nextthink = gpGlobals->time;
+		}
+	}
+}
+
+void CParticleShooter::ShootParticle()
+{
+	extern int gmsgParticleShooter;
+
+	if (FStringNull(pev->target))
+		return;
+
+	pev->nextthink = gpGlobals->time + m_fireDelay;
+
+	CBaseEntity* pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target));
+	if (!pTarget)
+		return;
+
+	Vector vecShootDir = (pTarget->pev->origin - pev->origin).Normalize();
+
+	float teta = acos(vecShootDir.z);
+	float fi = (vecShootDir.x == 0 && vecShootDir.y == 0) ? RANDOM_FLOAT(0, M_PI_F * 2) : atan2(vecShootDir.y, vecShootDir.x);
+
+	teta += RANDOM_FLOAT(-1.0f,1.0f) * m_velVariance * M_PI_F / 180.0f;
+	fi += RANDOM_FLOAT(-1.0f,1.0f) * m_velVariance * M_PI_F / 180.0f;
+
+	vecShootDir.x = cos(fi) * sin(teta);
+	vecShootDir.y = sin(fi) * sin(teta);
+	vecShootDir.z = cos(teta);
+
+	/*vecShootDir = vecShootDir + gpGlobals->v_right * RANDOM_FLOAT( -1.0f, 1.0f ) * m_velVariance;;
+	vecShootDir = vecShootDir + gpGlobals->v_forward * RANDOM_FLOAT( -1.0f, 1.0f ) * m_velVariance;;
+	vecShootDir = vecShootDir + gpGlobals->v_up * RANDOM_FLOAT( -1.0f, 1.0f ) * m_velVariance;;
+	vecShootDir = vecShootDir.Normalize();*/
+
+	const Vector velocity = vecShootDir * pev->speed;
+
+	if (gmsgParticleShooter)
+	{
+		MESSAGE_BEGIN( MSG_PVS, gmsgParticleShooter, pev->origin );
+			WRITE_COORD(pev->origin.x);
+			WRITE_COORD(pev->origin.y);
+			WRITE_COORD(pev->origin.z);
+			WRITE_COORD(velocity.x);
+			WRITE_COORD(velocity.y);
+			WRITE_COORD(velocity.z);
+			WRITE_BYTE(pev->rendermode);
+			WRITE_BYTE(m_particleLife * 10);
+			WRITE_SHORT(pev->scale * 10);
+			WRITE_BYTE(pev->rendercolor.x);
+			WRITE_BYTE(pev->rendercolor.y);
+			WRITE_BYTE(pev->rendercolor.z);
+			WRITE_BYTE(pev->renderamt);
+			WRITE_BYTE(pev->gravity * 100);
+			WRITE_BYTE(m_fadeSpeed * 10);
+			WRITE_BYTE(m_scaleSpeed * 10);
+			WRITE_BYTE(pev->framerate);
+			WRITE_BYTE(pev->spawnflags);
+			WRITE_SHORT(m_iSprite);
+		MESSAGE_END();
+	}
+
+	if (m_particleCount > 0)
+	{
+		m_particleCountLeft--;
+		if (m_particleCountLeft <= 0)
+		{
+			ClearBits(pev->spawnflags, SF_PARTICLESHOOTER_STARTON);
+			SetThink(NULL);
+			if (FBitSet(pev->spawnflags, SF_PARTICLESHOOTER_REPEATABLE)) {
+				m_particleCountLeft = m_particleCount;
+			} else {
+				SetThink(&CBaseEntity::SUB_Remove);
+				pev->nextthink = gpGlobals->time;
+			}
+		}
+	}
+}
