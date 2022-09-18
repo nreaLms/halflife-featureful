@@ -2690,7 +2690,7 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 
 //float CGraph::PathLength( int iStart, int iDest, int iHull, int afCapMask )
 
-BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags )
+BOOL CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags , const char *displayName)
 {
 	int i;
 	int iMyHullIndex;
@@ -2716,7 +2716,7 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 
 	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
 	{
-		ALERT( at_aiconsole, "Graph not ready for findcover!\n" );
+		ALERT( at_aiconsole, "Graph not ready for %s!\n", displayName );
 		return FALSE;
 	}
 
@@ -2726,12 +2726,12 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 
 	if( iMyNode == NO_NODE )
 	{
-		ALERT( at_aiconsole, "FindCover() - %s has no nearest node!\n", STRING( pev->classname ) );
+		ALERT( at_aiconsole, "%s - %s has no nearest node!\n", displayName, STRING( pev->classname ) );
 		return FALSE;
 	}
 	if( iThreatNode == NO_NODE )
 	{
-		// ALERT( at_aiconsole, "FindCover() - Threat has no nearest node!\n" );
+		// ALERT( at_aiconsole, "%s - Threat has no nearest node!\n", displayName );
 		iThreatNode = iMyNode;
 		// return FALSE;
 	}
@@ -2752,10 +2752,14 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 		// provide cover! Also make sure the node is within the mins/maxs of the search.
 		if( flDist >= flMinDist && flDist < flMaxDist )
 		{
-			UTIL_TraceLine( node.m_vecOrigin + vecViewOffset, vecLookersOffset, ignore_monsters, ignore_glass,  ENT( pev ), &tr );
-
-			// if this node will block the threat's line of sight to me...
-			if( tr.flFraction != 1.0f )
+			bool traceOk = true;
+			if (FBitSet(flags, FINDSPOTAWAY_TRACE_LOOKER))
+			{
+				UTIL_TraceLine( node.m_vecOrigin + vecViewOffset, vecLookersOffset, ignore_monsters, ignore_glass,  ENT( pev ), &tr );
+				// if this node will block the threat's line of sight to me...
+				traceOk = tr.flFraction != 1.0f;
+			}
+			if( traceOk )
 			{
 				// ..and is also closer to me than the threat, or the same distance from myself and the threat the node is good.
 				if( ( iMyNode == iThreatNode ) || WorldGraph.PathLength( iMyNode, nodeNumber, iMyHullIndex, m_afCapability ) <= WorldGraph.PathLength( iThreatNode, nodeNumber, iMyHullIndex, m_afCapability ) )
@@ -2786,6 +2790,11 @@ BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMi
 	return FALSE;
 }
 
+BOOL CBaseMonster::FindCover( Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags )
+{
+	return FindSpotAway(vecThreat, vecViewOffset, flMinDist, flMaxDist, flags|FINDSPOTAWAY_TRACE_LOOKER, "FindCover()");
+}
+
 BOOL CBaseMonster::FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist)
 {
 	return FindCover( vecThreat, vecViewOffset, flMinDist, flMaxDist, FINDSPOTAWAY_RUN|FINDSPOTAWAY_CHECK_SPOT );
@@ -2793,74 +2802,7 @@ BOOL CBaseMonster::FindCover(Vector vecThreat, Vector vecViewOffset, float flMin
 
 BOOL CBaseMonster::FindSpotAway( Vector vecThreat, float flMinDist, float flMaxDist, int flags )
 {
-	int i;
-	int iMyHullIndex;
-	int iMyNode;
-	int iThreatNode;
-	float flDist;
-
-	if( !flMaxDist )
-	{
-		// user didn't supply a MaxDist, so work up a crazy one.
-		flMaxDist = 784;
-	}
-
-	if( flMinDist > 0.5 * flMaxDist )
-	{
-#if _DEBUG
-		ALERT( at_console, "FindSpotAway MinDist (%.0f) too close to MaxDist (%.0f)\n", flMinDist, flMaxDist );
-#endif
-		flMinDist = 0.5 * flMaxDist;
-	}
-
-	if( !WorldGraph.m_fGraphPresent || !WorldGraph.m_fGraphPointersSet )
-	{
-		ALERT( at_aiconsole, "Graph not ready for findspot!\n" );
-		return FALSE;
-	}
-
-	iMyNode = WorldGraph.FindNearestNode( pev->origin, this );
-	iThreatNode = WorldGraph.FindNearestNode ( vecThreat, this );
-	iMyHullIndex = WorldGraph.HullIndex( this );
-
-	if( iMyNode == NO_NODE )
-	{
-		ALERT( at_aiconsole, "FindSpotAway() - %s has no nearest node!\n", STRING( pev->classname ) );
-		return FALSE;
-	}
-	if( iThreatNode == NO_NODE )
-	{
-		// ALERT( at_aiconsole, "FindSpotAway() - Threat has no nearest node!\n" );
-		iThreatNode = iMyNode;
-		// return FALSE;
-	}
-
-	// we'll do a rough sample to find nodes that are relatively nearby
-	for( i = 0; i < WorldGraph.m_cNodes; i++ )
-	{
-		int nodeNumber = ( i + WorldGraph.m_iLastCoverSearch ) % WorldGraph.m_cNodes;
-
-		CNode &node = WorldGraph.Node( nodeNumber );
-
-		// could use an optimization here!!
-		flDist = ( pev->origin - node.m_vecOrigin ).Length();
-
-		// DON'T do the trace check on a node that is farther away than a node that we've already found to
-		// provide cover! Also make sure the node is within the mins/maxs of the search.
-		if( flDist >= flMinDist && flDist < flMaxDist )
-		{
-			// node is closer to me than the threat, or the same distance from myself and the threat the node is good.
-			if( ( iMyNode == iThreatNode ) || WorldGraph.PathLength( iMyNode, nodeNumber, iMyHullIndex, m_afCapability ) <= WorldGraph.PathLength( iThreatNode, nodeNumber, iMyHullIndex, m_afCapability ) )
-			{
-				if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( node.m_vecOrigin )) && MoveToLocation( FBitSet(flags, FINDSPOTAWAY_RUN) ? ACT_RUN : ACT_WALK, 0, node.m_vecOrigin ) )
-				{
-					WorldGraph.m_iLastCoverSearch = nodeNumber + 1; // next monster that searches for cover node will start where we left off here.
-					return TRUE;
-				}
-			}
-		}
-	}
-	return FALSE;
+	return FindSpotAway(vecThreat, g_vecZero, flMinDist, flMaxDist, flags, "FindSpotAway()");
 }
 
 //=========================================================

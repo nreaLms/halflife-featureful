@@ -261,6 +261,7 @@ public:
 	BOOL FindLateralCover( const Vector &vecThreat, const Vector &vecViewOffset );
 	BOOL FindLateralSpotAway( const Vector &vecThreat, float minDist, float maxDist, int flags );
 	BOOL FindStraightSpotAway( const Vector &vecThreat, float minDist, float maxDist, int flags );
+	BOOL FindSpotAway(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags, const char* displayName);
 	BOOL FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist, int flags);
 	BOOL FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist);
 	BOOL FindSpotAway(Vector vecThreat, float flMinDist, float flMaxDist, int flags);
