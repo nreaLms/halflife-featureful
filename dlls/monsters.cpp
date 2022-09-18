@@ -3986,6 +3986,30 @@ Vector CBaseMonster::ShootAtEnemy( const Vector &shootOrigin )
 		return gpGlobals->v_forward;
 }
 
+Vector CBaseMonster::SpitAtEnemy(const Vector& vecSpitOrigin, float dirRandomDeviation, float *distance)
+{
+	Vector vecEnemyPosition;
+	if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
+		vecEnemyPosition = m_hTargetEnt->pev->origin;
+	else if (m_hEnemy != 0)
+		vecEnemyPosition = m_hEnemy->BodyTarget(pev->origin);
+	else
+		vecEnemyPosition = m_vecEnemyLKP;
+	const Vector vecDiff = (vecEnemyPosition - vecSpitOrigin);
+	if (distance)
+	{
+		*distance = vecDiff.Length();
+	}
+	Vector vecSpitDir = vecDiff.Normalize();
+	if (dirRandomDeviation > 0)
+	{
+		vecSpitDir.x += RANDOM_FLOAT( -dirRandomDeviation, dirRandomDeviation );
+		vecSpitDir.y += RANDOM_FLOAT( -dirRandomDeviation, dirRandomDeviation );
+		vecSpitDir.z += RANDOM_FLOAT( -dirRandomDeviation, 0.0f );
+	}
+	return vecSpitDir;
+}
+
 //=========================================================
 // FacingIdeal - tells us if a monster is facing its ideal
 // yaw. Created this function because many spots in the 

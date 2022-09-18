@@ -723,48 +723,37 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				// !!!HACKHACK - the spot at which the spit originates (in front of the mouth) was measured in 3ds and hardcoded here.
 				// we should be able to read the position of bones at runtime for this info.
-				Vector vecSpitOffset = ( gpGlobals->v_right * 8.0f + gpGlobals->v_forward * 37.0f + gpGlobals->v_up * 23.0f );
-				vecSpitOffset = ( pev->origin + vecSpitOffset );
-				Vector vecEnemyPosition;
-				if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
-				{
-					vecEnemyPosition = m_hTargetEnt->pev->origin;
-				}
-				else if (m_hEnemy != 0)
-					vecEnemyPosition = m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs / 2;
-				else
-					vecEnemyPosition = m_vecEnemyLKP;
-				Vector vecSpitDir = ( vecEnemyPosition - vecSpitOffset ).Normalize();
-
-				bool bigSpit = false;
-#if FEATURE_BULLSQUID_BIGSPIT
-				if (RANDOM_LONG(0,1))
-				{
-					if ((vecEnemyPosition - vecSpitOffset).Length() < 400) {
-						bigSpit = true;
-					}
-				}
-#endif
+				const Vector vecSpitOffset = ( gpGlobals->v_right * 8.0f + gpGlobals->v_forward * 37.0f + gpGlobals->v_up * 23.0f );
+				const Vector vecSpitOrigin = ( pev->origin + vecSpitOffset );
 
 				float dirRandomDeviation = 0.05f;
 				if (g_iSkillLevel == SKILL_HARD)
 					dirRandomDeviation = 0.01f;
 				else if (g_iSkillLevel == SKILL_MEDIUM)
 					dirRandomDeviation = 0.03f;
+				float distanceToEnemy;
 
-				vecSpitDir.x += RANDOM_FLOAT( -dirRandomDeviation, dirRandomDeviation );
-				vecSpitDir.y += RANDOM_FLOAT( -dirRandomDeviation, dirRandomDeviation );
-				vecSpitDir.z += RANDOM_FLOAT( -dirRandomDeviation, 0.0f );
+				const Vector vecSpitDir = SpitAtEnemy(vecSpitOrigin, dirRandomDeviation, &distanceToEnemy);
+
+				bool bigSpit = false;
+#if FEATURE_BULLSQUID_BIGSPIT
+				if (RANDOM_LONG(0,1))
+				{
+					if (distanceToEnemy < 400) {
+						bigSpit = true;
+					}
+				}
+#endif
 
 				// do stuff for this event.
 				AttackSound(bigSpit);
 
 				// spew the spittle temporary ents.
-				MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOffset );
+				MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOrigin );
 					WRITE_BYTE( TE_SPRITE_SPRAY );
-					WRITE_COORD( vecSpitOffset.x );	// pos
-					WRITE_COORD( vecSpitOffset.y );	
-					WRITE_COORD( vecSpitOffset.z );	
+					WRITE_COORD( vecSpitOrigin.x );	// pos
+					WRITE_COORD( vecSpitOrigin.y );
+					WRITE_COORD( vecSpitOrigin.z );
 					WRITE_COORD( vecSpitDir.x );	// dir
 					WRITE_COORD( vecSpitDir.y );	
 					WRITE_COORD( vecSpitDir.z );	
@@ -775,9 +764,9 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				MESSAGE_END();
 
 				if (bigSpit) {
-					CBigSquidSpit::Shoot(pev, vecSpitOffset, vecSpitDir * 600.0f);
+					CBigSquidSpit::Shoot(pev, vecSpitOrigin, vecSpitDir * 600.0f);
 				} else {
-					CSquidSpit::Shoot( pev, vecSpitOffset, vecSpitDir * CSquidSpit::SpitSpeed() );
+					CSquidSpit::Shoot( pev, vecSpitOrigin, vecSpitDir * CSquidSpit::SpitSpeed() );
 				}
 			}
 			break;

@@ -338,6 +338,7 @@ public:
 	virtual void FadeMonster( void );	// Called instead of GibMonster() when gibs are disabled
 
 	Vector ShootAtEnemy( const Vector &shootOrigin );
+	Vector SpitAtEnemy(const Vector& vecSpitOrigin, float dirRandomDeviation = 0.05f, float* distance = 0 );
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center() * 0.75 + EyePosition() * 0.25; };		// position to shoot at
 
 	virtual	Vector GetGunPosition( void );

@@ -568,41 +568,25 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 		m_cAmmoLoaded--;
 		BodyChange(m_cAmmoLoaded);
 
-		Vector	vecSpitOffset;
-		Vector	vecSpitDir;
-
 		UTIL_MakeAimVectors(pev->angles);
 
 		// !!!HACKHACK - the spot at which the spit originates (in front of the mouth) was measured in 3ds and hardcoded here.
 		// we should be able to read the position of bones at runtime for this info.
-		vecSpitOffset = (gpGlobals->v_forward * 15 + gpGlobals->v_up * 36);
-		vecSpitOffset = (pev->origin + vecSpitOffset);
-		//vecSpitDir = ((m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs) - vecSpitOffset).Normalize();
-		Vector vecEnemyPosition;
-		if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
-		{
-			vecEnemyPosition = m_hTargetEnt->pev->origin;
-		}
-		else if (m_hEnemy != 0)
-			vecEnemyPosition = m_hEnemy->BodyTarget(pev->origin);
-		else
-			vecEnemyPosition = m_vecEnemyLKP;
-		vecSpitDir = (vecEnemyPosition - vecSpitOffset).Normalize();
+		const Vector vecSpitOffset = (gpGlobals->v_forward * 15 + gpGlobals->v_up * 36);
+		const Vector vecSpitOrigin = (pev->origin + vecSpitOffset);
 
-		vecSpitDir.x += RANDOM_FLOAT(-0.01, 0.01);
-		vecSpitDir.y += RANDOM_FLOAT(-0.01, 0.01);
-		vecSpitDir.z += RANDOM_FLOAT(-0.01, 0);
+		const Vector vecSpitDir = SpitAtEnemy(vecSpitOrigin, 0.01f);
 
 		// SOUND HERE! (in the pitdrone model)
 
-		CPitdroneSpike::Shoot(pev, vecSpitOffset, vecSpitDir * 900, UTIL_VecToAngles(vecSpitDir));
+		CPitdroneSpike::Shoot(pev, vecSpitOrigin, vecSpitDir * 900, UTIL_VecToAngles(vecSpitDir));
 
 		// spew the spittle temporary ents.
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOffset );
+		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOrigin );
 			WRITE_BYTE( TE_SPRITE_SPRAY );
-			WRITE_COORD( vecSpitOffset.x );	// pos
-			WRITE_COORD( vecSpitOffset.y );
-			WRITE_COORD( vecSpitOffset.z );
+			WRITE_COORD( vecSpitOrigin.x );	// pos
+			WRITE_COORD( vecSpitOrigin.y );
+			WRITE_COORD( vecSpitOrigin.z );
 			WRITE_COORD( vecSpitDir.x );	// dir
 			WRITE_COORD( vecSpitDir.y );
 			WRITE_COORD( vecSpitDir.z );

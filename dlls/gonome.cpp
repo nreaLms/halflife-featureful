@@ -485,22 +485,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 		if (GetGonomeGuts(vecArmPos))
 		{
-			Vector	vecSpitDir;
-
-			Vector vecEnemyPosition;
-			if (m_pCine && m_hTargetEnt != 0 && m_pCine->PreciseAttack()) // LRC- are we being told to do this by a scripted_action?
-			{
-				vecEnemyPosition = m_hTargetEnt->pev->origin;
-			}
-			else if (m_hEnemy != 0)
-				vecEnemyPosition = (m_hEnemy->pev->origin + m_hEnemy->pev->view_ofs);
-			else
-				vecEnemyPosition = m_vecEnemyLKP;
-			vecSpitDir = (vecEnemyPosition - vecArmPos).Normalize();
-
-			vecSpitDir.x += RANDOM_FLOAT(-0.05, 0.05);
-			vecSpitDir.y += RANDOM_FLOAT(-0.05, 0.05);
-			vecSpitDir.z += RANDOM_FLOAT(-0.05, 0);
+			const Vector vecSpitDir = SpitAtEnemy(vecArmPos);
 
 			m_pGonomeGuts->pev->body = 0;
 			m_pGonomeGuts->pev->skin = 0;
