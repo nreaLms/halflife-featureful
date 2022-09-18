@@ -232,7 +232,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 			Vector vecGunAngles;
 			GetAttachment( 0, vecGunPos, vecGunAngles );
 
-			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY );
+			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecGunPos );
 				WRITE_BYTE( TE_ELIGHT );
 				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
 				WRITE_COORD( vecGunPos.x );		// origin

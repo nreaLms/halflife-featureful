@@ -298,7 +298,7 @@ void CGib::SpawnRandomClientGibs(entvars_t *pevVictim, int cGibs, const char *gi
 
 	if (gmsgRandomGibs)
 	{
-		MESSAGE_BEGIN( MSG_PVS, gmsgRandomGibs, NULL );
+		MESSAGE_BEGIN( MSG_PVS, gmsgRandomGibs, pevVictim->origin );
 			// position
 			WRITE_COORD( pevVictim->absmin.x );
 			WRITE_COORD( pevVictim->absmin.y );

@@ -1994,7 +1994,7 @@ void CISlave::StartMeleeAttackGlow(int side)
 	HandGlowOn(handGlow);
 	int brightness;
 	const Vector armBeamColor = GetArmBeamColor(brightness);
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY );
+	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMFOLLOW );
 		WRITE_SHORT( entindex() + 0x1000 * (AttachmentFromSide(side)) );
 		WRITE_SHORT( m_iTrailTexture );
