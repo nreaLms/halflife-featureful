@@ -1248,7 +1248,7 @@ void CGargantua::StartTask( Task_t *pTask )
 		break;
 	// allow a scripted_action to make gargantua shoot flames.
 	case TASK_PLAY_SCRIPT:
-		if ( m_pCine->IsAction() && m_pCine->m_fAction == 3)
+		if ( m_pCine->IsAction() && m_pCine->m_fAction == SCRIPT_ACT_MELEE_ATTACK2)
 		{
 			FlameCreate();
 			m_flWaitFinished = gpGlobals->time + 4.5f;
@@ -1346,6 +1346,31 @@ void CGargantua::RunTask( Task_t *pTask )
 		else
 			CFollowingMonster::RunTask( pTask );
 		break;
+	case TASK_PLAY_SCRIPT:
+		if (m_pCine->IsAction() && m_pCine->m_fAction == SCRIPT_ACT_MELEE_ATTACK2)
+		{
+			if (m_fSequenceFinished)
+			{
+				if (m_pCine->m_iRepeatsLeft > 0)
+					CBaseMonster::RunTask( pTask );
+				else
+				{
+					FlameOffSound();
+					FlameDestroy();
+					FlameControls( 0, 0 );
+					SetBoneController( 0, 0 );
+					SetBoneController( 1, 0 );
+					m_pCine->SequenceDone( this );
+				}
+				break;
+			}
+			//if not finished, drop through into task_flame_sweep!
+		}
+		else
+		{
+			CBaseMonster::RunTask( pTask );
+			break;
+		}
 	case TASK_FLAME_SWEEP:
 		if( gpGlobals->time > m_flWaitFinished )
 		{
@@ -1363,12 +1388,33 @@ void CGargantua::RunTask( Task_t *pTask )
 			Vector angles = g_vecZero;
 
 			FlameUpdate();
-			CBaseEntity *pEnemy = m_hEnemy;
-			if( pEnemy )
+
+			Vector org = pev->origin;
+			org.z += 64;
+			Vector dir = g_vecZero;
+
+			if (m_pCine) // LRC- are we obeying a scripted_action?
 			{
-				Vector org = pev->origin;
-				org.z += 64;
-				Vector dir = pEnemy->BodyTarget( org ) - org;
+				if (m_hTargetEnt != 0 && m_hTargetEnt != m_pGoalEnt)
+				{
+					dir = m_hTargetEnt->BodyTarget( org ) - org;
+				}
+				else
+				{
+					UTIL_MakeVectors( pev->angles );
+					dir = gpGlobals->v_forward;
+				}
+			}
+			else
+			{
+				CBaseEntity *pEnemy = m_hEnemy;
+				if (pEnemy)
+				{
+					dir = pEnemy->BodyTarget( org ) - org;
+				}
+			}
+			if( dir != g_vecZero )
+			{
 				angles = UTIL_VecToAngles( dir );
 				angles.x = -angles.x;
 				angles.y -= pev->angles.y;
