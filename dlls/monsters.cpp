@@ -364,9 +364,11 @@ void CBaseMonster::Look( int iDistance )
 				CBaseMonster* pSightMonster = pSightEnt->MyMonsterPointer();
 				if (pSightMonster && pSightMonster->m_prisonerTo != 0 && pSightMonster->m_prisonerTo == Classify())
 					continue;
+
+				const int iRelationship = IRelationship( pSightEnt );
 				// the looker will want to consider this entity
 				// don't check anything else about an entity that can't be seen, or an entity that you don't care about.
-				if( IRelationship( pSightEnt ) != R_NO && FInViewCone( pSightEnt ) && !FBitSet( pSightEnt->pev->flags, FL_NOTARGET ) && FVisible( pSightEnt ) )
+				if( iRelationship != R_NO && FInViewCone( pSightEnt ) && !FBitSet( pSightEnt->pev->flags, FL_NOTARGET ) && FVisible( pSightEnt ) )
 				{
 					if( pSightEnt->IsPlayer() )
 					{
@@ -402,7 +404,7 @@ void CBaseMonster::Look( int iDistance )
 
 					// don't add the Enemy's relationship to the conditions. We only want to worry about conditions when
 					// we see monsters other than the Enemy.
-					switch( IRelationship( pSightEnt ) )
+					switch( iRelationship )
 					{
 					case R_NM:
 						iSighted |= bits_COND_SEE_NEMESIS;		
