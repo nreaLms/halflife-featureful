@@ -3077,19 +3077,13 @@ void CTriggerRandom::KeyValue( KeyValueData *pkvd )
 		}
 		pkvd->fHandled = TRUE;
 	} else if ( strncmp(pkvd->szKeyName, "target", 6) == 0 && isdigit(pkvd->szKeyName[6])) {
-		pkvd->fHandled = FALSE;
-		char buf[10] = "target";
-		for (int i=0; i<TRIGGER_RANDOM_MAX_COUNT; ++i) {
-			sprintf(buf+6, "%d", i+1);
-			if (strcmp(buf+6, pkvd->szKeyName+6) == 0) {
-				m_targets[i] = ALLOC_STRING( pkvd->szValue );
-				pkvd->fHandled = TRUE;
-				break;
-			}
-		}
-		if (pkvd->fHandled == FALSE) {
-			CBaseEntity::KeyValue( pkvd );
-		}
+		const int num = atoi(pkvd->szKeyName+6);
+		if (num <= 0 || num > TRIGGER_RANDOM_MAX_COUNT)
+			return;
+
+		const int index = num - 1;
+		m_targets[index] = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
 	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_limit") ) {
 		m_triggerOnLimit = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
