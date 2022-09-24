@@ -1008,6 +1008,12 @@ void EV_FireGauss( event_args_t *args )
 		if( tr.allsolid )
 			break;
 
+		const float beamBrightness = (m_fPrimaryFire ? 128.0f : flDamage) / 255.0f;
+		const float beamR = (m_fPrimaryFire ? 255 : 255) / 255.0f;
+		const float beamG = (m_fPrimaryFire ? 128 : 255) / 255.0f;
+		const float beamB = (m_fPrimaryFire ? 0 : 255) / 255.0f;
+		const float beamWidth = m_fPrimaryFire ? 1.0f : 2.5f;
+
 		if( fFirstBeam )
 		{
 			if( EV_IsLocal( idx ) )
@@ -1022,15 +1028,15 @@ void EV_FireGauss( event_args_t *args )
 				tr.endpos,
 				m_iBeam,
 				0.1f,
-				m_fPrimaryFire ? 1.0f : 2.5f,
+				beamWidth,
 				0.0f,
-				(m_fPrimaryFire ? 128.0f : flDamage) / 255.0f,
+				beamBrightness,
 				0,
 				0,
 				0,
-				(m_fPrimaryFire ? 255 : 255) / 255.0f,
-				(m_fPrimaryFire ? 128 : 255) / 255.0f,
-				(m_fPrimaryFire ? 0 : 255) / 255.0f
+				beamR,
+				beamG,
+				beamB
 			);
 		}
 		else
@@ -1039,15 +1045,15 @@ void EV_FireGauss( event_args_t *args )
 				tr.endpos,
 				m_iBeam,
 				0.1f,
-				m_fPrimaryFire ? 1.0f : 2.5f,
+				beamWidth,
 				0.0f,
-				(m_fPrimaryFire ? 128.0f : flDamage) / 255.0f,
+				beamBrightness,
 				0,
 				0,
 				0,
-				(m_fPrimaryFire ? 255 : 255) / 255.0f,
-				(m_fPrimaryFire ? 128 : 255) / 255.0f,
-				(m_fPrimaryFire ? 0 : 255) / 255.0f
+				beamR,
+				beamG,
+				beamB
 			);
 		}
 
