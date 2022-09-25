@@ -1010,13 +1010,13 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 		player->GiveNamedItem("item_suit", (m_suitLogon ? (1 << (m_suitLogon-1)) : m_suitLogon) | SF_ITEM_NOFALL);
 		if (pev->spawnflags & SF_PLAYER_SETTINGS_LONGJUMP)
 		{
-			player->GiveNamedItem("item_longjump");
+			player->GiveNamedItem("item_longjump", SF_ITEM_NOFALL);
 		}
 	}
 
 #if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_FLASHLIGHT)
-		player->GiveNamedItem("item_flashlight");
+		player->GiveNamedItem("item_flashlight", SF_ITEM_NOFALL);
 #endif
 
 	const int weaponFlags[] = {
