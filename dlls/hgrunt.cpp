@@ -855,9 +855,6 @@ void CHGrunt::PlayFirstBurstSounds()
 
 void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
-	Vector vecShootDir;
-	Vector vecShootOrigin;
-
 	switch( pEvent->event )
 	{
 		case HGRUNT_AE_DROP_GUN:

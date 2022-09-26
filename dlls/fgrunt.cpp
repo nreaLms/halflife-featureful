@@ -1700,9 +1700,6 @@ void CHFGrunt :: M249 ( void )
 //=========================================================
 void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 {
-	Vector	vecShootDir;
-	Vector	vecShootOrigin;
-
 	switch( pEvent->event )
 	{
 		case HGRUNT_ALLY_AE_DROP_GUN:
