@@ -493,8 +493,6 @@ public:
 		return pev->origin + gpGlobals->v_forward * 36 + Vector(0,0,20);
 	}
 
-	bool CanSpawnBeams() const;
-
 	int m_iBravery;
 
 	CBeam *m_pBeam[ISLAVE_MAX_BEAMS];
@@ -830,21 +828,18 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				Vector vecSrc = pev->origin + gpGlobals->v_forward * 2;
 				MakeDynamicLight(vecSrc, 12, (int)(20/pev->framerate));
 			}
-			if (CanSpawnBeams())
+			if( CanRevive() )
 			{
-				if( CanRevive() )
-				{
-					WackBeam( ISLAVE_LEFT_ARM, m_hDead );
-					WackBeam( ISLAVE_RIGHT_ARM, m_hDead );
-				}
-				else
-				{
-					ArmBeam( ISLAVE_LEFT_ARM );
-					ArmBeam( ISLAVE_RIGHT_ARM );
-					BeamGlow();
-				}
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100 + m_iBeams * 10 );
+				WackBeam( ISLAVE_LEFT_ARM, m_hDead );
+				WackBeam( ISLAVE_RIGHT_ARM, m_hDead );
 			}
+			else
+			{
+				ArmBeam( ISLAVE_LEFT_ARM );
+				ArmBeam( ISLAVE_RIGHT_ARM );
+				BeamGlow();
+			}
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100 + m_iBeams * 10 );
 		}
 			break;
 		case ISLAVE_AE_ZAP_SHOOT:
@@ -1155,6 +1150,10 @@ void CISlave::StartTask( Task_t *pTask )
 		}
 		break;
 	}
+	case TASK_WAIT_FOR_MOVEMENT:
+		// a hack to prevent vortigaunts running with beams caused by dangling events from the attack animation
+		m_IdealActivity = ACT_IDLE;
+		// fallthrough
 	default:
 		CFollowingMonster::StartTask( pTask );
 		break;
@@ -2142,12 +2141,6 @@ Vector CISlave::GetArmBeamColor(int &brightness)
 #endif
 	brightness = 64;
 	return Vector(ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE);
-}
-
-bool CISlave::CanSpawnBeams() const
-{
-	// TODO: Not sure if this is good
-	return m_pSchedule == slSlaveAttack1 || m_pSchedule == slSlaveHealOrReviveAttack;
 }
 
 void CISlave::PlayUseSentence()
