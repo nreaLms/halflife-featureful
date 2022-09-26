@@ -2226,6 +2226,7 @@
 		16: "Auto-return" : 0
 		64: "X Axis" : 0
 		128: "Y Axis" : 0
+		256: "Rotate both ways" : 0
 	]
 	_minlight(string) : "Minimum light level"
 ]

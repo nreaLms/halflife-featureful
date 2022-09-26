@@ -699,6 +699,9 @@ void CFuncRotating::Blocked( CBaseEntity *pOther )
 	pOther->TakeDamage( pev, pev, pev->dmg, DMG_CRUSH );
 }
 //#endif
+
+#define	SF_PENDULUM_BOTHWAYS 256
+
 class CPendulum : public CBaseEntity
 {
 public:
@@ -777,10 +780,14 @@ void CPendulum::Spawn( void )
 	if( pev->speed == 0.0f )
 		pev->speed = 100.0f;
 
-	m_accel = ( pev->speed * pev->speed ) / ( 2.0f * fabs( m_distance ) );	// Calculate constant acceleration from speed and distance
+	const float multiplier = (FBitSet(pev->spawnflags, SF_PENDULUM_BOTHWAYS)) ? 1.0f : 2.0f;
+	m_accel = ( pev->speed * pev->speed ) / ( multiplier * fabs( m_distance ) );	// Calculate constant acceleration from speed and distance
 	m_maxSpeed = pev->speed;
 	m_start = pev->angles;
-	m_center = pev->angles + ( m_distance * 0.5f ) * pev->movedir;
+	if (FBitSet(pev->spawnflags, SF_PENDULUM_BOTHWAYS))
+		m_center = m_start;
+	else
+		m_center = pev->angles + ( m_distance * 0.5f ) * pev->movedir;
 
 	if( FBitSet( pev->spawnflags, SF_BRUSH_ROTATE_INSTANT ) )
 	{	
