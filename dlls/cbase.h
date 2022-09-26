@@ -386,6 +386,7 @@ public:
 	virtual CBasePlayerWeapon* MyWeaponPointer() {return NULL;}
 
 	virtual bool IsAlienMonster() { return false; }
+	virtual bool IsMachine() { return DefaultClassify() == CLASS_MACHINE; }
 	virtual float InputByMonster(CBaseMonster* pMonster) { return 0.0f; }
 	virtual NODE_LINKENT HandleLinkEnt(int afCapMask, bool nodeQueryStatic) { return NLE_PROHIBIT; }
 };
