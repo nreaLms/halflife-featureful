@@ -45,7 +45,7 @@ protected:
 };
 
 // No need for goldsource input support on the platforms that are not supported by GoldSource.
-#if GOLDSOURCE_SUPPORT && (_WIN32 || __linux__ || __APPLE__) && (__i386 || _M_IX86)
+#if GOLDSOURCE_SUPPORT && (_WIN32 || (__linux__ && !__ANDROID__) || __APPLE__) && (__i386 || _M_IX86)
 #define SUPPORT_GOLDSOURCE_INPUT	1
 
 #if _WIN32
