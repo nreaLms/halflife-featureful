@@ -2142,7 +2142,6 @@ Schedule_t* CHFGrunt :: GetScheduleOfType ( int Type )
 {
 	switch( Type )
 	{
-	// Hook these to make a looping schedule
 	case SCHED_TAKE_COVER_FROM_ENEMY:
 		{
 			return &slFGruntTakeCover[ 0 ];

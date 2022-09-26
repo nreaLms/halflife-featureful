@@ -552,7 +552,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 		float flGravity = g_psv_gravity->value;
 
-		// throw the squid up into the air on this frame.
+		// throw the pitdrone up into the air on this frame.
 		if( FBitSet( pev->flags, FL_ONGROUND ) )
 		{
 			pev->flags -= FL_ONGROUND;

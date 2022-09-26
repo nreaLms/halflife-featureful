@@ -1106,9 +1106,6 @@ Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot
 
 	// Don't worry about actually hitting the target, this won't hurt us!
 
-	// TODO: Need another way to calculate height because current calculation is completely wrong
-	// and there posible crash.
-
 	// How high should the grenade travel (subtract 15 so the grenade doesn't hit the ceiling)?
 	const float height = vecApex.z - vecSpot1.z - 15.0f;
 	if (height < 0)

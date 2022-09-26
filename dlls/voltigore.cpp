@@ -1404,6 +1404,7 @@ Schedule_t *CBabyVoltigore::GetSchedule(void)
 Schedule_t *CBabyVoltigore::GetScheduleOfType(int Type)
 {
 	switch (Type) {
+	// TODO:
 	// For some cryptic reason baby voltigore tries to start the range attack even though its model does not have sequence with range attack activity. 
 	// This hack is for preventing baby voltigore to do this.
 	case SCHED_RANGE_ATTACK1:
