@@ -483,7 +483,7 @@ public:
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
-		if( pPlayer->pev->weapons & ( 1<<WEAPON_SUIT ) )
+		if( pPlayer->HasSuit() )
 			return FALSE;
 
 		if ( pev->spawnflags & SF_SUIT_NOLOGON )
@@ -499,11 +499,11 @@ public:
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_AAx" );	// long version of suit logon
 		}
 
-		pPlayer->pev->weapons |= ( 1 << WEAPON_SUIT );
+		pPlayer->m_iItemsBits |= PLAYER_ITEM_SUIT;
 #if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
 		if (FBitSet(pev->spawnflags, SF_SUIT_FLASHLIGHT))
 		{
-			pPlayer->pev->weapons |= ( 1 << WEAPON_FLASHLIGHT );
+			pPlayer->m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
 		}
 #endif
 		return TRUE;
@@ -533,8 +533,7 @@ public:
 			return FALSE;
 		}
 
-		if( ( pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY ) &&
-			( pPlayer->pev->weapons & ( 1 << WEAPON_SUIT ) ) )
+		if( ( pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY ) && pPlayer->HasSuit() )
 		{
 			pPlayer->pev->armorvalue += pev->health > 0 ? pev->health : DefaultCapacity();
 			pPlayer->pev->armorvalue = Q_min( pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY );
@@ -696,7 +695,7 @@ class CItemLongJump : public CItem
 			return FALSE;
 		}
 
-		if( ( pPlayer->pev->weapons & ( 1 << WEAPON_SUIT ) ) )
+		if( pPlayer->HasSuit() )
 		{
 			pPlayer->m_fLongJump = TRUE;// player now has longjump module
 
@@ -731,9 +730,9 @@ class CItemFlashlight : public CItem
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
-		if ( pPlayer->pev->weapons & (1<<WEAPON_FLASHLIGHT) )
+		if ( pPlayer->HasFlashlight() )
 			return FALSE;
-		pPlayer->pev->weapons |= (1<<WEAPON_FLASHLIGHT);
+		pPlayer->m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING(pev->classname) );
 		MESSAGE_END();

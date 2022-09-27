@@ -46,6 +46,8 @@ int CHud::MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 	}
 	m_Nightvision.Reset();
 
+	m_iItemBits = 0;
+
 	// reset sensitivity
 	m_flMouseSensitivity = 0;
 

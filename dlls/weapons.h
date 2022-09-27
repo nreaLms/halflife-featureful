@@ -20,6 +20,7 @@
 #include "mod_features.h"
 #include "bullet_types.h"
 #include "weapon_animations.h"
+#include "player_items.h"
 
 class CBasePlayer;
 extern int gmsgWeapPickup;
@@ -123,17 +124,6 @@ public:
 #if FEATURE_UZI
 #define WEAPON_UZI				27
 #endif
-
-#if FEATURE_FLASHLIGHT_ITEM
-#define WEAPON_ALLWEAPONS		(~((1<<WEAPON_SUIT)|(1<<WEAPON_FLASHLIGHT)))
-#else
-#define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
-#endif
-
-#if FEATURE_FLASHLIGHT_ITEM
-#define WEAPON_FLASHLIGHT	30
-#endif
-#define WEAPON_SUIT				31	// ?????
 
 #define MAX_NORMAL_BATTERY	100
 

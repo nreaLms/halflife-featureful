@@ -19,6 +19,7 @@
 #pragma once
 #if !defined(CDLL_DLL_H)
 #define CDLL_DLL_H
+#include "player_items.h"
 #include "mod_features.h"
 
 #define MAX_WEAPONS		32
@@ -46,8 +47,4 @@
 #define HUD_PRINTTALK		3
 #define HUD_PRINTCENTER		4
 
-#if FEATURE_FLASHLIGHT_ITEM
-#define WEAPON_FLASHLIGHT	30
-#endif
-#define WEAPON_SUIT		31
 #endif

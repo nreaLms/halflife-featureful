@@ -258,6 +258,15 @@ public:
 	BOOL SwitchWeapon( CBasePlayerWeapon *pWeapon );
 	BOOL SwitchToBestWeapon();
 
+	bool HasSuit() const
+	{
+		return (m_iItemsBits & PLAYER_ITEM_SUIT) != 0;
+	}
+	bool HasFlashlight() const
+	{
+		return (m_iItemsBits & PLAYER_ITEM_FLASHLIGHT) != 0;
+	}
+
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
 	virtual void UpdateClientData( void );
 	
@@ -422,6 +431,9 @@ public:
 	void LetGoRope(float delay = 2.0f);
 	bool SetClosestOriginOnRope(const Vector& vecPos);
 #endif
+	int m_iItemsBits;
+	int m_iClientItemsBits;
+
 	BOOL m_settingsLoaded;
 	BOOL m_buddha;
 };

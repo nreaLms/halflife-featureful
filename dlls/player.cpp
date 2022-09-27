@@ -126,6 +126,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 #if FEATURE_ROPE
 	DEFINE_FIELD(CBasePlayer, m_pRope, FIELD_CLASSPTR),
 #endif
+	DEFINE_FIELD(CBasePlayer, m_iItemsBits, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBasePlayer, m_buddha, FIELD_BOOLEAN),
 
@@ -196,6 +197,7 @@ int gmsgGeigerRange = 0;
 int gmsgTeamNames = 0;
 int gmsgBhopcap = 0;
 int gmsgPlayMP3 = 0;
+int gmsgItems = 0;
 int gmsgHUDColor = 0;
 
 int gmsgStatusText = 0;
@@ -260,6 +262,7 @@ void LinkUserMessages( void )
 	gmsgTeamNames = REG_USER_MSG( "TeamNames", -1 );
 	gmsgBhopcap = REG_USER_MSG( "Bhopcap", 1 );
 	gmsgPlayMP3 = REG_USER_MSG( "PlayMP3", -1 );
+	gmsgItems = REG_USER_MSG( "Items", 4 );
 	gmsgHUDColor = REG_USER_MSG( "HUDColor", 4 );
 
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
@@ -919,12 +922,12 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 		FlashlightTurnOff(false);
 	}
 
-	pev->weapons &= ~WEAPON_ALLWEAPONS;
+	pev->weapons = 0;
 	if( FBitSet(stripFlags, STRIP_SUIT) )
-		pev->weapons &= ~(1 << WEAPON_SUIT);
+		m_iItemsBits &= ~PLAYER_ITEM_SUIT;
 #if FEATURE_FLASHLIGHT_ITEM
 	if ( FBitSet(stripFlags, STRIP_FLASHLIGHT) )
-		pev->weapons &= ~(1 << WEAPON_FLASHLIGHT);
+		m_iItemsBits &= ~PLAYER_ITEM_FLASHLIGHT;
 #endif
 
 	if (FBitSet(stripFlags, STRIP_LONGJUMP)) {
@@ -2817,7 +2820,7 @@ void CBasePlayer::CheckSuitUpdate()
 	int isearch = m_iSuitPlayNext;
 
 	// Ignore suit updates if no suit
-	if( !( pev->weapons & ( 1 << WEAPON_SUIT ) ) )
+	if( !HasSuit() )
 		return;
 
 	// if in range of radiation source, ping geiger counter
@@ -2882,7 +2885,7 @@ void CBasePlayer::SetSuitUpdate( const char *name, int fgroup, int iNoRepeatTime
 	int iempty = -1;
 
 	// Ignore suit updates if no suit
-	if( !( pev->weapons & ( 1 << WEAPON_SUIT ) ) )
+	if( !HasSuit() )
 		return;
 
 #if FEATURE_SUIT_NO_SOUNDS
@@ -3856,10 +3859,10 @@ void CBasePlayer::FlashlightTurnOn( void )
 
 	bool hasFlashlight = false;
 #if FEATURE_FLASHLIGHT_ITEM
-	hasFlashlight = hasFlashlight || (pev->weapons & (1 << WEAPON_FLASHLIGHT));
+	hasFlashlight = hasFlashlight || HasFlashlight();
 #endif
 #if FEATURE_SUIT_FLASHLIGHT
-	hasFlashlight = hasFlashlight || (pev->weapons & (1 << WEAPON_SUIT));
+	hasFlashlight = hasFlashlight || HasSuit();
 #endif
 	if( hasFlashlight )
 	{
@@ -4624,6 +4627,14 @@ void CBasePlayer::UpdateClientData( void )
 		// send "health" update message
 		MESSAGE_BEGIN( MSG_ONE, gmsgBattery, NULL, pev );
 			WRITE_SHORT( (int)pev->armorvalue );
+		MESSAGE_END();
+	}
+
+	if (m_iItemsBits != m_iClientItemsBits)
+	{
+		m_iClientItemsBits = m_iItemsBits;
+		MESSAGE_BEGIN( MSG_ONE, gmsgItems, NULL, pev );
+		WRITE_LONG( m_iItemsBits );
 		MESSAGE_END();
 	}
 

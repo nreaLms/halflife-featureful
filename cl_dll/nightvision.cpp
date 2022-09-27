@@ -119,7 +119,7 @@ int CHudNightvision::Draw(float flTime)
 		return 1;
 
 	// Only display this if the player is equipped with the suit.
-	if (!(gHUD.m_iWeaponBits & (1 << (WEAPON_SUIT))))
+	if (!gHUD.HasSuit())
 		return 1;
 
 	if (m_fOn) {

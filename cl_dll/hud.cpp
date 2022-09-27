@@ -128,6 +128,11 @@ int __MsgFunc_Logo( const char *pszName, int iSize, void *pbuf )
 	return gHUD.MsgFunc_Logo( pszName, iSize, pbuf );
 }
 
+int __MsgFunc_Items(const char* pszName, int iSize, void* pbuf)
+{
+	return gHUD.MsgFunc_Items(pszName, iSize, pbuf);
+}
+
 int __MsgFunc_HUDColor(const char *pszName, int iSize, void *pbuf)
 {
 	return gHUD.MsgFunc_HUDColor(pszName, iSize, pbuf );
@@ -391,6 +396,7 @@ void CHud::Init( void )
 	HOOK_MESSAGE( ViewMode );
 	HOOK_MESSAGE( SetFOV );
 	HOOK_MESSAGE( Concuss );
+	HOOK_MESSAGE( Items );
 	HOOK_MESSAGE( HUDColor );
 	HOOK_MESSAGE( SetFog );
 
@@ -723,6 +729,13 @@ int CHud::MsgFunc_Logo( const char *pszName,  int iSize, void *pbuf )
 	return 1;
 }
 
+int CHud::MsgFunc_Items(const char *pszName,  int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+	m_iItemBits = READ_LONG();
+	return 1;
+}
+
 int CHud::MsgFunc_HUDColor(const char *pszName,  int iSize, void *pbuf)
 {
 	BEGIN_READ( pbuf, iSize );
@@ -954,8 +967,7 @@ int CHudMoveMode::VidInit()
 
 int CHudMoveMode::Draw(float flTime)
 {
-	if ( gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & HIDEHUD_ALL)
-		 || !( gHUD.m_iWeaponBits & (1 << (WEAPON_SUIT))) )
+	if ( gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & HIDEHUD_ALL) || !gHUD.HasSuit() )
 	{
 		return 1;
 	}

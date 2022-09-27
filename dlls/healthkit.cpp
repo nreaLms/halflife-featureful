@@ -299,7 +299,7 @@ void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pActivator->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) )
+	if( ( m_iJuice <= 0 ) || !(static_cast<CBasePlayer*>(pActivator))->HasSuit() )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
@@ -626,7 +626,7 @@ void CWallHealthDecay::SearchForPlayer()
 	CBaseEntity* pEntity = 0;
 	UTIL_MakeVectors( pev->angles );
 	while((pEntity = UTIL_FindEntityInSphere(pEntity, Center(), 64)) != 0) { // this must be in sync with PLAYER_SEARCH_RADIUS from player.cpp
-		if (pEntity->IsPlayer() && pEntity->IsAlive() && FBitSet(pEntity->pev->weapons, 1 << WEAPON_SUIT)) {
+		if (pEntity->IsPlayer() && pEntity->IsAlive() && (static_cast<CBasePlayer*>(pEntity))->HasSuit()) {
 			if (DotProduct(pEntity->pev->origin - pev->origin, gpGlobals->v_forward) < 0) {
 				continue;
 			}
@@ -691,10 +691,10 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	if( !pCaller->IsPlayer() )
 		return;
 
-	CBaseEntity* pPlayer = pCaller;
+	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pCaller);
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !( pPlayer->pev->weapons & ( 1 << WEAPON_SUIT ) ) ) )
+	if( ( m_iJuice <= 0 ) || !pPlayer->HasSuit() )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{

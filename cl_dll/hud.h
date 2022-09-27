@@ -673,6 +673,21 @@ public:
 	int m_iHUDColor;
 
 	int MinHUDAlpha();
+
+	bool HasSuit() const
+	{
+		return (m_iItemBits & PLAYER_ITEM_SUIT) != 0;
+	}
+	bool HasFlashlight() const
+	{
+		if ((m_iItemBits & PLAYER_ITEM_FLASHLIGHT) != 0)
+			return true;
+#if FEATURE_SUIT_FLASHLIGHT
+		return HasSuit();
+#else
+		return false;
+#endif
+	}
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()
@@ -739,6 +754,7 @@ public:
 	int _cdecl MsgFunc_SetFOV( const char *pszName,  int iSize, void *pbuf );
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
 
+	int _cdecl MsgFunc_Items(const char* pszName, int iSize, void* pbuf);
 	int _cdecl MsgFunc_HUDColor( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf );
 
@@ -746,6 +762,7 @@ public:
 	SCREENINFO	m_scrinfo;
 
 	int	m_iWeaponBits;
+	int m_iItemBits;
 	int	m_fPlayerDead;
 	int m_iIntermission;
 

@@ -24,6 +24,7 @@
 #include	"schedule.h"
 #include	"effects.h"
 #include	"weapons.h"
+#include	"player.h"
 #include	"soundent.h"
 #include	"mod_features.h"
 
@@ -231,7 +232,7 @@ void CChargeToken::Precache()
 
 void CChargeToken::ArmorPieceTouch(CBaseEntity *pOther)
 {
-	if (pOther->IsPlayer() && ( pOther->pev->weapons & ( 1 << WEAPON_SUIT ) ))
+	if (pOther->IsPlayer() && (static_cast<CBasePlayer*>(pOther))->HasSuit())
 	{
 		pOther->pev->armorvalue += pev->health;
 		pOther->pev->armorvalue = Q_min(pOther->pev->armorvalue, MAX_NORMAL_BATTERY);

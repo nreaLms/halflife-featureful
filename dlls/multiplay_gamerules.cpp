@@ -120,17 +120,18 @@ void SavePlayerStates()
 	int j = 0;
 	for( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
-		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
-		if (pPlayer && pPlayer->IsPlayer() && pPlayer->IsAlive())
+		CBaseEntity *pEntity = UTIL_PlayerByIndex( i );
+		if (pEntity && pEntity->IsPlayer() && pEntity->IsAlive())
 		{
+			CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pEntity);
 			PlayerState* state = &g_playerStates[j];
 			strncpy(state->uid, GetAuthID(pPlayer), sizeof(state->uid) - 1);
 			strncpy(state->nickname, STRING(pPlayer->pev->netname), sizeof(state->nickname) - 1);
 
-			state->hasSuit = (pPlayer->pev->weapons & ( 1 << WEAPON_SUIT )) != 0;
-			state->health = pPlayer->pev->health;
-			state->armor = pPlayer->pev->armorvalue;
-			CBasePlayer* player = (CBasePlayer*)pPlayer;
+			state->hasSuit = pPlayer->HasSuit();
+			state->health = pEntity->pev->health;
+			state->armor = pEntity->pev->armorvalue;
+			CBasePlayer* player = (CBasePlayer*)pEntity;
 			state->hasLongjump = player->m_fLongJump;
 
 			if (player->m_pActiveItem != 0)
@@ -166,7 +167,7 @@ bool RestorePlayerState(CBasePlayer* player)
 			player->pev->health = state->health;
 			player->pev->armorvalue = state->armor;
 			if (state->hasSuit)
-				player->pev->weapons |= ( 1 << WEAPON_SUIT );
+				player->m_iItemsBits |= PLAYER_ITEM_SUIT;
 			if (state->hasLongjump)
 			{
 				player->m_fLongJump = TRUE;
@@ -957,7 +958,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	}
 
 	if (giveSuit)
-		pPlayer->pev->weapons |= ( 1 << WEAPON_SUIT );
+		pPlayer->m_iItemsBits |= PLAYER_ITEM_SUIT;
 
 	while( ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ) ) )
 	{
