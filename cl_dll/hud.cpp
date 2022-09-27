@@ -957,10 +957,10 @@ int CHudMoveMode::VidInit()
 	m_hSpriteCrouch = gHUD.GetSprite(HUD_mode_crouch);
 	m_hSpriteJump = gHUD.GetSprite(HUD_mode_jump);
 
-	m_prcStand = &gHUD.GetSpriteRect(HUD_mode_stand);
-	m_prcRun = &gHUD.GetSpriteRect(HUD_mode_run);
-	m_prcCrouch = &gHUD.GetSpriteRect(HUD_mode_crouch);
-	m_prcJump = &gHUD.GetSpriteRect(HUD_mode_jump);
+	m_prcStand = gHUD.GetSpriteRectPointer(HUD_mode_stand);
+	m_prcRun = gHUD.GetSpriteRectPointer(HUD_mode_run);
+	m_prcCrouch = gHUD.GetSpriteRectPointer(HUD_mode_crouch);
+	m_prcJump = gHUD.GetSpriteRectPointer(HUD_mode_jump);
 
 	return 1;
 }
@@ -972,29 +972,33 @@ int CHudMoveMode::Draw(float flTime)
 		return 1;
 	}
 	int r, g, b, x, y;
-	wrect_t rc;
+	wrect_t* prc;
 	HSPRITE sprite;
-	UnpackRGB( r,g,b, RGB_YELLOWISH );
+	UnpackRGB( r,g,b, gHUD.HUDColor() );
 
 	switch (m_movementState) {
 	case MovementRun:
 		sprite = m_hSpriteRun;
-		rc = *m_prcRun;
+		prc = m_prcRun;
 		break;
 	case MovementCrouch:
 		sprite = m_hSpriteCrouch;
-		rc = *m_prcCrouch;
+		prc = m_prcCrouch;
 		break;
 	case MovementJump:
 		sprite = m_hSpriteJump;
-		rc = *m_prcJump;
+		prc = m_prcJump;
 		break;
 	default:
 		sprite = m_hSpriteStand;
-		rc = *m_prcStand;
+		prc = m_prcStand;
 		break;
 	}
 
+	if (!sprite || !prc)
+		return 1;
+
+	const wrect_t rc = *prc;
 	int width = rc.right - rc.left;
 	y = ( rc.bottom - rc.top ) * 2;
 	x = ScreenWidth - width - width / 2;

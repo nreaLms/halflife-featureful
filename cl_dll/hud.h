@@ -706,6 +706,13 @@ public:
 	{
 		return m_rgrcRects[index];
 	}
+
+	wrect_t* GetSpriteRectPointer( int index )
+	{
+		if (index < 0 || index >= m_iSpriteCount)
+			return NULL;
+		return &m_rgrcRects[index];
+	}
 	
 	int GetSpriteIndex( const char *SpriteName );	// gets a sprite index, for use in the m_rghSprites[] array
 
