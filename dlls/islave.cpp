@@ -898,6 +898,11 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 			bool coilAttack = false;
 			if (g_modFeatures.vortigaunt_coil_attack)
 			{
+				if (m_Activity == ACT_SPECIAL_ATTACK1 && m_pCine)
+				{
+					coilAttack = true;
+					ALERT(at_aiconsole, "Vort makes coil attack due to the script\n");
+				}
 				// make coil attack on purpose to heal only if two wounded friends around
 				if ( HasFreeEnergy() && IsValidHealTarget(m_hWounded) && IsValidHealTarget(m_hWounded2) &&
 						(pev->origin - m_hWounded->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS &&
@@ -905,7 +910,6 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 					if (m_hWounded.Get() == m_hWounded2.Get()) {
 						ALERT(at_console, "m_hWounded && m_hWounded2 are the same!\n");
 					}
-
 					coilAttack = true;
 					ALERT(at_aiconsole, "Vort makes coil attack to heal friends\n");
 				} else if ( m_hEnemy != 0 && (pev->origin - m_hEnemy->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS && !HasMemory(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL) ) {
@@ -1196,6 +1200,10 @@ int CISlave::LookupActivity(int activity)
 	if (activity == ACT_ARM && IDefaultRelationship(CLASS_PLAYER) == R_AL)
 	{
 		return LookupSequence("updown");
+	}
+	else if (activity == ACT_SPECIAL_ATTACK1 && m_pCine)
+	{
+		return LookupSequence("zapattack1");
 	}
 	return CFollowingMonster::LookupActivity(activity);
 }
