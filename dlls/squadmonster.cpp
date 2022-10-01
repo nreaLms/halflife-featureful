@@ -409,7 +409,7 @@ int CSquadMonster::SquadRecruit( int searchRadius, int maxMembers )
 		{
 			CSquadMonster *pRecruit = pEntity->MySquadMonsterPointer();
 
-			if( pRecruit && pRecruit != this && pRecruit->IsFullyAlive() && !pRecruit->m_pCine )
+			if( pRecruit && pRecruit != this && pRecruit->IsFullyAlive() && !pRecruit->m_pCine && !FBitSet(pRecruit->pev->spawnflags, SF_MONSTER_PRISONER) )
 			{
 				// Can we recruit this guy?
 				if( !pRecruit->InSquad() && pRecruit->Classify() == iMyClass &&
@@ -482,6 +482,11 @@ void CSquadMonster::StartMonster( void )
 			{
 				return;
 			}
+		}
+		else // Don't allow prisoners form squads
+		{
+			if (FBitSet(pev->spawnflags, SF_MONSTER_PRISONER))
+				return;
 		}
 
 		// try to form squads now.
