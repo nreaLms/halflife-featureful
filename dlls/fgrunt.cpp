@@ -358,7 +358,7 @@ void CHFGrunt :: KeyValue( KeyValueData *pkvd )
 BOOL CHFGrunt :: FOkToSpeak( void )
 {
 // if someone else is talking, don't speak
-	if (gpGlobals->time <= CTalkMonster::g_talkWaitTime)
+	if ( CTalkMonster::SomeoneIsTalking() )
 		return FALSE;
 
 	// if in the grip of a barnacle, don't speak
@@ -2020,6 +2020,9 @@ void CHFGrunt :: TalkInit()
 
 	m_szGrp[TLK_SHOT] = "FG_SHOT";
 	m_szGrp[TLK_MAD] = "FG_MAD";
+
+	m_szGrp[TLK_KILL] = "FG_KILL";
+	m_szGrp[TLK_ATTACK] = "FG_ATTACK";
 }
 
 //=========================================================
@@ -2038,7 +2041,7 @@ void CHFGrunt::AlertSound()
 {
 	if (m_hEnemy !=0 && FOkToSpeak())
 	{
-		PlaySentence("FG_ATTACK", RandomSentenceDuraion(), VOL_NORM, ATTN_NORM);
+		PlaySentence(m_szGrp[TLK_ATTACK], RandomSentenceDuraion(), VOL_NORM, ATTN_NORM);
 	}
 }
 
@@ -2452,7 +2455,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 
 	if ( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak() )
 	{
-		PlaySentence( "FG_KILL", 4, VOL_NORM, ATTN_NORM );
+		PlaySentence( m_szGrp[TLK_KILL], 4, VOL_NORM, ATTN_NORM );
 	}
 
 	switch( m_MonsterState )
