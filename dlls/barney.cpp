@@ -358,8 +358,6 @@ void CBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 void CBarney::SpawnImpl(const char* modelName, float health)
 {
-	Precache();
-
 	SetMyModel( modelName );
 	SetMySize( DefaultMinHullSize(), DefaultMaxHullSize() );
 
@@ -735,7 +733,7 @@ LINK_ENTITY_TO_CLASS( monster_otis, COtis )
 
 void COtis::Spawn()
 {
-	Precache( );
+	Precache();
 	SpawnImpl("models/otis.mdl", gSkillData.otisHealth);
 	if ( m_iHead == -1 )
 		SetBodygroup(2, RANDOM_LONG(0, 1));
