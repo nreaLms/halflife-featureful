@@ -26,13 +26,15 @@
 
 #define FOG_LIMIT 30000
 
-#if FEATURE_OPFOR_SPECIFIC
-#define RGB_YELLOWISH 0x0000A000
-#else
 #define RGB_YELLOWISH 0x00FFA000 //255,160,0
-#endif
 #define RGB_REDISH 0x00FF1010 //255,160,0
 #define RGB_GREENISH 0x0000A000 //0,160,0
+
+#if FEATURE_OPFOR_SPECIFIC
+#define RGB_HUD_DEFAULT RGB_GREENISH
+#else
+#define RGB_HUD_DEFAULT RGB_YELLOWISH
+#endif
 
 #include "wrect.h"
 #include "cl_dll.h"

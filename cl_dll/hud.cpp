@@ -445,7 +445,7 @@ void CHud::Init( void )
 	m_iLogo = 0;
 	m_iFOV = 0;
 
-	m_iHUDColor = RGB_YELLOWISH;
+	m_iHUDColor = RGB_HUD_DEFAULT;
 
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
