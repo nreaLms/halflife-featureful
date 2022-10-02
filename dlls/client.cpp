@@ -1303,6 +1303,10 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	if(ent->v.flags & FL_FLY )
 		state->eflags |= EFLAG_SLERP;
 	else state->eflags &= ~EFLAG_SLERP;
+
+	CBaseEntity* pEntity = (CBaseEntity*)GET_PRIVATE(ent);
+	if (pEntity)
+		state->eflags |= pEntity->m_EFlags;
 #endif
 
 	state->scale		= ent->v.scale;
