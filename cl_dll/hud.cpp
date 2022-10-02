@@ -20,9 +20,10 @@
 
 #include "hud.h"
 #include "cl_util.h"
-#include <string.h>
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include "parsemsg.h"
+#include "parsetext.h"
 #if USE_VGUI
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
@@ -40,6 +41,46 @@ int g_iTeamNumber;
 int g_iUser1 = 0;
 int g_iUser2 = 0;
 int g_iUser3 = 0;
+
+ConfigurableBooleanValue::ConfigurableBooleanValue() : enabled_by_default(false), configurable(true) {}
+
+ConfigurableBoundedValue::ConfigurableBoundedValue() :
+	defaultValue(0),
+	minValue(0),
+	maxValue(0),
+	configurable(true)
+{}
+
+FlashlightFeatures::FlashlightFeatures()
+{
+	color = 0xFFFFFF;
+	distance = 2048;
+	fade_distance.defaultValue = 600;
+	fade_distance.minValue = 500;
+	fade_distance.maxValue = distance;
+	radius.defaultValue = 100;
+	radius.minValue = 80;
+	radius.maxValue = 200;
+}
+
+ClientFeatures::ClientFeatures() : flashlight()
+{
+	hud_color = RGB_HUD_DEFAULT;
+	hud_color_critical = 0xFF0000;
+	hud_min_alpha = MIN_ALPHA;
+}
+
+static cvar_t* CVAR_CREATE_INTVALUE(const char* name, int value, int flags)
+{
+	char valueStr[12];
+	sprintf(valueStr, "%d", value);
+	return CVAR_CREATE(name, valueStr, flags);
+}
+
+static cvar_t* CVAR_CREATE_BOOLVALUE(const char* name, bool value, int flags)
+{
+	return CVAR_CREATE(name, value ? "1" : "0", flags);
+}
 
 #if USE_VGUI
 #include "vgui_ScorePanel.h"
@@ -452,7 +493,7 @@ void CHud::Init( void )
 	m_iLogo = 0;
 	m_iFOV = 0;
 
-	m_iHUDColor = RGB_HUD_DEFAULT;
+	ParseClientFeatures();
 
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
@@ -465,8 +506,10 @@ void CHud::Init( void )
 	cl_rollangle = gEngfuncs.pfnRegisterVariable ( "cl_rollangle", "0.65", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "300", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
-	cl_weapon_sparks = gEngfuncs.pfnRegisterVariable( "cl_weapon_sparks", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
-	cl_weapon_wallpuff = gEngfuncs.pfnRegisterVariable( "cl_weapon_wallpuff", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	if (clientFeatures.weapon_sparks.configurable)
+		cl_weapon_sparks = CVAR_CREATE_BOOLVALUE( "cl_weapon_sparks", clientFeatures.weapon_sparks.enabled_by_default, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	if (clientFeatures.weapon_wallpuff.configurable)
+		cl_weapon_wallpuff = CVAR_CREATE_BOOLVALUE( "cl_weapon_wallpuff", clientFeatures.weapon_wallpuff.enabled_by_default, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 	cl_muzzlelight = CVAR_CREATE( "cl_muzzlelight", "0", FCVAR_ARCHIVE );
 	cl_muzzlelight_monsters = CVAR_CREATE( "cl_muzzlelight_monsters", "0", FCVAR_ARCHIVE );
@@ -487,9 +530,19 @@ void CHud::Init( void )
 	cl_nvgfilterbrightness = CVAR_CREATE( "cl_nvgfilterbrightness", "0.6", FCVAR_ARCHIVE );
 #endif
 
-	cl_flashlight_custom = CVAR_CREATE( "cl_flashlight_custom", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
-	cl_flashlight_radius = CVAR_CREATE( "cl_flashlight_radius", "100", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
-	cl_flashlight_fade_distance = CVAR_CREATE( "cl_flashlight_fade_distance", "600", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	if (clientFeatures.flashlight.custom.configurable)
+	{
+		cl_flashlight_custom = CVAR_CREATE_BOOLVALUE( "cl_flashlight_custom", clientFeatures.flashlight.custom.enabled_by_default, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	}
+
+	if (clientFeatures.flashlight.radius.configurable)
+	{
+		cl_flashlight_radius = CVAR_CREATE_INTVALUE( "cl_flashlight_radius", clientFeatures.flashlight.radius.defaultValue, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	}
+	if (clientFeatures.flashlight.fade_distance.configurable)
+	{
+		cl_flashlight_fade_distance = CVAR_CREATE_INTVALUE( "cl_flashlight_fade_distance", clientFeatures.flashlight.radius.defaultValue, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	}
 
 	m_pSpriteList = NULL;
 
@@ -541,6 +594,138 @@ void CHud::Init( void )
 	m_Menu.Init();
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
+}
+
+void CHud::ParseClientFeatures()
+{
+	const char* fileName = "featureful_client.cfg";
+	int length = 0;
+	char* const pfile = (char *)gEngfuncs.COM_LoadFile( fileName, 5, &length );
+
+	if( !pfile )
+	{
+		gEngfuncs.Con_DPrintf( "Couldn't open file %s.\n", fileName );
+		return;
+	}
+
+	gEngfuncs.Con_DPrintf("Parsing client features from %s\n", fileName);
+
+	char valueBuf[CLIENT_FEATURE_VALUE_LENGTH+1];
+	int i = 0;
+	while ( i<length )
+	{
+		if (pfile[i] == ' ' || pfile[i] == '\r' || pfile[i] == '\n')
+		{
+			++i;
+		}
+		else if (pfile[i] == '/')
+		{
+			++i;
+			ConsumeLine(pfile, i, length);
+		}
+		else
+		{
+			const int idTokenStart = i;
+			ConsumeNonSpaceCharacters(pfile, i, length);
+
+			const int tokenLength = i - idTokenStart;
+			SkipSpaces(pfile, i, length);
+			const int valueStart = i;
+			ConsumeLine(pfile, i, length);
+			const int valueLength = i - valueStart;
+			if (valueLength == 0)
+			{
+				continue;
+			}
+			if (valueLength > CLIENT_FEATURE_VALUE_LENGTH)
+			{
+				continue;
+			}
+
+			strncpy(valueBuf, pfile + valueStart, valueLength);
+			valueBuf[valueLength] = '\0';
+
+			const char* tokenName = pfile + idTokenStart;
+			if (strncmp("hud_color", tokenName, tokenLength) == 0)
+			{
+				ReadColor(valueBuf, valueLength, clientFeatures.hud_color);
+			}
+			else if (strncmp("hud_min_alpha", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.hud_min_alpha);
+			}
+			else if (strncmp("hud_color_critical", tokenName, tokenLength) == 0)
+			{
+				ReadColor(valueBuf, valueLength, clientFeatures.hud_color_critical);
+			}
+			else if (strncmp("flashlight.custom.enabled_by_default", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.flashlight.custom.enabled_by_default);
+			}
+			else if (strncmp("flashlight.custom.configurable", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.flashlight.custom.configurable);
+			}
+			else if (strncmp("flashlight.color", tokenName, tokenLength) == 0)
+			{
+				ReadColor(valueBuf, valueLength, clientFeatures.flashlight.color);
+			}
+			else if (strncmp("flashlight.distance", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.flashlight.distance);
+			}
+			else if (strncmp("flashlight.radius.default", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.flashlight.radius.defaultValue);
+			}
+			else if (strncmp("flashlight.radius.min", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.flashlight.radius.minValue);
+			}
+			else if (strncmp("flashlight.radius.max", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.flashlight.radius.maxValue);
+			}
+			else if (strncmp("flashlight.fade_distance.default", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.defaultValue);
+			}
+			else if (strncmp("flashlight.radius.configurable", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.flashlight.radius.configurable);
+			}
+			else if (strncmp("flashlight.fade_distance.min", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.minValue);
+			}
+			else if (strncmp("flashlight.fade_distance.max", tokenName, tokenLength) == 0)
+			{
+				ReadInteger(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.maxValue);
+			}
+			else if (strncmp("flashlight.fade_distance.configurable", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.configurable);
+			}
+			else if (strncmp("weapon_wallpuff.enabled_by_default", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.weapon_wallpuff.enabled_by_default);
+			}
+			else if (strncmp("weapon_wallpuff.configurable", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.weapon_wallpuff.configurable);
+			}
+			else if (strncmp("weapon_sparks.enabled_by_default", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.weapon_sparks.enabled_by_default);
+			}
+			else if (strncmp("weapon_sparks.configurable", tokenName, tokenLength) == 0)
+			{
+				ReadBoolean(valueBuf, valueLength, clientFeatures.weapon_sparks.configurable);
+			}
+		}
+	}
+
+	gEngfuncs.COM_FreeFile(pfile);
 }
 
 // CHud destructor
@@ -754,7 +939,7 @@ int CHud::MsgFunc_HUDColor(const char *pszName,  int iSize, void *pbuf)
 {
 	BEGIN_READ( pbuf, iSize );
 
-	m_iHUDColor = READ_LONG();
+	clientFeatures.hud_color = READ_LONG();
 
 	return 1;
 }
@@ -940,6 +1125,27 @@ void CHud::GetAllPlayersInfo()
 #endif
 		}
 	}
+}
+
+bool CHud::WeaponWallpuffEnabled()
+{
+	if (cl_weapon_wallpuff)
+		return cl_weapon_wallpuff->value != 0;
+	return clientFeatures.weapon_wallpuff.enabled_by_default;
+}
+
+bool CHud::WeaponSparksEnabled()
+{
+	if (cl_weapon_sparks)
+		return cl_weapon_sparks->value != 0;
+	return clientFeatures.weapon_sparks.enabled_by_default;
+}
+
+bool CHud::CustomFlashlightEnabled()
+{
+	if (cl_flashlight_custom)
+		return cl_flashlight_custom->value != 0;
+	return clientFeatures.flashlight.custom.enabled_by_default;
 }
 
 #if FEATURE_MOVE_MODE

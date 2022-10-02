@@ -170,9 +170,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 	}
 	else
 	{
-		r = 250;
-		g = 0;
-		b = 0;
+		UnpackRGB( r, g, b, gHUD.HUDColorCritical() );
 	}
 #endif
 }

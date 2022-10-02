@@ -116,6 +116,7 @@ set (CLDLL_SOURCES
 	message.cpp
 	nightvision.cpp
 	parsemsg.cpp
+	parsetext.cpp
 	../pm_shared/pm_debug.c
 	../pm_shared/pm_math.c
 	../pm_shared/pm_shared.c

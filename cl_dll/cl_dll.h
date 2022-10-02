@@ -43,7 +43,7 @@ typedef float vec_t;
 #define _cdecl
 #endif
 #include "exportdef.h"
-#include <string.h>
+#include <cstring>
 #if HAVE_CMATH
 #include <cmath>
 #else

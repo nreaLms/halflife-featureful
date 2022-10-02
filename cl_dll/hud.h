@@ -639,6 +639,49 @@ struct FogProperties
 	bool affectSkybox;
 };
 
+#define CLIENT_FEATURE_VALUE_LENGTH 127
+
+struct ConfigurableBooleanValue
+{
+	ConfigurableBooleanValue();
+	bool enabled_by_default;
+	bool configurable;
+};
+
+struct ConfigurableBoundedValue
+{
+	ConfigurableBoundedValue();
+	int defaultValue;
+	int minValue;
+	int maxValue;
+	bool configurable;
+};
+
+struct FlashlightFeatures
+{
+	FlashlightFeatures();
+
+	ConfigurableBooleanValue custom;
+	int color;
+	int distance;
+	ConfigurableBoundedValue fade_distance;
+	ConfigurableBoundedValue radius;
+};
+
+struct ClientFeatures
+{
+	ClientFeatures();
+
+	int hud_color;
+	int hud_min_alpha;
+	int hud_color_critical;
+
+	FlashlightFeatures flashlight;
+
+	ConfigurableBooleanValue weapon_wallpuff;
+	ConfigurableBooleanValue weapon_sparks;
+};
+
 //
 //-----------------------------------------------------
 //
@@ -679,9 +722,9 @@ public:
 	void DrawDarkRectangle( int x, int y, int wide, int tall );
 
 	int HUDColor();
-	int m_iHUDColor;
-
+	int HUDColorCritical();
 	int MinHUDAlpha();
+	ClientFeatures clientFeatures;
 
 	bool HasSuit() const
 	{
@@ -697,7 +740,12 @@ public:
 		return false;
 #endif
 	}
+	bool WeaponWallpuffEnabled();
+	bool WeaponSparksEnabled();
+	bool CustomFlashlightEnabled();
 private:
+	void ParseClientFeatures();
+
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()
 	HSPRITE *m_rghSprites;	/*[HUD_SPRITE_COUNT]*/			// the sprites loaded from hud.txt
