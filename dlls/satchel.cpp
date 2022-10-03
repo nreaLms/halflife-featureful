@@ -359,6 +359,9 @@ BOOL CSatchel::CanDeploy( void )
 
 BOOL CSatchel::Deploy()
 {
+	if (m_chargeReady == SATCHEL_RELOAD)
+		m_chargeReady = SATCHEL_IDLE;
+
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0f;
 
 	BOOL result;
