@@ -39,6 +39,12 @@
 
 #define SCRIPT_BREAK_CONDITIONS		(bits_COND_LIGHT_DAMAGE|bits_COND_HEAVY_DAMAGE)
 
+//LRC - rearranged into flags
+#define SS_INTERRUPT_IDLE		0x0
+#define SS_INTERRUPT_ALERT		0x1
+#define SS_INTERRUPT_ANYSTATE	0x2
+#define SS_INTERRUPT_SCRIPTS	0x4
+
 enum SCRIPT_MOVE_TYPE
 {
 	SCRIPT_MOVE_NO = 0,
@@ -67,13 +73,6 @@ enum SCRIPT_ACTION
 	SCRIPT_ACT_RELOAD,
 	SCRIPT_ACT_JUMP,
 	SCRIPT_ACT_NO_ACTION,
-};
-
-enum SS_INTERRUPT
-{
-	SS_INTERRUPT_IDLE = 0,
-	SS_INTERRUPT_BY_NAME,
-	SS_INTERRUPT_AI
 };
 
 #define SCRIPT_REQUIRED_FOLLOWER_STATE_UNSPECIFIED 0
@@ -130,7 +129,7 @@ public:
 	void DelayStart( int state );
 	CBaseMonster *FindEntity( void );
 	bool TryFindAndPossessEntity();
-	bool IsAppropriateTarget(CBaseMonster* pTarget, int interruptLevel, bool shouldCheckRadius);
+	bool IsAppropriateTarget(CBaseMonster* pTarget, int interruptFlags, bool shouldCheckRadius);
 	bool AcceptedFollowingState(CBaseMonster* pMonster);
 	virtual void PossessEntity( void );
 
@@ -179,6 +178,7 @@ public:
 	int m_iRepeats; //LRC - number of times to repeat the animation
 	int m_iRepeatsLeft; //LRC
 	float m_fRepeatFrame; //LRC
+	int m_iPriority;
 
 	int m_iDelay;
 	float m_startTime;

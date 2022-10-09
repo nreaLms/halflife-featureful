@@ -920,6 +920,11 @@
 	m_iszFireOnBegin(target_destination): "Fire after moving"
 	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_flRadius(integer) : "Search Radius" : 512
+	m_iPriority(choices) : "Priority" =
+	[
+		0 : "Normal"
+		4 : "Override other sequences"
+	]
 	m_iszMoveTarget(string) : "Move target (blank = this) [LE]"
 	m_fMoveTo(choices) : "Move to Position" : 0 =
 	[

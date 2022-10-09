@@ -205,7 +205,7 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd ) { }
 void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax) {}
 BOOL CBaseMonster::FCheckAITrigger( void ) { return FALSE; }
 BOOL CBaseMonster::FCheckAITrigger( short ) { return FALSE; }
-int CBaseMonster::CanPlaySequence( BOOL fDisregardMonsterState, int interruptLevel ) { return FALSE; }
+int CBaseMonster::CanPlaySequence( int interruptFlags ) { return FALSE; }
 Vector CBaseMonster::ShootAtEnemy( const Vector &shootOrigin ) { return g_vecZero; }
 BOOL CBaseMonster::FacingIdeal( void ) { return FALSE; }
 BOOL CBaseMonster::FCanActiveIdle( void ) { return FALSE; }

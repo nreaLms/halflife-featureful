@@ -131,6 +131,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_iFinishSchedule = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_iPriority"))
+	{
+		m_iPriority = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "m_iszFireOnAnimStart" ) )
 	{
 		m_iszFireOnAnimStart = ALLOC_STRING( pkvd->szValue );
@@ -237,6 +242,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_iRepeats, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_iRepeatsLeft, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_fRepeatFrame, FIELD_FLOAT ),
+	DEFINE_FIELD( CCineMonster, m_iPriority, FIELD_INTEGER ),
 
 	DEFINE_FIELD( CCineMonster, m_interruptionPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_searchPolicy, FIELD_SHORT ),
@@ -418,7 +424,7 @@ CBaseMonster *CCineMonster::FindEntity( void )
 	{
 		if (m_hActivator != 0 && FBitSet(m_hActivator->pev->flags, FL_MONSTER) && (pTarget = m_hActivator->MyMonsterPointer()) != 0 )
 		{
-			if (IsAppropriateTarget(pTarget, SS_INTERRUPT_AI, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
+			if (IsAppropriateTarget(pTarget, m_iPriority | SS_INTERRUPT_ALERT, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
 				return pTarget;
 		}
 		return NULL;
@@ -435,7 +441,7 @@ CBaseMonster *CCineMonster::FindEntity( void )
 			{
 				pTarget = GetMonsterPointer( pentTarget );
 
-				if (IsAppropriateTarget(pTarget, SS_INTERRUPT_BY_NAME, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
+				if (IsAppropriateTarget(pTarget, m_iPriority | SS_INTERRUPT_ALERT, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
 					return pTarget;
 				if (!m_cantPlayReported)
 				{
@@ -461,7 +467,7 @@ CBaseMonster *CCineMonster::FindEntity( void )
 					if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
 					{
 						pTarget = pEntity->MyMonsterPointer();
-						if (IsAppropriateTarget(pTarget, SS_INTERRUPT_IDLE, false))
+						if (IsAppropriateTarget(pTarget, m_iPriority, false))
 						{
 							return pTarget;
 						}
@@ -500,14 +506,11 @@ void CCineMonster::PossessEntity( void )
 
 	if( pTarget )
 	{
-	// FindEntity() just checked this!
-#if 0
-		if( !pTarget->CanPlaySequence( FCanOverrideState() ) )
+		if (pTarget->m_pCine)
 		{
-			ALERT( at_aiconsole, "Can't possess entity %s\n", STRING( pTarget->pev->classname ) );
-			return;
+			pTarget->m_pCine->CancelScript();
 		}
-#endif
+
 		pTarget->m_pGoalEnt = this;
 		pTarget->m_pCine = this;
 		pTarget->m_hTargetEnt = this;
@@ -631,9 +634,11 @@ bool CCineMonster::TryFindAndPossessEntity()
 	}
 }
 
-bool CCineMonster::IsAppropriateTarget(CBaseMonster *pTarget, int interruptLevel, bool shouldCheckRadius)
+bool CCineMonster::IsAppropriateTarget(CBaseMonster *pTarget, int interruptFlags, bool shouldCheckRadius)
 {
-	return pTarget && pTarget->CanPlaySequence( FCanOverrideState(), interruptLevel ) &&
+	if (FCanOverrideState())
+		interruptFlags |= SS_INTERRUPT_ANYSTATE;
+	return pTarget && pTarget->CanPlaySequence( interruptFlags ) &&
 			MatchingMonsterState(pTarget->m_MonsterState, m_requiredState) && AcceptedFollowingState(pTarget) &&
 			(!shouldCheckRadius || (pev->origin - pTarget->pev->origin).Length() <= m_flRadius);
 }
@@ -831,6 +836,8 @@ void ScriptEntityCancel( edict_t *pentCine )
 				pTarget->m_scriptState = CCineMonster::SCRIPT_CLEANUP;
 				// do it now
 				pTarget->CineCleanup();
+				//LRC - clean up so that if another script is starting immediately, the monster will notice it.
+				pTarget->ClearSchedule();
 			}
 		}
 	}
