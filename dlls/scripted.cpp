@@ -106,6 +106,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_iszMoveTarget = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszFireOnBegin"))
+	{
+		m_iszFireOnBegin = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "m_fMoveTo" ) )
 	{
 		m_fMoveTo = atoi( pkvd->szValue );
@@ -206,6 +211,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_fMoveTo, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_iszAttack, FIELD_STRING ), //LRC
 	DEFINE_FIELD( CCineMonster, m_iszMoveTarget, FIELD_STRING ), //LRC
+	DEFINE_FIELD( CCineMonster, m_iszFireOnBegin, FIELD_STRING ),
 	//DEFINE_FIELD( CCineMonster, m_flRepeat, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_flRadius, FIELD_FLOAT ),
 
@@ -657,19 +663,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 	{
 		if( !m_firedOnAnimStart && !FStringNull( m_iszFireOnAnimStart ) )
 		{
-			CBaseEntity* pActivator = NULL;
-			if (m_targetActivator == STA_SCRIPT)
-			{
-				pActivator = this;
-			}
-			else if (m_targetActivator == STA_MONSTER)
-			{
-				pActivator = pTarget;
-			}
-			else if (m_targetActivator == STA_FORWARD)
-			{
-				pActivator = m_hActivator;
-			}
+			CBaseEntity* pActivator = GetActivator(pTarget);
 			FireTargets( STRING( m_iszFireOnAnimStart ), pActivator, this, USE_TOGGLE, 0 );
 		}
 		m_firedOnAnimStart = TRUE;
@@ -723,19 +717,7 @@ void CCineMonster::SequenceDone( CBaseMonster *pMonster )
 
 	// This may cause a sequence to attempt to grab this guy NOW, so we have to clear him out
 	// of the existing sequence
-	CBaseEntity* pActivator = NULL;
-	if (m_targetActivator == STA_SCRIPT)
-	{
-		pActivator = this;
-	}
-	else if (m_targetActivator == STA_MONSTER)
-	{
-		pActivator = pMonster;
-	}
-	else if (m_targetActivator == STA_FORWARD)
-	{
-		pActivator = m_hActivator;
-	}
+	CBaseEntity* pActivator = GetActivator(pMonster);
 	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 }
 
@@ -892,7 +874,12 @@ void CCineMonster::DelayStart( int state )
 			{
 				pTarget->m_iDelay--;
 				if( pTarget->m_iDelay <= 0 )
+				{
 					pTarget->m_startTime = gpGlobals->time + 0.05f;
+
+					CBaseEntity* pActivator = GetActivator(m_hTargetEnt);
+					FireTargets(STRING(m_iszFireOnBegin), pActivator, this, USE_TOGGLE, 0); //LRC
+				}
 			}
 		}
 		pentCine = FIND_ENTITY_BY_TARGETNAME( pentCine, STRING( pev->targetname ) );
@@ -1109,6 +1096,24 @@ bool CCineMonster::MoveFailAttemptsExceeded() const {
 bool CCineMonster::IsAutoSearch() const
 {
 	return FStringNull(pev->targetname) || FBitSet(pev->spawnflags, SF_SCRIPT_AUTOSEARCH);
+}
+
+CBaseEntity* CCineMonster::GetActivator(CBaseEntity* pMonster)
+{
+	CBaseEntity* pActivator = NULL;
+	if (m_targetActivator == STA_SCRIPT)
+	{
+		pActivator = this;
+	}
+	else if (m_targetActivator == STA_MONSTER)
+	{
+		pActivator = pMonster;
+	}
+	else if (m_targetActivator == STA_FORWARD)
+	{
+		pActivator = m_hActivator;
+	}
+	return pActivator;
 }
 
 class CScriptedSentence : public CBaseDelay

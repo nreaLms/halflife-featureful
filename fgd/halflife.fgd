@@ -917,6 +917,7 @@
 	m_iszEntity(string) : "Target Monster [LE]"
 	m_iszPlay(string) : "Action Animation"
 	m_iszIdle(string) : "Idle Animation"
+	m_iszFireOnBegin(target_destination): "Fire after moving"
 	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
 	m_flRadius(integer) : "Search Radius" : 512
 	m_iszMoveTarget(string) : "Move target (blank = this) [LE]"
@@ -948,7 +949,7 @@
 		4096: "Try once" : 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
 		8192: "Don't reset head turn" : 0 : "Don't reset head turn for talk monsters"
 	]
-	m_targetActivator(choices) : "Target's Activator" =
+	m_targetActivator(choices) : "Activator for Target, Fire after moving, Fire on Animation start" =
 	[
 		0 : "No (Default)"
 		1 : "This script"
