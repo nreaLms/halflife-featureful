@@ -4243,6 +4243,8 @@ void CTriggerMotion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 //===========================================================
 //LRC- motion_manager
 //===========================================================
+#define SF_MOTION_REQUIRES_ACTIVATOR ( 1 << 24 )
+
 class CMotionThread : public CPointEntity
 {
 public:
@@ -4300,7 +4302,7 @@ void CMotionThread::MotionThink( void )
 {
 	const bool debug = pev->spawnflags & SF_MOTION_DEBUG;
 
-	if( m_hLocus == 0 || m_hTarget == 0 )
+	if( (m_hLocus == 0 && FBitSet(pev->spawnflags, SF_MOTION_REQUIRES_ACTIVATOR)) || m_hTarget == 0 )
 	{
 		if (debug)
 			ALERT(at_console, "motion_thread expires\n");
@@ -4551,6 +4553,11 @@ void CMotionManager::Affect( CBaseEntity *pTarget, CBaseEntity *pActivator )
 	pThread->m_iFaceMode = m_iFaceMode;
 	pThread->pev->spawnflags = pev->spawnflags;
 	pThread->pev->nextthink = gpGlobals->time;
+
+	if (UTIL_TargetnameIsActivator(m_iszPosition) || UTIL_TargetnameIsActivator(m_iszFacing))
+	{
+		pThread->pev->spawnflags |= SF_MOTION_REQUIRES_ACTIVATOR;
+	}
 }
 
 void CMotionManager::UpdateOnRemove()
