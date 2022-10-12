@@ -28,6 +28,7 @@ def build(bld):
 		'hl/*.cpp'
 	])
 	source += bld.path.parent.ant_glob([
+		'dlls/weapons_shared.cpp',
 		'dlls/crossbow.cpp',
 		'dlls/crowbar.cpp',
 		'dlls/egon.cpp',

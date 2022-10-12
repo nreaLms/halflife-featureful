@@ -55,6 +55,7 @@ if (USE_VGUI)
 endif()
 
 set (CLDLL_SOURCES
+	../dlls/weapons_shared.cpp
 	../dlls/crossbow.cpp
 	../dlls/crowbar.cpp
 	../dlls/egon.cpp

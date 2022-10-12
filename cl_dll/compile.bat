@@ -8,7 +8,8 @@ echo -- Compiler is MSVC6
 
 set XASH3DSRC=..\..\Xash3D_original
 set INCLUDES=-I../common -I../engine -I../pm_shared -I../game_shared -I../public -I../external -I../dlls -I../utils/fake_vgui/include
-set SOURCES=../dlls/crossbow.cpp ^
+set SOURCES=../dlls/weapons_shared.cpp ^
+	../dlls/crossbow.cpp ^
 	../dlls/crowbar.cpp ^
 	../dlls/egon.cpp ^
 	../dlls/gauss.cpp ^
