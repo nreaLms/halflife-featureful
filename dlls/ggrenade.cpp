@@ -234,12 +234,10 @@ void CGrenade::BounceTouch( CBaseEntity *pOther )
 	if( m_flNextAttack < gpGlobals->time && pev->velocity.Length() > 100 )
 	{
 		entvars_t *pevOwner = VARS( pev->owner );
-		if( pevOwner )
+		if( pevOwner && pOther->pev->takedamage )
 		{
 			TraceResult tr = UTIL_GetGlobalTrace();
-			ClearMultiDamage();
-			pOther->TraceAttack( pevOwner, 1, gpGlobals->v_forward, &tr, DMG_CLUB ); 
-			ApplyMultiDamage( pev, pevOwner );
+			pOther->ApplyTraceAttack( pev, pevOwner, 1, gpGlobals->v_forward, &tr, DMG_CLUB );
 		}
 		m_flNextAttack = gpGlobals->time + 1.0f; // debounce
 	}

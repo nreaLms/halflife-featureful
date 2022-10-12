@@ -1470,9 +1470,7 @@ void CNihilanthHVR::ZapThink( void )
 		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
 		if( pEntity != NULL && pEntity->pev->takedamage )
 		{
-			ClearMultiDamage();
-			pEntity->TraceAttack( pev, gSkillData.nihilanthZap, pev->velocity, &tr, DMG_SHOCK );
-			ApplyMultiDamage( pev, pev );
+			pEntity->ApplyTraceAttack( pev, pev, gSkillData.nihilanthZap, pev->velocity, &tr, DMG_SHOCK );
 		}
 
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
