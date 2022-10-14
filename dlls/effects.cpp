@@ -3036,7 +3036,7 @@ void CWarpballHurt::SelfCreate(const Vector& vecOrigin, float dmg, int radius, f
 void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	Vector vecOrigin;
-	edict_t* playSoundEnt = NULL;
+	edict_t* playSoundEnt = edict();
 	bool playSoundOnMyself = false;
 	string_t warpTarget = WarpTarget();
 	int inflictedRadius = 48;
@@ -3048,23 +3048,13 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 	else if( !FStringNull( warpTarget ) )
 	{
-		CBaseEntity *pEntity = UTIL_FindEntityByTargetname( NULL, STRING( warpTarget ), pActivator );
-		if (pEntity)
-		{
-			vecOrigin = pEntity->pev->origin;
-			playSoundEnt = pEntity->edict();
-		}
-		else
-		{
-			ALERT(at_error, "Could not find a warp target %s for %s\n", STRING(warpTarget), STRING(pev->classname));
+		if (!TryCalcLocus_Position(this, pActivator, STRING(warpTarget), vecOrigin))
 			return;
-		}
 	}
 	else
 	{
 		//use myself as center
 		vecOrigin = pev->origin;
-		playSoundEnt = edict();
 		playSoundOnMyself = true;
 	}
 
@@ -3073,7 +3063,6 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		if (playSoundOnMyself)
 			EMIT_SOUND( edict(), CHAN_BODY, WarpballSound1(), SoundVolume(), SoundAttenuation() );
 		else
-			//EMIT_SOUND( playSoundEnt, CHAN_BODY, WarpballSound1(), SoundVolume(), SoundAttenuation() );
 			UTIL_EmitAmbientSound( playSoundEnt, vecOrigin, WarpballSound1(), SoundVolume(), SoundAttenuation(), 0, 100 );
 	}
 	
@@ -3121,7 +3110,6 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 			if (playSoundOnMyself)
 				EMIT_SOUND( edict(), CHAN_ITEM, warpballSound2, SoundVolume(), SoundAttenuation() );
 			else
-				//EMIT_SOUND( playSoundEnt, CHAN_ITEM, warpballSound2, SoundVolume(), SoundAttenuation() );
 				UTIL_EmitAmbientSound( playSoundEnt, vecOrigin, warpballSound2, SoundVolume(), SoundAttenuation(), 0, 100 );
 		}
 	}
