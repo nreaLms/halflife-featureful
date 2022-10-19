@@ -2904,11 +2904,16 @@ public:
 		return pev->noise1 ? STRING(pev->noise1) : WARPBALL_SOUND1;
 	}
 	inline const char* WarpballSound2() {
+		if (FStringNull(pev->noise2))
+		{
 #if FEATURE_ALIEN_TELEPORT_SOUND
-		return pev->noise2 ? STRING(pev->noise2) : NULL;
+			return NULL;
 #else
-		return pev->noise2 ? STRING(pev->noise2) : WARPBALL_SOUND2;
+			return FStringNull(pev->noise1) ? WARPBALL_SOUND2 : NULL;
 #endif
+		}
+		else
+			return STRING(pev->noise2);
 	}
 	inline float SoundAttenuation() {
 		return ::SoundAttenuation((short)pev->impulse);
