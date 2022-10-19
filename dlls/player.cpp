@@ -406,7 +406,7 @@ void CBasePlayer::DeathSound( void )
 // bitsDamageType indicates type of damage healed. 
 int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType )
 {
-	const int healed = CBaseMonster::TakeHealth(pHealer, flHealth, bitsDamageType);
+	const int healed = CBaseMonster::TakeHealth(pHealer, (int)flHealth, bitsDamageType);
 #if FEATURE_MEDKIT
 	CBasePlayerWeapon* pPlayerMedkit = WeaponById(WEAPON_MEDKIT);
 	if ((bitsDamageType & HEAL_CHARGE) != 0 && pPlayerMedkit) {
