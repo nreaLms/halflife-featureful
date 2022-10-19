@@ -1102,7 +1102,7 @@ int CTalkMonster::FIdleSpeak( void )
 		{
 			CTalkMonster *pTalkMonster = pMonster->MyTalkMonsterPointer();
 			if (pTalkMonster && pTalkMonster->m_flStopTalkTime <= gpGlobals->time + duration &&
-					!FBitSet(pTalkMonster->pev->spawnflags, SF_MONSTER_GAG) && AskQuestion(duration))
+					!FBitSet(pTalkMonster->pev->spawnflags, SF_MONSTER_GAG) && pMonster->IsFreeToManipulate() && AskQuestion(duration))
 			{
 				if (pTalkMonster->SetAnswerQuestion( this )) // UNDONE: This is EVIL!!!
 					pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
