@@ -598,7 +598,8 @@ LINK_ENTITY_TO_CLASS( multi_sequence, CMultiSequence )
 
 void CMultiSequence::Spawn()
 {
-	for (int i=0; i<MAX_MULTI_TARGETS; ++i)
+	int i;
+	for (i=0; i<MAX_MULTI_TARGETS; ++i)
 	{
 		if (!m_iTargetName[i])
 		{
@@ -621,7 +622,7 @@ void CMultiSequence::Spawn()
 	}
 
 	// Adjust delays so they work as in multi_manager
-	for (int i=1; i<m_cTargets; ++i)
+	for (i=1; i<m_cTargets; ++i)
 	{
 		m_flTargetDelay[i] += m_flTargetDelay[i-1];
 	}

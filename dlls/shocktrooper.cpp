@@ -335,7 +335,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 	case STROOPER_AE_BURST1:
 	{
-		if (m_hEnemy || m_pCine)
+		if (m_hEnemy != 0 || m_pCine != 0)
 		{
 			Vector	vecGunPos;
 			Vector	vecGunAngles;
