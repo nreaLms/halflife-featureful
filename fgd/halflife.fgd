@@ -235,7 +235,7 @@
 [
 	prisonerto(choices) : "Act as Prisoner to" : : "Ignore and get ignored by this class" =
 	[
-		0 : "Default"
+		0 : "Nobody"
 		1 : "Machine"
 		2 : "Player"
 		3 : "Human passive"
@@ -954,9 +954,9 @@
 		4096: "Try once" : 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
 		8192: "Don't reset head turn" : 0 : "Don't reset head turn for talk monsters"
 	]
-	m_targetActivator(choices) : "Activator for Target, Fire after moving, Fire on Animation start" =
+	m_targetActivator(choices) : "Activator for targets" : : "Activator for Target, Fire after moving, Fire on Animation start" =
 	[
-		0 : "No (Default)"
+		0 : "None (Default)"
 		1 : "This script"
 		2 : "Possessed Monster"
 		3 : "Forward my activator"
@@ -2397,7 +2397,7 @@
 
 @PointClass base(Targetname) = game_autosave : "Point entity alternative to trigger_autosave"
 [
-	health(string) : "Minumum Hit Points" : : "Don't save when player has less than this many hitpoints."
+	health(string) : "Minimum Hit Points" : : "Don't save when player has less than this many hitpoints."
 ]
 
 @PointClass base(Targetname, Target) = game_counter : "Fires when it hits limit"
@@ -6813,7 +6813,7 @@
 @SolidClass base(Targetname) = trigger_autosave : "AutoSave Trigger"
 [
 	master(string) : "Master"
-	health(string) : "Minumum Hit Points" : : "Don't save when player has less than this many hitpoints."
+	health(string) : "Minimum Hit Points" : : "Don't save when player has less than this many hitpoints."
 ]
 
 @PointClass base(Targetx, Targetname) iconsprite("sprites/trigger_camera.spr") = trigger_camera : "Trigger Camera"
