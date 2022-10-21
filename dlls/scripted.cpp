@@ -244,12 +244,13 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 	}
 	else
 	{
-		CBaseMonster::KeyValue( pkvd );
+		CBaseDelay::KeyValue( pkvd );
 	}
 }
 
 TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 {
+	DEFINE_FIELD( CCineMonster, m_hTargetEnt, FIELD_EHANDLE ),
 	DEFINE_FIELD( CCineMonster, m_iszIdle, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_iszPlay, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_iszEntity, FIELD_STRING ),
@@ -291,7 +292,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_takeDamagePolicy, FIELD_SHORT ),
 };
 
-IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )
+IMPLEMENT_SAVERESTORE( CCineMonster, CBaseDelay )
 
 LINK_ENTITY_TO_CLASS( scripted_sequence, CCineMonster )
 LINK_ENTITY_TO_CLASS( scripted_action, CCineMonster ) //LRC
@@ -369,7 +370,7 @@ void CCineMonster::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	if( pTarget )
 	{
 		// am I already playing the script?
-		if( pTarget->m_scriptState == SCRIPT_PLAYING )
+		if( pTarget->m_scriptState == CBaseMonster::SCRIPT_PLAYING )
 			return;
 
 		m_startTime = gpGlobals->time + 0.05f;
@@ -607,14 +608,14 @@ void CCineMonster::PossessEntity( void )
 		switch( m_fMoveTo )
 		{
 		case SCRIPT_MOVE_NO:
-			pTarget->m_scriptState = SCRIPT_WAIT;
+			pTarget->m_scriptState = CBaseMonster::SCRIPT_WAIT;
 			break;
 		case SCRIPT_MOVE_WALK:
-			pTarget->m_scriptState = SCRIPT_WALK_TO_MARK;
+			pTarget->m_scriptState = CBaseMonster::SCRIPT_WALK_TO_MARK;
 			DelayStart( 1 );
 			break;
 		case SCRIPT_MOVE_RUN:
-			pTarget->m_scriptState = SCRIPT_RUN_TO_MARK;
+			pTarget->m_scriptState = CBaseMonster::SCRIPT_RUN_TO_MARK;
 			DelayStart( 1 );
 			break;
 		case SCRIPT_MOVE_INSTANT:
@@ -624,14 +625,14 @@ void CCineMonster::PossessEntity( void )
 			pTarget->pev->velocity = Vector( 0, 0, 0 );
 			pTarget->pev->effects |= EF_NOINTERP;
 			pTarget->pev->angles.y = pev->angles.y;
-			pTarget->m_scriptState = SCRIPT_WAIT;
+			pTarget->m_scriptState = CBaseMonster::SCRIPT_WAIT;
 			m_startTime = gpGlobals->time + (float)1E6;
 			// UNDONE: Add a flag to do this so people can fixup physics after teleporting monsters
 			if (ShouldResetOnGroundFlag())
 				pTarget->pev->flags &= ~FL_ONGROUND;
 			break;
 		case SCRIPT_MOVE_TELEPORT:
-			pTarget->m_scriptState = SCRIPT_WAIT;
+			pTarget->m_scriptState = CBaseMonster::SCRIPT_WAIT;
 			if (ShouldResetOnGroundFlag())
 				pTarget->pev->flags &= ~FL_ONGROUND;
 			break;
@@ -916,7 +917,7 @@ void ScriptEntityCancel( edict_t *pentCine, int cancellationReason )
 			if( pTarget->m_MonsterState == MONSTERSTATE_SCRIPT || pTarget->m_IdealMonsterState == MONSTERSTATE_SCRIPT )
 			{
 				// tell them do die
-				pTarget->m_scriptState = CCineMonster::SCRIPT_CLEANUP;
+				pTarget->m_scriptState = CBaseMonster::SCRIPT_CLEANUP;
 				// do it now
 				pTarget->CineCleanup();
 				//LRC - clean up so that if another script is starting immediately, the monster will notice it.

@@ -120,7 +120,7 @@ enum
 #define SCRIPT_FINISHSCHED_DEFAULT	0
 #define SCRIPT_FINISHSCHED_AMBUSH	1
 
-class CCineMonster : public CBaseMonster
+class CCineMonster : public CBaseDelay
 {
 public:
 	void Spawn( void );
@@ -128,7 +128,7 @@ public:
 	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	virtual void Blocked( CBaseEntity *pOther );
 	virtual void Touch( CBaseEntity *pOther );
-	virtual int	 ObjectCaps( void ) { return (CBaseMonster :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
+	virtual int	 ObjectCaps( void ) { return (CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 	virtual void Activate( void );
 	virtual void UpdateOnRemove();
 
@@ -180,6 +180,8 @@ public:
 	bool MoveFailAttemptsExceeded() const;
 	bool IsAutoSearch() const;
 	CBaseEntity* GetActivator(CBaseEntity *pMonster);
+
+	EHANDLE m_hTargetEnt;
 
 	string_t m_iszIdle;		// string index for idle animation
 	string_t m_iszPlay;		// string index for scripted animation
