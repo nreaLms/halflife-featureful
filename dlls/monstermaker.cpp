@@ -382,11 +382,14 @@ void CMonsterMakerHull::Think()
 	pev->solid = SOLID_NOT;
 	pev->effects |= EF_NODRAW;
 
-	CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
-	if (pOwner)
+	if (!FNullEnt(pev->owner))
 	{
-		CMonsterMaker* pMonsterMaker = static_cast<CMonsterMaker*>(pOwner);
-		pMonsterMaker->SpawnMonster(pev->origin, pev->angles);
+		CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
+		if (pOwner)
+		{
+			CMonsterMaker* pMonsterMaker = static_cast<CMonsterMaker*>(pOwner);
+			pMonsterMaker->SpawnMonster(pev->origin, pev->angles);
+		}
 	}
 
 	UTIL_Remove(this);

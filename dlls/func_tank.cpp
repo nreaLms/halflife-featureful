@@ -1143,7 +1143,7 @@ void CFuncTankRocket::Fire( const Vector &barrelEnd, const Vector &forward, entv
 		{
 			for( i = 0; i < bulletCount && HaveBullets(); i++ )
 			{
-				CBaseEntity* owner = CBaseEntity::Instance(pevAttacker);
+				CBaseEntity* owner = FNullEnt(pevAttacker) ? NULL : CBaseEntity::Instance(pevAttacker);
 				CBaseEntity::Create( "rpg_rocket", barrelEnd, pev->angles, owner ? owner->edict() : edict() );
 			}
 			RemoveBullet();

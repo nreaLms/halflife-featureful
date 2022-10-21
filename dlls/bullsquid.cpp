@@ -195,12 +195,7 @@ public:
 	void Touch( CBaseEntity *pOther );
 	void EXPORT Animate( void );
 	CBaseMonster* GetBullsquid() {
-		if (pev->owner) {
-			CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
-			if (owner)
-				return owner->MyMonsterPointer();
-		}
-		return NULL;
+		return GetMonsterPointer(pev->owner);
 	}
 
 	virtual int Save( CSave &save );
