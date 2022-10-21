@@ -20,6 +20,7 @@
 #include "weapons.h"
 #include "explode.h"
 
+#include "monsters.h"
 #include "player.h"
 
 #define SF_TANK_ACTIVE			0x0001
@@ -58,6 +59,10 @@ public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void Think( void );
 	void TrackTarget( void );
+
+	CBaseEntity* BestVisibleEnemy( void );
+	int IRelationship( CBaseEntity* pTarget );
+	int DefaultClassify( void ) { return m_iTankClass; }
 
 	virtual void Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker );
 	virtual Vector UpdateTargetPosition( CBaseEntity *pTarget )
@@ -146,6 +151,8 @@ protected:
 	float		m_flEmptySoundTime;
 	short		m_smokeRenderMode;
 
+	int			m_iTankClass;	// Behave As
+
 	void UpdateSpot( void );
 };
 
@@ -180,6 +187,7 @@ TYPEDESCRIPTION	CFuncTank::m_SaveData[] =
 	DEFINE_FIELD( CFuncTank, m_bulletCount, FIELD_INTEGER ),
 	DEFINE_FIELD( CFuncTank, m_pSpot, FIELD_CLASSPTR ), //LRC
 	DEFINE_FIELD( CFuncTank, m_smokeRenderMode, FIELD_SHORT ),
+	DEFINE_FIELD( CFuncTank, m_iTankClass, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTank, CBaseEntity )
@@ -352,6 +360,11 @@ void CFuncTank::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "smokerendermode" ) )
 	{
 		m_smokeRenderMode = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iClass"))
+	{
+		m_iTankClass = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -569,6 +582,81 @@ edict_t *CFuncTank::FindTarget( edict_t *pPlayer )
 	return pPlayer;
 }
 
+CBaseEntity *CFuncTank:: BestVisibleEnemy ( void )
+{
+	if (m_iTankClass == 0)
+	{
+		edict_t *pPlayer = FIND_CLIENT_IN_PVS( edict() );
+		return FNullEnt(pPlayer) ? NULL : CBaseEntity::Instance(pPlayer);
+	}
+
+	CBaseEntity	*pReturn = NULL;
+	int			iNearest;
+	int			iDist;
+	int			iBestRelationship;
+	int			iLookDist = m_maxRange?m_maxRange:512; //thanks to Waldo for this.
+
+	iNearest = 8192;// so first visible entity will become the closest.
+	iBestRelationship = R_DL;
+
+	CBaseEntity *pList[100];
+
+	Vector delta = Vector( iLookDist, iLookDist, iLookDist );
+
+	// Find only monsters/clients in box, NOT limited to PVS
+	int count = UTIL_EntitiesInBox( pList, 100, pev->origin - delta, pev->origin + delta, FL_CLIENT|FL_MONSTER );
+	int i;
+
+	for (i = 0; i < count; i++ )
+	{
+		const int iRelationship = IRelationship( pList[i] );
+		if ( pList[i]->IsFullyAlive() )
+		{
+			if ( iRelationship > iBestRelationship )
+			{
+				// this entity is disliked MORE than the entity that we
+				// currently think is the best visible enemy. No need to do
+				// a distance check, just get mad at this one for now.
+				iBestRelationship = IRelationship ( pList[i] );
+				iNearest = ( pList[i]->pev->origin - pev->origin ).Length();
+				pReturn = pList[i];
+			}
+			else if ( iRelationship == iBestRelationship )
+			{
+				// this entity is disliked just as much as the entity that
+				// we currently think is the best visible enemy, so we only
+				// get mad at it if it is closer.
+				iDist = ( pList[i]->pev->origin - pev->origin ).Length();
+
+				if ( iDist <= iNearest )
+				{
+					iNearest = iDist;
+					//these are guaranteed to be the same! iBestRelationship = IRelationship ( pList[i] );
+					pReturn = pList[i];
+				}
+			}
+		}
+	}
+
+//	if (pReturn)
+//		ALERT(at_debug, "Tank's best enemy is %s\n", STRING(pReturn->pev->classname));
+//	else
+//		ALERT(at_debug, "Tank has no best enemy\n");
+	return pReturn;
+}
+
+int	CFuncTank::IRelationship( CBaseEntity* pTarget )
+{
+	if (m_iTankClass == 0)
+	{
+		if (pTarget->IsPlayer())
+			return R_HT;
+		else
+			return R_NO;
+	}
+	return CBaseMonster::IDefaultRelationship(Classify(), pTarget->Classify());
+}
+
 BOOL CFuncTank::InRange( float range )
 {
 	if( range < m_minRange )
@@ -593,10 +681,9 @@ void CFuncTank::Think( void )
 void CFuncTank::TrackTarget( void )
 {
 	TraceResult tr;
-	edict_t *pPlayer = FIND_CLIENT_IN_PVS( edict() );
 	BOOL updateTime = FALSE;
 	Vector angles, direction, targetPosition, barrelEnd;
-	edict_t *pTarget = NULL;
+	CBaseEntity *pTarget = NULL;
 
 	// Get a position to aim for
 	if( m_pController )
@@ -617,19 +704,20 @@ void CFuncTank::TrackTarget( void )
 
 		UpdateSpot();
 
-		if( FNullEnt( pPlayer ) )
+		pTarget = BestVisibleEnemy();
+		if( pTarget == 0 )
 		{
 			if( IsActive() )
 				pev->nextthink = pev->ltime + 2.0f;	// Wait 2 secs
 			return;
 		}
-		pTarget = FindTarget( pPlayer );
+
 		if( !pTarget )
 			return;
 
 		// Calculate angle needed to aim at target
 		barrelEnd = BarrelPosition();
-		targetPosition = pTarget->v.origin + pTarget->v.view_ofs;
+		targetPosition = pTarget->pev->origin + pTarget->pev->view_ofs;
 		float range = ( targetPosition - barrelEnd ).Length();
 
 		if( !InRange( range ) )
@@ -637,13 +725,12 @@ void CFuncTank::TrackTarget( void )
 
 		UTIL_TraceLine( barrelEnd, targetPosition, dont_ignore_monsters, edict(), &tr );
 
-		if( tr.flFraction == 1.0f || tr.pHit == pTarget )
+		if( tr.flFraction == 1.0f || tr.pHit == pTarget->edict() )
 		{
-			CBaseEntity *pInstance = CBaseEntity::Instance(pTarget);
-			if( InRange( range ) && pInstance && pInstance->IsAlive() )
+			if( InRange( range ) && pTarget && pTarget->IsAlive() )
 			{
 				updateTime = TRUE;
-				m_sightOrigin = UpdateTargetPosition( pInstance );
+				m_sightOrigin = UpdateTargetPosition( pTarget );
 			}
 		}
 
@@ -714,7 +801,7 @@ void CFuncTank::TrackTarget( void )
 		{
 			float length = direction.Length();
 			UTIL_TraceLine( barrelEnd, barrelEnd + forward * length, dont_ignore_monsters, edict(), &tr );
-			if( tr.pHit == pTarget )
+			if( tr.pHit == pTarget->edict() )
 				fire = TRUE;
 		}
 		else

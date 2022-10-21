@@ -816,8 +816,17 @@
 	]
 	minRange(string) : "Minmum target range"
 	maxRange(string) : "Maximum target range"
+	bulletCount(integer) : "Bullet count" : : "Less or equal to 0 means infinite number of bullets"
+	m_iClass(choices) : "Behavior" =
+	[
+		 0: "Attack only players"
+		11: "Security guard"
+		 4: "Human Military"
+		 5: "Alien Military"
+		15 : "Race X shock"
+		16 : "Opfor ally"
+	]
 	_minlight(string) : "Minimum light level"
-	bulletCount(integer) : "Bullet count" : 0 : "Less or equal to 0 means infinite number of bullets"
 ]
 
 @BaseClass base(SoundRadius) = PlatSounds
