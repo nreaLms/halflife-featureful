@@ -865,21 +865,11 @@ void CItemGeneric::SetObjectCollisionBox()
 
 void CItemGeneric::StartupThink(void)
 {
-	// Try to look for a sequence to play.
-	int iSequence = LookupSequence(STRING(m_iszSequenceName));
-
-	// Validate sequence.
-	if (iSequence != -1)
-	{
-		pev->sequence = iSequence;
-		SetThink(&CItemGeneric::SequenceThink);
-		pev->nextthink = gpGlobals->time + 0.01f;
-	}
-	else
-	{
-		// Cancel play sequence.
-		SetThink(NULL);
-	}
+	pev->sequence = LookupSequence(STRING(m_iszSequenceName));
+	pev->frame = 0;
+	ResetSequenceInfo();
+	SetThink(&CItemGeneric::SequenceThink);
+	pev->nextthink = gpGlobals->time + 0.01f;
 }
 
 void CItemGeneric::SequenceThink(void)
@@ -899,15 +889,7 @@ void CItemGeneric::SequenceThink(void)
 
 		if (!m_fSequenceLoops)
 		{
-			// Prevent from calling ItemThink.
 			SetThink(NULL);
-			m_fSequenceFinished = TRUE;
-			return;
-		}
-		else
-		{
-			pev->frame = 0;
-			ResetSequenceInfo();
 		}
 	}
 }
