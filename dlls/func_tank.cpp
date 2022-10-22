@@ -1120,6 +1120,7 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( func_tankrocket, CFuncTankRocket )
+LINK_ENTITY_TO_CLASS( func_tankrocket_of, CFuncTankRocket )
 
 void CFuncTankRocket::Precache( void )
 {
