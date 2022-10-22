@@ -63,6 +63,9 @@ void CBasePlayerWeapon::ResetEmptySound( void )
 
 BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
 {
+#ifdef CLIENT_DLL
+	return attack_time <= 0.0f;
+#else
 #if CLIENT_WEAPONS
 	if( !isPredicted )
 #else
@@ -75,6 +78,7 @@ BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
 	{
 		return ( (static_cast<int>(::floor(attack_time * 1000.0f)) * 1000.0f) <= 0.0f) ? TRUE : FALSE;
 	}
+#endif
 }
 
 void CBasePlayerWeapon::ItemPostFrame( void )
@@ -99,10 +103,12 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		m_fInReload = FALSE;
 	}
 
+#ifndef CLIENT_DLL
 	if( !(m_pPlayer->pev->button & IN_ATTACK ) )
 	{
 		m_flLastFireTime = 0.0f;
 	}
+#endif
 
 	if( ( m_pPlayer->pev->button & IN_ATTACK2 ) && CanAttack( m_flNextSecondaryAttack, gpGlobals->time, UseDecrement() ) )
 	{
@@ -147,7 +153,13 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 #endif
 		{
 			// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
-			if( m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD ) && m_flNextPrimaryAttack < ( UseDecrement() ? 0.0f : gpGlobals->time ) )
+			if( m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD ) &&
+#ifdef CLIENT_DLL
+					m_flNextPrimaryAttack <= 0.0f
+#else
+					m_flNextPrimaryAttack < ( UseDecrement() ? 0.0f : gpGlobals->time )
+#endif
+					)
 			{
 				Reload();
 				return;
