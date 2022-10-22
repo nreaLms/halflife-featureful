@@ -25,6 +25,8 @@
 #include "shake.h"
 #include "bullsquid.h"
 #include "soundradius.h"
+#include "gamerules.h"
+#include "player.h"
 #include "locus.h"
 #include "mod_features.h"
 
@@ -2100,15 +2102,9 @@ bool CBlood::CheckBloodPosition( CBaseEntity *pActivator, Vector& bloodPos )
 {
 	if( pev->spawnflags & SF_BLOOD_PLAYER )
 	{
-		edict_t *pPlayer;
-		if( pActivator && pActivator->IsPlayer() )
-		{
-			pPlayer = pActivator->edict();
-		}
-		else
-			pPlayer = g_engfuncs.pfnPEntityOfEntIndex( 1 );
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if( pPlayer ) {
-			bloodPos = ( pPlayer->v.origin + pPlayer->v.view_ofs ) + Vector( RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ) );
+			bloodPos = ( pPlayer->pev->origin + pPlayer->pev->view_ofs ) + Vector( RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ), RANDOM_FLOAT( -10.0f, 10.0f ) );
 			return true;
 		}
 		return false;
@@ -2434,17 +2430,11 @@ void CMessage::KeyValue( KeyValueData *pkvd )
 
 void CMessage::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	CBaseEntity *pPlayer = NULL;
-
 	if( pev->spawnflags & SF_MESSAGE_ALL )
 		UTIL_ShowMessageAll( STRING( pev->message ) );
 	else
 	{
-		if( pActivator && pActivator->IsPlayer() )
-			pPlayer = pActivator;
-		else
-			pPlayer = CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
-
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if( pPlayer )
 			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
 	}

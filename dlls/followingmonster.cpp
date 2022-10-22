@@ -5,11 +5,11 @@
 #include "monsters.h"
 #include "animation.h"
 #include "saverestore.h"
-#include "squadmonster.h"
 #include "followingmonster.h"
 #include "scripted.h"
 #include "soundent.h"
 #include "gamerules.h"
+#include "player.h"
 
 TYPEDESCRIPTION	CFollowingMonster::m_SaveData[] =
 {
@@ -739,17 +739,8 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 
 CBaseEntity* CFollowingMonster::PlayerToFace()
 {
-	CBaseEntity* pPlayer = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex( 1 ));
-	if (g_pGameRules->IsMultiplayer())
-	{
-		CBaseEntity* followedPlayer = FollowedPlayer();
-		if (followedPlayer && followedPlayer->IsPlayer() && followedPlayer->IsAlive())
-		{
-			pPlayer = followedPlayer;
-		}
-	}
-
-	if (pPlayer && pPlayer->IsPlayer())
+	CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(FollowedPlayer());
+	if (pPlayer && pPlayer->IsAlive())
 		return pPlayer;
 	return 0;
 }

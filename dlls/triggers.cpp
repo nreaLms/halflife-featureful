@@ -2842,12 +2842,12 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		m_flReturnTime = gpGlobals->time;
 		return;
 	}
-	if( !pActivator || !pActivator->IsPlayer() )
-	{
-		pActivator = CBaseEntity::Instance( g_engfuncs.pfnPEntityOfEntIndex( 1 ) );
-	}
+	CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+	if (!pPlayer)
+		return;
 
-	m_hPlayer = pActivator;
+	pActivator = pPlayer;
+	m_hPlayer = pPlayer;
 
 	m_flReturnTime = gpGlobals->time + m_flWait;
 	pev->speed = m_initialSpeed;
@@ -2870,7 +2870,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	if( FBitSet( pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL ) )
 	{
-		( (CBasePlayer *)pActivator )->EnableControl( FALSE );
+		pPlayer->EnableControl( FALSE );
 	}
 
 	if( m_sPath )
@@ -2907,7 +2907,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	SET_VIEW( pActivator->edict(), edict() );
 
-	( (CBasePlayer *)pActivator )->m_hViewEntity = this;
+	pPlayer->m_hViewEntity = this;
 
 	SET_MODEL( ENT( pev ), STRING( pActivator->pev->model ) );
 
