@@ -64,6 +64,36 @@ static bool MatchingMonsterState(MONSTERSTATE state, int requiredState)
 	}
 }
 
+enum
+{
+	CHECKFAIL_NOFAIL = 0,
+	CHECKFAIL_TARGET_IS_NULL,
+	CHECKFAIL_TARGET_IS_BUSY,
+	CHECKFAIL_UNMATCHING_MONSTERSTATE,
+	CHECKFAIL_UNMATCHING_FOLLOWERSTATE,
+	CHECKFAIL_TARGET_IS_TOOFAR,
+};
+
+static const char* ScriptCheckFailMessage(int checkFail)
+{
+	switch (checkFail) {
+	case CHECKFAIL_NOFAIL:
+		return "target is ok!";
+	case CHECKFAIL_TARGET_IS_NULL:
+		return "target is null (not a monster?)";
+	case CHECKFAIL_TARGET_IS_BUSY:
+		return "target is busy";
+	case CHECKFAIL_UNMATCHING_MONSTERSTATE:
+		return "target has unmatching monster state";
+	case CHECKFAIL_UNMATCHING_FOLLOWERSTATE:
+		return "target has unmatching follower state";
+	case CHECKFAIL_TARGET_IS_TOOFAR:
+		return "target is too far";
+	default:
+		return "unknown";
+	}
+}
+
 /*
 classname "scripted_sequence"
 targetname "me" - there can be more than one with the same name, and they act in concert
@@ -336,6 +366,7 @@ void CCineMonster::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	{
 		// if not, try finding them
 		m_cantFindReported = false;
+		m_cantPlayReported = false;
 		m_hActivator = pActivator;
 
 		if (FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
@@ -419,13 +450,16 @@ CBaseMonster *CCineMonster::FindEntity( void )
 {
 	edict_t *pentTarget;
 	CBaseMonster *pTarget = NULL;
+	int checkFail;
+	bool failedCheckReported = false;
 
 	if (UTIL_TargetnameIsActivator(m_iszEntity))
 	{
 		if (m_hActivator != 0 && FBitSet(m_hActivator->pev->flags, FL_MONSTER) && (pTarget = m_hActivator->MyMonsterPointer()) != 0 )
 		{
-			if (IsAppropriateTarget(pTarget, m_iPriority | SS_INTERRUPT_ALERT, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
+			if (IsAppropriateTarget(pTarget, m_iPriority | SS_INTERRUPT_ALERT, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS, &checkFail))
 				return pTarget;
+			failedCheckReported = failedCheckReported || MayReportInappropriateTarget(checkFail);
 		}
 		return NULL;
 	}
@@ -441,14 +475,9 @@ CBaseMonster *CCineMonster::FindEntity( void )
 			{
 				pTarget = GetMonsterPointer( pentTarget );
 
-				if (IsAppropriateTarget(pTarget, m_iPriority | SS_INTERRUPT_ALERT, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS))
+				if (IsAppropriateTarget(pTarget, m_iPriority | SS_INTERRUPT_ALERT, m_applySearchRadius == SCRIPT_APPLY_SEARCH_RADIUS_ALWAYS, &checkFail))
 					return pTarget;
-				if (!m_cantPlayReported)
-				{
-					ALERT( at_console, "Found %s, but can't play! (busy or not in proper state or too far)\n", STRING( m_iszEntity ) );
-					if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
-						m_cantPlayReported = true;
-				}
+				failedCheckReported = failedCheckReported || MayReportInappropriateTarget(checkFail);
 			}
 			pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
 			pTarget = NULL;
@@ -467,14 +496,19 @@ CBaseMonster *CCineMonster::FindEntity( void )
 					if( FBitSet( pEntity->pev->flags, FL_MONSTER ) )
 					{
 						pTarget = pEntity->MyMonsterPointer();
-						if (IsAppropriateTarget(pTarget, m_iPriority, false))
-						{
+						if (IsAppropriateTarget(pTarget, m_iPriority, false, &checkFail))
 							return pTarget;
-						}
+						failedCheckReported = failedCheckReported || MayReportInappropriateTarget(checkFail);
 					}
 				}
 			}
 		}
+	}
+
+	if (!m_cantFindReported && !failedCheckReported && !IsAutoSearch())
+	{
+		ALERT( at_aiconsole, "script \"%s\" can't find monster \"%s\" (nonexistent or out of range)\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+		m_cantFindReported = true;
 	}
 	return NULL;
 }
@@ -625,22 +659,54 @@ bool CCineMonster::TryFindAndPossessEntity()
 	else
 	{
 		CancelScript();
-		if (!m_cantFindReported && !IsAutoSearch())
-		{
-			ALERT( at_aiconsole, "script \"%s\" can't find appropriate monster \"%s\" (busy or too far)\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
-			m_cantFindReported = true;
-		}
 		return false;
 	}
 }
 
-bool CCineMonster::IsAppropriateTarget(CBaseMonster *pTarget, int interruptFlags, bool shouldCheckRadius)
+bool CCineMonster::MayReportInappropriateTarget(int checkFail)
+{
+	if (!m_cantPlayReported && !IsAutoSearch())
+	{
+		ALERT( at_console, "script \"%s\" found \"%s\", but can't play! Reason: %s\n", STRING(pev->targetname), STRING( m_iszEntity ), ScriptCheckFailMessage(checkFail) );
+		if (!FBitSet(pev->spawnflags, SF_SCRIPT_TRY_ONCE))
+			m_cantPlayReported = true;
+		return true;
+	}
+	return false;
+}
+
+bool CCineMonster::IsAppropriateTarget(CBaseMonster *pTarget, int interruptFlags, bool shouldCheckRadius, int *pCheckFail)
 {
 	if (FCanOverrideState())
 		interruptFlags |= SS_INTERRUPT_ANYSTATE;
-	return pTarget && pTarget->CanPlaySequence( interruptFlags ) &&
-			MatchingMonsterState(pTarget->m_MonsterState, m_requiredState) && AcceptedFollowingState(pTarget) &&
-			(!shouldCheckRadius || (pev->origin - pTarget->pev->origin).Length() <= m_flRadius);
+
+	int searchFail = CHECKFAIL_NOFAIL;
+	if (!pTarget)
+	{
+		searchFail = CHECKFAIL_TARGET_IS_NULL;
+	}
+	else if (!pTarget->CanPlaySequence( interruptFlags ))
+	{
+		searchFail = CHECKFAIL_TARGET_IS_BUSY;
+	}
+	else if (!MatchingMonsterState(pTarget->m_MonsterState, m_requiredState))
+	{
+		searchFail = CHECKFAIL_UNMATCHING_MONSTERSTATE;
+	}
+	else if (!AcceptedFollowingState(pTarget))
+	{
+		searchFail = CHECKFAIL_UNMATCHING_FOLLOWERSTATE;
+	}
+	else if (shouldCheckRadius)
+	{
+		if ((pev->origin - pTarget->pev->origin).Length() > m_flRadius)
+		{
+			searchFail = CHECKFAIL_TARGET_IS_TOOFAR;
+		}
+	}
+	if (pCheckFail)
+		*pCheckFail = searchFail;
+	return searchFail == CHECKFAIL_NOFAIL;
 }
 
 typedef enum

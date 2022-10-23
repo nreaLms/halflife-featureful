@@ -129,7 +129,8 @@ public:
 	void DelayStart( int state );
 	CBaseMonster *FindEntity( void );
 	bool TryFindAndPossessEntity();
-	bool IsAppropriateTarget(CBaseMonster* pTarget, int interruptFlags, bool shouldCheckRadius);
+	bool MayReportInappropriateTarget(int checkFail);
+	bool IsAppropriateTarget(CBaseMonster* pTarget, int interruptFlags, bool shouldCheckRadius, int* pCheckFail = 0);
 	bool AcceptedFollowingState(CBaseMonster* pMonster);
 	virtual void PossessEntity( void );
 
