@@ -866,6 +866,11 @@ void CItemGeneric::SetObjectCollisionBox()
 void CItemGeneric::StartupThink(void)
 {
 	pev->sequence = LookupSequence(STRING(m_iszSequenceName));
+	if (pev->sequence == ACTIVITY_NOT_AVAILABLE)
+	{
+		ALERT(at_console, "Can't find a sequence \"%s\" in model \"%s\"\n", STRING(m_iszSequenceName), STRING(pev->model));
+		pev->sequence = 0;
+	}
 	pev->frame = 0;
 	ResetSequenceInfo();
 	SetThink(&CItemGeneric::SequenceThink);
