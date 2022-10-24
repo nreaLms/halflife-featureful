@@ -70,6 +70,8 @@ typedef struct cvar_s cvar_t;
 extern cvar_t* cl_weapon_sparks;
 extern cvar_t* cl_weapon_wallpuff;
 
+extern cvar_t* cl_muzzlelight;
+
 extern cvar_t* cl_flashlight_custom;
 
 #define HUD_ACTIVE	1

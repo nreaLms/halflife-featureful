@@ -204,3 +204,28 @@ void EV_MuzzleFlash( void )
 	// Or in the muzzle flash
 	ent->curstate.effects |= EF_MUZZLEFLASH;
 }
+
+void EV_MuzzleLight(const Vector &vecForward)
+{
+	cl_entity_t *ent = GetViewEntity();
+	if( !ent )
+	{
+		return;
+	}
+
+	if (cl_muzzlelight && cl_muzzlelight->value)
+	{
+		Vector vecSrc = ent->origin + vecForward * 36;
+		vecSrc.z = (ent->curstate.maxs.z - ent->curstate.mins.z)*0.35f;
+		dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight( 0 );
+		dl->origin[0] = vecSrc.x;
+		dl->origin[1] = vecSrc.y;
+		dl->origin[2] = vecSrc.z;
+		dl->radius = 144;
+		dl->color.r = 255;
+		dl->color.g = 208;
+		dl->color.b = 128;
+		dl->decay = 512;
+		dl->die = gEngfuncs.GetClientTime() + 0.04f;
+	}
+}

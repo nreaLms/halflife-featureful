@@ -441,6 +441,11 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 	int iShot;
 	int tracer;
 
+	if( EV_IsLocal( idx ) )
+	{
+		EV_MuzzleLight(Vector(forward));
+	}
+
 	for( iShot = 1; iShot <= cShots; iShot++ )
 	{
 		vec3_t vecDir, vecEnd;
