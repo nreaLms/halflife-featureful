@@ -415,6 +415,7 @@ void CBarney::Precache()
 	// when a level is loaded, nobody will talk (time is reset to 0)
 	TalkInit();
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }	
 
 // Init talk data
@@ -750,6 +751,7 @@ void COtis::Precache()
 	PRECACHE_SOUND("weapons/desert_eagle_fire.wav");
 	TalkInit();
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 void COtis::TalkInit()
@@ -938,6 +940,7 @@ void CBarniel::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 void CBarniel::TalkInit()

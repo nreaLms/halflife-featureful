@@ -1976,6 +1976,7 @@ void CHFGrunt :: Precache()
 	}
 
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 void CHFGrunt::PrecacheHelper()
@@ -2963,6 +2964,7 @@ void CTorch::Precache()
 	TalkInit();
 	m_voicePitch = 95;
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
@@ -3677,6 +3679,8 @@ void CMedic::Precache()
 	else
 		m_voicePitch = 105;
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
+	RegisterMedic();
 }
 
 void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)

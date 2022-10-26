@@ -764,6 +764,8 @@ void CScientist::Precache( void )
 	TalkInit();
 
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
+	RegisterMedic();
 }
 
 void CScientist::PrecacheSounds()
@@ -1334,6 +1336,7 @@ void CSittingScientist::Precache( void )
 {
 	m_baseSequence = LookupSequence( "sitlookleft" );
 	TalkInit();
+	RegisterTalkMonster(false);
 }
 
 //=========================================================
@@ -1524,6 +1527,7 @@ void CCleansuitScientist::Precache()
 	PrecacheSounds();
 	TalkInit();
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 BOOL CCleansuitScientist::CanHeal()
@@ -1742,6 +1746,7 @@ void CGus::Precache()
 	else
 		m_voicePitch = 100;
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 BOOL CGus::CanHeal()

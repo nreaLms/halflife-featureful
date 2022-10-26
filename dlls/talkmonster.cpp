@@ -65,22 +65,8 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CFollowingMonster )
 
-// array of friend names
-CTalkMonster::TalkFriend CTalkMonster::m_szFriends[TLK_CFRIENDS] =
-{
-	// Classname						CanFollow	CanHeal	Friend type
-	{"monster_barney",						true,	false,	TALK_FRIEND_PERSONNEL},
-	{"monster_scientist",					true,	true, 	TALK_FRIEND_PERSONNEL},
-	{"monster_otis",						true,	false,	TALK_FRIEND_PERSONNEL},
-	{"monster_cleansuit_scientist",			true,	false,	TALK_FRIEND_PERSONNEL},
-	{"monster_sitting_scientist",			false,	false,	TALK_FRIEND_PERSONNEL},
-	{"monster_sitting_cleansuit_scientist", false,	false,	TALK_FRIEND_PERSONNEL},
-	{"monster_barniel",						true,	false,	TALK_FRIEND_PERSONNEL},
-	{"monster_gus",							true,	false,	TALK_FRIEND_PERSONNEL},
-	{"monster_human_grunt_ally",			true,	false,	TALK_FRIEND_SOLDIER},
-	{"monster_human_torch_ally",			true,	false,	TALK_FRIEND_SOLDIER},
-	{"monster_human_medic_ally",			true,	true,	TALK_FRIEND_SOLDIER}
-};
+CTalkMonster::TalkFriend CTalkMonster::m_szFriends[TLK_CFRIENDS] = {};
+const char* CTalkMonster::m_szMedics[NUM_MEDICS] = {};
 
 //=========================================================
 // AI Schedules Specific to talking monsters
@@ -619,6 +605,9 @@ CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, const char* pszF
 	TraceResult tr;
 	Vector vecCheck;
 
+	if (!pszFriend)
+		return NULL;
+
 	while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
 	{
 		if( pFriend == this || !pFriend->IsFullyAlive() )
@@ -704,6 +693,8 @@ void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 	for( i = 0; i < TLK_CFRIENDS; i++ )
 	{
 		TalkFriend& talkFriend = m_szFriends[i];
+		if (!talkFriend.name)
+			break;
 		if (!talkFriend.canFollow) // no sense in limiting friends who can't move, like sitting scientists
 			continue;
 		if (maxFollowers && talkFriend.category != TalkFriendCategory()) // so scientists and security guards won't limit soldiers
@@ -1500,13 +1491,13 @@ bool CTalkMonster::FindAndCallMedic()
 	if ( !foundMedic )
 	{
 		// for each medic in this bsp...
-		for( int i = 0; i < TLK_CFRIENDS; i++ )
+		for( int i = 0; i < NUM_MEDICS; i++ )
 		{
-			TalkFriend& talkFriend = m_szFriends[i];
-			if (!talkFriend.canHeal)
+			const char* medicName = m_szMedics[i];
+			if (!medicName)
 				continue;
 			CBaseEntity *pFriend = NULL;
-			while ((pFriend = EnumFriends( pFriend, talkFriend.name, TRUE )) != NULL)
+			while ((pFriend = EnumFriends( pFriend, medicName, TRUE )) != NULL)
 			{
 				CSquadMonster* friendMedic = pFriend->MySquadMonsterPointer();
 				if (CanCallThisMedic(friendMedic))
@@ -1636,4 +1627,62 @@ void CTalkMonster::ReportAIState(ALERT_TYPE level)
 bool CTalkMonster::SomeoneIsTalking()
 {
 	return gpGlobals->time <= CTalkMonster::g_talkWaitTime;
+}
+
+void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, short followerCategory)
+{
+	int i;
+	for (i=0; i<TLK_CFRIENDS; ++i)
+	{
+		if (!m_szFriends[i].name)
+		{
+			m_szFriends[i].name = className;
+			m_szFriends[i].canFollow = canFollow;
+			m_szFriends[i].category = followerCategory;
+
+			ALERT(at_aiconsole, "Registered %s as talk friend\n", className);
+			return;
+		}
+		else if (FStrEq(m_szFriends[i].name, className))
+		{
+			return;
+		}
+	}
+	if (i >= TLK_CFRIENDS)
+	{
+		ALERT(at_console, "Too many talk friends classes! Can't register %s\n", className);
+	}
+}
+
+void CTalkMonster::RegisterTalkMonster(bool canFollow)
+{
+	CTalkMonster::RegisterTalkMonster(STRING(pev->classname), canFollow, TalkFriendCategory());
+}
+
+void CTalkMonster::RegisterMedic(const char* className)
+{
+	int i;
+	for (i=0; i<NUM_MEDICS; ++i)
+	{
+		if (!m_szMedics[i])
+		{
+			m_szMedics[i] = className;
+
+			ALERT(at_aiconsole, "Registered %s as medic\n", className);
+			return;
+		}
+		else if (FStrEq(m_szMedics[i], className))
+		{
+			return;
+		}
+	}
+	if (i >= NUM_MEDICS)
+	{
+		ALERT(at_console, "Too many medic classes! Can't register %s\n", className);
+	}
+}
+
+void CTalkMonster::RegisterMedic()
+{
+	CTalkMonster::RegisterMedic(STRING(pev->classname));
 }

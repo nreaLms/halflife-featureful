@@ -731,6 +731,8 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 			for (int i=0; i<TLK_CFRIENDS; ++i)
 			{
 				CTalkMonster::TalkFriend friendClass = CTalkMonster::m_szFriends[i];
+				if (!friendClass.name)
+					break;
 				if (friendClass.category == TALK_FRIEND_SOLDIER)
 				{
 					CBaseEntity* pEntity = NULL;

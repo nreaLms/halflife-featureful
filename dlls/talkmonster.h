@@ -36,7 +36,8 @@
 #define bit_saidHeard			(1<<6)
 #define bit_saidSmelled			(1<<7)
 
-#define TLK_CFRIENDS		11
+#define TLK_CFRIENDS		20
+#define NUM_MEDICS 5
 
 enum
 {
@@ -205,14 +206,18 @@ public:
 	{
 		const char* name;
 		bool canFollow;
-		bool canHeal;
 		short category;
 	};
 
 	static TalkFriend m_szFriends[TLK_CFRIENDS];		// array of friend names
+	static const char* m_szMedics[NUM_MEDICS];
 	static float g_talkWaitTime;
 	static bool SomeoneIsTalking();
-	
+	static void RegisterTalkMonster(const char* className, bool canFollow, short followerCategory);
+	void RegisterTalkMonster(bool canFollow = true);
+	static void RegisterMedic(const char* className);
+	void RegisterMedic();
+
 	int			m_bitsSaid;						// set bits for sentences we don't want repeated
 	int			m_nSpeak;						// number of times initiated talking
 	int			m_voicePitch;					// pitch of voice for this head
