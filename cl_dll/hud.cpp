@@ -105,6 +105,7 @@ cvar_t* cl_weapon_sparks = NULL;
 cvar_t* cl_weapon_wallpuff = NULL;
 
 cvar_t* cl_muzzlelight = NULL;
+cvar_t* cl_muzzlelight_monsters = NULL;
 
 #if FEATURE_NIGHTVISION_STYLES
 cvar_t *cl_nvgstyle = NULL;
@@ -466,6 +467,7 @@ void CHud::Init( void )
 	cl_weapon_wallpuff = gEngfuncs.pfnRegisterVariable( "cl_weapon_wallpuff", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 	cl_muzzlelight = CVAR_CREATE( "cl_muzzlelight", "0", FCVAR_ARCHIVE );
+	cl_muzzlelight_monsters = CVAR_CREATE( "cl_muzzlelight_monsters", "0", FCVAR_ARCHIVE );
 
 #if FEATURE_NIGHTVISION_STYLES
 	cl_nvgstyle = CVAR_CREATE( "cl_nvgstyle", "0", FCVAR_ARCHIVE );

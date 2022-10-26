@@ -31,7 +31,7 @@
 #include "weapons.h"
 #include "gamerules.h"
 
-void UTIL_MuzzleLight( Vector vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay )
+void UTIL_DynamicLight( const Vector &vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay )
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
 		WRITE_BYTE( TE_DLIGHT );
@@ -44,6 +44,16 @@ void UTIL_MuzzleLight( Vector vecSrc, float flRadius, byte r, byte g, byte b, fl
 		WRITE_BYTE( b );		// b
 		WRITE_BYTE( flTime * 10.0f );	// time * 10
 		WRITE_BYTE( flDecay * 0.1f );	// decay * 0.1
+	MESSAGE_END();
+}
+
+void UTIL_MuzzleLight( const Vector& vecSrc )
+{
+	extern int gmsgMuzzleLight;
+	MESSAGE_BEGIN( MSG_PVS, gmsgMuzzleLight, vecSrc );
+		WRITE_COORD( vecSrc.x );
+		WRITE_COORD( vecSrc.y );
+		WRITE_COORD( vecSrc.z );
 	MESSAGE_END();
 }
 

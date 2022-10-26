@@ -204,6 +204,7 @@ int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
 
 int gmsgRandomGibs = 0;
+int gmsgMuzzleLight = 0;
 
 #if FEATURE_NIGHTVISION
 int gmsgNightvision = 0;
@@ -269,6 +270,7 @@ void LinkUserMessages( void )
 	gmsgStatusValue = REG_USER_MSG( "StatusValue", 3 );
 
 	gmsgRandomGibs = REG_USER_MSG( "RandomGibs", 27 );
+	gmsgMuzzleLight = REG_USER_MSG( "MuzzleLight", 6 );
 
 #if FEATURE_NIGHTVISION
 	gmsgNightvision = REG_USER_MSG( "Nightvision", 1 );

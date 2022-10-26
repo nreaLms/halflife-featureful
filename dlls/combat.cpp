@@ -1714,6 +1714,8 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
+	UTIL_MuzzleLight(vecSrc);
+
 	for( ULONG iShot = 1; iShot <= cShots; iShot++ )
 	{
 		// get circular gaussian spread

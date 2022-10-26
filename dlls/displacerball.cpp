@@ -247,7 +247,7 @@ void CDisplacerBall::Circle( void )
 		WRITE_BYTE(255); // brightness
 		WRITE_BYTE(0);		// speed
 	MESSAGE_END();
-	UTIL_MuzzleLight( pev->origin, 160.0f, 255, 180, 96, 1.0f, 100.0f );
+	UTIL_DynamicLight( pev->origin, 160.0f, 255, 180, 96, 1.0f, 100.0f );
 }
 
 void CDisplacerBall::KillThink( void )

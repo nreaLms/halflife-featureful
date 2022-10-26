@@ -43,6 +43,7 @@ set SOURCES=../dlls/weapons_shared.cpp ^
 	ammohistory.cpp ^
 	battery.cpp ^
 	cdll_int.cpp ^
+	cl_msg_fx.cpp ^
 	com_weapons.cpp ^
 	death.cpp ^
 	demo.cpp ^

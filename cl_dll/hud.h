@@ -71,6 +71,7 @@ extern cvar_t* cl_weapon_sparks;
 extern cvar_t* cl_weapon_wallpuff;
 
 extern cvar_t* cl_muzzlelight;
+extern cvar_t* cl_muzzlelight_monsters;
 
 extern cvar_t* cl_flashlight_custom;
 
