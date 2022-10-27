@@ -254,7 +254,7 @@ void CBigSquidSpit::Animate( void )
 		if ( pEntity->MyMonsterPointer() && !FClassnameIs(pEntity->pev, "monster_bullchicken")) {
 			CBaseMonster* bullsquid = GetBullsquid();
 			if (!bullsquid || bullsquid->IRelationship(pEntity) >= R_DL) {
-				pEntity->TakeDamage(pev, bullsquid ? bullsquid->pev : pev, gSkillData.bullsquidDmgSpit/4, DMG_POISON | DMG_TIMEDNONLETHAL);
+				pEntity->TakeDamage(pev, bullsquid ? bullsquid->pev : pev, gSkillData.bullsquidDmgSpit/4, DMG_POISON | DMG_TIMEDNONLETHAL | DMG_IGNORE_ARMOR);
 			}
 		}
 	}
@@ -335,7 +335,7 @@ void CBigSquidSpit::Touch( CBaseEntity *pOther )
 		if (!bullsquid || bullsquid->IRelationship(pOther) >= R_DL) {
 			entvars_t* pevAttacker = bullsquid ? bullsquid->pev : pev;
 			pOther->TakeDamage( pev, pevAttacker, gSkillData.bullsquidDmgSpit * 1.5, DMG_ACID );
-			pOther->TakeDamage( pev, pevAttacker, gSkillData.bullsquidDmgSpit/4, DMG_POISON | DMG_TIMEDNONLETHAL);
+			pOther->TakeDamage( pev, pevAttacker, gSkillData.bullsquidDmgSpit/4, DMG_POISON | DMG_TIMEDNONLETHAL | DMG_IGNORE_ARMOR);
 		}
 	}
 

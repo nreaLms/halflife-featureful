@@ -506,6 +506,10 @@ static BYTE TBDModFromDmgType(int bitsDamageType)
 	{
 		result |= DMG_TIMED_MOD_NONLETHAL;
 	}
+	if (bitsDamageType & DMG_IGNORE_ARMOR)
+	{
+		result |= DMG_TIMED_MOD_IGNORE_ARMOR;
+	}
 	return result;
 }
 
@@ -515,6 +519,10 @@ static int DmgTypeFromTBDMod(BYTE timeBasedModifier)
 	if (timeBasedModifier & DMG_TIMED_MOD_NONLETHAL)
 	{
 		result |= DMG_NONLETHAL;
+	}
+	if (timeBasedModifier & DMG_TIMED_MOD_IGNORE_ARMOR)
+	{
+		result |= DMG_IGNORE_ARMOR;
 	}
 	return result;
 }
@@ -558,7 +566,7 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	m_lastDamageAmount = (int)flDamage;
 
 	// Armor. 
-	if( !( pev->flags & FL_GODMODE ) && pev->armorvalue && !( bitsDamageType & ( DMG_FALL | DMG_DROWN ) ) )// armor doesn't protect against fall or drown damage!
+	if( !( pev->flags & FL_GODMODE ) && pev->armorvalue && !( bitsDamageType & ( DMG_FALL | DMG_DROWN | DMG_IGNORE_ARMOR ) ) )// armor doesn't protect against fall or drown damage!
 	{
 		float flNew = flDamage * flRatio;
 
