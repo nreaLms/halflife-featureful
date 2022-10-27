@@ -53,7 +53,9 @@ extern "C"
 #include "pm_shared.h"
 }
 
-#include <string.h>
+#include "r_studioint.h"
+
+extern engine_studio_api_t IEngineStudio;
 
 #ifdef CLDLL_FOG
 GLAPI_glEnable GL_glEnable = NULL;
