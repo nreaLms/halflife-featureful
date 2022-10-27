@@ -661,7 +661,7 @@ void CAM_EndDistance( void )
 
 int DLLEXPORT CL_IsThirdPerson( void )
 {
-	return ( cam_thirdperson ? 1 : 0 ) || ( g_iUser1 && ( g_iUser2 == gEngfuncs.GetLocalPlayer()->index ) ) || (gHUD.m_bFlashlight && cl_flashlight_custom && cl_flashlight_custom->value);
+	return ( cam_thirdperson ? 1 : 0 ) || ( g_iUser1 && ( g_iUser2 == gEngfuncs.GetLocalPlayer()->index ) );
 }
 
 void DLLEXPORT CL_CameraOffset( float *ofs )

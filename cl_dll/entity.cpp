@@ -39,8 +39,6 @@ extern "C"
 	struct cl_entity_s DLLEXPORT *HUD_GetUserEntity( int index );
 }
 
-extern int cam_thirdperson;
-
 void DrawFlashlight()
 {
 	Vector forward, vecSrc, vecEnd, origin, angles;
@@ -98,27 +96,8 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 {
 	switch( type )
 	{
-	case ET_PLAYER:
-	{
-		if (cl_flashlight_custom && cl_flashlight_custom->value)
-		{
-			cl_entity_s* ent = gEngfuncs.GetLocalPlayer();
-			// Remove flashlight flag before the info reaches the engine
-			if (ent && (ent->curstate.effects & EF_DIMLIGHT) != 0)
-			{
-				ent->curstate.effects &= ~EF_DIMLIGHT;
-				// Call the function that will draw our custom flashlight
-				DrawFlashlight();
-			}
-			// Stop telling the engine its in "thirdperson" mode
-			gHUD.m_bFlashlight = false;
-			// Don't draw the player if we are in firstperson mode
-			if (!cam_thirdperson)
-				return 0;
-		}
-	}
-	break;
 	case ET_NORMAL:
+	case ET_PLAYER:
 	case ET_BEAM:
 	case ET_TEMPENTITY:
 	case ET_FRAGMENTED:
@@ -229,6 +208,19 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 		g_iUser1 = src->iuser1;
 		g_iUser2 = src->iuser2;
 		g_iUser3 = src->iuser3;
+
+		if (cl_flashlight_custom && cl_flashlight_custom->value)
+		{
+			if ((player->curstate.effects & EF_DIMLIGHT) != 0)
+			{
+				gHUD.m_bFlashlight = true;
+				player->curstate.effects &= ~EF_DIMLIGHT;
+			}
+			else
+			{
+				gHUD.m_bFlashlight = false;
+			}
+		}
 	}
 }
 

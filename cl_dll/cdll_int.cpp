@@ -438,9 +438,13 @@ called every screen frame to
 redraw the HUD.
 ===========================
 */
+extern void DrawFlashlight();
 
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
+	if (gHUD.m_bFlashlight)
+		DrawFlashlight();
+
 	gHUD.Redraw( time, intermission );
 
 	return 1;
@@ -489,9 +493,6 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame( double time )
 {
-	if (cl_flashlight_custom && cl_flashlight_custom->value)
-		gHUD.m_bFlashlight = true;
-
 #if USE_VGUI
 	GetClientVoiceMgr()->Frame(time);
 #elif USE_FAKE_VGUI
