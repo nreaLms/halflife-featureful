@@ -1699,7 +1699,7 @@
 		4: "Concrete"
 	]
 	scale(string) : "Gib Sprite Scale" : ""
-	skin(integer) : "Gib Skin" : 0
+	skin(integer) : "Gib Skin (-1 is random)" : 0
 	spawnflags(Flags) =
 	[
 		1 : "Repeatable" 	: 0

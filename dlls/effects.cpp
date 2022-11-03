@@ -25,6 +25,7 @@
 #include "shake.h"
 #include "bullsquid.h"
 #include "soundradius.h"
+#include "studio.h"
 #include "gamerules.h"
 #include "player.h"
 #include "locus.h"
@@ -1903,7 +1904,16 @@ CGib *CEnvShooter::CreateGib( float lifeTime )
 		pGib->pev->scale = pev->scale;
 	}
 
-	pGib->pev->skin = pev->skin;
+	if (pev->skin < 0)
+	{
+		studiohdr_t *pstudiohdr = (studiohdr_t *)GET_MODEL_PTR( pGib->edict() );
+		if (pstudiohdr && pstudiohdr->ident == IDSTUDIOHEADER && pstudiohdr->numskinfamilies > 0)
+			pGib->pev->skin = RANDOM_LONG(0, pstudiohdr->numskinfamilies-1);
+	}
+	else
+	{
+		pGib->pev->skin = pev->skin;
+	}
 
 	return pGib;
 }
