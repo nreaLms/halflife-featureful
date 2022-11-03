@@ -66,7 +66,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CTalkMonster, CFollowingMonster )
 
 CTalkMonster::TalkFriend CTalkMonster::m_szFriends[TLK_CFRIENDS] = {};
-const char* CTalkMonster::m_szMedics[NUM_MEDICS] = {};
+char CTalkMonster::m_szMedics[NUM_MEDICS][64] = {};
 
 //=========================================================
 // AI Schedules Specific to talking monsters
@@ -693,7 +693,7 @@ void CTalkMonster::LimitFollowers( CBaseEntity *pPlayer, int maxFollowers )
 	for( i = 0; i < TLK_CFRIENDS; i++ )
 	{
 		TalkFriend& talkFriend = m_szFriends[i];
-		if (!talkFriend.name)
+		if (!talkFriend.name[0])
 			break;
 		if (!talkFriend.canFollow) // no sense in limiting friends who can't move, like sitting scientists
 			continue;
@@ -1634,9 +1634,10 @@ void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, sh
 	int i;
 	for (i=0; i<TLK_CFRIENDS; ++i)
 	{
-		if (!m_szFriends[i].name)
+		if (!m_szFriends[i].name[0])
 		{
-			m_szFriends[i].name = className;
+			strncpy(m_szFriends[i].name, className, sizeof(m_szFriends[i].name));
+			m_szFriends[i].name[sizeof(m_szFriends[i].name)-1] = '\0';
 			m_szFriends[i].canFollow = canFollow;
 			m_szFriends[i].category = followerCategory;
 
@@ -1664,9 +1665,10 @@ void CTalkMonster::RegisterMedic(const char* className)
 	int i;
 	for (i=0; i<NUM_MEDICS; ++i)
 	{
-		if (!m_szMedics[i])
+		if (!m_szMedics[i][0])
 		{
-			m_szMedics[i] = className;
+			strncpy(m_szMedics[i], className, sizeof(m_szMedics[i]));
+			m_szMedics[i][sizeof(m_szMedics[i])-1] = '\0';
 
 			ALERT(at_aiconsole, "Registered %s as medic\n", className);
 			return;

@@ -204,13 +204,13 @@ public:
 
 	struct TalkFriend
 	{
-		const char* name;
+		char name[64];
 		bool canFollow;
 		short category;
 	};
 
 	static TalkFriend m_szFriends[TLK_CFRIENDS];		// array of friend names
-	static const char* m_szMedics[NUM_MEDICS];
+	static char m_szMedics[NUM_MEDICS][64];
 	static float g_talkWaitTime;
 	static bool SomeoneIsTalking();
 	static void RegisterTalkMonster(const char* className, bool canFollow, short followerCategory);
