@@ -88,7 +88,6 @@ def build(bld):
 		'menu.cpp',
 		'message.cpp',
 		'nightvision.cpp',
-		'overview.cpp',
 		'parsemsg.cpp',
 		'saytext.cpp',
 		'scoreboard.cpp',

@@ -67,7 +67,6 @@ set SOURCES=../dlls/weapons_shared.cpp ^
 	menu.cpp ^
 	message.cpp ^
 	nightvision.cpp ^
-	overview.cpp ^
 	parsemsg.cpp ^
 	../pm_shared/pm_debug.c ^
 	../pm_shared/pm_math.c ^

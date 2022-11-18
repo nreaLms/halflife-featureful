@@ -83,7 +83,6 @@ SRCS+=./input_mouse.cpp
 SRCS+=./menu.cpp
 SRCS+=./message.cpp
 SRCS+=./nightvision.cpp
-SRCS+=./overview.cpp
 SRCS+=./parsemsg.cpp
 SRCS_C+=../pm_shared/pm_debug.c
 SRCS_C+=../pm_shared/pm_math.c
