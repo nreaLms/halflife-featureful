@@ -120,6 +120,7 @@ public:
 	string_t m_iszDecline;
 
 	float m_spawnDelay;
+	int m_delayedCount;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -151,6 +152,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iszUnUse, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_iszDecline, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_spawnDelay, FIELD_FLOAT ),
+	DEFINE_FIELD( CMonsterMaker, m_delayedCount, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -367,6 +369,7 @@ CMonsterMakerHull* CMonsterMakerHull::SelfCreate(CMonsterMaker *pMonsterMaker, c
 	SET_MODEL( pHull->edict(), "sprites/iunknown.spr" );
 	pHull->pev->angles = angles;
 	pHull->pev->solid = SOLID_BBOX;
+	pHull->pev->flags = FL_MONSTER;
 	pHull->pev->classname = MAKE_STRING("monstermaker_hull");
 	pHull->pev->movetype = MOVETYPE_NONE;
 	pHull->pev->owner = pMonsterMaker->edict();
@@ -389,6 +392,7 @@ void CMonsterMakerHull::Think()
 		{
 			CMonsterMaker* pMonsterMaker = static_cast<CMonsterMaker*>(pOwner);
 			pMonsterMaker->SpawnMonster(pev->origin, pev->angles);
+			pMonsterMaker->m_delayedCount--;
 		}
 	}
 
@@ -760,7 +764,7 @@ void CMonsterMaker::StartWarpballEffect(const Vector &vecPosition, edict_t* warp
 //=========================================================
 int CMonsterMaker::MakeMonster( void )
 {
-	if( m_iMaxLiveChildren > 0 && m_cLiveChildren >= m_iMaxLiveChildren )
+	if( m_iMaxLiveChildren > 0 && m_cLiveChildren + m_delayedCount >= m_iMaxLiveChildren )
 	{
 		// not allowed to make a new one yet. Too many live ones out right now.
 		return MONSTERMAKER_LIMIT;
@@ -828,6 +832,7 @@ int CMonsterMaker::MakeMonster( void )
 		CMonsterMakerHull* pHull = CMonsterMakerHull::SelfCreate(this, placePosition, placeAngles, minHullSize, maxHullSize, m_spawnDelay);
 		if (!pHull)
 			return MONSTERMAKER_NULLENTITY;
+		m_delayedCount++;
 
 		if (!FStringNull(warpballName))
 		{
@@ -920,7 +925,7 @@ void CMonsterMaker::DeathNotice( entvars_t *pevChild )
 	}
 	else
 	{
-		ALERT(at_aiconsole, "Impossible situation: %s got DeathNotice when live children count is 0!\n", STRING(pev->classname));
+		ALERT(at_aiconsole, "Impossible situation: %s got DeathNotice from %s when live children count is 0!\n", STRING(pev->classname), STRING(pevChild->classname));
 	}
 
 	if( !m_fFadeChildren )
@@ -928,7 +933,7 @@ void CMonsterMaker::DeathNotice( entvars_t *pevChild )
 		pevChild->owner = NULL;
 	}
 
-	if (m_cNumMonsters == 0)
+	if (m_cNumMonsters == 0 && m_cLiveChildren == 0)
 	{
 		SetThink(&CMonsterMaker::SUB_Remove);
 		pev->nextthink = gpGlobals->time;
