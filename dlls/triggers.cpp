@@ -55,6 +55,7 @@
 #define SF_TRIGGER_HURT_CLIENTONLYTOUCH 32// only clients may touch this trigger.
 #define SF_TRIGGER_HURT_AFFECT_NON_MOVING_MONSTERS 64 // hack to affect non-moving monsters
 #define SF_TRIGGER_HURT_FULL_DAMAGE_EVERY_HALF_SECOND 128
+#define SF_TRIGGER_HURT_IGNORE_ARMOR 256
 
 extern DLL_GLOBAL BOOL		g_fGameOver;
 
@@ -981,15 +982,21 @@ public:
 	void EXPORT HurtNonMovingMonstersThink( void );
 	bool CanHurt( CBaseEntity* pOther );
 
-	int DmgGibFlag() {
+	int DamageType() const {
+		int damageType = m_bitsDamageInflict;
 		switch (pev->impulse) {
 		case 1:
-			return DMG_ALWAYSGIB;
+			damageType = DMG_ALWAYSGIB;
+			break;
 		case 2:
-			return DMG_NEVERGIB;
+			damageType = DMG_NEVERGIB;
+			break;
 		default:
-			return 0;
+			break;
 		}
+		if (pev->spawnflags & SF_TRIGGER_HURT_IGNORE_ARMOR)
+			damageType |= DMG_IGNORE_ARMOR;
+		return damageType;
 	}
 };
 
@@ -1417,7 +1424,7 @@ void CTriggerHurt::HurtNonMovingMonsters()
 			if (flDmg < 0)
 				pMonster->TakeHealth( this, -flDmg, m_bitsDamageInflict );
 			else
-				pMonster->TakeDamage( pev, pev, flDmg, m_bitsDamageInflict|DmgGibFlag() );
+				pMonster->TakeDamage( pev, pev, flDmg, DamageType() );
 		}
 	}
 }
@@ -1589,7 +1596,7 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 		if (pev->dmg_save > 0) {
 			fldmg = Q_max(Q_min(pOther->pev->health - pev->dmg_save, fldmg), 0.0f);
 		}
-		pOther->TakeDamage( pev, pev, fldmg, m_bitsDamageInflict|DmgGibFlag() );
+		pOther->TakeDamage( pev, pev, fldmg, DamageType() );
 	}
 
 	// Store pain time so we can get all of the other entities on this frame
@@ -5067,6 +5074,8 @@ void CTriggerChangeClass::Affect(CBaseEntity *pEntity, USE_TYPE useType)
 #define SF_TRIGGER_HURT_REMOTE_CONSTANT 2
 #define SF_TRIGGER_HURT_REMOTE_STARTON 4
 
+#define SF_TRIGGER_HURT_REMOTE_IGNORE_ARMOR 256
+
 class CTriggerHurtRemote : public CPointEntity
 {
 public:
@@ -5098,6 +5107,8 @@ protected:
 		default:
 			break;
 		}
+		if (pev->spawnflags & SF_TRIGGER_HURT_REMOTE_IGNORE_ARMOR)
+			damageType |= DMG_IGNORE_ARMOR;
 		return damageType;
 	}
 	float Delay() const { return pev->frags ? pev->frags : 0.1; }
