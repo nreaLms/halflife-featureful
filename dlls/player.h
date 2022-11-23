@@ -434,6 +434,8 @@ public:
 	int m_iItemsBits;
 	int m_iClientItemsBits;
 
+	BYTE m_timeBasedDmgModifiers[CDMG_TIMEBASED];
+
 	BOOL m_settingsLoaded;
 	BOOL m_buddha;
 };

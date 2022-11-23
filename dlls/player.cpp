@@ -127,6 +127,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_pRope, FIELD_CLASSPTR),
 #endif
 	DEFINE_FIELD(CBasePlayer, m_iItemsBits, FIELD_INTEGER),
+	DEFINE_ARRAY(CBasePlayer, m_timeBasedDmgModifiers, FIELD_CHARACTER, CDMG_TIMEBASED),
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBasePlayer, m_buddha, FIELD_BOOLEAN),
 
@@ -498,6 +499,26 @@ void CBasePlayer::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 	etc are implemented with subsequent calls to TakeDamage using DMG_GENERIC.
 */
 
+static BYTE TBDModFromDmgType(int bitsDamageType)
+{
+	BYTE result = 0;
+	if (bitsDamageType & DMG_TIMEDNONLETHAL)
+	{
+		result |= DMG_TIMED_MOD_NONLETHAL;
+	}
+	return result;
+}
+
+static int DmgTypeFromTBDMod(BYTE timeBasedModifier)
+{
+	int result = 0;
+	if (timeBasedModifier & DMG_TIMED_MOD_NONLETHAL)
+	{
+		result |= DMG_NONLETHAL;
+	}
+	return result;
+}
+
 int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	// have suit diagnose the problem - ie: report damage type
@@ -565,9 +586,13 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 
 	// reset damage time countdown for each type of time based damage player just sustained
 	{
+		const BYTE timeBasedModifier = TBDModFromDmgType(bitsDamageType);
 		for( int i = 0; i < CDMG_TIMEBASED; i++ )
 			if( bitsDamageType & ( DMG_PARALYZE << i ) )
+			{
 				m_rgbTimeBasedDamage[i] = 0;
+				m_timeBasedDmgModifiers[i] = timeBasedModifier;
+			}
 	}
 
 	// tell director about it
@@ -2644,7 +2669,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				bDuration = NERVEGAS_DURATION;
 				break;
 			case itbd_Poison:
-				TakeDamage( pev, pev, POISON_DAMAGE, FBitSet(m_bitsDamageType, DMG_TIMEDNONLETHAL) ? DMG_NONLETHAL : DMG_GENERIC );
+				TakeDamage( pev, pev, POISON_DAMAGE, DMG_GENERIC | (DmgTypeFromTBDMod(m_timeBasedDmgModifiers[i])) );
 				bDuration = POISON_DURATION;
 				break;
 			case itbd_Radiation:
@@ -2697,6 +2722,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				if( !m_rgbTimeBasedDamage[i] || --m_rgbTimeBasedDamage[i] == 0 )
 				{
 					m_rgbTimeBasedDamage[i] = 0;
+					m_timeBasedDmgModifiers[i] = 0;
 
 					// if we're done, clear damage bits
 					m_bitsDamageType &= ~( DMG_PARALYZE << i );	

@@ -39,6 +39,9 @@
 #define DMG_TIMEDNONLETHAL	(1 << 25) // timed damage, e.g. poison, shouldn't kill player completely
 #define DMG_DONTBLEED		(1 << 26) // used in TraceAttack. Force not to bleed.
 
+// Modifiers to time-based damage, up to 8
+#define DMG_TIMED_MOD_NONLETHAL ( 1 << 0 )
+
 #define HEAL_GENERIC 0
 #define HEAL_CHARGE (1<<0) // Charge my portable medkit
 
