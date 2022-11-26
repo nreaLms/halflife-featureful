@@ -659,7 +659,7 @@ void CCineMonster::PossessEntity( void )
 
 void CCineMonster::CineThink( void )
 {
-	if (!TryFindAndPossessEntity())
+	if (IsLockedByMaster() || !TryFindAndPossessEntity())
 	{
 		pev->nextthink = gpGlobals->time + 1.0f;
 	}

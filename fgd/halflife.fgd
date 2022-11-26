@@ -1071,6 +1071,7 @@
 		1 : "No (Invulnerable)"
 		2 : "Non-lethal damage"
 	]
+	master(string) : "Master" : : "Scripted sequence won't search for its target monster while master is locked"
 ]
 
 //
