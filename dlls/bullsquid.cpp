@@ -400,6 +400,7 @@ public:
 
 	float m_flLastHurtTime;// we keep track of this, because if something hurts a squid, it will forget about its love of headcrabs for a while.
 	float m_flNextSpitTime;// last time the bullsquid used the spit attack.
+	float m_flNextHopTime;
 };
 
 LINK_ENTITY_TO_CLASS( monster_bullchicken, CBullsquid )
@@ -409,6 +410,7 @@ TYPEDESCRIPTION	CBullsquid::m_SaveData[] =
 	DEFINE_FIELD( CBullsquid, m_fCanThreatDisplay, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CBullsquid, m_flLastHurtTime, FIELD_TIME ),
 	DEFINE_FIELD( CBullsquid, m_flNextSpitTime, FIELD_TIME ),
+	DEFINE_FIELD( CBullsquid, m_flNextHopTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CBullsquid, CBaseMonster )
@@ -1262,7 +1264,7 @@ Schedule_t *CBullsquid::GetSchedule( void )
 	{
 	case MONSTERSTATE_ALERT:
 		{
-			if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+			if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) && gpGlobals->time >= m_flNextHopTime )
 			{
 				return GetScheduleOfType( SCHED_SQUID_HURTHOP );
 			}
@@ -1432,6 +1434,7 @@ void CBullsquid::StartTask( Task_t *pTask )
 		}
 	case TASK_SQUID_HOPTURN:
 		{
+			m_flNextHopTime = gpGlobals->time + 5.0f;
 			SetActivity( ACT_HOP );
 			MakeIdealYaw( m_vecEnemyLKP );
 			break;

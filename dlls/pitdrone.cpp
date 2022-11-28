@@ -175,7 +175,6 @@ void CPitdroneSpike::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVeloc
 #define PITDRONE_HORNS5		5
 #define PITDRONE_HORNS6		6
 #define	PITDRONE_SPRINT_DIST			255
-#define PITDRONE_FLINCH_DELAY			2		// at most one flinch every n secs
 #define PITDRONE_MAX_HORNS	6
 #define PITDRONE_GIB_COUNT	5
 
@@ -257,7 +256,7 @@ public:
 
 	float	m_flLastHurtTime;
 	float	m_flNextSpitTime;// last time the PitDrone used the spit attack.
-	float	m_flNextFlinch;
+	float	m_flNextHopTime;
 	int m_iInitialAmmo;
 	bool shouldAttackWithLeftClaw;
 
@@ -279,6 +278,7 @@ TYPEDESCRIPTION	CPitdrone::m_SaveData[] =
 	DEFINE_FIELD(CPitdrone, m_iInitialAmmo, FIELD_INTEGER),
 	DEFINE_FIELD(CPitdrone, m_flLastHurtTime, FIELD_TIME),
 	DEFINE_FIELD(CPitdrone, m_flNextSpitTime, FIELD_TIME),
+	DEFINE_FIELD(CPitdrone, m_flNextHopTime, FIELD_TIME),
 };
 
 IMPLEMENT_SAVERESTORE(CPitdrone, CFollowingMonster)
@@ -306,18 +306,6 @@ int CPitdrone::IgnoreConditions(void)
 	{
 		// haven't been hurt in 20 seconds, so let the pitdrone care about stink.
 		iIgnore |= bits_COND_SMELL | bits_COND_SMELL_FOOD;
-	}
-
-	if ((m_Activity == ACT_MELEE_ATTACK1) || (m_Activity == ACT_MELEE_ATTACK2))
-	{
-			if (m_flNextFlinch >= gpGlobals->time)
-				iIgnore |= (bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE);
-	}
-
-	if ((m_Activity == ACT_SMALL_FLINCH) || (m_Activity == ACT_BIG_FLINCH))
-	{
-		if (m_flNextFlinch < gpGlobals->time)
-			m_flNextFlinch = gpGlobals->time + PITDRONE_FLINCH_DELAY;
 	}
 
 	return iIgnore;
@@ -1021,7 +1009,7 @@ Schedule_t *CPitdrone::GetSchedule(void)
 	case MONSTERSTATE_ALERT:
 	case MONSTERSTATE_HUNT:
 	{
-		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+		if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) && gpGlobals->time >= m_flNextHopTime )
 		{
 			return GetScheduleOfType( SCHED_PDRONE_HURTHOP );
 		}
@@ -1146,6 +1134,7 @@ void CPitdrone::StartTask(Task_t *pTask)
 	{
 	case TASK_PDRONE_HOPTURN:
 	{
+		m_flNextHopTime = gpGlobals->time + 5.0f;
 		SetActivity( ACT_HOP );
 		MakeIdealYaw( m_vecEnemyLKP );
 		break;
