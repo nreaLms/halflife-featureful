@@ -102,8 +102,13 @@ public:
 	int DefaultISoundMask( void );
 	void DeclineFollowing( CBaseEntity* pCaller );
 
-	float CoverRadius( void ) { return 1200; }		// Need more room for cover because scientists want to get far away!
+	float CoverRadius( void ) {
+		if (!IsFollowingPlayer())
+			return 1200; // Need more room for cover because scientists want to get far away!
+		return CTalkMonster::CoverRadius(); // Don't run too far when following the player
+	}
 	BOOL DisregardEnemy( CBaseEntity *pEnemy ) { return !pEnemy->IsAlive() || ( gpGlobals->time - m_fearTime ) > 15; }
+	bool CanTolerateWhileFollowing( CBaseEntity* pEnemy );
 
 	virtual BOOL	CanHeal( void );
 	void StartFollowingHealTarget(CBaseEntity* pTarget);
@@ -335,7 +340,8 @@ Task_t tlScientistHide[] =
 	{ TASK_STOP_MOVING, 0.0f },
 	{ TASK_PLAY_SEQUENCE, (float)ACT_CROUCH },
 	{ TASK_SET_ACTIVITY, (float)ACT_CROUCHIDLE },	// FIXME: This looks lame
-	{ TASK_WAIT_RANDOM, 10.0f },
+	{ TASK_WAIT, 1.0f },
+	{ TASK_WAIT_RANDOM, 2.0f },
 };
 
 Schedule_t slScientistHide[] =
@@ -1048,21 +1054,37 @@ Schedule_t *CScientist::GetSchedule( void )
 		TrySmellTalk();
 		break;
 	case MONSTERSTATE_COMBAT:
+		if( HasConditions( bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST ) )
+		{
+			// call base class, all code to handle dead enemies is centralized there.
+			return CBaseMonster::GetSchedule();
+		}
 		if( HasConditions( bits_COND_NEW_ENEMY ) )
-			return slFear;					// Point and scream!
-		if( HasConditions( bits_COND_SEE_ENEMY ) )
+			return GetScheduleOfType( SCHED_FEAR );					// Point and scream!
+		if( HasConditions( bits_COND_SEE_ENEMY | bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 			return slScientistCover;		// Take Cover
 
 		if( HasConditions( bits_COND_HEAR_SOUND ) )
 			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );	// Cower and panic from the scary sound!
 
-		return slScientistCover;			// Run & Cower
+		if (!IsFollowingPlayer())
+			return slScientistCover;			// Run & Cower
 		break;
 	default:
 		break;
 	}
 	
 	return CTalkMonster::GetSchedule();
+}
+
+bool CScientist::CanTolerateWhileFollowing(CBaseEntity *pEnemy)
+{
+	if (!pEnemy)
+		return true;
+	// TODO: better check. Should tolerate enemies that are not very dangerous and easily avoidable (like headcrabs)
+	if (IRelationship( pEnemy ) == R_DL)
+		return true;
+	return false;
 }
 
 MONSTERSTATE CScientist::GetIdealState( void )
@@ -1076,21 +1098,19 @@ MONSTERSTATE CScientist::GetIdealState( void )
 		{
 			if( IsFollowingPlayer() )
 			{
-				int relationship = IRelationship( m_hEnemy );
-				if( relationship != R_FR || ( relationship < R_HT && !HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) ) )
+				if( CanTolerateWhileFollowing(m_hEnemy) && !HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 				{
 					// Don't go to combat if you're following the player
 					m_IdealMonsterState = MONSTERSTATE_ALERT;
 					return m_IdealMonsterState;
 				}
-				StopFollowing( TRUE );
 			}
 		}
 		else if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{
 			// Stop following if you take damage
 			if( IsFollowingPlayer() )
-				StopFollowing( TRUE );
+				StopFollowing( TRUE, false );
 		}
 		break;
 	case MONSTERSTATE_COMBAT:
@@ -1103,13 +1123,6 @@ MONSTERSTATE CScientist::GetIdealState( void )
 					// Strip enemy when going to alert
 					m_IdealMonsterState = MONSTERSTATE_ALERT;
 					m_hEnemy = 0;
-					return m_IdealMonsterState;
-				}
-
-				// Follow if only scared a little
-				if( m_hTargetEnt != 0 && FollowedPlayer() == m_hTargetEnt )
-				{
-					m_IdealMonsterState = MONSTERSTATE_ALERT;
 					return m_IdealMonsterState;
 				}
 
