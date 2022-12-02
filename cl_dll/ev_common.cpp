@@ -216,7 +216,7 @@ void EV_MuzzleLight(const Vector &vecForward)
 	if (cl_muzzlelight && cl_muzzlelight->value)
 	{
 		Vector vecSrc = ent->origin + vecForward * 36;
-		vecSrc.z = (ent->curstate.maxs.z - ent->curstate.mins.z)*0.35f;
+		vecSrc.z += (ent->curstate.maxs.z - ent->curstate.mins.z)*0.4f;
 		dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight( 0 );
 		dl->origin[0] = vecSrc.x;
 		dl->origin[1] = vecSrc.y;
