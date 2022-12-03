@@ -1394,19 +1394,7 @@ void CBullsquid::StartTask( Task_t *pTask )
 	{
 	case TASK_MELEE_ATTACK2:
 		{
-			switch( RANDOM_LONG( 0, 2 ) )
-			{
-			case 0:
-				EMIT_SOUND( ENT( pev ), CHAN_VOICE, "bullchicken/bc_attackgrowl.wav", 1, ATTN_NORM );
-				break;
-			case 1:
-				EMIT_SOUND( ENT( pev ), CHAN_VOICE, "bullchicken/bc_attackgrowl2.wav", 1, ATTN_NORM );
-				break;
-			case 2:
-				EMIT_SOUND( ENT( pev ), CHAN_VOICE, "bullchicken/bc_attackgrowl3.wav", 1, ATTN_NORM );
-				break;
-			}
-
+			EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackGrowlSounds), 1, ATTN_NORM );
 			CBaseMonster::StartTask( pTask );
 			break;
 		}
