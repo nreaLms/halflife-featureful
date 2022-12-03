@@ -1367,6 +1367,11 @@ void CBaseMonster::RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars
 //=========================================================
 CBaseEntity* CBaseMonster::CheckTraceHullAttack( float flDist, int iDamage, int iDmgType )
 {
+	return CheckTraceHullAttack( flDist, iDamage, iDmgType, pev->size.z * 0.5f );
+}
+
+CBaseEntity* CBaseMonster::CheckTraceHullAttack( float flDist, int iDamage, int iDmgType, float height )
+{
 	TraceResult tr;
 
 	if( IsPlayer() )
@@ -1375,7 +1380,7 @@ CBaseEntity* CBaseMonster::CheckTraceHullAttack( float flDist, int iDamage, int 
 		UTIL_MakeAimVectors( pev->angles );
 
 	Vector vecStart = pev->origin;
-	vecStart.z += pev->size.z * 0.5f;
+	vecStart.z += height;
 	Vector vecEnd = vecStart + ( gpGlobals->v_forward * flDist );
 
 	UTIL_TraceHull( vecStart, vecEnd, dont_ignore_monsters, head_hull, ENT( pev ), &tr );

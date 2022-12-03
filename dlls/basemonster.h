@@ -308,6 +308,7 @@ public:
 	void Eat( float flFullDuration );// make the monster 'full' for a while.
 
 	CBaseEntity *CheckTraceHullAttack( float flDist, int iDamage, int iDmgType );
+	CBaseEntity *CheckTraceHullAttack( float flDist, int iDamage, int iDmgType, float height );
 	BOOL FacingIdeal( void );
 
 	BOOL FCheckAITrigger( void );// checks and, if necessary, fires the monster's trigger target.
