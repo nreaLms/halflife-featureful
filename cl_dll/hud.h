@@ -74,6 +74,8 @@ extern cvar_t* cl_muzzlelight;
 extern cvar_t* cl_muzzlelight_monsters;
 
 extern cvar_t* cl_flashlight_custom;
+extern cvar_t* cl_flashlight_radius;
+extern cvar_t* cl_flashlight_fade_distance;
 
 #define HUD_ACTIVE	1
 #define HUD_INTERMISSION 2

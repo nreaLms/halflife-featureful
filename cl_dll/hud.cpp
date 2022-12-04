@@ -124,6 +124,8 @@ cvar_t *cl_nvgfilterbrightness = NULL;
 #endif
 
 cvar_t* cl_flashlight_custom = NULL;
+cvar_t* cl_flashlight_radius = NULL;
+cvar_t* cl_flashlight_fade_distance = NULL;
 
 void ShutdownInput( void );
 
@@ -486,6 +488,8 @@ void CHud::Init( void )
 #endif
 
 	cl_flashlight_custom = CVAR_CREATE( "cl_flashlight_custom", "0", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	cl_flashlight_radius = CVAR_CREATE( "cl_flashlight_radius", "100", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	cl_flashlight_fade_distance = CVAR_CREATE( "cl_flashlight_fade_distance", "600", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 	m_pSpriteList = NULL;
 

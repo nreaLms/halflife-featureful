@@ -39,6 +39,37 @@ extern "C"
 	struct cl_entity_s DLLEXPORT *HUD_GetUserEntity( int index );
 }
 
+#define FLASHLIGHT_DISTANCE 2048.0f
+
+#define FLASHLIGHT_FADE_DISTANCE 500.0f
+#define FLASHLIGHT_MIN_FADE_DISTANCE 500.0f
+#define FLASHLIGHT_MAX_FADE_DISTANCE FLASHLIGHT_DISTANCE
+
+#define FLASHLIGHT_RADIUS 100.0f
+#define FLASHLIGHT_MIN_RADIUS 80.0f
+#define FLASHLIGHT_MAX_RADIUS 200.0f
+
+static float boundValue(float min, float value, float max)
+{
+	if (value < min)
+		return min;
+	if (value > max)
+		return max;
+	return value;
+}
+
+static float GetFlashlightRadius()
+{
+	const float radius = cl_flashlight_radius && cl_flashlight_radius->value > 0.0f ? cl_flashlight_radius->value : FLASHLIGHT_RADIUS;
+	return boundValue(FLASHLIGHT_MIN_RADIUS, radius, FLASHLIGHT_MAX_RADIUS);
+}
+
+static float GetFadeDistance()
+{
+	const float distance = cl_flashlight_fade_distance && cl_flashlight_fade_distance->value > 0.0f ? cl_flashlight_fade_distance->value : FLASHLIGHT_FADE_DISTANCE;
+	return boundValue(FLASHLIGHT_MIN_FADE_DISTANCE, distance, FLASHLIGHT_MAX_FADE_DISTANCE);
+}
+
 void DrawFlashlight()
 {
 	Vector forward, vecSrc, vecEnd, origin, angles;
@@ -58,7 +89,7 @@ void DrawFlashlight()
 	VectorCopy(pl->origin, vecSrc);
 	VectorAdd(vecSrc, view_ofs, vecSrc);
 
-	VectorMA(vecSrc, 8192, forward, vecEnd);
+	VectorMA(vecSrc, FLASHLIGHT_DISTANCE, forward, vecEnd);
 
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(0, 1);
 
@@ -73,14 +104,21 @@ void DrawFlashlight()
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 
+	const float fadeDistance = GetFadeDistance();
+
+	float falloff = tr.fraction * FLASHLIGHT_DISTANCE;
+	if( falloff < fadeDistance ) falloff = 1.0f;
+	else falloff = fadeDistance / falloff;
+	falloff *= falloff;
+
 	dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(idx); // Create the flashlight using the player's index as key
 	if (dl)
 	{
 		dl->origin = tr.endpos;
-		dl->color.r = 255;
-		dl->color.g = 255;
-		dl->color.b = 255;
-		dl->radius = 100; // Size of the flashlight
+		dl->color.r = boundValue(0, falloff * 255, 255);
+		dl->color.g = boundValue(0, falloff * 255, 255);
+		dl->color.b = boundValue(0, falloff * 255, 255);
+		dl->radius = GetFlashlightRadius();
 		dl->decay = 512; // Flashlight fade speed
 		dl->die = gEngfuncs.GetClientTime() + 0.1f;
 	}
