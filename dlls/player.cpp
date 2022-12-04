@@ -2811,7 +2811,11 @@ Things powered by the battery
 
 // if in range of radiation source, ping geiger counter
 
+#if FEATURE_GEIGER_SOUNDS_FIX
 #define GEIGERDELAY 0.28f
+#else
+#define GEIGERDELAY 0.25f
+#endif
 
 void CBasePlayer::UpdateGeigerCounter( void )
 {
