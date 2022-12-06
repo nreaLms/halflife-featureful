@@ -326,7 +326,7 @@ void CBigSquidSpit::Touch( CBaseEntity *pOther )
 	}
 	else if (pev->owner == pOther->edict())
 	{
-		ALERT(at_aiconsole, "Bullsquid caught himself in big spit\n");
+		ALERT(at_aiconsole, "%s caught himself in big spit\n", STRING(pev->classname));
 		return;
 	}
 	else
@@ -621,7 +621,7 @@ BOOL CBullsquid::FValidateHintType( short sHint )
 		}
 	}
 
-	ALERT( at_aiconsole, "Couldn't validate hint type\n" );
+	ALERT( at_aiconsole, "%s couldn't validate hint type\n", STRING(pev->classname) );
 	return FALSE;
 }
 

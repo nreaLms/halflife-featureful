@@ -2485,7 +2485,7 @@ Schedule_t* CBaseMonster::StartPatrol(CBaseEntity *path)
 		}
 		else
 		{
-			ALERT( at_aiconsole, "Couldn't create route. Can't patrol\n" );
+			ALERT( at_aiconsole, "%s: couldn't create route. Can't patrol\n", STRING(pev->classname) );
 		}
 	}
 	else
@@ -2673,7 +2673,7 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 	};
 	if (classify1 >= CLASS_NUMBER_OF_CLASSES || classify1 < 0 || classify2 >= CLASS_NUMBER_OF_CLASSES || classify2 < 0 )
 	{
-		ALERT(at_console, "Unknown classify for monster relationship %d,%d\n", classify1, classify2);
+		ALERT(at_aiconsole, "Unknown classify for monster relationship %d,%d\n", classify1, classify2);
 		return R_NO;
 	}
 	return iEnemy[classify1][classify2];
@@ -3404,9 +3404,34 @@ static const char* ClassifyDisplayName(int classify)
 	}
 }
 
+const char* CBaseMonster::MonsterStateDisplayString(MONSTERSTATE monsterState)
+{
+	switch (monsterState) {
+	case MONSTERSTATE_NONE:
+		return "None";
+	case MONSTERSTATE_IDLE:
+		return "Idle";
+	case MONSTERSTATE_COMBAT:
+		return "Combat";
+	case MONSTERSTATE_ALERT:
+		return "Alert";
+	case MONSTERSTATE_HUNT:
+		return "Hunt";
+	case MONSTERSTATE_PRONE:
+		return "Prone";
+	case MONSTERSTATE_SCRIPT:
+		return "Scripted";
+	case MONSTERSTATE_PLAYDEAD:
+		return "PlayDead";
+	case MONSTERSTATE_DEAD:
+		return "Dead";
+	default:
+		return "Unknown";
+	}
+}
+
 void CBaseMonster::ReportAIState( ALERT_TYPE level )
 {
-	static const char *pStateNames[] = { "None", "Idle", "Combat", "Alert", "Hunt", "Prone", "Scripted", "PlayDead", "Dead" };
 	static const char *pDeadNames[] = {"No", "Dying", "Dead", "Respawnable", "DiscardBody"};
 
 	if (FStringNull(pev->targetname)) {
@@ -3417,10 +3442,7 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	const int classify = Classify();
 	ALERT( level, "Classify: %s (%d), ", ClassifyDisplayName(classify), classify );
 
-	if( (int)m_MonsterState < ARRAYSIZE( pStateNames ) )
-		ALERT( level, "State: %s, ", pStateNames[m_MonsterState] );
-	else
-		ALERT( level, "State: %d, ", (int)m_MonsterState );
+	ALERT( level, "State: %s, ", MonsterStateDisplayString(m_MonsterState) );
 
 	if( pev->deadflag < ARRAYSIZE( pDeadNames ) )
 		ALERT( level, "Dead flag: %s, ", pDeadNames[pev->deadflag] );
@@ -3713,7 +3735,8 @@ BOOL CBaseMonster::FCheckAITrigger( short condition )
 	if( fFireTarget )
 	{
 		// fire the target, then set the trigger conditions to NONE so we don't fire again
-		ALERT( at_aiconsole, "AI Trigger Fire Target\n" );
+		if (m_iszTriggerTarget)
+			ALERT( at_aiconsole, "%s: AI Trigger Fire Target %s\n", STRING(pev->classname), STRING(m_iszTriggerTarget) );
 		FireTargets( STRING( m_iszTriggerTarget ), this, this, USE_TOGGLE, 0 );
 		m_iTriggerCondition = AITRIGGER_NONE;
 		m_iTriggerAltCondition = AITRIGGER_NONE;

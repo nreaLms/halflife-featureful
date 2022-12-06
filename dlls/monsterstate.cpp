@@ -45,8 +45,8 @@ void CBaseMonster::SetState( MONSTERSTATE State )
 	case MONSTERSTATE_IDLE:
 		if( m_hEnemy != 0 )
 		{
+			ALERT( at_aiconsole, "%s (in state %s): stripped enemy %s\n", STRING(pev->classname), MonsterStateDisplayString(m_MonsterState), STRING(m_hEnemy->pev->classname) );
 			m_hEnemy = NULL;// not allowed to have an enemy anymore.
-			ALERT( at_aiconsole, "%s: stripped enemy\n", STRING(pev->classname) );
 		}
 		break;
 	case MONSTERSTATE_ALERT:

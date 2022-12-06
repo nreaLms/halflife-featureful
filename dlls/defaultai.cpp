@@ -1388,7 +1388,7 @@ Schedule_t *CBaseMonster::ScheduleInList( const char *pName, Schedule_t **pList,
 	{
 		if( !pList[i]->pName )
 		{
-			ALERT( at_console, "Unnamed schedule!\n" );
+			ALERT( at_console, "Unnamed schedule in %s!\n", STRING( pev->classname ) );
 			continue;
 		}
 		if( stricmp( pName, pList[i]->pName ) == 0 )

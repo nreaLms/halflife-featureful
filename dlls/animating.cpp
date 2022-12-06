@@ -140,7 +140,7 @@ void CBaseAnimating::DispatchAnimEvents( float flInterval )
 
 	if( !pmodel )
 	{
-		ALERT( at_aiconsole, "Gibbed monster is thinking!\n" );
+		ALERT( at_aiconsole, "Gibbed %s is thinking!\n", STRING(pev->classname) );
 		return;
 	}
 

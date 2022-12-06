@@ -250,7 +250,7 @@ BOOL CHoundeye::FValidateHintType( short sHint )
 		}
 	}
 
-	ALERT( at_aiconsole, "Couldn't validate hint type\n" );
+	ALERT( at_aiconsole, "%s couldn't validate hint type\n", STRING(pev->classname) );
 	return FALSE;
 }
 

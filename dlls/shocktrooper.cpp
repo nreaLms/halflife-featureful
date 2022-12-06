@@ -367,7 +367,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 		}
 		else if (m_pSchedule)
 		{
-			ALERT(at_aiconsole, "Shooting with no enemy! Schedule: %s\n", m_pSchedule->pName);
+			ALERT(at_aiconsole, "%s: shooting with no enemy! Schedule: %s\n", STRING(pev->classname), m_pSchedule->pName);
 		}
 	}
 	break;

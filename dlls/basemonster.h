@@ -225,6 +225,7 @@ public:
 	virtual void SetActivity( Activity NewActivity );
 	void SetSequenceByName( const char *szSequence );
 	void SetState( MONSTERSTATE State );
+	static const char* MonsterStateDisplayString(MONSTERSTATE monsterState);
 	virtual void ReportAIState( ALERT_TYPE level );
 
 	void CheckAttacks( CBaseEntity *pTarget, float flDist, float flMeleeDist );

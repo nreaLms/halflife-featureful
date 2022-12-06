@@ -647,7 +647,7 @@ void ClientCommand( edict_t *pEntity )
 		}
 		else
 		{
-			ALERT(at_console, "Syntax: hud_color RRR GGG BBB\n");
+			ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, "Syntax: hud_color RRR GGG BBB\n");
 		}
 	}
 	else if ( FStrEq(pcmd, "buddha" ) )
@@ -657,10 +657,10 @@ void ClientCommand( edict_t *pEntity )
 			CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 			if (pPlayer->m_buddha) {
 				pPlayer->m_buddha = FALSE;
-				ALERT(at_console, "Buddha Mode off\n");
+				ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, "Buddha Mode off\n");
 			} else {
 				pPlayer->m_buddha = TRUE;
-				ALERT(at_console, "Buddha Mode on\n");
+				ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, "Buddha Mode on\n");
 			}
 		}
 	}

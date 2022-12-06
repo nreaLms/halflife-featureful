@@ -587,7 +587,7 @@ void CTalkMonster::StartMonster()
 {
 	CFollowingMonster::StartMonster();
 	if (m_fStartSuspicious) {
-		ALERT(at_console, "Talk Monster Pre-Provoked\n");
+		ALERT(at_console, "%s Pre-Provoked\n", STRING(pev->classname));
 		Remember(bits_MEMORY_PROVOKED);
 	}
 }
