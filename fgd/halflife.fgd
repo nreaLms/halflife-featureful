@@ -7298,6 +7298,8 @@
 		8 : "Timed" : 0
 		16 : "Unique" : 0
 		32 : "Not repetitive" : 0 : "Don't repeat the same target twice in a row. Targets still can be repeated if there're several with the same name."
+		64 : "Predetermined" : 0
+		128 : "Predetermined delays (Timed only)" : 0
 	]
 	min_delay(string) : "Minimum delay (Timed only)"
 	max_delay(string) : "Maximum delay (Timed only)"
@@ -7367,6 +7369,7 @@
 	[
 		1 : "Start on" : 0 : "Automatically activate trigger_timer on the first map load"
 		32 : "Don't delay first fire" : 0 : "Don't use random delay on the first target fire upon the activation"
+		128 : "Predetermined delays" : 0
 	]
 	min_delay(string) : "Minimum delay"
 	max_delay(string) : "Maximum delay"

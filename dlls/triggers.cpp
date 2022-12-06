@@ -3039,6 +3039,8 @@ void CTriggerCamera::Move()
 #define SF_TRIGGER_RANDOM_TIMED 8
 #define SF_TRIGGER_RANDOM_UNIQUE 16
 #define SF_TRIGGER_RANDOM_DONT_REPEAT 32
+#define SF_TRIGGER_RANDOM_PREDETERMINED 64
+#define SF_TRIGGER_RANDOM_PREDETERMINED_TIMED 128
 
 class CTriggerRandom : public CPointEntity
 {
@@ -3066,6 +3068,19 @@ public:
 	string_t m_lastTarget;
 	string_t m_triggerOnLimit;
 
+	unsigned int m_randomSeed;
+	unsigned int m_delayRandomSeed;
+
+	int RandomizeIndex(int low, int high) {
+		if (HasPredeterminedTargets()) {
+			const int index = UTIL_SharedRandomLong(m_randomSeed, low, high);
+			m_randomSeed = UTIL_SharedRandomLong(m_randomSeed, 0, 1<<15);
+			return index;
+		} else {
+			return RANDOM_LONG(low, high);
+		}
+	}
+
 	inline bool IsActive() { return pev->spawnflags & SF_TRIGGER_RANDOM_START_ON; }
 	inline void SetActive(bool active)
 	{
@@ -3077,6 +3092,13 @@ public:
 		{
 			ClearBits(pev->spawnflags, SF_TRIGGER_RANDOM_START_ON);
 		}
+	}
+
+	bool HasPredeterminedTargets() const {
+		return FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_PREDETERMINED);
+	}
+	bool HasPrederminedDelays() const {
+		return FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_PREDETERMINED_TIMED);
 	}
 };
 
@@ -3097,6 +3119,8 @@ TYPEDESCRIPTION	CTriggerRandom::m_SaveData[] =
 	DEFINE_FIELD( CTriggerRandom, m_maxDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerRandom, m_lastTarget, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerRandom, m_triggerOnLimit, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerRandom, m_randomSeed, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerRandom, m_delayRandomSeed, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CTriggerRandom, CPointEntity )
@@ -3173,6 +3197,13 @@ void CTriggerRandom::Spawn()
 			pev->nextthink = gpGlobals->time + GetRandomDelay() + 0.1;
 		}
 	}
+
+	if (HasPredeterminedTargets()) {
+		m_randomSeed = RANDOM_LONG(0, (1<<15));
+	}
+	if (HasPrederminedDelays()) {
+		m_delayRandomSeed = RANDOM_LONG(0, (1<<15));
+	}
 }
 
 void CTriggerRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -3228,7 +3259,7 @@ string_t CTriggerRandom::ChooseTarget()
 
 	if (pev->spawnflags & SF_TRIGGER_RANDOM_UNIQUE) {
 		if (m_uniqueTargetsLeft) {
-			chosenTargetIndex = RANDOM_LONG(0, m_uniqueTargetsLeft - 1);
+			chosenTargetIndex = RandomizeIndex(0, m_uniqueTargetsLeft - 1);
 			chosenTarget = m_targets[chosenTargetIndex];
 
 			if (chosenTarget == m_lastTarget && FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_DONT_REPEAT) && m_uniqueTargetsLeft > 1)
@@ -3250,7 +3281,7 @@ string_t CTriggerRandom::ChooseTarget()
 	} else {
 		const int targetCount = TargetCount();
 		if (targetCount) {
-			chosenTargetIndex = RANDOM_LONG(0, targetCount - 1);
+			chosenTargetIndex = RandomizeIndex(0, targetCount - 1);
 			chosenTarget = m_targets[chosenTargetIndex];
 			if (chosenTarget == m_lastTarget && FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_DONT_REPEAT) && targetCount > 1)
 			{
@@ -3267,7 +3298,15 @@ string_t CTriggerRandom::ChooseTarget()
 
 float CTriggerRandom::GetRandomDelay()
 {
-	return RANDOM_FLOAT(m_minDelay, Q_max(m_maxDelay, m_minDelay));
+	const float minDelay = m_minDelay;
+	const float maxDelay = Q_max(m_maxDelay, m_minDelay);
+	if (HasPrederminedDelays())
+	{
+		const float delay = UTIL_SharedRandomFloat(m_delayRandomSeed, minDelay, maxDelay);
+		m_delayRandomSeed = UTIL_SharedRandomLong(m_delayRandomSeed, 0, 1<<15);
+		return delay;
+	}
+	return RANDOM_FLOAT(minDelay, maxDelay);
 }
 
 int CTriggerRandom::TargetCount()
@@ -3603,6 +3642,7 @@ void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 
 #define SF_TRIGGER_TIMER_START_ON 1
 #define SF_TRIGGER_TIMER_NO_FIRST_DELAY 32
+#define SF_TRIGGER_TIMER_PREDETERMINED_TIMED 128
 
 class CTriggerTimer : public CPointEntity
 {
@@ -3619,12 +3659,17 @@ public:
 	float GetRandomDelay();
 	void SetActive(BOOL active);
 
+	bool HasPredeterminedDelays() const {
+		return FBitSet(pev->spawnflags, SF_TRIGGER_TIMER_PREDETERMINED_TIMED);
+	}
+
 	int m_triggerNumberLimit;
 	int m_triggerCounter;
 	float m_minDelay;
 	float m_maxDelay;
 	BOOL m_active;
 	string_t m_triggerOnLimit;
+	unsigned int m_delayRandomSeed;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_timer, CTriggerTimer )
@@ -3637,6 +3682,7 @@ TYPEDESCRIPTION	CTriggerTimer::m_SaveData[] =
 	DEFINE_FIELD( CTriggerTimer, m_maxDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerTimer, m_active, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CTriggerTimer, m_triggerOnLimit, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerTimer, m_delayRandomSeed, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CTriggerTimer, CPointEntity )
@@ -3674,6 +3720,10 @@ void CTriggerTimer::Spawn()
 	m_triggerCounter = 0;
 	m_active = FALSE;
 	SetThink(&CTriggerTimer::TimerThink);
+
+	if (HasPredeterminedDelays()) {
+		m_delayRandomSeed = RANDOM_LONG(0, (1<<15));
+	}
 
 	if (pev->spawnflags & SF_TRIGGER_TIMER_START_ON) {
 		SetActive(TRUE);
@@ -3718,7 +3768,15 @@ void CTriggerTimer::TimerThink()
 
 float CTriggerTimer::GetRandomDelay()
 {
-	return RANDOM_FLOAT(m_minDelay, Q_max(m_maxDelay, m_minDelay));
+	const float minDelay = m_minDelay;
+	const float maxDelay = Q_max(m_maxDelay, m_minDelay);
+	if (HasPredeterminedDelays())
+	{
+		const float delay = UTIL_SharedRandomFloat(m_delayRandomSeed, minDelay, maxDelay);
+		m_delayRandomSeed = UTIL_SharedRandomLong(m_delayRandomSeed, 0, 1<<15);
+		return delay;
+	}
+	return RANDOM_FLOAT(minDelay, maxDelay);
 }
 
 void CTriggerTimer::SetActive(BOOL active)
