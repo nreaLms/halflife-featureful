@@ -503,6 +503,11 @@ DECLARE_SKILL_VALUE(sk_flashlight_charge_time, "20")
 
 // END Cvars for Skill Level settings
 
+void Cmd_ReportAIState()
+{
+	ReportAIStateByClassname(CMD_ARGV( 1 ));
+}
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
@@ -980,5 +985,8 @@ void GameDLLInit( void )
 #if FEATURE_OPFOR_SKILL
 	SERVER_COMMAND( "exec skillopfor.cfg\n" );
 #endif
+
+	// Register server commands
+	g_engfuncs.pfnAddServerCommand("report_ai_state", Cmd_ReportAIState);
 }
 
