@@ -499,42 +499,35 @@ void CHoundeye::WriteBeamColor( void )
 {
 	BYTE bRed, bGreen, bBlue;
 
-	if( InSquad() )
+	const int squadSize = SquadCount();
+	switch( squadSize )
 	{
-		const int squadSize = SquadCount();
-		switch( squadSize )
-		{
-		case 2:
-			// no case for 0 or 1, cause those are impossible for monsters in Squads.
-			bRed = 101;
-			bGreen = 133;
-			bBlue = 221;
-			break;
-		case 3:
-			bRed = 67;
-			bGreen = 85;
-			bBlue = 255;
-			break;
-		case 4:
-		case 5:
-			bRed = 62;
-			bGreen = 33;
-			bBlue = 211;
-			break;
-		default:
-			ALERT( at_aiconsole, "Unsupported Houndeye SquadSize %d!\n", squadSize );
-			bRed = 188;
-			bGreen = 220;
-			bBlue = 255;
-			break;
-		}
-	}
-	else
-	{
+	default:
+		ALERT( at_aiconsole, "Unsupported Houndeye SquadSize %d!\n", squadSize );
+	case 0:
+	case 1:
 		// solo houndeye - weakest beam
 		bRed = 188;
 		bGreen = 220;
 		bBlue = 255;
+		break;
+	case 2:
+		// no case for 0 or 1, cause those are impossible for monsters in Squads.
+		bRed = 101;
+		bGreen = 133;
+		bBlue = 221;
+		break;
+	case 3:
+		bRed = 67;
+		bGreen = 85;
+		bBlue = 255;
+		break;
+	case 4:
+	case 5:
+		bRed = 62;
+		bGreen = 33;
+		bBlue = 211;
+		break;
 	}
 
 	WRITE_BYTE( bRed );
