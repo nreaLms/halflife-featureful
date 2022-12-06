@@ -1104,6 +1104,7 @@ public:
 	BOOL Deploy( void );
 	void Holster();
 	void Reload( void );
+	void ItemPostFrame();
 	void WeaponIdle( void );
 
 	void UpdateSpot( void );

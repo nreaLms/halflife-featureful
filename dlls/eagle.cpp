@@ -130,13 +130,10 @@ void CEagle::PrimaryAttack()
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
-		UpdateSpot( );
 		PlayEmptySound( );
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15f;
 		return;
 	}
-
-	UpdateSpot( );
 
 	float flSpread = 0.001;
 
@@ -193,7 +190,6 @@ void CEagle::Reload( void )
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == EAGLE_MAX_CLIP)
 	{
-		UpdateSpot();
 		return;
 	}
 
@@ -243,11 +239,14 @@ void CEagle::UpdateSpot( void )
 #endif
 }
 
+void CEagle::ItemPostFrame()
+{
+	UpdateSpot();
+	CBasePlayerWeapon::ItemPostFrame();
+}
 
 void CEagle::WeaponIdle( void )
 {
-	UpdateSpot( );
-
 	ResetEmptySound( );
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
