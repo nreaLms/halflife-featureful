@@ -7305,6 +7305,8 @@
 	max_delay(string) : "Maximum delay (Timed only)"
 	trigger_number(integer) : "Trigger number limit (Timed only)" : : "Automatically stop after triggering this number of targets (including empty ones, if present). This was not in Sven Co-op and a special addition. A flexible replacement for Trigger Once flag."
 	trigger_on_limit(target_destination) : "Trigger on limit (Timed only)" : : "Trigger when the trigger limit is reached"
+	trigger_on_exhaust(target_destination) : "Trigger on exhaust (Unique only)" : : "Fire when last unique target is called. Will be fired again if trigger_random is Reusable and it drains the unique targets another time."
+	first_target(integer) : "Index of first target (1-16)" : : "First target to fire on the first entity call. 0 means no preference."
 ]
 
 @PointClass base(Targetname, Random) = trigger_random_time : "Trigger Random Time. Outdated entity for Sven Co-op 3.0 compatibility."

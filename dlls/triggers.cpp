@@ -3057,6 +3057,7 @@ public:
 	string_t ChooseTarget();
 	float GetRandomDelay();
 	int TargetCount();
+	void DoUnique();
 
 	int m_targetCount;
 	string_t m_targets[TRIGGER_RANDOM_MAX_COUNT];
@@ -3067,11 +3068,19 @@ public:
 	float m_maxDelay;
 	string_t m_lastTarget;
 	string_t m_triggerOnLimit;
+	string_t m_triggerOnExhaust;
+	int m_firstPreferredTarget;
 
 	unsigned int m_randomSeed;
 	unsigned int m_delayRandomSeed;
 
 	int RandomizeIndex(int low, int high) {
+		if (m_firstPreferredTarget > 0 && m_firstPreferredTarget <= TargetCount()) {
+			const int result = m_firstPreferredTarget - 1;
+			m_firstPreferredTarget = 0;
+			return result;
+		}
+
 		if (HasPredeterminedTargets()) {
 			const int index = UTIL_SharedRandomLong(m_randomSeed, low, high);
 			m_randomSeed = UTIL_SharedRandomLong(m_randomSeed, 0, 1<<15);
@@ -3164,6 +3173,12 @@ void CTriggerRandom::KeyValue( KeyValueData *pkvd )
 	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_limit") ) {
 		m_triggerOnLimit = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
+	} else if ( FStrEq( pkvd->szKeyName, "trigger_on_exhaust") ) {
+		m_triggerOnExhaust = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	} else if ( FStrEq( pkvd->szKeyName, "first_target") ) {
+		m_firstPreferredTarget = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
 	} else {
 		CBaseEntity::KeyValue( pkvd );
 	}
@@ -3219,20 +3234,22 @@ void CTriggerRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 			m_triggerCounter = 0;
 		}
 	} else {
-		const int chosenTarget = ChooseTarget();
+		string_t chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
 			FireTargets(STRING(chosenTarget), pActivator, this, USE_TOGGLE, value);
 		}
+		DoUnique();
 	}
 }
 
 void CTriggerRandom::TimedThink()
 {
 	if (IsActive()) {
-		int chosenTarget = ChooseTarget();
+		string_t chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
 			FireTargets(STRING(chosenTarget), this, this, USE_TOGGLE, 0);
 		}
+		DoUnique();
 
 		if (m_triggerNumberLimit) {
 			m_triggerCounter++;
@@ -3272,11 +3289,7 @@ string_t CTriggerRandom::ChooseTarget()
 
 			m_targets[chosenTargetIndex] = m_targets[m_uniqueTargetsLeft-1];
 			m_targets[m_uniqueTargetsLeft-1] = chosenTarget;
-			m_uniqueTargetsLeft--;
 
-			if (!m_uniqueTargetsLeft && (pev->spawnflags & SF_TRIGGER_RANDOM_REUSABLE) ) {
-				m_uniqueTargetsLeft = TargetCount();
-			}
 			m_lastTarget = chosenTarget;
 			return chosenTarget;
 		}
@@ -3324,6 +3337,20 @@ int CTriggerRandom::TargetCount()
 		}
 	}
 	return 0;
+}
+
+void CTriggerRandom::DoUnique()
+{
+	if (pev->spawnflags & SF_TRIGGER_RANDOM_UNIQUE) {
+		m_uniqueTargetsLeft--;
+
+		if (!m_uniqueTargetsLeft) {
+			if (!FStringNull(m_triggerOnExhaust))
+				FireTargets(STRING(m_triggerOnExhaust), this, this, USE_TOGGLE, 0.0f);
+			if ((pev->spawnflags & SF_TRIGGER_RANDOM_REUSABLE))
+				m_uniqueTargetsLeft = TargetCount();
+		}
+	}
 }
 #endif
 
