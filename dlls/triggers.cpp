@@ -3187,6 +3187,7 @@ void CTriggerRandom::Spawn()
 	}
 
 	m_triggerCounter = 0;
+	TargetCount(); // call in case it needs to be evaluated
 	if (FBitSet(pev->spawnflags, SF_TRIGGER_RANDOM_UNIQUE)) {
 		m_uniqueTargetsLeft = TargetCount();
 	}
@@ -3231,15 +3232,16 @@ void CTriggerRandom::TimedThink()
 		int chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
 			FireTargets(STRING(chosenTarget), this, this, USE_TOGGLE, 0);
-			if (m_triggerNumberLimit) {
-				m_triggerCounter++;
-				if (m_triggerCounter >= m_triggerNumberLimit) {
-					SetActive(false);
-					m_triggerCounter = 0;
+		}
 
-					if (!FStringNull(m_triggerOnLimit))
-						FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
-				}
+		if (m_triggerNumberLimit) {
+			m_triggerCounter++;
+			if (m_triggerCounter >= m_triggerNumberLimit) {
+				SetActive(false);
+				m_triggerCounter = 0;
+
+				if (!FStringNull(m_triggerOnLimit))
+					FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
 			}
 		}
 
@@ -3751,14 +3753,15 @@ void CTriggerTimer::TimerThink()
 	if (m_active) {
 		if (!FStringNull(pev->target)) {
 			FireTargets(STRING(pev->target), this, this, USE_TOGGLE, 0);
-			if (m_triggerNumberLimit) {
-				m_triggerCounter++;
-				if (m_triggerCounter >= m_triggerNumberLimit) {
-					SetActive(FALSE);
-					if (!FStringNull(m_triggerOnLimit))
-						FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
-					return;
-				}
+		}
+
+		if (m_triggerNumberLimit) {
+			m_triggerCounter++;
+			if (m_triggerCounter >= m_triggerNumberLimit) {
+				SetActive(FALSE);
+				if (!FStringNull(m_triggerOnLimit))
+					FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
+				return;
 			}
 		}
 

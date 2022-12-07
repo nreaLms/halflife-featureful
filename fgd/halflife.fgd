@@ -7303,7 +7303,7 @@
 	]
 	min_delay(string) : "Minimum delay (Timed only)"
 	max_delay(string) : "Maximum delay (Timed only)"
-	trigger_number(integer) : "Trigger number limit (Timed only)" : : "Stop after triggering this number of targets. This was not in Sven Co-op and a special addition. A flexible replacement for Trigger Once flag."
+	trigger_number(integer) : "Trigger number limit (Timed only)" : : "Automatically stop after triggering this number of targets (including empty ones, if present). This was not in Sven Co-op and a special addition. A flexible replacement for Trigger Once flag."
 	trigger_on_limit(target_destination) : "Trigger on limit (Timed only)" : : "Trigger when the trigger limit is reached"
 ]
 
@@ -7373,7 +7373,7 @@
 	]
 	min_delay(string) : "Minimum delay"
 	max_delay(string) : "Maximum delay"
-	trigger_number(integer) : "Trigger number limit" : : "Stop after triggering this number of targets (after that trigger_timer can be reactivated again). 0 means no limit."
+	trigger_number(integer) : "Trigger number limit" : : "Automatically stop after triggering the target this number of times. After that trigger_timer can be reactivated again. 0 means no limit."
 	trigger_on_limit(target_destination) : "Trigger on limit" : : "Trigger when the trigger limit is reached"
 ]
 
