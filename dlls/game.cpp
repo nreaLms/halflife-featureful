@@ -47,6 +47,7 @@ cvar_t explosionfix	= { "explosionfix", "1", FCVAR_SERVER };
 cvar_t monsteryawspeedfix	= { "monsteryawspeedfix", "1", FCVAR_SERVER };
 cvar_t animeventfix = {"animeventfix", "0", FCVAR_SERVER };
 cvar_t corpsephysics = { "corpsephysics", "0", FCVAR_SERVER };
+cvar_t pushablemode = { "pushablemode", "0", FCVAR_SERVER };
 cvar_t forcerespawn	= { "mp_forcerespawn","1", FCVAR_SERVER };
 cvar_t respawndelay	= { "mp_respawndelay","0", FCVAR_SERVER };
 cvar_t flashlight	= { "mp_flashlight","0", FCVAR_SERVER };
@@ -579,6 +580,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &monsteryawspeedfix );
 	CVAR_REGISTER( &animeventfix );
 	CVAR_REGISTER( &corpsephysics );
+	CVAR_REGISTER( &pushablemode );
 	CVAR_REGISTER( &forcerespawn );
 	CVAR_REGISTER( &respawndelay );
 	CVAR_REGISTER( &flashlight );
