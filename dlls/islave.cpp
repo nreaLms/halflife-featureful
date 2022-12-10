@@ -418,7 +418,7 @@ public:
 	void ArmBeam(int side );
 	void ArmBeamMessage(int side );
 	void WackBeam( int side, CBaseEntity *pEntity );
-	void ZapBeam( int side );
+	CBaseEntity* ZapBeam( int side );
 	void BeamGlow( void );
 	void HandsGlowOn(int brightness = 224);
 	void HandGlowOn(CSprite* handGlow, int brightness = 224);
@@ -1807,14 +1807,14 @@ void CISlave::WackBeam( int side, CBaseEntity *pEntity )
 //=========================================================
 // ZapBeam - heavy damage directly forward
 //=========================================================
-void CISlave::ZapBeam( int side )
+CBaseEntity *CISlave::ZapBeam( int side )
 {
 	Vector vecSrc, vecAim;
 	TraceResult tr;
 	CBaseEntity *pEntity;
 
 	if( m_iBeams >= ISLAVE_MAX_BEAMS )
-		return;
+		return NULL;
 
 	vecSrc = pev->origin + gpGlobals->v_up * 36;
 	if (IsValidHealTarget(m_hWounded)) {
@@ -1830,7 +1830,7 @@ void CISlave::ZapBeam( int side )
 
 	m_pBeam[m_iBeams] = CBeam::BeamCreate( "sprites/lgtning.spr", 50 );
 	if( !m_pBeam[m_iBeams] )
-		return;
+		return NULL;
 
 	const Vector zapColor = GetZapColor();
 	m_pBeam[m_iBeams]->PointEntInit( tr.vecEndPos, entindex() );
@@ -1840,6 +1840,7 @@ void CISlave::ZapBeam( int side )
 	m_pBeam[m_iBeams]->SetNoise( 20 );
 	m_iBeams++;
 
+	CBaseEntity* pResult = NULL;
 	pEntity = CBaseEntity::Instance( tr.pHit );
 	if( pEntity != NULL && pEntity->pev->takedamage )
 	{
@@ -1868,8 +1869,10 @@ void CISlave::ZapBeam( int side )
 			}
 #endif
 		}
+		pResult = pEntity;
 	}
 	UTIL_EmitAmbientSound( ENT( pev ), tr.vecEndPos, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
+	return pResult;
 }
 
 //=========================================================
