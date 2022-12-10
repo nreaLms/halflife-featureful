@@ -958,6 +958,8 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 					}
 				}
 				UTIL_EmitAmbientSound( ENT( pev ), pev->origin, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
+
+				m_flNextAttack = gpGlobals->time + RANDOM_FLOAT( 1.0, 4.0 );
 			} else {
 				Forget(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL);
 				UTIL_MakeAimVectors( pev->angles );
@@ -968,9 +970,9 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "hassault/hw_shoot1.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 130, 160 ) );
 				// STOP_SOUND( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav" );
 				ApplyMultiDamage( pev, pev );
-			}
 
-			m_flNextAttack = gpGlobals->time + RANDOM_FLOAT( 0.5, 4.0 );
+				m_flNextAttack = gpGlobals->time + RANDOM_FLOAT( 0.5, 4.0 );
+			}
 		}
 			break;
 		case ISLAVE_AE_ZAP_DONE:
