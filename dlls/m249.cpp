@@ -22,6 +22,7 @@
 #include "player.h"
 #include "soundent.h"
 #include "gamerules.h"
+#include "game.h"
 
 #if FEATURE_M249
 
@@ -178,7 +179,7 @@ void CM249::PrimaryAttack()
 	if( vecInvPushDir.z >= 10.0 )
 		flNewZVel = vecInvPushDir.z;
 	else
-		flNewZVel = CVAR_GET_FLOAT( "sv_maxspeed" );
+		flNewZVel = g_psv_maxspeed->value;
 
 	Vector vecNewVel;
 

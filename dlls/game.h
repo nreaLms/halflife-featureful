@@ -62,9 +62,11 @@ extern cvar_t keepinventory;
 
 // Engine Cvars
 extern cvar_t *g_psv_gravity;
+extern cvar_t *g_psv_maxspeed;
 extern cvar_t *g_psv_aim;
 extern cvar_t *g_footsteps;
 extern cvar_t *g_enable_cheats;
 
 extern cvar_t *g_psv_developer;
+
 #endif // GAME_H

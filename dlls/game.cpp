@@ -107,6 +107,7 @@ cvar_t keepinventory	= { "mp_keepinventory","0", FCVAR_SERVER }; // keep invento
 
 // Engine Cvars
 cvar_t *g_psv_gravity = NULL;
+cvar_t *g_psv_maxspeed = NULL;
 cvar_t *g_psv_aim = NULL;
 cvar_t *g_footsteps = NULL;
 cvar_t *g_enable_cheats = NULL;
@@ -517,12 +518,14 @@ void GameDLLInit( void )
 		g_fIsXash3D = TRUE;
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
+	g_psv_maxspeed = CVAR_GET_POINTER( "sv_maxspeed" );
 	g_psv_aim = CVAR_GET_POINTER( "sv_aim" );
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
 
 	g_psv_developer = CVAR_GET_POINTER( "developer" );
 
 	g_enable_cheats = CVAR_GET_POINTER( "sv_cheats" );
+
 
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );
