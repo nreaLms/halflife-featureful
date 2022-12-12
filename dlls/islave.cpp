@@ -1814,7 +1814,10 @@ CBaseEntity *CISlave::ZapBeam( int side )
 	CBaseEntity *pEntity;
 
 	if( m_iBeams >= ISLAVE_MAX_BEAMS )
+	{
+		ALERT(at_warning, "Vort didn't zap because too many beams!\n");
 		return NULL;
+	}
 
 	vecSrc = pev->origin + gpGlobals->v_up * 36;
 	if (IsValidHealTarget(m_hWounded)) {
