@@ -4099,28 +4099,28 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		gEvilImpulse101 = TRUE;
 		GiveNamedItem( "item_suit", SF_ITEM_NOFALL );
 #if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
-		GiveNamedItem( "item_flashlight" );
+		m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
 #endif
 		GiveNamedItem( "item_battery", SF_ITEM_NOFALL );
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_9mmhandgun" );
-		GiveNamedItem( "ammo_9mmclip" );
+		GiveAmmo(AMMO_GLOCKCLIP_GIVE, "9mm"); //GiveNamedItem( "ammo_9mmclip" );
 		GiveNamedItem( "weapon_shotgun" );
-		GiveNamedItem( "ammo_buckshot" );
+		GiveAmmo(AMMO_BUCKSHOTBOX_GIVE, "buckshot"); //GiveNamedItem( "ammo_buckshot" );
 		GiveNamedItem( "weapon_9mmAR" );
-		GiveNamedItem( "ammo_9mmAR" );
-		GiveNamedItem( "ammo_ARgrenades" );
+		GiveAmmo(AMMO_MP5CLIP_GIVE, "9mm"); //GiveNamedItem( "ammo_9mmAR" );
+		GiveAmmo(AMMO_M203BOX_GIVE, "ARgrenades"); //GiveNamedItem( "ammo_ARgrenades" );
 		GiveNamedItem( "weapon_handgrenade" );
 		GiveNamedItem( "weapon_tripmine" );
 		GiveNamedItem( "weapon_357" );
-		GiveNamedItem( "ammo_357" );
+		GiveAmmo(AMMO_357BOX_GIVE, "357"); //GiveNamedItem( "ammo_357" );
 		GiveNamedItem( "weapon_crossbow" );
-		GiveNamedItem( "ammo_crossbow" );
+		GiveAmmo(AMMO_CROSSBOWCLIP_GIVE, "bolts"); //GiveNamedItem( "ammo_crossbow" );
 		GiveNamedItem( "weapon_egon" );
 		GiveNamedItem( "weapon_gauss" );
-		GiveNamedItem( "ammo_gaussclip" );
+		GiveAmmo(AMMO_URANIUMBOX_GIVE, "uranium"); //GiveNamedItem( "ammo_gaussclip" );
 		GiveNamedItem( "weapon_rpg" );
-		GiveNamedItem( "ammo_rpgclip" );
+		GiveAmmo(AMMO_RPGCLIP_GIVE, "rockets"); //GiveNamedItem( "ammo_rpgclip" );
 		GiveNamedItem( "weapon_satchel" );
 		GiveNamedItem( "weapon_snark" );
 		GiveNamedItem( "weapon_hornetgun" );
@@ -4138,11 +4138,11 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #endif
 #if FEATURE_M249
 		GiveNamedItem( "weapon_m249" );
-		GiveNamedItem( "ammo_556" );
+		GiveAmmo(AMMO_556CLIP_GIVE, "556");
 #endif
 #if FEATURE_SNIPERRIFLE
 		GiveNamedItem( "weapon_sniperrifle" );
-		GiveNamedItem( "ammo_762" );
+		GiveAmmo( AMMO_762BOX_GIVE, "762");
 #endif
 #if FEATURE_DISPLACER
 		GiveNamedItem( "weapon_displacer" );
@@ -4152,6 +4152,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 #endif
 #if FEATURE_SPORELAUNCHER
 		GiveNamedItem( "weapon_sporelauncher" );
+		GiveAmmo(5, "spores");
 #endif
 #if FEATURE_KNIFE
 		GiveNamedItem( "weapon_knife" );
