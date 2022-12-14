@@ -2645,6 +2645,10 @@
 	weapon_penguin(string) : "Penguins chance"
 	weapon_m249(string) : "M249 chance"
 	weapon_sniperrifle(string) : "Sniperrifle chance"
+	spawnflags(Flags) =
+	[
+		64 : "Predetermined" : 0
+	]
 ]
 
 @PointClass base(Targetname) size(-24 -24 0, 24 24 16) color(20 190 60) = info_bigmomma : "Big Mamma Node"
@@ -2758,8 +2762,8 @@
 	]
 ]
 
-@PointClass size(-16 -16 0, 16 16 36) base(Target, Angles, RandomItem) = item_random : "Random item" []
-@PointClass size(-16 -16 0, 16 16 36) color(140 115 65) base(Target, Angles) = item_random_proxy : "Random item proxy. Must be used with info_item_random."
+@PointClass size(-16 -16 0, 16 16 36) base(RandomItem, Target, Angles) = item_random : "Random item" []
+@PointClass size(-16 -16 0, 16 16 36) color(140 115 65) base(Targetname, Target, Angles) = item_random_proxy : "Random item proxy. Must be used with info_item_random."
 [
 	template(string) : "info_item_random entity"
 ]

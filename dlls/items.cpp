@@ -158,6 +158,8 @@ void CItemRandomProxy::SpawnItem()
 
 #define ITEM_RANDOM_MAX_COUNT 16
 
+#define SF_ITEM_RANDOM_PREDETERMINED 64
+
 class CItemRandom : public CPointEntity
 {
 public:
@@ -172,6 +174,7 @@ public:
 	string_t m_itemNames[ITEM_RANDOM_MAX_COUNT];
 	float m_itemProbabilities[ITEM_RANDOM_MAX_COUNT];
 	int m_itemCount;
+	unsigned int m_randomSeed;
 
 	static bool IsAppropriateItemName(const char* name);
 	static bool IsNullItem(const char* name);
@@ -189,6 +192,7 @@ TYPEDESCRIPTION CItemRandom::m_SaveData[] =
 	DEFINE_ARRAY( CItemRandom, m_itemNames, FIELD_STRING, ITEM_RANDOM_MAX_COUNT ),
 	DEFINE_ARRAY( CItemRandom, m_itemProbabilities, FIELD_FLOAT, ITEM_RANDOM_MAX_COUNT ),
 	DEFINE_FIELD( CItemRandom, m_itemCount, FIELD_INTEGER ),
+	DEFINE_FIELD( CItemRandom, m_randomSeed, FIELD_INTEGER ),
 };
 IMPLEMENT_SAVERESTORE( CItemRandom, CBaseEntity )
 
@@ -226,6 +230,10 @@ void CItemRandom::Spawn()
 	Precache();
 	pev->solid = SOLID_NOT;
 	pev->effects = EF_NODRAW;
+
+	if (FBitSet(pev->spawnflags, SF_ITEM_RANDOM_PREDETERMINED))
+		m_randomSeed = RANDOM_LONG(0, (1<<15));
+
 	if (FStringNull(pev->targetname))
 	{
 		SpawnItem(pev->origin, pev->angles, pev->target);
@@ -250,7 +258,16 @@ void CItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 void CItemRandom::SpawnItem(const Vector &origin, const Vector &angles, string_t target)
 {
-	const float choice = RANDOM_FLOAT(0, m_probabilitySum);
+	float choice;
+	if (FBitSet(pev->spawnflags, SF_ITEM_RANDOM_PREDETERMINED))
+	{
+		choice = UTIL_SharedRandomFloat(m_randomSeed, 0, m_probabilitySum);
+		m_randomSeed = UTIL_SharedRandomLong(m_randomSeed, 0, 1<<15);
+	}
+	else
+	{
+		choice = RANDOM_FLOAT(0, m_probabilitySum);
+	}
 	float sum = 0;
 	for (int i=0; i<m_itemCount; ++i)
 	{
@@ -289,7 +306,8 @@ void CInfoItemRandom::Spawn()
 void CInfoItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	// Was called by SOLID_BSP entity, e.g. func_breakable
-	if (pActivator->IsBSPModel())
+	const char* model = FStringNull(pActivator->pev->model) ? NULL : STRING(pActivator->pev->model);
+	if (model && *model == '*')
 	{
 		SpawnItem(VecBModelOrigin( pActivator->pev ), pActivator->pev->angles, iStringNull);
 	}

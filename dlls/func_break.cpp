@@ -812,7 +812,6 @@ void CBreakable::Die( void )
 	pev->effects |= EF_NODRAW;
 	pev->takedamage = DAMAGE_NO;
 
-	const int originalSolidity = pev->solid;
 	pev->solid = SOLID_NOT;
 
 	// Fire targets on break
@@ -825,9 +824,7 @@ void CBreakable::Die( void )
 		CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
 		if ( foundEntity && FClassnameIs(foundEntity->pev, "info_item_random"))
 		{
-			pev->solid = originalSolidity;
 			foundEntity->Use(this, this, USE_TOGGLE, 0.0f);
-			pev->solid = SOLID_NOT;
 		}
 		else
 		{
