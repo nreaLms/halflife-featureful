@@ -3132,6 +3132,8 @@ TYPEDESCRIPTION	CTriggerRandom::m_SaveData[] =
 	DEFINE_FIELD( CTriggerRandom, m_maxDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerRandom, m_lastTarget, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerRandom, m_triggerOnLimit, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerRandom, m_triggerOnExhaust, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerRandom, m_firstPreferredTarget, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerRandom, m_randomSeed, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerRandom, m_delayRandomSeed, FIELD_INTEGER ),
 };
