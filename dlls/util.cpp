@@ -1155,7 +1155,7 @@ int UTIL_IsMasterTriggered( string_t sMaster, CBaseEntity *pActivator )
 			}
 		}
 
-		ALERT( at_console, "Master was null or not a master!\n" );
+		ALERT( at_console, "Master %s was null or not a master!\n", STRING(sMaster) );
 	}
 
 	// if this isn't a master entity, just say yes.
