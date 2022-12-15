@@ -728,6 +728,8 @@ int CBasePlayerWeapon::AddToPlayer( CBasePlayer *pPlayer )
 		m_iPrimaryAmmoType = pPlayer->GetAmmoIndex( pszAmmo1() );
 		m_iSecondaryAmmoType = pPlayer->GetAmmoIndex( pszAmmo2() );
 	}
+	// Remove weapon's global name to avoid problems with carrying the weapon to other maps
+	pev->globalname = iStringNull;
 
 	return AddWeapon();
 }

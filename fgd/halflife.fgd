@@ -111,7 +111,11 @@
 [
 	scale(string) : "Scale (1.0 = normal size)"
 ]
-@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles) = Weapon []
+@BaseClass = Global
+[
+	globalname(string) : "Global Entity Name"
+]
+@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles, Global) = Weapon []
 @BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles) = Item
 [
 	model(studio) : "Custom Model"
@@ -120,10 +124,6 @@
 		128 : "TOUCH Only" : 0
 		256 : "USE Only" : 0
 	]
-]
-@BaseClass = Global
-[
-	globalname(string) : "Global Entity Name"
 ]
 
 @BaseClass base(Target) = Targetx
