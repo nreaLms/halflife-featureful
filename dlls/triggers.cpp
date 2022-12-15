@@ -53,6 +53,7 @@
 #define SF_TRIGGER_HURT_CLIENTONLYFIRE	16// trigger hurt will only fire its target if it is hurting a client
 #define SF_TRIGGER_HURT_CLIENTONLYTOUCH 32// only clients may touch this trigger.
 #define SF_TRIGGER_HURT_AFFECT_NON_MOVING_MONSTERS 64 // hack to affect non-moving monsters
+#define SF_TRIGGER_HURT_FULL_DAMAGE_EVERY_HALF_SECOND 128
 
 extern DLL_GLOBAL BOOL		g_fGameOver;
 
@@ -1175,7 +1176,7 @@ void CTriggerHurt::HurtNonMovingMonsters()
 	for (int i=0; i<count; ++i) {
 		CBaseMonster* pMonster = pList[i]->MyMonsterPointer();
 		if (pMonster && CanHurt(pMonster) && !pMonster->IsMoving()) {
-			const float flDmg = pev->dmg * 0.5f;
+			const float flDmg = FBitSet(pev->spawnflags, SF_TRIGGER_HURT_FULL_DAMAGE_EVERY_HALF_SECOND) ? pev->dmg : pev->dmg * 0.5f;
 			if (flDmg < 0)
 				pMonster->TakeHealth( this, -flDmg, m_bitsDamageInflict );
 			else
@@ -1310,7 +1311,10 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 	// while touching the trigger.  Player continues taking damage for a while after
 	// leaving the trigger
 
-	fldmg = pev->dmg * 0.5f;	// 0.5 seconds worth of damage, pev->dmg is damage/second
+	if (FBitSet(pev->spawnflags, SF_TRIGGER_HURT_FULL_DAMAGE_EVERY_HALF_SECOND))
+		fldmg = pev->dmg;
+	else
+		fldmg = pev->dmg * 0.5f;	// 0.5 seconds worth of damage, pev->dmg is damage/second
 
 	// JAY: Cut this because it wasn't fully realized.  Damage is simpler now.
 #if 0

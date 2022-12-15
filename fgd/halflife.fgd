@@ -7128,9 +7128,10 @@
 		16:"FireClientOnly" : 0
 		32:"TouchClientOnly" : 0
 		64:"Affect non-moving NPC's" : 0 : "Uses entity's bounding box to find and hurt non-moving monsters. Will produce wrong results on non-cuboid brush shapes."
+		128:"Full dmg every 0.5 seconds" : 0 : "Do full damage (or healing) instead of halving the value. Recommended to use with odd values."
 	]
 	master(string) : "Master"
-	dmg(integer) : "Damage" : 10
+	dmg(integer) : "Damage" : 10 : "The damage is applied every 0.5 seconds. Negative value means healing. The value is getting halved, unless 'Full dmg every 0.5 seconds' spawnflag is set."
 	delay(string) : "Delay before trigger"
 	untouchable_ent_name(string) : "Untouchable entity name" : : "Don't hurt targets with this classname or targetname"
 	min_health(string) : "Minimum health threshold" : : "Don't decrease the toucher health beyond this value"
