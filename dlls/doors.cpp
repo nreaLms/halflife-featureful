@@ -758,7 +758,7 @@ void CBaseDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	else if (m_iObeyTriggerMode == 2)
 	{
 		if (useType == USE_TOGGLE)
-			shouldActivate = atEndPosition;
+			shouldActivate = true;
 		else if (atEndPosition)
 			shouldActivate = (m_toggle_state == TS_AT_BOTTOM && useType == USE_ON) || (m_toggle_state == TS_AT_TOP && useType == USE_OFF);
 		else
