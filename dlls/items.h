@@ -18,23 +18,41 @@
 
 #include "cbase.h"
 
-class CItem : public CBaseDelay
+class CPickup : public CBaseDelay
+{
+public:
+	int ObjectCaps();
+	void SetObjectCollisionBox();
+
+	bool IsPickableByTouch();
+	bool IsPickableByUse();
+
+	void EXPORT FallThink( void );
+
+	virtual Vector MyRespawnSpot() = 0;
+	virtual float MyRespawnTime() = 0;
+
+	CBaseEntity *Respawn( void );
+	void EXPORT Materialize( void );
+	virtual void OnMaterialize() = 0;
+};
+
+class CItem : public CPickup
 {
 public:
 	void Spawn( void );
-	CBaseEntity *Respawn( void );
 	void EXPORT ItemTouch( CBaseEntity *pOther );
-	void EXPORT Materialize( void );
-	void EXPORT FallThink( void );
 	virtual BOOL MyTouch( CBasePlayer *pPlayer )
 	{
 		return FALSE;
 	}
-	int ObjectCaps();
-	void SetObjectCollisionBox();
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void TouchOrUse( CBaseEntity* pOther );
 	void SetMyModel( const char* model );
 	void PrecacheMyModel( const char* model );
+
+	Vector MyRespawnSpot();
+	virtual float MyRespawnTime();
+	void OnMaterialize();
 };
 #endif // ITEMS_H

@@ -475,7 +475,7 @@ extern MULTIDAMAGE gMultiDamage;
 // CWeaponBox - a single entity that can store weapons
 // and ammo.
 //=========================================================
-class CWeaponBox : public CBaseEntity
+class CWeaponBox : public CBaseDelay
 {
 public:
 	void Precache( void );

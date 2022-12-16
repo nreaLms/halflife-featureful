@@ -97,8 +97,6 @@
 	angles(string) : "Pitch Yaw Roll (Y Z X)" : "0 0 0" : "Sets the pitch (up / down), yaw (left / right) and roll (bank) respectively. The compass in Jackhammer corresponds to Yaw. The settings are not always (or not all) used."
 ]
 
-@BaseClass size(0 0 0, 32 32 32) color(80 0 200) base(Appearflags) = Ammo []
-
 @BaseClass = Targetname
 [
 	targetname(target_source) : "Name" : : "Property used to identify entities."
@@ -106,6 +104,10 @@
 @BaseClass = Target
 [
 	target(target_destination) : "Target" : : "When an entity is activated, it triggers the entity with the name specified by Target."
+]
+@BaseClass = Delay
+[
+	delay(string) : "Delay before trigger" : "0" : "Usually the time in seconds before an entity should trigger its target (after being triggered itself). Under other SmartEdit names, delay might also be the time to wait before performing some other action."
 ]
 @BaseClass = Scalable
 [
@@ -115,20 +117,30 @@
 [
 	globalname(string) : "Global Entity Name"
 ]
-@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles, Global) = Weapon []
-@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, Appearflags, Angles) = Item
+
+@BaseClass = TargetOnPickup
 [
-	model(studio) : "Custom Model"
+	target(target_destination) : "Target on pickup" : : "When the item is picked up, trigger the entity with the specified name."
+	killtarget(target_destination) : "KillTarget on pickup" : : "When the item is picked up, remove the entity specified by this property from the game."
+]
+
+@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Targetname, TargetOnPickup, Delay, Appearflags, Angles, Global, Scalable) = Pickup
+[
 	spawnflags(Flags) =
 	[
 		128 : "TOUCH Only" : 0
 		256 : "USE Only" : 0
 	]
 ]
-
-@BaseClass base(Target) = Targetx
+@BaseClass size(-16 -16 0, 16 16 32) color(0 0 200) base(Pickup) = Weapon []
+@BaseClass base(Pickup) = Item
 [
-	delay(string) : "Delay before trigger" : "0" : "Usually the time in seconds before an entity should trigger its target (after being triggered itself). Under other SmartEdit names, delay might also be the time to wait before performing some other action."
+	model(studio) : "Custom Model"
+]
+@BaseClass size(-16 -16 0, 16 16 32) color(80 0 200) base(Pickup) = Ammo []
+
+@BaseClass base(Target, Delay) = Targetx
+[
 	killtarget(target_destination) : "KillTarget" : : "When an entity is triggered, it will remove from the game the entity specified by this property."
 ]
 
@@ -1114,18 +1126,18 @@
 //
 
 
-@PointClass base(Weapon, Targetx) studio("models/w_9mmclip.mdl") = ammo_9mmclip : "Spawns a 9mm handgun ammo clip." : "http://twhl.info/wiki.php?id=1" []
-@PointClass base(Weapon, Targetx) studio("models/w_9mmarclip.mdl") = ammo_9mmAR : "Spawns ammo for the 9mm AR / handgun." : "http://twhl.info/wiki.php?id=2" []
-@PointClass base(Weapon, Targetx) studio("models/w_chainammo.mdl") = ammo_9mmbox : "Spawns a large amount (200) of 9mm ammo in a box." : "http://twhl.info/wiki.php?id=3" []
-@PointClass base(Weapon, Targetx) studio("models/w_argrenade.mdl") = ammo_ARgrenades : "Spawns 2 grenades for the 9mm AR's secondary fire." : "http://twhl.info/wiki.php?id=4" []
-@PointClass base(Weapon, Targetx) studio("models/w_shotbox.mdl") = ammo_buckshot : "Spawns ammo for the shotgun." : "http://twhl.info/wiki.php?id=7" []
-@PointClass base(Weapon, Targetx) studio("models/w_357ammobox.mdl") = ammo_357 : "Spawns ammo for the .357 Magnum." : "http://twhl.info/wiki.php?id=6" []
-@PointClass base(Weapon, Targetx) studio("models/w_rpgammo.mdl") = ammo_rpgclip : "Spawns rockets for the RPG." : "http://twhl.info/wiki.php?id=9" []
-@PointClass base(Weapon, Targetx) studio("models/w_gaussammo.mdl") = ammo_gaussclip : "Spawns ammo for the gauss and egon weapons." : "http://twhl.info/wiki.php?id=5" []
-@PointClass base(Weapon, Targetx) studio("models/w_crossbow_clip.mdl") = ammo_crossbow : "Spawns crossbow ammo." : "http://twhl.info/wiki.php?id=8" []
-@PointClass base(Weapon, Targetx) studio("models/w_saw_clip.mdl") = ammo_556 : "M249 Ammo" []
-@PointClass base(Weapon, Targetx) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
-@PointClass base(Weapon, Targetx) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
+@PointClass base(Ammo) studio("models/w_9mmclip.mdl") = ammo_9mmclip : "Spawns a 9mm handgun ammo clip." : "http://twhl.info/wiki.php?id=1" []
+@PointClass base(Ammo) studio("models/w_9mmarclip.mdl") = ammo_9mmAR : "Spawns ammo for the 9mm AR / handgun." : "http://twhl.info/wiki.php?id=2" []
+@PointClass base(Ammo) studio("models/w_chainammo.mdl") = ammo_9mmbox : "Spawns a large amount (200) of 9mm ammo in a box." : "http://twhl.info/wiki.php?id=3" []
+@PointClass base(Ammo) studio("models/w_argrenade.mdl") = ammo_ARgrenades : "Spawns 2 grenades for the 9mm AR's secondary fire." : "http://twhl.info/wiki.php?id=4" []
+@PointClass base(Ammo) studio("models/w_shotbox.mdl") = ammo_buckshot : "Spawns ammo for the shotgun." : "http://twhl.info/wiki.php?id=7" []
+@PointClass base(Ammo) studio("models/w_357ammobox.mdl") = ammo_357 : "Spawns ammo for the .357 Magnum." : "http://twhl.info/wiki.php?id=6" []
+@PointClass base(Ammo) studio("models/w_rpgammo.mdl") = ammo_rpgclip : "Spawns rockets for the RPG." : "http://twhl.info/wiki.php?id=9" []
+@PointClass base(Ammo) studio("models/w_gaussammo.mdl") = ammo_gaussclip : "Spawns ammo for the gauss and egon weapons." : "http://twhl.info/wiki.php?id=5" []
+@PointClass base(Ammo) studio("models/w_crossbow_clip.mdl") = ammo_crossbow : "Spawns crossbow ammo." : "http://twhl.info/wiki.php?id=8" []
+@PointClass base(Ammo) studio("models/w_saw_clip.mdl") = ammo_556 : "M249 Ammo" []
+@PointClass base(Ammo) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
+@PointClass base(Targetname, Appearflags, Angles, Global) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
 
 @SolidClass base(Target, ZHLT, RenderFields) = button_target : "Target Button"
 [
@@ -2713,16 +2725,16 @@
 // items
 //
 
-@PointClass size(-16 -16 0, 16 16 36) base(Weapon, Targetx) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
+@PointClass size(-16 -16 0, 16 16 36) base(Targetname, Appearflags, Angles, Global, Scalable) studio("models/w_oxygen.mdl") = item_airtank : "Oxygen tank" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_antidote.mdl") = item_antidote : "Poison antidote"
 [
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_battery.mdl") = item_battery : "HEV battery"
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_battery.mdl") = item_battery : "HEV battery"
 [
 	health(integer) : "Charge Supplied"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/barney_vest.mdl") = item_armorvest : "Armor vest"
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/barney_vest.mdl") = item_armorvest : "Armor vest"
 [
 	sequence(choices) : "Placement" : 0 =
 	[
@@ -2732,7 +2744,7 @@
 		3 : "Reclining"
 	]
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/barney_helmet.mdl") = item_helmet : "Helmet"
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/barney_helmet.mdl") = item_helmet : "Helmet"
 [
 	sequence(choices) : "Placement" : 0 =
 	[
@@ -2741,19 +2753,19 @@
 		2 : "Lying upside-down"
 	]
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_flashlight.mdl") = item_flashlight : "Flashlight" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit"
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_flashlight.mdl") = item_flashlight : "Flashlight" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_medkit.mdl") = item_healthkit : "Small Health Kit"
 [
 	health(integer) : "Health Supplied"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_security.mdl") = item_security : "Security card"
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_security.mdl") = item_security : "Security card"
 [
 	message(string) : "Message" : : "Message from titles.txt to show on pickup"
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
 	hudname(string) : "Hud name" : : "Custom name from hud.txt to show on pickup. The default is item_security"
 ]
-@PointClass size(-16 -16 0, 16 16 36) base(Item, Targetx, Scalable) studio("models/w_suit.mdl") = item_suit : "HEV Suit"
+@PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_suit.mdl") = item_suit : "HEV Suit"
 [
 	spawnflags(Flags) =
 	[
@@ -7422,14 +7434,14 @@
 // weapons
 //
 
-@PointClass base(Weapon, Targetx) studio("models/w_crowbar.mdl") = weapon_crowbar : "Crowbar" []
-@PointClass base(Weapon, Targetx) studio("models/w_9mmhandgun.mdl") = weapon_9mmhandgun : "9mm Handgun" []
-@PointClass base(Weapon, Targetx) studio("models/w_357.mdl") = weapon_357 : "357 Handgun" []
-@PointClass base(Weapon, Targetx) studio("models/w_9mmar.mdl") = weapon_9mmAR : "9mm Assault Rifle" []
-@PointClass base(Weapon, Targetx) studio("models/w_shotgun.mdl") = weapon_shotgun : "Shotgun" []
-@PointClass base(Weapon, Targetx) studio("models/w_rpg.mdl") = weapon_rpg : "RPG" []
-@PointClass base(Weapon, Targetx) studio("models/w_gauss.mdl") = weapon_gauss : "Gauss Gun" []
-@PointClass base(Weapon, Targetx) studio("models/w_crossbow.mdl") = weapon_crossbow : "Crossbow"
+@PointClass base(Weapon) studio("models/w_crowbar.mdl") = weapon_crowbar : "Crowbar" []
+@PointClass base(Weapon) studio("models/w_9mmhandgun.mdl") = weapon_9mmhandgun : "9mm Handgun" []
+@PointClass base(Weapon) studio("models/w_357.mdl") = weapon_357 : "357 Handgun" []
+@PointClass base(Weapon) studio("models/w_9mmar.mdl") = weapon_9mmAR : "9mm Assault Rifle" []
+@PointClass base(Weapon) studio("models/w_shotgun.mdl") = weapon_shotgun : "Shotgun" []
+@PointClass base(Weapon) studio("models/w_rpg.mdl") = weapon_rpg : "RPG" []
+@PointClass base(Weapon) studio("models/w_gauss.mdl") = weapon_gauss : "Gauss Gun" []
+@PointClass base(Weapon) studio("models/w_crossbow.mdl") = weapon_crossbow : "Crossbow"
 [
 	sequence(choices) : "Placement" : 0 =
 	[
@@ -7437,11 +7449,11 @@
 		1 : "Realistic (tilted)"
 	]
 ]
-@PointClass base(Weapon, Targetx) studio("models/w_egon.mdl") = weapon_egon : "Egon Gun" []
-@PointClass base(Weapon, Targetx) studio("models/v_tripmine.mdl") body(3) sequence(8) size(-16 -16 -5, 16 16 27) = weapon_tripmine : "Tripmine Ammo" []
-@PointClass base(Weapon, Targetx) studio("models/w_satchel.mdl") = weapon_satchel : "Satchel Charge Ammo" []
-@PointClass base(Weapon, Targetx) studio("models/w_grenade.mdl") = weapon_handgrenade : "Handgrenade Ammo" []
-@PointClass base(Weapon, Targetx) studio("models/w_sqknest.mdl") = weapon_snark : "Squeak Grenade"
+@PointClass base(Weapon) studio("models/w_egon.mdl") = weapon_egon : "Egon Gun" []
+@PointClass base(Weapon) studio("models/v_tripmine.mdl") body(3) sequence(8) size(-16 -16 -5, 16 16 27) = weapon_tripmine : "Tripmine Ammo" []
+@PointClass base(Weapon) studio("models/w_satchel.mdl") = weapon_satchel : "Satchel Charge Ammo" []
+@PointClass base(Weapon) studio("models/w_grenade.mdl") = weapon_handgrenade : "Handgrenade Ammo" []
+@PointClass base(Weapon) studio("models/w_sqknest.mdl") = weapon_snark : "Squeak Grenade"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 1 =
 	[
@@ -7449,22 +7461,22 @@
 		1 : "idle"
 	]
 ]
-@PointClass base(Weapon, Targetx) studio("models/w_hgun.mdl") = weapon_hornetgun : "Hornet Gun" []
-@PointClass base(Target) size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_weaponbox.mdl") =  weaponbox : "Weapon/Ammo Container" []
-@PointClass base(Weapon, Targetx) studio("models/w_desert_eagle.mdl") = weapon_eagle : "Desert Eagle" []
-@PointClass base(Weapon, Targetx) studio("models/w_penguinnest.mdl") = weapon_penguin : "Killer Penguin" []
-@PointClass base(Weapon, Targetx) studio("models/w_pipe_wrench.mdl") = weapon_pipewrench : "Pipe Wrench" []
-@PointClass base(Weapon, Targetx) studio("models/w_knife.mdl") = weapon_knife : "Knife" []
-@PointClass base(Weapon, Targetx) studio("models/w_bgrap.mdl") = weapon_grapple : "Barnacle Grapple" []
-@PointClass base(Weapon, Targetx) studio("models/w_shock.mdl") = weapon_shockrifle : "Shock Roach" []
-@PointClass base(Weapon, Targetx) studio("models/w_saw.mdl") = weapon_m249 : "M249 SAW" []
-@PointClass base(Weapon, Targetx) studio("models/w_m40a1.mdl") = weapon_sniperrifle : "Sniper Rifle" []
-@PointClass base(Weapon, Targetx) studio("models/w_displacer.mdl") = weapon_displacer : "Displacer" []
-@PointClass base(Weapon, Targetx) studio("models/w_spore_launcher.mdl") = weapon_sporelauncher : "Spore Launcher" []
-@PointClass base(Weapon, Targetx) studio("models/w_medkit.mdl") = weapon_medkit : "Medkit" []
-@PointClass base(Weapon, Targetx) studio("models/w_uzi.mdl") = weapon_uzi : "Single UZI" []
+@PointClass base(Weapon) studio("models/w_hgun.mdl") = weapon_hornetgun : "Hornet Gun" []
+@PointClass base(Pickup) size(-16 -16 0, 16 16 64) color(0 128 0) studio("models/w_weaponbox.mdl") =  weaponbox : "Weapon/Ammo Container" []
+@PointClass base(Weapon) studio("models/w_desert_eagle.mdl") = weapon_eagle : "Desert Eagle" []
+@PointClass base(Weapon) studio("models/w_penguinnest.mdl") = weapon_penguin : "Killer Penguin" []
+@PointClass base(Weapon) studio("models/w_pipe_wrench.mdl") = weapon_pipewrench : "Pipe Wrench" []
+@PointClass base(Weapon) studio("models/w_knife.mdl") = weapon_knife : "Knife" []
+@PointClass base(Weapon) studio("models/w_bgrap.mdl") = weapon_grapple : "Barnacle Grapple" []
+@PointClass base(Weapon) studio("models/w_shock.mdl") = weapon_shockrifle : "Shock Roach" []
+@PointClass base(Weapon) studio("models/w_saw.mdl") = weapon_m249 : "M249 SAW" []
+@PointClass base(Weapon) studio("models/w_m40a1.mdl") = weapon_sniperrifle : "Sniper Rifle" []
+@PointClass base(Weapon) studio("models/w_displacer.mdl") = weapon_displacer : "Displacer" []
+@PointClass base(Weapon) studio("models/w_spore_launcher.mdl") = weapon_sporelauncher : "Spore Launcher" []
+@PointClass base(Weapon) studio("models/w_medkit.mdl") = weapon_medkit : "Medkit" []
+@PointClass base(Weapon) studio("models/w_uzi.mdl") = weapon_uzi : "Single UZI" []
 
-@PointClass base(Weapon, Targetx) = world_items : "World Items" 
+@PointClass base(Pickup) = world_items : "World Items"
 [
 	type(choices) :"types" : 42 =
 	[

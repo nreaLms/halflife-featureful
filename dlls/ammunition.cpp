@@ -28,47 +28,25 @@ void CBasePlayerAmmo::Precache()
 	PRECACHE_SOUND( AMMO_PICKUP_SOUND );
 }
 
-void CBasePlayerAmmo::FallThink()
+Vector CBasePlayerAmmo::MyRespawnSpot()
 {
-	pev->nextthink = gpGlobals->time + 0.1;
-	if( pev->flags & FL_ONGROUND )
-	{
-		pev->solid = SOLID_TRIGGER;
-		UTIL_SetOrigin( pev, pev->origin );
-		ResetThink();
-	}
+	return g_pGameRules->VecAmmoRespawnSpot( this );
 }
 
-CBaseEntity* CBasePlayerAmmo::Respawn( void )
+float CBasePlayerAmmo::MyRespawnTime()
 {
-	pev->effects |= EF_NODRAW;
-	SetTouch( NULL );
-
-	UTIL_SetOrigin( pev, g_pGameRules->VecAmmoRespawnSpot( this ) );// move to wherever I'm supposed to repawn.
-
-	SetThink( &CBasePlayerAmmo::Materialize );
-	pev->nextthink = g_pGameRules->FlAmmoRespawnTime( this );
-
-	return this;
+	return g_pGameRules->FlAmmoRespawnTime( this );
 }
 
-void CBasePlayerAmmo::Materialize( void )
+void CBasePlayerAmmo::OnMaterialize()
 {
-	if( pev->effects & EF_NODRAW )
-	{
-		// changing from invisible state to visible.
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
-		pev->effects &= ~EF_NODRAW;
-		pev->effects |= EF_MUZZLEFLASH;
-	}
-
 	SetTouch( &CBasePlayerAmmo::DefaultTouch );
 	SetThink( NULL );
 }
 
 void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther )
 {
-	if (!NeedUseToTake()) {
+	if (IsPickableByTouch()) {
 		//Prevent dropped ammo from touching at the same time
 		if( pev->bInDuck && !( pev->flags & FL_ONGROUND ) )
 		{
@@ -79,25 +57,10 @@ void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther )
 	}
 }
 
-int CBasePlayerAmmo::ObjectCaps()
-{
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
-		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
-	} else {
-		return CBaseEntity::ObjectCaps();
-	}
-}
-
-void CBasePlayerAmmo::SetObjectCollisionBox()
-{
-	pev->absmin = pev->origin + Vector( -16, -16, 0 );
-	pev->absmax = pev->origin + Vector( 16, 16, 16 );
-}
-
 void CBasePlayerAmmo::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW) ) {
-		TouchOrUse(pActivator);
+	if (IsPickableByUse() && !(pev->effects & EF_NODRAW) ) {
+		TouchOrUse(pCaller);
 	}
 }
 

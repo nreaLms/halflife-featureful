@@ -595,16 +595,28 @@ CBaseEntity* CBasePlayerWeapon::Respawn( void )
 	return pNewWeapon;
 }
 
+static bool IsPickableByTouch(CBaseEntity* pEntity)
+{
+	return !FBitSet(pEntity->pev->spawnflags, SF_ITEM_USE_ONLY) &&
+			(FBitSet(pEntity->pev->spawnflags, SF_ITEM_TOUCH_ONLY) || !NeedUseToTake());
+}
+
+static bool IsPickableByUse(CBaseEntity* pEntity)
+{
+	return !FBitSet(pEntity->pev->spawnflags, SF_ITEM_TOUCH_ONLY) &&
+			(FBitSet(pEntity->pev->spawnflags, SF_ITEM_USE_ONLY) || NeedUseToTake());
+}
+
 void CBasePlayerWeapon::DefaultTouch( CBaseEntity *pOther )
 {
-	if (!NeedUseToTake()) {
+	if (IsPickableByTouch(this)) {
 		TouchOrUse(pOther);
 	}
 }
 
 int CBasePlayerWeapon::ObjectCaps()
 {
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
+	if (IsPickableByUse(this) && !(pev->effects & EF_NODRAW)) {
 		return CBaseAnimating::ObjectCaps() | FCAP_IMPULSE_USE;
 	} else {
 		return CBaseAnimating::ObjectCaps();
@@ -613,8 +625,8 @@ int CBasePlayerWeapon::ObjectCaps()
 
 void CBasePlayerWeapon::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW) ) {
-		TouchOrUse(pActivator);
+	if (IsPickableByUse(this) && !(pev->effects & EF_NODRAW) ) {
+		TouchOrUse(pCaller);
 	}
 }
 
@@ -1069,7 +1081,7 @@ TYPEDESCRIPTION	CWeaponBox::m_SaveData[] =
 	DEFINE_FIELD( CWeaponBox, m_cAmmoTypes, FIELD_INTEGER ),
 };
 
-IMPLEMENT_SAVERESTORE( CWeaponBox, CBaseEntity )
+IMPLEMENT_SAVERESTORE( CWeaponBox, CBaseDelay )
 
 //=========================================================
 //
@@ -1083,16 +1095,20 @@ void CWeaponBox::Precache( void )
 //=========================================================
 void CWeaponBox::KeyValue( KeyValueData *pkvd )
 {
-	if( m_cAmmoTypes < MAX_AMMO_SLOTS )
+	CBaseDelay::KeyValue(pkvd);
+	if (!pkvd->fHandled)
 	{
-		PackAmmo( ALLOC_STRING( pkvd->szKeyName ), atoi( pkvd->szValue ) );
-		m_cAmmoTypes++;// count this new ammo type.
+		if( m_cAmmoTypes < MAX_AMMO_SLOTS )
+		{
+			PackAmmo( ALLOC_STRING( pkvd->szKeyName ), atoi( pkvd->szValue ) );
+			m_cAmmoTypes++;// count this new ammo type.
 
-		pkvd->fHandled = TRUE;
-	}
-	else
-	{
-		ALERT( at_console, "WeaponBox too full! only %d ammotypes allowed\n", MAX_AMMO_SLOTS );
+			pkvd->fHandled = TRUE;
+		}
+		else
+		{
+			ALERT( at_console, "WeaponBox too full! only %d ammotypes allowed\n", MAX_AMMO_SLOTS );
+		}
 	}
 }
 
@@ -1146,14 +1162,14 @@ void CWeaponBox::Kill( void )
 
 void CWeaponBox::Touch( CBaseEntity *pOther )
 {
-	if (!NeedUseToTake()) {
+	if (IsPickableByTouch(this)) {
 		TouchOrUse(pOther);
 	}
 }
 
 int CWeaponBox::ObjectCaps()
 {
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW)) {
+	if (IsPickableByUse(this) && !(pev->effects & EF_NODRAW)) {
 		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
 	} else {
 		return CBaseEntity::ObjectCaps();
@@ -1162,8 +1178,8 @@ int CWeaponBox::ObjectCaps()
 
 void CWeaponBox::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (NeedUseToTake() && !(pev->effects & EF_NODRAW) ) {
-		TouchOrUse(pActivator);
+	if (IsPickableByUse(this) && !(pev->effects & EF_NODRAW) ) {
+		TouchOrUse(pCaller);
 	}
 }
 
@@ -1232,10 +1248,7 @@ void CWeaponBox::TouchOrUse( CBaseEntity *pOther )
 	if (shouldRemove) {
 		EMIT_SOUND( pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
 		SetTouch( NULL );
-		if (!FStringNull(pev->target))
-		{
-			FireTargets(STRING(pev->target), pOther, this, USE_TOGGLE, 0.0f);
-		}
+		SUB_UseTargets( pOther, USE_TOGGLE, 0 );
 		UTIL_Remove(this);
 	}
 }

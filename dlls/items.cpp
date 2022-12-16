@@ -31,9 +31,6 @@
 #include "gamerules.h"
 #include "animation.h"
 
-#define SF_ITEM_TOUCH_ONLY 128
-#define SF_ITEM_USE_ONLY 256
-
 extern int gmsgItemPickup;
 
 class CWorldItem : public CBaseEntity
@@ -319,16 +316,67 @@ void CInfoItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 //=========
 
-static bool AppliedByTouch(CItem* item)
+int CPickup::ObjectCaps()
 {
-	return !FBitSet(item->pev->spawnflags, SF_ITEM_USE_ONLY) &&
-			(FBitSet(item->pev->spawnflags, SF_ITEM_TOUCH_ONLY) || !NeedUseToTake());
+	if (IsPickableByUse() && !(pev->effects & EF_NODRAW)) {
+		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
+	} else {
+		return CBaseEntity::ObjectCaps();
+	}
 }
 
-static bool AppliedByUse(CItem* item)
+void CPickup::SetObjectCollisionBox()
 {
-	return !FBitSet(item->pev->spawnflags, SF_ITEM_TOUCH_ONLY) &&
-			(FBitSet(item->pev->spawnflags, SF_ITEM_USE_ONLY) || NeedUseToTake());
+	pev->absmin = pev->origin + Vector( -16, -16, 0 );
+	pev->absmax = pev->origin + Vector( 16, 16, 16 );
+}
+
+bool CPickup::IsPickableByTouch()
+{
+	return !FBitSet(pev->spawnflags, SF_ITEM_USE_ONLY) &&
+			(FBitSet(pev->spawnflags, SF_ITEM_TOUCH_ONLY) || !NeedUseToTake());
+}
+
+bool CPickup::IsPickableByUse()
+{
+	return !FBitSet(pev->spawnflags, SF_ITEM_TOUCH_ONLY) &&
+			(FBitSet(pev->spawnflags, SF_ITEM_USE_ONLY) || NeedUseToTake());
+}
+
+void CPickup::FallThink()
+{
+	pev->nextthink = gpGlobals->time + 0.1;
+	if( pev->flags & FL_ONGROUND )
+	{
+		pev->solid = SOLID_TRIGGER;
+		UTIL_SetOrigin( pev, pev->origin );
+		ResetThink();
+	}
+}
+
+CBaseEntity* CPickup::Respawn( void )
+{
+	SetTouch( NULL );
+	pev->effects |= EF_NODRAW;
+
+	UTIL_SetOrigin( pev, MyRespawnSpot() );// blip to whereever you should respawn.
+
+	SetThink( &CPickup::Materialize );
+	pev->nextthink = MyRespawnTime();
+	return this;
+}
+
+void CPickup::Materialize( void )
+{
+	if( pev->effects & EF_NODRAW )
+	{
+		// changing from invisible state to visible.
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
+		pev->effects &= ~EF_NODRAW;
+		pev->effects |= EF_MUZZLEFLASH;
+	}
+
+	OnMaterialize();
 }
 
 extern int gEvilImpulse101;
@@ -359,41 +407,15 @@ void CItem::Spawn( void )
 
 void CItem::ItemTouch( CBaseEntity *pOther )
 {
-	if (AppliedByTouch(this)) {
+	if (IsPickableByTouch()) {
 		TouchOrUse(pOther);
 	}
 }
 
-void CItem::FallThink()
-{
-	pev->nextthink = gpGlobals->time + 0.1;
-	if( pev->flags & FL_ONGROUND )
-	{
-		pev->solid = SOLID_TRIGGER;
-		UTIL_SetOrigin( pev, pev->origin );
-		ResetThink();
-	}
-}
-
-int CItem::ObjectCaps()
-{
-	if (AppliedByUse(this) && !(pev->effects & EF_NODRAW)) {
-		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
-	} else {
-		return CBaseEntity::ObjectCaps();
-	}
-}
-
-void CItem::SetObjectCollisionBox()
-{
-	pev->absmin = pev->origin + Vector( -16, -16, 0 );
-	pev->absmax = pev->origin + Vector( 16, 16, 16 );
-}
-
 void CItem::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (AppliedByUse(this) && !(pev->effects & EF_NODRAW)) {
-		TouchOrUse(pActivator);
+	if (IsPickableByUse() && !(pev->effects & EF_NODRAW)) {
+		TouchOrUse(pCaller);
 	}
 }
 
@@ -436,28 +458,18 @@ void CItem::TouchOrUse(CBaseEntity *pOther)
 	}
 }
 
-CBaseEntity* CItem::Respawn( void )
+Vector CItem::MyRespawnSpot()
 {
-	SetTouch( NULL );
-	pev->effects |= EF_NODRAW;
-
-	UTIL_SetOrigin( pev, g_pGameRules->VecItemRespawnSpot( this ) );// blip to whereever you should respawn.
-
-	SetThink( &CItem::Materialize );
-	pev->nextthink = g_pGameRules->FlItemRespawnTime( this ); 
-	return this;
+	return g_pGameRules->VecItemRespawnSpot( this );
 }
 
-void CItem::Materialize( void )
+float CItem::MyRespawnTime()
 {
-	if( pev->effects & EF_NODRAW )
-	{
-		// changing from invisible state to visible.
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
-		pev->effects &= ~EF_NODRAW;
-		pev->effects |= EF_MUZZLEFLASH;
-	}
+	return g_pGameRules->FlItemRespawnTime( this );
+}
 
+void CItem::OnMaterialize()
+{
 	SetTouch( &CItem::ItemTouch );
 	SetThink( NULL );
 }
