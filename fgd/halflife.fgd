@@ -2002,8 +2002,12 @@
 	trigger_on_return(target_destination) : "Trigger on return"
 	trigger_before_move(target_destination) : "Trigger before move/rotate"
 ]
+@BaseClass = ButtonWaitToggle
+[
+	wait_toggle(string) : "Delay before toggling again"
+]
 
-@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy, ButtonTrigger) = func_button : "Button"
+@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_button : "Button"
 [
 	speed(integer) : "Speed" : 5
 	health(integer) : "Health (shootable if > 0)"
@@ -2197,7 +2201,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy, ButtonTrigger) = func_rot_button : "RotatingButton"
+@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_rot_button : "RotatingButton"
 [
 	target(target_destination) : "Targetted object"
 	// changetarget will change the button's target's TARGET field to the button's changetarget.

@@ -756,6 +756,9 @@ public:
 	string_t m_triggerOnReturn;
 	string_t m_triggerBeforeMove;
 
+	float m_waitBeforeToggleAgain;
+	float m_toggleAgainTime;
+
 	short m_iDirectUse;
 	BOOL m_fNonMoving;
 };

@@ -534,6 +534,8 @@ TYPEDESCRIPTION CBaseButton::m_SaveData[] =
 	DEFINE_FIELD( CBaseButton, m_unlockedSentenceOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_triggerOnReturn, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_triggerBeforeMove, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_waitBeforeToggleAgain, FIELD_FLOAT ),
+	DEFINE_FIELD( CBaseButton, m_toggleAgainTime, FIELD_TIME ),
 	DEFINE_FIELD( CBaseButton, m_iDirectUse, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseButton, m_fNonMoving, FIELD_BOOLEAN ),
 };
@@ -725,6 +727,11 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "trigger_before_move" ) )
 	{
 		m_triggerBeforeMove = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "wait_toggle" ) )
+	{
+		m_waitBeforeToggleAgain = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "directuse"))
@@ -982,6 +989,9 @@ void CBaseButton::ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	if( m_toggle_state == TS_GOING_UP || m_toggle_state == TS_GOING_DOWN )
 		return;
 
+	if (FBitSet( pev->spawnflags, SF_BUTTON_TOGGLE ) && m_toggleAgainTime > gpGlobals->time)
+		return;
+
 	m_hActivator = pActivator;
 	if( m_toggle_state == TS_AT_TOP )
 	{
@@ -1147,6 +1157,8 @@ void CBaseButton::TriggerAndWait( void )
 	pev->frame = 1;			// use alternate textures
 
 	SUB_UseTargets( m_hActivator, UseType(false), 0 );
+	if (FBitSet( pev->spawnflags, SF_BUTTON_TOGGLE ))
+		m_toggleAgainTime = gpGlobals->time + m_waitBeforeToggleAgain;
 }
 
 //
