@@ -753,6 +753,9 @@ public:
 	string_t m_lockedSentenceOverride;
 	string_t m_unlockedSentenceOverride;
 
+	string_t m_triggerOnReturn;
+	string_t m_triggerBeforeMove;
+
 	short m_iDirectUse;
 	BOOL m_fNonMoving;
 };

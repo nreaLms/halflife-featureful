@@ -532,6 +532,8 @@ TYPEDESCRIPTION CBaseButton::m_SaveData[] =
 	DEFINE_FIELD( CBaseButton, m_unlockedSoundOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_lockedSentenceOverride, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_unlockedSentenceOverride, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_triggerOnReturn, FIELD_STRING ),
+	DEFINE_FIELD( CBaseButton, m_triggerBeforeMove, FIELD_STRING ),
 	DEFINE_FIELD( CBaseButton, m_iDirectUse, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseButton, m_fNonMoving, FIELD_BOOLEAN ),
 };
@@ -713,6 +715,16 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "unlocked_sentence_override" ) )
 	{
 		m_unlockedSentenceOverride = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_on_return" ) )
+	{
+		m_triggerOnReturn = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_before_move" ) )
+	{
+		m_triggerBeforeMove = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "directuse"))
@@ -1071,6 +1083,11 @@ void CBaseButton::ButtonActivate()
 	ASSERT( m_toggle_state == TS_AT_BOTTOM );
 	m_toggle_state = TS_GOING_UP;
 	
+	if (!FStringNull(m_triggerBeforeMove))
+	{
+		FireTargets(STRING(m_triggerBeforeMove), m_hActivator, this, USE_TOGGLE, 0.0f );
+	}
+
 	if (m_fNonMoving)
 	{
 		TriggerAndWait();
@@ -1205,6 +1222,9 @@ void CBaseButton::ButtonBackHome( void )
 		SetThink( &CBaseButton::ButtonSpark );
 		pev->nextthink = gpGlobals->time + 0.5f;// no hurry.
 	}
+
+	if (!FStringNull(m_triggerOnReturn))
+		FireTargets(STRING(m_triggerOnReturn), m_hActivator, this, USE_TOGGLE, 0.0f);
 }
 
 bool CBaseButton::IsSparkingButton()
