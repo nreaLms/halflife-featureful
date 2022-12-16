@@ -224,6 +224,43 @@ BOOL CBaseMonster::FScheduleValid( void )
 	return TRUE;
 }
 
+bool CBaseMonster::ShouldGetIdealState()
+{
+	// Don't get ideal state if you are supposed to be dead.
+	if ( m_IdealMonsterState == MONSTERSTATE_DEAD )
+		return false;
+
+	// If I'm supposed to be in scripted state, but i'm not yet, do not allow
+	// GetIdealState() to be called, because it doesn't know how to determine
+	// that a NPC should be in SCRIPT state and will stomp it with some other state.
+	if ( m_IdealMonsterState == MONSTERSTATE_SCRIPT && m_MonsterState != MONSTERSTATE_SCRIPT )
+		return false;
+
+	// conditions bits (excluding SCHEDULE_DONE) indicate interruption
+	if ( m_afConditions && !HasConditions( bits_COND_SCHEDULE_DONE ) )
+		return true;
+
+	// schedule is done but schedule indicates it wants GetIdealState called
+	// after successful completion (by setting bits_COND_SCHEDULE_DONE in iInterruptMask)
+	if ( m_pSchedule && (m_pSchedule->iInterruptMask & bits_COND_SCHEDULE_DONE ) )
+		return true;
+
+	// in COMBAT state with no enemy (it died?)
+	if ( ( m_MonsterState == MONSTERSTATE_COMBAT ) && ( m_hEnemy == 0 ) )
+		return true;
+
+	// Always get ideal state in Hunt state, to check if monster wants to stop hunting
+	if ( m_MonsterState == MONSTERSTATE_HUNT )
+		return true;
+
+	// Got an enemy from somewhere else (e.g. from squad member) while in non-combat state
+	if ( (m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT ||
+		  m_MonsterState == MONSTERSTATE_HUNT) && m_hEnemy != 0 )
+		return true;
+
+	return false;
+}
+
 //=========================================================
 // MaintainSchedule - does all the per-think schedule maintenance.
 // ensures that the monster leaves this function with a valid
@@ -252,22 +289,9 @@ void CBaseMonster::MaintainSchedule( void )
 			// Notify the monster that his schedule is changing
 			ScheduleChange();
 
-			// Call GetIdealState if we're not dead and one or more of the following...
-			// - in COMBAT state with no enemy (it died?)
-			// - conditions bits (excluding SCHEDULE_DONE) indicate interruption,
-			// - schedule is done but schedule indicates it wants GetIdealState called
-			//   after successful completion (by setting bits_COND_SCHEDULE_DONE in iInterruptMask)
-			// DEAD & SCRIPT are not suggestions, they are commands!
-			if( m_IdealMonsterState != MONSTERSTATE_DEAD && 
-				 ( m_IdealMonsterState != MONSTERSTATE_SCRIPT || m_IdealMonsterState == m_MonsterState ) )
+			if( ShouldGetIdealState() )
 			{
-				if( (m_afConditions && !HasConditions( bits_COND_SCHEDULE_DONE ) ) ||
-						( m_pSchedule && (m_pSchedule->iInterruptMask & bits_COND_SCHEDULE_DONE ) ) ||
-						( ( m_MonsterState == MONSTERSTATE_COMBAT ) && ( m_hEnemy == 0 ) ) ||
-						m_MonsterState == MONSTERSTATE_HUNT )
-				{
-					GetIdealState();
-				}
+				GetIdealState();
 			}
 			if( HasConditions( bits_COND_TASK_FAILED ) && m_MonsterState == m_IdealMonsterState )
 			{

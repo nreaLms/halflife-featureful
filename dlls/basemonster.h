@@ -197,6 +197,7 @@ public:
 	virtual Schedule_t *ScheduleFromName( const char *pName );
 	static Schedule_t *m_scheduleList[];
 
+	bool ShouldGetIdealState();
 	void MaintainSchedule( void );
 	virtual void StartTask( Task_t *pTask );
 	virtual void RunTask( Task_t *pTask );
