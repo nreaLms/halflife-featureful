@@ -71,9 +71,10 @@ public:
 	void EXPORT DyingThink( void );
 	void EXPORT CommandUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	// int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	void ShowDamage( void );
+	void Update();
 
 	CBaseEntity *m_pGoalEnt;
 	Vector m_vel1;
@@ -194,6 +195,7 @@ void COsprey::SpawnImpl(const char* modelName, const float defaultHealth)
 	m_flRightHealth = 200;
 	m_flLeftHealth = 200;
 	SetMyHealth( defaultHealth );
+	pev->max_health = pev->health;
 
 	SetMyFieldOfView(0); // 180 degrees
 
@@ -449,7 +451,7 @@ void COsprey::HoverThink( void )
 
 	pev->nextthink = gpGlobals->time + 0.1f;
 	UTIL_MakeAimVectors( pev->angles );
-	ShowDamage();
+	Update();
 }
 
 void COsprey::UpdateGoal()
@@ -522,7 +524,7 @@ void COsprey::FlyThink( void )
 	}
 
 	Flight();
-	ShowDamage();
+	Update();
 }
 
 void COsprey::Flight()
@@ -634,6 +636,7 @@ void COsprey::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib 
 	pev->nextthink = gpGlobals->time + 0.1f;
 	pev->health = 0;
 	pev->takedamage = DAMAGE_NO;
+	pev->deadflag = DEAD_DYING;
 
 	m_startTime = gpGlobals->time + 4.0f;
 }
@@ -661,7 +664,7 @@ void COsprey::DyingThink( void )
 	if( m_startTime > gpGlobals->time )
 	{
 		UTIL_MakeAimVectors( pev->angles );
-		ShowDamage();
+		Update();
 
 		Vector vecSpot = pev->origin + pev->velocity * 0.2f;
 
@@ -900,6 +903,30 @@ void COsprey::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	{
 		UTIL_Sparks( ptr->vecEndPos );
 	}
+}
+
+void COsprey::Update()
+{
+	//Look around so AI triggers work.
+	Look(4092);
+
+	//Listen for sounds so AI triggers work.
+	Listen();
+
+	ShowDamage();
+	FCheckAITrigger();
+}
+
+int COsprey::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+{
+	//Set enemy to last attacker.
+	//Ospreys are not capable of fighting so they'll get angry at whatever shoots at them, not whatever looks like an enemy.
+	m_hEnemy = Instance(pevAttacker);
+
+	//It's on now!
+	m_MonsterState = MONSTERSTATE_COMBAT;
+
+	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
 
 #if FEATURE_BLACK_OSPREY
