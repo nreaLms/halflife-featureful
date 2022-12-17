@@ -434,6 +434,32 @@ Schedule_t slInvestigateSpot[] =
 	},
 };
 
+Task_t tlMoveToSpot[] =
+{
+	{ TASK_STOP_MOVING, (float)0 },
+	{ TASK_GET_PATH_TO_SPOT, (float)0 },
+	{ TASK_FACE_IDEAL, (float)0 },
+	{ TASK_WALK_OR_RUN_PATH, (float)0 },
+	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
+	{ TASK_PLAY_SEQUENCE, (float)ACT_IDLE },
+};
+
+Schedule_t slMoveToSpot[] =
+{
+	{
+		tlMoveToSpot,
+		ARRAYSIZE( tlMoveToSpot ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_SEE_FEAR |
+		bits_COND_SCHEDULE_SUGGESTED |
+		bits_COND_LIGHT_DAMAGE |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_HEAR_SOUND,
+		bits_SOUND_DANGER,
+		"MoveToSpot"
+	},
+};
+
 //=========================================================
 // CombatIdle Schedule
 //=========================================================
@@ -1330,6 +1356,7 @@ Schedule_t *CBaseMonster::m_scheduleList[] =
 	slAlertStand,
 	slInvestigateSound,
 	slInvestigateSpot,
+	slMoveToSpot,
 	slCombatStand,
 	slCombatFace,
 	slStandoff,
@@ -1575,6 +1602,10 @@ Schedule_t* CBaseMonster::GetScheduleOfType( int Type )
 	case SCHED_INVESTIGATE_SPOT:
 		{
 			return &slInvestigateSpot[0];
+		}
+	case SCHED_MOVE_TO_SPOT:
+		{
+			return &slMoveToSpot[0];
 		}
 	case SCHED_DIE:
 		{

@@ -6653,6 +6653,7 @@
 		2 : "Cover or retreat from spot"
 		3 : "Investigate spot"
 		4 : "Turn to spot"
+		5 : "Move to spot"
 	]
 	mindist(string) : "Min distance" : : "Minimum distance for schedule, when applicable. E.g. the minimum distance to go away from the spot. If not specified or zero, the schedule will use its default value"
 	maxdist(string) : "Max distance" : : "Maximum distance for schedule, when applicable. E.g. the maximum distance to go away from the spot. If not specified or zero, the schedule will use its default value"
