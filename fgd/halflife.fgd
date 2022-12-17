@@ -1024,6 +1024,12 @@
 		1 : "Targetname only"
 		2 : "Classname only"
 	]
+	m_takeDamagePolicy(choices) : "TakeDamage policy" =
+	[
+		0 : "As usual"
+		1 : "No (Invulnerable)"
+		2 : "Non-lethal damage"
+	]
 ]
 
 //

@@ -1079,6 +1079,10 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		return DeadTakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 	}
 
+	const short takeDamagePolicy = m_pCine ? m_pCine->m_takeDamagePolicy : 0;
+	if (takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_INVULNERABLE)
+		return 0;
+
 	if( pev->deadflag == DEAD_NO && flDamage > 0 )
 	{
 		// no pain sound during death animation.
@@ -1139,6 +1143,9 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
 	if( m_MonsterState == MONSTERSTATE_SCRIPT )
 	{
+		if (takeDamagePolicy == SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL && pev->health <= 0.0f)
+			pev->health = 1.0f;
+
 		if ( m_pCine && m_pCine->m_interruptionPolicy == SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH )
 		{
 			if (pev->health <= 0.0f)

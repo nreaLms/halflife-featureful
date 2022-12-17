@@ -227,6 +227,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_searchPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "m_takeDamagePolicy" ) )
+	{
+		m_takeDamagePolicy = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if ( FStrEq( pkvd->szKeyName, "required_state" ) )
 	{
 		m_requiredState = atoi( pkvd->szValue );
@@ -277,6 +282,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_interruptionPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_searchPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_requiredState, FIELD_SHORT ),
+	DEFINE_FIELD( CCineMonster, m_takeDamagePolicy, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster )

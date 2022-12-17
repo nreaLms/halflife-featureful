@@ -99,6 +99,13 @@ enum
 	SCRIPT_SEARCH_POLICY_CLASSNAME_ONLY = 2,
 };
 
+enum
+{
+	SCRIPT_TAKE_DAMAGE_POLICY_DEFAULT = 0,
+	SCRIPT_TAKE_DAMAGE_POLICY_INVULNERABLE = 1,
+	SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL = 2,
+};
+
 // when a monster finishes an AI scripted sequence, we can choose
 // a schedule to place them in. These defines are the aliases to
 // resolve worldcraft input to real schedules (sjb)
@@ -203,6 +210,7 @@ public:
 	short m_interruptionPolicy;
 	short m_searchPolicy;
 	short m_requiredState;
+	short m_takeDamagePolicy;
 
 	bool m_cantFindReported; // no need to save
 	bool m_cantPlayReported;
