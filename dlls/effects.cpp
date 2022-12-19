@@ -30,6 +30,7 @@
 #include "player.h"
 #include "locus.h"
 #include "mod_features.h"
+#include "particledef.h"
 
 #define FEATURE_ENV_WARPBALL 1
 #define FEATURE_ENV_XENMAKER 1
@@ -3924,6 +3925,103 @@ void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		pev->nextthink = gpGlobals->time;
 	}
 }
+
+#define SF_ENVSTREAK_REMOVE_ON_FIRE 1
+
+class CEnvStreak : public CPointEntity
+{
+	void KeyValue( KeyValueData *pkvd );
+	void Spawn();
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+LINK_ENTITY_TO_CLASS( env_streak, CEnvStreak )
+
+void CEnvStreak::KeyValue( KeyValueData *pkvd )
+{
+	if (FStrEq(pkvd->szKeyName, "minlife"))
+	{
+		pev->health = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "maxlife"))
+	{
+		pev->max_health = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "tracer_color"))
+	{
+		pev->skin = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "count"))
+	{
+		pev->body = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "randomness"))
+	{
+		pev->dmg = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "pt_type"))
+	{
+		pev->impulse = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CEnvStreak::Spawn()
+{
+	CPointEntity::Spawn();
+	SetMovedir( pev );
+	if (pev->health == 0.0f)
+	{
+		pev->health = 0.1f;
+		if (pev->max_health == 0.0f)
+			pev->max_health = 0.5f;
+	}
+}
+
+void CEnvStreak::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	extern int gmsgStreaks;
+
+	Vector origin;
+	if (pev->message)
+	{
+		if (!TryCalcLocus_Position( this, pActivator, STRING(pev->message), origin )) {
+			return;
+		}
+	}
+	else
+		origin = pev->origin;
+
+	const Vector direction = pev->movedir;
+
+	MESSAGE_BEGIN( MSG_PVS, gmsgStreaks, origin );
+		WRITE_COORD( origin.x );		// origin
+		WRITE_COORD( origin.y );
+		WRITE_COORD( origin.z );
+		WRITE_COORD( direction.x );	// direction
+		WRITE_COORD( direction.y );
+		WRITE_COORD( direction.z );
+		WRITE_BYTE( pev->skin ); // color
+		WRITE_SHORT( pev->body );	// count
+		WRITE_SHORT( pev->speed );
+		WRITE_SHORT( pev->dmg );	// Random velocity modifier
+		WRITE_BYTE( pev->health * 10 );
+		WRITE_BYTE( pev->max_health * 10 );
+		WRITE_BYTE( pev->impulse > 0 ? pev->impulse : pt_grav );
+		WRITE_BYTE( pev->scale > 0 ? pev->scale * 10 : 10 );
+	MESSAGE_END();
+
+	if (FBitSet(pev->spawnflags, SF_ENVSTREAK_REMOVE_ON_FIRE))
+		UTIL_Remove(this);
+}
+
 
 //=========================================================
 // LRC - Decal effect

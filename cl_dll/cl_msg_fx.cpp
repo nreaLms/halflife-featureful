@@ -340,10 +340,63 @@ int __MsgFunc_SpriteTrail( const char* pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+void FX_Streaks( Vector pos, Vector dir, int color, int count, float speed, int velocityMin, int velocityMax, float minLife = 0.1f, float maxLife = 0.5f, ptype_t particleType = pt_grav, float length = 1.0f )
+{
+	if (maxLife < minLife)
+		maxLife = minLife;
+
+	Vector vel;
+	VectorScale( dir, speed, vel );
+
+	for( int i = 0; i < count; i++ )
+	{
+		vel.x += Com_RandomFloat( velocityMin, velocityMax );
+		vel.y += Com_RandomFloat( velocityMin, velocityMax );
+		vel.z += Com_RandomFloat( velocityMin, velocityMax );
+
+		particle_t *p = gEngfuncs.pEfxAPI->R_TracerParticles( pos, vel, Com_RandomFloat( minLife, maxLife ));
+		if( !p ) return;
+
+		p->type = particleType;
+		p->color = color;
+		p->ramp = length;
+	}
+}
+
+int __MsgFunc_Streaks( const char* pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	Vector pos, dir;
+	int color, count;
+	ptype_t particleType;
+	float minLife, maxLife, speed, velRandomness, length;
+
+	pos[0] = READ_COORD();
+	pos[1] = READ_COORD();
+	pos[2] = READ_COORD();
+	dir[0] = READ_COORD();
+	dir[1] = READ_COORD();
+	dir[2] = READ_COORD();
+	color = READ_BYTE();
+	count = READ_SHORT();
+	speed = READ_SHORT();
+	velRandomness = READ_SHORT();
+	minLife = READ_BYTE() * 0.1f;
+	maxLife = READ_BYTE() * 0.1f;
+	particleType = (ptype_t)READ_BYTE();
+	length = READ_BYTE() * 0.1f;
+
+	FX_Streaks(pos, dir, color, count, speed, -velRandomness, velRandomness, minLife, maxLife, particleType, length);
+
+	return 1;
+}
+
 void HookFXMessages()
 {
 	HOOK_MESSAGE( RandomGibs );
 	HOOK_MESSAGE( MuzzleLight );
 	HOOK_MESSAGE( CustomBeam );
 	HOOK_MESSAGE( SpriteTrail );
+	HOOK_MESSAGE( Streaks );
 }

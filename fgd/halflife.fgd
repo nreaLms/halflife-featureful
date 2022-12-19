@@ -1919,6 +1919,48 @@
 	]
 ]
 
+@PointClass base(Targetname) = env_streak : "Streak splash"
+[
+	count(integer) : "Count" : 20
+	speed(integer) : "Speed" : 50
+	scale(string) : "Length" : 1.0
+	randomness(integer) : "Random velocity modifier" : 400
+	tracer_color(choices) : "Tracer color index" : 6 =
+	[
+		0: "White"
+		1: "Red"
+		2: "Green"
+		3: "Blue"
+		4: "Default (cvars)"
+		5: "Golden"
+		6: "Orange"
+		7: "Purple"
+		8: "Yellowish"
+		9: "Yellowish 2"
+		10: "Yellowish 3"
+		11: "Yellowish 4"
+	]
+	minlife : "Min life" : 0.1
+	maxlife : "Min life" : 0.5
+	pt_type(choices) : "Particel type" : 1 =
+	[
+		1 : "Gravity"
+		2 : "Slow gravity"
+		3 : "Fire"
+		4 : "Explode"
+		5 : "Explode 2"
+		6 : "Blob"
+		7 : "Blob 2"
+		8 : "Vox slow gravity"
+		9 : "Vox gravity"
+	]
+	message(string) : "Position (blank = here) [LP]"
+	spawnflags(flags) =
+	[
+		1: "Remove on fire" : 0
+	]
+]
+
 @PointClass sprite() base(Targetname, RenderFields, SoundRadius) size(-16 -16 -16, 16 16 16) = env_warpball : "Xen Warpball"
 [
 	model(sprite) : "Sprite Name" : "sprites/fexplo1.spr"
