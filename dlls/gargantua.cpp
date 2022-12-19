@@ -1557,43 +1557,125 @@ void CGargantua::PlayUnUseSentence()
 	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
 }
 
+#define SF_SMOKER_ACTIVE 1
+#define SF_SMOKER_REPEATABLE 4
+
 class CSmoker : public CBaseEntity
 {
 public:
+	void Precache();
 	void Spawn( void );
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	void Think( void );
+
+	bool IsActive() {
+		return FBitSet(pev->spawnflags, SF_SMOKER_ACTIVE);
+	}
+	void SetActive(bool active)
+	{
+		if (active)
+			SetBits(pev->spawnflags, SF_SMOKER_ACTIVE);
+		else
+			ClearBits(pev->spawnflags, SF_SMOKER_ACTIVE);
+	}
+
+	int smokeIndex;
 };
 
 LINK_ENTITY_TO_CLASS( env_smoker, CSmoker )
 
+void CSmoker::Precache()
+{
+	if (!FStringNull(pev->model))
+		smokeIndex = PRECACHE_MODEL(STRING(pev->model));
+}
+
 void CSmoker::Spawn( void )
 {
+	Precache();
+
 	pev->movetype = MOVETYPE_NONE;
 	pev->nextthink = gpGlobals->time;
 	pev->solid = SOLID_NOT;
 	UTIL_SetSize(pev, g_vecZero, g_vecZero );
 	pev->effects |= EF_NODRAW;
 	pev->angles = g_vecZero;
+
+	if (pev->scale <= 0.0f)
+		pev->scale = 10;
+	if (pev->framerate <= 0.0f)
+		pev->framerate = 11.0f;
+
+	if (pev->dmg_take <= 0.0f)
+		pev->dmg_take = 0.1f;
+	if (pev->dmg_save <= 0.0f)
+		pev->dmg_save = 0.2f;
+
+	pev->max_health = pev->health;
+
+	if (FStringNull(pev->targetname))
+		SetActive(true);
+
+	if (IsActive())
+		pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+void CSmoker::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	const bool active = IsActive();
+	if (ShouldToggle(useType, active))
+	{
+		if (active)
+		{
+			pev->nextthink = -1;
+			SetActive(false);
+		}
+		else
+		{
+			pev->nextthink = gpGlobals->time;
+			SetActive(true);
+		}
+	}
 }
 
 void CSmoker::Think( void )
 {
+	if (!IsActive())
+		return;
+
+	const int minFramerate = Q_max(pev->framerate - 3, 1);
+	const int maxFramerate = pev->framerate + 3;
+
 	// lots of smoke
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_SMOKE );
 		WRITE_COORD( pev->origin.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 		WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 		WRITE_COORD( pev->origin.z);
-		WRITE_SHORT( g_sModelIndexSmoke );
+		WRITE_SHORT( smokeIndex ? smokeIndex : g_sModelIndexSmoke );
 		WRITE_BYTE( RANDOM_LONG(pev->scale, pev->scale * 1.1f ) );
-		WRITE_BYTE( RANDOM_LONG( 8, 14 ) ); // framerate
+		WRITE_BYTE( RANDOM_LONG( minFramerate, maxFramerate ) ); // framerate
 	MESSAGE_END();
 
-	pev->health--;
-	if( pev->health > 0 )
-		pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.1f, 0.2f );
+	if (pev->max_health > 0)
+		pev->health--;
+	if( pev->max_health <= 0 || pev->health > 0 )
+	{
+		const float minDelay = pev->dmg_take;
+		const float maxDelay = Q_max(pev->dmg_take, pev->dmg_save);
+
+		pev->nextthink = gpGlobals->time + RANDOM_FLOAT( minDelay, maxDelay );
+	}
 	else
-		UTIL_Remove( this );
+	{
+		if (FBitSet(pev->spawnflags, SF_SMOKER_REPEATABLE))
+		{
+			pev->health = pev->max_health;
+			SetActive(false);
+		}
+		else
+			UTIL_Remove( this );
+	}
 }
 
 void CSpiral::Spawn( void )

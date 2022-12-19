@@ -1740,6 +1740,22 @@
 	]
 ]
 
+@PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_smoker : "Smoker"
+[
+	health(integer) : "Times to smoke" : 1
+	scale(string) : "Smoke Scale (decile)"
+	dmg(string) : "Dispersion of smoke particles" : "0.0"
+	dmg_take(string) : "Min delay between smokes"
+	dmg_save(string) : "Max delay between smokes"
+	framerate(integer) : "Framerate"
+	model(sprite) : "Sprite"
+	spawnflags(Flags) =
+	[
+		1 : "Start On" : 0
+		4 : "Repeatable" : 0
+	]
+]
+
 @BaseClass = RoomType
 [
 	roomtype(Choices) : "Room Type" : 0 =
