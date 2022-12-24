@@ -136,6 +136,9 @@ void ClientDisconnect( edict_t *pEntity )
 	pEntity->v.effects = 0;// clear any effects
 	UTIL_SetOrigin( &pEntity->v, pEntity->v.origin );
 
+	const int clientIndex = ENTINDEX(pEntity) - 1;
+	g_PlayerFullyInitialized[clientIndex] = false;
+
 	g_pGameRules->ClientDisconnected( pEntity );
 }
 
@@ -753,6 +756,7 @@ void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 	g_pGameRules->ClientUserInfoChanged( GetClassPtr( (CBasePlayer *)&pEntity->v ), infobuffer );
 }
 
+bool g_PlayerFullyInitialized[MAX_CLIENTS];
 static int g_serveractive = 0;
 
 void ServerDeactivate( void )
@@ -770,6 +774,7 @@ void ServerDeactivate( void )
 
 	// Peform any shutdown operations here...
 	//
+	memset(g_PlayerFullyInitialized, 0, sizeof(g_PlayerFullyInitialized));
 }
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
@@ -1154,6 +1159,9 @@ void SetupVisibility( edict_t *pViewEntity, edict_t *pClient, unsigned char **pv
 	{
 		pView = pViewEntity;
 	}
+
+	const int clientIndex = ENTINDEX(pClient) - 1;
+	g_PlayerFullyInitialized[clientIndex] = true;
 
 	if( pClient->v.flags & FL_PROXY )
 	{

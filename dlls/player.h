@@ -22,6 +22,7 @@
 #if FEATURE_ROPE
 #include "ropes.h"
 #endif
+#include "com_model.h"
 
 #define PLAYER_FATAL_FALL_SPEED		1024// approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED	580// approx 20 feet
@@ -432,6 +433,7 @@ public:
 #endif
 
 	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
+	bool m_bSentMessages;
 
 #if FEATURE_ROPE
 	bool m_bIsClimbing;
@@ -475,5 +477,7 @@ public:
 
 extern int gmsgHudText;
 extern BOOL gInitHUD;
+
+extern bool g_PlayerFullyInitialized[MAX_CLIENTS];
 
 #endif // PLAYER_H
