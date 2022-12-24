@@ -173,12 +173,12 @@ void CBreakable::Spawn( void )
 {
 	Precache();
 
-	if( FBitSet( pev->spawnflags, SF_BREAK_TRIGGER_ONLY | SF_BREAK_NOT_SOLID ) )
+	if( FBitSet( pev->spawnflags, SF_BREAK_TRIGGER_ONLY | SF_BREAK_NOT_SOLID | SF_BREAK_NOT_SOLID_OLD ) )
 		pev->takedamage	= DAMAGE_NO;
 	else
 		pev->takedamage	= DAMAGE_YES;
   
-	pev->solid = FBitSet(pev->spawnflags, SF_BREAK_NOT_SOLID) ? SOLID_NOT : SOLID_BSP;
+	pev->solid = FBitSet(pev->spawnflags, SF_BREAK_NOT_SOLID|SF_BREAK_NOT_SOLID_OLD) ? SOLID_NOT : SOLID_BSP;
 	pev->movetype = MOVETYPE_PUSH;
 	m_angle = pev->angles.y;
 	pev->angles.y = 0;
@@ -535,7 +535,7 @@ NODE_LINKENT CBreakable::HandleLinkEnt(int afCapMask, bool nodeQueryStatic)
 	if (nodeQueryStatic) {
 		return NLE_ALLOW;
 	}
-	if (FBitSet(pev->spawnflags, SF_BREAK_NOT_SOLID)) {
+	if (FBitSet(pev->spawnflags, SF_BREAK_NOT_SOLID | SF_BREAK_NOT_SOLID_OLD)) {
 		return NLE_ALLOW;
 	}
 	return NLE_PROHIBIT;
