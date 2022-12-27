@@ -2046,6 +2046,7 @@
 		64: "Sparks" : 0
 		256:"Touch Activates": 0
 		512:"Player Can't Use": 0
+		1024:"Check master on return": 0
 	]
 	target_on_locked(target_destination) : "Target on locked" : : "Trigger if used when locked"
 	_minlight(string) : "Minimum light level"
@@ -2241,6 +2242,7 @@
 		128: "Y Axis" : 0
 		256:"Touch Activates": 0
 		512:"Player Can't Use": 0
+		1024:"Check master on return": 0
 	]
 	_minlight(string) : "Minimum light level"
 ]

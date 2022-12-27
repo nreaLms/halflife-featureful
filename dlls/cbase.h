@@ -725,6 +725,7 @@ public:
 	enum BUTTON_CODE { BUTTON_NOTHING, BUTTON_ACTIVATE, BUTTON_RETURN };
 	BUTTON_CODE ButtonResponseToTouch( void );
 	void OnLocked();
+	bool PrepareActivation(bool doActivationCheck);
 	bool IsSparkingButton();
 	USE_TYPE UseType(bool returning);
 	

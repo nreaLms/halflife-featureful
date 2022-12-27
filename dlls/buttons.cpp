@@ -33,6 +33,7 @@
 #define	SF_BUTTON_SPARK_IF_OFF		64	// button sparks in OFF state
 #define SF_BUTTON_TOUCH_ONLY		256	// button only fires as a result of USE key.
 #define SF_BUTTON_PLAYER_CANT_USE	512 // Player can't impulse use this button
+#define SF_BUTTON_CHECK_MASTER_ON_TOGGLE_RETURN 1024 // Check master and play locked and unlocked sounds on toggle return
 
 #define SF_GLOBAL_SET			1	// Set global state to initial state on spawn
 
@@ -997,9 +998,8 @@ void CBaseButton::ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	{
 		if( !m_fStayPushed && FBitSet( pev->spawnflags, SF_BUTTON_TOGGLE ) )
 		{
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noise ), 1.0f, ATTN_NORM );
-
-			ButtonReturn();
+			if (PrepareActivation(FBitSet(pev->spawnflags, SF_BUTTON_CHECK_MASTER_ON_TOGGLE_RETURN)))
+				ButtonReturn();
 		}
 	}
 	else
@@ -1075,20 +1075,8 @@ void CBaseButton::ButtonTouch( CBaseEntity *pOther )
 //
 void CBaseButton::ButtonActivate()
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noise ), 1, ATTN_NORM );
-
-	if( !UTIL_IsMasterTriggered( m_sMaster, m_hActivator ) )
-	{
-		OnLocked();
-		// button is locked, play locked sound
-		PlayLockSounds( pev, &m_ls, TRUE, TRUE );
+	if (!PrepareActivation(true))
 		return;
-	}
-	else
-	{
-		// button is unlocked, play unlocked sound
-		PlayLockSounds( pev, &m_ls, FALSE, TRUE );
-	}
 
 	ASSERT( m_toggle_state == TS_AT_BOTTOM );
 	m_toggle_state = TS_GOING_UP;
@@ -1122,6 +1110,28 @@ void CBaseButton::OnLocked()
 			m_targetOnLockedTime = gpGlobals->time + 2.0f;
 		}
 	}
+}
+
+bool CBaseButton::PrepareActivation(bool doActivationCheck)
+{
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noise ), 1.0f, ATTN_NORM );
+
+	if (doActivationCheck)
+	{
+		if( !UTIL_IsMasterTriggered( m_sMaster, m_hActivator ) )
+		{
+			OnLocked();
+			// button is locked, play locked sound
+			PlayLockSounds( pev, &m_ls, TRUE, TRUE );
+			return false;
+		}
+		else
+		{
+			// button is unlocked, play unlocked sound
+			PlayLockSounds( pev, &m_ls, FALSE, TRUE );
+		}
+	}
+	return true;
 }
 
 //
