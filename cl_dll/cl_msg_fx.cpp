@@ -3,6 +3,7 @@
 #include "parsemsg.h"
 
 #include "r_efx.h"
+#include "customentity.h"
 #include "r_studioint.h"
 #include "event_api.h"
 #include "com_model.h"
@@ -174,8 +175,91 @@ int __MsgFunc_MuzzleLight( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int __MsgFunc_CustomBeam( const char* pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+	int beamType = READ_BYTE();
+
+	vec3_t	start, end;
+	int	modelIndex, startFrame;
+	float	frameRate, life, width;
+	int	startEnt, endEnt;
+	float	noise, speed;
+	float	r, g, b, a;
+	BEAM* beam;
+	int flags;
+
+	switch (beamType) {
+	case TE_BEAMPOINTS:
+	case TE_BEAMENTPOINT:
+	case TE_BEAMENTS:
+	case TE_BEAMRING:
+	{
+		if( beamType == TE_BEAMENTS || beamType == TE_BEAMRING )
+		{
+			startEnt = READ_SHORT();
+			endEnt = READ_SHORT();
+		}
+		else
+		{
+			if( beamType == TE_BEAMENTPOINT )
+			{
+				startEnt = READ_SHORT();
+			}
+			else
+			{
+				start[0] = READ_COORD();
+				start[1] = READ_COORD();
+				start[2] = READ_COORD();
+			}
+			end[0] = READ_COORD();
+			end[1] = READ_COORD();
+			end[2] = READ_COORD();
+		}
+		modelIndex = READ_SHORT();
+		startFrame = READ_BYTE();
+		frameRate = (float)READ_BYTE() * 0.1f;
+		life = (float)READ_BYTE() * 0.1f;
+		width = (float)READ_BYTE() * 0.1f;
+		noise = (float)READ_BYTE() * 0.01f;
+		r = (float)READ_BYTE() / 255.0f;
+		g = (float)READ_BYTE() / 255.0f;
+		b = (float)READ_BYTE() / 255.0f;
+		a = (float)READ_BYTE() / 255.0f;
+		speed = (float)READ_BYTE() * 0.1f;
+		flags = READ_BYTE();
+		if ( beamType == TE_BEAMRING )
+			beam = gEngfuncs.pEfxAPI->R_BeamRing( startEnt, endEnt, modelIndex, life, width, noise, a, speed, startFrame, frameRate, r, g, b );
+		if( beamType == TE_BEAMENTS )
+			beam = gEngfuncs.pEfxAPI->R_BeamEnts( startEnt, endEnt, modelIndex, life, width, noise, a, speed, startFrame, frameRate, r, g, b );
+		else if( beamType == TE_BEAMENTPOINT )
+			beam = gEngfuncs.pEfxAPI->R_BeamEntPoint( startEnt, end, modelIndex, life, width, noise, a, speed, startFrame, frameRate, r, g, b );
+		else
+			beam = gEngfuncs.pEfxAPI->R_BeamPoints( start, end, modelIndex, life, width, noise, a, speed, startFrame, frameRate, r, g, b );
+		if (beam)
+		{
+			if (flags & BEAM_FSINE)
+				beam->flags |= FBEAM_SINENOISE;
+			if (flags & BEAM_FSOLID)
+				beam->flags |= FBEAM_SOLID;
+			if (flags & BEAM_FSHADEIN)
+				beam->flags |= FBEAM_SHADEIN;
+			if (flags & BEAM_FSHADEOUT)
+				beam->flags |= FBEAM_SHADEOUT;
+		}
+	}
+		break;
+	default:
+		gEngfuncs.Con_DPrintf("%s: got the unknown beam type %d\n", pszName, beamType);
+		break;
+	}
+
+	return 1;
+}
+
 void HookFXMessages()
 {
 	gEngfuncs.pfnHookUserMsg( "RandomGibs", __MsgFunc_RandomGibs );
 	gEngfuncs.pfnHookUserMsg( "MuzzleLight", __MsgFunc_MuzzleLight );
+	gEngfuncs.pfnHookUserMsg( "CustomBeam", __MsgFunc_CustomBeam );
 }

@@ -364,6 +364,8 @@ void CBeam::DoSparks( const Vector &start, const Vector &end )
 	}
 }
 
+extern int gmsgCustomBeam;
+
 class CLightning : public CBeam
 {
 public:
@@ -392,6 +394,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	void BeamUpdateVars( void );
+	void BeamUpdateFlags();
 
 	int	m_active;
 	string_t	m_iszStartEntity;
@@ -485,6 +488,7 @@ void CLightning::Spawn( void )
 	}
 	else
 	{
+		BeamUpdateFlags();
 		m_active = 0;
 		if( !FStringNull( pev->targetname ) )
 		{
@@ -666,7 +670,7 @@ void CLightning::StrikeThink( void )
 			}
 		}
 
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgCustomBeam ? gmsgCustomBeam : SVC_TEMPENTITY );
 			if( IsPointEntity( pStart ) || IsPointEntity( pEnd ) )
 			{
 				if( !IsPointEntity( pEnd ) )	// One point entity must be in pEnd
@@ -717,6 +721,10 @@ void CLightning::StrikeThink( void )
 			WRITE_BYTE( (int)pev->rendercolor.z );   // r, g, b
 			WRITE_BYTE( (int)pev->renderamt );	// brightness
 			WRITE_BYTE( m_speed );		// speed
+		if (gmsgCustomBeam)
+		{
+			WRITE_BYTE( GetFlags() );
+		}
 		MESSAGE_END();
 		DoSparks( pStart->pev->origin, pEnd->pev->origin );
 		if( pev->dmg > 0 )
@@ -758,7 +766,7 @@ void CLightning::DamageThink( void )
 void CLightning::Zap( const Vector &vecSrc, const Vector &vecDest )
 {
 #if 1
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgCustomBeam ? gmsgCustomBeam : SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BEAMPOINTS );
 		WRITE_COORD( vecSrc.x );
 		WRITE_COORD( vecSrc.y );
@@ -777,6 +785,10 @@ void CLightning::Zap( const Vector &vecSrc, const Vector &vecDest )
 		WRITE_BYTE( (int)pev->rendercolor.z );   // r, g, b
 		WRITE_BYTE( (int)pev->renderamt );	// brightness
 		WRITE_BYTE( m_speed );		// speed
+	if (gmsgCustomBeam)
+	{
+		WRITE_BYTE( GetFlags() );
+	}
 	MESSAGE_END();
 #else
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
@@ -918,6 +930,11 @@ void CLightning::BeamUpdateVars( void )
 	SetNoise( m_noiseAmplitude );
 	SetFrame( m_frameStart );
 	SetScrollRate( m_speed );
+	BeamUpdateFlags();
+}
+
+void CLightning::BeamUpdateFlags()
+{
 	if( pev->spawnflags & SF_BEAM_SHADEIN )
 		SetFlags( BEAM_FSHADEIN );
 	else if( pev->spawnflags & SF_BEAM_SHADEOUT )
