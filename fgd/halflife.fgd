@@ -1456,6 +1456,8 @@
 		64: "No Sound" : 0
 		128: "Activator is attacker" : 0
 	]
+	model(sprite) : "Fireball Sprite"
+	scale(string) : "Custom sprite scale"
 ]
 
 @PointClass base(Targetname) color(255 255 128) iconsprite("sprites/env_global.spr") = env_global : "Global State"
