@@ -1328,6 +1328,8 @@
 		64: "Decal End" : 0
 		128: "Shade Start" : 0
 		256: "Shade End" : 0
+		512: "Draw Solid" : 0
+		1024: "Draw Sine" : 0
 	]
 ]
 

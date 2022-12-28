@@ -935,10 +935,16 @@ void CLightning::BeamUpdateVars( void )
 
 void CLightning::BeamUpdateFlags()
 {
+	int flags = 0;
 	if( pev->spawnflags & SF_BEAM_SHADEIN )
-		SetFlags( BEAM_FSHADEIN );
-	else if( pev->spawnflags & SF_BEAM_SHADEOUT )
-		SetFlags( BEAM_FSHADEOUT );
+		flags |= BEAM_FSHADEIN;
+	if( pev->spawnflags & SF_BEAM_SHADEOUT )
+		flags |= BEAM_FSHADEOUT;
+	if ( pev->spawnflags & SF_BEAM_SOLID )
+		flags |= BEAM_FSOLID;
+	if ( pev->spawnflags & SF_BEAM_SINE )
+		flags |= BEAM_FSINE;
+	SetFlags(flags);
 }
 
 LINK_ENTITY_TO_CLASS( env_laser, CLaser )
