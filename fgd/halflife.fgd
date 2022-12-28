@@ -1620,14 +1620,22 @@
 	]
 ]
 
-@PointClass base(Targetname, Target, RenderFields) size(-16 -16 -16, 16 16 16) color(100 100 0) = env_render : "Render Controls"
+@PointClass base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) color(100 100 0) = env_render : "Render Controls"
 [
+	target(target_destination) : "Target to affect [LE]"
+	message(string) : "FX Amount factor [LR]"
+	m_fScale(string) : "Scale (0 = no change) [LR]"
+	frags(string) : "Fade Time (secs)"
+	armorvalue(string) : "Fade Coarseness (secs)"
+	netname(target_destination) : "Trigger after fading"
 	spawnflags(flags) =
 	[
 		1: "No Renderfx" : 0
 		2: "No Renderamt" : 0
 		4: "No Rendermode" : 0
 		8: "No Rendercolor" : 0
+		32: "Remove target" : 0
+		64: "Remove self" : 0
 	]
 ]
 
