@@ -213,7 +213,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.slaveDmgClawrake = GetSkillCvar( "sk_islave_dmg_clawrake" );
 	gSkillData.slaveDmgZap = GetSkillCvar( "sk_islave_dmg_zap" );
 	gSkillData.slaveZapRate = GetSkillCvar( "sk_islave_zap_rate" );
-	gSkillData.slaveRevival = GetSkillCvar( "sk_islave_revival", 0, true );
+	gSkillData.slaveRevival = GetSkillCvarZeroable( "sk_islave_revival" );
 
 	// Icthyosaur
 	gSkillData.ichthyosaurHealth = GetSkillCvar( "sk_ichthyosaur_health" );
@@ -383,7 +383,7 @@ void CGameRules::RefreshSkillData ( void )
 #if FEATURE_MEDKIT
 	// Medkit 
 	gSkillData.plrDmgMedkit = GetSkillCvar( "sk_plr_medkitshot" );
-	gSkillData.plrMedkitTime = GetSkillCvar( "sk_plr_medkittime", 0, true );
+	gSkillData.plrMedkitTime = GetSkillCvarZeroable( "sk_plr_medkittime" );
 #endif
 
 #if FEATURE_DESERT_EAGLE

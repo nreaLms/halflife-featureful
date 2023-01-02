@@ -52,6 +52,9 @@ struct skilldata_t
 	float bullsquidDmgBite;
 	float bullsquidDmgWhip;
 	float bullsquidDmgSpit;
+	float bullsquidToxicity;
+	float bullsquidDmgToxicPoison;
+	float bullsquidDmgToxicImpact;
 
 #if FEATURE_CLEANSUIT_SCIENTIST
 	float cleansuitScientistHealth;
@@ -304,7 +307,9 @@ struct skilldata_t
 };
 
 extern	DLL_GLOBAL	skilldata_t	gSkillData;
-float GetSkillCvar( const char *pName, const char* fallback = 0, bool allowZero = false );
+float GetSkillCvar( const char *pName, const char* fallback = 0 );
+float GetSkillCvar( const char *pName, float fallback );
+float GetSkillCvarZeroable( const char* pName );
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
