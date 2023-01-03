@@ -157,6 +157,9 @@ DECLARE_SKILL_VALUE(sk_bullsquid_health, "0")
 DECLARE_SKILL_VALUE(sk_bullsquid_dmg_bite, "0")
 DECLARE_SKILL_VALUE(sk_bullsquid_dmg_whip, "0")
 DECLARE_SKILL_VALUE(sk_bullsquid_dmg_spit, "0")
+DECLARE_SKILL_VALUE3(sk_bullsquid_toxicity, "0", "1", "1")
+DECLARE_SKILL_VALUE(sk_bullsquid_dmg_toxic_poison, "0")
+DECLARE_SKILL_VALUE(sk_bullsquid_dmg_toxic_impact, "0")
 
 // Big Momma
 DECLARE_SKILL_VALUE(sk_bigmomma_health_factor, "1.0")
@@ -638,6 +641,9 @@ void GameDLLInit( void )
 	REGISTER_SKILL_CVARS(sk_bullsquid_dmg_bite);
 	REGISTER_SKILL_CVARS(sk_bullsquid_dmg_whip);
 	REGISTER_SKILL_CVARS(sk_bullsquid_dmg_spit);
+	REGISTER_SKILL_CVARS(sk_bullsquid_toxicity);
+	REGISTER_SKILL_CVARS(sk_bullsquid_dmg_toxic_poison);
+	REGISTER_SKILL_CVARS(sk_bullsquid_dmg_toxic_impact);
 
 	// Big Momma
 	REGISTER_SKILL_CVARS(sk_bigmomma_health_factor);

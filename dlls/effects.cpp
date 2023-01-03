@@ -3528,6 +3528,7 @@ enum
 	BLOWERCANNON_SPOREGRENADE,
 	BLOWERCANNON_SHOCKBEAM,
 	BLOWERCANNON_DISPLACERBALL,
+	BLOWERCANNON_SQUIDTOXICSPIT,
 };
 
 enum
@@ -3634,6 +3635,9 @@ void CBlowerCannon::Precache( void )
 #if FEATURE_SPOREGRENADE
 		UTIL_PrecacheOther( "spore" );
 #endif
+		break;
+	case BLOWERCANNON_SQUIDTOXICSPIT:
+		UTIL_PrecacheOther( "squidtoxicspit" );
 		break;
 	default:
 		break;
@@ -3742,6 +3746,9 @@ void CBlowerCannon::BlowerCannonThink( void )
 				CDisplacerBall::Shoot(owner->pev, position, direction * CDisplacerBall::BallSpeed(), angles);
 				break;
 #endif
+			case BLOWERCANNON_SQUIDTOXICSPIT:
+				CSquidToxicSpit::Shoot(owner->pev, position, direction * CSquidToxicSpit::SpitSpeed());
+				break;
 			default:
 				ALERT(at_console, "Unknown projectile type in blowercannon: %d\n", m_iWeapType);
 				break;

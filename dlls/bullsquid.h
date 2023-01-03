@@ -45,4 +45,26 @@ protected:
 	void SpawnHelper(const char* className);
 };
 
+class CSquidToxicSpit : public CBaseEntity
+{
+public:
+	void Spawn( void );
+	void Precache();
+
+	static void Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
+	static float SpitSpeed() { return 600.0f; }
+	void Touch( CBaseEntity *pOther );
+	void EXPORT Animate( void );
+	CBaseMonster* GetBullsquid();
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	int m_maxFrame;
+
+	int m_iImpactSprite;
+	int m_iFleckSprite;
+};
+
 #endif // BULLSQUID_H

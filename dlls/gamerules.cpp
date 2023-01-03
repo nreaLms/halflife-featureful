@@ -157,6 +157,9 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.bullsquidDmgBite = GetSkillCvar( "sk_bullsquid_dmg_bite" );
 	gSkillData.bullsquidDmgWhip = GetSkillCvar( "sk_bullsquid_dmg_whip" );
 	gSkillData.bullsquidDmgSpit = GetSkillCvar( "sk_bullsquid_dmg_spit" );
+	gSkillData.bullsquidToxicity = GetSkillCvarZeroable( "sk_bullsquid_toxicity" );
+	gSkillData.bullsquidDmgToxicPoison = GetSkillCvar( "sk_bullsquid_dmg_toxic_poison", gSkillData.bullsquidDmgSpit/4.0f );
+	gSkillData.bullsquidDmgToxicImpact = GetSkillCvar( "sk_bullsquid_dmg_toxic_impact", gSkillData.bullsquidDmgSpit * 1.5f );
 
 #if FEATURE_CLEANSUIT_SCIENTIST
 	// Cleansuit Scientist

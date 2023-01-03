@@ -207,6 +207,7 @@ int gmsgStatusValue = 0;
 int gmsgRandomGibs = 0;
 int gmsgMuzzleLight = 0;
 int gmsgCustomBeam = 0;
+int gmsgSpriteTrail = 0;
 
 #if FEATURE_NIGHTVISION
 int gmsgNightvision = 0;
@@ -274,6 +275,7 @@ void LinkUserMessages( void )
 	gmsgRandomGibs = REG_USER_MSG( "RandomGibs", 27 );
 	gmsgMuzzleLight = REG_USER_MSG( "MuzzleLight", 6 );
 	gmsgCustomBeam = REG_USER_MSG( "CustomBeam", -1 );
+	gmsgSpriteTrail = REG_USER_MSG( "SpriteTrail", 24 );
 
 #if FEATURE_NIGHTVISION
 	gmsgNightvision = REG_USER_MSG( "Nightvision", 1 );

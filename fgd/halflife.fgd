@@ -1399,6 +1399,7 @@
 		2: "Spore (Grenade)"
 		3: "Shock Beam"
 		4: "Displacer Ball"
+		5: "Squid toxic spit"
 	]
 	firetype(choices) :"Fire Type" : 1 =
 	[
