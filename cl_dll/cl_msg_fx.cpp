@@ -342,8 +342,8 @@ int __MsgFunc_SpriteTrail( const char* pszName, int iSize, void *pbuf )
 
 void HookFXMessages()
 {
-	gEngfuncs.pfnHookUserMsg( "RandomGibs", __MsgFunc_RandomGibs );
-	gEngfuncs.pfnHookUserMsg( "MuzzleLight", __MsgFunc_MuzzleLight );
-	gEngfuncs.pfnHookUserMsg( "CustomBeam", __MsgFunc_CustomBeam );
-	HOOK_MESSAGE(SpriteTrail);
+	HOOK_MESSAGE( RandomGibs );
+	HOOK_MESSAGE( MuzzleLight );
+	HOOK_MESSAGE( CustomBeam );
+	HOOK_MESSAGE( SpriteTrail );
 }

@@ -424,8 +424,8 @@ void DLLEXPORT HUD_Init( void )
 	Scheme_Init();
 #endif
 
-	gEngfuncs.pfnHookUserMsg( "Bhopcap", __MsgFunc_Bhopcap );
-	gEngfuncs.pfnHookUserMsg( "UseSound", __MsgFunc_UseSound );
+	HOOK_MESSAGE( Bhopcap );
+	HOOK_MESSAGE( UseSound );
 
 	HookFXMessages();
 }
