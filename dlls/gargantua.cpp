@@ -1640,6 +1640,8 @@ void CSmoker::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 
 void CSmoker::Think( void )
 {
+	extern int gmsgSmoke;
+
 	if (!IsActive())
 		return;
 
@@ -1647,14 +1649,20 @@ void CSmoker::Think( void )
 	const int maxFramerate = pev->framerate + 3;
 
 	// lots of smoke
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
-		WRITE_BYTE( TE_SMOKE );
+	MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
 		WRITE_COORD( pev->origin.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 		WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 		WRITE_COORD( pev->origin.z);
 		WRITE_SHORT( smokeIndex ? smokeIndex : g_sModelIndexSmoke );
 		WRITE_BYTE( RANDOM_LONG(pev->scale, pev->scale * 1.1f ) );
 		WRITE_BYTE( RANDOM_LONG( minFramerate, maxFramerate ) ); // framerate
+		WRITE_SHORT( pev->speed );
+		WRITE_SHORT( pev->frags );
+		WRITE_BYTE( pev->rendermode );
+		WRITE_BYTE( pev->renderamt );
+		WRITE_BYTE( pev->rendercolor.x );
+		WRITE_BYTE( pev->rendercolor.y );
+		WRITE_BYTE( pev->rendercolor.z );
 	MESSAGE_END();
 
 	if (pev->max_health > 0)

@@ -392,6 +392,64 @@ int __MsgFunc_Streaks( const char* pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+void FX_Smoke(TEMPENTITY* pTemp, float scale, float speed, float zOffset, int rendermode, int renderamt, int r, int g, int b )
+{
+	if( !pTemp ) return;
+
+	pTemp->entity.curstate.rendermode = rendermode;
+	pTemp->entity.curstate.renderfx = kRenderFxNone;
+	pTemp->entity.baseline.origin[2] = speed;
+	pTemp->entity.curstate.rendercolor.r = r;
+	pTemp->entity.curstate.rendercolor.g = g;
+	pTemp->entity.curstate.rendercolor.b = b;
+	pTemp->entity.curstate.renderamt = renderamt;
+	pTemp->entity.origin[2] += zOffset;
+	pTemp->entity.curstate.scale = scale;
+}
+
+int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	Vector pos;
+	int modelIndex;
+	float scale, frameRate, speed, zOffset;
+	int rendermode, renderamt, r, g, b;
+
+	pos[0] = READ_COORD();
+	pos[1] = READ_COORD();
+	pos[2] = READ_COORD();
+	modelIndex = READ_SHORT();
+	scale = (float)(READ_BYTE() * 0.1f);
+	frameRate = READ_BYTE();
+	speed = READ_SHORT();
+	zOffset = READ_SHORT();
+	rendermode = READ_BYTE();
+	renderamt = READ_BYTE();
+	r = READ_BYTE();
+	g = READ_BYTE();
+	b = READ_BYTE();
+
+	// Original hard-coded TE_SMOKE values
+	if (speed == 0.0f && zOffset == 0.0f)
+	{
+		speed = 30;
+		zOffset = 20;
+	}
+	if (renderamt == 0)
+		renderamt = 255;
+	if (rendermode == 0)
+		rendermode = kRenderTransAlpha;
+	if (r + g + b == 0)
+		r = g = b = Com_RandomLong( 20, 35 );
+
+	TEMPENTITY* pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( pos, modelIndex, frameRate );
+
+	FX_Smoke(pTemp, scale, speed, zOffset, rendermode, renderamt, r, g, b);
+
+	return 1;
+}
+
 void HookFXMessages()
 {
 	HOOK_MESSAGE( RandomGibs );
@@ -399,4 +457,5 @@ void HookFXMessages()
 	HOOK_MESSAGE( CustomBeam );
 	HOOK_MESSAGE( SpriteTrail );
 	HOOK_MESSAGE( Streaks );
+	HOOK_MESSAGE( Smoke );
 }
