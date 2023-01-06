@@ -1593,8 +1593,8 @@ Schedule_t *CISlave::GetSchedule( void )
 #if FEATURE_ISLAVE_CHARGE_TOKEN
 		if (HasFreeEnergy())
 		{
-			CBaseEntity* pPlayer = FollowedPlayer();
-			if (pPlayer && (pPlayer->pev->weapons & (1 << WEAPON_SUIT)) && pPlayer->IsAlive() && pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY/4 &&
+			CBasePlayer* pPlayer = static_cast<CBasePlayer*>(FollowedPlayer());
+			if (pPlayer && pPlayer->HasSuit() && pPlayer->IsAlive() && pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY/4 &&
 					FVisible(pPlayer) && (pPlayer->pev->origin - pev->origin).Length() < 128)
 			{
 				return GetScheduleOfType(SCHED_ISLAVE_GIVE_CHARGE);
