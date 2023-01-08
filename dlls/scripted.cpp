@@ -938,6 +938,17 @@ void CCineMonster::CancelScript( void )
 // find all the cinematic entities with my targetname and tell them to wait before starting
 void CCineMonster::DelayStart( int state )
 {
+	// Need this to use m_iszFireOnBegin with unnamed scripts
+	if ( FStringNull( pev->targetname ) )
+	{
+		if (state == 0 && !FStringNull(m_iszFireOnBegin))
+		{
+			CBaseEntity* pActivator = GetActivator(m_hTargetEnt);
+			FireTargets(STRING(m_iszFireOnBegin), pActivator, this, USE_TOGGLE, 0);
+		}
+		return;
+	}
+
 	edict_t *pentCine = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->targetname ) );
 
 	while( !FNullEnt( pentCine ) )
