@@ -1169,8 +1169,9 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	Materials m_Material;
-	int m_idShard;
 	string_t m_iszGibModel;
+	int m_iGibs;
+	int m_idShard;
 };
 
 void CFuncBreakableEffect::KeyValue( KeyValueData* pkvd )
@@ -1193,6 +1194,11 @@ void CFuncBreakableEffect::KeyValue( KeyValueData* pkvd )
 		m_iszGibModel = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq( pkvd->szKeyName, "m_iGibs") )
+	{
+		m_iGibs = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -1203,6 +1209,7 @@ TYPEDESCRIPTION CFuncBreakableEffect::m_SaveData[] =
 {
 	DEFINE_FIELD( CFuncBreakableEffect, m_Material, FIELD_INTEGER ),
 	DEFINE_FIELD( CFuncBreakableEffect, m_iszGibModel, FIELD_STRING ),
+	DEFINE_FIELD( CFuncBreakableEffect, m_iGibs, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncBreakableEffect, CBaseEntity )
@@ -1272,7 +1279,7 @@ void CFuncBreakableEffect::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		WRITE_SHORT( m_idShard );	//model id#
 
 		// # of shards
-		WRITE_BYTE( 0 );	// let client decide
+		WRITE_BYTE( m_iGibs );	// let client decide
 
 		// duration
 		WRITE_BYTE( 25 );// 2.5 seconds
