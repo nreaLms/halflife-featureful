@@ -1559,6 +1559,7 @@ void CGargantua::PlayUnUseSentence()
 
 #define SF_SMOKER_ACTIVE 1
 #define SF_SMOKER_REPEATABLE 4
+#define SF_SMOKER_MAXHEALTH_SET (1 << 24)
 
 class CSmoker : public CBaseEntity
 {
@@ -1641,6 +1642,13 @@ void CSmoker::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 void CSmoker::Think( void )
 {
 	extern int gmsgSmoke;
+
+	// Support for CBaseEntity::Create followed by pev->health setting
+	if (!FBitSet(pev->spawnflags, SF_SMOKER_MAXHEALTH_SET))
+	{
+		pev->max_health = pev->health;
+		FBitSet(pev->spawnflags, SF_SMOKER_MAXHEALTH_SET);
+	}
 
 	if (!IsActive())
 		return;
