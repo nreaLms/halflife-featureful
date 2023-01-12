@@ -89,25 +89,32 @@ char EV_HLDM_GetTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vec
 		// hit body
 		chTextureType = CHAR_TEX_FLESH;
 	}
-	else if( entity == 0 )
+	else
 	{
-		// get texture from entity or world (world is ent(0))
-		pTextureName = gEngfuncs.pEventAPI->EV_TraceTexture( ptr->ent, vecSrc, vecEnd );
+		physent_t *pe = NULL;
+		if (entity)
+			pe = gEngfuncs.pEventAPI->EV_GetPhysent( ptr->ent );
 
-		if ( pTextureName )
+		if (entity == 0 || (pe && ( pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP )))
 		{
-			strcpy( texname, pTextureName );
-			pTextureName = texname;
+			// get texture from entity or world (world is ent(0))
+			pTextureName = gEngfuncs.pEventAPI->EV_TraceTexture( ptr->ent, vecSrc, vecEnd );
 
-			if( strcmp( pTextureName, "sky" ) == 0 )
+			if ( pTextureName )
 			{
-				isSky = true;
+				strcpy( texname, pTextureName );
+				pTextureName = texname;
+
+				if( strcmp( pTextureName, "sky" ) == 0 )
+				{
+					isSky = true;
+				}
+
+				GetStrippedTextureName(szbuffer, pTextureName);
+
+				// get texture type
+				chTextureType = PM_FindTextureType( szbuffer );
 			}
-
-			GetStrippedTextureName(szbuffer, pTextureName);
-
-			// get texture type
-			chTextureType = PM_FindTextureType( szbuffer );
 		}
 	}
 
