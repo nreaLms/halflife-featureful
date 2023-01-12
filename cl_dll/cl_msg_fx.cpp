@@ -392,10 +392,22 @@ int __MsgFunc_Streaks( const char* pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+void ExpandCallback(TEMPENTITY *ent, float frametime, float currenttime)
+{
+	const float minScale = 0.0001;
+	const float timeCreated = ent->entity.curstate.fuser1;
+	const float originalScale = ent->entity.curstate.fuser2;
+	const float scaleSpeed = ent->entity.curstate.fuser3;
+	ent->entity.curstate.scale = scaleSpeed * originalScale * (currenttime - timeCreated) + originalScale;
+	if (ent->entity.curstate.scale < minScale)
+	{
+		ent->entity.curstate.scale = minScale;
+		ent->die = currenttime;
+	}
+}
+
 void FX_Smoke(TEMPENTITY* pTemp, float scale, float speed, float zOffset, int rendermode, int renderamt, int r, int g, int b )
 {
-	if( !pTemp ) return;
-
 	pTemp->entity.curstate.rendermode = rendermode;
 	pTemp->entity.curstate.renderfx = kRenderFxNone;
 	pTemp->entity.baseline.origin[2] = speed;
@@ -411,11 +423,12 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Vector pos;
+	Vector pos, dir;
 	int modelIndex;
-	float scale, frameRate, speed, zOffset;
+	float scale, frameRate, speed, zOffset, scaleSpeed;
 	int rendermode, renderamt, r, g, b;
 
+	const int directed = READ_BYTE();
 	pos[0] = READ_COORD();
 	pos[1] = READ_COORD();
 	pos[2] = READ_COORD();
@@ -429,6 +442,14 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	r = READ_BYTE();
 	g = READ_BYTE();
 	b = READ_BYTE();
+	scaleSpeed = READ_SHORT() / 10.0f;
+
+	if (directed)
+	{
+		dir[0] = READ_COORD();
+		dir[1] = READ_COORD();
+		dir[2] = READ_COORD();
+	}
 
 	// Original hard-coded TE_SMOKE values
 	if (speed == 0.0f && zOffset == 0.0f)
@@ -445,7 +466,22 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 
 	TEMPENTITY* pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( pos, modelIndex, frameRate );
 
-	FX_Smoke(pTemp, scale, speed, zOffset, rendermode, renderamt, r, g, b);
+	if (pTemp)
+	{
+		FX_Smoke(pTemp, scale, speed, zOffset, rendermode, renderamt, r, g, b);
+		if (directed)
+		{
+			pTemp->entity.baseline.origin = dir * speed;
+		}
+		if (scaleSpeed != 0)
+		{
+			pTemp->entity.curstate.fuser1 = gEngfuncs.GetClientTime();
+			pTemp->entity.curstate.fuser2 = scale;
+			pTemp->entity.curstate.fuser3 = scaleSpeed;
+			pTemp->flags |= FTENT_CLIENTCUSTOM;
+			pTemp->callback = &ExpandCallback;
+		}
+	}
 
 	return 1;
 }

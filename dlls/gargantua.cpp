@@ -1559,6 +1559,7 @@ void CGargantua::PlayUnUseSentence()
 
 #define SF_SMOKER_ACTIVE 1
 #define SF_SMOKER_REPEATABLE 4
+#define SF_SMOKER_DIRECTIONAL 8
 #define SF_SMOKER_MAXHEALTH_SET (1 << 24)
 
 class CSmoker : public CBaseEntity
@@ -1566,6 +1567,7 @@ class CSmoker : public CBaseEntity
 public:
 	void Precache();
 	void Spawn( void );
+	void KeyValue(KeyValueData* pkvd);
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	void Think( void );
 
@@ -1600,7 +1602,7 @@ void CSmoker::Spawn( void )
 	pev->solid = SOLID_NOT;
 	UTIL_SetSize(pev, g_vecZero, g_vecZero );
 	pev->effects |= EF_NODRAW;
-	pev->angles = g_vecZero;
+	SetMovedir(pev);
 
 	if (pev->scale <= 0.0f)
 		pev->scale = 10;
@@ -1619,6 +1621,17 @@ void CSmoker::Spawn( void )
 
 	if (IsActive())
 		pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+void CSmoker::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "scale_speed"))
+	{
+		pev->armorvalue = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue( pkvd );
 }
 
 void CSmoker::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -1653,25 +1666,53 @@ void CSmoker::Think( void )
 	if (!IsActive())
 		return;
 
-	const int minFramerate = Q_max(pev->framerate - 3, 1);
-	const int maxFramerate = pev->framerate + 3;
+	const int minFramerate = Q_max(pev->framerate - 1, 1);
+	const int maxFramerate = pev->framerate + 1;
 
-	// lots of smoke
-	MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
-		WRITE_COORD( pev->origin.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
-		WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
-		WRITE_COORD( pev->origin.z);
-		WRITE_SHORT( smokeIndex ? smokeIndex : g_sModelIndexSmoke );
-		WRITE_BYTE( RANDOM_LONG(pev->scale, pev->scale * 1.1f ) );
-		WRITE_BYTE( RANDOM_LONG( minFramerate, maxFramerate ) ); // framerate
-		WRITE_SHORT( pev->speed );
-		WRITE_SHORT( pev->frags );
-		WRITE_BYTE( pev->rendermode );
-		WRITE_BYTE( pev->renderamt );
-		WRITE_BYTE( pev->rendercolor.x );
-		WRITE_BYTE( pev->rendercolor.y );
-		WRITE_BYTE( pev->rendercolor.z );
-	MESSAGE_END();
+	bool isDirValid = true;
+	bool directed = FBitSet(pev->spawnflags, SF_SMOKER_DIRECTIONAL);
+	Vector direction;
+
+	if (!FStringNull(pev->target))
+	{
+		directed = true;
+		CBaseEntity *pTarget = GetNextTarget();
+		if (pTarget)
+			direction = (pTarget->pev->origin - pev->origin).Normalize();
+		else
+			isDirValid = false;
+	}
+	else if (directed)
+	{
+		direction = pev->movedir;
+	}
+
+	if (isDirValid)
+	{
+		MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
+			WRITE_BYTE( directed );
+			WRITE_COORD( pev->origin.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
+			WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
+			WRITE_COORD( pev->origin.z);
+			WRITE_SHORT( smokeIndex ? smokeIndex : g_sModelIndexSmoke );
+			WRITE_BYTE( RANDOM_LONG(pev->scale, pev->scale * 1.1f ) );
+			WRITE_BYTE( RANDOM_LONG( minFramerate, maxFramerate ) ); // framerate
+			WRITE_SHORT( pev->speed );
+			WRITE_SHORT( pev->frags );
+			WRITE_BYTE( pev->rendermode );
+			WRITE_BYTE( pev->renderamt );
+			WRITE_BYTE( pev->rendercolor.x );
+			WRITE_BYTE( pev->rendercolor.y );
+			WRITE_BYTE( pev->rendercolor.z );
+			WRITE_SHORT( pev->armorvalue * 10 );
+		if (directed)
+		{
+			WRITE_COORD( direction.x );
+			WRITE_COORD( direction.y );
+			WRITE_COORD( direction.z );
+		}
+		MESSAGE_END();
+	}
 
 	if (pev->max_health > 0)
 		pev->health--;

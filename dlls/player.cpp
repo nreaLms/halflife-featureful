@@ -279,7 +279,7 @@ void LinkUserMessages( void )
 	gmsgCustomBeam = REG_USER_MSG( "CustomBeam", -1 );
 	gmsgSpriteTrail = REG_USER_MSG( "SpriteTrail", 24 );
 	gmsgStreaks = REG_USER_MSG( "Streaks", 23 );
-	gmsgSmoke = REG_USER_MSG( "Smoke", 19 );
+	gmsgSmoke = REG_USER_MSG( "Smoke", -1 );
 
 #if FEATURE_NIGHTVISION
 	gmsgNightvision = REG_USER_MSG( "Nightvision", 1 );
