@@ -66,17 +66,13 @@ extern cvar_t *cl_lw;
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
 // returns volume of strike instrument (crowbar) to play
-char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType, bool& isSky )
+char EV_HLDM_GetTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType, bool& isSky )
 {
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
-	float fvol;
-	float fvolbar;
-	const char *rgsz[4];
-	int cnt;
-	float fattn = ATTN_NORM;
+
 	int entity;
-	char *pTextureName;
+	const char *pTextureName;
 	char texname[64];
 	char szbuffer[64];
 
@@ -96,7 +92,7 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 	else if( entity == 0 )
 	{
 		// get texture from entity or world (world is ent(0))
-		pTextureName = (char *)gEngfuncs.pEventAPI->EV_TraceTexture( ptr->ent, vecSrc, vecEnd );
+		pTextureName = gEngfuncs.pEventAPI->EV_TraceTexture( ptr->ent, vecSrc, vecEnd );
 
 		if ( pTextureName )
 		{
@@ -115,12 +111,23 @@ char EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 		}
 	}
 
-	if (!GetTextureMaterialProperties(chTextureType, &fvol, &fvolbar, rgsz, &cnt, &fattn, iBulletType))
-		return 0.0;
+	return chTextureType;
+}
 
+float EV_HLDM_PlayTextureSound( pmtrace_t *ptr, char chTextureType, int iBulletType )
+{
+	float fvol;
+	float fvolbar;
+	const char *rgsz[4];
+	int cnt;
+	float fattn = ATTN_NORM;
+
+	if (!GetTextureMaterialProperties(chTextureType, &fvol, &fvolbar, rgsz, &cnt, &fattn, iBulletType))
+		return 0;
 	// play material hit sound
 	gEngfuncs.pEventAPI->EV_PlaySound( 0, ptr->endpos, CHAN_STATIC, rgsz[gEngfuncs.pfnRandomLong( 0, cnt - 1 )], fvol, fattn, 0, 96 + gEngfuncs.pfnRandomLong( 0, 0xf ) );
-	return chTextureType;
+
+	return fvol;
 }
 
 void EV_SmokeColorFromTextureType(char cTextureType, int& r_smoke, int& g_smoke, int& b_smoke)
@@ -378,7 +385,7 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType, char cTextureType
 			gEngfuncs.pEfxAPI->R_StreakSplash( pTrace->endpos, dir, 4, Com_RandomLong( 5, 10 ), dir.z, -75.0f, 75.0f );
 		}
 
-		if (cTextureType && cl_weapon_wallpuff && cl_weapon_wallpuff->value)
+		if (cl_weapon_wallpuff && cl_weapon_wallpuff->value)
 		{
 			int r_smoke, g_smoke, b_smoke;
 			EV_SmokeColorFromTextureType(cTextureType, r_smoke, g_smoke, b_smoke);
@@ -501,33 +508,39 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 		// do damage, paint decals
 		if( tr.fraction != 1.0f )
 		{
-			int cTextureType = 0;
+			bool shouldPlayTextureSound = true;
+			bool shouldPlayGunshotEffect= true;
 
 			switch( iBulletType )
 			{
 			default:
 			case BULLET_PLAYER_9MM:
-				cTextureType = EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType, isSky );
-				EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType, isSky );
 				break;
 			case BULLET_PLAYER_MP5:
 			case BULLET_PLAYER_556:
 			case BULLET_PLAYER_UZI:
-				if( !tracer )
-				{
-					cTextureType = EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType, isSky );
-					EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType, isSky );
-				}
+				shouldPlayTextureSound = shouldPlayGunshotEffect = !tracer;
 				break;
 			case BULLET_PLAYER_BUCKSHOT:
-				EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType, isSky );
+				shouldPlayTextureSound = iShot == 1;
 				break;
 			case BULLET_PLAYER_357:
 			case BULLET_PLAYER_EAGLE:
 			case BULLET_PLAYER_762:
-				cTextureType = EV_HLDM_PlayTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType, isSky );
-				EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType, isSky );
 				break;
+			}
+
+			if ( shouldPlayTextureSound || shouldPlayGunshotEffect )
+			{
+				const char cTextureType = EV_HLDM_GetTextureSound( idx, &tr, vecSrc, vecEnd, iBulletType, isSky );
+				if ( shouldPlayTextureSound )
+				{
+					EV_HLDM_PlayTextureSound(&tr, cTextureType, iBulletType);
+				}
+				if ( shouldPlayGunshotEffect )
+				{
+					EV_HLDM_DecalGunshot( &tr, iBulletType, cTextureType, isSky );
+				}
 			}
 		}
 
