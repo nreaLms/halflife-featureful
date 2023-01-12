@@ -369,7 +369,7 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType, char cTextureType
 	{
 		EV_HLDM_GunshotDecalTrace( pTrace, EV_HLDM_DamageDecal( pe ) );
 
-		if( cl_weapon_sparks && cl_weapon_sparks->value )
+		if( cTextureType != CHAR_TEX_WOOD && cl_weapon_sparks && cl_weapon_sparks->value )
 		{
 			Vector dir = pTrace->plane.normal;
 			dir.x = dir.x * dir.x * gEngfuncs.pfnRandomFloat( 4.0f, 12.0f );
