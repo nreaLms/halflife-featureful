@@ -219,6 +219,9 @@ void CEagle::UpdateSpot( void )
 #ifndef CLIENT_DLL
 	if (m_fEagleLaserActive)
 	{
+		if (m_pPlayer->pev->viewmodel == 0)
+			return;
+
 		if (!m_pEagleLaser)
 		{
 			m_pEagleLaser = CLaserSpot::CreateSpot(m_pPlayer->edict());
