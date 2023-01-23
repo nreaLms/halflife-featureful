@@ -21,6 +21,8 @@
 #define SF_XEN_PLANT_DROP_TO_FLOOR 2
 #define SF_XEN_PLANT_NONSOLID 8
 
+#define SF_XEN_PLATN_LIGHT_IGNORE_PLAYER 64
+
 #define XEN_PLANT_GLOW_SPRITE		"sprites/flare3.spr"
 #define XEN_PLANT_HIDE_TIME			5
 
@@ -164,7 +166,7 @@ void CXenPLight::Think( void )
 
 void CXenPLight::Touch( CBaseEntity *pOther )
 {
-	if( pOther->IsPlayer() )
+	if( !FBitSet(pev->spawnflags, SF_XEN_PLATN_LIGHT_IGNORE_PLAYER) && pOther->IsPlayer() )
 	{
 		pev->dmgtime = gpGlobals->time + XEN_PLANT_HIDE_TIME;
 		if( GetActivity() == ACT_IDLE || GetActivity() == ACT_STAND )

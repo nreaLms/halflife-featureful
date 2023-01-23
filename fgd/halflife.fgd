@@ -7998,7 +7998,13 @@
 	]
 ]
 
-@PointClass base(Target, XenPlant) size(-48 -48 0, 48 48 32 ) studio("models/light.mdl") = xen_plantlight : "Xen Plant Light" []
+@PointClass base(Target, XenPlant) size(-48 -48 0, 48 48 32 ) studio("models/light.mdl") = xen_plantlight : "Xen Plant Light"
+[
+	spawnflags(Flags) =
+	[
+		64 : "Ignore Player" 	: 0
+	]
+]
 @PointClass base(XenPlant) size(-8 -8 0, 8 8 32 ) studio("models/hair.mdl") = xen_hair : "Xen Hair"
 [
 	spawnflags(Flags) =
