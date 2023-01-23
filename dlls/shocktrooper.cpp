@@ -285,7 +285,7 @@ BOOL CShockTrooper::CheckRangeAttack2( float flDot, float flDist )
 	{
 		return FALSE;
 	}
-	return CheckRangeAttack2Impl(gSkillData.strooperGrenadeSpeed, flDot, flDist);
+	return CheckRangeAttack2Impl(gSkillData.strooperGrenadeSpeed, flDot, flDist, false);
 }
 
 //=========================================================

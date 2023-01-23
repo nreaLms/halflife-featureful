@@ -141,7 +141,7 @@ protected:
 	void SpawnHelper(const char* modelName, int health, int bloodColor = BLOOD_COLOR_RED);
 	void PrecacheHelper(const char* modelName);
 	void PlayFirstBurstSounds();
-	BOOL CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist );
+	BOOL CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist, bool contact);
 	virtual int GetRangeAttack1Sequence();
 	virtual int GetRangeAttack2Sequence();
 	virtual Schedule_t* ScheduleOnRangeAttack1();

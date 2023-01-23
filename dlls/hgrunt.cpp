@@ -421,10 +421,10 @@ BOOL CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 	{
 		return FALSE;
 	}
-	return CheckRangeAttack2Impl(gSkillData.hgruntGrenadeSpeed, flDot, flDist);
+	return CheckRangeAttack2Impl(gSkillData.hgruntGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, HGRUNT_GRENADELAUNCHER));
 }
 
-BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist )
+BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist, bool contact )
 {
 	// if the grunt isn't moving, it's ok to check.
 	if( m_flGroundSpeed != 0 )
@@ -450,7 +450,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 
 	Vector vecTarget;
 
-	if( FBitSet( pev->weapons, HGRUNT_HANDGRENADE ) )
+	if( !contact )
 	{
 		// find feet
 		if( RANDOM_LONG( 0, 1 ) )
@@ -494,7 +494,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 		return m_fThrowGrenade;
 	}
 
-	if( FBitSet( pev->weapons, HGRUNT_HANDGRENADE ) )
+	if( !contact )
 	{
 		Vector vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.5 );
 
@@ -575,15 +575,15 @@ int CHGrunt::GetRangeAttack2Sequence()
 {
 	// grunt is going to a secondary long range attack. This may be a thrown
 	// grenade or fired grenade, we must determine which and pick proper sequence
-	if( pev->weapons & HGRUNT_HANDGRENADE )
-	{
-		// get toss anim
-		return LookupSequence( "throwgrenade" );
-	}
-	else
+	if( pev->weapons & HGRUNT_GRENADELAUNCHER )
 	{
 		// get launch anim
 		return LookupSequence( "launchgrenade" );
+	}
+	else
+	{
+		// get toss anim
+		return LookupSequence( "throwgrenade" );
 	}
 }
 

@@ -264,7 +264,7 @@ BOOL CMassn::CheckRangeAttack2( float flDot, float flDist )
 	{
 		return FALSE;
 	}
-	return CheckRangeAttack2Impl(gSkillData.massnGrenadeSpeed, flDot, flDist);
+	return CheckRangeAttack2Impl(gSkillData.massnGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, MASSN_GRENADELAUNCHER));
 }
 
 //=========================================================
