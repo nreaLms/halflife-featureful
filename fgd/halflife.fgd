@@ -1679,6 +1679,7 @@
 	skin(integer) : "Skin" : 0
 	body(integer) : "Body" : 0
 	scale(string) : "Scale (1.0 = normal size)"
+	frame(integer) : "Starting frame (-1..255)"
 	m_iszSequence_On(string) : "Sequence when on"
 	m_iAction_On(choices) : "Behaviour when on" : 0 =
 	[

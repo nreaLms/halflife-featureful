@@ -1509,7 +1509,12 @@ void CEnvModel :: Spawn( void )
 	SetBoneController( 0, 0 );
 	SetBoneController( 1, 0 );
 
+	const float startingFrame = pev->frame;
 	SetSequence();
+	if (startingFrame < 0)
+		pev->frame = RANDOM_LONG(0, 255);
+	else
+		pev->frame = startingFrame;
 
 	pev->nextthink = gpGlobals->time + 0.1;
 }
