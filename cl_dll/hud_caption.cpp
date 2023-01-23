@@ -202,6 +202,36 @@ void CHudCaption::RecalculateLineOffsets()
 	}
 }
 
+void CHudCaption::Update(float flTime, float flTimeDelta)
+{
+	if (!sub_count)
+		return;
+
+	if(subtitles[0].timeLeft <= 0)
+	{
+		for (int j=0; j<sub_count-1; ++j)
+		{
+			subtitles[j] = subtitles[j+1];
+		}
+		memset(&subtitles[sub_count-1], 0, sizeof(subtitles[0]));
+		sub_count--;
+	}
+
+	for (int i=0; i<sub_count; ++i)
+	{
+		if (subtitles[i].timeBeforeStart <= 0.0f) {
+			subtitles[i].timeLeft -= flTimeDelta;
+		} else {
+			subtitles[i].timeBeforeStart -= flTimeDelta;
+			if (subtitles[i].timeBeforeStart <= 0.0f) {
+				subtitles[i].timeLeft += subtitles[i].timeBeforeStart;
+			} else {
+				continue;
+			}
+		}
+	}
+}
+
 int CHudCaption::Draw(float flTime)
 {
 	if (!sub_count)
@@ -217,33 +247,13 @@ int CHudCaption::Draw(float flTime)
 	int ypos = ScreenHeight - hudNumberHeight - lineHeight - SUB_BORDER_LENGTH;
 
 	int i, j;
-	if(subtitles[0].timeLeft <= 0)
-	{
-		for (j=0; j<sub_count-1; ++j)
-		{
-			subtitles[j] = subtitles[j+1];
-		}
-		memset(&subtitles[sub_count-1], 0, sizeof(subtitles[0]));
-		sub_count--;
-	}
-
-	if (!sub_count)
-		return 0;
 
 	int overallLineCount = 0;
 	int maxLineWidth = 0;
 	for (i=0; i<sub_count; ++i)
 	{
-		if (subtitles[i].timeBeforeStart <= 0.0f) {
-			subtitles[i].timeLeft -= gHUD.m_flTimeDelta;
-		} else {
-			subtitles[i].timeBeforeStart -= gHUD.m_flTimeDelta;
-			if (subtitles[i].timeBeforeStart <= 0.0f) {
-				subtitles[i].timeLeft += subtitles[i].timeBeforeStart;
-			} else {
-				continue;
-			}
-		}
+		if (subtitles[i].timeBeforeStart > 0)
+			continue;
 
 		overallLineCount += subtitles[i].lineCount;
 		for (j=0; j<subtitles[i].lineCount; ++j)

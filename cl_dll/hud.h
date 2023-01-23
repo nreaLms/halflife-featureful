@@ -289,6 +289,7 @@ class CHudCaption : public CHudBase
 public:
 	int Init();
 	int VidInit();
+	void Update(float flTime, float flTimeDelta);
 	int Draw(float flTime);
 	void Reset();
 

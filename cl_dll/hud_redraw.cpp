@@ -165,6 +165,7 @@ int CHud::Redraw( float flTime, int intermission )
 	// if no redrawing is necessary
 	// return 0;
 
+	m_Caption.Update( flTime, m_flTimeDelta );
 	if( m_pCvarDraw->value )
 	{
 		HUDLIST *pList = m_pHudList;
