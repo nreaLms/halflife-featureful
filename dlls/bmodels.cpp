@@ -50,6 +50,9 @@ Vector VecBModelOrigin( entvars_t* pevBModel )
 /*QUAKED func_wall (0 .5 .8) ?
 This is just a solid wall if not inhibited
 */
+
+#define SF_FUNCWALL_USE_ANGLES 2
+
 class CFuncWall : public CBaseEntity
 {
 public:
@@ -64,7 +67,8 @@ LINK_ENTITY_TO_CLASS( func_wall, CFuncWall )
 
 void CFuncWall::Spawn( void )
 {
-	pev->angles = g_vecZero;
+	if (!FBitSet(pev->spawnflags, SF_FUNCWALL_USE_ANGLES))
+		pev->angles = g_vecZero;
 	pev->movetype = MOVETYPE_PUSH;  // so it doesn't get pushed by anything
 	pev->solid = SOLID_BSP;
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );
@@ -231,7 +235,8 @@ void CFuncIllusionary::KeyValue( KeyValueData *pkvd )
 
 void CFuncIllusionary::Spawn( void )
 {
-	pev->angles = g_vecZero;
+	if (!FBitSet(pev->spawnflags, SF_FUNCWALL_USE_ANGLES))
+		pev->angles = g_vecZero;
 	pev->movetype = MOVETYPE_NONE;  
 	pev->solid = SOLID_NOT;// always solid_not 
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );

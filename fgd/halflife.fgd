@@ -2186,7 +2186,10 @@
 
 @SolidClass base(Targetname, RenderFields, ZHLT) = func_illusionary : "Fake Wall/Light"
 [
-
+	spawnflags(flags) =
+	[
+		2 : "Use Angles" : 0
+	]
 	skin(choices) : "Contents" : -1 =
 	[
 		-1: "Empty"
@@ -2478,6 +2481,10 @@
 @SolidClass base(Targetname, Appearflags, RenderFields, Global, ZHLT) = func_wall : "Wall"
 [
 	_minlight(string) : "Minimum light level"
+	spawnflags(flags) =
+	[
+		2 : "Use Angles" : 0
+	]
 ]
 
 @SolidClass base(func_wall) = func_wall_toggle : "Toggleable geometry"
