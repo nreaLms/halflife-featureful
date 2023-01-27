@@ -488,7 +488,7 @@
 	attenuation(string) : "Rotor attenuation"
 ]
 
-@BaseClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = gibshooterbase
+@BaseClass base(Targetname, Angles) size(-8 -8 -8, 8 8 8) = gibshooterbase
 [
 	// how many pieces to create
 	m_iGibs(integer) : "Number of Gibs" : 3
@@ -1718,7 +1718,7 @@
 	]
 ]
 
-@PointClass base(gibshooterbase, RenderFields) size(-16 -16 -16, 16 16 16) = env_shooter : "Model Shooter"
+@PointClass base(gibshooterbase, RenderFields) color(184 90 164) = env_shooter : "Model Shooter"
 [
 	shootmodel(studio) : "Model or Sprite name" : ""
 	shootsounds(choices) :"Material Sound" : -1 =
@@ -1826,7 +1826,7 @@
 	]
 ]
 
-@PointClass base(Targetname, Angles) size(-16 -16 -16, 16 16 16) = env_spark : "Spark"
+@PointClass base(Targetname, Angles) size(-8 -8 -8, 8 8 8) color(255 220 15) = env_spark : "Spark"
 [
 	MaxDelay(string) : "Max Time between sparks"
 	spawnflags(flags) =
@@ -2701,7 +2701,7 @@
 	// master(string) : "Master"
 ]
 
-@PointClass base(gibshooterbase) = gibshooter : "Gib Shooter" []
+@PointClass base(gibshooterbase) color(180 2 0) = gibshooter : "Gib Shooter" []
 
 //
 // info entities
