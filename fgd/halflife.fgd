@@ -2871,7 +2871,7 @@
 	template(string) : "info_item_random entity"
 ]
 
-@PointClass base(Weapon, Targetx, RenderFields, Scalable) studio() = item_generic : "Generic scenery item"
+@PointClass base(Targetname, Appearflags, Angles, Global, RenderFields, Scalable) studio() = item_generic : "Generic scenery item"
 [
 	model(studio) : "Model" : "models/w_security.mdl"
 	sequencename(string) : "Sequence Name"
