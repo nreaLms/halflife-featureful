@@ -25,6 +25,7 @@
 #include "cbase.h"
 #include "saverestore.h"
 #include "doors.h"
+#include "soundradius.h"
 
 #define SF_BUTTON_DONTMOVE		1
 #define SF_ROTBUTTON_NOTSOLID		1
@@ -963,13 +964,13 @@ const char *ButtonSound( int sound )
 //
 // Makes flagged buttons spark when turned off
 //
-void DoSpark( entvars_t *pev, const Vector &location )
+void DoSpark( entvars_t *pev, const Vector &location, float attenuation = ATTN_NORM )
 {
 	Vector tmp = location + pev->size * 0.5f;
 	UTIL_Sparks( tmp );
 
 	const float flVolume = RANDOM_FLOAT( 0.25f, 0.75f ) * 0.4f;//random volume range
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( g_sparkSounds ), flVolume, ATTN_NORM );
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( g_sparkSounds ), flVolume, attenuation );
 }
 
 void CBaseButton::ButtonSpark( void )
@@ -1644,11 +1645,13 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	float m_flDelay;
+	short m_soundRadius;
 };
 
 TYPEDESCRIPTION CEnvSpark::m_SaveData[] =
 {
 	DEFINE_FIELD( CEnvSpark, m_flDelay, FIELD_FLOAT),
+	DEFINE_FIELD( CEnvSpark, m_soundRadius, FIELD_SHORT),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvSpark, CBaseEntity )
@@ -1701,6 +1704,11 @@ void CEnvSpark::KeyValue( KeyValueData *pkvd )
 		m_flDelay = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;	
 	}
+	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
+	{
+		m_soundRadius = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "style" ) ||
 				FStrEq( pkvd->szKeyName, "height" ) ||
 				FStrEq( pkvd->szKeyName, "killtarget" ) ||
@@ -1716,7 +1724,7 @@ void CEnvSpark::SparkCyclic(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 {
 	if (m_pfnThink == NULL)
 	{
-		DoSpark( pev, pev->origin );
+		DoSpark( pev, pev->origin, ::SoundAttenuation(m_soundRadius) );
 		SetThink(&CEnvSpark::SparkWait );
 		pev->nextthink = gpGlobals->time + m_flDelay;
 	}
@@ -1733,7 +1741,7 @@ void CEnvSpark::SparkWait(void)
 
 void CEnvSpark::SparkThink( void )
 {
-	DoSpark( pev, pev->origin );
+	DoSpark( pev, pev->origin, ::SoundAttenuation(m_soundRadius) );
 	if (pev->spawnflags & SF_SPARK_CYCLIC)
 	{
 		SetThink( NULL );

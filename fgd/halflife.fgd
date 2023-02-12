@@ -1861,7 +1861,7 @@
 	]
 ]
 
-@PointClass base(Targetname, Angles) size(-8 -8 -8, 8 8 8) color(255 220 15) = env_spark : "Spark"
+@PointClass base(Targetname, Angles, SoundRadius) size(-8 -8 -8, 8 8 8) color(255 220 15) = env_spark : "Spark"
 [
 	MaxDelay(string) : "Max Time between sparks"
 	spawnflags(flags) =
