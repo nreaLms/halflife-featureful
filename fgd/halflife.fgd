@@ -3697,6 +3697,7 @@
 		3 : "9mmAR + HG"
 		5 : "9mmAR + GL"
 		8 : "Sniper Rifle"
+		10 : "Sniper Rifle + HG"
 	]
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
@@ -5089,6 +5090,7 @@
 		3 : "9mmAR + HG"
 		5 : "9mmAR + GL"
 		8 : "Sniper Rifle"
+		10 : "Sniper Rifle + HG"
 	]
 	standgroundrange(string) : "Stand Ground Range" : "0.0"
 	sequence(Choices) : "Animation Sequence (editor)" : 7 =
