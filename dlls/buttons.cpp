@@ -1208,6 +1208,7 @@ void CBaseButton::ButtonBackHome( void )
 		//EMIT_SOUND( ENT( pev ), CHAN_VOICE, STRING( pev->noise ), 1, ATTN_NORM );
 		
 		SUB_UseTargets( m_hActivator, UseType(true), 0 );
+		m_toggleAgainTime = gpGlobals->time + m_waitBeforeToggleAgain;
 	}
 
 	if( !FStringNull( pev->target ) )
