@@ -104,6 +104,7 @@ set (SVDLL_SOURCES
 	lights.cpp
 	locus.cpp
 	m249.cpp
+	mapconfig.cpp
 	maprules.cpp
 	massn.cpp
 	medkit.cpp

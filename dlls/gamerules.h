@@ -20,6 +20,7 @@
 #define GAMERULES_H
 
 #include "cbase.h"
+#include "mapconfig.h"
 //#include "weapons.h"
 //#include "items.h"
 class CBasePlayerWeapon;
@@ -171,6 +172,8 @@ public:
 
 	virtual void BeforeChangeLevel(const char* nextMap) {}
 	virtual CBasePlayer* EffectivePlayer( CBaseEntity* pActivator );
+
+	bool EquipPlayerFromMapConfig(CBasePlayer* pPlayer, const MapConfig& mapConfig);
 };
 
 extern CGameRules *InstallGameRules( void );
@@ -379,6 +382,8 @@ protected:
 	float m_flIntermissionEndTime;
 	BOOL m_iEndIntermissionButtonHit;
 	void SendMOTDToClient( edict_t *client );
+
+	MapConfig mapConfig;
 };
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;

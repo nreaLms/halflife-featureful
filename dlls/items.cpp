@@ -492,8 +492,6 @@ void CItem::PrecacheMyModel(const char *model)
 	}
 }
 
-#define SF_SUIT_SHORTLOGON		0x0001
-#define SF_SUIT_NOLOGON		0x0002
 #if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
 #define SF_SUIT_FLASHLIGHT 0x0004
 #endif

@@ -964,15 +964,10 @@ IMPLEMENT_SAVERESTORE( CGamePlayerSettings, CRulePointEntity )
 void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 {
 	const char* ammoName = pkvd->szKeyName;
-	// some ammo names with spaces
-	if (FStrEq(ammoName, "Hand_Grenade"))
-		ammoName = "Hand Grenade";
-	else if (FStrEq(ammoName, "Satchel_Charge"))
-		ammoName = "Satchel Charge";
-	else if (FStrEq(ammoName, "Trip_Mine"))
-		ammoName = "Trip Mine";
-	else if (*ammoName == '_')
+	if (*ammoName == '_')
 		ammoName++;
+	else
+		ammoName = FixedAmmoName(ammoName);
 
 	const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(ammoName);
 	if (ammoInfo.pszName)
@@ -1007,7 +1002,18 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_SUIT)
 	{
-		player->GiveNamedItem("item_suit", (m_suitLogon ? (1 << (m_suitLogon-1)) : m_suitLogon) | SF_ITEM_NOFALL);
+		int suitSpawnFlags = SF_ITEM_NOFALL;
+		switch (m_suitLogon) {
+		case 1:
+			suitSpawnFlags |= SF_SUIT_SHORTLOGON;
+			break;
+		case 2:
+			suitSpawnFlags |= SF_SUIT_NOLOGON;
+			break;
+		default:
+			break;
+		}
+		player->GiveNamedItem("item_suit", suitSpawnFlags);
 		if (pev->spawnflags & SF_PLAYER_SETTINGS_LONGJUMP)
 		{
 			player->GiveNamedItem("item_longjump", SF_ITEM_NOFALL);

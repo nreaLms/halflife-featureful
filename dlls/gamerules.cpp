@@ -493,6 +493,73 @@ CBasePlayer *CGameRules::EffectivePlayer(CBaseEntity *pActivator)
 	return NULL;
 }
 
+bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig &mapConfig)
+{
+	extern int gEvilImpulse101;
+
+	if (mapConfig.valid)
+	{
+		gEvilImpulse101 = TRUE;
+
+		bool giveSuit = !mapConfig.nosuit;
+		if (giveSuit)
+		{
+			int suitSpawnFlags = 0;
+			switch (mapConfig.suitLogon) {
+			case SuitNoLogon:
+				suitSpawnFlags |= SF_SUIT_NOLOGON;
+				break;
+			case SuitShortLogon:
+				suitSpawnFlags |= SF_SUIT_SHORTLOGON;
+				break;
+			case SuitLongLogon:
+				break;
+			}
+			pPlayer->GiveNamedItem("item_suit", suitSpawnFlags);
+		}
+
+		int i, j;
+		for (i=0; i<mapConfig.pickupEntCount; ++i)
+		{
+			for (j=0; j<mapConfig.pickupEnts[i].count; ++j)
+			{
+				pPlayer->GiveNamedItem(STRING(mapConfig.pickupEnts[i].entName));
+			}
+		}
+		gEvilImpulse101 = FALSE;
+
+		for (i=0; i<mapConfig.ammoCount; ++i)
+		{
+			const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(mapConfig.ammo[i].name);
+			if (mapConfig.ammo[i].count > 0 && ammoInfo.pszName)
+			{
+				pPlayer->GiveAmmo(mapConfig.ammo[i].count, ammoInfo.pszName);
+			}
+		}
+
+#if FEATURE_MEDKIT
+		if (IsCoop() && !g_mapConfig.nomedkit && !pPlayer->WeaponById(WEAPON_MEDKIT))
+		{
+			pPlayer->GiveNamedItem("weapon_medkit");
+		}
+#endif
+		if (mapConfig.startarmor > 0)
+			pPlayer->pev->armorvalue = Q_min(mapConfig.startarmor, MAX_NORMAL_BATTERY);
+		if (mapConfig.starthealth > 0 && mapConfig.starthealth < pPlayer->pev->max_health)
+			pPlayer->pev->health = mapConfig.starthealth;
+
+		if (mapConfig.longjump)
+		{
+			pPlayer->SetLongjump(true);
+		}
+
+		pPlayer->SwitchToBestWeapon();
+
+		return true;
+	}
+	return false;
+}
+
 //=========================================================
 // instantiate the proper game rules object
 //=========================================================

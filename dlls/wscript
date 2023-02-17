@@ -95,6 +95,7 @@ def build(bld):
 		'lights.cpp', 
 		'locus.cpp', 
 		'm249.cpp', 
+		'mapconfig.cpp',
 		'maprules.cpp',
 		'massn.cpp',
 		'monstermaker.cpp',

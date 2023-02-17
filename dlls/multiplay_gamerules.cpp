@@ -33,6 +33,7 @@
 #include	"voice_gamemgr.h"
 #endif
 #include	"hltv.h"
+#include	"mapconfig.h"
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -214,138 +215,6 @@ void ClearPlayerStates()
 
 static char g_changelevelName[cchMapNameMost];
 
-struct AmmoEnt
-{
-	char entName[32];
-	short count;
-};
-
-struct WeaponEnt
-{
-	char entName[32];
-	short count;
-};
-
-struct OverrideCvar
-{
-	char name[32];
-	char value[32];
-};
-
-struct MapConfig
-{
-	WeaponEnt weapons[MAX_WEAPONS];
-	AmmoEnt ammo[MAX_AMMO_SLOTS];
-	OverrideCvar overrideCvars[32];
-	int cvarCount;
-
-	int weaponsCount;
-	int ammoCount;
-
-	int starthealth;
-	int startarmor;
-
-	bool nomedkit;
-	bool nosuit;
-	bool longjump;
-
-	bool valid;
-};
-
-MapConfig g_mapConfig;
-
-bool ReadMapConfig(const char* mapName)
-{
-	memset(&g_mapConfig, 0, sizeof(g_mapConfig));
-	char fileName[cchMapNameMost + 8];
-	sprintf(fileName, "maps/%s.cfg", mapName);
-	int filePos = 0, fileSize;
-	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
-	if( !pMemFile )
-		return false;
-	char buffer[512];
-	memset( buffer, 0, sizeof(buffer) );
-	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer) ) != NULL )
-	{
-		int i = 0;
-		while( buffer[i] && buffer[i] == ' ' )
-			i++;
-		if( !buffer[i] || buffer[i] == '\n' )
-			continue;
-		if( buffer[i] == '/' || !isalpha( buffer[i] ) )
-			continue;
-		int j = i;
-		while( buffer[j] && buffer[j] != ' ' && buffer[j] != '\n' )
-			j++;
-		char* key = buffer+i;
-		char* value = buffer+j;
-		if (buffer[j] && buffer[j] != '\n')
-		{
-			value = buffer+j+1;
-			while(*value && *value == ' ')
-				value++;
-			int k = 0;
-			while( value[k] && value[k] != ' ' && value[k] != '\n' )
-				k++;
-			value[k] = '\0';
-		}
-
-		key[j-i] = '\0';
-		if (strncmp(key, "weapon_", 7) == 0)
-		{
-			if (g_mapConfig.weaponsCount < MAX_WEAPONS)
-				strncpy(g_mapConfig.weapons[g_mapConfig.weaponsCount].entName, key, 31);
-			g_mapConfig.weapons[g_mapConfig.weaponsCount].count = atoi(value);
-			if (!g_mapConfig.weapons[g_mapConfig.weaponsCount].count)
-				g_mapConfig.weapons[g_mapConfig.weaponsCount].count = 1;
-			g_mapConfig.weaponsCount++;
-		}
-		else if (strncmp(key, "ammo_", 5) == 0)
-		{
-			if (g_mapConfig.ammoCount < MAX_AMMO_SLOTS)
-			{
-				strncpy(g_mapConfig.ammo[g_mapConfig.ammoCount].entName, key, 31);
-				g_mapConfig.ammo[g_mapConfig.ammoCount].count = atoi(value);
-				if (!g_mapConfig.ammo[g_mapConfig.ammoCount].count)
-					g_mapConfig.ammo[g_mapConfig.ammoCount].count = 1;
-				g_mapConfig.ammoCount++;
-			}
-		}
-		else if (strncmp(key, "nomedkit", 8) == 0)
-		{
-			g_mapConfig.nomedkit = true;
-		}
-		else if (strncmp(key, "nosuit", 6) == 0)
-		{
-			g_mapConfig.nosuit = true;
-		}
-		else if (strncmp(key, "item_longjump", 6) == 0)
-		{
-			g_mapConfig.longjump = true;
-		}
-		else if (strncmp(key, "startarmor", 10) == 0)
-		{
-			g_mapConfig.startarmor = atoi(value);
-		}
-		else if (strncmp(key, "starthealth", 11) == 0)
-		{
-			g_mapConfig.starthealth = atoi(value);
-		}
-		else if (strncmp(key, "sv_", 3) == 0 || strncmp(key, "mp_", 3) == 0 || strncmp(key, "npc_", 4) == 0)
-		{
-			if (g_mapConfig.cvarCount < 32)
-			{
-				strncpy(g_mapConfig.overrideCvars[g_mapConfig.cvarCount].name, key, 31);
-				strncpy(g_mapConfig.overrideCvars[g_mapConfig.cvarCount].value, value, 31);
-				g_mapConfig.cvarCount++;
-			}
-		}
-	}
-	g_engfuncs.pfnFreeFile( pMemFile );
-	g_mapConfig.valid = true;
-	return true;
-}
-
 //*********************************************************
 // Rules for the half-life multiplayer game.
 //*********************************************************
@@ -407,14 +276,17 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 		}
 	}
 
-	if (IsCoOp() && ReadMapConfig(STRING(gpGlobals->mapname)))
+	if (IsCoOp())
 	{
-		for (int k=0; k<g_mapConfig.cvarCount; ++k)
+		if (ReadMapConfigByMapName(mapConfig, STRING(gpGlobals->mapname)))
 		{
-			const char* name  = g_mapConfig.overrideCvars[k].name;
-			const char* value = g_mapConfig.overrideCvars[k].value;
-			ALERT(at_aiconsole, "Setting %s to %s\n", name, value);
-			CVAR_SET_STRING(name, value);
+			for (int k=0; k<mapConfig.cvarCount; ++k)
+			{
+				const char* name  = mapConfig.overrideCvars[k].name;
+				const char* value = mapConfig.overrideCvars[k].value;
+				ALERT(at_aiconsole, "Setting %s to %s\n", name, value);
+				CVAR_SET_STRING(name, value);
+			}
 		}
 	}
 }
@@ -902,7 +774,6 @@ extern int gEvilImpulse101;
 void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 {
 	BOOL		addDefault = TRUE;
-	bool giveSuit = true;
 	CBaseEntity	*pWeaponEntity = NULL;
 	int 		iOldAutoWepSwitch;
 
@@ -912,56 +783,20 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	if (IsCoOp() && keepinventory.value && RestorePlayerState(pPlayer))
 		return;
 
-	if (IsCoOp() && g_mapConfig.valid)
+	if (IsCoOp() && mapConfig.valid)
 	{
-		int i, j;
-		gEvilImpulse101 = TRUE;
-		for (i=0; i<g_mapConfig.weaponsCount; ++i)
-		{
-			for (j=0; j<g_mapConfig.weapons[i].count; ++j)
-			{
-				pPlayer->GiveNamedItem(g_mapConfig.weapons[i].entName);
-			}
-		}
-		for (i=0; i<g_mapConfig.ammoCount; ++i)
-		{
-			for (j=0; j<g_mapConfig.ammo[i].count; ++j)
-			{
-				pPlayer->GiveNamedItem(g_mapConfig.ammo[i].entName);
-			}
-		}
-		gEvilImpulse101 = FALSE;
-		if (g_mapConfig.nosuit)
-			giveSuit = false;
-
-#if FEATURE_MEDKIT
-		if (!pPlayer->WeaponById(WEAPON_MEDKIT) && !g_mapConfig.nomedkit)
-		{
-			pPlayer->GiveNamedItem("weapon_medkit");
-		}
-#endif
-		if (g_mapConfig.startarmor > 0)
-			pPlayer->pev->armorvalue = Q_min(g_mapConfig.startarmor, MAX_NORMAL_BATTERY);
-		if (g_mapConfig.starthealth > 0 && g_mapConfig.starthealth < pPlayer->pev->max_health)
-			pPlayer->pev->health = g_mapConfig.starthealth;
-
-		if (g_mapConfig.longjump)
-		{
-			pPlayer->SetLongjump(true);
-		}
-
-		pPlayer->SwitchToBestWeapon();
-
+		EquipPlayerFromMapConfig(pPlayer, mapConfig);
 		addDefault = FALSE;
 	}
-
-	if (giveSuit)
+	else
+	{
 		pPlayer->m_iItemsBits |= PLAYER_ITEM_SUIT;
 
-	while( ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ) ) )
-	{
-		pWeaponEntity->Touch( pPlayer );
-		addDefault = FALSE;
+		while( ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ) ) )
+		{
+			pWeaponEntity->Touch( pPlayer );
+			addDefault = FALSE;
+		}
 	}
 
 	if( addDefault )
