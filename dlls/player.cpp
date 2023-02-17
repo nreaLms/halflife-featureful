@@ -2006,7 +2006,7 @@ void CBasePlayer::UpdateStatusBar()
 		CBaseMonster* pMonster = pEntity->MyMonsterPointer();
 		if (pMonster && pMonster->IsAlive() && pMonster->m_IdealMonsterState != MONSTERSTATE_DEAD && g_pGameRules->IsMultiplayer()) {
 			const int entityIndex = ENTINDEX( pEntity->edict() );
-			int health = (int)pEntity->pev->health;
+			int health = (int)ceil(pEntity->pev->health);
 			if (health < 0) {
 				health = 0;
 			}
@@ -2061,7 +2061,7 @@ void CBasePlayer::UpdateStatusBar()
 							displayName = className;
 					}
 
-					sprintf(buf, "%s\nHealth: %d/%d", displayName, health, (int)pEntity->pev->max_health);
+					sprintf(buf, "%s\nHealth: %d/%d", displayName, health, (int)ceil(pEntity->pev->max_health));
 					if (displayName == className + 8) {
 						buf[0] = toupper(buf[0]); //Capitalize monster name
 						char* str = buf;
