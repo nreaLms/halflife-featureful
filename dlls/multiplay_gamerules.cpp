@@ -170,8 +170,7 @@ bool RestorePlayerState(CBasePlayer* player)
 				player->m_iItemsBits |= PLAYER_ITEM_SUIT;
 			if (state->hasLongjump)
 			{
-				player->m_fLongJump = TRUE;
-				g_engfuncs.pfnSetPhysicsKeyValue( player->edict(), "slj", "1" );
+				player->SetLongjump(true);
 			}
 
 			int k;
@@ -948,8 +947,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 
 		if (g_mapConfig.longjump)
 		{
-			pPlayer->m_fLongJump = TRUE;
-			g_engfuncs.pfnSetPhysicsKeyValue( pPlayer->edict(), "slj", "1" );
+			pPlayer->SetLongjump(true);
 		}
 
 		pPlayer->SwitchToBestWeapon();

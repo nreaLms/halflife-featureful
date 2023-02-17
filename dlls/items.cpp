@@ -727,9 +727,7 @@ class CItemLongJump : public CItem
 
 		if( pPlayer->HasSuit() )
 		{
-			pPlayer->m_fLongJump = TRUE;// player now has longjump module
-
-			g_engfuncs.pfnSetPhysicsKeyValue( pPlayer->edict(), "slj", "1" );
+			pPlayer->SetLongjump(true);
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 				WRITE_STRING( STRING( pev->classname ) );

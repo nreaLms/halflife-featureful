@@ -976,8 +976,7 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 #endif
 
 	if (FBitSet(stripFlags, STRIP_LONGJUMP)) {
-		m_fLongJump = FALSE;
-		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
+		SetLongjump(false);
 	}
 
 	for( i = 0; i < MAX_AMMO_SLOTS; i++ )
@@ -5472,6 +5471,15 @@ CBasePlayerWeapon* CBasePlayer::WeaponById(int id)
 		return m_rgpPlayerWeapons[id-1];
 	}
 	return NULL;
+}
+
+void CBasePlayer::SetLongjump(bool enabled)
+{
+	m_fLongJump = enabled;
+	if (enabled)
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "1" );
+	else
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 }
 
 //=========================================================

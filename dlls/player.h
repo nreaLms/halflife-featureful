@@ -266,6 +266,7 @@ public:
 	{
 		return (m_iItemsBits & PLAYER_ITEM_FLASHLIGHT) != 0;
 	}
+	void SetLongjump(bool enabled);
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
 	virtual void UpdateClientData( void );
