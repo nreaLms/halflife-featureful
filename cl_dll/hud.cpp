@@ -51,10 +51,12 @@ ConfigurableBoundedValue::ConfigurableBoundedValue() :
 	configurable(true)
 {}
 
-FlashlightFeatures::FlashlightFeatures()
+ConfigurableBoundedValue::ConfigurableBoundedValue(int defValue, int minimumValue, int maximumValue, bool config) :
+	defaultValue(defValue), minValue(minimumValue), maxValue(maximumValue), configurable(config)
+{}
+
+FlashlightFeatures::FlashlightFeatures() : color(0xFFFFFF), distance(2048)
 {
-	color = 0xFFFFFF;
-	distance = 2048;
 	fade_distance.defaultValue = 600;
 	fade_distance.minValue = 500;
 	fade_distance.maxValue = distance;
@@ -63,7 +65,7 @@ FlashlightFeatures::FlashlightFeatures()
 	radius.maxValue = 200;
 }
 
-ClientFeatures::ClientFeatures() : flashlight()
+ClientFeatures::ClientFeatures()
 {
 	hud_color = RGB_HUD_DEFAULT;
 	hud_color_critical = 0xFF0000;
@@ -603,10 +605,7 @@ void CHud::ParseClientFeatures()
 	char* const pfile = (char *)gEngfuncs.COM_LoadFile( fileName, 5, &length );
 
 	if( !pfile )
-	{
-		gEngfuncs.Con_DPrintf( "Couldn't open file %s.\n", fileName );
 		return;
-	}
 
 	gEngfuncs.Con_DPrintf("Parsing client features from %s\n", fileName);
 

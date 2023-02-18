@@ -651,6 +651,7 @@ struct ConfigurableBooleanValue
 struct ConfigurableBoundedValue
 {
 	ConfigurableBoundedValue();
+	ConfigurableBoundedValue(int defValue, int minimumValue, int maximumValue, bool config = true);
 	int defaultValue;
 	int minValue;
 	int maxValue;
