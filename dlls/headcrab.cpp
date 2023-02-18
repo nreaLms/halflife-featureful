@@ -25,7 +25,7 @@
 #include	"mod_features.h"
 #if FEATURE_SHOCKRIFLE
 #include "player.h"
-#include "weapons.h"
+#include "weapon_ids.h"
 #endif
 
 //=========================================================
@@ -781,7 +781,7 @@ bool CShockRoach::TryGiveAsWeapon(CBaseEntity *pOther)
 {
 #if FEATURE_SHOCKRIFLE
 	// Give the shockrifle weapon to the player, if not already in possession.
-	if (pOther->IsPlayer() && pOther->IsAlive() && !(pOther->pev->weapons & (1 << WEAPON_SHOCKRIFLE))) {
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE) && pOther->IsPlayer() && pOther->IsAlive() && !(pOther->pev->weapons & (1 << WEAPON_SHOCKRIFLE))) {
 		CBasePlayer* pPlayer = (CBasePlayer*)(pOther);
 		pPlayer->GiveNamedItem("weapon_shockrifle");
 		UTIL_Remove(this);

@@ -3,6 +3,11 @@
 #include <cstdio>
 #include <cstdlib>
 
+bool IsValidIdentifierCharacter(char c)
+{
+	return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+}
+
 void SkipSpaceCharacters(const char* const text, int& i, const int length)
 {
 	while (i<length && (text[i] == ' ' || text[i] == '\r' || text[i] == '\n'))
@@ -48,6 +53,21 @@ static int ClampColorComponent(int colorComponent)
 static int ReadColorHexComponent(const char* hexDigits)
 {
 	return ClampColorComponent(strtol(hexDigits, 0, 16));
+}
+
+bool ReadIdentifier(const char* const text, int& i, char* identBuf, unsigned int identBufSize)
+{
+	if (identBufSize < 2)
+		return false;
+
+	unsigned int identLength = 0;
+	while(IsValidIdentifierCharacter(text[i]) && identLength < (identBufSize-1))
+	{
+		identBuf[identLength++] = text[i];
+		++i;
+	}
+	identBuf[identLength] = '\0';
+	return identLength > 0;
 }
 
 bool ReadInteger(const char* const valueText, const int valueLength, int& result)

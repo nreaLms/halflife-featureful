@@ -20,6 +20,26 @@
 
 extern void GameDLLInit( void );
 
+struct ModFeatures
+{
+	bool EnableWeapon(const char* name);
+	void EnableAllWeapons();
+
+	bool IsWeaponEnabled(int weaponId) const;
+
+	const char* DesertEagleDropName() const;
+	const char* M249DropName() const;
+
+	bool DisplacerBallEnabled() const;
+	bool ShockBeamEnabled() const;
+	bool SporesEnabled() const;
+
+private:
+	bool weapons[64];
+};
+
+extern ModFeatures g_modFeatures;
+
 extern cvar_t displaysoundlist;
 
 // multiplayer server rules

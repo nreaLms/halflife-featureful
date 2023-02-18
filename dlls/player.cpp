@@ -4132,43 +4132,61 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_snark" );
 		GiveNamedItem( "weapon_hornetgun" );
 #if FEATURE_MEDKIT
-		GiveNamedItem( "weapon_medkit" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT))
+			GiveNamedItem( "weapon_medkit" );
 #endif
 #if FEATURE_DESERT_EAGLE
-		GiveNamedItem( "weapon_eagle" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE))
+			GiveNamedItem( "weapon_eagle" );
 #endif
 #if FEATURE_PIPEWRENCH
-		GiveNamedItem( "weapon_pipewrench" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH))
+			GiveNamedItem( "weapon_pipewrench" );
 #endif
 #if FEATURE_GRAPPLE
-		GiveNamedItem( "weapon_grapple" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE))
+			GiveNamedItem( "weapon_grapple" );
 #endif
 #if FEATURE_M249
-		GiveNamedItem( "weapon_m249" );
-		GiveAmmo(AMMO_556CLIP_GIVE, "556");
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_M249))
+		{
+			GiveNamedItem( "weapon_m249" );
+			GiveAmmo(AMMO_556CLIP_GIVE, "556");
+		}
 #endif
 #if FEATURE_SNIPERRIFLE
-		GiveNamedItem( "weapon_sniperrifle" );
-		GiveAmmo( AMMO_762BOX_GIVE, "762");
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
+		{
+			GiveNamedItem( "weapon_sniperrifle" );
+			GiveAmmo( AMMO_762BOX_GIVE, "762");
+		}
 #endif
 #if FEATURE_DISPLACER
-		GiveNamedItem( "weapon_displacer" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_DISPLACER))
+			GiveNamedItem( "weapon_displacer" );
 #endif
 #if FEATURE_SHOCKRIFLE
-		GiveNamedItem( "weapon_shockrifle" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE))
+			GiveNamedItem( "weapon_shockrifle" );
 #endif
 #if FEATURE_SPORELAUNCHER
-		GiveNamedItem( "weapon_sporelauncher" );
-		GiveAmmo(5, "spores");
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_SPORELAUNCHER))
+		{
+			GiveNamedItem( "weapon_sporelauncher" );
+			GiveAmmo(5, "spores");
+		}
 #endif
 #if FEATURE_KNIFE
-		GiveNamedItem( "weapon_knife" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
+			GiveNamedItem( "weapon_knife" );
 #endif
 #if FEATURE_PENGUIN
-		GiveNamedItem( "weapon_penguin" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_PENGUIN))
+			GiveNamedItem( "weapon_penguin" );
 #endif
 #if FEATURE_UZI
-		GiveNamedItem( "weapon_uzi" );
+		if (g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
+			GiveNamedItem( "weapon_uzi" );
 #endif
 		gEvilImpulse101 = FALSE;
 		break;

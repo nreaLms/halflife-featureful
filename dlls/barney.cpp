@@ -27,6 +27,7 @@
 #include	"weapons.h"
 #include	"soundent.h"
 #include	"mod_features.h"
+#include	"game.h"
 #include	"gamerules.h"
 
 //=========================================================
@@ -844,7 +845,7 @@ void COtis::OnDying()
 
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 
-		DropItem( DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles );
+		DropItem( g_modFeatures.DesertEagleDropName(), vecGunPos, vecGunAngles );
 	}
 	CTalkMonster::OnDying();
 }

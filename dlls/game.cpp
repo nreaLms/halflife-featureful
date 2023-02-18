@@ -17,8 +17,137 @@
 #include "util.h"
 #include "game.h"
 #include "mod_features.h"
+#include "parsetext.h"
+#include "weapon_ids.h"
 
 BOOL		g_fIsXash3D;
+
+ModFeatures g_modFeatures;
+
+struct WeaponNameAndId
+{
+	WeaponNameAndId(const char* n, int i): name(n), id(i) {}
+	const char* name;
+	int id;
+};
+
+bool ModFeatures::EnableWeapon(const char *name)
+{
+	static const WeaponNameAndId knownWeapons[] = {
+		WeaponNameAndId("pipewrench", WEAPON_PIPEWRENCH),
+		WeaponNameAndId("knife", WEAPON_KNIFE),
+		WeaponNameAndId("medkit", WEAPON_MEDKIT),
+		WeaponNameAndId("grapple", WEAPON_GRAPPLE),
+		WeaponNameAndId("eagle", WEAPON_EAGLE),
+		WeaponNameAndId("m249", WEAPON_M249),
+		WeaponNameAndId("sniperrifle", WEAPON_SNIPERRIFLE),
+		WeaponNameAndId("displacer", WEAPON_DISPLACER),
+		WeaponNameAndId("sporelauncher", WEAPON_SPORELAUNCHER),
+		WeaponNameAndId("shockrifle", WEAPON_SHOCKRIFLE),
+		WeaponNameAndId("penguin", WEAPON_PENGUIN),
+		WeaponNameAndId("uzi", WEAPON_UZI),
+	};
+
+	for (unsigned int i=0; i<ARRAYSIZE(knownWeapons); ++i)
+	{
+		if (stricmp(name, knownWeapons[i].name) == 0)
+		{
+			weapons[knownWeapons[i].id] = true;
+			return true;
+		}
+	}
+	return false;
+}
+
+void ModFeatures::EnableAllWeapons()
+{
+	memset(weapons, 1, sizeof(weapons));
+}
+
+bool ModFeatures::IsWeaponEnabled(int weaponId) const
+{
+	return weapons[weaponId];
+}
+
+const char* ModFeatures::DesertEagleDropName() const
+{
+#if FEATURE_DESERT_EAGLE
+	if (IsWeaponEnabled(WEAPON_EAGLE))
+		return "weapon_eagle";
+#endif
+	return "ammo_357";
+}
+
+const char* ModFeatures::M249DropName() const
+{
+#if FEATURE_M249
+	if (IsWeaponEnabled(WEAPON_M249))
+		return "weapon_m249";
+#endif
+	return "ammo_9mmAR";
+}
+
+bool ModFeatures::DisplacerBallEnabled() const
+{
+#if FEATURE_DISPLACER
+	return IsWeaponEnabled(WEAPON_DISPLACER);
+#else
+	return false;
+#endif
+}
+
+bool ModFeatures::ShockBeamEnabled() const
+{
+	if (FEATURE_SHOCKTROOPER)
+		return true;
+#if FEATURE_SHOCKRIFLE
+	return IsWeaponEnabled(WEAPON_SHOCKRIFLE);
+#else
+	return false;
+#endif
+}
+
+bool ModFeatures::SporesEnabled() const
+{
+	if (FEATURE_SHOCKTROOPER)
+		return true;
+#if FEATURE_SPORELAUNCHER
+	return IsWeaponEnabled(WEAPON_SPORELAUNCHER);
+#else
+	return false;
+#endif
+}
+
+void ReadEnabledWeapons()
+{
+	const char* fileName = "featureful_weapons.cfg";
+	int filePos = 0, fileSize;
+	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	if (!pMemFile)
+	{
+		g_modFeatures.EnableAllWeapons();
+		return;
+	}
+	char buffer[128];
+	memset(buffer, 0, sizeof(buffer));
+	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
+	{
+		int i = 0;
+		SkipSpaces(buffer, i, sizeof(buffer));
+
+		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
+			continue;
+
+		char identBuf[64];
+		if (ReadIdentifier(buffer, i, identBuf, sizeof(identBuf)))
+		{
+			bool found = g_modFeatures.EnableWeapon(identBuf);
+			if (!found)
+				ALERT(at_warning, "Unknown weapon '%s' in %s\n", identBuf, fileName);
+		}
+	}
+	g_engfuncs.pfnFreeFile( pMemFile );
+}
 
 cvar_t displaysoundlist = {"displaysoundlist","0"};
 
@@ -521,6 +650,8 @@ void GameDLLInit( void )
 	if( CVAR_GET_POINTER( "build" ) )
 		g_fIsXash3D = TRUE;
 
+	ReadEnabledWeapons();
+
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
 	g_psv_maxspeed = CVAR_GET_POINTER( "sv_maxspeed" );
 	g_psv_aim = CVAR_GET_POINTER( "sv_aim" );
@@ -529,7 +660,6 @@ void GameDLLInit( void )
 	g_psv_developer = CVAR_GET_POINTER( "developer" );
 
 	g_enable_cheats = CVAR_GET_POINTER( "sv_cheats" );
-
 
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );
@@ -896,57 +1026,68 @@ void GameDLLInit( void )
 
 #if FEATURE_MEDKIT
 	// Medkit
-	REGISTER_SKILL_CVARS(sk_plr_medkitshot);
-	REGISTER_SKILL_CVARS(sk_plr_medkittime);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT))
+	{
+		REGISTER_SKILL_CVARS(sk_plr_medkitshot);
+		REGISTER_SKILL_CVARS(sk_plr_medkittime);
+	}
 #endif
 
 #if FEATURE_DESERT_EAGLE
 	// Desert Eagle
-	REGISTER_SKILL_CVARS(sk_plr_eagle);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE))
+		REGISTER_SKILL_CVARS(sk_plr_eagle);
 #endif
 
 #if FEATURE_PIPEWRENCH
 	// Pipe wrench
-	REGISTER_SKILL_CVARS(sk_plr_pipewrench);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH))
+		REGISTER_SKILL_CVARS(sk_plr_pipewrench);
 #endif
 
 #if FEATURE_KNIFE
 	// Knife
-	REGISTER_SKILL_CVARS(sk_plr_knife);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
+		REGISTER_SKILL_CVARS(sk_plr_knife);
 #endif
 
 #if FEATURE_GRAPPLE
 	// Grapple
-	REGISTER_SKILL_CVARS(sk_plr_grapple);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE))
+		REGISTER_SKILL_CVARS(sk_plr_grapple);
 #endif
 
 #if FEATURE_M249
 	// M249
-	REGISTER_SKILL_CVARS(sk_plr_556_bullet);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_M249))
+		REGISTER_SKILL_CVARS(sk_plr_556_bullet);
 #endif
 
 #if FEATURE_SNIPERRIFLE
 	// Sniper rifle
-	REGISTER_SKILL_CVARS(sk_plr_762_bullet);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
+		REGISTER_SKILL_CVARS(sk_plr_762_bullet);
 #endif
 
-#if FEATURE_SHOCKBEAM
 	// Shock rifle
-	REGISTER_SKILL_CVARS(sk_plr_shockroachs);
-	REGISTER_SKILL_CVARS(sk_plr_shockroachm);
-#endif
+	if (g_modFeatures.ShockBeamEnabled())
+	{
+		REGISTER_SKILL_CVARS(sk_plr_shockroachs);
+		REGISTER_SKILL_CVARS(sk_plr_shockroachm);
+	}
 
-#if FEATURE_SPOREGRENADE
-	REGISTER_SKILL_CVARS(sk_plr_spore);
-#endif
+	if (g_modFeatures.SporesEnabled())
+		REGISTER_SKILL_CVARS(sk_plr_spore);
 
-#if FEATURE_DISPLACER
-	REGISTER_SKILL_CVARS(sk_plr_displacer_other);
-	REGISTER_SKILL_CVARS(sk_plr_displacer_radius);
-#endif
+	if (g_modFeatures.DisplacerBallEnabled())
+	{
+		REGISTER_SKILL_CVARS(sk_plr_displacer_other);
+		REGISTER_SKILL_CVARS(sk_plr_displacer_radius);
+	}
 
 #if FEATURE_UZI
-	REGISTER_SKILL_CVARS(sk_plr_uzi);
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
+		REGISTER_SKILL_CVARS(sk_plr_uzi);
 #endif
 
 	// WORLD WEAPONS

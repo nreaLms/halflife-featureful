@@ -24,6 +24,7 @@
 #include	"decals.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
+#include	"game.h"
 #include	"gamerules.h"
 
 #define FEATURE_MEDIC_DROP_HEALTHKIT 0
@@ -1197,7 +1198,7 @@ void CHFGrunt::DropMyItems(BOOL isGibbed)
 		}
 		else if (FBitSet( pev->weapons, FGRUNT_M249 ))
 		{
-			DropMyItem( M249_DROP_NAME, vecGunPos, vecGunAngles, isGibbed );
+			DropMyItem( g_modFeatures.M249DropName(), vecGunPos, vecGunAngles, isGibbed );
 		}
 
 		if (FBitSet( pev->weapons, FGRUNT_GRENADELAUNCHER ))
@@ -3084,7 +3085,7 @@ void CTorch::DropMyItems(BOOL isGibbed)
 		Vector	vecGunPos;
 		Vector	vecGunAngles;
 		GetAttachment( 0, vecGunPos, vecGunAngles );
-		DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
+		DropMyItem(g_modFeatures.DesertEagleDropName(), vecGunPos, vecGunAngles, isGibbed);
 	}
 }
 
@@ -3774,7 +3775,7 @@ void CMedic::DropMyItems(BOOL isGibbed)
 		Vector	vecGunAngles;
 		GetAttachment( 0, vecGunPos, vecGunAngles );
 		if (FBitSet(pev->weapons, MEDIC_EAGLE))
-			DropMyItem(DESERT_EAGLE_DROP_NAME, vecGunPos, vecGunAngles, isGibbed);
+			DropMyItem(g_modFeatures.DesertEagleDropName(), vecGunPos, vecGunAngles, isGibbed);
 		else if (FBitSet(pev->weapons, MEDIC_HANDGUN)) {
 			DropMyItem("weapon_9mmhandgun", vecGunPos, vecGunAngles, isGibbed);
 		}

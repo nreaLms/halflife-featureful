@@ -282,11 +282,38 @@ void UTIL_PrecacheOtherWeapon( const char *szClassname )
 	REMOVE_ENTITY( pent );
 }
 
+const char* defaultPrecachedItems[128] = {0};
+unsigned int defaultPrecachedItemsCount = 0;
+
+static void DefaultPrecachedOther(const char *szClassname)
+{
+	UTIL_PrecacheOther(szClassname);
+	defaultPrecachedItems[defaultPrecachedItemsCount++] = szClassname;
+}
+
+static void DefaultPrecachedOtherWeapon(const char *szClassname)
+{
+	UTIL_PrecacheOtherWeapon(szClassname);
+	defaultPrecachedItems[defaultPrecachedItemsCount++] = szClassname;
+}
+
+static int PrecachedItemComparator(const void* a, const void* b)
+{
+	return strcmp(* (char * const *) a, * (char * const *) b);
+}
+
+bool IsDefaultPrecached( const char* szClassname )
+{
+	return bsearch(&szClassname, defaultPrecachedItems, defaultPrecachedItemsCount, sizeof(defaultPrecachedItems[0]), PrecachedItemComparator) != 0;
+}
+
 // called by worldspawn
 void W_Precache( void )
 {
 	memset( CBasePlayerWeapon::ItemInfoArray, 0, sizeof(CBasePlayerWeapon::ItemInfoArray) );
 	memset( CBasePlayerWeapon::AmmoInfoArray, 0, sizeof(CBasePlayerWeapon::AmmoInfoArray) );
+	memset( defaultPrecachedItems, 0, sizeof(defaultPrecachedItems) );
+	defaultPrecachedItemsCount = 0;
 	giAmmoIndex = 0;
 
 	AmmoInfo& ammoInfo = CBasePlayerWeapon::AmmoInfoArray[0];
@@ -297,110 +324,128 @@ void W_Precache( void )
 	// custom items...
 
 	// common world objects
-	UTIL_PrecacheOther( "item_suit" );
-	UTIL_PrecacheOther( "item_healthkit" );
-	UTIL_PrecacheOther( "item_battery" );
-	UTIL_PrecacheOther( "item_antidote" );
-	UTIL_PrecacheOther( "item_security" );
-	UTIL_PrecacheOther( "item_longjump" );
+	DefaultPrecachedOther( "item_suit" );
+	DefaultPrecachedOther( "item_healthkit" );
+	DefaultPrecachedOther( "item_battery" );
+	DefaultPrecachedOther( "item_antidote" );
+	DefaultPrecachedOther( "item_security" );
+	DefaultPrecachedOther( "item_longjump" );
 #if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
 	UTIL_PrecacheOther( "item_flashlight" );
 #endif
 
 	// shotgun
-	UTIL_PrecacheOtherWeapon( "weapon_shotgun" );
-	UTIL_PrecacheOther( "ammo_buckshot" );
+	DefaultPrecachedOtherWeapon( "weapon_shotgun" );
+	DefaultPrecachedOther( "ammo_buckshot" );
 
 	// crowbar
-	UTIL_PrecacheOtherWeapon( "weapon_crowbar" );
+	DefaultPrecachedOtherWeapon( "weapon_crowbar" );
 
 	// glock
-	UTIL_PrecacheOtherWeapon( "weapon_9mmhandgun" );
-	UTIL_PrecacheOther( "ammo_9mmclip" );
+	DefaultPrecachedOtherWeapon( "weapon_9mmhandgun" );
+	DefaultPrecachedOther( "ammo_9mmclip" );
 
 	// mp5
-	UTIL_PrecacheOtherWeapon( "weapon_9mmAR" );
-	UTIL_PrecacheOther( "ammo_9mmAR" );
-	UTIL_PrecacheOther( "ammo_ARgrenades" );
+	DefaultPrecachedOtherWeapon( "weapon_9mmAR" );
+	DefaultPrecachedOther( "ammo_9mmAR" );
+	DefaultPrecachedOther( "ammo_ARgrenades" );
 
 	// 9mm ammo box
-	UTIL_PrecacheOther( "ammo_9mmbox" );
+	DefaultPrecachedOther( "ammo_9mmbox" );
 
 	// python
-	UTIL_PrecacheOtherWeapon( "weapon_357" );
-	UTIL_PrecacheOther( "ammo_357" );
+	DefaultPrecachedOtherWeapon( "weapon_357" );
+	DefaultPrecachedOther( "ammo_357" );
 
 	// gauss
-	UTIL_PrecacheOtherWeapon( "weapon_gauss" );
-	UTIL_PrecacheOther( "ammo_gaussclip" );
+	DefaultPrecachedOtherWeapon( "weapon_gauss" );
+	DefaultPrecachedOther( "ammo_gaussclip" );
 
 	// rpg
-	UTIL_PrecacheOtherWeapon( "weapon_rpg" );
-	UTIL_PrecacheOther( "ammo_rpgclip" );
+	DefaultPrecachedOtherWeapon( "weapon_rpg" );
+	DefaultPrecachedOther( "ammo_rpgclip" );
 
 	// crossbow
-	UTIL_PrecacheOtherWeapon( "weapon_crossbow" );
-	UTIL_PrecacheOther( "ammo_crossbow" );
+	DefaultPrecachedOtherWeapon( "weapon_crossbow" );
+	DefaultPrecachedOther( "ammo_crossbow" );
 
 	// egon
-	UTIL_PrecacheOtherWeapon( "weapon_egon" );
+	DefaultPrecachedOtherWeapon( "weapon_egon" );
 
 	// tripmine
-	UTIL_PrecacheOtherWeapon( "weapon_tripmine" );
+	DefaultPrecachedOtherWeapon( "weapon_tripmine" );
 
 	// satchel charge
-	UTIL_PrecacheOtherWeapon( "weapon_satchel" );
+	DefaultPrecachedOtherWeapon( "weapon_satchel" );
 
 	// hand grenade
-	UTIL_PrecacheOtherWeapon("weapon_handgrenade");
+	DefaultPrecachedOtherWeapon("weapon_handgrenade");
 
 	// squeak grenade
-	UTIL_PrecacheOtherWeapon( "weapon_snark" );
+	DefaultPrecachedOtherWeapon( "weapon_snark" );
 
 	// hornetgun
-	UTIL_PrecacheOtherWeapon( "weapon_hornetgun" );
+	DefaultPrecachedOtherWeapon( "weapon_hornetgun" );
 #if FEATURE_MEDKIT
-	UTIL_PrecacheOtherWeapon( "weapon_medkit" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT))
+		DefaultPrecachedOtherWeapon( "weapon_medkit" );
 #endif
 	if( g_pGameRules->IsDeathmatch() )
 	{
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
 	}
 #if FEATURE_DESERT_EAGLE
-	UTIL_PrecacheOtherWeapon( "weapon_eagle" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE))
+		DefaultPrecachedOtherWeapon( "weapon_eagle" );
 #endif
 #if FEATURE_PIPEWRENCH
-	UTIL_PrecacheOtherWeapon( "weapon_pipewrench" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH))
+		DefaultPrecachedOtherWeapon( "weapon_pipewrench" );
 #endif
 #if FEATURE_KNIFE
-	UTIL_PrecacheOtherWeapon( "weapon_knife" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
+		DefaultPrecachedOtherWeapon( "weapon_knife" );
 #endif
 #if FEATURE_GRAPPLE
-	UTIL_PrecacheOtherWeapon( "weapon_grapple" );
-	UTIL_PrecacheOther( "grapple_tip" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE))
+	{
+		DefaultPrecachedOtherWeapon( "weapon_grapple" );
+		UTIL_PrecacheOther( "grapple_tip" );
+	}
 #endif
 #if FEATURE_PENGUIN
-	UTIL_PrecacheOtherWeapon( "weapon_penguin" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_PENGUIN))
+		DefaultPrecachedOtherWeapon( "weapon_penguin" );
 #endif
 #if FEATURE_M249
-	UTIL_PrecacheOtherWeapon( "weapon_m249" );
-	UTIL_PrecacheOther( "ammo_556" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_M249))
+	{
+		DefaultPrecachedOtherWeapon( "weapon_m249" );
+		DefaultPrecachedOther( "ammo_556" );
+	}
 #endif
 #if FEATURE_SNIPERRIFLE
-	UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
-	UTIL_PrecacheOther( "ammo_762" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
+	{
+		DefaultPrecachedOtherWeapon( "weapon_sniperrifle" );
+		DefaultPrecachedOther( "ammo_762" );
+	}
 #endif
 #if FEATURE_DISPLACER
-	UTIL_PrecacheOtherWeapon( "weapon_displacer" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_DISPLACER))
+		DefaultPrecachedOtherWeapon( "weapon_displacer" );
 #endif
 #if FEATURE_SHOCKRIFLE
-	UTIL_PrecacheOtherWeapon( "weapon_shockrifle" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE))
+		DefaultPrecachedOtherWeapon( "weapon_shockrifle" );
 #endif
 #if FEATURE_SPORELAUNCHER
-	UTIL_PrecacheOtherWeapon( "weapon_sporelauncher" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_SPORELAUNCHER))
+		DefaultPrecachedOtherWeapon( "weapon_sporelauncher" );
 #endif
 #if FEATURE_UZI
-	UTIL_PrecacheOtherWeapon( "weapon_uzi" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
+		DefaultPrecachedOtherWeapon( "weapon_uzi" );
 #endif
 	g_sModelIndexFireball = PRECACHE_MODEL( "sprites/zerogxplode.spr" );// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL( "sprites/WXplo1.spr" );// underwater fireball
@@ -428,6 +473,8 @@ void W_Precache( void )
 	PRECACHE_SOUND( "weapons/bullet_hit2.wav" );	// hit by bullet
 
 	PRECACHE_SOUND( "items/weapondrop1.wav" );// weapon falls to the ground
+
+	qsort(defaultPrecachedItems, defaultPrecachedItemsCount, sizeof(defaultPrecachedItems[0]), PrecachedItemComparator);
 }
 
 TYPEDESCRIPTION	CBasePlayerWeapon::m_SaveData[] =

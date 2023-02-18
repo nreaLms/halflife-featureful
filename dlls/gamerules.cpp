@@ -385,56 +385,73 @@ void CGameRules::RefreshSkillData ( void )
 
 #if FEATURE_MEDKIT
 	// Medkit 
-	gSkillData.plrDmgMedkit = GetSkillCvar( "sk_plr_medkitshot" );
-	gSkillData.plrMedkitTime = GetSkillCvarZeroable( "sk_plr_medkittime" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT))
+	{
+		gSkillData.plrDmgMedkit = GetSkillCvar( "sk_plr_medkitshot" );
+		gSkillData.plrMedkitTime = GetSkillCvarZeroable( "sk_plr_medkittime" );
+	}
 #endif
 
 #if FEATURE_DESERT_EAGLE
 	// Desert Eagle
-	gSkillData.plrDmgEagle = GetSkillCvar( "sk_plr_eagle" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE))
+		gSkillData.plrDmgEagle = GetSkillCvar( "sk_plr_eagle" );
 #endif
 
 #if FEATURE_PIPEWRENCH
 	// Pipe wrench
-	gSkillData.plrDmgPWrench = GetSkillCvar( "sk_plr_pipewrench" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH))
+		gSkillData.plrDmgPWrench = GetSkillCvar( "sk_plr_pipewrench" );
 #endif
 
 #if FEATURE_KNIFE
 	// Knife
-	gSkillData.plrDmgKnife = GetSkillCvar( "sk_plr_knife" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
+		gSkillData.plrDmgKnife = GetSkillCvar( "sk_plr_knife" );
 #endif
 
 #if FEATURE_GRAPPLE
 	// Grapple
-	gSkillData.plrDmgGrapple = GetSkillCvar( "sk_plr_grapple" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE))
+		gSkillData.plrDmgGrapple = GetSkillCvar( "sk_plr_grapple" );
 #endif
 
 #if FEATURE_M249
 	// M249
-	gSkillData.plrDmg556 = GetSkillCvar( "sk_plr_556_bullet" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_M249))
+		gSkillData.plrDmg556 = GetSkillCvar( "sk_plr_556_bullet" );
 #endif
 
 #if FEATURE_SNIPERRIFLE
 	// 762 Round
-	gSkillData.plrDmg762 = GetSkillCvar( "sk_plr_762_bullet" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
+		gSkillData.plrDmg762 = GetSkillCvar( "sk_plr_762_bullet" );
 #endif
 
 #if FEATURE_SHOCKBEAM
-	gSkillData.plrDmgShockroach = GetSkillCvar( "sk_plr_shockroachs" );
-	gSkillData.plrDmgShockroachM = GetSkillCvar( "sk_plr_shockroachm" );
+	if (g_modFeatures.ShockBeamEnabled())
+	{
+		gSkillData.plrDmgShockroach = GetSkillCvar( "sk_plr_shockroachs" );
+		gSkillData.plrDmgShockroachM = GetSkillCvar( "sk_plr_shockroachm" );
+	}
 #endif
 
 #if FEATURE_SPOREGRENADE
-	gSkillData.plrDmgSpore = GetSkillCvar( "sk_plr_spore" );
+	if (g_modFeatures.SporesEnabled())
+		gSkillData.plrDmgSpore = GetSkillCvar( "sk_plr_spore" );
 #endif
 
 #if FEATURE_DISPLACER
-	gSkillData.plrDmgDisplacer = GetSkillCvar( "sk_plr_displacer_other" );
-	gSkillData.plrDisplacerRadius = GetSkillCvar( "sk_plr_displacer_radius" );
+	if (g_modFeatures.DisplacerBallEnabled())
+	{
+		gSkillData.plrDmgDisplacer = GetSkillCvar( "sk_plr_displacer_other" );
+		gSkillData.plrDisplacerRadius = GetSkillCvar( "sk_plr_displacer_radius" );
+	}
 #endif
 
 #if FEATURE_UZI
-	gSkillData.plrDmgUzi = GetSkillCvar( "sk_plr_uzi" );
+	if (g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
+		gSkillData.plrDmgUzi = GetSkillCvar( "sk_plr_uzi" );
 #endif
 
 	// MONSTER WEAPONS
@@ -493,6 +510,8 @@ CBasePlayer *CGameRules::EffectivePlayer(CBaseEntity *pActivator)
 	return NULL;
 }
 
+extern bool IsDefaultPrecached( const char* szClassname );
+
 bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig &mapConfig)
 {
 	extern int gEvilImpulse101;
@@ -523,7 +542,9 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 		{
 			for (j=0; j<mapConfig.pickupEnts[i].count; ++j)
 			{
-				pPlayer->GiveNamedItem(STRING(mapConfig.pickupEnts[i].entName));
+				const char* entName = STRING(mapConfig.pickupEnts[i].entName);
+				if (IsDefaultPrecached(entName))
+					pPlayer->GiveNamedItem(entName);
 			}
 		}
 		gEvilImpulse101 = FALSE;
@@ -538,7 +559,7 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 		}
 
 #if FEATURE_MEDKIT
-		if (IsCoOp() && !mapConfig.nomedkit && !pPlayer->WeaponById(WEAPON_MEDKIT))
+		if (IsCoOp() && g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT) && !mapConfig.nomedkit && !pPlayer->WeaponById(WEAPON_MEDKIT))
 		{
 			pPlayer->GiveNamedItem("weapon_medkit");
 		}
