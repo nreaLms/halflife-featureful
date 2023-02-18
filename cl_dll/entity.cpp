@@ -259,6 +259,8 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 				gHUD.m_bFlashlight = false;
 			}
 		}
+		else if (gHUD.m_bFlashlight)
+			gHUD.m_bFlashlight = false;
 	}
 }
 
