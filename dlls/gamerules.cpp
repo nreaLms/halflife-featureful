@@ -538,7 +538,7 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 		}
 
 #if FEATURE_MEDKIT
-		if (IsCoop() && !g_mapConfig.nomedkit && !pPlayer->WeaponById(WEAPON_MEDKIT))
+		if (IsCoOp() && !mapConfig.nomedkit && !pPlayer->WeaponById(WEAPON_MEDKIT))
 		{
 			pPlayer->GiveNamedItem("weapon_medkit");
 		}
