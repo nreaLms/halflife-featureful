@@ -134,7 +134,7 @@ class CBasePlayerWeapon;
 class CSquadMonster;
 
 #define SF_ITEM_TOUCH_ONLY 128
-#define SF_ITEM_USE_ONLY 256
+#define SF_ITEM_USE_ONLY 256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!
 
 #define	SF_NORESPAWN	( 1 << 30 )// !!!set this bit on guns and stuff that should never respawn.
 
@@ -541,7 +541,6 @@ public:
 //
 // generic Toggle entity.
 //
-#define	SF_ITEM_USE_ONLY	256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!! 
 
 class CBaseToggle : public CBaseAnimating
 {
