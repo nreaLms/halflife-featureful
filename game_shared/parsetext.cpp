@@ -40,21 +40,6 @@ void ConsumeLine(const char* const text, int& i, const int length)
 	}
 }
 
-static int ClampColorComponent(int colorComponent)
-{
-	if (colorComponent > 255)
-		return 255;
-	else if (colorComponent < 0)
-		return 0;
-	else
-		return colorComponent;
-}
-
-static int ReadColorHexComponent(const char* hexDigits)
-{
-	return ClampColorComponent(strtol(hexDigits, 0, 16));
-}
-
 bool ReadIdentifier(const char* const text, int& i, char* identBuf, unsigned int identBufSize)
 {
 	if (identBufSize < 2)
@@ -70,12 +55,22 @@ bool ReadIdentifier(const char* const text, int& i, char* identBuf, unsigned int
 	return identLength > 0;
 }
 
-bool ReadInteger(const char* const valueText, const int valueLength, int& result)
+bool ParseInteger(const char* const valueText, const int valueLength, int& result)
 {
 	return sscanf(valueText, "%d", &result) == 1;
 }
 
-bool ReadColor(const char* const valueText, const int valueLength, int& result)
+static int ClampColorComponent(int colorComponent)
+{
+	if (colorComponent > 255)
+		return 255;
+	else if (colorComponent < 0)
+		return 0;
+	else
+		return colorComponent;
+}
+
+bool ParseColor(const char* const valueText, const int valueLength, int& result)
 {
 	if (valueLength >= 8 && strncmp(valueText, "0x", 2) == 0)
 	{
@@ -97,7 +92,7 @@ bool ReadColor(const char* const valueText, const int valueLength, int& result)
 	return false;
 }
 
-bool ReadBoolean(const char* const valueText, const int valueLength, bool& result)
+bool ParseBoolean(const char* const valueText, const int valueLength, bool& result)
 {
 	if (strncmp(valueText, "0", valueLength) == 0 || strnicmp(valueText, "false", valueLength) == 0 || strnicmp(valueText, "no", valueLength) == 0)
 	{
