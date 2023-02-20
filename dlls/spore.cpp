@@ -9,6 +9,7 @@
 #include	"gamerules.h"
 #include	"skill.h"
 #include	"spore.h"
+#include	"game.h"
 
 #define FEATURE_SPORE_AMMO_CEILING_LIGHT 1
 
@@ -126,11 +127,10 @@ void CSpore::IgniteThink()
 		pev->origin, pev->origin + vecDir * (m_SporeType == GRENADE ? 64 : 32),
 		dont_ignore_monsters, edict(), &tr);
 
-#if FEATURE_OPFOR_DECALS
-	UTIL_DecalTrace(&tr, DECAL_SPR_SPLT1 + RANDOM_LONG(0, 2));
-#else
-	UTIL_DecalTrace(&tr, DECAL_YBLOOD5 + RANDOM_LONG(0, 1));
-#endif
+	if (g_modFeatures.opfor_decals)
+		UTIL_DecalTrace(&tr, DECAL_SPR_SPLT1 + RANDOM_LONG(0, 2));
+	else
+		UTIL_DecalTrace(&tr, DECAL_YBLOOD5 + RANDOM_LONG(0, 1));
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_SPRITE_SPRAY);

@@ -22,6 +22,8 @@ extern void GameDLLInit( void );
 
 struct ModFeatures
 {
+	ModFeatures();
+	bool SetValue(const char* key, const char* value);
 	bool EnableWeapon(const char* name);
 	void EnableAllWeapons();
 
@@ -29,12 +31,36 @@ struct ModFeatures
 
 	const char* DesertEagleDropName() const;
 	const char* M249DropName() const;
+	const char* DeadHazModel() const;
 
 	bool DisplacerBallEnabled() const;
 	bool ShockBeamEnabled() const;
 	bool SporesEnabled() const;
 
+	bool items_instant_drop;
+	bool tripmines_solid;
+	bool satchels_pickable;
+
+	bool monsters_stop_attacking_dying_monsters;
+	bool monsters_delegate_squad_leadership;
+	bool monsters_eat_for_health;
+
+	bool blackops_classify;
+	bool opfor_grunts_dislike_civilians;
+
+	bool racex_dislike_alien_military;
+	bool racex_dislike_gargs;
+	bool racex_dislike_alien_monsters;
+
+	bool skill_opfor;
+	bool opfor_decals;
+	bool opfor_deadhaz;
+
 private:
+	bool UpdateBoolean(const char* value, bool& result, const char* key);
+	bool UpdateInteger(const char* value, int& result, const char* key);
+	bool UpdateColor(const char* value, int& result, const char* key);
+
 	bool weapons[64];
 };
 

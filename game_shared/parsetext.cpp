@@ -8,7 +8,7 @@ bool IsValidIdentifierCharacter(char c)
 	return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
 }
 
-void SkipSpaceCharacters(const char* const text, int& i, const int length)
+void SkipSpaceCharacters(const char* text, int& i, const int length)
 {
 	while (i<length && (text[i] == ' ' || text[i] == '\r' || text[i] == '\n'))
 	{
@@ -16,7 +16,7 @@ void SkipSpaceCharacters(const char* const text, int& i, const int length)
 	}
 }
 
-void SkipSpaces(const char* const text, int& i, const int length)
+void SkipSpaces(const char *text, int& i, const int length)
 {
 	while (i<length && text[i] == ' ')
 	{
@@ -24,23 +24,23 @@ void SkipSpaces(const char* const text, int& i, const int length)
 	}
 }
 
-void ConsumeNonSpaceCharacters(const char* const text, int& i, const int length)
+void ConsumeNonSpaceCharacters(const char *text, int& i, const int length)
 {
-	while(i<length && text[i] != ' ' && text[i] != '\n' && text[i] != '\r')
+	while(i<length && text[i] != ' ' && text[i] != '\n' && text[i] != '\r' && text[i] != '\0')
 	{
 		++i;
 	}
 }
 
-void ConsumeLine(const char* const text, int& i, const int length)
+void ConsumeLine(const char *text, int& i, const int length)
 {
-	while(i<length && text[i] != '\n' && text[i] != '\r')
+	while(i<length && text[i] != '\n' && text[i] != '\r' && text[i] != '\0')
 	{
 		++i;
 	}
 }
 
-bool ReadIdentifier(const char* const text, int& i, char* identBuf, unsigned int identBufSize)
+bool ReadIdentifier(const char *text, int& i, char* identBuf, unsigned int identBufSize)
 {
 	if (identBufSize < 2)
 		return false;
@@ -55,7 +55,7 @@ bool ReadIdentifier(const char* const text, int& i, char* identBuf, unsigned int
 	return identLength > 0;
 }
 
-bool ParseInteger(const char* const valueText, const int valueLength, int& result)
+bool ParseInteger(const char *valueText, int& result)
 {
 	return sscanf(valueText, "%d", &result) == 1;
 }
@@ -70,9 +70,9 @@ static int ClampColorComponent(int colorComponent)
 		return colorComponent;
 }
 
-bool ParseColor(const char* const valueText, const int valueLength, int& result)
+bool ParseColor(const char *valueText, int& result)
 {
-	if (valueLength >= 8 && strncmp(valueText, "0x", 2) == 0)
+	if (strncmp(valueText, "0x", 2) == 0)
 	{
 		const char* colorStart = valueText + 2;
 		return sscanf(colorStart, "%x", &result) == 1;
@@ -92,14 +92,14 @@ bool ParseColor(const char* const valueText, const int valueLength, int& result)
 	return false;
 }
 
-bool ParseBoolean(const char* const valueText, const int valueLength, bool& result)
+bool ParseBoolean(const char* valueText, bool& result)
 {
-	if (strncmp(valueText, "0", valueLength) == 0 || strnicmp(valueText, "false", valueLength) == 0 || strnicmp(valueText, "no", valueLength) == 0)
+	if (strcmp(valueText, "0") == 0 || stricmp(valueText, "false") == 0 || stricmp(valueText, "no") == 0)
 	{
 		result = false;
 		return true;
 	}
-	else if (strncmp(valueText, "1", valueLength) == 0 || strnicmp(valueText, "true", valueLength) == 0 || strnicmp(valueText, "yes", valueLength) == 0)
+	else if (strcmp(valueText, "1") == 0 || stricmp(valueText, "true") == 0 || stricmp(valueText, "yes") == 0)
 	{
 		result = true;
 		return true;

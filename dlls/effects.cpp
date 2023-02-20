@@ -30,6 +30,7 @@
 #include "player.h"
 #include "locus.h"
 #include "mod_features.h"
+#include "game.h"
 #include "particledef.h"
 
 #define FEATURE_ENV_WARPBALL 1
@@ -4049,15 +4050,30 @@ void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 		case 6: iTexture = DECAL_SCORCH1	+	RANDOM_LONG(0,1); break;
 		case 7: iTexture = DECAL_SPIT1		+	RANDOM_LONG(0,1); break;
 		case 8: iTexture = DECAL_SMALLSCORCH1 +	RANDOM_LONG(0,2); break;
-#if FEATURE_OPFOR_DECALS
-		case 9: iTexture = DECAL_SPR_SPLT1 +	RANDOM_LONG(0,2); break;
-		case 10: iTexture = DECAL_OPFOR_SCORCH1 +	RANDOM_LONG(0,2); break;
-		case 11: iTexture = DECAL_OPFOR_SMALLSCORCH1 +	RANDOM_LONG(0,2); break;
-#else
-		case 9: iTexture = DECAL_YBLOOD5 +	RANDOM_LONG(0,1); break;
-		case 10: iTexture = DECAL_SCORCH1 +	RANDOM_LONG(0,1); break;
-		case 11: iTexture = DECAL_SMALLSCORCH1 +	RANDOM_LONG(0,2); break;
-#endif
+		case 9:
+		{
+			if (g_modFeatures.opfor_decals)
+				iTexture = DECAL_SPR_SPLT1 + RANDOM_LONG(0,2);
+			else
+				iTexture = DECAL_YBLOOD5 + RANDOM_LONG(0,1);
+		}
+		break;
+		case 10:
+		{
+			if (g_modFeatures.opfor_decals)
+				iTexture = DECAL_OPFOR_SCORCH1 + RANDOM_LONG(0,2);
+			else
+				iTexture = DECAL_SCORCH1 + RANDOM_LONG(0,1);
+		}
+		break;
+		case 11:
+		{
+			if (g_modFeatures.opfor_decals)
+				iTexture = DECAL_OPFOR_SMALLSCORCH1 + RANDOM_LONG(0,2);
+			else
+				iTexture = DECAL_SMALLSCORCH1 + RANDOM_LONG(0,2);
+		}
+		break;
 	}
 
 	if (pev->impulse)

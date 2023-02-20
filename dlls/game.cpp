@@ -31,6 +31,119 @@ struct WeaponNameAndId
 	int id;
 };
 
+ModFeatures::ModFeatures()
+{
+	items_instant_drop = true;
+	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
+	satchels_pickable = true;
+
+	monsters_stop_attacking_dying_monsters = false;
+	monsters_delegate_squad_leadership = true;
+	monsters_eat_for_health = true;
+
+	blackops_classify = false;
+	opfor_grunts_dislike_civilians = FEATURE_OPFOR_SPECIFIC ? true : false;
+
+	racex_dislike_alien_military = true;
+	racex_dislike_gargs = true;
+	racex_dislike_alien_monsters = false;
+
+	skill_opfor = FEATURE_OPFOR_SPECIFIC ? true : false;
+	opfor_decals = FEATURE_OPFOR_SPECIFIC ? true : false;
+	opfor_deadhaz = FEATURE_OPFOR_SPECIFIC ? true : false;
+}
+
+bool ModFeatures::SetValue(const char *key, const char *value)
+{
+	// TODO: handle this more elegant?
+
+	if (strcmp(key, "items_instant_drop") == 0)
+	{
+		return UpdateBoolean(value, items_instant_drop, key);
+	}
+	else if (strcmp(key, "tripmines_solid") == 0)
+	{
+		return UpdateBoolean(value, tripmines_solid, key);
+	}
+	else if (strcmp(key, "satchels_pickable") == 0)
+	{
+		return UpdateBoolean(value, satchels_pickable, key);
+	}
+	else if (strcmp(key, "monsters_stop_attacking_dying_monsters") == 0)
+	{
+		return UpdateBoolean(value, monsters_stop_attacking_dying_monsters, key);
+	}
+	else if (strcmp(key, "monsters_delegate_squad_leadership") == 0)
+	{
+		return UpdateBoolean(value, monsters_delegate_squad_leadership, key);
+	}
+	else if (strcmp(key, "monsters_eat_for_health") == 0)
+	{
+		return UpdateBoolean(value, monsters_eat_for_health, key);
+	}
+	else if (strcmp(key, "blackops_classify") == 0)
+	{
+		return UpdateBoolean(value, blackops_classify, key);
+	}
+	else if (strcmp(key, "opfor_grunts_dislike_civilians") == 0)
+	{
+		return UpdateBoolean(value, opfor_grunts_dislike_civilians, key);
+	}
+	else if (strcmp(key, "racex_dislike_alien_military") == 0)
+	{
+		return UpdateBoolean(value, racex_dislike_alien_military, key);
+	}
+	else if (strcmp(key, "racex_dislike_gargs") == 0)
+	{
+		return UpdateBoolean(value, racex_dislike_gargs, key);
+	}
+	else if (strcmp(key, "racex_dislike_alien_monsters") == 0)
+	{
+		return UpdateBoolean(value, racex_dislike_alien_monsters, key);
+	}
+	else if (strcmp(key, "skill_opfor") == 0)
+	{
+		return UpdateBoolean(value, skill_opfor, key);
+	}
+	else if (strcmp(key, "opfor_decals") == 0)
+	{
+		return UpdateBoolean(value, opfor_decals, key);
+	}
+	else if (strcmp(key, "opfor_deadhaz") == 0)
+	{
+		return UpdateBoolean(value, opfor_deadhaz, key);
+	}
+	else
+	{
+		ALERT(at_console, "Unknown mod feature key '%s'\n", key);
+		return false;
+	}
+}
+
+bool ModFeatures::UpdateBoolean(const char *value, bool &result, const char *key)
+{
+	bool success = ParseBoolean(value, result);
+	if (!success)
+		ALERT(at_console, "Parameter '%s' expected a boolean value, got '%s' instead\n", key, value);
+	return success;
+}
+
+bool ModFeatures::UpdateInteger(const char *value, int &result, const char *key)
+{
+	bool success = ParseInteger(value, result);
+	if (!success)
+		ALERT(at_console, "Parameter '%s' expected an integer value, got '%s' instead\n", key, value);
+	return success;
+}
+
+bool ModFeatures::UpdateColor(const char *value, int &result, const char *key)
+{
+	bool success = ParseColor(value, result);
+	if (!success)
+		ALERT(at_console, "Parameter '%s' expected a color value, got '%s' instead\n", key, value);
+	return success;
+}
+
 bool ModFeatures::EnableWeapon(const char *name)
 {
 	static const WeaponNameAndId knownWeapons[] = {
@@ -87,6 +200,14 @@ const char* ModFeatures::M249DropName() const
 	return "ammo_9mmAR";
 }
 
+const char* ModFeatures::DeadHazModel() const
+{
+	if (opfor_deadhaz)
+		return "models/deadhaz.mdl";
+	else
+		return "models/player.mdl";
+}
+
 bool ModFeatures::DisplacerBallEnabled() const
 {
 #if FEATURE_DISPLACER
@@ -128,6 +249,9 @@ void ReadEnabledWeapons()
 		g_modFeatures.EnableAllWeapons();
 		return;
 	}
+
+	ALERT(at_console, "Parsing enabled weapons from %s\n", fileName);
+
 	char buffer[128];
 	memset(buffer, 0, sizeof(buffer));
 	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
@@ -138,15 +262,65 @@ void ReadEnabledWeapons()
 		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
 			continue;
 
-		char identBuf[64];
-		if (ReadIdentifier(buffer, i, identBuf, sizeof(identBuf)))
+		int tokenStart = i;
+		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
+		int tokenLength = i - tokenStart;
+		if (tokenLength > 0)
 		{
-			bool found = g_modFeatures.EnableWeapon(identBuf);
-			if (!found)
-				ALERT(at_warning, "Unknown weapon '%s' in %s\n", identBuf, fileName);
+			char* weaponName = buffer + tokenStart;
+			weaponName[tokenLength] = '\0';
+
+			if (g_modFeatures.EnableWeapon(weaponName))
+				ALERT(at_console, "Enabled weapon '%s'\n", weaponName);
+			else
+				ALERT(at_warning, "Unknown weapon '%s' in %s\n", weaponName, fileName);
 		}
 	}
 	g_engfuncs.pfnFreeFile( pMemFile );
+}
+
+void ReadServerFeatures()
+{
+	const char* fileName = "featureful_server.cfg";
+	int filePos = 0, fileSize;
+	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	if (!pMemFile)
+		return;
+
+	ALERT(at_console, "Parsing server features from %s\n", fileName);
+
+	char buffer[512];
+	memset(buffer, 0, sizeof(buffer));
+
+	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
+	{
+		int i = 0;
+		SkipSpaces(buffer, i, sizeof(buffer));
+
+		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
+			continue;
+
+
+		const int keyStart = i;
+		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
+		const int keyLength = i - keyStart;
+		SkipSpaces(buffer, i, sizeof(buffer));
+		const int valueStart = i;
+		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
+		const int valueLength = i - valueStart;
+
+		if (keyLength > 0 && valueLength > 0)
+		{
+			char* key = buffer + keyStart;
+			key[keyLength] = '\0';
+			char* value = buffer + valueStart;
+			value[valueLength] = '\0';
+
+			ALERT(at_console, "Key: %s. Value: %s\n", key, value);
+
+			g_modFeatures.SetValue(key, value);
+		}
+	}
 }
 
 cvar_t displaysoundlist = {"displaysoundlist","0"};
@@ -650,6 +824,7 @@ void GameDLLInit( void )
 	if( CVAR_GET_POINTER( "build" ) )
 		g_fIsXash3D = TRUE;
 
+	ReadServerFeatures();
 	ReadEnabledWeapons();
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
@@ -1134,9 +1309,9 @@ void GameDLLInit( void )
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
-#if FEATURE_OPFOR_SKILL
-	SERVER_COMMAND( "exec skillopfor.cfg\n" );
-#endif
+
+	if (g_modFeatures.skill_opfor)
+		SERVER_COMMAND( "exec skillopfor.cfg\n" );
 
 	// Register server commands
 	g_engfuncs.pfnAddServerCommand("report_ai_state", Cmd_ReportAIState);

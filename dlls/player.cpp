@@ -5527,7 +5527,7 @@ LINK_ENTITY_TO_CLASS( monster_hevsuit_dead, CDeadHEV )
 //=========================================================
 void CDeadHEV :: Spawn( void )
 {
-	SpawnHelper(DEADHAZMODEL);
+	SpawnHelper(g_modFeatures.DeadHazModel());
 	pev->body			= 1;
 	MonsterInitDead();
 }

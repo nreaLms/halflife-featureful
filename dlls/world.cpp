@@ -33,6 +33,7 @@
 #include "weapons.h"
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
+#include "game.h"
 
 extern CGraph WorldGraph;
 extern CSoundEnt *pSoundEnt;
@@ -90,7 +91,6 @@ DLL_DECALLIST gDecals[] = {
 	{ "{smscorch3", 0 },		// DECAL_SMALLSCORCH3,	// Small scorch mark
 	{ "{mommablob", 0 },		// DECAL_MOMMABIRTH		// BM Birth spray
 	{ "{mommablob", 0 },		// DECAL_MOMMASPLAT		// BM Mortar spray?? need decal
-#if FEATURE_OPFOR_DECALS
 	{ "{spr_splt1", 0 },
 	{ "{spr_splt2", 0 },
 	{ "{spr_splt3", 0 },
@@ -100,7 +100,6 @@ DLL_DECALLIST gDecals[] = {
 	{ "{ofsmscorch1", 0 },
 	{ "{ofsmscorch2", 0 },
 	{ "{ofsmscorch3", 0 }
-#endif
 };
 
 /*
@@ -596,7 +595,9 @@ void CWorld::Precache( void )
 	// 63 testing
 	LIGHT_STYLE( 63, "a" );
 
-	for( int i = 0; i < (int)ARRAYSIZE( gDecals ); i++ )
+	const int decalCount = g_modFeatures.opfor_decals ? (int)ARRAYSIZE( gDecals ) : DECAL_BASE_COUNT;
+
+	for( int i = 0; i < decalCount; i++ )
 		gDecals[i].index = DECAL_INDEX( gDecals[i].name );
 
 	// init the WorldGraph.

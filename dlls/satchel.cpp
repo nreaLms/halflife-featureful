@@ -21,6 +21,7 @@
 #include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
+#include "game.h"
 
 enum satchel_state
 {
@@ -192,8 +193,7 @@ void CSatchelCharge::BounceSound( void )
 #if !CLIENT_DLL
 void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-#if FEATURE_PICKABLE_SATCHELS
-	if (useType == USE_SET && pActivator && pActivator->edict() == pev->owner)
+	if (useType == USE_SET && pActivator && pActivator->edict() == pev->owner && g_modFeatures.satchels_pickable)
 	{
 		if (pActivator->IsPlayer())
 		{
@@ -230,7 +230,6 @@ void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		}
 	}
 	else
-#endif
 	{
 		CGrenade::DetonateUse(pActivator, pCaller, useType, value);
 	}
@@ -239,12 +238,10 @@ void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 int CSatchelCharge::ObjectCaps()
 {
 	int caps = CBaseEntity::ObjectCaps();
-#if FEATURE_PICKABLE_SATCHELS
-	if (pev->owner)
+	if (pev->owner && g_modFeatures.satchels_pickable)
 	{
 		caps |= FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	}
-#endif
 	return caps;
 }
 #endif

@@ -647,79 +647,79 @@ void CHud::ParseClientFeatures()
 			const char* tokenName = pfile + idTokenStart;
 			if (strncmp("hud_color", tokenName, tokenLength) == 0)
 			{
-				ParseColor(valueBuf, valueLength, clientFeatures.hud_color);
+				ParseColor(valueBuf, clientFeatures.hud_color);
 			}
 			else if (strncmp("hud_min_alpha", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.hud_min_alpha);
+				ParseInteger(valueBuf, clientFeatures.hud_min_alpha);
 			}
 			else if (strncmp("hud_color_critical", tokenName, tokenLength) == 0)
 			{
-				ParseColor(valueBuf, valueLength, clientFeatures.hud_color_critical);
+				ParseColor(valueBuf, clientFeatures.hud_color_critical);
 			}
 			else if (strncmp("flashlight.custom.enabled_by_default", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.flashlight.custom.enabled_by_default);
+				ParseBoolean(valueBuf, clientFeatures.flashlight.custom.enabled_by_default);
 			}
 			else if (strncmp("flashlight.custom.configurable", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.flashlight.custom.configurable);
+				ParseBoolean(valueBuf, clientFeatures.flashlight.custom.configurable);
 			}
 			else if (strncmp("flashlight.color", tokenName, tokenLength) == 0)
 			{
-				ParseColor(valueBuf, valueLength, clientFeatures.flashlight.color);
+				ParseColor(valueBuf, clientFeatures.flashlight.color);
 			}
 			else if (strncmp("flashlight.distance", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.flashlight.distance);
+				ParseInteger(valueBuf, clientFeatures.flashlight.distance);
 			}
 			else if (strncmp("flashlight.radius.default", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.flashlight.radius.defaultValue);
+				ParseInteger(valueBuf, clientFeatures.flashlight.radius.defaultValue);
 			}
 			else if (strncmp("flashlight.radius.min", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.flashlight.radius.minValue);
+				ParseInteger(valueBuf, clientFeatures.flashlight.radius.minValue);
 			}
 			else if (strncmp("flashlight.radius.max", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.flashlight.radius.maxValue);
+				ParseInteger(valueBuf, clientFeatures.flashlight.radius.maxValue);
 			}
 			else if (strncmp("flashlight.fade_distance.default", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.defaultValue);
+				ParseInteger(valueBuf, clientFeatures.flashlight.fade_distance.defaultValue);
 			}
 			else if (strncmp("flashlight.radius.configurable", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.flashlight.radius.configurable);
+				ParseBoolean(valueBuf, clientFeatures.flashlight.radius.configurable);
 			}
 			else if (strncmp("flashlight.fade_distance.min", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.minValue);
+				ParseInteger(valueBuf, clientFeatures.flashlight.fade_distance.minValue);
 			}
 			else if (strncmp("flashlight.fade_distance.max", tokenName, tokenLength) == 0)
 			{
-				ParseInteger(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.maxValue);
+				ParseInteger(valueBuf, clientFeatures.flashlight.fade_distance.maxValue);
 			}
 			else if (strncmp("flashlight.fade_distance.configurable", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.flashlight.fade_distance.configurable);
+				ParseBoolean(valueBuf, clientFeatures.flashlight.fade_distance.configurable);
 			}
 			else if (strncmp("weapon_wallpuff.enabled_by_default", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.weapon_wallpuff.enabled_by_default);
+				ParseBoolean(valueBuf, clientFeatures.weapon_wallpuff.enabled_by_default);
 			}
 			else if (strncmp("weapon_wallpuff.configurable", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.weapon_wallpuff.configurable);
+				ParseBoolean(valueBuf, clientFeatures.weapon_wallpuff.configurable);
 			}
 			else if (strncmp("weapon_sparks.enabled_by_default", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.weapon_sparks.enabled_by_default);
+				ParseBoolean(valueBuf, clientFeatures.weapon_sparks.enabled_by_default);
 			}
 			else if (strncmp("weapon_sparks.configurable", tokenName, tokenLength) == 0)
 			{
-				ParseBoolean(valueBuf, valueLength, clientFeatures.weapon_sparks.configurable);
+				ParseBoolean(valueBuf, clientFeatures.weapon_sparks.configurable);
 			}
 		}
 	}

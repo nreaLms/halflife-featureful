@@ -1137,7 +1137,7 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 	else
 		ClearConditions( bits_COND_ENEMY_OCCLUDED );
 
-	const bool enemyIsDead = FEATURE_STOP_ATTACKING_DYING_MONSTERS ? !pEnemy->IsFullyAlive() : !pEnemy->IsAlive();
+	const bool enemyIsDead = g_modFeatures.monsters_stop_attacking_dying_monsters ? !pEnemy->IsFullyAlive() : !pEnemy->IsAlive();
 
 	if( enemyIsDead )
 	{
@@ -2626,25 +2626,11 @@ int CBaseMonster::IDefaultRelationship(int classify)
 	return IDefaultRelationship(Classify(), classify);
 }
 
-#if FEATURE_RACEX_AND_AMIL_ENEMIES
-#define R_XA R_HT
-#define R_PA R_HT
-#else
-#define R_XA R_NO
-#define R_PA R_NO
-#endif
-
-#if FEATURE_RACEX_AND_AMONSTERS_ENEMIES
-#define R_AX R_DL
-#else
-#define R_AX R_NO
-#endif
-
-#if FEATURE_OPFOR_ALLY_RELATIONSHIP
-#define R_OA R_DL
-#else
-#define R_OA R_AL
-#endif
+#define R_OA (R_AL-1)
+#define R_XA (R_AL-2)
+#define R_PA (R_AL-3)
+#define R_XG (R_AL-4)
+#define R_AX (R_AL-5)
 
 int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 {
@@ -2664,19 +2650,32 @@ int CBaseMonster::IDefaultRelationship(int classify1, int classify2)
 	/*PLAYERALLY*/	{ R_NO	,R_DL	,R_AL	,R_AL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_AL,	R_NO,	R_NO,	R_DL,	R_DL,	R_OA,	R_DL,	R_HT,	R_DL},
 	/*PBIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL},
 	/*ABIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_AL},
-	/*XPREDATOR*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_PA	,R_NO	,R_AX	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_DL,	R_DL,	R_NO,	R_PA},
-	/*XSHOCK*/		{ R_NO	,R_DL	,R_DL	,R_DL	,R_HT	,R_XA	,R_NO	,R_AX	,R_AX	,R_AX	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_HT,	R_HT,	R_NO,	R_XA},
+	/*XPREDATOR*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_PA	,R_NO	,R_AX	,R_DL	,R_DL	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_DL,	R_DL,	R_NO,	R_XG},
+	/*XSHOCK*/		{ R_NO	,R_DL	,R_DL	,R_DL	,R_HT	,R_XA	,R_NO	,R_AX	,R_AX	,R_AX	,R_NO	,R_DL,	R_NO,	R_NO,	R_AL,	R_AL,	R_HT,	R_HT,	R_NO,	R_XG},
 	/*PLRALLYMIL*/	{ R_NO	,R_DL	,R_AL	,R_OA	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_OA,	R_NO,	R_NO,	R_DL,	R_HT,	R_AL,	R_DL,	R_HT,	R_HT},
 	/*BLACKOPS*/	{ R_NO	,R_DL	,R_HT	,R_DL	,R_DL	,R_HT	,R_DL	,R_DL	,R_DL	,R_DL	,R_NO	,R_HT,	R_NO,	R_NO,	R_HT,	R_HT,	R_DL,	R_AL,	R_HT,	R_HT},
 	/*SNARK*/		{ R_NO	,R_NO	,R_HT	,R_DL	,R_HT	,R_NO	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_HT,	R_HT,	R_NO,	R_DL},
-	/*GARGANTUA*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_PA,	R_XA,	R_DL,	R_DL,	R_NO,	R_AL},
+	/*GARGANTUA*/	{ R_NO	,R_DL	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_NO	,R_NO	,R_NO	,R_NO	,R_DL,	R_NO,	R_NO,	R_XG,	R_XG,	R_DL,	R_DL,	R_NO,	R_AL},
 	};
 	if (classify1 >= CLASS_NUMBER_OF_CLASSES || classify1 < 0 || classify2 >= CLASS_NUMBER_OF_CLASSES || classify2 < 0 )
 	{
 		ALERT(at_aiconsole, "Unknown classify for monster relationship %d,%d\n", classify1, classify2);
 		return R_NO;
 	}
-	return iEnemy[classify1][classify2];
+	const int rel = iEnemy[classify1][classify2];
+	switch (rel) {
+	case R_OA:
+		return g_modFeatures.opfor_grunts_dislike_civilians ? R_DL : R_AL;
+	case R_XA:
+	case R_PA:
+		return g_modFeatures.racex_dislike_alien_military ? R_HT : R_NO;
+	case R_XG:
+		return g_modFeatures.racex_dislike_gargs ? R_HT : R_NO;
+	case R_AX:
+		return g_modFeatures.racex_dislike_alien_monsters ? R_DL : R_NO;
+	default:
+		return rel;
+	}
 }
 
 //=========================================================

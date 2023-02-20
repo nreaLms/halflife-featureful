@@ -7,6 +7,7 @@
 #include	"hgrunt.h"
 #include	"mod_features.h"
 #include	"gamerules.h"
+#include	"game.h"
 
 #if FEATURE_MASSN
 
@@ -64,11 +65,9 @@ public:
 	void PlayUnUseSentence();
 	int	DefaultClassify ( void )
 	{
-#if FEATURE_BLACKOPS_CLASS
-		return CLASS_HUMAN_BLACKOPS;
-#else
+		if (g_modFeatures.blackops_classify)
+			return CLASS_HUMAN_BLACKOPS;
 		return CHGrunt::DefaultClassify();
-#endif
 	}
 
 	BOOL FOkToSpeak(void);
@@ -411,11 +410,9 @@ public:
 	void Spawn( void );
 	int	DefaultClassify ( void )
 	{
-#if FEATURE_BLACKOPS_CLASS
-		return CLASS_HUMAN_BLACKOPS;
-#else
+		if (g_modFeatures.blackops_classify)
+			return CLASS_HUMAN_BLACKOPS;
 		return CLASS_HUMAN_MILITARY;
-#endif
 	}
 
 	void KeyValue( KeyValueData *pkvd );

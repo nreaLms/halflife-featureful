@@ -22,6 +22,7 @@
 #include "player.h"
 #include "effects.h"
 #include "gamerules.h"
+#include "game.h"
 
 #define	TRIPMINE_PRIMARY_VOLUME		450
 
@@ -92,15 +93,16 @@ void CTripmineGrenade::Spawn( void )
 	pev->sequence = TRIPMINE_WORLD;
 	ResetSequenceInfo();
 	pev->framerate = 0;
-#if FEATURE_TRIPMINE_NONSOLID
-	if (pev->angles.y >= 270.0 || pev->angles.y <= 90.0) {
-		UTIL_SetSize( pev, Vector( 0.0f, 0.0f, 0.0f ), Vector( 1.0f, 1.0f, 1.0f ) );
-	} else {
-		UTIL_SetSize( pev, Vector( -1.0f, -1.0f, 0.0f ), Vector( 0.0f, 0.0f, 1.0f ) );
+	if (!g_modFeatures.tripmines_solid)
+	{
+		if (pev->angles.y >= 270.0 || pev->angles.y <= 90.0) {
+			UTIL_SetSize( pev, Vector( 0.0f, 0.0f, 0.0f ), Vector( 1.0f, 1.0f, 1.0f ) );
+		} else {
+			UTIL_SetSize( pev, Vector( -1.0f, -1.0f, 0.0f ), Vector( 0.0f, 0.0f, 1.0f ) );
+		}
 	}
-#else
-	UTIL_SetSize( pev, Vector( -8.0f, -8.0f, -8.0f ), Vector( 8.0f, 8.0f, 8.0f ) );
-#endif
+	else
+		UTIL_SetSize( pev, Vector( -8.0f, -8.0f, -8.0f ), Vector( 8.0f, 8.0f, 8.0f ) );
 
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -287,12 +289,10 @@ void CTripmineGrenade::BeamBreakThink( void )
 		}
 	}
 
-#if FEATURE_TRIPMINE_NONSOLID
-	if (tr.fStartSolid)
+	if (tr.fStartSolid && !g_modFeatures.tripmines_solid)
 	{
 		bBlowup = 1;
 	}
-#endif
 	if( fabs( m_flBeamLength - tr.flFraction ) > 0.001f )
 	{
 		bBlowup = 1;

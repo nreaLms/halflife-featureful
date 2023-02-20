@@ -23,6 +23,7 @@
 #include "effects.h"
 #include "customentity.h"
 #include "mod_features.h"
+#include "game.h"
 
 #define SF_OSPREY_DONT_DEPLOY SF_MONSTER_SPECIAL_FLAG
 
@@ -938,11 +939,9 @@ public:
 	void PrepareGruntBeforeSpawn(CBaseEntity* pGrunt);
 	int	DefaultClassify ( void )
 	{
-#if FEATURE_BLACKOPS_CLASS
-		return CLASS_HUMAN_BLACKOPS;
-#else
+		if (g_modFeatures.blackops_classify)
+			return CLASS_HUMAN_BLACKOPS;
 		return COsprey::DefaultClassify();
-#endif
 	}
 protected:
 	const char* TrooperName();

@@ -15,7 +15,6 @@
 #define FEATURE_OPFOR_TITLE (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_OPFOR_TENTACLE_HEIGHT (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_OPFOR_SCIENTIST_BODIES (0 || FEATURE_OPFOR_SPECIFIC)
-#define FEATURE_OPFOR_SKILL (0 || FEATURE_OPFOR_SPECIFIC)
 
 // Fast way to enable/disable entities that require extra content to be added in mod
 #define FEATURE_OPFOR_WEAPONS 1
@@ -54,21 +53,6 @@
 #define FEATURE_OPFOR_DEADHAZ (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_SKELETON (0 || FEATURE_OPFOR_MONSTERS)
 
-// whether fgrunts and black mesa personnel are enemies like in Opposing Force
-#define FEATURE_OPFOR_ALLY_RELATIONSHIP (0 || FEATURE_OPFOR_SPECIFIC)
-
-// whether race x and alien military are enemies
-#define FEATURE_RACEX_AND_AMIL_ENEMIES 1
-
-// whether race x and alien monsters are enemies
-#define FEATURE_RACEX_AND_AMONSTERS_ENEMIES 0
-
-// whether blackops monsters have a separate class which is enemy to military
-#define FEATURE_BLACKOPS_CLASS 0
-
-// whether monsters get health from eating meat or enemy corpses
-#define FEATURE_EAT_FOR_HEALTH 1
-
 // enable reverse relationship models, like barnabus
 #define FEATURE_REVERSE_RELATIONSHIP_MODELS 0
 
@@ -76,12 +60,6 @@
 #define FEATURE_MONSTERS_DROP_HANDGRENADES 0
 
 #define FEATURE_DYING_MONSTERS_DONT_COLLIDE_WITH_PLAYER 0
-
-#define FEATURE_STOP_ATTACKING_DYING_MONSTERS 0
-
-/* Whether a new squad leader gets chosen if the original one dies.
- * This prevents squad dissolving */
-#define FEATURE_DELEGATE_SQUAD_LEADERSHIP 1
 
 // New weapons
 #define FEATURE_PIPEWRENCH (0 || FEATURE_OPFOR_WEAPONS)
@@ -98,20 +76,11 @@
 #define FEATURE_UZI 1
 
 // Weapon features
-#define FEATURE_TRIPMINE_NONSOLID (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_PREDICTABLE_LASER_SPOT 0
-#define FEATURE_PICKABLE_SATCHELS 0
 
 // Dependent features
 #define FEATURE_SHOCKBEAM (FEATURE_SHOCKTROOPER || FEATURE_SHOCKRIFLE)
 #define FEATURE_SPOREGRENADE (FEATURE_SHOCKTROOPER || FEATURE_SPORELAUNCHER)
-
-// Replacement stuff
-#if FEATURE_OPFOR_DEADHAZ
-#define DEADHAZMODEL "models/deadhaz.mdl"
-#else
-#define DEADHAZMODEL "models/player.mdl"
-#endif
 
 // Brush entities features
 // Open func_door_rotating in the direction of player's movement, not facing
@@ -119,7 +88,6 @@
 
 // Misc features
 #define FEATURE_SUIT_NO_SOUNDS (0 || FEATURE_OPFOR_SPECIFIC)
-#define FEATURE_OPFOR_DECALS (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_OPFOR_NIGHTVISION (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_CS_NIGHTVISION (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_FILTER_NIGHTVISION 0
@@ -136,9 +104,6 @@
 #define FEATURE_NIGHTVISION_STYLES (FEATURE_OPFOR_NIGHTVISION + FEATURE_CS_NIGHTVISION + FEATURE_FILTER_NIGHTVISION > 1)
 
 #define FEATURE_ROPE (1 || FEATURE_OPFOR_SPECIFIC)
-
-// whether items drop instantly when spawned, e.g. from func_breakable (this is default behavior)
-#define FEATURE_ITEM_INSTANT_DROP 1
 
 // enable/disable opengl fog and env_fog
 #define FEATURE_FOG 0

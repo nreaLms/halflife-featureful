@@ -809,12 +809,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		( (CRpg *)player.m_pActiveItem )->m_fSpotActive = (int)from->client.vuser2[1];
 		( (CRpg *)player.m_pActiveItem )->m_cActiveRockets = (int)from->client.vuser2[2];
 	}
-#if FEATURE_PICKABLE_SATCHELS
-	if( player.m_pActiveItem->m_iId == WEAPON_SATCHEL )
-	{
-		player.m_pActiveItem->m_chargeReady = (int)from->client.vuser2[1];
-	}
-#endif
 #if FEATURE_DESERT_EAGLE
 	if( player.m_pActiveItem->m_iId == WEAPON_EAGLE )
 	{

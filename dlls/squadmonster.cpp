@@ -25,7 +25,7 @@
 #include "saverestore.h"
 #include "squadmonster.h"
 #include "plane.h"
-#include "mod_features.h"
+#include "game.h"
 
 //=========================================================
 // Save/Restore
@@ -169,20 +169,21 @@ void CSquadMonster::SquadRemove( CSquadMonster *pRemove )
 		int squadCountLeft = 0;
 		CSquadMonster* newLeader = NULL;
 
-#if FEATURE_DELEGATE_SQUAD_LEADERSHIP
-		for( int i = 0; i < MAX_SQUAD_MEMBERS - 1; i++ )
+		if (g_modFeatures.monsters_delegate_squad_leadership)
 		{
-			CSquadMonster *pMember = MySquadMember( i );
-			if (pMember && pMember->IsFullyAlive())
+			for( int i = 0; i < MAX_SQUAD_MEMBERS - 1; i++ )
 			{
-				squadCountLeft++;
+				CSquadMonster *pMember = MySquadMember( i );
+				if (pMember && pMember->IsFullyAlive())
+				{
+					squadCountLeft++;
 
-				// choose the healthiest member as a new leader
-				if (!newLeader || pMember->pev->health > newLeader->pev->health)
-					newLeader = pMember;
+					// choose the healthiest member as a new leader
+					if (!newLeader || pMember->pev->health > newLeader->pev->health)
+						newLeader = pMember;
+				}
 			}
 		}
-#endif
 
 		if (newLeader && squadCountLeft > 1)
 		{

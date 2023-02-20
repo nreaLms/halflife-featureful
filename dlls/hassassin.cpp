@@ -204,11 +204,9 @@ int CHAssassin::DefaultISoundMask( void )
 //=========================================================
 int CHAssassin::DefaultClassify( void )
 {
-#if FEATURE_BLACKOPS_CLASS
-	return CLASS_HUMAN_BLACKOPS;
-#else
+	if (g_modFeatures.blackops_classify)
+		return CLASS_HUMAN_BLACKOPS;
 	return CLASS_HUMAN_MILITARY;
-#endif
 }
 
 //=========================================================

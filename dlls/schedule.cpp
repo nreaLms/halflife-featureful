@@ -26,8 +26,8 @@
 #include "nodes.h"
 #include "defaultai.h"
 #include "soundent.h"
-#include "mod_features.h"
 #include "gamerules.h"
+#include "game.h"
 
 extern CGraph WorldGraph;
 
@@ -1696,11 +1696,12 @@ void CBaseMonster::StartTask( Task_t *pTask )
 		TaskComplete();
 		break;
 	case TASK_GET_HEALTH_FROM_FOOD:
-#if FEATURE_EAT_FOR_HEALTH
-		ALERT(at_aiconsole, "%s eating. Current health: %d/%d\n", STRING(pev->classname), (int)pev->health, (int)pev->max_health);
-		TakeHealth(this, pev->max_health * pTask->flData, DMG_GENERIC);
-		ALERT(at_aiconsole, "%s health after eating: %d/%d\n", STRING(pev->classname), (int)pev->health, (int)pev->max_health);
-#endif
+		if (g_modFeatures.monsters_eat_for_health)
+		{
+			ALERT(at_aiconsole, "%s eating. Current health: %d/%d\n", STRING(pev->classname), (int)pev->health, (int)pev->max_health);
+			TakeHealth(this, pev->max_health * pTask->flData, DMG_GENERIC);
+			ALERT(at_aiconsole, "%s health after eating: %d/%d\n", STRING(pev->classname), (int)pev->health, (int)pev->max_health);
+		}
 		TaskComplete();
 		break;
 	case TASK_GET_PATH_TO_FREEROAM_NODE:

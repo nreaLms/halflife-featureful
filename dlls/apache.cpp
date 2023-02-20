@@ -21,6 +21,7 @@
 #include "nodes.h"
 #include "effects.h"
 #include "mod_features.h"
+#include "game.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -1116,11 +1117,9 @@ public:
 	void Precache();
 	int	DefaultClassify ( void )
 	{
-#if FEATURE_BLACKOPS_CLASS
-		return CLASS_HUMAN_BLACKOPS;
-#else
+		if (g_modFeatures.blackops_classify)
+			return CLASS_HUMAN_BLACKOPS;
 		return CApache::DefaultClassify();
-#endif
 	}
 };
 
