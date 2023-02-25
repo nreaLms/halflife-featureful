@@ -397,6 +397,9 @@ public:
 	void BeamUpdateVars( void );
 	void BeamUpdateFlags();
 
+	void SendRingBeam(CBaseEntity* pClient);
+	void SendMessages(CBaseEntity* pClient);
+
 	int	m_active;
 	string_t	m_iszStartEntity;
 	string_t	m_iszEndEntity;
@@ -946,6 +949,54 @@ void CLightning::BeamUpdateFlags()
 	if ( pev->spawnflags & SF_BEAM_SINE )
 		flags |= BEAM_FSINE;
 	SetFlags(flags);
+}
+
+void CLightning::SendRingBeam(CBaseEntity *pClient)
+{
+	CBaseEntity *pStart = RandomTargetname( STRING( m_iszStartEntity ) );
+	CBaseEntity *pEnd = RandomTargetname( STRING( m_iszEndEntity ) );
+
+	const int msgType = pClient ? MSG_ONE : MSG_BROADCAST;
+	edict_t* pClientEdict = pClient ? pClient->edict() : NULL;
+
+	if( pStart != NULL && pEnd != NULL )
+	{
+		if( IsPointEntity( pStart ) || IsPointEntity( pEnd ) )
+		{
+			// don't work
+			return;
+		}
+
+		MESSAGE_BEGIN( msgType, gmsgCustomBeam ? gmsgCustomBeam : SVC_TEMPENTITY, NULL, pClientEdict );
+			WRITE_BYTE( TE_BEAMRING );
+			WRITE_SHORT( pStart->entindex() );
+			WRITE_SHORT( pEnd->entindex() );
+
+			WRITE_SHORT( m_spriteTexture );
+			WRITE_BYTE( m_frameStart ); // framestart
+			WRITE_BYTE( (int)pev->framerate ); // framerate
+			WRITE_BYTE( (int)( m_life * 10.0f ) ); // life
+			WRITE_BYTE( m_boltWidth );  // width
+			WRITE_BYTE( m_noiseAmplitude );   // noise
+			WRITE_BYTE( (int)pev->rendercolor.x );   // r, g, b
+			WRITE_BYTE( (int)pev->rendercolor.y );   // r, g, b
+			WRITE_BYTE( (int)pev->rendercolor.z );   // r, g, b
+			WRITE_BYTE( (int)pev->renderamt );	// brightness
+			WRITE_BYTE( m_speed );		// speed
+		if (gmsgCustomBeam)
+		{
+			WRITE_BYTE( GetFlags() );
+		}
+		MESSAGE_END();
+	}
+}
+
+void CLightning::SendMessages(CBaseEntity *pClient)
+{
+	if ( m_active && m_life == 0 && pev->spawnflags & SF_BEAM_RING )
+	{
+		SendRingBeam(pClient);
+	}
 }
 
 LINK_ENTITY_TO_CLASS( env_laser, CLaser )
