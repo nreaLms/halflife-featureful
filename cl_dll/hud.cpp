@@ -70,6 +70,8 @@ ClientFeatures::ClientFeatures()
 	hud_color = RGB_HUD_DEFAULT;
 	hud_color_critical = 0xFF0000;
 	hud_min_alpha = MIN_ALPHA;
+
+	movemode.configurable = false;
 }
 
 static cvar_t* CVAR_CREATE_INTVALUE(const char* name, int value, int flags)
@@ -88,6 +90,8 @@ static void CreateBooleanCvarConditionally(cvar_t*& cvarPtr, const char* name, c
 {
 	if (booleanValue.configurable)
 		cvarPtr = CVAR_CREATE_BOOLVALUE( name, booleanValue.enabled_by_default, FCVAR_ARCHIVE );
+	else
+		cvarPtr = 0;
 }
 
 #if USE_VGUI
@@ -508,6 +512,7 @@ void CHud::Init( void )
 	default_fov = CVAR_CREATE( "default_fov", "90", FCVAR_ARCHIVE );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
+	CreateBooleanCvarConditionally(m_pCvarDrawMoveMode, "hud_draw_movemode", clientFeatures.movemode);
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
 
 	CreateBooleanCvarConditionally(cl_viewbob, "cl_viewbob", clientFeatures.view_bob);
@@ -748,6 +753,10 @@ void CHud::ParseClientFeatures()
 			else if ((subKey = strStartsWith(keyName, "muzzlelight.")))
 			{
 				UpdateBooleanValue(clientFeatures.muzzlelight, subKey, valueBuf);
+			}
+			else if ((subKey = strStartsWith(keyName, "movemode.")))
+			{
+				UpdateBooleanValue(clientFeatures.movemode, subKey, valueBuf);
 			}
 		}
 	}
@@ -1191,6 +1200,11 @@ bool CHud::CustomFlashlightEnabled()
 	return ClientFeatureEnabled(cl_flashlight_custom, clientFeatures.flashlight.custom.enabled_by_default);
 }
 
+bool CHud::MoveModeEnabled()
+{
+	return ClientFeatureEnabled(m_pCvarDrawMoveMode, clientFeatures.movemode.enabled_by_default);
+}
+
 #if FEATURE_MOVE_MODE
 DECLARE_MESSAGE( m_MoveMode, MoveMode )
 
@@ -1230,6 +1244,9 @@ int CHudMoveMode::VidInit()
 
 int CHudMoveMode::Draw(float flTime)
 {
+	if (!gHUD.MoveModeEnabled())
+		return 1;
+
 	if ( gHUD.m_fPlayerDead || (gHUD.m_iHideHUDDisplay & HIDEHUD_ALL) || !gHUD.HasSuit() )
 	{
 		return 1;

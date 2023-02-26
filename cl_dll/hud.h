@@ -680,6 +680,8 @@ struct ClientFeatures
 	ConfigurableBooleanValue weapon_wallpuff;
 	ConfigurableBooleanValue weapon_sparks;
 	ConfigurableBooleanValue muzzlelight;
+
+	ConfigurableBooleanValue movemode;
 };
 
 //
@@ -711,6 +713,7 @@ public:
 	int		m_iRes;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
+	cvar_t	*m_pCvarDrawMoveMode;
 
 	int m_iFontHeight;
 	int DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -746,6 +749,7 @@ public:
 	bool WeaponSparksEnabled();
 	bool MuzzleLightEnabled();
 	bool CustomFlashlightEnabled();
+	bool MoveModeEnabled();
 private:
 	void ParseClientFeatures();
 	static bool ClientFeatureEnabled(cvar_t *cVariable, bool defaultValue);
