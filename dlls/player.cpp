@@ -168,6 +168,7 @@ int gmsgFlashBattery = 0;
 int gmsgResetHUD = 0;
 int gmsgInitHUD = 0;
 int gmsgSetFog = 0;
+int gmsgKeyedDLight = 0;
 int gmsgShowGameTitle = 0;
 int gmsgCurWeapon = 0;
 int gmsgHealth = 0;
@@ -247,6 +248,7 @@ void LinkUserMessages( void )
 	gmsgInitHUD = REG_USER_MSG( "InitHUD", 0 );		// called every time a new player joins the server
 
 	gmsgSetFog = REG_USER_MSG("SetFog", 14 );
+	gmsgKeyedDLight = REG_USER_MSG("KeyedDLight", -1 );
 
 	gmsgShowGameTitle = REG_USER_MSG( "GameTitle", 1 );
 	gmsgDeathMsg = REG_USER_MSG( "DeathMsg", -1 );

@@ -253,6 +253,12 @@ int __MsgFunc_SetFog(const char *pszName, int iSize, void *pbuf)
 	return gHUD.MsgFunc_SetFog( pszName, iSize, pbuf );
 }
 
+//LRC
+int __MsgFunc_KeyedDLight(const char *pszName, int iSize, void *pbuf)
+{
+	return gHUD.MsgFunc_KeyedDLight( pszName, iSize, pbuf );
+}
+
 //DECLARE_MESSAGE( m_Logo, Logo )
 int __MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 {
@@ -508,6 +514,7 @@ void CHud::Init( void )
 	HOOK_MESSAGE( Items );
 	HOOK_MESSAGE( HUDColor );
 	HOOK_MESSAGE( SetFog );
+	HOOK_MESSAGE( KeyedDLight );
 
 	// TFFree CommandMenu
 	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );

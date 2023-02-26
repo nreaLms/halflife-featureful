@@ -1452,6 +1452,19 @@
 	noise(decal) : "Custom decal texture"
 ]
 
+@PointClass base(Targetname) = env_dlight : "Dynamic light effect"
+[
+	message(string) : "Position (blank = here) [LP]"
+	rendercolor(color255) : "Light Color (R G B)" : "255 255 255"
+	renderamt(integer) : "Radius" : 80
+	health(string) : "Duration (0 = until triggered)" : "0.0"
+	spawnflags(Flags) =
+	[
+		1 : "Only once" : 0
+		2 : "Start on"  : 0
+	]
+]
+
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_explosion : "Explosion"
 [
 	target(string) : "Initial position (blank = here) [LP]"

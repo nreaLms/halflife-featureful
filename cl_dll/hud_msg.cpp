@@ -119,6 +119,36 @@ int CHud::MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+//LRC
+int CHud::MsgFunc_KeyedDLight( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	int iKey = READ_BYTE();
+	dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight( iKey );
+
+	int bActive = READ_BYTE();
+	if (!bActive)
+	{
+		// die instantly
+		dl->die = gEngfuncs.GetClientTime();
+	}
+	else
+	{
+		// never die
+		dl->die = gEngfuncs.GetClientTime() + (float)1E6;
+
+		dl->origin[0] = READ_COORD();
+		dl->origin[1] = READ_COORD();
+		dl->origin[2] = READ_COORD();
+		dl->radius = READ_SHORT();
+		dl->color.r = READ_BYTE();
+		dl->color.g = READ_BYTE();
+		dl->color.b = READ_BYTE();
+	}
+	return 1;
+}
+
 int CHud::MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );

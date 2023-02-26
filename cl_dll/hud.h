@@ -861,6 +861,7 @@ public:
 	int _cdecl MsgFunc_Items(const char* pszName, int iSize, void* pbuf);
 	int _cdecl MsgFunc_HUDColor( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_KeyedDLight( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
