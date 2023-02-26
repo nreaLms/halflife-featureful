@@ -70,6 +70,7 @@ ClientFeatures::ClientFeatures()
 	hud_color = RGB_HUD_DEFAULT;
 	hud_color_critical = 0xFF0000;
 	hud_min_alpha = MIN_ALPHA;
+	opfor_title = FEATURE_OPFOR_SPECIFIC ? true : false;
 
 	movemode.configurable = false;
 }
@@ -757,6 +758,10 @@ void CHud::ParseClientFeatures()
 			else if ((subKey = strStartsWith(keyName, "movemode.")))
 			{
 				UpdateBooleanValue(clientFeatures.movemode, subKey, valueBuf);
+			}
+			else if (strcmp(keyName, "opfor_title") == 0)
+			{
+				ParseBoolean(valueBuf, clientFeatures.opfor_title);
 			}
 		}
 	}

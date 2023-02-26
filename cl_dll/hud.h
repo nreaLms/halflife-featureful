@@ -548,10 +548,9 @@ private:
 
 	int m_HUD_title_life;
 	int m_HUD_title_half;
-#if FEATURE_OPFOR_TITLE
+
 	int m_HUD_title_opposing;
 	int m_HUD_title_force;
-#endif
 };
 
 //
@@ -672,6 +671,7 @@ struct ClientFeatures
 	int hud_color;
 	int hud_min_alpha;
 	int hud_color_critical;
+	bool opfor_title;
 
 	FlashlightFeatures flashlight;
 
