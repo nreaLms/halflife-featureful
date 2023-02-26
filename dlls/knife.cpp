@@ -18,10 +18,11 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
-#include "mod_features.h"
+#ifndef CLIENT_DLL
+#include "game.h"
+#endif
 
 #if FEATURE_KNIFE
 
@@ -34,6 +35,13 @@ LINK_ENTITY_TO_CLASS(weapon_knife, CKnife)
 
 void CKnife::Spawn()
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
 	Precache();
 	m_iId = WEAPON_KNIFE;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -46,6 +54,10 @@ void CKnife::Spawn()
 
 void CKnife::Precache(void)
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
+		return;
+#endif
 	PRECACHE_MODEL("models/v_knife.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_knife.mdl");

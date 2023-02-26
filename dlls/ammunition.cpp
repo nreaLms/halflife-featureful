@@ -8,8 +8,19 @@
 #include "game.h"
 #include "gamerules.h"
 
+bool CBasePlayerAmmo::IsEnabledInMod()
+{
+	return true;
+}
+
 void CBasePlayerAmmo::Spawn( void )
 {
+	if (!IsEnabledInMod())
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+
 	Precache();
 	SET_MODEL( ENT( pev ), MyModel() );
 
@@ -24,6 +35,9 @@ void CBasePlayerAmmo::Spawn( void )
 
 void CBasePlayerAmmo::Precache()
 {
+	if (!IsEnabledInMod())
+		return;
+
 	PRECACHE_MODEL( MyModel() );
 	PRECACHE_SOUND( AMMO_PICKUP_SOUND );
 }
@@ -284,6 +298,9 @@ LINK_ENTITY_TO_CLASS( ammo_gaussclip, CGaussAmmo )
 #if FEATURE_SNIPERRIFLE
 class CSniperrifleAmmo : public CBasePlayerAmmo
 {
+	bool IsEnabledInMod() {
+		return g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE);
+	}
 	const char* MyModel() {
 		return "models/w_m40a1clip.mdl";
 	}
@@ -300,6 +317,9 @@ LINK_ENTITY_TO_CLASS( ammo_762, CSniperrifleAmmo )
 #if FEATURE_M249
 class CM249AmmoClip : public CBasePlayerAmmo
 {
+	bool IsEnabledInMod() {
+		return g_modFeatures.IsWeaponEnabled(WEAPON_M249);
+	}
 	const char* MyModel() {
 		return "models/w_saw_clip.mdl";
 	}

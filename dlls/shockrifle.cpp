@@ -18,12 +18,12 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
 #include "mod_features.h"
 #ifndef CLIENT_DLL
 #include "shockbeam.h"
+#include "game.h"
 #endif
 
 #if FEATURE_SHOCKRIFLE
@@ -32,6 +32,13 @@ LINK_ENTITY_TO_CLASS(weapon_shockrifle, CShockrifle)
 
 void CShockrifle::Spawn()
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
 	Precache();
 	m_iId = WEAPON_SHOCKRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -45,6 +52,10 @@ void CShockrifle::Spawn()
 
 void CShockrifle::Precache(void)
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE))
+		return;
+#endif
 	PRECACHE_MODEL("models/v_shock.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_shock.mdl");

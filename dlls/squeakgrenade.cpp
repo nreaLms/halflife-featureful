@@ -18,10 +18,12 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "soundent.h"
 #include "gamerules.h"
+#ifndef CLIENT_DLL
+#include "game.h"
+#endif
 
 enum w_squeak_e
 {
@@ -699,6 +701,27 @@ const char* CSqueak::EventsFile() const
 
 #if FEATURE_PENGUIN
 LINK_ENTITY_TO_CLASS( weapon_penguin, CPenguin )
+
+void CPenguin::Spawn()
+{
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WeaponId()))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
+	CSqueak::Spawn();
+}
+
+void CPenguin::Precache()
+{
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WeaponId()))
+		return;
+#endif
+	CSqueak::Precache();
+}
 
 const char* CPenguin::GrenadeName() const
 {

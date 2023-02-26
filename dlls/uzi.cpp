@@ -18,10 +18,12 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "soundent.h"
 #include "gamerules.h"
+#ifndef CLIENT_DLL
+#include "game.h"
+#endif
 
 #if FEATURE_UZI
 
@@ -32,6 +34,13 @@ LINK_ENTITY_TO_CLASS( weapon_uziakimbo, CUzi ) // Link to single uzi until akimb
 //=========================================================
 void CUzi::Spawn()
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
 	Precache();
 	SET_MODEL( ENT( pev ), MyWModel() );
 	m_iId = WEAPON_UZI;
@@ -43,6 +52,10 @@ void CUzi::Spawn()
 
 void CUzi::Precache( void )
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
+		return;
+#endif
 	PRECACHE_MODEL( "models/v_uzi.mdl" );
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/p_uzi.mdl" );

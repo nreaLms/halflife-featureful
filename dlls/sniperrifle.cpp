@@ -18,8 +18,10 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
+#ifndef CLIENT_DLL
+#include "game.h"
+#endif
 
 #if FEATURE_SNIPERRIFLE
 
@@ -27,6 +29,14 @@ LINK_ENTITY_TO_CLASS( weapon_sniperrifle, CSniperrifle )
 
 void CSniperrifle::Spawn( )
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
+
 	Precache( );
 	m_iId = WEAPON_SNIPERRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -39,6 +49,11 @@ void CSniperrifle::Spawn( )
 
 void CSniperrifle::Precache( void )
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
+		return;
+#endif
+
 	PRECACHE_MODEL("models/v_m40a1.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_m40a1.mdl");

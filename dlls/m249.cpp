@@ -18,11 +18,12 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "soundent.h"
 #include "gamerules.h"
+#ifndef CLIENT_DLL
 #include "game.h"
+#endif
 
 #if FEATURE_M249
 
@@ -33,6 +34,13 @@ LINK_ENTITY_TO_CLASS(weapon_m249, CM249)
 
 void CM249::Spawn()
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_M249))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
 	Precache();
 	SET_MODEL(ENT(pev), MyWModel());
 	m_iId = WEAPON_M249;
@@ -47,6 +55,10 @@ void CM249::Spawn()
 
 void CM249::Precache(void)
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_M249))
+		return;
+#endif
 	PRECACHE_MODEL("models/v_saw.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_saw.mdl");

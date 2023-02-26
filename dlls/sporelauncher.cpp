@@ -18,11 +18,11 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "gamerules.h"
 #ifndef CLIENT_DLL
 #include "spore.h"
+#include "game.h"
 #endif
 
 #if FEATURE_SPORELAUNCHER
@@ -35,6 +35,13 @@ LINK_ENTITY_TO_CLASS(weapon_sporelauncher, CSporelauncher)
 
 void CSporelauncher::Spawn()
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SPORELAUNCHER))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
 	Precache();
 	m_iId = WEAPON_SPORELAUNCHER;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -50,6 +57,10 @@ void CSporelauncher::Spawn()
 
 void CSporelauncher::Precache(void)
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SPORELAUNCHER))
+		return;
+#endif
 	PRECACHE_MODEL("models/v_spore_launcher.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_spore_launcher.mdl");

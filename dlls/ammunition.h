@@ -7,6 +7,7 @@
 class CBasePlayerAmmo : public CPickup
 {
 public:
+	virtual bool IsEnabledInMod();
 	virtual void Spawn( void );
 	void Precache();
 	void EXPORT DefaultTouch( CBaseEntity *pOther ); // default weapon touch

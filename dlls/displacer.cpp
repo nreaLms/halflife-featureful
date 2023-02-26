@@ -23,6 +23,7 @@
 #include "shake.h"
 
 #ifndef CLIENT_DLL
+#include "game.h"
 #include "displacerball.h"
 #endif
 
@@ -79,6 +80,13 @@ BOOL CDisplacer::PlayEmptySound(void)
 
 void CDisplacer::Spawn()
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_DISPLACER))
+	{
+		REMOVE_ENTITY( ENT( pev ) );
+		return;
+	}
+#endif
 	Precache();
 	m_iId = WEAPON_DISPLACER;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -90,6 +98,10 @@ void CDisplacer::Spawn()
 
 void CDisplacer::Precache(void)
 {
+#ifndef CLIENT_DLL
+	if (!g_modFeatures.IsWeaponEnabled(WEAPON_DISPLACER))
+		return;
+#endif
 	PRECACHE_MODEL("models/v_displacer.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_displacer.mdl");

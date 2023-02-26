@@ -3866,6 +3866,12 @@ void CBasePlayer::GiveNamedItem(const char *pszName , int spawnFlags)
 
 	DispatchSpawn( pent );
 
+	if ( pent->free )
+	{
+		ALERT( at_console, "Item '%s' was freed (probably not enabled)\n", pszName );
+		return;
+	}
+
 	if (NeedUseToTake()) {
 		CBaseEntity* entity = (CBaseEntity *)GET_PRIVATE( pent );
 		if (entity) {

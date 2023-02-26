@@ -1446,6 +1446,8 @@ private:
 class CPenguin : public CSqueak
 {
 public:
+	void Spawn( void );
+	void Precache( void );
 	virtual const char* GrenadeName() const;
 	virtual int WeaponId() const;
 	virtual const char* NestModel() const;
