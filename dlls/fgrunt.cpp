@@ -129,6 +129,7 @@ class CHFGrunt : public CTalkMonster
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	void SetYawSpeed( void );
 	int  DefaultISoundMask( void );
 	int  DefaultClassify ( void );
@@ -255,6 +256,7 @@ class CMedic : public CHFGrunt
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* DefaultDisplayName() { return "Human Medic"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
@@ -2736,6 +2738,7 @@ void CTalkMonsterRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 class CHFGruntRepel : public CTalkMonsterRepel
 {
 public:
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	void KeyValue(KeyValueData* pkvd);
 	const char* TrooperName() {
 		return "monster_human_grunt_ally";
@@ -2779,6 +2782,7 @@ void CHFGruntRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 class CMedicRepel : public CHFGruntRepel
 {
 public:
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* TrooperName() {
 		return "monster_human_medic_ally";
 	}
@@ -2789,6 +2793,7 @@ LINK_ENTITY_TO_CLASS( monster_medic_ally_repel, CMedicRepel )
 class CTorchRepel : public CTalkMonsterRepel
 {
 public:
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* TrooperName() {
 		return "monster_human_torch_ally";
 	}
@@ -2804,6 +2809,7 @@ class CDeadFGrunt : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
 	void KeyValue( KeyValueData *pkvd );
@@ -2898,6 +2904,7 @@ class CTorch : public CHFGrunt
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* DefaultDisplayName() { return "Human Torch"; }
 	void HandleAnimEvent( MonsterEvent_t* pEvent );
 	BOOL CheckRangeAttack1(float flDot, float flDist);
@@ -3249,6 +3256,7 @@ class CDeadTorch : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
 	const char* getPos(int pos) const;
@@ -3910,6 +3918,7 @@ class CDeadMedic : public CDeadFGrunt
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
 };

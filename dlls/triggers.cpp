@@ -27,6 +27,7 @@
 #include "saverestore.h"
 #include "trains.h"			// trigger_camera has train functionality
 #include "gamerules.h"
+#include "game.h"
 #include "skill.h"
 #include "monsters.h"
 #include "talkmonster.h"
@@ -4027,6 +4028,7 @@ class CTriggerGenewormHit : public CBaseTrigger
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("geneworm"); }
 	void EXPORT GeneWormTouch(CBaseEntity *pOther);
 
 	static const char* pAttackSounds[];

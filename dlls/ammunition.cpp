@@ -8,19 +8,8 @@
 #include "game.h"
 #include "gamerules.h"
 
-bool CBasePlayerAmmo::IsEnabledInMod()
-{
-	return true;
-}
-
 void CBasePlayerAmmo::Spawn( void )
 {
-	if (!IsEnabledInMod())
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-
 	Precache();
 	SET_MODEL( ENT( pev ), MyModel() );
 
@@ -35,9 +24,6 @@ void CBasePlayerAmmo::Spawn( void )
 
 void CBasePlayerAmmo::Precache()
 {
-	if (!IsEnabledInMod())
-		return;
-
 	PRECACHE_MODEL( MyModel() );
 	PRECACHE_SOUND( AMMO_PICKUP_SOUND );
 }

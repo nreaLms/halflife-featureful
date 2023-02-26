@@ -7,6 +7,7 @@
 #include	"decals.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #if FEATURE_ROBOGRUNT
 
@@ -27,6 +28,7 @@ class CRGrunt : public CHGrunt
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("robogrunt"); }
 	int DefaultClassify() { return CLASS_MACHINE; }
 	const char* DefaultDisplayName() { return "Robo Grunt"; }
 	const char* ReverseRelationshipModel() { return "models/rgruntf.mdl"; }

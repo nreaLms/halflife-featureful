@@ -29,6 +29,7 @@
 #include	"animation.h"
 #include	"studio.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #if FEATURE_GONOME
 
@@ -123,6 +124,7 @@ class CGonome : public CBaseMonster
 public:
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("gonome"); }
 
 	int  DefaultClassify(void);
 	const char* DefaultDisplayName() { return "Gonome"; }
@@ -885,6 +887,7 @@ class CDeadGonome : public CDeadMonster
 {
 public:
 	void Spawn(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("gonome"); }
 	int	DefaultClassify(void) { return	CLASS_ALIEN_MONSTER; }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];

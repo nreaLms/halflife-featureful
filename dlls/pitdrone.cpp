@@ -215,6 +215,7 @@ class CPitdrone : public CFollowingMonster
 public:
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("pitdrone"); }
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	void SetYawSpeed(void);
 	int DefaultISoundMask();
@@ -1208,6 +1209,7 @@ class CDeadPitdrone : public CDeadMonster
 public:
 	void Spawn( void );
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("pitdrone"); }
 	int	DefaultClassify ( void ) { return	CLASS_RACEX_PREDATOR; }
 	const char* DefaultGibModel() {
 		return "models/pit_drone_gibs.mdl";

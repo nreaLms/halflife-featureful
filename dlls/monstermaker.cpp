@@ -686,6 +686,12 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 	}
 
 	DispatchSpawn( ENT( pevCreate ) );
+	if (pent->free)
+	{
+		ALERT( at_console, "Entity '%s' has been freed after spawn (probably not enabled)\n", STRING(m_iszMonsterClassname) );
+		return 0;
+	}
+
 	pevCreate->owner = edict();
 	// Disable until proper investigation
 #if 0

@@ -27,6 +27,7 @@
 #include	"scripted.h"
 #include	"decals.h"
 #include	"gamerules.h"
+#include	"game.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
 
@@ -79,6 +80,7 @@ public:
 	void Spawn(void);
 	void MonsterThink();
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("shocktrooper"); }
 	int  DefaultClassify(void);
 	const char* ReverseRelationshipModel() { return NULL; }
 	const char* DefaultDisplayName() { return "Shock Trooper"; }
@@ -560,7 +562,7 @@ bool CShockTrooper::CanDropGrenade() const
 
 void CShockTrooper::DropShockRoach(bool gibbed)
 {
-	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
+	if (!FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN) && g_modFeatures.IsMonsterEnabled("shockroach"))
 	{
 		Vector	vecGunPos;
 		Vector	vecGunAngles = g_vecZero;
@@ -615,6 +617,7 @@ class CDeadStrooper : public CDeadMonster
 public:
 	void Spawn( void );
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("shocktrooper"); }
 	int	DefaultClassify ( void ) { return	CLASS_RACEX_SHOCK; }
 	const char* DefaultGibModel() {
 		return "models/strooper_gibs.mdl";

@@ -7,6 +7,7 @@
 #include	"scripted.h"
 #include	"soundent.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #if FEATURE_RECRUIT
 
@@ -15,6 +16,7 @@ class CRecruit : public CTalkMonster
 public:
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("recruit"); }
 	void SetYawSpeed(void);
 	int DefaultISoundMask(void);
 	int DefaultClassify(void);

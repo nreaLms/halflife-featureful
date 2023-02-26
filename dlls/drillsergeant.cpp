@@ -7,6 +7,7 @@
 #include	"scripted.h"
 #include	"soundent.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #if FEATURE_DRILLSERGEANT
 
@@ -15,6 +16,7 @@ class CDrillSergeant : public CTalkMonster
 public:
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("drillsergeant"); }
 	const char* DefaultDisplayName() { return "Drill Sergeant"; }
 	void SetYawSpeed(void);
 	int DefaultISoundMask(void);
@@ -221,6 +223,7 @@ class CDeadDrillSergeant : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("drillsergeant"); }
 	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
 	const char* getPos(int pos) const;

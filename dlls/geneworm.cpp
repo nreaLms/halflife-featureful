@@ -24,6 +24,7 @@
 #include	"player.h"
 #include	"weapons.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #if FEATURE_GENEWORM
 
@@ -408,6 +409,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("geneworm"); }
 	int  DefaultClassify(void) { return CLASS_RACEX_SHOCK; }
 	void Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib);
 	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);

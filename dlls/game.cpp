@@ -33,6 +33,10 @@ struct WeaponNameAndId
 
 ModFeatures::ModFeatures()
 {
+	memset(monsters, 0, sizeof(monsters));
+	memset(weapons, 0, sizeof(weapons));
+	monstersCount = 0;
+
 	items_instant_drop = true;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
@@ -239,6 +243,41 @@ bool ModFeatures::SporesEnabled() const
 #endif
 }
 
+void ModFeatures::EnableMonster(const char *name)
+{
+	for (unsigned int i=0; i<monstersCount; ++i)
+	{
+		if (strcmp(monsters[i], name) == 0)
+		{
+			ALERT(at_warning, "Monster '%s' is already enabled\n", name);
+			return;
+		}
+	}
+
+	if (monstersCount >= ARRAYSIZE(monsters))
+	{
+		ALERT(at_error, "Can't enable monster '%s' due to monster count limit\n", name);
+		return;
+	}
+
+	strncpy(monsters[monstersCount], name, sizeof(monsters[0]));
+	monsters[monstersCount][sizeof(monsters[monstersCount])-1] = '\0';
+	monstersCount++;
+}
+
+bool ModFeatures::IsMonsterEnabled(const char *name)
+{
+	// TODO: optimize
+	for (unsigned int i=0; i<monstersCount; ++i)
+	{
+		if (strcmp(monsters[i], name) == 0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void ReadEnabledWeapons()
 {
 	const char* fileName = "featureful_weapons.cfg";
@@ -274,6 +313,43 @@ void ReadEnabledWeapons()
 				ALERT(at_console, "Enabled weapon '%s'\n", weaponName);
 			else
 				ALERT(at_warning, "Unknown weapon '%s' in %s\n", weaponName, fileName);
+		}
+	}
+	g_engfuncs.pfnFreeFile( pMemFile );
+}
+
+void ReadEnabledMonsters()
+{
+	const char* fileName = "featureful_monsters.cfg";
+	int filePos = 0, fileSize;
+	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	if (!pMemFile)
+	{
+		return;
+	}
+
+	ALERT(at_console, "Parsing enabled monsters from %s\n", fileName);
+
+	char buffer[128];
+	memset(buffer, 0, sizeof(buffer));
+	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
+	{
+		int i = 0;
+		SkipSpaces(buffer, i, sizeof(buffer));
+
+		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
+			continue;
+
+		int tokenStart = i;
+		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
+		int tokenLength = i - tokenStart;
+		if (tokenLength > 0)
+		{
+			char* monsterName = buffer + tokenStart;
+			monsterName[tokenLength] = '\0';
+
+			ALERT(at_console, "Enabling monster '%s'\n", monsterName);
+			g_modFeatures.EnableMonster(monsterName);
 		}
 	}
 	g_engfuncs.pfnFreeFile( pMemFile );
@@ -825,6 +901,7 @@ void GameDLLInit( void )
 		g_fIsXash3D = TRUE;
 
 	ReadServerFeatures();
+	ReadEnabledMonsters();
 	ReadEnabledWeapons();
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
@@ -932,10 +1009,13 @@ void GameDLLInit( void )
 
 #if FEATURE_BABYGARG
 	// Baby Gargantua
-	REGISTER_SKILL_CVARS(sk_babygargantua_health);
-	REGISTER_SKILL_CVARS(sk_babygargantua_dmg_slash);
-	REGISTER_SKILL_CVARS(sk_babygargantua_dmg_fire);
-	REGISTER_SKILL_CVARS(sk_babygargantua_dmg_stomp);
+	if (g_modFeatures.IsMonsterEnabled("babygarg"))
+	{
+		REGISTER_SKILL_CVARS(sk_babygargantua_health);
+		REGISTER_SKILL_CVARS(sk_babygargantua_dmg_slash);
+		REGISTER_SKILL_CVARS(sk_babygargantua_dmg_fire);
+		REGISTER_SKILL_CVARS(sk_babygargantua_dmg_stomp);
+	}
 #endif
 
 	// Barney
@@ -958,7 +1038,8 @@ void GameDLLInit( void )
 
 #if FEATURE_CLEANSUIT_SCIENTIST
 	// Cleansuit Scientist
-	REGISTER_SKILL_CVARS(sk_cleansuit_scientist_health);
+	if (g_modFeatures.IsMonsterEnabled("cleansuit_scientist"))
+		REGISTER_SKILL_CVARS(sk_cleansuit_scientist_health);
 #endif
 
 	// Gargantua
@@ -976,21 +1057,30 @@ void GameDLLInit( void )
 
 #if FEATURE_OPFOR_GRUNT
 	// Opposing Hgrunt
-	REGISTER_SKILL_CVARS(sk_hgrunt_ally_health);
-	REGISTER_SKILL_CVARS(sk_hgrunt_ally_kick);
-	REGISTER_SKILL_CVARS(sk_hgrunt_ally_pellets);
-	REGISTER_SKILL_CVARS(sk_hgrunt_ally_gspeed);
+	if (g_modFeatures.IsMonsterEnabled("human_grunt_ally"))
+	{
+		REGISTER_SKILL_CVARS(sk_hgrunt_ally_health);
+		REGISTER_SKILL_CVARS(sk_hgrunt_ally_kick);
+		REGISTER_SKILL_CVARS(sk_hgrunt_ally_pellets);
+		REGISTER_SKILL_CVARS(sk_hgrunt_ally_gspeed);
+	}
 
 	// Medic
-	REGISTER_SKILL_CVARS(sk_medic_ally_health);
-	REGISTER_SKILL_CVARS(sk_medic_ally_kick);
-	REGISTER_SKILL_CVARS(sk_medic_ally_gspeed);
-	REGISTER_SKILL_CVARS(sk_medic_ally_heal);
+	if (g_modFeatures.IsMonsterEnabled("human_grunt_medic"))
+	{
+		REGISTER_SKILL_CVARS(sk_medic_ally_health);
+		REGISTER_SKILL_CVARS(sk_medic_ally_kick);
+		REGISTER_SKILL_CVARS(sk_medic_ally_gspeed);
+		REGISTER_SKILL_CVARS(sk_medic_ally_heal);
+	}
 
 	// Torch
-	REGISTER_SKILL_CVARS(sk_torch_ally_health);
-	REGISTER_SKILL_CVARS(sk_torch_ally_kick);
-	REGISTER_SKILL_CVARS(sk_torch_ally_gspeed);
+	if (g_modFeatures.IsMonsterEnabled("human_grunt_torch"))
+	{
+		REGISTER_SKILL_CVARS(sk_torch_ally_health);
+		REGISTER_SKILL_CVARS(sk_torch_ally_kick);
+		REGISTER_SKILL_CVARS(sk_torch_ally_gspeed);
+	}
 #endif
 
 	// Hgrunt
@@ -1001,7 +1091,8 @@ void GameDLLInit( void )
 
 #if FEATURE_HWGRUNT
 	// HWgrunt
-	REGISTER_SKILL_CVARS(sk_hwgrunt_health);
+	if (g_modFeatures.IsMonsterEnabled("hwgrunt"))
+		REGISTER_SKILL_CVARS(sk_hwgrunt_health);
 #endif
 
 	// Houndeye
@@ -1032,9 +1123,12 @@ void GameDLLInit( void )
 
 #if FEATURE_MASSN
 	// Massassin
-	REGISTER_SKILL_CVARS(sk_massassin_health);
-	REGISTER_SKILL_CVARS(sk_massassin_kick);
-	REGISTER_SKILL_CVARS(sk_massassin_gspeed);
+	if (g_modFeatures.IsMonsterEnabled("male_assassin"))
+	{
+		REGISTER_SKILL_CVARS(sk_massassin_health);
+		REGISTER_SKILL_CVARS(sk_massassin_kick);
+		REGISTER_SKILL_CVARS(sk_massassin_gspeed);
+	}
 #endif
 
 	// Nihilanth
@@ -1046,58 +1140,77 @@ void GameDLLInit( void )
 
 #if FEATURE_BLACK_OSPREY
 	// Blackops Osprey
-	REGISTER_SKILL_CVARS(sk_blkopsosprey);
+	if (g_modFeatures.IsMonsterEnabled("blkop_osprey"))
+		REGISTER_SKILL_CVARS(sk_blkopsosprey);
 #endif
 
 #if FEATURE_OTIS
 	// Otis
-	REGISTER_SKILL_CVARS(sk_otis_health);
+	if (g_modFeatures.IsMonsterEnabled("otis"))
+		REGISTER_SKILL_CVARS(sk_otis_health);
 #endif
 
 #if FEATURE_KATE
 	// Kate
-	REGISTER_SKILL_CVARS(sk_kate_health);
+	if (g_modFeatures.IsMonsterEnabled("kate"))
+		REGISTER_SKILL_CVARS(sk_kate_health);
 #endif
 
 #if FEATURE_PITDRONE
 	// Pitdrone
-	REGISTER_SKILL_CVARS(sk_pitdrone_health);
-	REGISTER_SKILL_CVARS(sk_pitdrone_dmg_bite);
-	REGISTER_SKILL_CVARS(sk_pitdrone_dmg_whip);
-	REGISTER_SKILL_CVARS(sk_pitdrone_dmg_spit);
+	if (g_modFeatures.IsMonsterEnabled("pitdrone"))
+	{
+		REGISTER_SKILL_CVARS(sk_pitdrone_health);
+		REGISTER_SKILL_CVARS(sk_pitdrone_dmg_bite);
+		REGISTER_SKILL_CVARS(sk_pitdrone_dmg_whip);
+		REGISTER_SKILL_CVARS(sk_pitdrone_dmg_spit);
+	}
 #endif
 
 #if FEATURE_PITWORM
 	// Pitworm
-	REGISTER_SKILL_CVARS(sk_pitworm_health);
-	REGISTER_SKILL_CVARS(sk_pitworm_dmg_swipe);
-	REGISTER_SKILL_CVARS(sk_pitworm_dmg_beam);
+	if (g_modFeatures.IsMonsterEnabled("pitworm"))
+	{
+		REGISTER_SKILL_CVARS(sk_pitworm_health);
+		REGISTER_SKILL_CVARS(sk_pitworm_dmg_swipe);
+		REGISTER_SKILL_CVARS(sk_pitworm_dmg_beam);
+	}
 #endif
 
 #if FEATURE_GENEWORM
 	// Geneworm
-	REGISTER_SKILL_CVARS(sk_geneworm_health);
-	REGISTER_SKILL_CVARS(sk_geneworm_dmg_spit);
-	REGISTER_SKILL_CVARS(sk_geneworm_dmg_hit);
+	if (g_modFeatures.IsMonsterEnabled("geneworm"))
+	{
+		REGISTER_SKILL_CVARS(sk_geneworm_health);
+		REGISTER_SKILL_CVARS(sk_geneworm_dmg_spit);
+		REGISTER_SKILL_CVARS(sk_geneworm_dmg_hit);
+	}
 #endif
 
 #if FEATURE_ROBOGRUNT
-	REGISTER_SKILL_CVARS(sk_rgrunt_explode);
+	if (g_modFeatures.IsMonsterEnabled("robogrunt"))
+		REGISTER_SKILL_CVARS(sk_rgrunt_explode);
 #endif
 
 
 #if FEATURE_SHOCKTROOPER
 	// ShockTrooper
-	REGISTER_SKILL_CVARS(sk_shocktrooper_health);
-	REGISTER_SKILL_CVARS(sk_shocktrooper_kick);
-	REGISTER_SKILL_CVARS(sk_shocktrooper_gspeed);
-	REGISTER_SKILL_CVARS(sk_shocktrooper_maxcharge);
-	REGISTER_SKILL_CVARS(sk_shocktrooper_rchgspeed);
+	if (g_modFeatures.IsMonsterEnabled("shocktrooper"))
+	{
+		REGISTER_SKILL_CVARS(sk_shocktrooper_health);
+		REGISTER_SKILL_CVARS(sk_shocktrooper_kick);
+		REGISTER_SKILL_CVARS(sk_shocktrooper_gspeed);
+		REGISTER_SKILL_CVARS(sk_shocktrooper_maxcharge);
+		REGISTER_SKILL_CVARS(sk_shocktrooper_rchgspeed);
+	}
 
 	// Shock Roach
-	REGISTER_SKILL_CVARS(sk_shockroach_health);
-	REGISTER_SKILL_CVARS(sk_shockroach_dmg_bite);
-	REGISTER_SKILL_CVARS(sk_shockroach_lifespan);
+	if (g_modFeatures.IsMonsterEnabled("shockroach"))
+	{
+		REGISTER_SKILL_CVARS(sk_shockroach_health);
+		REGISTER_SKILL_CVARS(sk_shockroach_dmg_bite);
+		REGISTER_SKILL_CVARS(sk_shockroach_lifespan);
+	}
 #endif
 
 	// Scientist
@@ -1110,14 +1223,20 @@ void GameDLLInit( void )
 
 #if FEATURE_VOLTIFORE
 	// Voltigore
-	REGISTER_SKILL_CVARS(sk_voltigore_health);
-	REGISTER_SKILL_CVARS(sk_voltigore_dmg_punch);
-	REGISTER_SKILL_CVARS(sk_voltigore_dmg_beam);
-	REGISTER_SKILL_CVARS(sk_voltigore_dmg_explode);
+	if (g_modFeatures.IsMonsterEnabled("voltigore"))
+	{
+		REGISTER_SKILL_CVARS(sk_voltigore_health);
+		REGISTER_SKILL_CVARS(sk_voltigore_dmg_punch);
+		REGISTER_SKILL_CVARS(sk_voltigore_dmg_beam);
+		REGISTER_SKILL_CVARS(sk_voltigore_dmg_explode);
+	}
 
 	// Baby Voltigore
-	REGISTER_SKILL_CVARS(sk_babyvoltigore_health);
-	REGISTER_SKILL_CVARS(sk_babyvoltigore_dmg_punch);
+	if (g_modFeatures.IsMonsterEnabled("babyvoltigore"))
+	{
+		REGISTER_SKILL_CVARS(sk_babyvoltigore_health);
+		REGISTER_SKILL_CVARS(sk_babyvoltigore_dmg_punch);
+	}
 #endif
 
 	// Zombie
@@ -1127,24 +1246,33 @@ void GameDLLInit( void )
 
 #if FEATURE_ZOMBIE_BARNEY
 	// Zombie Barney
-	REGISTER_SKILL_CVARS(sk_zombie_barney_health);
-	REGISTER_SKILL_CVARS(sk_zombie_barney_dmg_one_slash);
-	REGISTER_SKILL_CVARS(sk_zombie_barney_dmg_both_slash);
+	if (g_modFeatures.IsMonsterEnabled("zombie_barney"))
+	{
+		REGISTER_SKILL_CVARS(sk_zombie_barney_health);
+		REGISTER_SKILL_CVARS(sk_zombie_barney_dmg_one_slash);
+		REGISTER_SKILL_CVARS(sk_zombie_barney_dmg_both_slash);
+	}
 #endif
 
 #if FEATURE_ZOMBIE_SOLDIER
 	// Zombie Soldier
-	REGISTER_SKILL_CVARS(sk_zombie_soldier_health);
-	REGISTER_SKILL_CVARS(sk_zombie_soldier_dmg_one_slash);
-	REGISTER_SKILL_CVARS(sk_zombie_soldier_dmg_both_slash);
+	if (g_modFeatures.IsMonsterEnabled("zombie_soldier"))
+	{
+		REGISTER_SKILL_CVARS(sk_zombie_soldier_health);
+		REGISTER_SKILL_CVARS(sk_zombie_soldier_dmg_one_slash);
+		REGISTER_SKILL_CVARS(sk_zombie_soldier_dmg_both_slash);
+	}
 #endif
 
 #if FEATURE_GONOME
 	// Gonome
-	REGISTER_SKILL_CVARS(sk_gonome_health);
-	REGISTER_SKILL_CVARS(sk_gonome_dmg_one_slash);
-	REGISTER_SKILL_CVARS(sk_gonome_dmg_guts);
-	REGISTER_SKILL_CVARS(sk_gonome_dmg_one_bite);
+	if (g_modFeatures.IsMonsterEnabled("gonome"))
+	{
+		REGISTER_SKILL_CVARS(sk_gonome_health);
+		REGISTER_SKILL_CVARS(sk_gonome_dmg_one_slash);
+		REGISTER_SKILL_CVARS(sk_gonome_dmg_guts);
+		REGISTER_SKILL_CVARS(sk_gonome_dmg_one_bite);
+	}
 #endif
 
 	//Turret

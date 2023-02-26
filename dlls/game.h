@@ -37,6 +37,9 @@ struct ModFeatures
 	bool ShockBeamEnabled() const;
 	bool SporesEnabled() const;
 
+	void EnableMonster(const char* name);
+	bool IsMonsterEnabled(const char* name);
+
 	bool items_instant_drop;
 	bool tripmines_solid;
 	bool satchels_pickable;
@@ -62,6 +65,8 @@ private:
 	bool UpdateColor(const char* value, int& result, const char* key);
 
 	bool weapons[64];
+	char monsters[64][64];
+	unsigned int monstersCount;
 };
 
 extern ModFeatures g_modFeatures;

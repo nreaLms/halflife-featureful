@@ -1672,7 +1672,7 @@ void UTIL_PrecacheOther( const char *szClassname )
 	}
 	
 	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
-	if( pEntity )
+	if( pEntity && pEntity->IsEnabledInMod() )
 		pEntity->Precache();
 	REMOVE_ENTITY( pent );
 }
@@ -1698,7 +1698,8 @@ void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vec
 			if (vecMax)
 				*vecMax = pMonster->DefaultMaxHullSize();
 		}
-		pEntity->Precache();
+		if (pEntity->IsEnabledInMod())
+			pEntity->Precache();
 	}
 	REMOVE_ENTITY( pent );
 }

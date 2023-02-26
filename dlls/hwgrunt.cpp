@@ -7,6 +7,7 @@
 #include	"hgrunt.h"
 #include	"animation.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #if FEATURE_HWGRUNT
 
@@ -31,6 +32,7 @@ class CHWGrunt : public CFollowingMonster
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("hwgrunt"); }
 	void SetYawSpeed( void );
 	int DefaultClassify( void ) { return CLASS_HUMAN_MILITARY; }
 	const char* DefaultDisplayName() { return "Heavy Weapons Grunt"; }

@@ -711,6 +711,7 @@ class COtis : public CBarney
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("otis"); }
 	void TalkInit( void );
 	const char* DefaultDisplayName() { return "Otis"; }
 	const char* ReverseRelationshipModel() { return "models/otisf.mdl"; }
@@ -859,6 +860,7 @@ class CDeadOtis : public CDeadBarney
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("otis"); }
 	void KeyValue( KeyValueData *pkvd );
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[5];
@@ -875,7 +877,7 @@ const char* CDeadOtis::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_otis_dead, CDeadOtis )
 
-void CDeadOtis :: Spawn( )
+void CDeadOtis::Spawn( )
 {
 	SpawnHelper("models/otis.mdl");
 	if ( head == -1 )
@@ -903,6 +905,7 @@ class CBarniel : public CBarney
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("barniel"); }
 	void TalkInit( void );
 	const char* DefaultDisplayName() { return "Barniel"; }
 	const char* ReverseRelationshipModel() { return NULL; }
@@ -1027,6 +1030,7 @@ class CDeadBarniel : public CDeadBarney
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("barniel"); }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
 };
@@ -1056,6 +1060,7 @@ class CKate : public CBarney
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("kate"); }
 	void TalkInit( void );
 	const char* DefaultDisplayName() { return "Kate"; }
 	const char* ReverseRelationshipModel() { return NULL; }
@@ -1323,6 +1328,7 @@ class CDeadKate : public CDeadBarney
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("kate"); }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
 };

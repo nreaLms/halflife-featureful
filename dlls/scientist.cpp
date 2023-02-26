@@ -26,6 +26,7 @@
 #include	"animation.h"
 #include	"soundent.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #define FEATURE_SCIENTIST_PLFEAR 0
 
@@ -1520,6 +1521,7 @@ class CCleansuitScientist : public CScientist
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 	const char* DefaultDisplayName() { return "Cleansuit Scientist"; }
 	BOOL CanHeal();
 	bool ReadyToHeal() {return false;}
@@ -1557,6 +1559,7 @@ class CDeadCleansuitScientist : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
 
 	const char* getPos(int pos) const;
@@ -1571,7 +1574,7 @@ const char* CDeadCleansuitScientist::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist_dead, CDeadCleansuitScientist )
 
-void CDeadCleansuitScientist :: Spawn( )
+void CDeadCleansuitScientist::Spawn( )
 {
 	SpawnHelper("models/cleansuit_scientist.mdl");
 	if ( pev->body == -1 ) {
@@ -1584,6 +1587,7 @@ class CSittingCleansuitScientist : public CSittingScientist
 {
 public:
 	void Spawn();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 };
 
 void CSittingCleansuitScientist::Spawn()
@@ -1603,6 +1607,7 @@ class CRosenberg : public CScientist
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("rosenberg"); }
 	const char* DefaultDisplayName() { return "Dr. Rosenberg"; }
 	void TalkInit();
 	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
@@ -1823,6 +1828,7 @@ class CKeller : public CScientist
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("keller"); }
 	const char* DefaultDisplayName() { return "Richard Keller"; }
 	void TalkInit();
 	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }

@@ -74,6 +74,7 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
 	void MonsterInit();
 
 	void DeathSound(void);
@@ -365,6 +366,7 @@ void CMassn::SetHead(int head)
 class CAssassinRepel : public CHGruntRepel
 {
 public:
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
 	void KeyValue(KeyValueData* pkvd);
 	const char* TrooperName() {
 		return "monster_male_assassin";
@@ -408,6 +410,7 @@ class CDeadMassn : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
 	int	DefaultClassify ( void )
 	{
 		if (g_modFeatures.blackops_classify)

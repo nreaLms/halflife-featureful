@@ -139,6 +139,9 @@ int DispatchSpawn( edict_t *pent )
 		pEntity->pev->absmin = pEntity->pev->origin - Vector( 1.0f, 1.0f, 1.0f );
 		pEntity->pev->absmax = pEntity->pev->origin + Vector( 1.0f, 1.0f, 1.0f );
 
+		if (!pEntity->IsEnabledInMod())
+			return -1;
+
 		pEntity->Spawn();
 
 		// Try to get the pointer again, in case the spawn function deleted the entity.
@@ -761,7 +764,10 @@ CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, c
 {
 	CBaseEntity *pEntity = CreateNoSpawn(szName, vecOrigin, vecAngles, pentOwner);
 	if (pEntity)
-		DispatchSpawn( pEntity->edict() );
+	{
+		if (DispatchSpawn( pEntity->edict() ) == -1 )
+			return 0;
+	}
 	return pEntity;
 }
 

@@ -616,6 +616,7 @@ class CShockRoach : public CHeadCrab
 public:
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("shockroach"); }
 	const char* DefaultDisplayName() { return "Shock Roach"; }
 	virtual float GetDamageAmount( void ) { return gSkillData.sroachDmgBite; }
 	void EXPORT LeapTouch(CBaseEntity *pOther);

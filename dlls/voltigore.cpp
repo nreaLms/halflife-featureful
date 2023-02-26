@@ -319,6 +319,7 @@ class CVoltigore : public CSquadMonster
 public:
 	virtual void Spawn(void);
 	virtual void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("voltigore"); }
 	void SetYawSpeed(void);
 	virtual int  DefaultClassify(void);
 	const char* DefaultDisplayName() { return "Voltigore"; }
@@ -1199,6 +1200,7 @@ class CBabyVoltigore : public CVoltigore
 public:
 	void	Spawn(void);
 	void	Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("babyvoltigore"); }
 	const char* DefaultDisplayName() { return "Baby Voltigore"; }
 	void	HandleAnimEvent(MonsterEvent_t* pEvent);
 	BOOL	CheckMeleeAttack1(float flDot, float flDist);

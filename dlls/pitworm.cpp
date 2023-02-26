@@ -23,7 +23,6 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include	"nodes.h"
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"soundent.h"
@@ -31,6 +30,7 @@
 #include	"player.h"
 #include	"decals.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #if FEATURE_PITWORM
 
@@ -42,6 +42,7 @@ class CPitWorm : public CBaseMonster
 public:
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("pitworm"); }
 	int  DefaultClassify(void);
 	virtual int	ObjectCaps(void) { return CBaseMonster::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void SetObjectCollisionBox()
@@ -1391,6 +1392,7 @@ class CPitwormGib : public CBaseEntity
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("pitworm"); }
 	void EXPORT GibFloat();
 };
 
@@ -1446,6 +1448,7 @@ class CPitwormGibShooter : public CBaseDelay
 public:
 	void Spawn();
 	void Precache(void);
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("pitworm"); }
 	void KeyValue( KeyValueData *pkvd );
 	void EXPORT ShootThink( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -1544,6 +1547,7 @@ class CPitWormSteamTrigger : public CBaseEntity
 {
 public:
 	void Spawn();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("pitworm"); }
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 };
 

@@ -1115,6 +1115,7 @@ class CBlkopApache : public CApache
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("blkop_apache"); }
 	int	DefaultClassify ( void )
 	{
 		if (g_modFeatures.blackops_classify)

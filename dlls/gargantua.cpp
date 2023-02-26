@@ -32,6 +32,7 @@
 #include	"scripted.h"
 #include	"followingmonster.h"
 #include	"gamerules.h"
+#include	"game.h"
 #include	"mod_features.h"
 
 //=========================================================
@@ -1823,7 +1824,11 @@ void SpawnExplosion( Vector center, float randomRange, float time, int magnitude
 class CBabyGargantua : public CGargantua
 {
 public:
-	void Precache() { PrecacheImpl(); }
+	void Precache()
+	{
+		PrecacheImpl();
+	}
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("babygarg"); }
 	void SetYawSpeed( void );
 	const char* ReverseRelationshipModel() { return "models/babygargf.mdl"; }
 	const char* DefaultDisplayName() { return "Baby Gargantua"; }

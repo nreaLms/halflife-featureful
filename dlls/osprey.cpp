@@ -936,6 +936,7 @@ class CBlkopOsprey : public COsprey
 public:
 	void Spawn();
 	void Precache();
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("blkop_osprey"); }
 	void PrepareGruntBeforeSpawn(CBaseEntity* pGrunt);
 	int	DefaultClassify ( void )
 	{
