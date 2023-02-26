@@ -213,7 +213,7 @@ void EV_MuzzleLight(const Vector &vecForward)
 		return;
 	}
 
-	if (cl_muzzlelight && cl_muzzlelight->value)
+	if (gHUD.MuzzleLightEnabled())
 	{
 		Vector vecSrc = ent->origin + vecForward * 36;
 		vecSrc.z += (ent->curstate.maxs.z - ent->curstate.mins.z)*0.4f;

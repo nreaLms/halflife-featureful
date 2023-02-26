@@ -67,10 +67,6 @@ typedef struct
 
 typedef struct cvar_s cvar_t;
 
-extern cvar_t* cl_weapon_sparks;
-extern cvar_t* cl_weapon_wallpuff;
-
-extern cvar_t* cl_muzzlelight;
 extern cvar_t* cl_muzzlelight_monsters;
 
 extern cvar_t* cl_flashlight_custom;
@@ -679,8 +675,11 @@ struct ClientFeatures
 
 	FlashlightFeatures flashlight;
 
+	ConfigurableBooleanValue view_bob;
+	ConfigurableBooleanValue view_roll;
 	ConfigurableBooleanValue weapon_wallpuff;
 	ConfigurableBooleanValue weapon_sparks;
+	ConfigurableBooleanValue muzzlelight;
 };
 
 //
@@ -741,11 +740,15 @@ public:
 		return false;
 #endif
 	}
+	bool ViewBobEnabled();
+	bool ViewRollEnadled();
 	bool WeaponWallpuffEnabled();
 	bool WeaponSparksEnabled();
+	bool MuzzleLightEnabled();
 	bool CustomFlashlightEnabled();
 private:
 	void ParseClientFeatures();
+	static bool ClientFeatureEnabled(cvar_t *cVariable, bool defaultValue);
 
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()

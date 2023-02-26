@@ -84,6 +84,12 @@ static cvar_t* CVAR_CREATE_BOOLVALUE(const char* name, bool value, int flags)
 	return CVAR_CREATE(name, value ? "1" : "0", flags);
 }
 
+static void CreateBooleanCvarConditionally(cvar_t*& cvarPtr, const char* name, const ConfigurableBooleanValue& booleanValue)
+{
+	if (booleanValue.configurable)
+		cvarPtr = CVAR_CREATE_BOOLVALUE( name, booleanValue.enabled_by_default, FCVAR_ARCHIVE );
+}
+
 #if USE_VGUI
 #include "vgui_ScorePanel.h"
 
@@ -503,17 +509,16 @@ void CHud::Init( void )
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
-	cl_viewbob = CVAR_CREATE( "cl_viewbob", "0", FCVAR_ARCHIVE );
-	cl_viewroll = CVAR_CREATE( "cl_viewroll", "0", FCVAR_ARCHIVE );
+
+	CreateBooleanCvarConditionally(cl_viewbob, "cl_viewbob", clientFeatures.view_bob);
+	CreateBooleanCvarConditionally(cl_viewroll, "cl_viewroll", clientFeatures.view_roll);
 	cl_rollangle = gEngfuncs.pfnRegisterVariable ( "cl_rollangle", "0.65", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "300", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
-	if (clientFeatures.weapon_sparks.configurable)
-		cl_weapon_sparks = CVAR_CREATE_BOOLVALUE( "cl_weapon_sparks", clientFeatures.weapon_sparks.enabled_by_default, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
-	if (clientFeatures.weapon_wallpuff.configurable)
-		cl_weapon_wallpuff = CVAR_CREATE_BOOLVALUE( "cl_weapon_wallpuff", clientFeatures.weapon_wallpuff.enabled_by_default, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	CreateBooleanCvarConditionally(cl_weapon_sparks, "cl_weapon_sparks", clientFeatures.weapon_sparks);
+	CreateBooleanCvarConditionally(cl_weapon_wallpuff, "cl_weapon_wallpuff", clientFeatures.weapon_wallpuff);
 
-	cl_muzzlelight = CVAR_CREATE( "cl_muzzlelight", "0", FCVAR_ARCHIVE );
+	CreateBooleanCvarConditionally(cl_muzzlelight, "cl_muzzlelight", clientFeatures.muzzlelight);
 	cl_muzzlelight_monsters = CVAR_CREATE( "cl_muzzlelight_monsters", "0", FCVAR_ARCHIVE );
 
 #if FEATURE_NIGHTVISION_STYLES
@@ -532,10 +537,7 @@ void CHud::Init( void )
 	cl_nvgfilterbrightness = CVAR_CREATE( "cl_nvgfilterbrightness", "0.6", FCVAR_ARCHIVE );
 #endif
 
-	if (clientFeatures.flashlight.custom.configurable)
-	{
-		cl_flashlight_custom = CVAR_CREATE_BOOLVALUE( "cl_flashlight_custom", clientFeatures.flashlight.custom.enabled_by_default, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
-	}
+	CreateBooleanCvarConditionally(cl_flashlight_custom, "cl_flashlight_custom", clientFeatures.flashlight.custom);
 
 	if (clientFeatures.flashlight.radius.configurable)
 	{
@@ -598,11 +600,57 @@ void CHud::Init( void )
 	MsgFunc_ResetHUD( 0, 0, NULL );
 }
 
+const char* strStartsWith(const char* str, const char* start)
+{
+	while (*start && *str == *start)
+	{
+		start++;
+		str++;
+	}
+	if (*start == '\0')
+		return str;
+	return 0;
+}
+
+bool UpdateBooleanValue(ConfigurableBooleanValue& value, const char* key, const char* valueStr)
+{
+	if (strcmp("enabled_by_default", key) == 0)
+	{
+		return ParseBoolean(valueStr, value.enabled_by_default);
+	}
+	else if (strcmp("configurable", key) == 0)
+	{
+		return ParseBoolean(valueStr, value.configurable);
+	}
+	return false;
+}
+
+bool UpdateBoundedValue(ConfigurableBoundedValue& value, const char* key, const char* valueStr)
+{
+	if (strcmp("default", key) == 0)
+	{
+		return ParseInteger(valueStr, value.defaultValue);
+	}
+	else if (strcmp("min", key) == 0)
+	{
+		return ParseInteger(valueStr, value.minValue);
+	}
+	else if (strcmp("max", key) == 0)
+	{
+		return ParseInteger(valueStr, value.maxValue);
+	}
+	else if (strcmp("configurable", key) == 0)
+	{
+		return ParseBoolean(valueStr, value.configurable);
+	}
+	return false;
+}
+
 void CHud::ParseClientFeatures()
 {
 	const char* fileName = "featureful_client.cfg";
-	int length = 0;
-	char* const pfile = (char *)gEngfuncs.COM_LoadFile( fileName, 5, &length );
+	int fileSize = 0;
+	char* const pfile = (char *)gEngfuncs.COM_LoadFile( fileName, 5, &fileSize );
 
 	if( !pfile )
 		return;
@@ -611,7 +659,7 @@ void CHud::ParseClientFeatures()
 
 	char valueBuf[CLIENT_FEATURE_VALUE_LENGTH+1];
 	int i = 0;
-	while ( i<length )
+	while ( i<fileSize )
 	{
 		if (pfile[i] == ' ' || pfile[i] == '\r' || pfile[i] == '\n')
 		{
@@ -620,17 +668,17 @@ void CHud::ParseClientFeatures()
 		else if (pfile[i] == '/')
 		{
 			++i;
-			ConsumeLine(pfile, i, length);
+			ConsumeLine(pfile, i, fileSize);
 		}
 		else
 		{
-			const int idTokenStart = i;
-			ConsumeNonSpaceCharacters(pfile, i, length);
+			const int keyStart = i;
+			ConsumeNonSpaceCharacters(pfile, i, fileSize);
 
-			const int tokenLength = i - idTokenStart;
-			SkipSpaces(pfile, i, length);
+			const int keyLength = i - keyStart;
+			SkipSpaces(pfile, i, fileSize);
 			const int valueStart = i;
-			ConsumeLine(pfile, i, length);
+			ConsumeLine(pfile, i, fileSize);
 			const int valueLength = i - valueStart;
 			if (valueLength == 0)
 			{
@@ -644,82 +692,62 @@ void CHud::ParseClientFeatures()
 			strncpy(valueBuf, pfile + valueStart, valueLength);
 			valueBuf[valueLength] = '\0';
 
-			const char* tokenName = pfile + idTokenStart;
-			if (strncmp("hud_color", tokenName, tokenLength) == 0)
+			char* keyName = pfile + keyStart;
+			keyName[keyLength] = '\0';
+
+			const char* subKey = 0;
+
+			if (strcmp("hud_color", keyName) == 0)
 			{
 				ParseColor(valueBuf, clientFeatures.hud_color);
 			}
-			else if (strncmp("hud_min_alpha", tokenName, tokenLength) == 0)
+			else if (strcmp("hud_min_alpha", keyName) == 0)
 			{
 				ParseInteger(valueBuf, clientFeatures.hud_min_alpha);
 			}
-			else if (strncmp("hud_color_critical", tokenName, tokenLength) == 0)
+			else if (strcmp("hud_color_critical", keyName) == 0)
 			{
 				ParseColor(valueBuf, clientFeatures.hud_color_critical);
 			}
-			else if (strncmp("flashlight.custom.enabled_by_default", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "flashlight.custom.")))
 			{
-				ParseBoolean(valueBuf, clientFeatures.flashlight.custom.enabled_by_default);
+				UpdateBooleanValue(clientFeatures.flashlight.custom, subKey, valueBuf);
 			}
-			else if (strncmp("flashlight.custom.configurable", tokenName, tokenLength) == 0)
-			{
-				ParseBoolean(valueBuf, clientFeatures.flashlight.custom.configurable);
-			}
-			else if (strncmp("flashlight.color", tokenName, tokenLength) == 0)
+			else if (strcmp("flashlight.color", keyName) == 0)
 			{
 				ParseColor(valueBuf, clientFeatures.flashlight.color);
 			}
-			else if (strncmp("flashlight.distance", tokenName, tokenLength) == 0)
+			else if (strcmp("flashlight.distance", keyName) == 0)
 			{
 				ParseInteger(valueBuf, clientFeatures.flashlight.distance);
 			}
-			else if (strncmp("flashlight.radius.default", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "flashlight.radius.")))
 			{
-				ParseInteger(valueBuf, clientFeatures.flashlight.radius.defaultValue);
+				UpdateBoundedValue(clientFeatures.flashlight.radius, subKey, valueBuf);
 			}
-			else if (strncmp("flashlight.radius.min", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "flashlight.fade_distance.")))
 			{
-				ParseInteger(valueBuf, clientFeatures.flashlight.radius.minValue);
+				UpdateBoundedValue(clientFeatures.flashlight.fade_distance, subKey, valueBuf);
 			}
-			else if (strncmp("flashlight.radius.max", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "view_bob.")))
 			{
-				ParseInteger(valueBuf, clientFeatures.flashlight.radius.maxValue);
+				UpdateBooleanValue(clientFeatures.view_bob, subKey, valueBuf);
 			}
-			else if (strncmp("flashlight.fade_distance.default", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "view_roll.")))
 			{
-				ParseInteger(valueBuf, clientFeatures.flashlight.fade_distance.defaultValue);
+				UpdateBooleanValue(clientFeatures.view_roll, subKey, valueBuf);
 			}
-			else if (strncmp("flashlight.radius.configurable", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "weapon_wallpuff.")))
 			{
-				ParseBoolean(valueBuf, clientFeatures.flashlight.radius.configurable);
+				UpdateBooleanValue(clientFeatures.weapon_wallpuff, subKey, valueBuf);
 			}
-			else if (strncmp("flashlight.fade_distance.min", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "weapon_sparks.")))
 			{
-				ParseInteger(valueBuf, clientFeatures.flashlight.fade_distance.minValue);
+				UpdateBooleanValue(clientFeatures.weapon_sparks, subKey, valueBuf);
 			}
-			else if (strncmp("flashlight.fade_distance.max", tokenName, tokenLength) == 0)
+			else if ((subKey = strStartsWith(keyName, "muzzlelight.")))
 			{
-				ParseInteger(valueBuf, clientFeatures.flashlight.fade_distance.maxValue);
-			}
-			else if (strncmp("flashlight.fade_distance.configurable", tokenName, tokenLength) == 0)
-			{
-				ParseBoolean(valueBuf, clientFeatures.flashlight.fade_distance.configurable);
-			}
-			else if (strncmp("weapon_wallpuff.enabled_by_default", tokenName, tokenLength) == 0)
-			{
-				ParseBoolean(valueBuf, clientFeatures.weapon_wallpuff.enabled_by_default);
-			}
-			else if (strncmp("weapon_wallpuff.configurable", tokenName, tokenLength) == 0)
-			{
-				ParseBoolean(valueBuf, clientFeatures.weapon_wallpuff.configurable);
-			}
-			else if (strncmp("weapon_sparks.enabled_by_default", tokenName, tokenLength) == 0)
-			{
-				ParseBoolean(valueBuf, clientFeatures.weapon_sparks.enabled_by_default);
-			}
-			else if (strncmp("weapon_sparks.configurable", tokenName, tokenLength) == 0)
-			{
-				ParseBoolean(valueBuf, clientFeatures.weapon_sparks.configurable);
+				UpdateBooleanValue(clientFeatures.muzzlelight, subKey, valueBuf);
 			}
 		}
 	}
@@ -1126,25 +1154,41 @@ void CHud::GetAllPlayersInfo()
 	}
 }
 
+bool CHud::ClientFeatureEnabled(cvar_t* cVariable, bool defaultValue)
+{
+	if (cVariable)
+		return cVariable->value != 0;
+	return defaultValue;
+}
+
+bool CHud::ViewBobEnabled()
+{
+	return ClientFeatureEnabled(cl_viewbob, clientFeatures.view_bob.enabled_by_default);
+}
+
+bool CHud::ViewRollEnadled()
+{
+	return ClientFeatureEnabled(cl_viewroll, clientFeatures.view_roll.enabled_by_default);
+}
+
 bool CHud::WeaponWallpuffEnabled()
 {
-	if (cl_weapon_wallpuff)
-		return cl_weapon_wallpuff->value != 0;
-	return clientFeatures.weapon_wallpuff.enabled_by_default;
+	return ClientFeatureEnabled(cl_weapon_wallpuff, clientFeatures.weapon_wallpuff.enabled_by_default);
 }
 
 bool CHud::WeaponSparksEnabled()
 {
-	if (cl_weapon_sparks)
-		return cl_weapon_sparks->value != 0;
-	return clientFeatures.weapon_sparks.enabled_by_default;
+	return ClientFeatureEnabled(cl_weapon_sparks, clientFeatures.weapon_sparks.enabled_by_default);
+}
+
+bool CHud::MuzzleLightEnabled()
+{
+	return ClientFeatureEnabled(cl_muzzlelight, clientFeatures.muzzlelight.enabled_by_default);
 }
 
 bool CHud::CustomFlashlightEnabled()
 {
-	if (cl_flashlight_custom)
-		return cl_flashlight_custom->value != 0;
-	return clientFeatures.flashlight.custom.enabled_by_default;
+	return ClientFeatureEnabled(cl_flashlight_custom, clientFeatures.flashlight.custom.enabled_by_default);
 }
 
 #if FEATURE_MOVE_MODE
