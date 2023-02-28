@@ -55,6 +55,13 @@ struct ModFeatures
 	bool racex_dislike_gargs;
 	bool racex_dislike_alien_monsters;
 
+	bool vortigaunt_coil_attack;
+	bool vortigaunt_idle_effects;
+	bool vortigaunt_arm_boost;
+	bool vortigaunt_selfheal;
+	bool vortigaunt_heal;
+	bool vortigaunt_revive;
+
 	bool skill_opfor;
 	bool opfor_decals;
 	bool opfor_deadhaz;

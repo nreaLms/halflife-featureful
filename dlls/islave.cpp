@@ -27,6 +27,7 @@
 #include	"player.h"
 #include	"soundent.h"
 #include	"mod_features.h"
+#include	"game.h"
 
 #define bits_MEMORY_ISLAVE_PROVOKED bits_MEMORY_CUSTOM1
 #define bits_MEMORY_ISLAVE_REVIVED bits_MEMORY_CUSTOM2
@@ -35,12 +36,8 @@
 
 // whether vortigaunts can spawn familiars (snarks and headcrabs)
 #define FEATURE_ISLAVE_FAMILIAR 1
-// whether vortigaunt can do coil attack
-#define FEATURE_ISLAVE_COIL 1
 // whether vortigaunts get health and energy when attack enemies
 #define FEATURE_ISLAVE_ENERGY 1
-// whether vortigaunts play some effects on idle
-#define FEATURE_ISLAVE_IDLEARMBEAM 1
 // whether vortigaunt can have glowing hands
 #define FEATURE_ISLAVE_HANDGLOW 1
 // whether vortigaunt marked as squadleader has a different beam color
@@ -48,14 +45,6 @@
 
 #define FEATURE_ISLAVE_CAP_SQUAD 0
 
-// free energy dependent abilities
-
-// whether vortigaunts can heal allies using a free energy
-#define FEATURE_ISLAVE_HEAL (1 && FEATURE_ISLAVE_ENERGY)
-// whether vortigaunts can revive other vortigaunts using a free energy
-#define FEATURE_ISLAVE_REVIVE (1 && FEATURE_ISLAVE_ENERGY)
-// whether vortigaunts have damage boost on melee attacks when energy level is positive
-#define FEATURE_ISLAVE_ARMBOOST (1 && FEATURE_ISLAVE_ENERGY && FEATURE_ISLAVE_HANDGLOW)
 // wheter vortigaunt can charge ally player's suit
 #define FEATURE_ISLAVE_CHARGE_TOKEN (0 && FEATURE_ISLAVE_ENERGY)
 
@@ -441,6 +430,12 @@ public:
 	float HealPower();
 	void SpendEnergy(float energy);
 	bool HasFreeEnergy();
+	bool AbleToHeal() {
+		return g_modFeatures.vortigaunt_heal;
+	}
+	bool AbleToRevive() {
+		return g_modFeatures.vortigaunt_revive && gSkillData.slaveRevival > 0;
+	}
 	bool CanRevive();
 	int HealOther(CBaseEntity* pEntity);
 	bool CanSpawnFamiliar();
@@ -546,8 +541,6 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 	DEFINE_FIELD( CISlave, m_voicePitch, FIELD_INTEGER ),
 #if FEATURE_ISLAVE_ENERGY
 	DEFINE_FIELD( CISlave, m_freeEnergy, FIELD_FLOAT ),
-#endif
-#if FEATURE_ISLAVE_HEAL || FEATURE_ISLAVE_REVIVE
 	DEFINE_FIELD( CISlave, m_hDead, FIELD_EHANDLE ),
 	DEFINE_FIELD( CISlave, m_hWounded, FIELD_EHANDLE ),
 	DEFINE_FIELD( CISlave, m_hWounded2, FIELD_EHANDLE ),
@@ -562,10 +555,8 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 	DEFINE_FIELD( CISlave, m_handGlow1, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CISlave, m_handGlow2, FIELD_CLASSPTR ),
 #endif
-#if FEATURE_ISLAVE_REVIVE
 	DEFINE_FIELD( CISlave, m_minHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CISlave, m_maxHullSize, FIELD_VECTOR ),
-#endif
 #if FEATURE_ISLAVE_CHARGE_TOKEN
 	DEFINE_FIELD( CISlave, m_chargeToken, FIELD_CLASSPTR ),
 #endif
@@ -670,17 +661,19 @@ void CISlave::IdleSound( void )
 	{
 		SENTENCEG_PlayRndSz( ENT( pev ), "SLV_IDLE", 0.85, ATTN_NORM, 0, m_voicePitch );
 	}
-#if FEATURE_ISLAVE_IDLEARMBEAM
-	int side = RANDOM_LONG( 0, 1 ) * 2 - 1;
 
-	ArmBeamMessage( side );
+	if (g_modFeatures.vortigaunt_idle_effects)
+	{
+		int side = RANDOM_LONG( 0, 1 ) * 2 - 1;
 
-	UTIL_MakeAimVectors( pev->angles );
-	Vector vecSrc = pev->origin + gpGlobals->v_right * 2 * side;
-	MakeDynamicLight(vecSrc, 8, 10);
+		ArmBeamMessage( side );
 
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "debris/zap1.wav", 1, ATTN_NORM, 0, 100 );
-#endif
+		UTIL_MakeAimVectors( pev->angles );
+		Vector vecSrc = pev->origin + gpGlobals->v_right * 2 * side;
+		MakeDynamicLight(vecSrc, 8, 10);
+
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "debris/zap1.wav", 1, ATTN_NORM, 0, 100 );
+	}
 }
 
 //=========================================================
@@ -903,21 +896,22 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 			ClearMultiDamage();
 
 			bool coilAttack = false;
-#if FEATURE_ISLAVE_COIL
-			// make coil attack on purpose to heal only if two wounded friends around
-			if ( HasFreeEnergy() && IsValidHealTarget(m_hWounded) && IsValidHealTarget(m_hWounded2) &&
-					(pev->origin - m_hWounded->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS &&
-					(pev->origin - m_hWounded2->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS) {
-				if (m_hWounded.Get() == m_hWounded2.Get()) {
-					ALERT(at_console, "m_hWounded && m_hWounded2 are the same!\n");
-				}
+			if (g_modFeatures.vortigaunt_coil_attack)
+			{
+				// make coil attack on purpose to heal only if two wounded friends around
+				if ( HasFreeEnergy() && IsValidHealTarget(m_hWounded) && IsValidHealTarget(m_hWounded2) &&
+						(pev->origin - m_hWounded->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS &&
+						(pev->origin - m_hWounded2->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS) {
+					if (m_hWounded.Get() == m_hWounded2.Get()) {
+						ALERT(at_console, "m_hWounded && m_hWounded2 are the same!\n");
+					}
 
-				coilAttack = true;
-				ALERT(at_aiconsole, "Vort makes coil attack to heal friends\n");
-			} else if ( m_hEnemy != 0 && (pev->origin - m_hEnemy->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS && !HasMemory(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL) ) {
-				coilAttack = true;
+					coilAttack = true;
+					ALERT(at_aiconsole, "Vort makes coil attack to heal friends\n");
+				} else if ( m_hEnemy != 0 && (pev->origin - m_hEnemy->pev->origin).Length() <= ISLAVE_COIL_ATTACK_RADIUS && !HasMemory(bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL) ) {
+					coilAttack = true;
+				}
 			}
-#endif
 
 			if (coilAttack) {
 				CoilBeam();
@@ -948,11 +942,9 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 							}
 						} else {
 							if (FClassnameIs(pEntity->pev, STRING(pev->classname))) {
-#if FEATURE_ISLAVE_HEAL
-								if (HealOther(pEntity)) {
+								if (AbleToHeal() && HealOther(pEntity)) {
 									ALERT(at_aiconsole, "Vort healed friend with coil attack\n");
 								}
-#endif
 							}
 						}
 					}
@@ -996,12 +988,10 @@ BOOL CISlave::CheckRangeAttack1( float flDot, float flDist )
 		return FALSE;
 	}
 
-#if FEATURE_ISLAVE_COIL
-	if( flDist > 64 && flDist <= ISLAVE_COIL_ATTACK_RADIUS )
+	if( g_modFeatures.vortigaunt_coil_attack && flDist > 64 && flDist <= ISLAVE_COIL_ATTACK_RADIUS )
 	{
 		return TRUE;
 	}
-#endif
 
 	return CFollowingMonster::CheckRangeAttack1( flDot, flDist );
 }
@@ -1041,8 +1031,7 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 		UTIL_TraceLine( EyePosition(), pEntity->EyePosition(), ignore_monsters, ENT( pev ), &tr );
 		if( (mustSee && (tr.flFraction == 1.0f || tr.pHit == pEntity->edict())) || (!mustSee && (pEntity->pev->origin -pev->origin).Length() < flDist ) )
 		{
-#if FEATURE_ISLAVE_REVIVE
-			if( gSkillData.slaveRevival > 0 && CanBeRevived(pEntity) )
+			if( AbleToRevive() && CanBeRevived(pEntity) )
 			{
 				float d = ( pev->origin - pEntity->pev->origin ).Length();
 				if( d < flDist )
@@ -1051,9 +1040,7 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 					flDist = d;
 				}
 			}
-#endif
-#if FEATURE_ISLAVE_HEAL
-			if ( IsValidHealTarget(pEntity) ) 
+			if ( AbleToHeal() && IsValidHealTarget(pEntity) )
 			{
 				float d = ( pev->origin - pEntity->pev->origin ).Length();
 				if( d < flDist )
@@ -1063,7 +1050,6 @@ BOOL CISlave::CheckHealOrReviveTargets(float flDist, bool mustSee)
 					flDist = d;
 				}
 			}
-#endif
 		}
 	}
 	if( m_hDead != 0 || m_hWounded != 0 )
@@ -1323,9 +1309,8 @@ void CISlave::Precache()
 
 #if FEATURE_ISLAVE_HANDGLOW
 	PRECACHE_MODEL( ISLAVE_HAND_SPRITE_NAME );
-#endif
-#if FEATURE_ISLAVE_ARMBOOST
-	PRECACHE_SOUND_ARRAY(pGlowArmSounds);
+	if (g_modFeatures.vortigaunt_arm_boost)
+		PRECACHE_SOUND_ARRAY(pGlowArmSounds);
 #endif
 #if FEATURE_ISLAVE_FAMILIAR
 	PRECACHE_MODEL( "sprites/bexplo.spr" );
@@ -1848,18 +1833,18 @@ CBaseEntity *CISlave::ZapBeam( int side )
 	if( pEntity != NULL && pEntity->pev->takedamage )
 	{
 		if (IRelationship(pEntity) < R_DL && FClassnameIs(pEntity->pev, STRING(pev->classname))) {
-#if FEATURE_ISLAVE_HEAL
-			if (HealOther(pEntity)) {
+			if (AbleToHeal() && HealOther(pEntity)) {
 				ALERT(at_aiconsole, "Vortigaunt healed friend with zap attack\n");
 			}
-#endif
 		} else {
 			pEntity->TraceAttack( pev, gSkillData.slaveDmgZap, vecAim, &tr, DMG_SHOCK );
 #if FEATURE_ISLAVE_ENERGY
 			if (pEntity->pev->flags & (FL_CLIENT | FL_MONSTER)) {
 				//TODO: check that target is actually a living creature, not machine
 				const float toHeal = gSkillData.slaveDmgZap;
-				const int healed = TakeHealth(this, toHeal, DMG_GENERIC);
+				int healed = 0;
+				if (g_modFeatures.vortigaunt_selfheal)
+					healed = TakeHealth(this, toHeal, DMG_GENERIC);
 				if (healed) // give some health to vortigaunt like in Decay bonus mission
 				{
 					ALERT(at_aiconsole, "Vortigaunt gets health from enemy\n");
@@ -2017,11 +2002,7 @@ void CISlave::StartMeleeAttackGlow(int side)
 
 bool CISlave::CanUseGlowArms()
 {
-#if FEATURE_ISLAVE_ARMBOOST
-	return (pev->spawnflags & SF_SQUADMONSTER_LEADER) || HasFreeEnergy();
-#else
-	return false;
-#endif
+	return FEATURE_ISLAVE_HANDGLOW && g_modFeatures.vortigaunt_arm_boost && ((pev->spawnflags & SF_SQUADMONSTER_LEADER) || HasFreeEnergy());
 }
 
 Vector CISlave::HandPosition(int side)
@@ -2101,11 +2082,7 @@ bool CISlave::HasFreeEnergy()
 
 bool CISlave::CanRevive()
 {
-#if FEATURE_ISLAVE_REVIVE
-	return m_hDead != 0 && gSkillData.slaveRevival > 0 && HasFreeEnergy();
-#else
-	return false;
-#endif
+	return AbleToRevive() && m_hDead != 0 && HasFreeEnergy();
 }
 
 int CISlave::HealOther(CBaseEntity *pEntity)

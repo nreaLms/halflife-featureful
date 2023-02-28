@@ -52,6 +52,13 @@ ModFeatures::ModFeatures()
 	racex_dislike_gargs = true;
 	racex_dislike_alien_monsters = false;
 
+	vortigaunt_coil_attack = true;
+	vortigaunt_idle_effects = false;
+	vortigaunt_arm_boost = true;
+	vortigaunt_selfheal = true;
+	vortigaunt_heal = true;
+	vortigaunt_revive = true;
+
 	skill_opfor = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_decals = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_deadhaz = FEATURE_OPFOR_SPECIFIC ? true : false;
@@ -105,6 +112,30 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	else if (strcmp(key, "racex_dislike_alien_monsters") == 0)
 	{
 		return UpdateBoolean(value, racex_dislike_alien_monsters, key);
+	}
+	else if (strcmp(key, "vortigaunt_coil_attack") == 0)
+	{
+		return UpdateBoolean(value, vortigaunt_coil_attack, key);
+	}
+	else if (strcmp(key, "vortigaunt_idle_effects") == 0)
+	{
+		return UpdateBoolean(value, vortigaunt_idle_effects, key);
+	}
+	else if (strcmp(key, "vortigaunt_arm_boost") == 0)
+	{
+		return UpdateBoolean(value, vortigaunt_arm_boost, key);
+	}
+	else if (strcmp(key, "vortigaunt_selfheal") == 0)
+	{
+		return UpdateBoolean(value, vortigaunt_selfheal, key);
+	}
+	else if (strcmp(key, "vortigaunt_heal") == 0)
+	{
+		return UpdateBoolean(value, vortigaunt_heal, key);
+	}
+	else if (strcmp(key, "vortigaunt_revive") == 0)
+	{
+		return UpdateBoolean(value, vortigaunt_revive, key);
 	}
 	else if (strcmp(key, "skill_opfor") == 0)
 	{
