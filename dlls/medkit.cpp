@@ -91,7 +91,7 @@ void CMedkit::Spawn()
 
 void CMedkit::Precache(void)
 {
-	PRECACHE_MODEL("models/v_tfc_medkit.mdl");
+	PRECACHE_MODEL("models/v_medkit.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_medkit.mdl");
 
@@ -134,7 +134,7 @@ int CMedkit::AddToPlayer(CBasePlayer *pPlayer)
 BOOL CMedkit::Deploy()
 {
 	m_flSoundDelay = 0;
-	return DefaultDeploy("models/v_tfc_medkit.mdl", "models/p_medkit.mdl", MEDKIT_DRAW, "trip");
+	return DefaultDeploy("models/v_medkit.mdl", "models/p_medkit.mdl", MEDKIT_DRAW, "trip");
 }
 
 void CMedkit::Holster()
