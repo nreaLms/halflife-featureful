@@ -36,8 +36,7 @@
 #define FEATURE_ENV_WARPBALL 1
 #define FEATURE_ENV_XENMAKER 1
 
-// use a single sound (debris/alien_teleport.wav) for teleportation effect instead of two
-#define FEATURE_ALIEN_TELEPORT_SOUND 0
+#define ALIEN_TELEPORT_SOUND "debris/alien_teleport.wav"
 
 #define	SF_GIBSHOOTER_REPEATABLE		1 // allows a gibshooter to be refired
 
@@ -2842,11 +2841,7 @@ static void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, 
 
 #define WARPBALL_SPRITE "sprites/fexplo1.spr"
 #define WARPBALL_BEAM "sprites/lgtning.spr"
-#if FEATURE_ALIEN_TELEPORT_SOUND
-#define WARPBALL_SOUND1 "debris/alien_teleport.wav"
-#else
 #define WARPBALL_SOUND1 "debris/beamstart2.wav"
-#endif
 #define WARPBALL_SOUND2 "debris/beamstart7.wav"
 
 class CEnvWarpBall : public CBaseEntity
@@ -2926,16 +2921,16 @@ public:
 
 
 	inline const char* WarpballSound1() {
-		return pev->noise1 ? STRING(pev->noise1) : WARPBALL_SOUND1;
+		if (pev->noise1)
+			return STRING(pev->noise1);
+		return g_modFeatures.alien_teleport_sound ? ALIEN_TELEPORT_SOUND : WARPBALL_SOUND1;
 	}
 	inline const char* WarpballSound2() {
 		if (FStringNull(pev->noise2))
 		{
-#if FEATURE_ALIEN_TELEPORT_SOUND
-			return NULL;
-#else
+			if (g_modFeatures.alien_teleport_sound)
+				return NULL;
 			return FStringNull(pev->noise1) ? WARPBALL_SOUND2 : NULL;
-#endif
 		}
 		else
 			return STRING(pev->noise2);
@@ -3019,16 +3014,11 @@ void CEnvWarpBall::Precache( void )
 	else
 		PRECACHE_MODEL( WARPBALL_SPRITE );
 
-	if (pev->noise1)
-		PRECACHE_SOUND(STRING(pev->noise1));
-	else
-		PRECACHE_SOUND( WARPBALL_SOUND1 );
-	if (pev->noise2)
-		PRECACHE_SOUND(STRING(pev->noise2));
-#if !FEATURE_ALIEN_TELEPORT_SOUND
-	else
-		PRECACHE_SOUND( WARPBALL_SOUND2 );
-#endif
+	PRECACHE_SOUND(WarpballSound1());
+
+	const char* sound2 = WarpballSound2();
+	if (sound2)
+		PRECACHE_SOUND(sound2);
 
 	UTIL_PrecacheOther("warpball_hurt");
 }
@@ -3198,11 +3188,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 #define XENMAKER_SPRITE1 "sprites/fexplo1.spr"
 #define XENMAKER_SPRITE2 "sprites/xflare1.spr"
 #define XENMAKER_BEAM "sprites/lgtning.spr"
-#if FEATURE_ALIEN_TELEPORT_SOUND
-#define XENMAKER_SOUND1 "debris/alien_teleport.wav"
-#else
 #define XENMAKER_SOUND1 "debris/beamstart7.wav"
-#endif
 #define XENMAKER_SOUND2 "debris/beamstart2.wav"
 
 class CEnvXenMaker : public CBaseEntity
@@ -3284,10 +3270,15 @@ void CEnvXenMaker::Precache()
 	{
 		UTIL_PrecacheMonster(STRING(m_iszMonsterClassname), FALSE, &m_defaultMinHullSize, &m_defaultMaxHullSize);
 	}
-	PRECACHE_SOUND(XENMAKER_SOUND1);
-#if !FEATURE_ALIEN_TELEPORT_SOUND
-	PRECACHE_SOUND(XENMAKER_SOUND2);
-#endif
+	if (g_modFeatures.alien_teleport_sound)
+	{
+		PRECACHE_SOUND(ALIEN_TELEPORT_SOUND);
+	}
+	else
+	{
+		PRECACHE_SOUND(XENMAKER_SOUND1);
+		PRECACHE_SOUND(XENMAKER_SOUND2);
+	}
 	PRECACHE_MODEL(XENMAKER_SPRITE1);
 	PRECACHE_MODEL(XENMAKER_SPRITE2);
 }
@@ -3492,19 +3483,21 @@ void CEnvXenMaker::TrySpawn()
 		WRITE_BYTE( lifeTime/2 );		// decay * 0.1
 	MESSAGE_END();
 
-	EMIT_SOUND( posEnt, CHAN_ITEM, XENMAKER_SOUND1, 1, ATTN_NORM );
+	const char* teleportSound = g_modFeatures.alien_teleport_sound ? ALIEN_TELEPORT_SOUND : XENMAKER_SOUND1;
+	EMIT_SOUND( posEnt, CHAN_ITEM, teleportSound, 1, ATTN_NORM );
 
-#if !FEATURE_ALIEN_TELEPORT_SOUND
-	if (asTemplate)
+	if (!g_modFeatures.alien_teleport_sound)
 	{
-		PlaySecondSound(posEnt);
+		if (asTemplate)
+		{
+			PlaySecondSound(posEnt);
+		}
+		else
+		{
+			SetThink(&CEnvXenMaker::PlaySecondSoundThink);
+			pev->nextthink = gpGlobals->time + 0.8;
+		}
 	}
-	else
-	{
-		SetThink(&CEnvXenMaker::PlaySecondSoundThink);
-		pev->nextthink = gpGlobals->time + 0.8;
-	}
-#endif
 }
 
 void CEnvXenMaker::PlaySecondSoundThink()

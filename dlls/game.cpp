@@ -40,6 +40,7 @@ ModFeatures::ModFeatures()
 	items_instant_drop = true;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
+	alien_teleport_sound = false;
 
 	monsters_stop_attacking_dying_monsters = false;
 	monsters_delegate_squad_leadership = true;
@@ -80,6 +81,10 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	else if (strcmp(key, "satchels_pickable") == 0)
 	{
 		return UpdateBoolean(value, satchels_pickable, key);
+	}
+	else if (strcmp(key, "alien_teleport_sound") == 0)
+	{
+		return UpdateBoolean(value, alien_teleport_sound, key);
 	}
 	else if (strcmp(key, "monsters_stop_attacking_dying_monsters") == 0)
 	{
