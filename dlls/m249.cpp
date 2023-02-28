@@ -34,13 +34,6 @@ LINK_ENTITY_TO_CLASS(weapon_m249, CM249)
 
 void CM249::Spawn()
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_M249))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
 	Precache();
 	SET_MODEL(ENT(pev), MyWModel());
 	m_iId = WEAPON_M249;
@@ -55,10 +48,6 @@ void CM249::Spawn()
 
 void CM249::Precache(void)
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_M249))
-		return;
-#endif
 	PRECACHE_MODEL("models/v_saw.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_saw.mdl");
@@ -78,6 +67,15 @@ void CM249::Precache(void)
 	PRECACHE_SOUND("weapons/357_cock1.wav");
 
 	m_usM249 = PRECACHE_EVENT(1, "events/m249.sc");
+}
+
+bool CM249::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_M249);
+#else
+	return true;
+#endif
 }
 
 int CM249::GetItemInfo(ItemInfo *p)

@@ -242,10 +242,6 @@ LINK_ENTITY_TO_CLASS( weapon_grapple, CBarnacleGrapple )
 
 void CBarnacleGrapple::Precache( void )
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE))
-		return;
-#endif
 	PRECACHE_MODEL( "models/v_bgrap.mdl" );
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/p_bgrap.mdl" );
@@ -268,13 +264,6 @@ void CBarnacleGrapple::Precache( void )
 
 void CBarnacleGrapple::Spawn( void )
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
 	Precache();
 	m_iId = WEAPON_GRAPPLE;
 	SET_MODEL( ENT(pev), MyWModel() );
@@ -283,6 +272,15 @@ void CBarnacleGrapple::Spawn( void )
 	m_iClip = -1;
 
 	FallInit();
+}
+
+bool CBarnacleGrapple::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE);
+#else
+	return true;
+#endif
 }
 
 int CBarnacleGrapple::GetItemInfo(ItemInfo *p)

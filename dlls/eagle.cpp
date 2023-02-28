@@ -28,13 +28,6 @@ LINK_ENTITY_TO_CLASS( eagle_laser, CLaserSpot )
 
 void CEagle::Spawn( void )
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
 	Precache( );
 	m_iId = WEAPON_EAGLE;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -49,10 +42,6 @@ void CEagle::Spawn( void )
 
 void CEagle::Precache( void )
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE))
-		return;
-#endif
 	UTIL_PrecacheOther( "eagle_laser" );
 	PRECACHE_MODEL("models/v_desert_eagle.mdl");
 	PRECACHE_MODEL(MyWModel());
@@ -65,6 +54,15 @@ void CEagle::Precache( void )
 	PRECACHE_SOUND ("weapons/desert_eagle_sight2.wav");
 
 	m_usEagle = PRECACHE_EVENT( 1, "events/eagle.sc" );
+}
+
+bool CEagle::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE);
+#else
+	return true;
+#endif
 }
 
 int CEagle::AddToPlayer(CBasePlayer *pPlayer)

@@ -35,13 +35,6 @@ LINK_ENTITY_TO_CLASS(weapon_knife, CKnife)
 
 void CKnife::Spawn()
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
 	Precache();
 	m_iId = WEAPON_KNIFE;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -54,10 +47,6 @@ void CKnife::Spawn()
 
 void CKnife::Precache(void)
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
-		return;
-#endif
 	PRECACHE_MODEL("models/v_knife.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_knife.mdl");
@@ -70,6 +59,15 @@ void CKnife::Precache(void)
 	PRECACHE_SOUND("weapons/knife3.wav");
 
 	m_usKnife = PRECACHE_EVENT(1, "events/knife.sc");
+}
+
+bool CKnife::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE);
+#else
+	return true;
+#endif
 }
 
 int CKnife::GetItemInfo(ItemInfo *p)

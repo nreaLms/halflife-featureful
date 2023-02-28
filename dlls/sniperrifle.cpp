@@ -29,14 +29,6 @@ LINK_ENTITY_TO_CLASS( weapon_sniperrifle, CSniperrifle )
 
 void CSniperrifle::Spawn( )
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
-
 	Precache( );
 	m_iId = WEAPON_SNIPERRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -49,11 +41,6 @@ void CSniperrifle::Spawn( )
 
 void CSniperrifle::Precache( void )
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
-		return;
-#endif
-
 	PRECACHE_MODEL("models/v_m40a1.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_m40a1.mdl");
@@ -67,6 +54,15 @@ void CSniperrifle::Precache( void )
 	PRECACHE_SOUND ("weapons/sniper_zoom.wav");
 
 	m_usSniper = PRECACHE_EVENT( 1, "events/sniper.sc" );
+}
+
+bool CSniperrifle::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE);
+#else
+	return true;
+#endif
 }
 
 int CSniperrifle::GetItemInfo(ItemInfo *p)

@@ -702,25 +702,13 @@ const char* CSqueak::EventsFile() const
 #if FEATURE_PENGUIN
 LINK_ENTITY_TO_CLASS( weapon_penguin, CPenguin )
 
-void CPenguin::Spawn()
+bool CPenguin::IsEnabledInMod()
 {
 #ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WeaponId()))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
+	return g_modFeatures.IsWeaponEnabled(WeaponId());
+#else
+	return true;
 #endif
-	CSqueak::Spawn();
-}
-
-void CPenguin::Precache()
-{
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WeaponId()))
-		return;
-#endif
-	CSqueak::Precache();
 }
 
 const char* CPenguin::GrenadeName() const

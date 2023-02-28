@@ -34,13 +34,6 @@ LINK_ENTITY_TO_CLASS( weapon_uziakimbo, CUzi ) // Link to single uzi until akimb
 //=========================================================
 void CUzi::Spawn()
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
 	Precache();
 	SET_MODEL( ENT( pev ), MyWModel() );
 	m_iId = WEAPON_UZI;
@@ -52,10 +45,6 @@ void CUzi::Spawn()
 
 void CUzi::Precache( void )
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
-		return;
-#endif
 	PRECACHE_MODEL( "models/v_uzi.mdl" );
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/p_uzi.mdl" );
@@ -79,6 +68,15 @@ void CUzi::Precache( void )
 	PRECACHE_SOUND( "weapons/357_cock1.wav" );
 
 	m_usUzi = PRECACHE_EVENT( 1, "events/uzi.sc" );
+}
+
+bool CUzi::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_UZI);
+#else
+	return true;
+#endif
 }
 
 int CUzi::GetItemInfo( ItemInfo *p )

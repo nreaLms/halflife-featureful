@@ -35,13 +35,6 @@ LINK_ENTITY_TO_CLASS(weapon_pipewrench, CPipeWrench)
 
 void CPipeWrench::Spawn()
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
 	Precache();
 	m_iId = WEAPON_PIPEWRENCH;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -54,10 +47,6 @@ void CPipeWrench::Spawn()
 
 void CPipeWrench::Precache(void)
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH))
-		return;
-#endif
 	PRECACHE_MODEL("models/v_pipe_wrench.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_pipe_wrench.mdl");
@@ -79,6 +68,15 @@ void CPipeWrench::Precache(void)
 	PRECACHE_SOUND("weapons/pwrench_big_miss.wav");
 
 	m_usPWrench = PRECACHE_EVENT(1, "events/pipewrench.sc");
+}
+
+bool CPipeWrench::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH);
+#else
+	return true;
+#endif
 }
 
 int CPipeWrench::GetItemInfo(ItemInfo *p)

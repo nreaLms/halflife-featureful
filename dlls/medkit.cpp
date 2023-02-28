@@ -80,13 +80,6 @@ CBaseEntity* CMedkit::FindHealTarget(bool increasedRadius)
 
 void CMedkit::Spawn()
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT))
-	{
-		REMOVE_ENTITY( ENT( pev ) );
-		return;
-	}
-#endif
 	Precache();
 	m_iId = WEAPON_MEDKIT;
 	SET_MODEL(ENT(pev), MyWModel());
@@ -101,10 +94,6 @@ void CMedkit::Spawn()
 
 void CMedkit::Precache(void)
 {
-#ifndef CLIENT_DLL
-	if (!g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT))
-		return;
-#endif
 	PRECACHE_MODEL("models/v_medkit.mdl");
 	PRECACHE_MODEL(MyWModel());
 	PRECACHE_MODEL("models/p_medkit.mdl");
@@ -116,6 +105,15 @@ void CMedkit::Precache(void)
 	PRECACHE_SOUND("items/medshotno1.wav");
 
 	m_usMedkitFire = PRECACHE_EVENT(1, "events/medkit.sc");
+}
+
+bool CMedkit::IsEnabledInMod()
+{
+#ifndef CLIENT_DLL
+	return g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT);
+#else
+	return true;
+#endif
 }
 
 int CMedkit::GetItemInfo(ItemInfo *p)

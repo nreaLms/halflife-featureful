@@ -1041,6 +1041,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod();
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -1084,6 +1085,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1130,6 +1132,7 @@ public:
 #endif
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1183,6 +1186,7 @@ public:
 
 	void Precache( void );
 	void Spawn( void );
+	bool IsEnabledInMod();
 	void EndAttack( void );
 
 	int GetItemInfo(ItemInfo *p);
@@ -1235,6 +1239,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
 
@@ -1283,6 +1288,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod();
 
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1323,6 +1329,7 @@ public:
 #endif
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod();
 
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -1368,6 +1375,7 @@ class CShockrifle : public CHgun
 public:
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod();
 
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer(CBasePlayer *pPlayer);
@@ -1408,6 +1416,7 @@ public:
 
 	void Spawn(void);
 	void Precache(void);
+	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -1446,8 +1455,7 @@ private:
 class CPenguin : public CSqueak
 {
 public:
-	void Spawn( void );
-	void Precache( void );
+	bool IsEnabledInMod();
 	virtual const char* GrenadeName() const;
 	virtual int WeaponId() const;
 	virtual const char* NestModel() const;
@@ -1473,6 +1481,7 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod();
 
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -1507,6 +1516,7 @@ class CUzi : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod();
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
