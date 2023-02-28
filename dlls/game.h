@@ -63,6 +63,8 @@ struct ModFeatures
 	bool vortigaunt_heal;
 	bool vortigaunt_revive;
 
+	bool sentry_retract;
+
 	bool skill_opfor;
 	bool opfor_decals;
 	bool opfor_deadhaz;

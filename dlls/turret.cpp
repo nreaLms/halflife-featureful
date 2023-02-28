@@ -24,9 +24,7 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "effects.h"
-
-// Set to 1 to fix 'eternal' search for enemy of sentry turret
-#define FEATURE_SENTRY_TURRET_RETRACTS 0
+#include "game.h"
 
 extern Vector VecBModelOrigin( entvars_t* pevBModel );
 
@@ -1206,9 +1204,8 @@ void CSentry::Spawn()
 	SetMyHealth( gSkillData.sentryHealth );
 	m_HackedGunPos = Vector( 0, 0, 48 );
 	pev->view_ofs.z = 48;
-#if !FEATURE_SENTRY_TURRET_RETRACTS
-	m_flMaxWait = 1E6;
-#endif
+	if (!g_modFeatures.sentry_retract)
+		m_flMaxWait = 1E6;
 	m_flMaxSpin = 1E6;
 
 	CBaseTurret::Spawn();
