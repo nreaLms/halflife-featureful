@@ -3864,11 +3864,9 @@ void CBasePlayer::GiveNamedItem(const char *pszName , int spawnFlags)
 	pent->v.spawnflags |= SF_NORESPAWN;
 	pent->v.spawnflags |= spawnFlags;
 
-	DispatchSpawn( pent );
-
-	if ( pent->free )
+	if ( DispatchSpawn( pent ) == -1 )
 	{
-		ALERT( at_console, "Item '%s' was freed (probably not enabled)\n", pszName );
+		ALERT( at_console, "Game rejected to spawn '%s' (probably not enabled)\n", pszName );
 		return;
 	}
 

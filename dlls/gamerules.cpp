@@ -561,8 +561,6 @@ CBasePlayer *CGameRules::EffectivePlayer(CBaseEntity *pActivator)
 	return NULL;
 }
 
-extern bool IsDefaultPrecached( const char* szClassname );
-
 bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig &mapConfig)
 {
 	extern int gEvilImpulse101;
@@ -594,8 +592,7 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 			for (j=0; j<mapConfig.pickupEnts[i].count; ++j)
 			{
 				const char* entName = STRING(mapConfig.pickupEnts[i].entName);
-				if (IsDefaultPrecached(entName))
-					pPlayer->GiveNamedItem(entName);
+				pPlayer->GiveNamedItem(entName);
 			}
 		}
 		gEvilImpulse101 = FALSE;

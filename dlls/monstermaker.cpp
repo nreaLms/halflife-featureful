@@ -685,10 +685,9 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 		}
 	}
 
-	DispatchSpawn( ENT( pevCreate ) );
-	if (pent->free)
+	if (DispatchSpawn( ENT( pevCreate ) ) == -1)
 	{
-		ALERT( at_console, "Entity '%s' has been freed after spawn (probably not enabled)\n", STRING(m_iszMonsterClassname) );
+		ALERT( at_console, "Game rejected to spawn '%s' (probably not enabled)\n", STRING(m_iszMonsterClassname) );
 		return 0;
 	}
 
