@@ -321,7 +321,6 @@ void ReadEnabledWeapons()
 	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
 	if (!pMemFile)
 	{
-		g_modFeatures.EnableAllWeapons();
 		return;
 	}
 
