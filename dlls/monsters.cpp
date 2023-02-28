@@ -4456,6 +4456,7 @@ class CSkeleton : public CDeadMonster
 {
 public:
 	void Spawn(void);
+	bool IsEnabledInMod() { return  g_modFeatures.IsMonsterEnabled("skeleton"); }
 	int	DefaultClassify(void) { return	CLASS_NONE; }
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 
