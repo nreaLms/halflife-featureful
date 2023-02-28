@@ -25,6 +25,7 @@
 #include	"monsters.h"
 #include	"weapons.h"
 #include	"soundent.h"
+#include	"game.h"
 
 #define ACT_T_IDLE		1010
 #define ACT_T_TAP		1020
@@ -340,43 +341,52 @@ void CTentacle::KeyValue( KeyValueData *pkvd )
 
 int CTentacle::Level( float dz )
 {
-#if FEATURE_OPFOR_TENTACLE_HEIGHT
+	if (g_modFeatures.tentacle_opfor_height)
+	{
 	if( dz < 96 )
 		return 0;
 	if( dz < 150 )
 		return 1;
 	if( dz < 288 )
 		return 2;
-#else
-	if( dz < 216 )
-		return 0;
-	if( dz < 408 )
-		return 1;
-	if( dz < 600 )
-		return 2;
-#endif
+	}
+	else
+	{
+		if( dz < 216 )
+			return 0;
+		if( dz < 408 )
+			return 1;
+		if( dz < 600 )
+			return 2;
+	}
 	return 3;
 }
 
 float CTentacle::MyHeight()
 {
-	switch( MyLevel() )
+	if (g_modFeatures.tentacle_opfor_height)
 	{
-#if FEATURE_OPFOR_TENTACLE_HEIGHT
-	case 1:
-		return 136;
-	case 2:
-		return 190;
-	case 3:
-		return 328;
-#else
-	case 1:
-		return 256;
-	case 2:
-		return 448;
-	case 3:
-		return 640;
-#endif
+		switch( MyLevel() )
+		{
+		case 1:
+			return 136;
+		case 2:
+			return 190;
+		case 3:
+			return 328;
+		}
+	}
+	else
+	{
+		switch( MyLevel() )
+		{
+		case 1:
+			return 256;
+		case 2:
+			return 448;
+		case 3:
+			return 640;
+		}
 	}
 	return 0;
 }

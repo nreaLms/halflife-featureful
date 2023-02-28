@@ -58,6 +58,7 @@ struct ModFeatures
 	bool skill_opfor;
 	bool opfor_decals;
 	bool opfor_deadhaz;
+	bool tentacle_opfor_height;
 
 private:
 	bool UpdateBoolean(const char* value, bool& result, const char* key);

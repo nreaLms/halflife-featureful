@@ -55,6 +55,7 @@ ModFeatures::ModFeatures()
 	skill_opfor = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_decals = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_deadhaz = FEATURE_OPFOR_SPECIFIC ? true : false;
+	tentacle_opfor_height = FEATURE_OPFOR_SPECIFIC ? true : false;
 }
 
 bool ModFeatures::SetValue(const char *key, const char *value)
@@ -116,6 +117,10 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	else if (strcmp(key, "opfor_deadhaz") == 0)
 	{
 		return UpdateBoolean(value, opfor_deadhaz, key);
+	}
+	else if (strcmp(key, "tentacle_opfor_height") == 0)
+	{
+		return UpdateBoolean(value, tentacle_opfor_height, key);
 	}
 	else
 	{
