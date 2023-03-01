@@ -3439,7 +3439,10 @@ void CEnvXenMaker::TrySpawn()
 		pevCreate->angles = pev->angles;
 		SetBits( pevCreate->spawnflags, SF_MONSTER_FALL_TO_GROUND );
 
-		DispatchSpawn( ENT( pevCreate ) );
+		if (DispatchSpawn( ENT( pevCreate ) ) == -1)
+		{
+			REMOVE_ENTITY(ENT(pevCreate));
+		}
 	}
 
 	CSprite *pSpr = CSprite::SpriteCreate( XENMAKER_SPRITE1, vecOrigin, TRUE );

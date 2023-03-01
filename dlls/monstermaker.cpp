@@ -688,6 +688,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 	if (DispatchSpawn( ENT( pevCreate ) ) == -1)
 	{
 		ALERT( at_console, "Game rejected to spawn '%s' (probably not enabled)\n", STRING(m_iszMonsterClassname) );
+		REMOVE_ENTITY(ENT(pevCreate));
 		return 0;
 	}
 

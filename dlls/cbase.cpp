@@ -766,7 +766,10 @@ CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, c
 	if (pEntity)
 	{
 		if (DispatchSpawn( pEntity->edict() ) == -1 )
+		{
+			REMOVE_ENTITY(pEntity->edict());
 			return 0;
+		}
 	}
 	return pEntity;
 }

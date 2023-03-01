@@ -3867,6 +3867,7 @@ void CBasePlayer::GiveNamedItem(const char *pszName , int spawnFlags)
 	if ( DispatchSpawn( pent ) == -1 )
 	{
 		ALERT( at_console, "Game rejected to spawn '%s' (probably not enabled)\n", pszName );
+		REMOVE_ENTITY(pent);
 		return;
 	}
 
