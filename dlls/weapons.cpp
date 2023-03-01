@@ -238,7 +238,7 @@ void AddAmmoNameToAmmoRegistry( const char *szAmmoname, int maxAmmo, bool isExha
 }
 
 // Precaches the weapon and queues the weapon info for sending to clients
-void UTIL_PrecacheOtherWeapon( const char *szClassname )
+bool UTIL_PrecacheOtherWeapon( const char *szClassname )
 {
 	edict_t	*pent;
 
@@ -246,40 +246,49 @@ void UTIL_PrecacheOtherWeapon( const char *szClassname )
 	if( FNullEnt( pent ) )
 	{
 		ALERT( at_console, "NULL Ent in UTIL_PrecacheOtherWeapon\n" );
-		return;
+		return false;
 	}
 	
 	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
 
+	bool result = true;
 	if( pEntity )
 	{
 		ItemInfo II = {0};
-		pEntity->Precache();
 		CBasePlayerWeapon* pWeapon = pEntity->MyWeaponPointer();
-		if( pWeapon != NULL )
+		if( pWeapon != 0 )
 		{
-			if (pWeapon->GetItemInfo( &II ))
+			if (pWeapon->IsEnabledInMod())
 			{
-				CBasePlayerWeapon::ItemInfoArray[II.iId] = II;
+				pEntity->Precache();
 
-				if( II.pszAmmo1 && *II.pszAmmo1 )
+				if (pWeapon->GetItemInfo( &II ))
 				{
-					AddAmmoNameToAmmoRegistry( II.pszAmmo1, II.iMaxAmmo1, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
-				}
+					CBasePlayerWeapon::ItemInfoArray[II.iId] = II;
 
-				if( II.pszAmmo2 && *II.pszAmmo2 )
-				{
-					AddAmmoNameToAmmoRegistry( II.pszAmmo2, II.iMaxAmmo2, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
+					if( II.pszAmmo1 && *II.pszAmmo1 )
+					{
+						AddAmmoNameToAmmoRegistry( II.pszAmmo1, II.iMaxAmmo1, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
+					}
+
+					if( II.pszAmmo2 && *II.pszAmmo2 )
+					{
+						AddAmmoNameToAmmoRegistry( II.pszAmmo2, II.iMaxAmmo2, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
+					}
 				}
 			}
+			else
+				result = false;
 		}
 		else
 		{
 			ALERT(at_console, "UTIL_PrecacheOtherWeapon: %s is not a weapon\n", szClassname);
+			result = false;
 		}
 	}
 
 	REMOVE_ENTITY( pent );
+	return result;
 }
 
 // called by worldspawn
@@ -360,65 +369,47 @@ void W_Precache( void )
 	// hornetgun
 	UTIL_PrecacheOtherWeapon( "weapon_hornetgun" );
 #if FEATURE_MEDKIT
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT))
-		UTIL_PrecacheOtherWeapon( "weapon_medkit" );
+	UTIL_PrecacheOtherWeapon( "weapon_medkit" );
 #endif
 	if( g_pGameRules->IsDeathmatch() )
 	{
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
 	}
 #if FEATURE_DESERT_EAGLE
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE))
-		UTIL_PrecacheOtherWeapon( "weapon_eagle" );
+	UTIL_PrecacheOtherWeapon( "weapon_eagle" );
 #endif
 #if FEATURE_PIPEWRENCH
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH))
-		UTIL_PrecacheOtherWeapon( "weapon_pipewrench" );
+	UTIL_PrecacheOtherWeapon( "weapon_pipewrench" );
 #endif
 #if FEATURE_KNIFE
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE))
-		UTIL_PrecacheOtherWeapon( "weapon_knife" );
+	UTIL_PrecacheOtherWeapon( "weapon_knife" );
 #endif
 #if FEATURE_GRAPPLE
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_GRAPPLE))
-	{
-		UTIL_PrecacheOtherWeapon( "weapon_grapple" );
+	if (UTIL_PrecacheOtherWeapon( "weapon_grapple" ))
 		UTIL_PrecacheOther( "grapple_tip" );
-	}
 #endif
 #if FEATURE_PENGUIN
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_PENGUIN))
-		UTIL_PrecacheOtherWeapon( "weapon_penguin" );
+	UTIL_PrecacheOtherWeapon( "weapon_penguin" );
 #endif
 #if FEATURE_M249
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_M249))
-	{
-		UTIL_PrecacheOtherWeapon( "weapon_m249" );
+	if (UTIL_PrecacheOtherWeapon( "weapon_m249" ))
 		UTIL_PrecacheOther( "ammo_556" );
-	}
 #endif
 #if FEATURE_SNIPERRIFLE
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE))
-	{
-		UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" );
+	if (UTIL_PrecacheOtherWeapon( "weapon_sniperrifle" ))
 		UTIL_PrecacheOther( "ammo_762" );
-	}
 #endif
 #if FEATURE_DISPLACER
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_DISPLACER))
-		UTIL_PrecacheOtherWeapon( "weapon_displacer" );
+	UTIL_PrecacheOtherWeapon( "weapon_displacer" );
 #endif
 #if FEATURE_SHOCKRIFLE
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_SHOCKRIFLE))
-		UTIL_PrecacheOtherWeapon( "weapon_shockrifle" );
+	UTIL_PrecacheOtherWeapon( "weapon_shockrifle" );
 #endif
 #if FEATURE_SPORELAUNCHER
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_SPORELAUNCHER))
-		UTIL_PrecacheOtherWeapon( "weapon_sporelauncher" );
+	UTIL_PrecacheOtherWeapon( "weapon_sporelauncher" );
 #endif
 #if FEATURE_UZI
-	if (g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
-		UTIL_PrecacheOtherWeapon( "weapon_uzi" );
+	UTIL_PrecacheOtherWeapon( "weapon_uzi" );
 #endif
 	g_sModelIndexFireball = PRECACHE_MODEL( "sprites/zerogxplode.spr" );// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL( "sprites/WXplo1.spr" );// underwater fireball
