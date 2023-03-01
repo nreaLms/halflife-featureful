@@ -30,8 +30,7 @@
 #include	"squadmonster.h"
 #include	"weapons.h"
 #include	"mod_features.h"
-
-#define FEATURE_VOLGITOGRE_LESSER_SIZE 0
+#include	"game.h"
 
 #if FEATURE_VOLTIFORE
 #define		VOLTIGORE_SPRINT_DIST	256 // how close the voltigore has to get before starting to sprint and refusing to swerve
@@ -354,18 +353,16 @@ public:
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
 	bool IsDisplaceable() { return true; }
 	Vector DefaultMinHullSize() {
-#if FEATURE_VOLGITOGRE_LESSER_SIZE
-		return Vector( -40.0f, -40.0f, 0.0f );
-#else
-		return Vector( -80.0f, -80.0f, 0.0f );
-#endif
+		if (g_modFeatures.voltigore_lesser_size)
+			return Vector( -40.0f, -40.0f, 0.0f );
+		else
+			return Vector( -80.0f, -80.0f, 0.0f );
 	}
 	Vector DefaultMaxHullSize() {
-#if FEATURE_VOLGITOGRE_LESSER_SIZE
-		return Vector( 40.0f, 40.0f, 85.0f );
-#else
-		return Vector( 80.0f, 80.0f, 90.0f );
-#endif
+		if (g_modFeatures.voltigore_lesser_size)
+			return Vector( 40.0f, 40.0f, 85.0f );
+		else
+			return Vector( 80.0f, 80.0f, 90.0f );
 	}
 
 	float m_flNextBeamAttackCheck; // next time the voltigore can use the spit attack.

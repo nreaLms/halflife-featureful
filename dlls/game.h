@@ -70,6 +70,8 @@ struct ModFeatures
 
 	bool sentry_retract;
 
+	bool voltigore_lesser_size;
+
 	bool skill_opfor;
 	bool opfor_decals;
 	bool opfor_deadhaz;

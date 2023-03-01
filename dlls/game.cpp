@@ -62,6 +62,8 @@ ModFeatures::ModFeatures()
 
 	sentry_retract = true;
 
+	voltigore_lesser_size = false;
+
 	skill_opfor = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_decals = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_deadhaz = FEATURE_OPFOR_SPECIFIC ? true : false;
@@ -168,6 +170,10 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	else if (strcmp(key, "sentry_retract") == 0)
 	{
 		return UpdateBoolean(value, sentry_retract, key);
+	}
+	else if (strcmp(key, "voltigore_lesser_size") == 0)
+	{
+		return UpdateBoolean(value, voltigore_lesser_size, key);
 	}
 	else if (strcmp(key, "skill_opfor") == 0)
 	{
