@@ -959,6 +959,11 @@ void Cmd_ReportAIState()
 	ReportAIStateByClassname(CMD_ARGV( 1 ));
 }
 
+void Cmd_NumberOfEntities()
+{
+	ALERT(at_console, "%d\n", NUMBER_OF_ENTITIES());
+}
+
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
 	char valueStr[12];
@@ -1525,5 +1530,6 @@ void GameDLLInit( void )
 
 	// Register server commands
 	g_engfuncs.pfnAddServerCommand("report_ai_state", Cmd_ReportAIState);
+	g_engfuncs.pfnAddServerCommand("entities_count", Cmd_NumberOfEntities);
 }
 
