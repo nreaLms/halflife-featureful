@@ -33,7 +33,7 @@ include(CheckIncludeFile)
 include(CheckCSourceCompiles)
 include(VSForceXPToolchain) # Force XP toolchain for Visual Studio
 
-project (HLSDK-PORTABLE)
+project (HLSDK-FEATUREFUL)
 
 #--------------
 # USER DEFINES \
