@@ -684,7 +684,7 @@ void CHud::ParseClientFeatures()
 			const int keyLength = i - keyStart;
 			SkipSpaces(pfile, i, fileSize);
 			const int valueStart = i;
-			ConsumeLine(pfile, i, fileSize);
+			ConsumeLineSignificantOnly(pfile, i, fileSize);
 			const int valueLength = i - valueStart;
 			if (valueLength == 0)
 			{

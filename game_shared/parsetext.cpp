@@ -40,6 +40,26 @@ void ConsumeLine(const char *text, int& i, const int length)
 	}
 }
 
+void ConsumeLineSignificantOnly(const char *text, int& i, const int length)
+{
+	const int origi = i;
+	while(i<length && text[i] != '\n' && text[i] != '\r' && text[i] != '\0')
+	{
+		if (text[i] == '/' && i+1<length && text[i+1] == '/')
+			break;
+		++i;
+	}
+	if (origi != i)
+	{
+		int newi = i;
+		while(text[newi-1] == ' ' && newi-1 >= origi)
+		{
+			newi--;
+		}
+		i = newi;
+	}
+}
+
 bool ReadIdentifier(const char *text, int& i, char* identBuf, unsigned int identBufSize)
 {
 	if (identBufSize < 2)

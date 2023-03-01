@@ -462,23 +462,31 @@ void ReadServerFeatures()
 		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
 			continue;
 
-
 		const int keyStart = i;
 		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
 		const int keyLength = i - keyStart;
 		SkipSpaces(buffer, i, sizeof(buffer));
 		const int valueStart = i;
-		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
+		ConsumeLineSignificantOnly(buffer, i, sizeof(buffer));
 		const int valueLength = i - valueStart;
 
-		if (keyLength > 0 && valueLength > 0)
+		if (keyLength > 0)
 		{
 			char* key = buffer + keyStart;
 			key[keyLength] = '\0';
-			char* value = buffer + valueStart;
-			value[valueLength] = '\0';
 
-			g_modFeatures.SetValue(key, value);
+			if (valueLength > 0)
+			{
+				char* value = buffer + valueStart;
+				value[valueLength] = '\0';
+
+				//ALERT(at_console, "Key: '%s'. Value: '%s'\n", key, value);
+				g_modFeatures.SetValue(key, value);
+			}
+			else
+			{
+				ALERT(at_warning, "Key '%s' without value!\n", key);
+			}
 		}
 	}
 }
