@@ -478,8 +478,6 @@ void ReadServerFeatures()
 			char* value = buffer + valueStart;
 			value[valueLength] = '\0';
 
-			ALERT(at_console, "Key: %s. Value: %s\n", key, value);
-
 			g_modFeatures.SetValue(key, value);
 		}
 	}
