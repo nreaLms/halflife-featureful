@@ -1397,7 +1397,7 @@ public:
 #endif
 	}
 
-	const char* MyWModel() { return "models/w_shock.mdl"; }
+	const char* MyWModel() { return "models/w_shock_rifle.mdl"; }
 private:
 	unsigned short m_usShockFire;
 	CBeam* m_pBeam[4];

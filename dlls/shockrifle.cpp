@@ -40,6 +40,10 @@ void CShockrifle::Spawn()
 	m_iFirePhase = 0;
 
 	FallInit();// get ready to fall down.
+
+	pev->sequence = 0;
+	pev->animtime = gpGlobals->time;
+	pev->framerate = 1.0f;
 }
 
 
