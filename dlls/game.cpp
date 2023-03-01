@@ -52,6 +52,7 @@ ModFeatures::ModFeatures()
 	racex_dislike_alien_military = true;
 	racex_dislike_gargs = true;
 	racex_dislike_alien_monsters = false;
+	shockroach_racex_classify = false;
 
 	vortigaunt_coil_attack = true;
 	vortigaunt_idle_effects = false;
@@ -142,6 +143,10 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	else if (strcmp(key, "racex_dislike_alien_monsters") == 0)
 	{
 		return UpdateBoolean(value, racex_dislike_alien_monsters, key);
+	}
+	else if (strcmp(key, "shockroach_racex_classify") == 0)
+	{
+		return UpdateBoolean(value, shockroach_racex_classify, key);
 	}
 	else if (strcmp(key, "vortigaunt_coil_attack") == 0)
 	{

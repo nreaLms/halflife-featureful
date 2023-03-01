@@ -60,6 +60,7 @@ struct ModFeatures
 	bool racex_dislike_alien_military;
 	bool racex_dislike_gargs;
 	bool racex_dislike_alien_monsters;
+	bool shockroach_racex_classify;
 
 	bool vortigaunt_coil_attack;
 	bool vortigaunt_idle_effects;
