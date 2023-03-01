@@ -49,6 +49,11 @@ struct ModFeatures
 	bool monsters_delegate_squad_leadership;
 	bool monsters_eat_for_health;
 
+	int npc_tridepth;
+	bool npc_tridepth_all;
+	float npc_forget_enemy_time;
+	bool npc_active_after_combat;
+
 	bool blackops_classify;
 	bool opfor_grunts_dislike_civilians;
 
@@ -69,11 +74,11 @@ struct ModFeatures
 	bool opfor_decals;
 	bool opfor_deadhaz;
 	bool tentacle_opfor_height;
-
 private:
 	bool UpdateBoolean(const char* value, bool& result, const char* key);
 	bool UpdateInteger(const char* value, int& result, const char* key);
 	bool UpdateColor(const char* value, int& result, const char* key);
+	bool UpdateFloat(const char* value, float& result, const char* key);
 
 	bool weapons[64];
 	char monsters[64][64];

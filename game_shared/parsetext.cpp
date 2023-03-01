@@ -106,3 +106,8 @@ bool ParseBoolean(const char* valueText, bool& result)
 	}
 	return false;
 }
+
+bool ParseFloat(const char *valueText, float& result)
+{
+	return sscanf(valueText, "%f", &result) == 1;
+}

@@ -11,5 +11,6 @@ bool ReadIdentifier(const char* text, int &i, char* identBuf, unsigned int ident
 bool ParseInteger(const char* valueText, int& result);
 bool ParseColor(const char* valueText, int& result);
 bool ParseBoolean(const char* valueText, bool& result);
+bool ParseFloat(const char* valueText, float& result);
 
 #endif

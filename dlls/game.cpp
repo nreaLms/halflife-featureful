@@ -66,6 +66,11 @@ ModFeatures::ModFeatures()
 	opfor_decals = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_deadhaz = FEATURE_OPFOR_SPECIFIC ? true : false;
 	tentacle_opfor_height = FEATURE_OPFOR_SPECIFIC ? true : false;
+
+	npc_tridepth = 1;
+	npc_tridepth_all = false;
+	npc_forget_enemy_time = 0;
+	npc_active_after_combat = 0;
 }
 
 bool ModFeatures::SetValue(const char *key, const char *value)
@@ -99,6 +104,22 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	else if (strcmp(key, "monsters_eat_for_health") == 0)
 	{
 		return UpdateBoolean(value, monsters_eat_for_health, key);
+	}
+	else if (strcmp(key, "npc_tridepth") == 0)
+	{
+		return UpdateInteger(value, npc_tridepth, key);
+	}
+	else if (strcmp(key, "npc_tridepth_all") == 0)
+	{
+		return UpdateBoolean(value, npc_tridepth_all, key);
+	}
+	else if (strcmp(key, "npc_forget_enemy_time") == 0)
+	{
+		return UpdateFloat(value, npc_forget_enemy_time, key);
+	}
+	else if (strcmp(key, "npc_active_after_combat") == 0)
+	{
+		return UpdateBoolean(value, npc_active_after_combat, key);
 	}
 	else if (strcmp(key, "blackops_classify") == 0)
 	{
@@ -192,6 +213,14 @@ bool ModFeatures::UpdateColor(const char *value, int &result, const char *key)
 	bool success = ParseColor(value, result);
 	if (!success)
 		ALERT(at_console, "Parameter '%s' expected a color value, got '%s' instead\n", key, value);
+	return success;
+}
+
+bool ModFeatures::UpdateFloat(const char *value, float &result, const char *key)
+{
+	bool success = ParseFloat(value, result);
+	if (!success)
+		ALERT(at_console, "Parameter '%s' expected an floating-point value, got '%s' instead\n", key, value);
 	return success;
 }
 
@@ -497,24 +526,16 @@ cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 #if FEATURE_USE_THROUGH_WALLS_CVAR
 cvar_t use_through_walls = { "use_through_walls", "1", FCVAR_SERVER };
 #endif
-#if FEATURE_TRIDEPTH_CVAR
-cvar_t npc_tridepth = { "npc_tridepth", "1", FCVAR_SERVER };
-#endif
-#if FEATURE_TRIDEPTH_ALL_CVAR
-cvar_t npc_tridepth_all = { "npc_tridepth_all", "0", FCVAR_SERVER };
-#endif
+cvar_t npc_tridepth = { "npc_tridepth", "", FCVAR_SERVER };
+cvar_t npc_tridepth_all = { "npc_tridepth_all", "", FCVAR_SERVER };
 #if FEATURE_NPC_NEAREST_CVAR
 cvar_t npc_nearest = { "npc_nearest", "0", FCVAR_SERVER };
 #endif
-#if FEATURE_NPC_FORGET_ENEMY_CVAR
-cvar_t npc_forget_enemy_time = { "npc_forget_enemy_time", "0", FCVAR_SERVER };
-#endif
+cvar_t npc_forget_enemy_time = { "npc_forget_enemy_time", "", FCVAR_SERVER };
 #if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
 cvar_t npc_fix_melee_distance = { "npc_fix_melee_distance", "0", FCVAR_SERVER };
 #endif
-#if FEATURE_NPC_ACTIVE_AFTER_COMBAT_CVAR
-cvar_t npc_active_after_combat = { "npc_active_after_combat", "0", FCVAR_SERVER };
-#endif
+cvar_t npc_active_after_combat = { "npc_active_after_combat", "", FCVAR_SERVER };
 #if FEATURE_NPC_FOLLOW_OUT_OF_PVS_CVAR
 cvar_t npc_follow_out_of_pvs = { "npc_follow_out_of_pvs", "0", FCVAR_SERVER };
 #endif
@@ -938,6 +959,29 @@ void Cmd_ReportAIState()
 	ReportAIStateByClassname(CMD_ARGV( 1 ));
 }
 
+static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
+{
+	char valueStr[12];
+	sprintf(valueStr, "%d", value);
+	cvar->string = valueStr;
+	CVAR_REGISTER(cvar);
+}
+
+static void CVAR_REGISTER_BOOLEAN( cvar_t* cvar, bool value )
+{
+	const char* valueStr = value ? "1" : "0";
+	cvar->string = valueStr;
+	CVAR_REGISTER(cvar);
+}
+
+static void CVAR_REGISTER_FLOAT( cvar_t* cvar, float value )
+{
+	char valueStr[64];
+	sprintf(valueStr, "%g", value);
+	cvar->string = valueStr;
+	CVAR_REGISTER(cvar);
+}
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
@@ -964,24 +1008,16 @@ void GameDLLInit( void )
 #if FEATURE_USE_THROUGH_WALLS_CVAR
 	CVAR_REGISTER( &use_through_walls );
 #endif
-#if FEATURE_TRIDEPTH_CVAR
-	CVAR_REGISTER( &npc_tridepth );
-#endif
-#if FEATURE_TRIDEPTH_ALL_CVAR
-	CVAR_REGISTER( &npc_tridepth_all );
-#endif
+	CVAR_REGISTER_INTEGER( &npc_tridepth, g_modFeatures.npc_tridepth );
+	CVAR_REGISTER_BOOLEAN( &npc_tridepth_all, g_modFeatures.npc_tridepth_all );
 #if FEATURE_NPC_NEAREST_CVAR
 	CVAR_REGISTER( &npc_nearest );
 #endif
-#if FEATURE_NPC_FORGET_ENEMY_CVAR
-	CVAR_REGISTER( &npc_forget_enemy_time );
-#endif
+	CVAR_REGISTER_FLOAT( &npc_forget_enemy_time, g_modFeatures.npc_forget_enemy_time );
 #if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
 	CVAR_REGISTER( &npc_fix_melee_distance );
 #endif
-#if FEATURE_NPC_ACTIVE_AFTER_COMBAT_CVAR
-	CVAR_REGISTER( &npc_active_after_combat );
-#endif
+	CVAR_REGISTER_BOOLEAN( &npc_active_after_combat, g_modFeatures.npc_active_after_combat );
 #if FEATURE_NPC_FOLLOW_OUT_OF_PVS_CVAR
 	CVAR_REGISTER( &npc_follow_out_of_pvs );
 #endif

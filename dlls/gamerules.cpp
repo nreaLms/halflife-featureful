@@ -669,22 +669,14 @@ CGameRules *InstallGameRules( void )
 
 int TridepthValue()
 {
-#if FEATURE_TRIDEPTH_CVAR
 	extern cvar_t npc_tridepth;
 	return (int)npc_tridepth.value;
-#else
-	return 1;
-#endif
 }
 
 bool TridepthForAll()
 {
-#if FEATURE_TRIDEPTH_ALL_CVAR
 	extern cvar_t npc_tridepth_all;
 	return npc_tridepth_all.value > 0;
-#else
-	return 0;
-#endif
 }
 
 bool AllowUseThroughWalls()
@@ -719,22 +711,14 @@ bool NpcFollowNearest()
 
 float NpcForgetEnemyTime()
 {
-#if FEATURE_NPC_FORGET_ENEMY_CVAR
 	extern cvar_t npc_forget_enemy_time;
 	return npc_forget_enemy_time.value;
-#else
-	return 0.0f;
-#endif
 }
 
 bool NpcActiveAfterCombat()
 {
-#if FEATURE_NPC_ACTIVE_AFTER_COMBAT_CVAR
 	extern cvar_t npc_active_after_combat;
 	return npc_active_after_combat.value != 0;
-#else
-	return false;
-#endif
 }
 
 bool NpcFollowOutOfPvs()
