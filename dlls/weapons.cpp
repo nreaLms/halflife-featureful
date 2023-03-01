@@ -272,10 +272,10 @@ void UTIL_PrecacheOtherWeapon( const char *szClassname )
 					AddAmmoNameToAmmoRegistry( II.pszAmmo2, II.iMaxAmmo2, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
 				}
 			}
-			else
-			{
-				ALERT(at_console, "UTIL_PrecacheOtherWeapon: %s is not a weapon\n", szClassname);
-			}
+		}
+		else
+		{
+			ALERT(at_console, "UTIL_PrecacheOtherWeapon: %s is not a weapon\n", szClassname);
 		}
 	}
 
