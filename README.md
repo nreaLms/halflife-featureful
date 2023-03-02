@@ -1,6 +1,8 @@
-# Half-Life SDK for GoldSource and Xash3D [![Build Status](https://github.com/FreeSlave/halflife-featureful/actions/workflows/build.yml/badge.svg?branch=modbase)](https://github.com/FreeSlave/halflife-featureful/actions/workflows/build.yml) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FreeSlave/halflife-featureful?svg=true)](https://ci.appveyor.com/project/FreeSlave/halflife-featureful)
+# Half-Life Featureful SDK [![Build Status](https://github.com/FreeSlave/halflife-featureful/actions/workflows/build.yml/badge.svg?branch=featureful)](https://github.com/FreeSlave/halflife-featureful/actions/workflows/build.yml) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/FreeSlave/halflife-featureful?svg=true)](https://ci.appveyor.com/project/FreeSlave/halflife-featureful)
 
-Half-Life SDK for GoldSource & Xash3D with some bugfixes and features that can be useful for mod makers. Read the [wiki](https://github.com/FreeSlave/halflife-featureful/wiki) to see what's implemented.
+Half-Life SDK for GoldSource & Xash3D with some bugfixes and features that can be useful for mod makers.
+
+See the feature overview on the [Wiki](https://github.com/FreeSlave/halflife-featureful/wiki).
 
 # Obtaining source code
 
