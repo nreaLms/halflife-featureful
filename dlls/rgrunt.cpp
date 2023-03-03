@@ -50,7 +50,7 @@ public:
 
 	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void BecomeDead();
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
 	float m_flSparkTime;
 
@@ -324,7 +324,7 @@ void CRGrunt::BecomeDead()
 
 #define ROBOGRUNT_DAMAGE (DMG_ENERGYBEAM|DMG_CRUSH|DMG_MORTAR|DMG_BLAST|DMG_SHOCK|DMG_FREEZE|DMG_ACID)
 
-void CRGrunt::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+void CRGrunt::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	if ((bitsDamageType & ROBOGRUNT_DAMAGE) == 0)
 	{
@@ -335,7 +335,7 @@ void CRGrunt::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir,
 		}
 		flDamage *= 0.2;
 	}
-	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+	CSquadMonster::TraceAttack( pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
 void CRGrunt::DoSpark(const Vector &sparkLocation, float flVolume)

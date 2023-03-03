@@ -95,7 +95,7 @@ public:
 	void AttackSound( void );
 	void PrescheduleThink( void );
 	float HeadHitGroupDamageMultiplier();
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	int IRelationship( CBaseEntity *pTarget );
 	void StopTalking( void );
 	BOOL ShouldSpeak( void );
@@ -223,7 +223,7 @@ int CAGrunt::DefaultISoundMask( void )
 //=========================================================
 // TraceAttack
 //=========================================================
-static void AgruntTraceAttack( CBaseMonster* self, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+static void AgruntTraceAttack( CBaseMonster* self, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
 	if( ptr->iHitgroup == 10 && ( bitsDamageType & ( DMG_BULLET | DMG_SLASH | DMG_CLUB ) ) )
 	{
@@ -264,7 +264,7 @@ static void AgruntTraceAttack( CBaseMonster* self, entvars_t *pevAttacker, float
 		bitsDamageType |= DMG_DONTBLEED;
 	}
 
-	self->CBaseMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+	self->CBaseMonster::TraceAttack(pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
 float CAGrunt::HeadHitGroupDamageMultiplier()
@@ -272,9 +272,9 @@ float CAGrunt::HeadHitGroupDamageMultiplier()
 	return Q_min(gSkillData.monHead, 1.5f);
 }
 
-void CAGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+void CAGrunt::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
-	AgruntTraceAttack(this, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+	AgruntTraceAttack(this, pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
 //=========================================================
@@ -1209,7 +1209,7 @@ class CDeadAgrunt : public CDeadMonster
 public:
 	void Spawn( void );
 	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[2];
@@ -1231,7 +1231,7 @@ void CDeadAgrunt::Spawn( )
 	pev->frame = 255;
 }
 
-void CDeadAgrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+void CDeadAgrunt::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
-	AgruntTraceAttack(this, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
+	AgruntTraceAttack(this, pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }

@@ -69,7 +69,7 @@ public:
 	void MakeFriend( Vector vecPos );
 
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 
 	void PainSound( void );
 	void DeathSound( void );
@@ -1257,7 +1257,7 @@ int CNihilanth::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 	return 0;
 }
 
-void CNihilanth::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+void CNihilanth::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
 	if( m_irritation == 3 )
 		m_irritation = 2;
@@ -1273,7 +1273,7 @@ void CNihilanth::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 	}
 
 	// SpawnBlood( ptr->vecEndPos, BloodColor(), flDamage * 5.0 );// a little surface blood.
-	AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
+	AddMultiDamage( pevInflictor, pevAttacker, this, flDamage, bitsDamageType );
 }
 
 CBaseEntity *CNihilanth::RandomTargetname( const char *szName )

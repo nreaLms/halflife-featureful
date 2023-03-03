@@ -240,7 +240,7 @@ int CPipeWrench::Swing(int fFirst)
 				flDamage = gSkillData.plrDmgPWrench * 0.5f;
 			}
 			// Send trace attack to player.
-			pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_CLUB);
+			pEntity->TraceAttack(m_pPlayer->pev, m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_CLUB);
 
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
@@ -370,7 +370,7 @@ void CPipeWrench::BigSwing(void)
 			if (flDamage > 150.0f) {
 				flDamage = 150.0f;
 			}
-			pEntity->TraceAttack(m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_CLUB);
+			pEntity->TraceAttack(m_pPlayer->pev, m_pPlayer->pev, flDamage, gpGlobals->v_forward, &tr, DMG_CLUB);
 
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 		}

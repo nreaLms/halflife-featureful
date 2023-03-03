@@ -404,7 +404,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 		if( pEntity->pev->takedamage )
 		{
 			ClearMultiDamage();
-			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+			pEntity->TraceAttack( m_pPlayer->pev, m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 			ApplyMultiDamage( m_pPlayer->pev, m_pPlayer->pev );
 		}
 

@@ -94,7 +94,7 @@ void ApplyMultiDamage( entvars_t *pevInflictor, entvars_t *pevAttacker )
 
 // GLOBALS USED:
 //		gMultiDamage
-void AddMultiDamage( entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamage, int bitsDamageType )
+void AddMultiDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, CBaseEntity *pEntity, float flDamage, int bitsDamageType )
 {
 	if( !pEntity )
 		return;
@@ -103,7 +103,7 @@ void AddMultiDamage( entvars_t *pevInflictor, CBaseEntity *pEntity, float flDama
 
 	if( pEntity != gMultiDamage.pEntity )
 	{
-		ApplyMultiDamage( pevInflictor,pevInflictor ); // UNDONE: wrong attacker!
+		ApplyMultiDamage( pevInflictor, pevAttacker );
 		gMultiDamage.pEntity = pEntity;
 		gMultiDamage.amount = 0;
 	}

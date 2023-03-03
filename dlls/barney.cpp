@@ -71,7 +71,7 @@ public:
 
 	void TalkInit( void );
 
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
 
 	virtual int Save( CSave &save );
@@ -89,7 +89,7 @@ public:
 protected:
 	void SpawnImpl(const char* modelName, float health);
 	void PrecacheImpl( const char* modelName );
-	void TraceAttackImpl( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet);
+	void TraceAttackImpl( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet);
 	virtual bool PrioritizeMeleeAttack() { return false; }
 };
 
@@ -514,7 +514,7 @@ void CBarney::DeathSound( void )
 	}
 }
 
-void CBarney::TraceAttackImpl( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet)
+void CBarney::TraceAttackImpl( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet)
 {
 	switch( ptr->iHitgroup )
 	{
@@ -541,12 +541,12 @@ void CBarney::TraceAttackImpl( entvars_t *pevAttacker, float flDamage, Vector ve
 		break;
 	}
 
-	CTalkMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+	CTalkMonster::TraceAttack( pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
-void CBarney::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+void CBarney::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	TraceAttackImpl( pevAttacker, flDamage, vecDir, ptr, bitsDamageType, true);
+	TraceAttackImpl( pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType, true);
 }
 
 void CBarney::OnDying()
@@ -716,7 +716,7 @@ public:
 	const char* DefaultDisplayName() { return "Otis"; }
 	const char* ReverseRelationshipModel() { return "models/otisf.mdl"; }
 
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
 	
 	void KeyValue( KeyValueData *pkvd );
@@ -794,9 +794,9 @@ void COtis::TalkInit()
 	m_voicePitch = 100;
 }
 
-void COtis::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+void COtis::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	TraceAttackImpl( pevAttacker, flDamage, vecDir, ptr, bitsDamageType, false);
+	TraceAttackImpl( pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType, false);
 }
 
 void COtis::KeyValue( KeyValueData *pkvd )
@@ -1071,7 +1071,7 @@ public:
 	void DeathSound( void );
 	void PainSound( void );
 
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
 
 protected:
@@ -1294,9 +1294,9 @@ void CKate::OnDying()
 	CTalkMonster::OnDying();
 }
 
-void CKate::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+void CKate::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	TraceAttackImpl( pevAttacker, flDamage, vecDir, ptr, bitsDamageType, false);
+	TraceAttackImpl( pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType, false);
 }
 
 CBaseEntity* CKate::FindKickTarget()

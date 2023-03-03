@@ -68,7 +68,7 @@ public:
 
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	int TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
-	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+	void TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
 	void EXPORT StartupThink(void);
 	void EXPORT DyingThink(void);
@@ -523,7 +523,7 @@ void CPitWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 	}
 }
 
-void CPitWorm::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+void CPitWorm::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
 	if ( ptr->iHitgroup == HITGROUP_HEAD )
 	{
@@ -980,7 +980,7 @@ void CPitWorm::BeamEffect(TraceResult &tr)
 	if( pEntity != NULL && pEntity->pev->takedamage )
 	{
 		ClearMultiDamage();
-		pEntity->TraceAttack(pev, gSkillData.pwormDmgBeam, m_vecBeam, &tr, DMG_ENERGYBEAM);
+		pEntity->TraceAttack(pev, pev, gSkillData.pwormDmgBeam, m_vecBeam, &tr, DMG_ENERGYBEAM);
 		ApplyMultiDamage(pev, pev);
 	}
 	else if ( tr.flFraction != 1.0f )

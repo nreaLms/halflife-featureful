@@ -340,7 +340,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	int DefaultClassify() {return CLASS_NONE;}
-	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 };
 
 LINK_ENTITY_TO_CLASS(monster_op4loader, CLoader)
@@ -375,7 +375,7 @@ void CLoader::Precache()
 	PrecacheMyModel("models/loader.mdl");
 }
 
-void CLoader::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
+void CLoader::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT(1.0,2.0) );
 }

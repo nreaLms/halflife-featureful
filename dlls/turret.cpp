@@ -55,7 +55,7 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void EXPORT TurretUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	virtual void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+	virtual void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	virtual int Classify( void );
 	virtual int DefaultClassify();
@@ -988,7 +988,7 @@ void CBaseTurret::TurretDeath( void )
 	}
 }
 
-void CBaseTurret::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+void CBaseTurret::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
 	if( ptr->iHitgroup == 10 )
 	{
@@ -1005,7 +1005,7 @@ void CBaseTurret::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 	if( !pev->takedamage )
 		return;
 
-	AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
+	AddMultiDamage( pevInflictor, pevAttacker, this, flDamage, bitsDamageType );
 }
 
 // take damage. bitsDamageType indicates type of damage sustained, ie: DMG_BULLET

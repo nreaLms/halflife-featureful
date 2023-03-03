@@ -158,7 +158,7 @@ void CVoltigoreEnergyBall::BallTouch(CBaseEntity *pOther)
 		entvars_t* attacker = VARS( pev->owner );
 		if (!attacker)
 			attacker = pev;
-		pOther->TraceAttack(attacker, gSkillData.voltigoreDmgBeam, pev->velocity, &tr, DMG_SHOCK|DMG_ALWAYSGIB);
+		pOther->TraceAttack(pev, attacker, gSkillData.voltigoreDmgBeam, pev->velocity, &tr, DMG_SHOCK|DMG_ALWAYSGIB);
 		ApplyMultiDamage(pev, attacker);
 	}
 	pev->velocity = Vector(0,0,0);
