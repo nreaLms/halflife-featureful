@@ -76,131 +76,82 @@ ModFeatures::ModFeatures()
 	npc_active_after_combat = 0;
 }
 
+template <typename T>
+struct KeyValueDefinition
+{
+	const char* name;
+	T& value;
+};
+
+#define KEY_VALUE_DEF(name) { #name, name }
+
 bool ModFeatures::SetValue(const char *key, const char *value)
 {
-	// TODO: handle this more elegant?
+	KeyValueDefinition<bool> booleans[] = {
+		KEY_VALUE_DEF( items_instant_drop ),
+		KEY_VALUE_DEF(tripmines_solid),
+		KEY_VALUE_DEF(satchels_pickable),
+		KEY_VALUE_DEF(alien_teleport_sound),
+		KEY_VALUE_DEF(npc_tridepth_all),
+		KEY_VALUE_DEF(npc_active_after_combat),
+		KEY_VALUE_DEF(monsters_stop_attacking_dying_monsters),
+		KEY_VALUE_DEF(monsters_delegate_squad_leadership),
+		KEY_VALUE_DEF(monsters_eat_for_health),
+		KEY_VALUE_DEF(blackops_classify),
+		KEY_VALUE_DEF(opfor_grunts_dislike_civilians),
+		KEY_VALUE_DEF(racex_dislike_alien_military),
+		KEY_VALUE_DEF(racex_dislike_gargs),
+		KEY_VALUE_DEF(racex_dislike_alien_monsters),
+		KEY_VALUE_DEF(shockroach_racex_classify),
+		KEY_VALUE_DEF(vortigaunt_coil_attack),
+		KEY_VALUE_DEF(vortigaunt_idle_effects),
+		KEY_VALUE_DEF(vortigaunt_arm_boost),
+		KEY_VALUE_DEF(vortigaunt_selfheal),
+		KEY_VALUE_DEF(vortigaunt_heal),
+		KEY_VALUE_DEF(vortigaunt_revive),
+		KEY_VALUE_DEF(sentry_retract),
+		KEY_VALUE_DEF(voltigore_lesser_size),
+		KEY_VALUE_DEF(skill_opfor),
+		KEY_VALUE_DEF(opfor_decals),
+		KEY_VALUE_DEF(opfor_deadhaz),
+		KEY_VALUE_DEF(tentacle_opfor_height),
+	};
 
-	if (strcmp(key, "items_instant_drop") == 0)
+	unsigned int i = 0;
+	for (i = 0; i<ARRAYSIZE(booleans); ++i)
 	{
-		return UpdateBoolean(value, items_instant_drop, key);
+		if (strcmp(key, booleans[i].name) == 0)
+		{
+			return UpdateBoolean(value, booleans[i].value, key);
+		}
 	}
-	else if (strcmp(key, "tripmines_solid") == 0)
+
+	KeyValueDefinition<int> integers[] = {
+		{"npc_tridepth", npc_tridepth}
+	};
+
+	for (i = 0; i<ARRAYSIZE(integers); ++i)
 	{
-		return UpdateBoolean(value, tripmines_solid, key);
+		if (strcmp(key, integers[i].name) == 0)
+		{
+			return UpdateInteger(value, integers[i].value, key);
+		}
 	}
-	else if (strcmp(key, "satchels_pickable") == 0)
+
+	KeyValueDefinition<float> floats[] = {
+		{"npc_forget_enemy_time", npc_forget_enemy_time}
+	};
+
+	for (i = 0; i<ARRAYSIZE(floats); ++i)
 	{
-		return UpdateBoolean(value, satchels_pickable, key);
+		if (strcmp(key, floats[i].name) == 0)
+		{
+			return UpdateFloat(value, floats[i].value, key);
+		}
 	}
-	else if (strcmp(key, "alien_teleport_sound") == 0)
-	{
-		return UpdateBoolean(value, alien_teleport_sound, key);
-	}
-	else if (strcmp(key, "monsters_stop_attacking_dying_monsters") == 0)
-	{
-		return UpdateBoolean(value, monsters_stop_attacking_dying_monsters, key);
-	}
-	else if (strcmp(key, "monsters_delegate_squad_leadership") == 0)
-	{
-		return UpdateBoolean(value, monsters_delegate_squad_leadership, key);
-	}
-	else if (strcmp(key, "monsters_eat_for_health") == 0)
-	{
-		return UpdateBoolean(value, monsters_eat_for_health, key);
-	}
-	else if (strcmp(key, "npc_tridepth") == 0)
-	{
-		return UpdateInteger(value, npc_tridepth, key);
-	}
-	else if (strcmp(key, "npc_tridepth_all") == 0)
-	{
-		return UpdateBoolean(value, npc_tridepth_all, key);
-	}
-	else if (strcmp(key, "npc_forget_enemy_time") == 0)
-	{
-		return UpdateFloat(value, npc_forget_enemy_time, key);
-	}
-	else if (strcmp(key, "npc_active_after_combat") == 0)
-	{
-		return UpdateBoolean(value, npc_active_after_combat, key);
-	}
-	else if (strcmp(key, "blackops_classify") == 0)
-	{
-		return UpdateBoolean(value, blackops_classify, key);
-	}
-	else if (strcmp(key, "opfor_grunts_dislike_civilians") == 0)
-	{
-		return UpdateBoolean(value, opfor_grunts_dislike_civilians, key);
-	}
-	else if (strcmp(key, "racex_dislike_alien_military") == 0)
-	{
-		return UpdateBoolean(value, racex_dislike_alien_military, key);
-	}
-	else if (strcmp(key, "racex_dislike_gargs") == 0)
-	{
-		return UpdateBoolean(value, racex_dislike_gargs, key);
-	}
-	else if (strcmp(key, "racex_dislike_alien_monsters") == 0)
-	{
-		return UpdateBoolean(value, racex_dislike_alien_monsters, key);
-	}
-	else if (strcmp(key, "shockroach_racex_classify") == 0)
-	{
-		return UpdateBoolean(value, shockroach_racex_classify, key);
-	}
-	else if (strcmp(key, "vortigaunt_coil_attack") == 0)
-	{
-		return UpdateBoolean(value, vortigaunt_coil_attack, key);
-	}
-	else if (strcmp(key, "vortigaunt_idle_effects") == 0)
-	{
-		return UpdateBoolean(value, vortigaunt_idle_effects, key);
-	}
-	else if (strcmp(key, "vortigaunt_arm_boost") == 0)
-	{
-		return UpdateBoolean(value, vortigaunt_arm_boost, key);
-	}
-	else if (strcmp(key, "vortigaunt_selfheal") == 0)
-	{
-		return UpdateBoolean(value, vortigaunt_selfheal, key);
-	}
-	else if (strcmp(key, "vortigaunt_heal") == 0)
-	{
-		return UpdateBoolean(value, vortigaunt_heal, key);
-	}
-	else if (strcmp(key, "vortigaunt_revive") == 0)
-	{
-		return UpdateBoolean(value, vortigaunt_revive, key);
-	}
-	else if (strcmp(key, "sentry_retract") == 0)
-	{
-		return UpdateBoolean(value, sentry_retract, key);
-	}
-	else if (strcmp(key, "voltigore_lesser_size") == 0)
-	{
-		return UpdateBoolean(value, voltigore_lesser_size, key);
-	}
-	else if (strcmp(key, "skill_opfor") == 0)
-	{
-		return UpdateBoolean(value, skill_opfor, key);
-	}
-	else if (strcmp(key, "opfor_decals") == 0)
-	{
-		return UpdateBoolean(value, opfor_decals, key);
-	}
-	else if (strcmp(key, "opfor_deadhaz") == 0)
-	{
-		return UpdateBoolean(value, opfor_deadhaz, key);
-	}
-	else if (strcmp(key, "tentacle_opfor_height") == 0)
-	{
-		return UpdateBoolean(value, tentacle_opfor_height, key);
-	}
-	else
-	{
-		ALERT(at_console, "Unknown mod feature key '%s'\n", key);
-		return false;
-	}
+
+	ALERT(at_console, "Unknown mod feature key '%s'\n", key);
+	return false;
 }
 
 bool ModFeatures::UpdateBoolean(const char *value, bool &result, const char *key)
