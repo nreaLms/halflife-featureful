@@ -923,10 +923,21 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				while( ( pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, ISLAVE_COIL_ATTACK_RADIUS ) ) != NULL )
 				{
 					float flAdjustedDamage = gSkillData.slaveDmgZap*2.5;
-					if( pEntity != this && pEntity->pev->takedamage != DAMAGE_NO && pEntity->MyMonsterPointer() != NULL ) {
-						if (IRelationship(pEntity) >= R_DL) {
-							if( !FVisible( pEntity ) ) {
-								if( pEntity->IsPlayer() )
+					if( pEntity != this && pEntity->pev->takedamage != DAMAGE_NO ) {
+						const int rel = IRelationship(pEntity);
+						if (rel == R_AL)
+						{
+							if (FClassnameIs(pEntity->pev, STRING(pev->classname))) {
+								if (AbleToHeal() && HealOther(pEntity)) {
+									ALERT(at_aiconsole, "Vort healed friend with coil attack\n");
+								}
+							}
+						}
+						else
+						{
+							if ( !FVisible( pEntity ) )
+							{
+								if (pEntity->IsPlayer())
 								{
 									// Restrict it to clients so that monsters in other parts of the level don't take the damage and get pissed.
 									flAdjustedDamage *= 0.5f;
@@ -939,12 +950,6 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 							if( flAdjustedDamage > 0 ) {
 								pEntity->TakeDamage( pev, pev, flAdjustedDamage, DMG_SHOCK );
-							}
-						} else {
-							if (FClassnameIs(pEntity->pev, STRING(pev->classname))) {
-								if (AbleToHeal() && HealOther(pEntity)) {
-									ALERT(at_aiconsole, "Vort healed friend with coil attack\n");
-								}
 							}
 						}
 					}
