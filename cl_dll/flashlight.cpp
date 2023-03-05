@@ -133,7 +133,7 @@ int CHudFlashlight::Draw( float flTime )
 		a = gHUD.MinHUDAlpha();
 
 	if( m_flBat < 0.20f )
-		UnpackRGB( r,g,b, RGB_REDISH );
+		UnpackRGB( r,g,b, gHUD.HUDColorCritical() );
 	else
 		UnpackRGB( r,g,b, gHUD.HUDColor() );
 

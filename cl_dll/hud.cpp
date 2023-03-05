@@ -75,7 +75,7 @@ FlashlightFeatures::FlashlightFeatures() : color(0xFFFFFF), distance(2048)
 ClientFeatures::ClientFeatures()
 {
 	hud_color = RGB_HUD_DEFAULT;
-	hud_color_critical = 0xFF0000;
+	hud_color_critical = RGB_REDISH;
 	hud_min_alpha = MIN_ALPHA;
 
 	hud_color_nvg = 0x00FFFFFF;

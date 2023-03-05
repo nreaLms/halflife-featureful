@@ -1105,7 +1105,7 @@ int CHudAmmo::DrawWList( float flTime )
 						ScaleColors( r, g, b, 192 );
 					else
 					{
-						UnpackRGB( r, g, b, RGB_REDISH );
+						UnpackRGB( r, g, b, gHUD.HUDColorCritical() );
 						ScaleColors( r, g, b, 128 );
 					}
 
@@ -1140,7 +1140,7 @@ int CHudAmmo::DrawWList( float flTime )
 				}
 				else
 				{
-					UnpackRGB( r, g, b, RGB_REDISH );
+					UnpackRGB( r, g, b, gHUD.HUDColorCritical() );
 					a = 96;
 				}
 
