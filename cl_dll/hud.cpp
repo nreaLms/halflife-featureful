@@ -729,6 +729,13 @@ bool UpdateNVGValue(NVGFeatures& nvg, const char* key, const char* valueStr)
 	return false;
 }
 
+template <typename T>
+struct KeyValueDefinition
+{
+	const char* name;
+	T& value;
+};
+
 void CHud::ParseClientFeatures()
 {
 	const char* fileName = "featureful_client.cfg";
@@ -739,6 +746,31 @@ void CHud::ParseClientFeatures()
 		return;
 
 	gEngfuncs.Con_DPrintf("Parsing client features from %s\n", fileName);
+
+	KeyValueDefinition<int> colors[] = {
+		{ "hud_color", clientFeatures.hud_color},
+		{ "hud_color_critical", clientFeatures.hud_color_critical},
+		{ "hud_color_nvg", clientFeatures.hud_color_nvg},
+		{ "flashlight.color", clientFeatures.flashlight.color},
+	};
+	KeyValueDefinition<int> integers[] = {
+		{ "hud_min_alpha", clientFeatures.hud_min_alpha },
+		{ "hud_min_alpha_nvg", clientFeatures.hud_min_alpha_nvg },
+		{ "flashlight.distance", clientFeatures.flashlight.distance },
+	};
+	KeyValueDefinition<ConfigurableBooleanValue> configurableBooleans[] = {
+		{ "flashlight.custom.", clientFeatures.flashlight.custom},
+		{ "view_bob.", clientFeatures.view_bob},
+		{ "view_roll.", clientFeatures.view_roll},
+		{ "weapon_wallpuff.", clientFeatures.weapon_wallpuff},
+		{ "weapon_sparks.", clientFeatures.weapon_sparks},
+		{ "muzzlelight.", clientFeatures.muzzlelight},
+		{ "movemode.", clientFeatures.movemode},
+	};
+	KeyValueDefinition<ConfigurableBoundedValue> configurableBounds[] = {
+		{ "flashlight.radius.", clientFeatures.flashlight.radius },
+		{ "flashlight.fade_distance.", clientFeatures.flashlight.fade_distance },
+	};
 
 	char valueBuf[CLIENT_FEATURE_VALUE_LENGTH+1];
 	int i = 0;
@@ -780,95 +812,72 @@ void CHud::ParseClientFeatures()
 
 			const char* subKey = 0;
 
-			if (strcmp("hud_color", keyName) == 0)
+			unsigned int i = 0;
+			bool shouldContinue = true;
+			for (i = 0; shouldContinue && i<sizeof(colors)/sizeof(colors[0]); ++i)
 			{
-				ParseColor(valueBuf, clientFeatures.hud_color);
+				if (strcmp(keyName, colors[i].name) == 0)
+				{
+					ParseColor(valueBuf, colors[i].value);
+					shouldContinue = false;
+					break;
+				}
 			}
-			else if (strcmp("hud_min_alpha", keyName) == 0)
+			for (i = 0; shouldContinue && i<sizeof(integers)/sizeof(integers[0]); ++i)
 			{
-				ParseInteger(valueBuf, clientFeatures.hud_min_alpha);
+				if (strcmp(keyName, integers[i].name) == 0)
+				{
+					ParseInteger(valueBuf, integers[i].value);
+					shouldContinue = false;
+					break;
+				}
 			}
-			else if (strcmp("hud_color_critical", keyName) == 0)
+			for (i = 0; shouldContinue && i<sizeof(configurableBooleans)/sizeof(configurableBooleans[0]); ++i)
 			{
-				ParseColor(valueBuf, clientFeatures.hud_color_critical);
+				if ((subKey = strStartsWith(keyName, configurableBooleans[i].name)))
+				{
+					UpdateBooleanValue(configurableBooleans[i].value, subKey, valueBuf);
+					shouldContinue = false;
+					break;
+				}
 			}
-			if (strcmp("hud_color_nvg", keyName) == 0)
+			for (i = 0; shouldContinue && i<sizeof(configurableBounds)/sizeof(configurableBounds[0]); ++i)
 			{
-				ParseColor(valueBuf, clientFeatures.hud_color_nvg);
+				if ((subKey = strStartsWith(keyName, configurableBounds[i].name)))
+				{
+					UpdateBoundedValue(configurableBounds[i].value, subKey, valueBuf);
+					shouldContinue = false;
+					break;
+				}
 			}
-			else if (strcmp("hud_min_alpha_nvg", keyName) == 0)
+			if (shouldContinue)
 			{
-				ParseInteger(valueBuf, clientFeatures.hud_min_alpha_nvg);
-			}
-			else if ((subKey = strStartsWith(keyName, "flashlight.custom.")))
-			{
-				UpdateBooleanValue(clientFeatures.flashlight.custom, subKey, valueBuf);
-			}
-			else if (strcmp("flashlight.color", keyName) == 0)
-			{
-				ParseColor(valueBuf, clientFeatures.flashlight.color);
-			}
-			else if (strcmp("flashlight.distance", keyName) == 0)
-			{
-				ParseInteger(valueBuf, clientFeatures.flashlight.distance);
-			}
-			else if ((subKey = strStartsWith(keyName, "flashlight.radius.")))
-			{
-				UpdateBoundedValue(clientFeatures.flashlight.radius, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "flashlight.fade_distance.")))
-			{
-				UpdateBoundedValue(clientFeatures.flashlight.fade_distance, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "view_bob.")))
-			{
-				UpdateBooleanValue(clientFeatures.view_bob, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "view_roll.")))
-			{
-				UpdateBooleanValue(clientFeatures.view_roll, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "weapon_wallpuff.")))
-			{
-				UpdateBooleanValue(clientFeatures.weapon_wallpuff, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "weapon_sparks.")))
-			{
-				UpdateBooleanValue(clientFeatures.weapon_sparks, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "muzzlelight.")))
-			{
-				UpdateBooleanValue(clientFeatures.muzzlelight, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "movemode.")))
-			{
-				UpdateBooleanValue(clientFeatures.movemode, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "nvgstyle.")))
-			{
-				UpdateIntegerValue(clientFeatures.nvgstyle, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "nvg_cs.")))
-			{
-				UpdateNVGValue(clientFeatures.nvg_cs, subKey, valueBuf);
-			}
-			else if ((subKey = strStartsWith(keyName, "nvg_opfor.")))
-			{
-				UpdateNVGValue(clientFeatures.nvg_opfor, subKey, valueBuf);
-			}
-			else if (strcmp(keyName, "nvg_empty_sprite") == 0)
-			{
-				strncpy(clientFeatures.nvg_empty_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
-				clientFeatures.nvg_empty_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
-			}
-			else if (strcmp(keyName, "nvg_full_sprite") == 0)
-			{
-				strncpy(clientFeatures.nvg_full_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
-				clientFeatures.nvg_full_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
-			}
-			else if (strcmp(keyName, "opfor_title") == 0)
-			{
-				ParseBoolean(valueBuf, clientFeatures.opfor_title);
+				if ((subKey = strStartsWith(keyName, "nvgstyle.")))
+				{
+					UpdateIntegerValue(clientFeatures.nvgstyle, subKey, valueBuf);
+				}
+				else if ((subKey = strStartsWith(keyName, "nvg_cs.")))
+				{
+					UpdateNVGValue(clientFeatures.nvg_cs, subKey, valueBuf);
+				}
+				else if ((subKey = strStartsWith(keyName, "nvg_opfor.")))
+				{
+					UpdateNVGValue(clientFeatures.nvg_opfor, subKey, valueBuf);
+				}
+				else if (strcmp(keyName, "nvg_empty_sprite") == 0)
+				{
+					strncpy(clientFeatures.nvg_empty_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
+					clientFeatures.nvg_empty_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
+				}
+				else if (strcmp(keyName, "nvg_full_sprite") == 0)
+				{
+					strncpy(clientFeatures.nvg_full_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
+					clientFeatures.nvg_full_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
+				}
+				else if (strcmp(keyName, "opfor_title") == 0)
+				{
+					ParseBoolean(valueBuf, clientFeatures.opfor_title);
+				}
 			}
 		}
 	}
