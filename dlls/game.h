@@ -22,6 +22,12 @@ extern void GameDLLInit( void );
 
 struct ModFeatures
 {
+	enum {
+		SUIT_LIGHT_NOTHING,
+		SUIT_LIGHT_FLASHLIGHT,
+		SUIT_LIGHT_NVG,
+	};
+
 	ModFeatures();
 	bool SetValue(const char* key, const char* value);
 	bool EnableWeapon(const char* name);
@@ -40,6 +46,7 @@ struct ModFeatures
 	void EnableMonster(const char* name);
 	bool IsMonsterEnabled(const char* name);
 
+	int suit_light;
 	bool items_instant_drop;
 	bool tripmines_solid;
 	bool satchels_pickable;
@@ -77,6 +84,10 @@ struct ModFeatures
 	bool opfor_decals;
 	bool opfor_deadhaz;
 	bool tentacle_opfor_height;
+
+	// Strings for nvg sounds
+	char nvg_sound_on[64];
+	char nvg_sound_off[64];
 private:
 	bool UpdateBoolean(const char* value, bool& result, const char* key);
 	bool UpdateInteger(const char* value, int& result, const char* key);

@@ -40,6 +40,7 @@
 #include "netadr.h"
 #include "pm_shared.h"
 #include "nodes.h"
+#include "game.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
@@ -969,6 +970,11 @@ void ClientPrecache( void )
 
 	PRECACHE_SOUND( SOUND_FLASHLIGHT_ON );
 	PRECACHE_SOUND( SOUND_FLASHLIGHT_OFF );
+
+	if (*g_modFeatures.nvg_sound_on)
+		PRECACHE_SOUND( g_modFeatures.nvg_sound_on );
+	if (*g_modFeatures.nvg_sound_off)
+		PRECACHE_SOUND( g_modFeatures.nvg_sound_off );
 
 	// player gib sounds
 	PRECACHE_SOUND( "common/bodysplat.wav" );

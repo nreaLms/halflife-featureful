@@ -31,10 +31,10 @@
 
 #define STRIP_WEAPONS_ONLY 0
 #define STRIP_SUIT 1
-#define STRIP_FLASHLIGHT 2
+#define STRIP_SUITLIGHT 2
 #define STRIP_LONGJUMP 4
 #define STRIP_DONT_TURNOFF_FLASHLIGHT 8
-#define STRIP_ALL_ITEMS (STRIP_SUIT | STRIP_FLASHLIGHT | STRIP_LONGJUMP)
+#define STRIP_ALL_ITEMS (STRIP_SUIT | STRIP_SUITLIGHT | STRIP_LONGJUMP)
 
 #define SF_DISPLACER_TARGET_DISABLED 1
 
@@ -75,11 +75,7 @@
 #define CSUITNOREPEAT		32
 
 #define	SOUND_FLASHLIGHT_ON		"items/flashlight1.wav"
-#if FEATURE_NIGHTVISION
-#define	SOUND_FLASHLIGHT_OFF	"items/flashlight2.wav"
-#else
 #define	SOUND_FLASHLIGHT_OFF	"items/flashlight1.wav"
-#endif
 
 #define TEAM_NAME_LENGTH	16
 
@@ -255,6 +251,9 @@ public:
 	void RenewItems(void);
 	void PackDeadPlayerItems( void );
 	void RemoveAllItems( int stripFlags );
+	void RemoveSuitLight() {
+		m_iItemsBits &= ~(PLAYER_ITEM_FLASHLIGHT|PLAYER_ITEM_NIGHTVISION);
+	}
 	BOOL SwitchWeapon( CBasePlayerWeapon *pWeapon );
 	BOOL SwitchToBestWeapon();
 
@@ -266,6 +265,21 @@ public:
 	{
 		return (m_iItemsBits & PLAYER_ITEM_FLASHLIGHT) != 0;
 	}
+	bool HasNVG() const
+	{
+		return FEATURE_NIGHTVISION && (m_iItemsBits & PLAYER_ITEM_NIGHTVISION) != 0;
+	}
+
+	void SetJustSuit() {
+		m_iItemsBits |= PLAYER_ITEM_SUIT;
+	}
+	void SetFlashlight() {
+		m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
+	}
+	void SetNVG() {
+		m_iItemsBits |= PLAYER_ITEM_NIGHTVISION;
+	}
+	void SetSuitAndDefaultLight();
 	void SetLongjump(bool enabled);
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)
@@ -277,9 +291,9 @@ public:
 	virtual int		ObjectCaps( void ) { return CBaseMonster :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	virtual void	Precache( void );
 	BOOL			IsOnLadder( void );
-	BOOL			FlashlightIsOn( void );
-	void			FlashlightTurnOn( void );
-	void			FlashlightTurnOff( bool playOffSound = true );
+	BOOL			SuitLightIsOn( void );
+	void			SuitLightTurnOn( void );
+	void			SuitLightTurnOff( bool playOffSound = true );
 
 	void UpdatePlayerSound ( void );
 	void DeathSound ( void );
@@ -384,9 +398,7 @@ public:
 #if FEATURE_DISPLACER
 	BOOL	m_fInXen;
 #endif
-#if FEATURE_NIGHTVISION
 	BOOL	m_fNVGisON;
-#endif
 	friend class CDisplacer;
 	friend class CTriggerXenReturn;
 

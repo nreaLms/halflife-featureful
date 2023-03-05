@@ -30,6 +30,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+#include "game.h"
 
 class CRuleEntity : public CBaseEntity
 {
@@ -1020,10 +1021,8 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 		}
 	}
 
-#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_FLASHLIGHT)
-		player->GiveNamedItem("item_flashlight", SF_ITEM_NOFALL);
-#endif
+		player->m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
 
 	const int weaponFlags[] = {
 		SF_PLAYER_SETTINGS_CROWBAR,

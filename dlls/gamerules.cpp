@@ -586,6 +586,21 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 			pPlayer->GiveNamedItem("item_suit", suitSpawnFlags);
 		}
 
+		if (mapConfig.suit_light == MapConfig::SUIT_LIGHT_NOTHING)
+		{
+			pPlayer->RemoveSuitLight();
+		}
+		else if (mapConfig.suit_light == MapConfig::SUIT_LIGHT_FLASHLIGHT)
+		{
+			pPlayer->RemoveSuitLight();
+			pPlayer->SetFlashlight();
+		}
+		else if (mapConfig.suit_light == MapConfig::SUIT_LIGHT_NVG)
+		{
+			pPlayer->RemoveSuitLight();
+			pPlayer->SetNVG();
+		}
+
 		int i, j;
 		for (i=0; i<mapConfig.pickupEntCount; ++i)
 		{

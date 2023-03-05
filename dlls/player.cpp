@@ -963,17 +963,15 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 	pev->viewmodel = 0;
 	pev->weaponmodel = 0;
 
-	if (FBitSet(stripFlags, STRIP_FLASHLIGHT) || !FBitSet(stripFlags, STRIP_DONT_TURNOFF_FLASHLIGHT)) {
-		FlashlightTurnOff(false);
+	if (FBitSet(stripFlags, STRIP_SUITLIGHT) || !FBitSet(stripFlags, STRIP_DONT_TURNOFF_FLASHLIGHT)) {
+		SuitLightTurnOff(false);
 	}
 
 	pev->weapons = 0;
 	if( FBitSet(stripFlags, STRIP_SUIT) )
 		m_iItemsBits &= ~PLAYER_ITEM_SUIT;
-#if FEATURE_FLASHLIGHT_ITEM
-	if ( FBitSet(stripFlags, STRIP_FLASHLIGHT) )
-		m_iItemsBits &= ~PLAYER_ITEM_FLASHLIGHT;
-#endif
+	if ( FBitSet(stripFlags, STRIP_SUITLIGHT) )
+		RemoveSuitLight();
 
 	if (FBitSet(stripFlags, STRIP_LONGJUMP)) {
 		SetLongjump(false);
@@ -3895,79 +3893,75 @@ CBaseEntity *FindEntityForward( CBaseEntity *pMe )
 	return NULL;
 }
 
-BOOL CBasePlayer::FlashlightIsOn( void )
+BOOL CBasePlayer::SuitLightIsOn( void )
 {
-#if FEATURE_NIGHTVISION
-	return m_fNVGisON;
-#else
-	return FBitSet( pev->effects, EF_DIMLIGHT );
-#endif
+	return m_fNVGisON || FBitSet( pev->effects, EF_DIMLIGHT );
 }
 
-void CBasePlayer::FlashlightTurnOn( void )
+void CBasePlayer::SuitLightTurnOn( void )
 {
 	if( !g_pGameRules->FAllowFlashlight() )
 	{
 		return;
 	}
 
-	bool hasFlashlight = false;
-#if FEATURE_FLASHLIGHT_ITEM
-	hasFlashlight = hasFlashlight || HasFlashlight();
-#endif
-#if FEATURE_SUIT_FLASHLIGHT
-	hasFlashlight = hasFlashlight || HasSuit();
-#endif
-	if( hasFlashlight )
+	const bool hasFlashlight = HasFlashlight();
+	const bool hasNVG = HasNVG();
+
+	if ( hasNVG )
+	{
+		if (*g_modFeatures.nvg_sound_on)
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_on, 1.0, ATTN_NORM, 0, PITCH_NORM );
+		m_fNVGisON = TRUE;
+
+		// Send Nightvision On message.
+		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
+			WRITE_BYTE( 1 );
+		MESSAGE_END();
+	}
+	else if ( hasFlashlight )
 	{
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
-#if FEATURE_NIGHTVISION
-		m_fNVGisON = TRUE;
-#if FEATURE_OPFOR_NIGHTVISION_BRIGHTLIGHT
-		SetBits( pev->effects, EF_BRIGHTLIGHT );
-#endif
-#else
 		SetBits( pev->effects, EF_DIMLIGHT );
-#endif
+	}
+
+	if ( hasNVG || hasFlashlight )
+	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
 			WRITE_BYTE( 1 );
 			WRITE_BYTE( m_iFlashBattery );
 		MESSAGE_END();
 
-#if FEATURE_NIGHTVISION
-		// Send Nightvision On message.
-		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
-			WRITE_BYTE( 1 );
-		MESSAGE_END();
-#endif
-
 		m_flFlashLightTime = gSkillData.flashlightDrainTime/100 + gpGlobals->time;
 	}
 }
 
-void CBasePlayer::FlashlightTurnOff( bool playOffSound )
+void CBasePlayer::SuitLightTurnOff( bool playOffSound )
 {
 	if (playOffSound)
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
-#if FEATURE_NIGHTVISION
+	{
+		if (HasNVG())
+		{
+			if (*g_modFeatures.nvg_sound_off)
+				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_off, 1.0, ATTN_NORM, 0, PITCH_NORM );
+		}
+		else if (HasFlashlight())
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
+	}
 	m_fNVGisON = FALSE;
-#if FEATURE_OPFOR_NIGHTVISION_BRIGHTLIGHT
-	ClearBits( pev->effects, EF_BRIGHTLIGHT );
-#endif
-#else
 	ClearBits( pev->effects, EF_DIMLIGHT );
-#endif
 	MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
 		WRITE_BYTE( 0 );
 		WRITE_BYTE( m_iFlashBattery );
 	MESSAGE_END();
 
-#if FEATURE_NIGHTVISION
-	// Send Nightvision Off message.
-	MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
-		WRITE_BYTE( 0 );
-	MESSAGE_END();
-#endif
+	if (HasNVG())
+	{
+		// Send Nightvision Off message.
+		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
+			WRITE_BYTE( 0 );
+		MESSAGE_END();
+	}
 
 	m_flFlashLightTime = gSkillData.flashlightChargeTime/100 + gpGlobals->time;
 }
@@ -4043,13 +4037,13 @@ void CBasePlayer::ImpulseCommands()
 		break;
 	case 100:
         // temporary flashlight for level designers
-		if( FlashlightIsOn() )
+		if( SuitLightIsOn() )
 		{
-			FlashlightTurnOff();
+			SuitLightTurnOff();
 		}
 		else 
 		{
-			FlashlightTurnOn();
+			SuitLightTurnOn();
 		}
 		break;
 	case 201:
@@ -4109,10 +4103,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		break;
 	case 101:
 		gEvilImpulse101 = TRUE;
-		GiveNamedItem( "item_suit", SF_ITEM_NOFALL );
-#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
-		m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
-#endif
+		GiveNamedItem( "item_suit", SF_SUIT_FLASHLIGHT|SF_ITEM_NOFALL );
 		GiveNamedItem( "item_battery", SF_ITEM_NOFALL );
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_9mmhandgun" );
@@ -4630,16 +4621,17 @@ void CBasePlayer::UpdateClientData( void )
 
 		// Send flashlight status
 		MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
-			WRITE_BYTE( FlashlightIsOn() ? 1 : 0 );
+			WRITE_BYTE( SuitLightIsOn() ? 1 : 0 );
 			WRITE_BYTE( m_iFlashBattery );
 		MESSAGE_END();
 
-#if FEATURE_NIGHTVISION
-		// Send Nightvision Off message.
-		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
-			WRITE_BYTE( FlashlightIsOn() ? 1 : 0 );
-		MESSAGE_END();
-#endif
+		if (HasNVG())
+		{
+			// Send Nightvision Off message.
+			MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
+				WRITE_BYTE( SuitLightIsOn() ? 1 : 0 );
+			MESSAGE_END();
+		}
 
 		// Vit_amiN: the geiger state could run out of sync, too
 		MESSAGE_BEGIN( MSG_ONE, gmsgGeigerRange, NULL, pev );
@@ -4748,7 +4740,7 @@ void CBasePlayer::UpdateClientData( void )
 	// Update Flashlight
 	if( ( m_flFlashLightTime ) && ( m_flFlashLightTime <= gpGlobals->time ) )
 	{
-		if( FlashlightIsOn() )
+		if( SuitLightIsOn() )
 		{
 			if( m_iFlashBattery )
 			{
@@ -4756,7 +4748,7 @@ void CBasePlayer::UpdateClientData( void )
 				m_iFlashBattery--;
 
 				if( !m_iFlashBattery )
-					FlashlightTurnOff();
+					SuitLightTurnOff();
 			}
 		}
 		else
@@ -5496,6 +5488,21 @@ CBasePlayerWeapon* CBasePlayer::WeaponById(int id)
 	return NULL;
 }
 
+void CBasePlayer::SetSuitAndDefaultLight()
+{
+	SetJustSuit();
+	switch (g_modFeatures.suit_light) {
+	case ModFeatures::SUIT_LIGHT_FLASHLIGHT:
+		SetFlashlight();
+		break;
+	case ModFeatures::SUIT_LIGHT_NVG:
+		SetNVG();
+		break;
+	default:
+		break;
+	}
+}
+
 void CBasePlayer::SetLongjump(bool enabled)
 {
 	m_fLongJump = enabled;
@@ -5559,9 +5566,8 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 	if( pPlayer ) {
 		int stripFlags = pev->spawnflags;
-#if FEATURE_SUIT_FLASHLIGHT
-		stripFlags |= STRIP_FLASHLIGHT;
-#endif
+		if (g_modFeatures.suit_light != ModFeatures::SUIT_LIGHT_NOTHING)
+			stripFlags |= STRIP_SUITLIGHT;
 		pPlayer->RemoveAllItems( stripFlags );
 		if (!FStringNull(pev->noise))
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );

@@ -427,10 +427,14 @@ public:
 private:
 	HSPRITE m_hSprite1;
 	HSPRITE m_hSprite2;
+	HSPRITE m_hSprite3;
+	HSPRITE m_hSprite4;
 	HSPRITE m_hBeam;
 	wrect_t *m_prc1;
 	wrect_t *m_prc2;
 	wrect_t *m_prcBeam;
+	wrect_t *m_prc3;
+	wrect_t *m_prc4;
 	float m_flBat;	
 	int m_iBat;	
 	int m_fOn;
@@ -452,18 +456,13 @@ public:
 	void UpdateDynLight(dlight_t* dynLight, float radius, const Vector &origin);
 	void RemoveCSdlight();
 	void RemoveOFdlight();
-	void SetFilterMode();
-	void ResetFilterMode();
 	void UserCmd_NVGAdjustDown();
 	void UserCmd_NVGAdjustUp();
 #if FEATURE_CS_NIGHTVISION
 	float CSNvgRadius();
 #endif
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+#if FEATURE_OPFOR_NIGHTVISION
 	float OpforNvgRadius();
-#endif
-#if FEATURE_FILTER_NIGHTVISION
-	float FilterBrightness();
 #endif
 	bool IsOn();
 private:
@@ -471,7 +470,7 @@ private:
 #if FEATURE_CS_NIGHTVISION
 	dlight_t* m_pLightCS;
 #endif
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+#if FEATURE_OPFOR_NIGHTVISION
 	dlight_t* m_pLightOF;
 #endif
 #if FEATURE_OPFOR_NIGHTVISION
@@ -653,6 +652,13 @@ struct ConfigurableBoundedValue
 	bool configurable;
 };
 
+struct ConfigurableIntegerValue
+{
+	ConfigurableIntegerValue();
+	int defaultValue;
+	bool configurable;
+};
+
 struct FlashlightFeatures
 {
 	FlashlightFeatures();
@@ -664,6 +670,14 @@ struct FlashlightFeatures
 	ConfigurableBoundedValue radius;
 };
 
+struct NVGFeatures
+{
+	ConfigurableBoundedValue radius;
+	int light_color;
+	int layer_color;
+	int layer_alpha;
+};
+
 struct ClientFeatures
 {
 	ClientFeatures();
@@ -671,6 +685,9 @@ struct ClientFeatures
 	int hud_color;
 	int hud_min_alpha;
 	int hud_color_critical;
+
+	int hud_color_nvg;
+	int hud_min_alpha_nvg;
 	bool opfor_title;
 
 	FlashlightFeatures flashlight;
@@ -682,6 +699,14 @@ struct ClientFeatures
 	ConfigurableBooleanValue muzzlelight;
 
 	ConfigurableBooleanValue movemode;
+
+	ConfigurableIntegerValue nvgstyle;
+
+	NVGFeatures nvg_cs;
+	NVGFeatures nvg_opfor;
+
+	char nvg_empty_sprite[MAX_SPRITE_NAME_LENGTH];
+	char nvg_full_sprite[MAX_SPRITE_NAME_LENGTH];
 };
 
 //
@@ -735,13 +760,11 @@ public:
 	}
 	bool HasFlashlight() const
 	{
-		if ((m_iItemBits & PLAYER_ITEM_FLASHLIGHT) != 0)
-			return true;
-#if FEATURE_SUIT_FLASHLIGHT
-		return HasSuit();
-#else
-		return false;
-#endif
+		return (m_iItemBits & PLAYER_ITEM_FLASHLIGHT) != 0;
+	}
+	bool HasNVG() const
+	{
+		return (m_iItemBits & PLAYER_ITEM_NIGHTVISION) != 0;
 	}
 	bool ViewBobEnabled();
 	bool ViewRollEnadled();
@@ -749,6 +772,7 @@ public:
 	bool WeaponSparksEnabled();
 	bool MuzzleLightEnabled();
 	bool CustomFlashlightEnabled();
+	int NVGStyle();
 	bool MoveModeEnabled();
 private:
 	void ParseClientFeatures();

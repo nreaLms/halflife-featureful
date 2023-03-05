@@ -53,6 +53,16 @@ struct MapConfig
 
 	bool nosuit;
 	short suitLogon;
+
+	enum
+	{
+		SUIT_LIGHT_NOTHING = -1,
+		SUIT_LIGHT_DEFAULT = 0,
+		SUIT_LIGHT_FLASHLIGHT,
+		SUIT_LIGHT_NVG,
+	};
+	int suit_light;
+
 	bool longjump;
 
 	bool valid;

@@ -493,10 +493,6 @@ void CItem::PrecacheMyModel(const char *model)
 	}
 }
 
-#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
-#define SF_SUIT_FLASHLIGHT 0x0004
-#endif
-
 class CItemSuit : public CItem
 {
 public:
@@ -528,13 +524,10 @@ public:
 			EMIT_SOUND_SUIT( pPlayer->edict(), "!HEV_AAx" );	// long version of suit logon
 		}
 
-		pPlayer->m_iItemsBits |= PLAYER_ITEM_SUIT;
-#if FEATURE_FLASHLIGHT_ITEM && !FEATURE_SUIT_FLASHLIGHT
+		pPlayer->SetSuitAndDefaultLight();
 		if (FBitSet(pev->spawnflags, SF_SUIT_FLASHLIGHT))
-		{
-			pPlayer->m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
-		}
-#endif
+			pPlayer->SetFlashlight();
+
 		return TRUE;
 	}
 };
@@ -741,19 +734,47 @@ class CItemLongJump : public CItem
 
 LINK_ENTITY_TO_CLASS( item_longjump, CItemLongJump )
 
-#if FEATURE_FLASHLIGHT_ITEM
+#define FLASHLIGHT_MODEL "models/w_flashlight.mdl"
+
 class CItemFlashlight : public CItem
 {
+	static bool g_hasFlashlightModel;
+	static bool g_checkedFlashligthModel;
+public:
 	void Spawn( void )
 	{
-		Precache( );
-		SetMyModel("models/w_flashlight.mdl");
-		CItem::Spawn( );
+		Precache();
+		SetMyModel(DefaultModel());
+		CItem::Spawn();
+		if (!g_hasFlashlightModel)
+		{
+			pev->renderamt = 0;
+			pev->rendermode = kRenderTransAlpha;
+		}
 	}
 	void Precache( void )
 	{
-		PrecacheMyModel ("models/w_flashlight.mdl");
+		if (!g_checkedFlashligthModel)
+		{
+			int fileSize;
+			byte* pMemFile = g_engfuncs.pfnLoadFileForMe( FLASHLIGHT_MODEL, &fileSize );
+			if (pMemFile)
+			{
+				g_hasFlashlightModel = true;
+				g_engfuncs.pfnFreeFile( pMemFile );
+			}
+			g_checkedFlashligthModel = true;
+		}
+
+		PrecacheMyModel (DefaultModel());
 		PRECACHE_SOUND( "items/gunpickup2.wav" );
+	}
+	const char* DefaultModel()
+	{
+		if (g_hasFlashlightModel)
+			return FLASHLIGHT_MODEL;
+		else
+			return "sprites/iunknown.spr";
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
@@ -768,7 +789,37 @@ class CItemFlashlight : public CItem
 	}
 };
 LINK_ENTITY_TO_CLASS(item_flashlight, CItemFlashlight)
-#endif
+
+bool CItemFlashlight::g_hasFlashlightModel = false;
+bool CItemFlashlight::g_checkedFlashligthModel = false;
+
+class CItemNVG : public CItem
+{
+public:
+	void Spawn()
+	{
+		Precache();
+		SetMyModel("sprites/iunknown.spr");
+		pev->renderamt = 0;
+		pev->rendermode = kRenderTransAlpha;
+		CItem::Spawn();
+	}
+	void Precache()
+	{
+		PrecacheMyModel("sprites/iunknown.spr");
+	}
+	BOOL MyTouch( CBasePlayer *pPlayer )
+	{
+		if ( pPlayer->HasNVG() )
+			return FALSE;
+		pPlayer->m_iItemsBits |= PLAYER_ITEM_NIGHTVISION;
+		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
+			WRITE_STRING( STRING(pev->classname) );
+		MESSAGE_END();
+		return TRUE;
+	}
+};
+LINK_ENTITY_TO_CLASS(item_nvgs, CItemNVG)
 
 //=========================================================
 // Generic item

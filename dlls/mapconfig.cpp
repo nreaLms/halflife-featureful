@@ -8,7 +8,7 @@ MapConfig::MapConfig() :
 	pickupEntCount(0), ammoCount(0), cvarCount(0),
 	starthealth(0), startarmor(0),
 	nomedkit(false), nosuit(false),
-	suitLogon(SuitNoLogon), longjump(false),
+	suitLogon(SuitNoLogon), suit_light(SUIT_LIGHT_DEFAULT), longjump(false),
 	valid(false)
 {
 	memset(ammo, 0, sizeof(ammo));
@@ -98,6 +98,21 @@ bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize)
 		else if (strcmp(key, "nosuit") == 0)
 		{
 			mapConfig.nosuit = true;
+		}
+		else if (strcmp(key, "suitlight") == 0)
+		{
+			if (strcmp(value, "flashlight") == 0)
+			{
+				mapConfig.suit_light = MapConfig::SUIT_LIGHT_FLASHLIGHT;
+			}
+			else if (strcmp(value, "nvg") == 0 || strcmp(value, "nvg") == 0)
+			{
+				mapConfig.suit_light = MapConfig::SUIT_LIGHT_NVG;
+			}
+			else if (strcmp(value, "no") == 0 || strcmp(value, "nothing") == 0)
+			{
+				mapConfig.suit_light = MapConfig::SUIT_LIGHT_NOTHING;
+			}
 		}
 		else if (strcmp(key, "suitlogon") == 0)
 		{

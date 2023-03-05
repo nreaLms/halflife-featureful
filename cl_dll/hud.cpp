@@ -55,6 +55,8 @@ ConfigurableBoundedValue::ConfigurableBoundedValue(int defValue, int minimumValu
 	defaultValue(defValue), minValue(minimumValue), maxValue(maximumValue), configurable(config)
 {}
 
+ConfigurableIntegerValue::ConfigurableIntegerValue() : defaultValue(0), configurable(true) {}
+
 FlashlightFeatures::FlashlightFeatures() : color(0xFFFFFF), distance(2048)
 {
 	fade_distance.defaultValue = 600;
@@ -65,14 +67,45 @@ FlashlightFeatures::FlashlightFeatures() : color(0xFFFFFF), distance(2048)
 	radius.maxValue = 200;
 }
 
+#define OF_NVG_DLIGHT_RADIUS 400
+#define CS_NVG_DLIGHT_RADIUS 775
+#define NVG_DLIGHT_MIN_RADIUS 400
+#define NVG_DLIGHT_MAX_RADIUS 1000
+
 ClientFeatures::ClientFeatures()
 {
 	hud_color = RGB_HUD_DEFAULT;
 	hud_color_critical = 0xFF0000;
 	hud_min_alpha = MIN_ALPHA;
+
+	hud_color_nvg = 0x00FFFFFF;
+	hud_min_alpha_nvg = 192;
+
 	opfor_title = FEATURE_OPFOR_SPECIFIC ? true : false;
 
 	movemode.configurable = false;
+
+	nvgstyle.configurable = false;
+	nvgstyle.defaultValue = 1;
+
+	nvg_cs.radius.configurable = false;
+	nvg_cs.radius.defaultValue = CS_NVG_DLIGHT_RADIUS;
+	nvg_cs.radius.minValue = NVG_DLIGHT_MIN_RADIUS;
+	nvg_cs.radius.maxValue = NVG_DLIGHT_MAX_RADIUS;
+	nvg_cs.layer_color = 0x32E132;
+	nvg_cs.layer_alpha = 110;
+	nvg_cs.light_color = 0x32FF32;
+
+	nvg_opfor.radius.configurable = false;
+	nvg_opfor.radius.defaultValue = OF_NVG_DLIGHT_RADIUS;
+	nvg_opfor.radius.minValue = NVG_DLIGHT_MIN_RADIUS;
+	nvg_opfor.radius.maxValue = NVG_DLIGHT_MAX_RADIUS;
+	nvg_opfor.layer_color = RGB_GREENISH;
+	nvg_opfor.layer_alpha = 255;
+	nvg_opfor.light_color = 0xFAFAFA;
+
+	memset(nvg_empty_sprite, 0, sizeof (nvg_empty_sprite));
+	memset(nvg_full_sprite, 0, sizeof (nvg_full_sprite));
 }
 
 static cvar_t* CVAR_CREATE_INTVALUE(const char* name, int value, int flags)
@@ -85,6 +118,22 @@ static cvar_t* CVAR_CREATE_INTVALUE(const char* name, int value, int flags)
 static cvar_t* CVAR_CREATE_BOOLVALUE(const char* name, bool value, int flags)
 {
 	return CVAR_CREATE(name, value ? "1" : "0", flags);
+}
+
+static void CreateIntegerCvarConditionally(cvar_t*& cvarPtr, const char* name, const ConfigurableIntegerValue& integerValue)
+{
+	if (integerValue.configurable)
+		cvarPtr = CVAR_CREATE_INTVALUE( name, integerValue.defaultValue, FCVAR_ARCHIVE );
+	else
+		cvarPtr = 0;
+}
+
+static void CreateIntegerCvarConditionally(cvar_t*& cvarPtr, const char* name, const ConfigurableBoundedValue& boundedValue)
+{
+	if (boundedValue.configurable)
+		cvarPtr = CVAR_CREATE_INTVALUE( name, boundedValue.defaultValue, FCVAR_ARCHIVE );
+	else
+		cvarPtr = 0;
 }
 
 static void CreateBooleanCvarConditionally(cvar_t*& cvarPtr, const char* name, const ConfigurableBooleanValue& booleanValue)
@@ -169,12 +218,8 @@ cvar_t *cl_nvgstyle = NULL;
 cvar_t *cl_nvgradius_cs = NULL;
 #endif
 
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+#if FEATURE_OPFOR_NIGHTVISION
 cvar_t *cl_nvgradius_of = NULL;
-#endif
-
-#if FEATURE_FILTER_NIGHTVISION
-cvar_t *cl_nvgfilterbrightness = NULL;
 #endif
 
 cvar_t* cl_flashlight_custom = NULL;
@@ -528,19 +573,15 @@ void CHud::Init( void )
 	cl_muzzlelight_monsters = CVAR_CREATE( "cl_muzzlelight_monsters", "0", FCVAR_ARCHIVE );
 
 #if FEATURE_NIGHTVISION_STYLES
-	cl_nvgstyle = CVAR_CREATE( "cl_nvgstyle", "0", FCVAR_ARCHIVE );
+	CreateIntegerCvarConditionally(cl_nvgstyle, "cl_nvgstyle", clientFeatures.nvgstyle);
 #endif
 
 #if FEATURE_CS_NIGHTVISION
-	cl_nvgradius_cs = CVAR_CREATE( "cl_nvgradius_cs", "775", FCVAR_ARCHIVE );
+	CreateIntegerCvarConditionally(cl_nvgradius_cs, "cl_nvgradius_cs", clientFeatures.nvg_cs.radius );
 #endif
 
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
-	cl_nvgradius_of = CVAR_CREATE( "cl_nvgradius_of", "400", FCVAR_ARCHIVE );
-#endif
-
-#if FEATURE_FILTER_NIGHTVISION
-	cl_nvgfilterbrightness = CVAR_CREATE( "cl_nvgfilterbrightness", "0.6", FCVAR_ARCHIVE );
+#if FEATURE_OPFOR_NIGHTVISION
+	CreateIntegerCvarConditionally(cl_nvgradius_of, "cl_nvgradius_of", clientFeatures.nvg_opfor.radius );
 #endif
 
 	CreateBooleanCvarConditionally(cl_flashlight_custom, "cl_flashlight_custom", clientFeatures.flashlight.custom);
@@ -652,6 +693,42 @@ bool UpdateBoundedValue(ConfigurableBoundedValue& value, const char* key, const 
 	return false;
 }
 
+bool UpdateIntegerValue(ConfigurableIntegerValue& value, const char* key, const char* valueStr)
+{
+	if (strcmp("default", key) == 0)
+	{
+		return ParseInteger(valueStr, value.defaultValue);
+	}
+	else if (strcmp("configurable", key) == 0)
+	{
+		return ParseBoolean(valueStr, value.configurable);
+	}
+	return false;
+}
+
+bool UpdateNVGValue(NVGFeatures& nvg, const char* key, const char* valueStr)
+{
+	const char* subKey = 0;
+
+	if (strcmp("layer_color", key) == 0)
+	{
+		return ParseColor(valueStr, nvg.layer_color);
+	}
+	else if (strcmp("layer_alpha", key) == 0)
+	{
+		return ParseInteger(valueStr, nvg.layer_alpha);
+	}
+	else if (strcmp("light_color", key) == 0)
+	{
+		return ParseColor(valueStr, nvg.light_color);
+	}
+	else if ((subKey = strStartsWith(key, "radius.")))
+	{
+		UpdateBoundedValue(nvg.radius, subKey, valueStr);
+	}
+	return false;
+}
+
 void CHud::ParseClientFeatures()
 {
 	const char* fileName = "featureful_client.cfg";
@@ -715,6 +792,14 @@ void CHud::ParseClientFeatures()
 			{
 				ParseColor(valueBuf, clientFeatures.hud_color_critical);
 			}
+			if (strcmp("hud_color_nvg", keyName) == 0)
+			{
+				ParseColor(valueBuf, clientFeatures.hud_color_nvg);
+			}
+			else if (strcmp("hud_min_alpha_nvg", keyName) == 0)
+			{
+				ParseInteger(valueBuf, clientFeatures.hud_min_alpha_nvg);
+			}
 			else if ((subKey = strStartsWith(keyName, "flashlight.custom.")))
 			{
 				UpdateBooleanValue(clientFeatures.flashlight.custom, subKey, valueBuf);
@@ -758,6 +843,28 @@ void CHud::ParseClientFeatures()
 			else if ((subKey = strStartsWith(keyName, "movemode.")))
 			{
 				UpdateBooleanValue(clientFeatures.movemode, subKey, valueBuf);
+			}
+			else if ((subKey = strStartsWith(keyName, "nvgstyle.")))
+			{
+				UpdateIntegerValue(clientFeatures.nvgstyle, subKey, valueBuf);
+			}
+			else if ((subKey = strStartsWith(keyName, "nvg_cs.")))
+			{
+				UpdateNVGValue(clientFeatures.nvg_cs, subKey, valueBuf);
+			}
+			else if ((subKey = strStartsWith(keyName, "nvg_opfor.")))
+			{
+				UpdateNVGValue(clientFeatures.nvg_opfor, subKey, valueBuf);
+			}
+			else if (strcmp(keyName, "nvg_empty_sprite") == 0)
+			{
+				strncpy(clientFeatures.nvg_empty_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
+				clientFeatures.nvg_empty_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
+			}
+			else if (strcmp(keyName, "nvg_full_sprite") == 0)
+			{
+				strncpy(clientFeatures.nvg_full_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
+				clientFeatures.nvg_full_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
 			}
 			else if (strcmp(keyName, "opfor_title") == 0)
 			{
@@ -1203,6 +1310,15 @@ bool CHud::MuzzleLightEnabled()
 bool CHud::CustomFlashlightEnabled()
 {
 	return ClientFeatureEnabled(cl_flashlight_custom, clientFeatures.flashlight.custom.enabled_by_default);
+}
+
+int CHud::NVGStyle()
+{
+#if FEATURE_NIGHTVISION_STYLES
+	if (cl_nvgstyle)
+		return (int)cl_nvgstyle->value;
+#endif
+	return clientFeatures.nvgstyle.defaultValue;
 }
 
 bool CHud::MoveModeEnabled()

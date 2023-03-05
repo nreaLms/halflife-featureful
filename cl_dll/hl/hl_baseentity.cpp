@@ -287,9 +287,9 @@ int CBasePlayer::Restore( CRestore &restore ) { return 0; }
 BOOL CBasePlayer::HasWeapons( void ) { return FALSE; }
 void CBasePlayer::SelectPrevItem( int iItem ) { }
 CBaseEntity *FindEntityForward( CBaseEntity *pMe ) { return NULL; }
-BOOL CBasePlayer::FlashlightIsOn( void ) { return FALSE; }
-void CBasePlayer::FlashlightTurnOn( void ) { }
-void CBasePlayer::FlashlightTurnOff( bool playOffSound ) { }
+BOOL CBasePlayer::SuitLightIsOn( void ) { return FALSE; }
+void CBasePlayer::SuitLightTurnOn( void ) { }
+void CBasePlayer::SuitLightTurnOff( bool playOffSound ) { }
 void CBasePlayer::ForceClientDllUpdate( void ) { }
 void CBasePlayer::ImpulseCommands() { }
 void CBasePlayer::CheatImpulseCommands( int iImpulse ) { }

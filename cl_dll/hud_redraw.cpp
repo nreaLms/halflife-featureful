@@ -448,9 +448,9 @@ void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
 int CHud::HUDColor()
 {
 	int result = clientFeatures.hud_color;
-#if FEATURE_NIGHTVISION && FEATURE_NIGHTVISION_WHITE_HUD
+#if FEATURE_NIGHTVISION
 	if (this == &gHUD && gHUD.m_Nightvision.IsOn()) {
-		result = 0x00FFFFFF;
+		result = clientFeatures.hud_color_nvg;
 	}
 #endif
 	return result;
@@ -464,9 +464,9 @@ int CHud::HUDColorCritical()
 int CHud::MinHUDAlpha()
 {
 	int result = clientFeatures.hud_min_alpha;
-#if FEATURE_NIGHTVISION && FEATURE_NIGHTVISION_WHITE_HUD
+#if FEATURE_NIGHTVISION
 	if (this == &gHUD && gHUD.m_Nightvision.IsOn()) {
-		result = 192;
+		result = clientFeatures.hud_min_alpha_nvg;
 	}
 #endif
 	return result;

@@ -86,6 +86,8 @@ struct PlayerState
 	char nickname[32];
 	char uid[33];
 	bool hasSuit;
+	bool hasFlashlight;
+	bool hasNVG;
 	bool hasLongjump;
 };
 
@@ -130,6 +132,8 @@ void SavePlayerStates()
 			strncpy(state->nickname, STRING(pPlayer->pev->netname), sizeof(state->nickname) - 1);
 
 			state->hasSuit = pPlayer->HasSuit();
+			state->hasFlashlight = pPlayer->HasFlashlight();
+			state->hasNVG = pPlayer->HasNVG();
 			state->health = pEntity->pev->health;
 			state->armor = pEntity->pev->armorvalue;
 			CBasePlayer* player = (CBasePlayer*)pEntity;
@@ -168,11 +172,13 @@ bool RestorePlayerState(CBasePlayer* player)
 			player->pev->health = state->health;
 			player->pev->armorvalue = state->armor;
 			if (state->hasSuit)
-				player->m_iItemsBits |= PLAYER_ITEM_SUIT;
+				player->SetJustSuit();
+			if (state->hasFlashlight)
+				player->SetFlashlight();
+			if (state->hasNVG)
+				player->SetNVG();
 			if (state->hasLongjump)
-			{
 				player->SetLongjump(true);
-			}
 
 			int k;
 			for( k = 0; k < MAX_WEAPONS; ++k)
@@ -790,7 +796,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 	}
 	else
 	{
-		pPlayer->m_iItemsBits |= PLAYER_ITEM_SUIT;
+		pPlayer->SetSuitAndDefaultLight();
 
 		while( ( pWeaponEntity = UTIL_FindEntityByClassname( pWeaponEntity, "game_player_equip" ) ) )
 		{

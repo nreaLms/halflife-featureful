@@ -28,25 +28,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#if FEATURE_NIGHTVISION_STYLES
-extern cvar_t *cl_nvgstyle;
-#endif
-
 #if FEATURE_CS_NIGHTVISION
 extern cvar_t *cl_nvgradius_cs;
 #endif
 
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+#if FEATURE_OPFOR_NIGHTVISION
 extern cvar_t *cl_nvgradius_of;
-#endif
-
-#define OF_NVG_DLIGHT_RADIUS 400
-#define CS_NVG_DLIGHT_RADIUS 775
-#define NVG_DLIGHT_MIN_RADIUS 400
-#define NVG_DLIGHT_MAX_RADIUS 1000
-
-#if FEATURE_FILTER_NIGHTVISION
-extern cvar_t *cl_nvgfilterbrightness;
 #endif
 
 DECLARE_MESSAGE( m_Nightvision, Nightvision )
@@ -65,7 +52,7 @@ int CHudNightvision::Init(void)
 	m_pLightCS = 0;
 #endif
 
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+#if FEATURE_OPFOR_NIGHTVISION
 	m_pLightOF = 0;
 #endif
 
@@ -77,7 +64,6 @@ int CHudNightvision::Init(void)
 void CHudNightvision::Reset(void)
 {
 	m_fOn = 0;
-	ResetFilterMode();
 }
 
 int CHudNightvision::VidInit(void)
@@ -100,7 +86,6 @@ int CHudNightvision::MsgFunc_Nightvision(const char *pszName, int iSize, void *p
 	BEGIN_READ( pbuf, iSize );
 	m_fOn = READ_BYTE();
 	if (!m_fOn) {
-		ResetFilterMode();
 		RemoveCSdlight();
 		RemoveOFdlight();
 	}
@@ -119,44 +104,21 @@ int CHudNightvision::Draw(float flTime)
 		return 1;
 
 	// Only display this if the player is equipped with the suit.
-	if (!gHUD.HasSuit())
+	if (!gHUD.HasNVG())
 		return 1;
 
 	if (m_fOn) {
-#if FEATURE_NIGHTVISION_STYLES
-		if (cl_nvgstyle)
+		int nvgStyle = gHUD.NVGStyle();
+		if (nvgStyle == 0)
 		{
-			if (cl_nvgstyle->value < 1) {
-#if FEATURE_OPFOR_NIGHTVISION
-				RemoveCSdlight();
-				ResetFilterMode();
-				DrawOpforNVG(flTime);
-				return 1;
-#endif
-			}
-			if (cl_nvgstyle->value < 2) {
-#if FEATURE_CS_NIGHTVISION
-				RemoveOFdlight();
-				ResetFilterMode();
-				DrawCSNVG(flTime);
-				return 1;
-#endif
-			}
-#if FEATURE_FILTER_NIGHTVISION
 			RemoveCSdlight();
-			RemoveOFdlight();
-			SetFilterMode();
-			return 1;
-#endif
+			DrawOpforNVG(flTime);
 		}
-#endif
-#if FEATURE_CS_NIGHTVISION
-	DrawCSNVG(flTime);
-#elif FEATURE_OPFOR_NIGHTVISION
-	DrawOpforNVG(flTime);
-#elif FEATURE_FILTER_NIGHTVISION
-	SetFilterMode();
-#endif
+		else
+		{
+			RemoveOFdlight();
+			DrawCSNVG(flTime);
+		}
 	}
 	return 1;
 }
@@ -164,11 +126,15 @@ int CHudNightvision::Draw(float flTime)
 void CHudNightvision::DrawCSNVG(float flTime)
 {
 #if FEATURE_CS_NIGHTVISION
-	gEngfuncs.pfnFillRGBABlend(0, 0, ScreenWidth, ScreenHeight, 50, 225, 50, 110);
+	const NVGFeatures& nvg_cs = gHUD.clientFeatures.nvg_cs;
+	int r, g, b;
+	UnpackRGB(r, g, b, nvg_cs.layer_color);
+	gEngfuncs.pfnFillRGBABlend(0, 0, ScreenWidth, ScreenHeight, r, g, b, nvg_cs.layer_alpha);
 
 	if( !m_pLightCS || m_pLightCS->die < flTime )
 	{
-		m_pLightCS = MakeDynLight(flTime, 50, 255, 50);
+		UnpackRGB(r, g, b, gHUD.clientFeatures.nvg_cs.light_color);
+		m_pLightCS = MakeDynLight(flTime, r, g, b);
 	}
 	UpdateDynLight( m_pLightCS, CSNvgRadius(), gHUD.m_vecOrigin );
 #endif
@@ -178,11 +144,10 @@ void CHudNightvision::DrawOpforNVG(float flTime)
 {
 #if FEATURE_OPFOR_NIGHTVISION
 	int r, g, b, x, y;
-	int a = 255;
 
-	// Get each color component from the main
-	// hud color.
-	UnpackRGB(r, g, b, RGB_GREENISH);
+	const NVGFeatures& nvg_opfor = gHUD.clientFeatures.nvg_opfor;
+	UnpackRGB(r, g, b, nvg_opfor.layer_color);
+	int a = nvg_opfor.layer_alpha;
 
 	ScaleColors(r, g, b, a);
 
@@ -216,14 +181,12 @@ void CHudNightvision::DrawOpforNVG(float flTime)
 	// Increase sprite frame.
 	m_iFrame++;
 
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
 	if( !m_pLightOF || m_pLightOF->die < flTime )
 	{
-		m_pLightOF = MakeDynLight(flTime, 250, 250, 250);
+		UnpackRGB(r, g, b, gHUD.clientFeatures.nvg_opfor.light_color);
+		m_pLightOF = MakeDynLight(flTime, r, g, b);
 	}
 	UpdateDynLight( m_pLightOF, OpforNvgRadius(), gHUD.m_vecOrigin + Vector(0.0f, 0.0f, 32.0f ) );
-#endif
-
 #endif
 }
 
@@ -262,7 +225,7 @@ void CHudNightvision::RemoveCSdlight()
 
 void CHudNightvision::RemoveOFdlight()
 {
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+#if FEATURE_OPFOR_NIGHTVISION
 	if( m_pLightOF )
 	{
 		m_pLightOF->die = 0;
@@ -271,49 +234,28 @@ void CHudNightvision::RemoveOFdlight()
 #endif
 }
 
-void CHudNightvision::SetFilterMode()
-{
-#if FEATURE_FILTER_NIGHTVISION
-	if (!m_filterModeSet) {
-		m_filterModeSet = true;
-
-		gEngfuncs.pfnSetFilterMode(1);
-		gEngfuncs.pfnSetFilterColor(0.2f, 0.9f, 0.2f);
-	}
-	gEngfuncs.pfnSetFilterBrightness(FilterBrightness());
-#endif
-}
-
-void CHudNightvision::ResetFilterMode()
-{
-#if FEATURE_FILTER_NIGHTVISION
-	if (m_filterModeSet) {
-		m_filterModeSet = false;
-		gEngfuncs.pfnSetFilterMode(0);
-	}
-#endif
-}
-
 #if FEATURE_CS_NIGHTVISION
 float CHudNightvision::CSNvgRadius()
 {
-	float radius = cl_nvgradius_cs && cl_nvgradius_cs->value > 0.0f ? cl_nvgradius_cs->value : CS_NVG_DLIGHT_RADIUS;
-	if (radius < NVG_DLIGHT_MIN_RADIUS)
-		return NVG_DLIGHT_MIN_RADIUS;
-	else if (radius > NVG_DLIGHT_MAX_RADIUS)
-		return NVG_DLIGHT_MAX_RADIUS;
+	const NVGFeatures& nvg = gHUD.clientFeatures.nvg_cs;
+	float radius = cl_nvgradius_cs && cl_nvgradius_cs->value > 0.0f ? cl_nvgradius_cs->value : nvg.radius.defaultValue;
+	if (radius < nvg.radius.minValue)
+		return nvg.radius.minValue;
+	else if (radius > nvg.radius.maxValue)
+		return nvg.radius.minValue;
 	return radius;
 }
 #endif
 
-#if FEATURE_OPFOR_NIGHTVISION_DLIGHT
+#if FEATURE_OPFOR_NIGHTVISION
 float CHudNightvision::OpforNvgRadius()
 {
-	float radius = cl_nvgradius_of && cl_nvgradius_of->value > 0.0f ? cl_nvgradius_of->value : OF_NVG_DLIGHT_RADIUS;
-	if (radius < NVG_DLIGHT_MIN_RADIUS)
-		return NVG_DLIGHT_MIN_RADIUS;
-	else if (radius > NVG_DLIGHT_MAX_RADIUS)
-		return NVG_DLIGHT_MAX_RADIUS;
+	const NVGFeatures& nvg = gHUD.clientFeatures.nvg_opfor;
+	float radius = cl_nvgradius_of && cl_nvgradius_of->value > 0.0f ? cl_nvgradius_of->value : nvg.radius.defaultValue;
+	if (radius < nvg.radius.minValue)
+		return nvg.radius.minValue;
+	else if (radius > nvg.radius.maxValue)
+		return nvg.radius.minValue;
 	return radius;
 }
 #endif
@@ -322,16 +264,3 @@ bool CHudNightvision::IsOn()
 {
 	return m_fOn;
 }
-
-#if FEATURE_FILTER_NIGHTVISION
-float CHudNightvision::FilterBrightness()
-{
-	if (cl_nvgfilterbrightness) {
-		float brightness = cl_nvgfilterbrightness->value;
-		if (brightness >= 0.1f || brightness <= 1.0f) {
-			return brightness;
-		}
-	}
-	return 0.6f;
-}
-#endif

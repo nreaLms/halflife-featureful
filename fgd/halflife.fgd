@@ -6731,10 +6731,10 @@
 [
 	spawnflags(Flags) =
 	[
-		1 : "Remove suit" : 0
-		2 : "Remove flashlight" : 0 : "Remove flashlight item if it's a separate item from the suit."
+		1 : "Remove suit" : 0 : "Remove player's suit. The flashlight or nvg will be removed only if suit comes with one of them by default. Otherwise the 'Remove suit light' flag should be checked too"
+		2 : "Remove suit light" : 0 : "Remove flashlight or nvg."
 		4 : "Remove longjump" : 0
-		8 : "Don't turn off flashlight" : 0 : "By default in Half-Life any call to player_weaponstrip turns off the flashlight. Tick this flag to prevent such behavior. Flashlight is still getting turned off if suit or flashlight is removed."
+		8 : "Don't turn off suit light" : 0 : "By default in Half-Life any call to player_weaponstrip turns off the flashlight. Tick this flag to prevent such behavior. Flashlight is still getting turned off if suit or flashlight is removed."
 	]
 	noise(sound) : "Sound on trigger" : : "This will be played on player's item sound channel"
 ]

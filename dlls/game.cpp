@@ -37,6 +37,10 @@ ModFeatures::ModFeatures()
 	memset(weapons, 0, sizeof(weapons));
 	monstersCount = 0;
 
+	memset(nvg_sound_on, 0, sizeof (nvg_sound_on));
+	memset(nvg_sound_off, 0, sizeof (nvg_sound_off));
+
+	suit_light = SUIT_LIGHT_FLASHLIGHT;
 	items_instant_drop = true;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
@@ -88,7 +92,7 @@ struct KeyValueDefinition
 bool ModFeatures::SetValue(const char *key, const char *value)
 {
 	KeyValueDefinition<bool> booleans[] = {
-		KEY_VALUE_DEF( items_instant_drop ),
+		KEY_VALUE_DEF(items_instant_drop),
 		KEY_VALUE_DEF(tripmines_solid),
 		KEY_VALUE_DEF(satchels_pickable),
 		KEY_VALUE_DEF(alien_teleport_sound),
@@ -148,6 +152,34 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		{
 			return UpdateFloat(value, floats[i].value, key);
 		}
+	}
+
+	if (strcmp(key, "suit_light") == 0)
+	{
+		if (strcmp(value, "nothing") == 0 || strcmp(value, "no") == 0)
+			suit_light = SUIT_LIGHT_NOTHING;
+		else if (strcmp(value, "flashlight") == 0)
+			suit_light = SUIT_LIGHT_FLASHLIGHT;
+		else if (strcmp(value, "nvg") == 0 || strcmp(value, "nightvision") == 0)
+			suit_light = SUIT_LIGHT_NVG;
+		else
+		{
+			ALERT(at_console, "Parameter '%s' should be one of the following: nothing, flashlight, nvg", key);
+			return false;
+		}
+		return true;
+	}
+	else if (strcmp(key, "nvg_sound_on") == 0)
+	{
+		strncpy(nvg_sound_on, value, ARRAYSIZE(nvg_sound_on));
+		nvg_sound_on[ARRAYSIZE(nvg_sound_on)-1] = '\0';
+		return true;
+	}
+	else if (strcmp(key, "nvg_sound_off") == 0)
+	{
+		strncpy(nvg_sound_off, value, ARRAYSIZE(nvg_sound_off));
+		nvg_sound_off[ARRAYSIZE(nvg_sound_off)-1] = '\0';
+		return true;
 	}
 
 	ALERT(at_console, "Unknown mod feature key '%s'\n", key);
