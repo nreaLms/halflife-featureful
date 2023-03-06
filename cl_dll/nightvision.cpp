@@ -69,10 +69,13 @@ void CHudNightvision::Reset(void)
 int CHudNightvision::VidInit(void)
 {
 #if FEATURE_OPFOR_NIGHTVISION
-	m_hSprite = LoadSprite(NIGHTVISION_SPRITE_NAME);
+	if (gHUD.clientFeatures.nvgstyle.configurable || gHUD.clientFeatures.nvgstyle.defaultValue == 0)
+	{
+		m_hSprite = LoadSprite(NIGHTVISION_SPRITE_NAME);
 
-	// Get the number of frames available in this sprite.
-	m_nFrameCount = SPR_Frames(m_hSprite);
+		// Get the number of frames available in this sprite.
+		m_nFrameCount = SPR_Frames(m_hSprite);
+	}
 
 	// current frame.
 	m_iFrame = 0;
