@@ -609,6 +609,12 @@
 	]
 	explodemagnitude(integer) : "Explode Magnitude (0=none)" : 0
 	randomitem_template(string) : "info_item_random entity"
+	target_activator(choices) : "Target's Activator" =
+	[
+		0 : "No (Default)"
+		1 : "This breakable"
+		2 : "My attacker or activator"
+	]
 ]
 
 @BaseClass = BaseLockable

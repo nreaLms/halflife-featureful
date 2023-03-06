@@ -30,6 +30,13 @@
 
 extern DLL_GLOBAL Vector	g_vecAttackDir;
 
+typedef enum
+{
+	FB_TA_NO = 0,
+	FB_TA_BREAKABLE = 1,
+	FB_TA_ACTIVATOR_OR_ATTACKER = 2,
+} SCRIPT_TARGET_ACTIVATOR;
+
 // =================== FUNC_Breakable ==============================================
 
 // Just add more items to the bottom of this array and they will automagically be supported
@@ -141,6 +148,11 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 		ExplosionSetMagnitude( atoi( pkvd->szValue ) );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "target_activator" ) )
+	{
+		m_targetActivator = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "lip" ) )
 		pkvd->fHandled = TRUE;
 	else
@@ -163,6 +175,7 @@ TYPEDESCRIPTION CBreakable::m_SaveData[] =
 	DEFINE_FIELD( CBreakable, m_angle, FIELD_FLOAT ),
 	DEFINE_FIELD( CBreakable, m_iszGibModel, FIELD_STRING ),
 	DEFINE_FIELD( CBreakable, m_iszSpawnObject, FIELD_STRING ),
+	DEFINE_FIELD( CBreakable, m_targetActivator, FIELD_SHORT ),
 
 	// Explosion magnitude is stored in pev->impulse
 };
@@ -526,7 +539,7 @@ void CBreakable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		UTIL_MakeVectors( pev->angles );
 		g_vecAttackDir = gpGlobals->v_forward;
 
-		Die();
+		DieToActivator(pActivator);
 	}
 }
 
@@ -625,7 +638,7 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	if( pev->health <= 0 )
 	{
 		Killed( pevInflictor, pevAttacker, GIB_NORMAL );
-		Die();
+		DieToActivator(CBaseEntity::Instance(pevAttacker));
 		return 0;
 	}
 
@@ -715,7 +728,12 @@ static char PlayBreakableBustSound( entvars_t* pev, Materials material, float fv
 	return 0;
 }
 
-void CBreakable::Die( void )
+void CBreakable::Die()
+{
+	DieToActivator(NULL);
+}
+
+void CBreakable::DieToActivator( CBaseEntity* pActivator )
 {
 	Vector vecSpot;// shard origin
 	Vector vecVelocity;// shard velocity
@@ -815,7 +833,16 @@ void CBreakable::Die( void )
 	pev->solid = SOLID_NOT;
 
 	// Fire targets on break
-	SUB_UseTargets( NULL, USE_TOGGLE, 0 );
+	CBaseEntity* pTargetActivator = 0;
+	if (m_targetActivator == FB_TA_BREAKABLE)
+	{
+		pTargetActivator = this;
+	}
+	else if (m_targetActivator == FB_TA_ACTIVATOR_OR_ATTACKER)
+	{
+		pTargetActivator = pActivator;
+	}
+	SUB_UseTargets( pTargetActivator, USE_TOGGLE, 0 );
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = pev->ltime + 0.1f;

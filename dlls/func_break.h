@@ -63,6 +63,7 @@ public:
 	int DamageDecal( int bitsDamageType );
 
 	void EXPORT Die( void );
+	void DieToActivator(CBaseEntity* pActivator);
 	virtual int ObjectCaps( void ) { return ( CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ); }
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -90,5 +91,7 @@ public:
 	float m_angle;
 	string_t m_iszGibModel;
 	string_t m_iszSpawnObject;
+
+	short m_targetActivator;
 };
 #endif	// FUNC_BREAK_H
