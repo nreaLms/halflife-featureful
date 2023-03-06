@@ -581,6 +581,10 @@ void ClientCommand( edict_t *pEntity )
 	{
 		GetClassPtr( (CBasePlayer *)pev )->SelectLastItem();
 	}
+	else if( FStrEq( pcmd, "nightvision" ) )
+	{
+		GetClassPtr( (CBasePlayer *)pev )->NVGToggle();
+	}
 	else if( FStrEq( pcmd, "spectate" ) ) // clients wants to become a spectator
 	{
 		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );

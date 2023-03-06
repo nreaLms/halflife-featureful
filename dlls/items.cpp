@@ -746,11 +746,6 @@ public:
 		Precache();
 		SetMyModel(DefaultModel());
 		CItem::Spawn();
-		if (!g_hasFlashlightModel)
-		{
-			pev->renderamt = 0;
-			pev->rendermode = kRenderTransAlpha;
-		}
 	}
 	void Precache( void )
 	{
@@ -778,7 +773,12 @@ public:
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
-		if ( pPlayer->HasFlashlight() )
+		if (g_modFeatures.suit_light_allow_both)
+		{
+			if (pPlayer->HasFlashlight())
+				return FALSE;
+		}
+		else if ( pPlayer->HasSuitLight() )
 			return FALSE;
 		pPlayer->m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
@@ -800,8 +800,6 @@ public:
 	{
 		Precache();
 		SetMyModel("sprites/iunknown.spr");
-		pev->renderamt = 0;
-		pev->rendermode = kRenderTransAlpha;
 		CItem::Spawn();
 	}
 	void Precache()
@@ -810,7 +808,12 @@ public:
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
-		if ( pPlayer->HasNVG() )
+		if (g_modFeatures.suit_light_allow_both)
+		{
+			if (pPlayer->HasNVG())
+				return FALSE;
+		}
+		else if ( pPlayer->HasSuitLight() )
 			return FALSE;
 		pPlayer->m_iItemsBits |= PLAYER_ITEM_NIGHTVISION;
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );

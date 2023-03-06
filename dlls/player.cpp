@@ -3893,77 +3893,126 @@ CBaseEntity *FindEntityForward( CBaseEntity *pMe )
 	return NULL;
 }
 
-BOOL CBasePlayer::SuitLightIsOn( void )
-{
-	return m_fNVGisON || FBitSet( pev->effects, EF_DIMLIGHT );
-}
-
 void CBasePlayer::SuitLightTurnOn( void )
 {
-	if( !g_pGameRules->FAllowFlashlight() )
+	if (HasFlashlight())
 	{
-		return;
+		FlashlightTurnOn();
 	}
-
-	const bool hasFlashlight = HasFlashlight();
-	const bool hasNVG = HasNVG();
-
-	if ( hasNVG )
+	else if (HasNVG())
 	{
-		if (*g_modFeatures.nvg_sound_on)
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_on, 1.0, ATTN_NORM, 0, PITCH_NORM );
-		m_fNVGisON = TRUE;
-
-		// Send Nightvision On message.
-		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
-			WRITE_BYTE( 1 );
-		MESSAGE_END();
-	}
-	else if ( hasFlashlight )
-	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
-		SetBits( pev->effects, EF_DIMLIGHT );
-	}
-
-	if ( hasNVG || hasFlashlight )
-	{
-		MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
-			WRITE_BYTE( 1 );
-			WRITE_BYTE( m_iFlashBattery );
-		MESSAGE_END();
-
-		m_flFlashLightTime = gSkillData.flashlightDrainTime/100 + gpGlobals->time;
+		NVGTurnOn();
 	}
 }
 
 void CBasePlayer::SuitLightTurnOff( bool playOffSound )
 {
-	if (playOffSound)
+	NVGTurnOff( playOffSound );
+	FlashlightTurnOff( playOffSound );
+}
+
+void CBasePlayer::UpdateSuitLightBattery()
+{
+	MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
+		WRITE_BYTE( 1 );
+		WRITE_BYTE( m_iFlashBattery );
+	MESSAGE_END();
+
+	m_flFlashLightTime = gSkillData.flashlightDrainTime/100 + gpGlobals->time;
+}
+
+void CBasePlayer::FlashlightToggle()
+{
+	if (FlashlightIsOn())
 	{
-		if (HasNVG())
+		FlashlightTurnOff();
+	}
+	else
+	{
+		FlashlightTurnOn();
+	}
+}
+
+void CBasePlayer::FlashlightTurnOn()
+{
+	if( !HasFlashlight() || !g_pGameRules->FAllowFlashlight() )
+	{
+		return;
+	}
+
+	if (!FlashlightIsOn())
+	{
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
+		SetBits( pev->effects, EF_DIMLIGHT );
+
+		UpdateSuitLightBattery();
+		NVGTurnOff(false);
+	}
+}
+
+void CBasePlayer::FlashlightTurnOff( bool playOffSound )
+{
+	if (FlashlightIsOn())
+	{
+		if (playOffSound)
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
+
+		ClearBits( pev->effects, EF_DIMLIGHT );
+		UpdateSuitLightBattery();
+	}
+}
+
+void CBasePlayer::NVGToggle()
+{
+	if (NVGIsOn())
+	{
+		NVGTurnOff();
+	}
+	else
+	{
+		NVGTurnOn();
+	}
+}
+
+void CBasePlayer::NVGTurnOn()
+{
+	if( !HasNVG() || !g_pGameRules->FAllowFlashlight() )
+	{
+		return;
+	}
+
+	if (!m_fNVGisON)
+	{
+		if (*g_modFeatures.nvg_sound_on)
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_on, 1.0, ATTN_NORM, 0, PITCH_NORM );
+
+		m_fNVGisON = TRUE;
+		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
+			WRITE_BYTE( 1 );
+		MESSAGE_END();
+
+		UpdateSuitLightBattery();
+		FlashlightTurnOff(false);
+	}
+}
+
+void CBasePlayer::NVGTurnOff(bool playOffSound)
+{
+	if (m_fNVGisON)
+	{
+		if (playOffSound)
 		{
 			if (*g_modFeatures.nvg_sound_off)
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, g_modFeatures.nvg_sound_off, 1.0, ATTN_NORM, 0, PITCH_NORM );
 		}
-		else if (HasFlashlight())
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
-	}
-	m_fNVGisON = FALSE;
-	ClearBits( pev->effects, EF_DIMLIGHT );
-	MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
-		WRITE_BYTE( 0 );
-		WRITE_BYTE( m_iFlashBattery );
-	MESSAGE_END();
 
-	if (HasNVG())
-	{
-		// Send Nightvision Off message.
+		m_fNVGisON = FALSE;
 		MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
 			WRITE_BYTE( 0 );
 		MESSAGE_END();
-	}
 
-	m_flFlashLightTime = gSkillData.flashlightChargeTime/100 + gpGlobals->time;
+		UpdateSuitLightBattery();
+	}
 }
 
 /*
@@ -4036,14 +4085,20 @@ void CBasePlayer::ImpulseCommands()
 			gmsgLogo = 0;
 		break;
 	case 100:
-        // temporary flashlight for level designers
-		if( SuitLightIsOn() )
+		// temporary flashlight for level designers
+		if (HasNVG() && HasFlashlight()) // if player has both, this command effects flashlight
 		{
-			SuitLightTurnOff();
+			if( FlashlightIsOn() )
+				FlashlightTurnOff();
+			else
+				FlashlightTurnOn();
 		}
-		else 
+		else
 		{
-			SuitLightTurnOn();
+			if( SuitLightIsOn() )
+				SuitLightTurnOff();
+			else
+				SuitLightTurnOn();
 		}
 		break;
 	case 201:

@@ -41,6 +41,7 @@ ModFeatures::ModFeatures()
 	memset(nvg_sound_off, 0, sizeof (nvg_sound_off));
 
 	suit_light = SUIT_LIGHT_FLASHLIGHT;
+	suit_light_allow_both = false;
 	items_instant_drop = true;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
@@ -92,6 +93,7 @@ struct KeyValueDefinition
 bool ModFeatures::SetValue(const char *key, const char *value)
 {
 	KeyValueDefinition<bool> booleans[] = {
+		KEY_VALUE_DEF(suit_light_allow_both),
 		KEY_VALUE_DEF(items_instant_drop),
 		KEY_VALUE_DEF(tripmines_solid),
 		KEY_VALUE_DEF(satchels_pickable),

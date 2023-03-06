@@ -47,6 +47,7 @@ struct ModFeatures
 	bool IsMonsterEnabled(const char* name);
 
 	int suit_light;
+	bool suit_light_allow_both;
 	bool items_instant_drop;
 	bool tripmines_solid;
 	bool satchels_pickable;

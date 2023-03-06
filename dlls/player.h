@@ -269,6 +269,9 @@ public:
 	{
 		return FEATURE_NIGHTVISION && (m_iItemsBits & PLAYER_ITEM_NIGHTVISION) != 0;
 	}
+	bool HasSuitLight() const {
+		return HasFlashlight() || HasNVG();
+	}
 
 	void SetJustSuit() {
 		m_iItemsBits |= PLAYER_ITEM_SUIT;
@@ -291,9 +294,18 @@ public:
 	virtual int		ObjectCaps( void ) { return CBaseMonster :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	virtual void	Precache( void );
 	BOOL			IsOnLadder( void );
-	BOOL			SuitLightIsOn( void );
-	void			SuitLightTurnOn( void );
-	void			SuitLightTurnOff( bool playOffSound = true );
+	bool FlashlightIsOn() { return FBitSet(pev->effects, EF_DIMLIGHT); }
+	bool NVGIsOn() { return m_fNVGisON; }
+	bool SuitLightIsOn( void ) { return FlashlightIsOn() || NVGIsOn(); }
+	void SuitLightTurnOn( void );
+	void SuitLightTurnOff( bool playOffSound = true );
+	void UpdateSuitLightBattery();
+	void FlashlightToggle();
+	void FlashlightTurnOn();
+	void FlashlightTurnOff( bool playOffSound = true );
+	void NVGToggle();
+	void NVGTurnOn();
+	void NVGTurnOff( bool playOffSound = true );
 
 	void UpdatePlayerSound ( void );
 	void DeathSound ( void );

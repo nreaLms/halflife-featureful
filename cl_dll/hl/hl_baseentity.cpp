@@ -287,7 +287,6 @@ int CBasePlayer::Restore( CRestore &restore ) { return 0; }
 BOOL CBasePlayer::HasWeapons( void ) { return FALSE; }
 void CBasePlayer::SelectPrevItem( int iItem ) { }
 CBaseEntity *FindEntityForward( CBaseEntity *pMe ) { return NULL; }
-BOOL CBasePlayer::SuitLightIsOn( void ) { return FALSE; }
 void CBasePlayer::SuitLightTurnOn( void ) { }
 void CBasePlayer::SuitLightTurnOff( bool playOffSound ) { }
 void CBasePlayer::ForceClientDllUpdate( void ) { }
