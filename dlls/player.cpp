@@ -3911,10 +3911,10 @@ void CBasePlayer::SuitLightTurnOff( bool playOffSound )
 	FlashlightTurnOff( playOffSound );
 }
 
-void CBasePlayer::UpdateSuitLightBattery()
+void CBasePlayer::UpdateSuitLightBattery(bool on)
 {
 	MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
-		WRITE_BYTE( 1 );
+		WRITE_BYTE( on ? 1 : 0 );
 		WRITE_BYTE( m_iFlashBattery );
 	MESSAGE_END();
 
@@ -3945,7 +3945,7 @@ void CBasePlayer::FlashlightTurnOn()
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
 		SetBits( pev->effects, EF_DIMLIGHT );
 
-		UpdateSuitLightBattery();
+		UpdateSuitLightBattery(true);
 		NVGTurnOff(false);
 	}
 }
@@ -3958,7 +3958,7 @@ void CBasePlayer::FlashlightTurnOff( bool playOffSound )
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
 
 		ClearBits( pev->effects, EF_DIMLIGHT );
-		UpdateSuitLightBattery();
+		UpdateSuitLightBattery(false);
 	}
 }
 
@@ -3991,7 +3991,7 @@ void CBasePlayer::NVGTurnOn()
 			WRITE_BYTE( 1 );
 		MESSAGE_END();
 
-		UpdateSuitLightBattery();
+		UpdateSuitLightBattery(true);
 		FlashlightTurnOff(false);
 	}
 }
@@ -4011,7 +4011,7 @@ void CBasePlayer::NVGTurnOff(bool playOffSound)
 			WRITE_BYTE( 0 );
 		MESSAGE_END();
 
-		UpdateSuitLightBattery();
+		UpdateSuitLightBattery(false);
 	}
 }
 

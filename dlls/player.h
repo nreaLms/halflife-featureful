@@ -299,7 +299,7 @@ public:
 	bool SuitLightIsOn( void ) { return FlashlightIsOn() || NVGIsOn(); }
 	void SuitLightTurnOn( void );
 	void SuitLightTurnOff( bool playOffSound = true );
-	void UpdateSuitLightBattery();
+	void UpdateSuitLightBattery( bool on );
 	void FlashlightToggle();
 	void FlashlightTurnOn();
 	void FlashlightTurnOff( bool playOffSound = true );
