@@ -2873,9 +2873,8 @@ void CBasePlayer::CheckSuitUpdate()
 	// if in range of radiation source, ping geiger counter
 	UpdateGeigerCounter();
 
-#if FEATURE_SUIT_NO_SOUNDS
-	return;
-#endif
+	if (!g_modFeatures.suit_sentences)
+		return;
 
 	if( g_pGameRules->IsMultiplayer() )
 	{
@@ -2935,9 +2934,8 @@ void CBasePlayer::SetSuitUpdate( const char *name, int fgroup, int iNoRepeatTime
 	if( !HasSuit() )
 		return;
 
-#if FEATURE_SUIT_NO_SOUNDS
-	return;
-#endif
+	if (!g_modFeatures.suit_sentences)
+		return;
 
 	if( g_pGameRules->IsMultiplayer() )
 	{
