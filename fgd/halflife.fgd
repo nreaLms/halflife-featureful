@@ -6484,6 +6484,7 @@
 	delay(string) : "Frequency" : "5" : "How often (seconds) a new monster will be made"
 	m_imaxlivechildren(integer) : "Max live children" : 5 : "Maximum number of live children allowed at one time. (New ones will not be made until one dies, -1 = no limit)"
 
+    spawnorigin(string) : "Spawn position [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
 	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
 	impulse(choices) : "Warp at monster's..." : : "If using warpball template, spawn warpball at this monster position" =
 	[
@@ -6495,8 +6496,6 @@
 		7 : "Attachment point 2"
 		8 : "Attachment point 3"
 	]
-
-	spawnorigin(string) : "Position to place monster at [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
 	spawndelay(string) : "Delay before spawn" : : "If larger then zero, the monster spawn will be delayed by specified amount of time (in seconds). The hull is created in place of the future monster's spawn to make sure that monster will have enough place to spawn. Recommended to use with 'Auto size BBox' flag and 'Warpball template'. Does not work well with 'Warp at monster's...'"
 	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
 	[
@@ -6775,7 +6774,7 @@
 		1 : "Fire Once" 	: 1
 		2 : "Followers Only"	: 0
 		4 : "Interrupt Speech"	: 1
-		8 : "Concurrent"	: 0
+		8 : "Make Friends Shut Up"	: 0
 		16 : "Require listener"	: 0 : "Play sentence only if listener is present"
 		32 : "Listener looks at speaker"	: 0 : "Make listener look at speaker if possible"
 		256 : "Speaker turns to listener"	: 0
