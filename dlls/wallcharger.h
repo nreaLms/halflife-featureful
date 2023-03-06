@@ -23,6 +23,7 @@ public:
 	virtual const char* DefaultChargeStartSound() = 0;
 	virtual float SoundVolume() = 0;
 	virtual bool GiveCharge(CBaseEntity* pActivator) = 0;
+	virtual bool AllowNoSuit() { return false; }
 
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );

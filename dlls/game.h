@@ -48,6 +48,7 @@ struct ModFeatures
 
 	int suit_light;
 	bool suit_light_allow_both;
+	bool nosuit_allow_healthcharger;
 	bool items_instant_drop;
 	bool tripmines_solid;
 	bool satchels_pickable;
