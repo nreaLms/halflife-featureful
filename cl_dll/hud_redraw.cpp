@@ -447,7 +447,7 @@ void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
 
 int CHud::HUDColor()
 {
-	int result = clientFeatures.hud_color;
+	int result = HasSuit() ? clientFeatures.hud_color : clientFeatures.hud_color_nosuit;
 #if FEATURE_NIGHTVISION
 	if (this == &gHUD && gHUD.m_Nightvision.IsOn()) {
 		result = clientFeatures.hud_color_nvg;

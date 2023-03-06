@@ -36,6 +36,8 @@
 #define RGB_HUD_DEFAULT RGB_YELLOWISH
 #endif
 
+#define RGB_HUD_NOSUIT 0x00CCCCCC
+
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
@@ -685,6 +687,9 @@ struct ClientFeatures
 	int hud_color;
 	int hud_min_alpha;
 	int hud_color_critical;
+
+	bool hud_draw_nosuit;
+	int hud_color_nosuit;
 
 	int hud_color_nvg;
 	int hud_min_alpha_nvg;

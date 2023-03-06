@@ -78,6 +78,9 @@ ClientFeatures::ClientFeatures()
 	hud_color_critical = RGB_REDISH;
 	hud_min_alpha = MIN_ALPHA;
 
+	hud_draw_nosuit = false;
+	hud_color_nosuit = RGB_HUD_NOSUIT;
+
 	hud_color_nvg = 0x00FFFFFF;
 	hud_min_alpha_nvg = 192;
 
@@ -750,6 +753,7 @@ void CHud::ParseClientFeatures()
 	KeyValueDefinition<int> colors[] = {
 		{ "hud_color", clientFeatures.hud_color},
 		{ "hud_color_critical", clientFeatures.hud_color_critical},
+		{ "hud_color_nosuit", clientFeatures.hud_color_nosuit},
 		{ "hud_color_nvg", clientFeatures.hud_color_nvg},
 		{ "flashlight.color", clientFeatures.flashlight.color},
 	};
@@ -770,6 +774,10 @@ void CHud::ParseClientFeatures()
 	KeyValueDefinition<ConfigurableBoundedValue> configurableBounds[] = {
 		{ "flashlight.radius.", clientFeatures.flashlight.radius },
 		{ "flashlight.fade_distance.", clientFeatures.flashlight.fade_distance },
+	};
+	KeyValueDefinition<bool> booleans[] = {
+		{ "hud_draw_nosuit", clientFeatures.hud_draw_nosuit},
+		{ "opfor_title", clientFeatures.opfor_title},
 	};
 
 	char valueBuf[CLIENT_FEATURE_VALUE_LENGTH+1];
@@ -850,6 +858,15 @@ void CHud::ParseClientFeatures()
 					break;
 				}
 			}
+			for (i = 0; shouldContinue && i<sizeof(booleans)/sizeof(booleans[0]); ++i)
+			{
+				if (strcmp(keyName, booleans[i].name) == 0)
+				{
+					ParseBoolean(valueBuf, booleans[i].value);
+					shouldContinue = false;
+					break;
+				}
+			}
 			if (shouldContinue)
 			{
 				if ((subKey = strStartsWith(keyName, "nvgstyle.")))
@@ -873,10 +890,6 @@ void CHud::ParseClientFeatures()
 				{
 					strncpy(clientFeatures.nvg_full_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
 					clientFeatures.nvg_full_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
-				}
-				else if (strcmp(keyName, "opfor_title") == 0)
-				{
-					ParseBoolean(valueBuf, clientFeatures.opfor_title);
 				}
 			}
 		}
