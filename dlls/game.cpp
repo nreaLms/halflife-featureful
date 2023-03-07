@@ -47,6 +47,7 @@ ModFeatures::ModFeatures()
 	items_instant_drop = true;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
+	pushablemode = 0;
 	alien_teleport_sound = false;
 
 	monsters_stop_attacking_dying_monsters = false;
@@ -137,7 +138,8 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	}
 
 	KeyValueDefinition<int> integers[] = {
-		{"npc_tridepth", npc_tridepth}
+		{"npc_tridepth", npc_tridepth},
+		{"pushablemode", pushablemode},
 	};
 
 	for (i = 0; i<ARRAYSIZE(integers); ++i)
@@ -1058,7 +1060,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &monsteryawspeedfix );
 	CVAR_REGISTER( &animeventfix );
 	CVAR_REGISTER( &corpsephysics );
-	CVAR_REGISTER( &pushablemode );
+	CVAR_REGISTER_INTEGER( &pushablemode, g_modFeatures.pushablemode );
 	CVAR_REGISTER( &forcerespawn );
 	CVAR_REGISTER( &respawndelay );
 	CVAR_REGISTER( &flashlight );
