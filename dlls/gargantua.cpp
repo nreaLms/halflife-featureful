@@ -1555,6 +1555,7 @@ void CGargantua::PlayUnUseSentence()
 #define SF_SMOKER_ACTIVE 1
 #define SF_SMOKER_REPEATABLE 4
 #define SF_SMOKER_DIRECTIONAL 8
+#define SF_SMOKER_FADE 16
 #define SF_SMOKER_MAXHEALTH_SET (1 << 24)
 
 class CSmoker : public CBaseEntity
@@ -1684,8 +1685,14 @@ void CSmoker::Think( void )
 
 	if (isDirValid)
 	{
+		int flags = 0;
+		if (directed)
+			flags |= 1;
+		if (FBitSet(pev->spawnflags, SF_SMOKER_FADE))
+			flags |= 2;
+
 		MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
-			WRITE_BYTE( directed );
+			WRITE_BYTE( flags );
 			WRITE_COORD( pev->origin.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 			WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 			WRITE_COORD( pev->origin.z);

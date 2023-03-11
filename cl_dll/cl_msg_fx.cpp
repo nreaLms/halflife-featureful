@@ -408,11 +408,26 @@ void ExpandCallback(TEMPENTITY *ent, float frametime, float currenttime)
 	const float timeCreated = ent->entity.curstate.fuser1;
 	const float originalScale = ent->entity.curstate.fuser2;
 	const float scaleSpeed = ent->entity.curstate.fuser3;
-	ent->entity.curstate.scale = scaleSpeed * originalScale * (currenttime - timeCreated) + originalScale;
-	if (ent->entity.curstate.scale < minScale)
+	const bool fade = ent->entity.curstate.iuser1;
+
+	if (fade)
 	{
-		ent->entity.curstate.scale = minScale;
-		ent->die = currenttime;
+		const int originalRenderamt = ent->entity.curstate.iuser2;
+		ent->entity.curstate.renderamt = (ent->frameMax - ent->entity.curstate.frame)/ent->frameMax * originalRenderamt;
+		if (ent->entity.curstate.renderamt == 0)
+		{
+			ent->die = currenttime;
+		}
+	}
+
+	if (scaleSpeed)
+	{
+		ent->entity.curstate.scale = scaleSpeed * originalScale * (currenttime - timeCreated) + originalScale;
+		if (ent->entity.curstate.scale < minScale)
+		{
+			ent->entity.curstate.scale = minScale;
+			ent->die = currenttime;
+		}
 	}
 }
 
@@ -438,7 +453,9 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	float scale, frameRate, speed, zOffset, scaleSpeed;
 	int rendermode, renderamt, r, g, b;
 
-	const int directed = READ_BYTE();
+	const int flags = READ_BYTE();
+	const bool directed = (flags & 1) != 0;
+	const bool fade = (flags & 2) != 0;
 	pos[0] = READ_COORD();
 	pos[1] = READ_COORD();
 	pos[2] = READ_COORD();
@@ -483,11 +500,13 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 		{
 			pTemp->entity.baseline.origin = dir * speed;
 		}
-		if (scaleSpeed != 0)
+		if (scaleSpeed != 0 || fade)
 		{
 			pTemp->entity.curstate.fuser1 = gEngfuncs.GetClientTime();
 			pTemp->entity.curstate.fuser2 = scale;
 			pTemp->entity.curstate.fuser3 = scaleSpeed;
+			pTemp->entity.curstate.iuser1 = 1;
+			pTemp->entity.curstate.iuser2 = renderamt;
 			pTemp->flags |= FTENT_CLIENTCUSTOM;
 			pTemp->callback = &ExpandCallback;
 		}
