@@ -121,6 +121,8 @@ public:
 	string_t m_iszUnUse;
 	string_t m_iszDecline;
 
+	short m_followagePolicy;
+
 	float m_spawnDelay;
 	int m_delayedCount;
 
@@ -153,6 +155,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_defaultMinHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMaxHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_followFailPolicy, FIELD_SHORT ),
+	DEFINE_FIELD( CMonsterMaker, m_followagePolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CMonsterMaker, m_iszUse, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_iszUnUse, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_iszDecline, FIELD_STRING ),
@@ -263,6 +266,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if (FStrEq( pkvd->szKeyName, "RefusalSentence" ))
 	{
 		m_iszDecline = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "followage_policy" ) )
+	{
+		m_followagePolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "spawndelay" ) )
@@ -695,6 +703,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 		if (pFollowingMonster)
 		{
 			pFollowingMonster->m_followFailPolicy = m_followFailPolicy;
+			pFollowingMonster->m_followagePolicy = m_followagePolicy;
 		}
 
 		CTalkMonster* pTalkMonster = createdMonster->MyTalkMonsterPointer();

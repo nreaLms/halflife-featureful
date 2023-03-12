@@ -36,6 +36,8 @@
 #include "scripted.h"
 #include "defaultai.h"
 #include "talkmonster.h"
+#include "player.h"
+#include "gamerules.h"
 
 enum
 {
@@ -1870,3 +1872,51 @@ void CScriptedSchedule::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 }
 
 LINK_ENTITY_TO_CLASS( scripted_schedule, CScriptedSchedule )
+
+#define SF_SCRIPTED_FOLLOWING_ONCE 0x0001
+
+class CScriptedFollowing : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+LINK_ENTITY_TO_CLASS( scripted_following, CScriptedFollowing );
+
+void  CScriptedFollowing::KeyValue(KeyValueData *pkvd)
+{
+	if ( FStrEq( pkvd->szKeyName, "entity" ) )
+	{
+		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
+
+void CScriptedFollowing::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (pev->netname) {
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer)
+			return;
+
+		CBaseEntity* pEntity = 0;
+		while( (pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->netname))) )
+		{
+			CBaseMonster* pMonster = pEntity->MyMonsterPointer();
+			if (pMonster) {
+				CFollowingMonster* pFollowingMonster = pMonster->MyFollowingMonsterPointer();
+				if (pFollowingMonster)
+				{
+					pFollowingMonster->DoFollowerUse(pPlayer, false, useType, true);
+				}
+			}
+		}
+		if( FBitSet(pev->spawnflags, SF_SCRIPTED_FOLLOWING_ONCE) )
+			UTIL_Remove( this );
+	} else {
+		ALERT(at_aiconsole, "%s does not specify the affected monster!\n", STRING(pev->classname));
+	}
+}

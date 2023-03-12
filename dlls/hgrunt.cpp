@@ -2442,6 +2442,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	if (pFollowingMonster)
 	{
 		pFollowingMonster->m_followFailPolicy = m_followFailPolicy;
+		pFollowingMonster->m_followagePolicy = m_followagePolicy;
 	}
 	PrepareBeforeSpawn(pEntity);
 	DispatchSpawn(pEntity->edict());

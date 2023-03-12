@@ -442,6 +442,12 @@
 		2 : "Stop following"
 		3 : "Try nearest path"
 	]
+	followage_policy(choices) : "Followage policy" =
+	[
+		0 : "Regular"
+		1 : "Scripted only"
+		2 : "Scripted only, decline use"
+	]
 ]
 
 @BaseClass base(Monster, FollowingMonsterProps) = Repel
@@ -7016,6 +7022,15 @@
 		8 : "Don't turn off suit light" : 0 : "By default in Half-Life any call to player_weaponstrip turns off the flashlight. Tick this flag to prevent such behavior. Flashlight is still getting turned off if suit or flashlight is removed."
 	]
 	noise(sound) : "Sound on trigger" : : "This will be played on player's item sound channel"
+]
+
+@PointClass base(Targetname) color(255 0 255) = scripted_following : "Scripted Following"
+[
+	entity(string) : "Affected Monster"
+	spawnflags(Flags) =
+	[
+		1 : "Fire Once" : 0
+	]
 ]
 
 @PointClass base(Targetname) color(255 0 255) = scripted_schedule : "Scripted Schedule"

@@ -14,6 +14,7 @@
 TYPEDESCRIPTION	CFollowingMonster::m_SaveData[] =
 {
 	DEFINE_FIELD( CFollowingMonster, m_followFailPolicy, FIELD_SHORT ),
+	DEFINE_FIELD( CFollowingMonster, m_followagePolicy, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CFollowingMonster, CSquadMonster )
@@ -279,6 +280,11 @@ void CFollowingMonster::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "followfailpolicy" ) )
 	{
 		m_followFailPolicy = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "followage_policy" ) )
+	{
+		m_followagePolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -684,12 +690,28 @@ Schedule_t* CFollowingMonster::GetFollowingSchedule(bool ignoreEnemy)
 
 void CFollowingMonster::FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	if (m_followagePolicy == FOLLOWAGE_SCRIPTED_ONLY)
+		return;
+	if (m_followagePolicy == FOLLOWAGE_SCRIPTED_ONLY_DECLINE_USE)
+	{
+		if (!InScriptedSentence() && !ShouldDiscardFollowing(pCaller))
+		{
+			DeclineFollowing(pCaller);
+		}
+		return;
+	}
 	DoFollowerUse(pCaller, true, USE_TOGGLE);
 }
 
 bool CFollowingMonster::ShouldDeclineFollowing()
 {
 	return IsLockedByMaster() || (pev->spawnflags & SF_MONSTER_PREDISASTER && !m_sMaster);
+}
+
+bool CFollowingMonster::ShouldDiscardFollowing(CBaseEntity *pCaller)
+{
+	const int rel = IRelationship(pCaller);
+	return (rel >= R_DL || rel == R_FR);
 }
 
 int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE_TYPE useType, bool ignoreScriptedSentence)
@@ -699,8 +721,7 @@ int CFollowingMonster::DoFollowerUse(CBaseEntity *pCaller, bool saySentence, USE
 		if (!ignoreScriptedSentence && InScriptedSentence())
 			return FOLLOWING_NOTREADY;
 
-		int rel = IRelationship(pCaller);
-		if (rel >= R_DL || rel == R_FR)
+		if (ShouldDiscardFollowing(pCaller))
 			return FOLLOWING_DISCARDED;
 
 		// Pre-disaster followers can't be used unless they've got a master to override their behaviour...

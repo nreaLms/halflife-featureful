@@ -53,6 +53,13 @@ typedef enum
 	FOLLOW_FAIL_TRY_NEAREST,
 } FOLLOW_FAIL_POLICY;
 
+typedef enum
+{
+	FOLLOWAGE_REGULAR = 0,
+	FOLLOWAGE_SCRIPTED_ONLY,
+	FOLLOWAGE_SCRIPTED_ONLY_DECLINE_USE,
+} FOLLOWAGE_POLICY;
+
 class CFollowingMonster : public CSquadMonster
 {
 public:
@@ -91,11 +98,17 @@ public:
 	void EXPORT FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int DoFollowerUse(CBaseEntity* pCaller, bool saySentence, USE_TYPE useType, bool ignoreScriptedSentence = false);
 	bool ShouldDeclineFollowing();
+	bool ShouldDiscardFollowing(CBaseEntity* pCaller);
 	virtual FOLLOW_FAIL_POLICY DefaultFollowFailPolicy() {
 		return FOLLOW_FAIL_REGULAR;
 	}
 	FOLLOW_FAIL_POLICY FollowFailPolicy() {
-		return m_followFailPolicy > 0 ? (FOLLOW_FAIL_POLICY)m_followFailPolicy : DefaultFollowFailPolicy();
+		FOLLOW_FAIL_POLICY failPolicy = m_followFailPolicy > 0 ? (FOLLOW_FAIL_POLICY)m_followFailPolicy : DefaultFollowFailPolicy();
+		if (m_followagePolicy != 0 && failPolicy == FOLLOW_FAIL_STOP)
+		{
+			return FOLLOW_FAIL_REGULAR;
+		}
+		return failPolicy;
 	}
 
 	virtual void PlayUseSentence() {}
@@ -115,6 +128,7 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	short m_followFailPolicy;
+	short m_followagePolicy;
 
 	EHANDLE m_lastMoveBlocker;
 
