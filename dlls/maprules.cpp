@@ -926,6 +926,13 @@ void CGamePlayerTeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 class CGamePlayerSettings : public CRulePointEntity
 {
 public:
+	enum {
+		SUIT_LIGHT_NOTHING = -1,
+		SUIT_LIGHT_DEFAULT = 0,
+		SUIT_LIGHT_FLASHLIGHT = 1,
+		SUIT_LIGHT_NVG = 2,
+	};
+
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 	{
@@ -949,7 +956,8 @@ private:
 		SuitNoLogon
 	};
 	int m_ammoCounts[MAX_AMMO_SLOTS];
-	int m_suitLogon;
+	short m_suitLogon;
+	short m_suitLight;
 };
 
 LINK_ENTITY_TO_CLASS( game_player_settings, CGamePlayerSettings )
@@ -957,7 +965,8 @@ LINK_ENTITY_TO_CLASS( game_player_settings, CGamePlayerSettings )
 TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
 {
 	DEFINE_ARRAY( CGamePlayerSettings, m_ammoCounts, FIELD_INTEGER, MAX_AMMO_SLOTS ),
-	DEFINE_FIELD( CGamePlayerSettings, m_suitLogon, FIELD_INTEGER ),
+	DEFINE_FIELD( CGamePlayerSettings, m_suitLogon, FIELD_SHORT ),
+	DEFINE_FIELD( CGamePlayerSettings, m_suitLight, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CGamePlayerSettings, CRulePointEntity )
@@ -979,6 +988,11 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "suitlogon"))
 	{
 		m_suitLogon = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "suitlight"))
+	{
+		m_suitLight = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1003,26 +1017,42 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_SUIT)
 	{
-		int suitSpawnFlags = SF_ITEM_NOFALL;
-		switch (m_suitLogon) {
-		case 1:
-			suitSpawnFlags |= SF_SUIT_SHORTLOGON;
-			break;
-		case 2:
-			suitSpawnFlags |= SF_SUIT_NOLOGON;
-			break;
-		default:
-			break;
-		}
-		player->GiveNamedItem("item_suit", suitSpawnFlags);
-		if (pev->spawnflags & SF_PLAYER_SETTINGS_LONGJUMP)
+		if (!player->HasSuit())
 		{
-			player->GiveNamedItem("item_longjump", SF_ITEM_NOFALL);
+			int suitSpawnFlags = SF_ITEM_NOFALL;
+			switch (m_suitLogon) {
+			case 1:
+				suitSpawnFlags |= SF_SUIT_SHORTLOGON;
+				break;
+			case 2:
+				suitSpawnFlags |= SF_SUIT_NOLOGON;
+				break;
+			default:
+				break;
+			}
+			player->GiveNamedItem("item_suit", suitSpawnFlags);
 		}
 	}
 
+	if ((pev->spawnflags & SF_PLAYER_SETTINGS_LONGJUMP) && player->HasSuit() && !player->m_fLongJump)
+	{
+		player->GiveNamedItem("item_longjump", SF_ITEM_NOFALL);
+	}
+
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_FLASHLIGHT)
-		player->m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
+		player->SetFlashlight();
+
+	switch (m_suitLight) {
+	case SUIT_LIGHT_NOTHING:
+		player->RemoveSuitLight();
+		break;
+	case SUIT_LIGHT_FLASHLIGHT:
+		player->SetFlashlightOnly();
+		break;
+	case SUIT_LIGHT_NVG:
+		player->SetNVGOnly();
+		break;
+	}
 
 	const int weaponFlags[] = {
 		SF_PLAYER_SETTINGS_CROWBAR,

@@ -2636,11 +2636,18 @@
 	_762(integer) : "762 bullets"
 	Spores(integer) : "Spores"
 	Penguins(integer) : "Penguins"
-	suitlogon(choices) : "Suit logon" : 0 =
+	suitlogon(choices) : "Suit logon" : 2 =
 	[
 		0: "Long logon"
 		1: "Short logon"
 		2: "No logon"
+	]
+	suitlight(choices) : "Suit light" =
+	[
+		-1: "No light"
+		0: "Default"
+		1: "Flashlight"
+		2: "NVG"
 	]
 	health(integer) : "Starting health"
 	armorvalue(integer) : "Starting armor"

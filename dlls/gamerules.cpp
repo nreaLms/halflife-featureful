@@ -592,13 +592,11 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 		}
 		else if (mapConfig.suit_light == MapConfig::SUIT_LIGHT_FLASHLIGHT)
 		{
-			pPlayer->RemoveSuitLight();
-			pPlayer->SetFlashlight();
+			pPlayer->SetFlashlightOnly();
 		}
 		else if (mapConfig.suit_light == MapConfig::SUIT_LIGHT_NVG)
 		{
-			pPlayer->RemoveSuitLight();
-			pPlayer->SetNVG();
+			pPlayer->SetNVGOnly();
 		}
 
 		int i, j;

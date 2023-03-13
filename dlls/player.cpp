@@ -5541,6 +5541,35 @@ CBasePlayerWeapon* CBasePlayer::WeaponById(int id)
 	return NULL;
 }
 
+void CBasePlayer::SetFlashlightOnly()
+{
+	RemoveNVG();
+	SetFlashlight();
+}
+
+void CBasePlayer::RemoveFlashlight()
+{
+	FlashlightTurnOff(false);
+	m_iItemsBits &= ~(PLAYER_ITEM_FLASHLIGHT);
+}
+
+void CBasePlayer::SetNVGOnly()
+{
+	RemoveFlashlight();
+	SetNVG();
+}
+
+void CBasePlayer::RemoveNVG()
+{
+	NVGTurnOff(false);
+	m_iItemsBits &= ~(PLAYER_ITEM_NIGHTVISION);
+}
+
+void CBasePlayer::RemoveSuitLight() {
+	RemoveFlashlight();
+	RemoveNVG();
+}
+
 void CBasePlayer::SetSuitAndDefaultLight()
 {
 	SetJustSuit();

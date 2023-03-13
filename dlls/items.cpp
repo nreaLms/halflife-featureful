@@ -780,7 +780,7 @@ public:
 		}
 		else if ( pPlayer->HasSuitLight() )
 			return FALSE;
-		pPlayer->m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
+		pPlayer->SetFlashlight();
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING(pev->classname) );
 		MESSAGE_END();
@@ -815,7 +815,7 @@ public:
 		}
 		else if ( pPlayer->HasSuitLight() )
 			return FALSE;
-		pPlayer->m_iItemsBits |= PLAYER_ITEM_NIGHTVISION;
+		pPlayer->SetNVG();
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING(pev->classname) );
 		MESSAGE_END();

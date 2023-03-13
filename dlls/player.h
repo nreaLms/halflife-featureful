@@ -251,9 +251,6 @@ public:
 	void RenewItems(void);
 	void PackDeadPlayerItems( void );
 	void RemoveAllItems( int stripFlags );
-	void RemoveSuitLight() {
-		m_iItemsBits &= ~(PLAYER_ITEM_FLASHLIGHT|PLAYER_ITEM_NIGHTVISION);
-	}
 	BOOL SwitchWeapon( CBasePlayerWeapon *pWeapon );
 	BOOL SwitchToBestWeapon();
 
@@ -272,6 +269,7 @@ public:
 	bool HasSuitLight() const {
 		return HasFlashlight() || HasNVG();
 	}
+	void RemoveSuitLight();
 
 	void SetJustSuit() {
 		m_iItemsBits |= PLAYER_ITEM_SUIT;
@@ -279,9 +277,14 @@ public:
 	void SetFlashlight() {
 		m_iItemsBits |= PLAYER_ITEM_FLASHLIGHT;
 	}
+	void SetFlashlightOnly();
+	void RemoveFlashlight();
 	void SetNVG() {
 		m_iItemsBits |= PLAYER_ITEM_NIGHTVISION;
 	}
+	void SetNVGOnly();
+	void RemoveNVG();
+
 	void SetSuitAndDefaultLight();
 	void SetLongjump(bool enabled);
 
