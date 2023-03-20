@@ -5125,6 +5125,12 @@
 		80 : "pipetoss"
 		81 : "plunger"
 	]
+	desired_skin(Choices) : "Desired skin color" =
+	[
+		0 : "Default"
+		1 : "Light"
+		2 : "Dark"
+	]
 ]
 @PointClass base(Monster, TalkMonster, Sequence) size(-16 -16 0, 16 16 72) studio("models/hgrunt_opfor.mdl") = monster_human_grunt_ally : "Human Grunt Ally (camo)"
 [

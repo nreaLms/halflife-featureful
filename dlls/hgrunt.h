@@ -55,6 +55,7 @@ typedef enum
 class CHGrunt : public CFollowingMonster
 {
 public:
+	void KeyValue(KeyValueData* pkvd);
 	void Spawn( void );
 	void Precache( void );
 	void SetYawSpeed( void );
@@ -134,7 +135,7 @@ public:
 
 	int m_iSentence;
 
-
+	short m_desiredSkin;
 protected:
 	virtual void OnBecomingLeader();
 

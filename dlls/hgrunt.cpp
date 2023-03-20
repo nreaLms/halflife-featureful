@@ -996,6 +996,17 @@ void CHGrunt::SpawnHelper(const char* modelName, int health, int bloodColor)
 	m_HackedGunPos = Vector( 0, 0, 55 );
 }
 
+void CHGrunt::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq(pkvd->szKeyName, "desired_skin" ) )
+	{
+		m_desiredSkin = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CFollowingMonster::KeyValue( pkvd );
+}
+
 void CHGrunt::Spawn()
 {
 	SpawnHelper("models/hgrunt.mdl", gSkillData.hgruntHealth);
@@ -1018,10 +1029,21 @@ void CHGrunt::Spawn()
 	}
 	m_cAmmoLoaded = m_cClipSize;
 
-	if( RANDOM_LONG( 0, 99 ) < 80 )
-		pev->skin = 0;	// light skin
+	if (m_desiredSkin == 1)
+	{
+		pev->skin = 0;
+	}
+	else if (m_desiredSkin == 2)
+	{
+		pev->skin = 1;
+	}
 	else
-		pev->skin = 1;	// dark skin
+	{
+		if( RANDOM_LONG( 0, 99 ) < 80 )
+			pev->skin = 0;	// light skin
+		else
+			pev->skin = 1;	// dark skin
+	}
 
 	if( FBitSet( pev->weapons, HGRUNT_SHOTGUN ) )
 	{
