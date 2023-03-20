@@ -36,7 +36,7 @@ void CShockrifle::Spawn()
 	m_iId = WEAPON_SHOCKRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
 
-	m_iDefaultAmmo = SHOCKRIFLE_DEFAULT_GIVE;
+	InitDefaultAmmo(SHOCKRIFLE_DEFAULT_GIVE);
 	m_iFirePhase = 0;
 
 	FallInit();// get ready to fall down.

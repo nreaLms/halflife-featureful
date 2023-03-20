@@ -31,7 +31,7 @@ void CGlock::Spawn()
 	m_iId = WEAPON_GLOCK;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
-	m_iDefaultAmmo = GLOCK_DEFAULT_GIVE;
+	InitDefaultAmmo(GLOCK_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall down.
 }

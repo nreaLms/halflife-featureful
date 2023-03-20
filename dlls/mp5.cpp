@@ -36,7 +36,7 @@ void CMP5::Spawn()
 	SET_MODEL( ENT( pev ), MyWModel() );
 	m_iId = WEAPON_MP5;
 
-	m_iDefaultAmmo = MP5_DEFAULT_GIVE;
+	InitDefaultAmmo(MP5_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall down.
 }

@@ -84,7 +84,7 @@ void CDisplacer::Spawn()
 	m_iId = WEAPON_DISPLACER;
 	SET_MODEL(ENT(pev), MyWModel());
 
-	m_iDefaultAmmo = DISPLACER_DEFAULT_GIVE;
+	InitDefaultAmmo(DISPLACER_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall down.
 }

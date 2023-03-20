@@ -346,11 +346,11 @@ void CRpg::Spawn()
 #endif
 	{
 		// more default ammo in multiplay. 
-		m_iDefaultAmmo = RPG_DEFAULT_GIVE * 2;
+		InitDefaultAmmo(RPG_DEFAULT_GIVE * 2);
 	}
 	else
 	{
-		m_iDefaultAmmo = RPG_DEFAULT_GIVE;
+		InitDefaultAmmo(RPG_DEFAULT_GIVE);
 	}
 
 	FallInit();// get ready to fall down.

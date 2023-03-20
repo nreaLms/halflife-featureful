@@ -34,7 +34,7 @@ void CShotgun::Spawn()
 	m_iId = WEAPON_SHOTGUN;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
-	m_iDefaultAmmo = SHOTGUN_DEFAULT_GIVE;
+	InitDefaultAmmo(SHOTGUN_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall
 }

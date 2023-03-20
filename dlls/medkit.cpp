@@ -84,7 +84,7 @@ void CMedkit::Spawn()
 	m_iId = WEAPON_MEDKIT;
 	SET_MODEL(ENT(pev), MyWModel());
 
-	m_iDefaultAmmo = MEDKIT_DEFAULT_GIVE;
+	InitDefaultAmmo(MEDKIT_DEFAULT_GIVE);
 	m_secondaryAttack = FALSE;
 	m_flSoundDelay = 0;
 

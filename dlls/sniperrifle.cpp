@@ -33,7 +33,7 @@ void CSniperrifle::Spawn( )
 	m_iId = WEAPON_SNIPERRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
 
-	m_iDefaultAmmo = SNIPERRIFLE_DEFAULT_GIVE;
+	InitDefaultAmmo(SNIPERRIFLE_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall down.
 }

@@ -38,7 +38,7 @@ void CEagle::Spawn( void )
 	m_iId = WEAPON_EAGLE;
 	SET_MODEL(ENT(pev), MyWModel());
 
-	m_iDefaultAmmo = EAGLE_DEFAULT_GIVE;
+	InitDefaultAmmo(EAGLE_DEFAULT_GIVE);
 	m_fEagleLaserActive = 0;
 	m_pEagleLaser = 0;
 

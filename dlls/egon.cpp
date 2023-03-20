@@ -42,7 +42,7 @@ void CEgon::Spawn()
 	m_iId = WEAPON_EGON;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
-	m_iDefaultAmmo = EGON_DEFAULT_GIVE;
+	InitDefaultAmmo(EGON_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall down.
 }

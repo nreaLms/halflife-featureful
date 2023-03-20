@@ -35,7 +35,7 @@ void CSporelauncher::Spawn()
 	m_iId = WEAPON_SPORELAUNCHER;
 	SET_MODEL(ENT(pev), MyWModel());
 
-	m_iDefaultAmmo = SPORELAUNCHER_DEFAULT_GIVE;
+	InitDefaultAmmo(SPORELAUNCHER_DEFAULT_GIVE);
 
 	pev->animtime = gpGlobals->time;
 	pev->framerate = 1.0f;

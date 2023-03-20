@@ -38,7 +38,7 @@ void CUzi::Spawn()
 	SET_MODEL( ENT( pev ), MyWModel() );
 	m_iId = WEAPON_UZI;
 
-	m_iDefaultAmmo = UZI_DEFAULT_GIVE;
+	InitDefaultAmmo(UZI_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall down.
 }

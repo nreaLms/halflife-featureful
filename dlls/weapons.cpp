@@ -471,6 +471,17 @@ void CBasePlayerWeapon::SetObjectCollisionBox( void )
 	pev->absmax = pev->origin + Vector( 24, 24, 16 ); 
 }
 
+void CBasePlayerWeapon::KeyValue(KeyValueData *pkvd)
+{
+	if( FStrEq( pkvd->szKeyName, "initammo" ) )
+	{
+		m_iDefaultAmmo = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseAnimating::KeyValue(pkvd);
+}
+
 //=========================================================
 // Sets up movetype, size, solidtype for a new weapon. 
 //=========================================================

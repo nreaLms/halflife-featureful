@@ -55,7 +55,7 @@ void CPython::Spawn()
 	m_iId = WEAPON_PYTHON;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
-	m_iDefaultAmmo = PYTHON_DEFAULT_GIVE;
+	InitDefaultAmmo(PYTHON_DEFAULT_GIVE);
 
 	FallInit();// get ready to fall down.
 }

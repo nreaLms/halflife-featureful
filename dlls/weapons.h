@@ -228,6 +228,7 @@ class CBasePlayerWeapon : public CBaseAnimating
 {
 public:
 	virtual void SetObjectCollisionBox( void );
+	virtual void KeyValue( KeyValueData *pkvd );
 
 #ifndef CLIENT_DLL
 	virtual int		Save( CSave &save );
@@ -350,6 +351,16 @@ public:
 	int		m_iClientWeaponState;								// the last version of the weapon state sent to hud dll (is current weapon, is on target)
 	int		m_fInReload;										// Are we in the middle of a reload;
 
+	void	InitDefaultAmmo(int defaultGive) {
+		if (m_iDefaultAmmo == 0)
+		{
+			m_iDefaultAmmo = defaultGive;
+		}
+		else if (m_iDefaultAmmo < 0)
+		{
+			m_iDefaultAmmo = 0;
+		}
+	}
 	int		m_iDefaultAmmo;// how much ammo you get when you pick up this weapon as placed by a level designer.
 
 	// hle time creep vars

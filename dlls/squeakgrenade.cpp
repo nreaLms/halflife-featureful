@@ -476,7 +476,7 @@ void CSqueak::Spawn()
 
 	FallInit();//get ready to fall down.
 
-	m_iDefaultAmmo = DefaultGive();
+	InitDefaultAmmo(DefaultGive());
 
 	pev->sequence = 1;
 	pev->animtime = gpGlobals->time;

@@ -338,6 +338,7 @@ void DecalGunshot( TraceResult *pTrace, int iBulletType ) { }
 void EjectBrass( const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype ) { }
 float CBasePlayerWeapon::GetNextAttackDelay( float flTime ) { return flTime; }
 void CBasePlayerWeapon::SetObjectCollisionBox( void ) { }
+void CBasePlayerWeapon::KeyValue( KeyValueData *pkvd ) {}
 void CBasePlayerWeapon::FallInit( void ) { }
 void CBasePlayerWeapon::FallThink( void ) { }
 void CBasePlayerWeapon::Materialize( void ) { }

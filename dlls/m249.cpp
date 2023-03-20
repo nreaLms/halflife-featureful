@@ -38,7 +38,7 @@ void CM249::Spawn()
 	SET_MODEL(ENT(pev), MyWModel());
 	m_iId = WEAPON_M249;
 
-	m_iDefaultAmmo = M249_DEFAULT_GIVE;
+	InitDefaultAmmo(M249_DEFAULT_GIVE);
 
 	m_fInSpecialReload = FALSE;
 	m_bAlternatingEject = false;

@@ -382,7 +382,7 @@ void CTripmine::Spawn()
 
 	FallInit();// get ready to fall down
 
-	m_iDefaultAmmo = TRIPMINE_DEFAULT_GIVE;
+	InitDefaultAmmo(TRIPMINE_DEFAULT_GIVE);
 
 #if CLIENT_DLL
 	if( !bIsMultiplayer() )
