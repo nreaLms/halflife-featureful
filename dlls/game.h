@@ -54,6 +54,7 @@ struct ModFeatures
 	bool tripmines_solid;
 	bool satchels_pickable;
 	int pushablemode;
+	int pickup_policy;
 	bool alien_teleport_sound;
 
 	bool monsters_stop_attacking_dying_monsters;

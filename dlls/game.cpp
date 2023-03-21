@@ -48,6 +48,7 @@ ModFeatures::ModFeatures()
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
 	pushablemode = 0;
+	pickup_policy = 0;
 	alien_teleport_sound = false;
 
 	monsters_stop_attacking_dying_monsters = false;
@@ -140,6 +141,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	KeyValueDefinition<int> integers[] = {
 		{"npc_tridepth", npc_tridepth},
 		{"pushablemode", pushablemode},
+		{"pickup_policy", pickup_policy},
 	};
 
 	for (i = 0; i<ARRAYSIZE(integers); ++i)
@@ -1081,7 +1083,7 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &mp_chattime );
 
-	CVAR_REGISTER( &pickup_policy );
+	CVAR_REGISTER_INTEGER( &pickup_policy, g_modFeatures.pickup_policy );
 
 #if FEATURE_GRENADE_JUMP_CVAR
 	CVAR_REGISTER( &grenade_jump );
