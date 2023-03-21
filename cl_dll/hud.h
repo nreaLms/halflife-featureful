@@ -633,6 +633,9 @@ struct FogProperties
 	float finalEndDist;
 	float fadeDuration;
 	bool affectSkybox;
+
+	float density;
+	short type;
 };
 
 #define CLIENT_FEATURE_VALUE_LENGTH 127

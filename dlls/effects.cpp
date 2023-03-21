@@ -4136,24 +4136,24 @@ void CEnvDecal::Spawn( void )
 	}
 }
 
-#if FEATURE_FOG
 //=========================================================
 // LRC - env_fog, extended a bit from the DMC version
 //=========================================================
 #define SF_FOG_ACTIVE 1
 #define SF_FOG_FADING 0x8000
 
-class CEnvFog : public CBaseEntity
+class CEnvFog : public CPointEntity
 {
 public:
 	void Spawn( void );
-	void Precache( void );
 	void EXPORT ResumeThink( void );
 	void EXPORT TurnOn( void );
 	void EXPORT TurnOff( void );
 	void EXPORT FadeInDone( void );
 	void EXPORT FadeOutDone( void );
-	void SendData( Vector col, int fFadeTime, int StartDist, int iEndDist);
+	void SendMessages(CBaseEntity *pClient);
+	void SendData( Vector col, int iFadeTime, int iStartDist, int iEndDist);
+	void SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int iStartDist, int iEndDist);
 	void KeyValue( KeyValueData *pkvd );
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -4166,6 +4166,9 @@ public:
 	float m_iFadeOut;
 	float m_fHoldTime;
 	float m_fFadeStart; // if we're fading in/out, then when did the fade start?
+
+	float m_density;
+	short m_fogType;
 };
 
 TYPEDESCRIPTION	CEnvFog::m_SaveData[] =
@@ -4176,6 +4179,8 @@ TYPEDESCRIPTION	CEnvFog::m_SaveData[] =
 	DEFINE_FIELD( CEnvFog, m_iFadeOut, FIELD_INTEGER ),
 	DEFINE_FIELD( CEnvFog, m_fHoldTime, FIELD_FLOAT ),
 	DEFINE_FIELD( CEnvFog, m_fFadeStart, FIELD_TIME ),
+	DEFINE_FIELD( CEnvFog, m_density, FIELD_FLOAT ),
+	DEFINE_FIELD( CEnvFog, m_fogType, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvFog, CBaseEntity )
@@ -4207,6 +4212,16 @@ void CEnvFog :: KeyValue( KeyValueData *pkvd )
 		m_fHoldTime = atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "density"))
+	{
+		m_density = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "fogtype"))
+	{
+		m_fogType = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -4223,22 +4238,10 @@ void CEnvFog :: Spawn ( void )
 		SetThink(&CEnvFog :: TurnOn );
 	}
 
-// Precache is now used only to continue after a game has loaded.
-//	Precache();
-
 	// things get messed up if we try to draw fog with a startdist
 	// or an enddist of 0, so we don't allow it.
 	if (m_iStartDist == 0) m_iStartDist = 1;
 	if (m_iEndDist == 0) m_iEndDist = 1;
-}
-
-void CEnvFog :: Precache ( void )
-{
-	if (pev->spawnflags & SF_FOG_ACTIVE)
-	{
-		SetThink(&CEnvFog :: ResumeThink );
-		pev->nextthink = gpGlobals->time + 0.1;
-	}
 }
 
 extern int gmsgSetFog;
@@ -4329,27 +4332,41 @@ void CEnvFog :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	}
 }
 
-void CEnvFog :: SendData ( Vector col, int iFadeTime, int iStartDist, int iEndDist )
+void CEnvFog::SendMessages(CBaseEntity *pClient)
+{
+	if (FBitSet(pev->spawnflags, SF_FOG_ACTIVE) && pClient)
+	{
+		SendDataToOne(pClient, pev->rendercolor, 0, m_iStartDist, m_iEndDist);
+	}
+}
+
+void CEnvFog::SendData ( Vector col, int iFadeTime, int iStartDist, int iEndDist )
 {
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
 		if ( pPlayer )
 		{
-			MESSAGE_BEGIN( MSG_ONE, gmsgSetFog, NULL, pPlayer->pev );
-				WRITE_BYTE ( col.x );
-				WRITE_BYTE ( col.y );
-				WRITE_BYTE ( col.z );
-				WRITE_SHORT ( iFadeTime );
-				WRITE_SHORT ( iStartDist );
-				WRITE_SHORT ( iEndDist );
-			MESSAGE_END();
+			SendDataToOne(pPlayer, col, iFadeTime, iStartDist, iEndDist);
 		}
 	}
 }
 
+void CEnvFog::SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int iStartDist, int iEndDist)
+{
+	MESSAGE_BEGIN( MSG_ONE, gmsgSetFog, NULL, pClient->pev );
+		WRITE_BYTE ( col.x );
+		WRITE_BYTE ( col.y );
+		WRITE_BYTE ( col.z );
+		WRITE_SHORT ( iFadeTime );
+		WRITE_SHORT ( iStartDist );
+		WRITE_SHORT ( iEndDist );
+		WRITE_LONG ( m_density * 10000 );
+		WRITE_BYTE ( m_fogType );
+	MESSAGE_END();
+}
+
 LINK_ENTITY_TO_CLASS( env_fog, CEnvFog )
-#endif
 
 #define SF_BEAMTRAIL_OFF 1
 class CEnvBeamTrail : public CPointEntity

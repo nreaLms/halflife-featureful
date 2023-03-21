@@ -246,7 +246,7 @@ void LinkUserMessages( void )
 	gmsgResetHUD = REG_USER_MSG( "ResetHUD", 1 );		// called every respawn
 	gmsgInitHUD = REG_USER_MSG( "InitHUD", 0 );		// called every time a new player joins the server
 
-	gmsgSetFog = REG_USER_MSG("SetFog", 9 );
+	gmsgSetFog = REG_USER_MSG("SetFog", 14 );
 
 	gmsgShowGameTitle = REG_USER_MSG( "GameTitle", 1 );
 	gmsgDeathMsg = REG_USER_MSG( "DeathMsg", -1 );

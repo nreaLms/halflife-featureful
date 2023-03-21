@@ -4,7 +4,7 @@
 
 #include "mod_features.h"
 
-#if FEATURE_FOG
+#if (_WIN32 || (__unix__ && !__ANDROID__) || __APPLE__)
 #define CLDLL_FOG
 #endif
 
