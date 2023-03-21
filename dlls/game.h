@@ -105,6 +105,9 @@ private:
 
 extern ModFeatures g_modFeatures;
 
+bool ItemsPickableByTouch();
+bool ItemsPickableByUse();
+
 extern cvar_t displaysoundlist;
 
 // multiplayer server rules

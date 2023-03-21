@@ -607,13 +607,13 @@ CBaseEntity* CBasePlayerWeapon::Respawn( void )
 static bool IsPickableByTouch(CBaseEntity* pEntity)
 {
 	return !FBitSet(pEntity->pev->spawnflags, SF_ITEM_USE_ONLY) &&
-			(FBitSet(pEntity->pev->spawnflags, SF_ITEM_TOUCH_ONLY) || !NeedUseToTake());
+			(FBitSet(pEntity->pev->spawnflags, SF_ITEM_TOUCH_ONLY) || ItemsPickableByTouch());
 }
 
 static bool IsPickableByUse(CBaseEntity* pEntity)
 {
 	return !FBitSet(pEntity->pev->spawnflags, SF_ITEM_TOUCH_ONLY) &&
-			(FBitSet(pEntity->pev->spawnflags, SF_ITEM_USE_ONLY) || NeedUseToTake());
+			(FBitSet(pEntity->pev->spawnflags, SF_ITEM_USE_ONLY) || ItemsPickableByUse());
 }
 
 void CBasePlayerWeapon::DefaultTouch( CBaseEntity *pOther )

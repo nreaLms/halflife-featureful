@@ -334,13 +334,13 @@ void CPickup::SetObjectCollisionBox()
 bool CPickup::IsPickableByTouch()
 {
 	return !FBitSet(pev->spawnflags, SF_ITEM_USE_ONLY) &&
-			(FBitSet(pev->spawnflags, SF_ITEM_TOUCH_ONLY) || !NeedUseToTake());
+			(FBitSet(pev->spawnflags, SF_ITEM_TOUCH_ONLY) || ItemsPickableByTouch());
 }
 
 bool CPickup::IsPickableByUse()
 {
 	return !FBitSet(pev->spawnflags, SF_ITEM_TOUCH_ONLY) &&
-			(FBitSet(pev->spawnflags, SF_ITEM_USE_ONLY) || NeedUseToTake());
+			(FBitSet(pev->spawnflags, SF_ITEM_USE_ONLY) || ItemsPickableByUse());
 }
 
 void CPickup::FallThink()

@@ -3867,7 +3867,7 @@ void CBasePlayer::GiveNamedItem(const char *pszName , int spawnFlags)
 		return;
 	}
 
-	if (NeedUseToTake()) {
+	if (ItemsPickableByUse()) {
 		CBaseEntity* entity = (CBaseEntity *)GET_PRIVATE( pent );
 		if (entity) {
 			entity->Use(this, this, USE_TOGGLE, 0.0f);

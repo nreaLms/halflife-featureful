@@ -551,9 +551,8 @@ cvar_t npc_patrol = { "npc_patrol", "1", FCVAR_SERVER };
 
 cvar_t mp_chattime	= { "mp_chattime","10", FCVAR_SERVER };
 
-#if FEATURE_USE_TO_TAKE_CVAR
-cvar_t use_to_take = { "use_to_take","0", FCVAR_SERVER };
-#endif
+cvar_t pickup_policy = { "pickup_policy","0", FCVAR_SERVER };
+
 #if FEATURE_GRENADE_JUMP_CVAR
 cvar_t grenade_jump = { "grenade_jump","1", FCVAR_SERVER };
 #endif
@@ -1082,9 +1081,8 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &mp_chattime );
 
-#if FEATURE_USE_TO_TAKE_CVAR
-	CVAR_REGISTER( &use_to_take );
-#endif
+	CVAR_REGISTER( &pickup_policy );
+
 #if FEATURE_GRENADE_JUMP_CVAR
 	CVAR_REGISTER( &grenade_jump );
 #endif
@@ -1541,3 +1539,12 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("entities_count", Cmd_NumberOfEntities);
 }
 
+bool ItemsPickableByTouch()
+{
+	return pickup_policy.value != 1;
+}
+
+bool ItemsPickableByUse()
+{
+	return pickup_policy.value >= 1;
+}

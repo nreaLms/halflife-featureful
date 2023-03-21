@@ -702,16 +702,6 @@ bool AllowUseThroughWalls()
 #endif
 }
 
-bool NeedUseToTake()
-{
-#if FEATURE_USE_TO_TAKE_CVAR
-	extern cvar_t use_to_take;
-	return use_to_take.value != 0;
-#else
-	return false;
-#endif
-}
-
 bool NpcFollowNearest()
 {
 #if FEATURE_NPC_NEAREST_CVAR
