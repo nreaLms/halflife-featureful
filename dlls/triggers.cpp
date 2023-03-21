@@ -5552,6 +5552,7 @@ public:
 	short m_freeRoam;
 	short m_sizeForGrapple;
 	short m_gibPolicy;
+	short m_ignoredBy;
 
 	short m_iTriggerCondition;
 	short m_iTriggerAltCondition;
@@ -5583,6 +5584,7 @@ TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
 	DEFINE_FIELD( CTriggerConfigureMonster, m_freeRoam, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_sizeForGrapple, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_gibPolicy, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_ignoredBy, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerCondition, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerAltCondition, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iszTriggerTarget, FIELD_STRING ),
@@ -5656,6 +5658,11 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	else if ( FStrEq( pkvd->szKeyName, "gib_policy" ) )
 	{
 		m_gibPolicy = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "ignoredby" ) )
+	{
+		m_ignoredBy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerTarget" ) )
@@ -5773,6 +5780,7 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 	MaySetResettableValue(pMonster->m_freeRoam, m_freeRoam);
 	MaySetResettableValue2(pMonster->m_sizeForGrapple, m_sizeForGrapple);
 	MaySetResettableValue(pMonster->m_gibPolicy, m_gibPolicy);
+	MaySetResettableValue(pMonster->m_ignoredBy, m_ignoredBy);
 
 	MaySetResettableValue(pMonster->m_iTriggerCondition, m_iTriggerCondition);
 	MaySetResettableValue(pMonster->m_iTriggerAltCondition, m_iTriggerAltCondition);

@@ -123,6 +123,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 
 	DEFINE_FIELD( CBaseMonster, m_customSoundMask, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_prisonerTo, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseMonster, m_ignoredBy, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_freeRoam, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_activeAfterCombat, FIELD_SHORT ),
 	DEFINE_FIELD( CBaseMonster, m_huntActivitiesCount, FIELD_SHORT ),
@@ -361,9 +362,15 @@ void CBaseMonster::Look( int iDistance )
 				 (!m_prisonerTo || m_prisonerTo != pSightEnt->Classify()) &&
 				 pSightEnt->pev->health > 0 )
 			{
+				const int myClassify = Classify();
 				CBaseMonster* pSightMonster = pSightEnt->MyMonsterPointer();
-				if (pSightMonster && pSightMonster->m_prisonerTo != 0 && pSightMonster->m_prisonerTo == Classify())
-					continue;
+				if (pSightMonster)
+				{
+					if (pSightMonster->m_prisonerTo != 0 && pSightMonster->m_prisonerTo == myClassify)
+						continue;
+					if (pSightMonster->m_ignoredBy != 0 && pSightMonster->m_ignoredBy == myClassify)
+						continue;
+				}
 
 				const int iRelationship = IRelationship( pSightEnt );
 				// the looker will want to consider this entity
@@ -3670,6 +3677,11 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq( pkvd->szKeyName, "prisonerto" ) )
 	{
 		m_prisonerTo = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "ignoredby" ) )
+	{
+		m_ignoredBy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "freeroam" ) )

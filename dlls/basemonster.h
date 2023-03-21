@@ -447,6 +447,7 @@ public:
 
 	int m_customSoundMask;
 	short m_prisonerTo;
+	short m_ignoredBy;
 	short m_freeRoam;
 	short m_activeAfterCombat;
 	short m_huntActivitiesCount;

@@ -740,6 +740,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 
 		createdMonster->m_customSoundMask = m_customSoundMask;
 		createdMonster->m_prisonerTo = m_prisonerTo;
+		createdMonster->m_ignoredBy = m_ignoredBy;
 		createdMonster->m_freeRoam = m_freeRoam;
 		createdMonster->m_activeAfterCombat = m_activeAfterCombat;
 		createdMonster->m_sizeForGrapple = m_sizeForGrapple;

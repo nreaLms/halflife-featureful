@@ -295,6 +295,29 @@
 		18 : "Snark"
 		19 : "Gargantua"
 	]
+	ignoredby(choices) : "Ignored by classify" : : "Get ignored by this class" =
+	[
+		0 : "Not ignored"
+		1 : "Machine"
+		2 : "Player"
+		3 : "Human passive"
+		4 : "Human military"
+		5 : "Alien military"
+		6 : "Alien passive"
+		7 : "Alien monster"
+		8 : "Alien prey"
+		9 : "Alien predator"
+		10 : "Insect"
+		11 : "Player ally"
+		12 : "Player bioweapon"
+		13 : "Alien bioweapon"
+		14 : "Race X predator"
+		15 : "Race X shock"
+		16 : "Opfor ally"
+		17 : "Blackops"
+		18 : "Snark"
+		19 : "Gargantua"
+	]
 ]
 
 @BaseClass = MonsterSoundMask
@@ -7701,6 +7724,53 @@
 		37 : "Combat, Danger and Player"
 		127 : "Every sound and scent"
 		1028 : "Default, except Player"
+	]
+	prisonerto(choices) : "Act as Prisoner to" =
+	[
+		-1 : "Reset"
+		0 : "No change"
+		1 : "Machine"
+		2 : "Player"
+		3 : "Human passive"
+		4 : "Human military"
+		5 : "Alien military"
+		6 : "Alien passive"
+		7 : "Alien monster"
+		8 : "Alien prey"
+		9 : "Alien predator"
+		10 : "Insect"
+		11 : "Player ally"
+		12 : "Player bioweapon"
+		13 : "Alien bioweapon"
+		14 : "Race X predator"
+		15 : "Race X shock"
+		16 : "Opfor ally"
+		17 : "Blackops"
+		18 : "Snark"
+		19 : "Gargantua"
+	]
+	ignoredby(choices) : "Ignored by classify" =
+	[
+		-1 : "Reset"
+		0 : "No change"
+		1 : "Machine"
+		3 : "Human passive"
+		4 : "Human military"
+		5 : "Alien military"
+		6 : "Alien passive"
+		7 : "Alien monster"
+		8 : "Alien prey"
+		9 : "Alien predator"
+		10 : "Insect"
+		11 : "Player ally"
+		12 : "Player bioweapon"
+		13 : "Alien bioweapon"
+		14 : "Race X predator"
+		15 : "Race X shock"
+		16 : "Opfor ally"
+		17 : "Blackops"
+		18 : "Snark"
+		19 : "Gargantua"
 	]
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Setting 'null' means clearing the trigger target."
 	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
