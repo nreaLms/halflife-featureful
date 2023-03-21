@@ -7041,7 +7041,7 @@
 	netname(string) : "Command String"
 ]
 
-@PointClass base(Targetname, CustomSentences) = trigger_configure_monster : "Change some monster's parameters and flags"
+@BaseClass = TriggerConfigureMonsterBase
 [
 	target(string) : "Entity to affect"
 	gag_flag(choices) : "'Gag' flag" =
@@ -7051,6 +7051,12 @@
 		1 : "Add flag"
 	]
 	monsterclip_flag(choices) : "'Monsterclip' flag" =
+	[
+		-1 : "Remove flag"
+		0 : "No change"
+		1 : "Add flag"
+	]
+	prisoner_flag(choices) : "'Prisoner' flag" =
 	[
 		-1 : "Remove flag"
 		0 : "No change"
@@ -7162,6 +7168,8 @@
 		1 : "Add flag"
 	]
 ]
+
+@PointClass base(Targetname, TriggerConfigureMonsterBase, CustomSentences) = trigger_configure_monster : "Change some monster's parameters and flags" []
 
 @SolidClass base(Trigger) = trigger_counter : "Trigger counter"
 [

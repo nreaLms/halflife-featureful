@@ -5307,6 +5307,7 @@ public:
 	// For all these variables zero means no change
 	short m_gagFlag;
 	short m_monsterClipFlag;
+	short m_prisonerFlag;
 	short m_predisasterFlag;
 	short m_dontDropGunFlag;
 	short m_actOutOfPVS;
@@ -5332,6 +5333,7 @@ TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
 {
 	DEFINE_FIELD( CTriggerConfigureMonster, m_gagFlag, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_monsterClipFlag, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_prisonerFlag, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_predisasterFlag, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_dontDropGunFlag, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_actOutOfPVS, FIELD_SHORT ),
@@ -5360,6 +5362,11 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "monsterclip_flag"))
 	{
 		m_monsterClipFlag = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "prisoner_flag"))
+	{
+		m_prisonerFlag = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "predisaster_flag"))
@@ -5450,6 +5457,13 @@ void CTriggerConfigureMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller
 	}
 }
 
+struct ConfiguredFlag
+{
+	ConfiguredFlag(short myValue, int myFlagBit) : value(myValue), flagBit(myFlagBit) {}
+	short value;
+	int flagBit;
+};
+
 void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 {
 	if (!pEntity)
@@ -5460,12 +5474,22 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 	if (!pMonster)
 		return;
 
-	CFollowingMonster* followingMonster = pMonster->MyFollowingMonsterPointer();
+	ConfiguredFlag flagParams[] = {
+		ConfiguredFlag(m_gagFlag, SF_MONSTER_GAG),
+		ConfiguredFlag(m_prisonerFlag, SF_MONSTER_PRISONER),
+		ConfiguredFlag(m_predisasterFlag, SF_MONSTER_PREDISASTER),
+		ConfiguredFlag(m_dontDropGunFlag, SF_MONSTER_DONT_DROP_GUN),
+		ConfiguredFlag(m_actOutOfPVS, SF_MONSTER_ACT_OUT_OF_PVS),
+		ConfiguredFlag(m_ignorePushFlag, SF_MONSTER_IGNORE_PLAYER_PUSH),
+	};
 
-	if (m_gagFlag < 0)
-		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_GAG);
-	else if (m_gagFlag > 0)
-		SetBits(pMonster->pev->spawnflags, SF_MONSTER_GAG);
+	for (int i=0; i<ARRAYSIZE(flagParams); ++i)
+	{
+		if (flagParams[i].value < 0)
+			ClearBits(pMonster->pev->spawnflags, flagParams[i].flagBit);
+		else if (flagParams[i].value > 0)
+			SetBits(pMonster->pev->spawnflags, flagParams[i].flagBit);
+	}
 
 	if (m_monsterClipFlag < 0)
 	{
@@ -5477,21 +5501,6 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		SetBits(pMonster->pev->spawnflags, SF_MONSTER_HITMONSTERCLIP);
 		SetBits(pMonster->pev->flags, FL_MONSTERCLIP);
 	}
-
-	if (m_predisasterFlag < 0)
-		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_PREDISASTER);
-	else if (m_predisasterFlag > 0)
-		SetBits(pMonster->pev->spawnflags, SF_MONSTER_PREDISASTER);
-
-	if (m_dontDropGunFlag < 0)
-		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_DONT_DROP_GUN);
-	else if (m_dontDropGunFlag > 0)
-		SetBits(pMonster->pev->spawnflags, SF_MONSTER_DONT_DROP_GUN);
-
-	if (m_actOutOfPVS < 0)
-		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_ACT_OUT_OF_PVS);
-	else if (m_actOutOfPVS > 0)
-		SetBits(pMonster->pev->spawnflags, SF_MONSTER_ACT_OUT_OF_PVS);
 
 	if (m_iClass == -2)
 		pMonster->m_iClass = 0;
@@ -5520,11 +5529,6 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		else
 			pMonster->m_iszTriggerTarget = m_iszTriggerTarget;
 	}
-
-	if (m_ignorePushFlag < 0)
-		ClearBits(pMonster->pev->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH);
-	else if (m_ignorePushFlag > 0)
-		SetBits(pMonster->pev->spawnflags, SF_MONSTER_IGNORE_PLAYER_PUSH);
 
 	CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
 	if (pTalkMonster)
