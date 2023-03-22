@@ -2372,7 +2372,7 @@ void CHGruntRepel::KeyValue(KeyValueData *pkvd)
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CBaseMonster::KeyValue( pkvd );
+		CFollowingMonster::KeyValue( pkvd );
 }
 
 void CHGruntRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
@@ -2428,6 +2428,11 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pGrunt->m_activeAfterCombat = m_activeAfterCombat;
 	pGrunt->m_sizeForGrapple = m_sizeForGrapple;
 	pGrunt->m_gibPolicy = m_gibPolicy;
+	CFollowingMonster* pFollowingMonster = pGrunt->MyFollowingMonsterPointer();
+	if (pFollowingMonster)
+	{
+		pFollowingMonster->m_followFailPolicy = m_followFailPolicy;
+	}
 	PrepareBeforeSpawn(pEntity);
 	DispatchSpawn(pEntity->edict());
 	pGrunt->pev->movetype = MOVETYPE_FLY;

@@ -149,7 +149,7 @@ protected:
 	virtual int* GruntQuestionVar();
 };
 
-class CHGruntRepel : public CBaseMonster
+class CHGruntRepel : public CFollowingMonster
 {
 public:
 	void Spawn( void );

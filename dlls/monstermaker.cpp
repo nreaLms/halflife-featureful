@@ -116,6 +116,7 @@ public:
 	Vector m_defaultMinHullSize;
 	Vector m_defaultMaxHullSize;
 
+	short m_followFailPolicy;
 	string_t m_iszUse;
 	string_t m_iszUnUse;
 	string_t m_iszDecline;
@@ -149,6 +150,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iMaxYawDeviation, FIELD_SHORT ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMinHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CMonsterMaker, m_defaultMaxHullSize, FIELD_VECTOR ),
+	DEFINE_FIELD( CMonsterMaker, m_followFailPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CMonsterMaker, m_iszUse, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_iszUnUse, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_iszDecline, FIELD_STRING ),
@@ -238,6 +240,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "yawdeviation" ) )
 	{
 		m_iMaxYawDeviation = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "followfailpolicy" ) )
+	{
+		m_followFailPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "UseSentence" ) )
@@ -660,6 +667,12 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 		if (deadMonster)
 		{
 			deadMonster->m_iPose = m_iPose;
+		}
+
+		CFollowingMonster* pFollowingMonster = createdMonster->MyFollowingMonsterPointer();
+		if (pFollowingMonster)
+		{
+			pFollowingMonster->m_followFailPolicy = m_followFailPolicy;
 		}
 
 		CTalkMonster* pTalkMonster = createdMonster->MyTalkMonsterPointer();

@@ -410,7 +410,18 @@
 	]
 ]
 
-@BaseClass base(Monster) = Repel
+@BaseClass = FollowingMonsterProps
+[
+	followfailpolicy(choices) : "Follow fail policy" : : "What to do when couldn't reach the target" = 
+	[
+		0 : "Default for monster"
+		1 : "Regular fail"
+		2 : "Stop following"
+		3 : "Try nearest path"
+	]
+]
+
+@BaseClass base(Monster, FollowingMonsterProps) = Repel
 [
 	gruntname(string) : "Grunt's name" : : "The target name of spawned grunt"
 ]
@@ -422,16 +433,9 @@
 	RefusalSentence(String) : "Refusal Sentence" : : "Special case: 'null' means no sentense"
 ]
 
-@BaseClass base() = FollowingMonster
+@BaseClass base(FollowingMonsterProps) = FollowingMonster
 [
 	master(string) : "Master" : : "Decline following if locked by master (for player ally monsters)"
-	followfailpolicy(choices) : "Follow fail policy" : : "What to do when couldn't reach the target" = 
-	[
-		0 : "Default for monster"
-		1 : "Regular fail"
-		2 : "Stop following"
-		3 : "Try nearest path"
-	]
 	spawnflags(Flags) =
 	[
 		524288 : "Ignore player push" : 0 : "Don't move away when player tries to push me"
@@ -6554,7 +6558,7 @@
 	new_model(studio) : "Custom model"
 ]
 
-@BaseClass base(MonsterMakerBase, MonsterExtra, CustomSentences) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
+@BaseClass base(MonsterMakerBase, MonsterExtra, FollowingMonsterProps, CustomSentences) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
 [
 	spawnflags(Flags) =
 	[
