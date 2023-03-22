@@ -5302,6 +5302,14 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
+	template<typename T>
+	static void MaySetResettableValue(T& lvalue, T value)
+	{
+		if (value < 0)
+			lvalue = 0;
+		else if (value > 0)
+			lvalue = value;
+	}
 	void Affect(CBaseEntity* pEntity);
 
 	// For all these variables zero means no change
@@ -5512,15 +5520,8 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 	else if (m_soundMask)
 		pMonster->m_customSoundMask = m_soundMask;
 
-	if (m_iTriggerCondition < 0)
-		pMonster->m_iTriggerCondition = 0;
-	else if (m_iTriggerCondition > 0)
-		pMonster->m_iTriggerCondition = m_iTriggerCondition;
-
-	if (m_iTriggerAltCondition < 0)
-		pMonster->m_iTriggerAltCondition = 0;
-	else if (m_iTriggerAltCondition > 0)
-		pMonster->m_iTriggerAltCondition = m_iTriggerAltCondition;
+	MaySetResettableValue(pMonster->m_iTriggerCondition, m_iTriggerCondition);
+	MaySetResettableValue(pMonster->m_iTriggerAltCondition, m_iTriggerAltCondition);
 
 	if (!FStringNull(m_iszTriggerTarget))
 	{
@@ -5561,9 +5562,6 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 			pTalkMonster->m_szGrp[TLK_DECLINE] = CTalkMonster::GetRedefinedSentence(m_iszDecline);
 		}
 
-		if (m_iTolerance < 0)
-			pTalkMonster->m_iTolerance = 0;
-		else if (m_iTolerance > 0)
-			pTalkMonster->m_iTolerance = m_iTolerance;
+		MaySetResettableValue(pTalkMonster->m_iTolerance, m_iTolerance);
 	}
 }
