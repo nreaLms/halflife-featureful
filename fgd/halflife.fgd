@@ -332,8 +332,9 @@
 	]
 ]
 
-@BaseClass base(Target, Targetname, RenderFields, Angles) = MonsterBase
+@BaseClass base(Targetname, RenderFields, Angles) = MonsterBase
 [
+	target(target_destination) : "Target patrol path"
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
 	[
@@ -1749,8 +1750,8 @@
 	health(integer) : "Times to smoke" : 1
 	scale(string) : "Smoke Scale (decile)" : 10
 	dmg(string) : "Dispersion of smoke particles" : "0"
-	dmg_take(string) : "Min delay between smokes"
-	dmg_save(string) : "Max delay between smokes"
+	dmg_take(string) : "Min delay between smokes" : "0.4"
+	dmg_save(string) : "Max delay between smokes" : "0.6"
 	framerate(integer) : "Framerate"
 	speed(integer) : "Speed" : 30
 	scale_speed(string) : "Scale Speed"
@@ -6723,12 +6724,12 @@
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_loadsaved : "Load Auto-Saved game"
 [
 	duration(string) : "Fade Duration (seconds)" : "2"
-	holdtime(string) : "Hold Fade (seconds)" : "0"
+	holdtime(string) : "Hold Fade (seconds)" : "6"
 	renderamt(integer) : "Fade Alpha" : 255
 	rendercolor(color255) : "Fade Color (R G B)" : "0 0 0"
-	messagetime(string) : "Show Message delay" : "0"
+	messagetime(string) : "Show Message delay" : "0.5"
 	message(string) : "Message To Display" : ""
-	loadtime(string) : "Reload delay" : "0"
+	loadtime(string) : "Reload delay" : "7"
 	spawnflags(Flags) =
 	[
 		1 : "Freeze player" : 0
