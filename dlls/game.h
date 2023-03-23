@@ -44,7 +44,7 @@ struct ModFeatures
 	bool SporesEnabled() const;
 
 	void EnableMonster(const char* name);
-	bool IsMonsterEnabled(const char* name);
+	bool IsMonsterEnabled(const char* name) const;
 
 	int suit_light;
 	bool suit_light_allow_both;

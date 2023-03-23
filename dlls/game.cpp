@@ -303,7 +303,7 @@ bool ModFeatures::DisplacerBallEnabled() const
 
 bool ModFeatures::ShockBeamEnabled() const
 {
-	if (FEATURE_SHOCKTROOPER)
+	if (IsMonsterEnabled("shocktrooper"))
 		return true;
 #if FEATURE_SHOCKRIFLE
 	return IsWeaponEnabled(WEAPON_SHOCKRIFLE);
@@ -314,7 +314,7 @@ bool ModFeatures::ShockBeamEnabled() const
 
 bool ModFeatures::SporesEnabled() const
 {
-	if (FEATURE_SHOCKTROOPER)
+	if (IsMonsterEnabled("shocktrooper"))
 		return true;
 #if FEATURE_SPORELAUNCHER
 	return IsWeaponEnabled(WEAPON_SPORELAUNCHER);
@@ -345,7 +345,7 @@ void ModFeatures::EnableMonster(const char *name)
 	monstersCount++;
 }
 
-bool ModFeatures::IsMonsterEnabled(const char *name)
+bool ModFeatures::IsMonsterEnabled(const char *name) const
 {
 	// TODO: optimize
 	for (unsigned int i=0; i<monstersCount; ++i)
