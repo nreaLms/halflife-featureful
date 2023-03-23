@@ -160,17 +160,18 @@ void CHalfLifeRules::PlayerThink( CBasePlayer *pPlayer )
 		{
 			EquipPlayerFromMapConfig(pPlayer, mapConfig);
 		}
-		else
+		CBaseEntity* pSettingEntity = NULL;
+		while ( (pSettingEntity = UTIL_FindEntityByClassname( pSettingEntity, "game_player_settings" )) != NULL )
 		{
-			CBaseEntity* pSettingEntity = NULL;
-			while ( (pSettingEntity = UTIL_FindEntityByClassname( pSettingEntity, "game_player_settings" )) != NULL )
+			// If game_player_settings has a name, it means to be called by trigger, not run automatically.
+			if (FStringNull(pSettingEntity->pev->targetname))
 			{
-				// If game_player_settings has a name, it means to be called by trigger, not run automatically.
-				if (FStringNull(pSettingEntity->pev->targetname))
-				{
+				// If equiped from the config, just fire the game_player_settings target
+				if (readConfig)
+					pSettingEntity->SUB_UseTargets(pPlayer, USE_TOGGLE, 0.0f);
+				else
 					pSettingEntity->Touch( pPlayer );
-					break;
-				}
+				break;
 			}
 		}
 
