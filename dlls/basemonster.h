@@ -451,6 +451,7 @@ public:
 	int m_suggestedScheduleFlags;
 
 	short m_gibPolicy;
+	BOOL m_bForceConditionsGather;
 
 	float m_flLastYawTime;
 

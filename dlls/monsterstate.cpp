@@ -94,12 +94,15 @@ void CBaseMonster::RunAI( void )
 		 m_MonsterState != MONSTERSTATE_PRONE &&
 		 m_MonsterState != MONSTERSTATE_DEAD )// don't bother with this crap if monster is prone. 
 	{
+		bool bForcedGather = m_bForceConditionsGather;
+		m_bForceConditionsGather = FALSE;
+
 		// collect some sensory Condition information.
 		// don't let monsters outside of the player's PVS act up, or most of the interesting
 		// things will happen before the player gets there!
 		// UPDATE: We now let COMBAT state monsters think and act fully outside of player PVS. This allows the player to leave 
 		// an area where monsters are fighting, and the fight will continue.
-		if( FBitSet(pev->spawnflags, SF_MONSTER_ACT_OUT_OF_PVS) || ( m_MonsterState == MONSTERSTATE_COMBAT ) || !FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
+		if( bForcedGather || FBitSet(pev->spawnflags, SF_MONSTER_ACT_OUT_OF_PVS) || ( m_MonsterState == MONSTERSTATE_COMBAT ) || !FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) )
 		{
 			Look( m_flDistLook );
 			Listen();// check for audible sounds. 
