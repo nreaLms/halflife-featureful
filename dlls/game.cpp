@@ -970,7 +970,7 @@ void Cmd_ReportAIState()
 
 void Cmd_NumberOfEntities()
 {
-	ALERT(at_console, "%d\n", NUMBER_OF_ENTITIES());
+	ALERT(at_console, "%d / %d\n", NUMBER_OF_ENTITIES(), gpGlobals->maxEntities);
 }
 
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
