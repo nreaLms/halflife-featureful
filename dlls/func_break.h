@@ -93,5 +93,6 @@ public:
 	string_t m_iszSpawnObject;
 
 	short m_targetActivator;
+	int m_iGibs;
 };
 #endif	// FUNC_BREAK_H

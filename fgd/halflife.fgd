@@ -577,6 +577,7 @@
 	]
 	delay(string) : "Delay before fire" : "0"
 	gibmodel(studio) : "Gib Model" : ""
+	m_iGibs(integer) : "Custom number of gibs"
 	spawnobject(choices) : "Spawn On Break" : 0 =
 	[
 		0: "Nothing"
