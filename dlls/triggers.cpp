@@ -3467,7 +3467,7 @@ string_t CTriggerRandom::ChooseTarget()
 	string_t chosenTarget = iStringNull;
 
 	if (pev->spawnflags & SF_TRIGGER_RANDOM_UNIQUE) {
-		if (m_uniqueTargetsLeft) {
+		if (m_uniqueTargetsLeft > 0) {
 			chosenTargetIndex = RandomizeIndex(0, m_uniqueTargetsLeft - 1);
 			chosenTarget = m_targets[chosenTargetIndex];
 
@@ -3531,7 +3531,7 @@ int CTriggerRandom::TargetCount()
 
 void CTriggerRandom::DoUnique()
 {
-	if (pev->spawnflags & SF_TRIGGER_RANDOM_UNIQUE) {
+	if ((pev->spawnflags & SF_TRIGGER_RANDOM_UNIQUE) && m_uniqueTargetsLeft > 0) {
 		m_uniqueTargetsLeft--;
 
 		if (!m_uniqueTargetsLeft) {
