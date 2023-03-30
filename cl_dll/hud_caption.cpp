@@ -36,6 +36,8 @@ int CHudCaption::VidInit()
 		captionsInit = true;
 	}
 	m_hVoiceIcon = SPR_Load("sprites/voiceicon.spr");
+	voiceIconWidth = SPR_Width(m_hVoiceIcon, 0);
+	voiceIconHeight = SPR_Height(m_hVoiceIcon, 0);
 	RecalculateLineOffsets();
 
 	return 1;
@@ -303,7 +305,7 @@ int CHudCaption::Draw(float flTime)
 			if (j == 0 && m_hVoiceIcon != 0 && sub.radio)
 			{
 				SPR_Set( m_hVoiceIcon, sub.r, sub.g, sub.b );
-				SPR_DrawAdditive( 0, xpos-SUB_BORDER_LENGTH-32, ypos - distanceBetweenSubs, NULL );
+				SPR_DrawAdditive( 0, xpos-SUB_BORDER_LENGTH-voiceIconWidth-Q_max(voiceIconWidth/8, 1), ypos + lineHeight/2 - voiceIconWidth/2, NULL );
 			}
 
 			CHud::UtfText::DrawString( xpos, ypos, xmax, sub.caption->message + sub.lineOffsets[j], sub.r, sub.g, sub.b, sub.lineEndOffsets[j] - sub.lineOffsets[j] );

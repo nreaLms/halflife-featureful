@@ -314,6 +314,8 @@ protected:
 	int sub_count;
 	bool captionsInit;
 	HSPRITE m_hVoiceIcon;
+	int voiceIconWidth;
+	int voiceIconHeight;
 };
 
 #if !USE_VGUI || USE_NOVGUI_SCOREBOARD
