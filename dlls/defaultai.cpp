@@ -765,7 +765,7 @@ Task_t tlChaseEnemyFailed[] =
 {
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_WAIT, (float)0.2 },
-	{ TASK_FIND_COVER_FROM_ENEMY, (float)0 },
+	{ TASK_FIND_SPOT_AWAY_FROM_ENEMY, (float)0 },
 	{ TASK_RUN_PATH, (float)0 },
 	{ TASK_WAIT_FOR_MOVEMENT, (float)0 },
 	{ TASK_REMEMBER, (float)bits_MEMORY_INCOVER },
