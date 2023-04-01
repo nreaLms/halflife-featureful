@@ -3452,6 +3452,8 @@ void CTriggerRandom::TimedThink()
 			}
 		}
 
+		if ((pev->spawnflags & SF_TRIGGER_RANDOM_UNIQUE) && m_uniqueTargetsLeft <= 0)
+			SetActive(false);
 		if (pev->spawnflags & SF_TRIGGER_RANDOM_ONCE)
 			SetActive(false);
 
