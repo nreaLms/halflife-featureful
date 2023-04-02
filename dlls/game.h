@@ -53,18 +53,11 @@ struct ModFeatures
 	bool items_instant_drop;
 	bool tripmines_solid;
 	bool satchels_pickable;
-	int pushablemode;
-	int pickup_policy;
 	bool alien_teleport_sound;
 
 	bool monsters_stop_attacking_dying_monsters;
 	bool monsters_delegate_squad_leadership;
 	bool monsters_eat_for_health;
-
-	int npc_tridepth;
-	bool npc_tridepth_all;
-	float npc_forget_enemy_time;
-	bool npc_active_after_combat;
 
 	bool blackops_classify;
 	bool opfor_grunts_dislike_civilians;

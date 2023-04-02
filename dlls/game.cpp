@@ -47,8 +47,6 @@ ModFeatures::ModFeatures()
 	items_instant_drop = true;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
-	pushablemode = 0;
-	pickup_policy = 0;
 	alien_teleport_sound = false;
 
 	monsters_stop_attacking_dying_monsters = false;
@@ -78,11 +76,6 @@ ModFeatures::ModFeatures()
 	opfor_decals = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_deadhaz = FEATURE_OPFOR_SPECIFIC ? true : false;
 	tentacle_opfor_height = FEATURE_OPFOR_SPECIFIC ? true : false;
-
-	npc_tridepth = 1;
-	npc_tridepth_all = false;
-	npc_forget_enemy_time = 0;
-	npc_active_after_combat = 0;
 }
 
 template <typename T>
@@ -104,8 +97,6 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(tripmines_solid),
 		KEY_VALUE_DEF(satchels_pickable),
 		KEY_VALUE_DEF(alien_teleport_sound),
-		KEY_VALUE_DEF(npc_tridepth_all),
-		KEY_VALUE_DEF(npc_active_after_combat),
 		KEY_VALUE_DEF(monsters_stop_attacking_dying_monsters),
 		KEY_VALUE_DEF(monsters_delegate_squad_leadership),
 		KEY_VALUE_DEF(monsters_eat_for_health),
@@ -135,32 +126,6 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		if (strcmp(key, booleans[i].name) == 0)
 		{
 			return UpdateBoolean(value, booleans[i].value, key);
-		}
-	}
-
-	KeyValueDefinition<int> integers[] = {
-		{"npc_tridepth", npc_tridepth},
-		{"pushablemode", pushablemode},
-		{"pickup_policy", pickup_policy},
-	};
-
-	for (i = 0; i<ARRAYSIZE(integers); ++i)
-	{
-		if (strcmp(key, integers[i].name) == 0)
-		{
-			return UpdateInteger(value, integers[i].value, key);
-		}
-	}
-
-	KeyValueDefinition<float> floats[] = {
-		{"npc_forget_enemy_time", npc_forget_enemy_time}
-	};
-
-	for (i = 0; i<ARRAYSIZE(floats); ++i)
-	{
-		if (strcmp(key, floats[i].name) == 0)
-		{
-			return UpdateFloat(value, floats[i].value, key);
 		}
 	}
 
@@ -536,16 +501,16 @@ cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 #if FEATURE_USE_THROUGH_WALLS_CVAR
 cvar_t use_through_walls = { "use_through_walls", "1", FCVAR_SERVER };
 #endif
-cvar_t npc_tridepth = { "npc_tridepth", "", FCVAR_SERVER };
-cvar_t npc_tridepth_all = { "npc_tridepth_all", "", FCVAR_SERVER };
+cvar_t npc_tridepth = { "npc_tridepth", "1", FCVAR_SERVER };
+cvar_t npc_tridepth_all = { "npc_tridepth_all", "0", FCVAR_SERVER };
 #if FEATURE_NPC_NEAREST_CVAR
 cvar_t npc_nearest = { "npc_nearest", "0", FCVAR_SERVER };
 #endif
-cvar_t npc_forget_enemy_time = { "npc_forget_enemy_time", "", FCVAR_SERVER };
+cvar_t npc_forget_enemy_time = { "npc_forget_enemy_time", "0", FCVAR_SERVER };
 #if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
 cvar_t npc_fix_melee_distance = { "npc_fix_melee_distance", "0", FCVAR_SERVER };
 #endif
-cvar_t npc_active_after_combat = { "npc_active_after_combat", "", FCVAR_SERVER };
+cvar_t npc_active_after_combat = { "npc_active_after_combat", "0", FCVAR_SERVER };
 #if FEATURE_NPC_FOLLOW_OUT_OF_PVS_CVAR
 cvar_t npc_follow_out_of_pvs = { "npc_follow_out_of_pvs", "0", FCVAR_SERVER };
 #endif
@@ -1022,16 +987,16 @@ void GameDLLInit( void )
 #if FEATURE_USE_THROUGH_WALLS_CVAR
 	CVAR_REGISTER( &use_through_walls );
 #endif
-	CVAR_REGISTER_INTEGER( &npc_tridepth, g_modFeatures.npc_tridepth );
-	CVAR_REGISTER_BOOLEAN( &npc_tridepth_all, g_modFeatures.npc_tridepth_all );
+	CVAR_REGISTER( &npc_tridepth );
+	CVAR_REGISTER( &npc_tridepth_all );
 #if FEATURE_NPC_NEAREST_CVAR
 	CVAR_REGISTER( &npc_nearest );
 #endif
-	CVAR_REGISTER_FLOAT( &npc_forget_enemy_time, g_modFeatures.npc_forget_enemy_time );
+	CVAR_REGISTER( &npc_forget_enemy_time );
 #if FEATURE_NPC_FIX_MELEE_DISTANCE_CVAR
 	CVAR_REGISTER( &npc_fix_melee_distance );
 #endif
-	CVAR_REGISTER_BOOLEAN( &npc_active_after_combat, g_modFeatures.npc_active_after_combat );
+	CVAR_REGISTER( &npc_active_after_combat );
 #if FEATURE_NPC_FOLLOW_OUT_OF_PVS_CVAR
 	CVAR_REGISTER( &npc_follow_out_of_pvs );
 #endif
@@ -1061,7 +1026,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &monsteryawspeedfix );
 	CVAR_REGISTER( &animeventfix );
 	CVAR_REGISTER( &corpsephysics );
-	CVAR_REGISTER_INTEGER( &pushablemode, g_modFeatures.pushablemode );
+	CVAR_REGISTER( &pushablemode );
 	CVAR_REGISTER( &forcerespawn );
 	CVAR_REGISTER( &respawndelay );
 	CVAR_REGISTER( &flashlight );
@@ -1083,7 +1048,7 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER( &mp_chattime );
 
-	CVAR_REGISTER_INTEGER( &pickup_policy, g_modFeatures.pickup_policy );
+	CVAR_REGISTER( &pickup_policy );
 
 #if FEATURE_GRENADE_JUMP_CVAR
 	CVAR_REGISTER( &grenade_jump );
@@ -1535,6 +1500,14 @@ void GameDLLInit( void )
 
 	if (g_modFeatures.skill_opfor)
 		SERVER_COMMAND( "exec skillopfor.cfg\n" );
+
+	const char* fileName = "featureful_exec.cfg";
+	int fileSize;
+	byte *pExecFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	if (pExecFile)
+	{
+		SERVER_COMMAND((const char*)pExecFile);
+	}
 
 	// Register server commands
 	g_engfuncs.pfnAddServerCommand("report_ai_state", Cmd_ReportAIState);
