@@ -118,7 +118,6 @@ Task_t tlMoveAway[] =
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_MOVE_AWAY_FAIL },
 	{ TASK_STORE_LASTPOSITION, 0.0f },
 	{ TASK_MOVE_AWAY_PATH, 100.0f },
-	{ TASK_WALK_PATH_FOR_UNITS, 100.0f },
 	{ TASK_STOP_MOVING, 0.0f },
 	{ TASK_FACE_PLAYER, 0.5f },
 };
@@ -157,7 +156,6 @@ Task_t tlMoveAwayFollow[] =
 	{ TASK_SET_FAIL_SCHEDULE, (float)SCHED_TARGET_REACHED },
 	{ TASK_STORE_LASTPOSITION, (float)0 },
 	{ TASK_MOVE_AWAY_PATH, (float)100 },
-	{ TASK_WALK_PATH_FOR_UNITS, (float)100 },
 	{ TASK_STOP_MOVING, (float)0 },
 	{ TASK_SET_SCHEDULE, (float)SCHED_TARGET_REACHED },
 };
@@ -351,41 +349,42 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 	case TASK_FACE_PLAYER:
 		m_flWaitFinished = gpGlobals->time + pTask->flData;
 		break;
-	case TASK_WALK_PATH_FOR_UNITS:
-		m_movementActivity = ACT_WALK;
-		break;
 	case TASK_MOVE_AWAY_PATH:
+	case TASK_MOVE_AWAY_PATH_RUNNING:
 		{
+			Activity movementActivity = pTask->iTask == TASK_MOVE_AWAY_PATH_RUNNING ? ACT_RUN : ACT_WALK;
 			Vector dir = pev->angles;
 			dir.y = pev->ideal_yaw + 180;
 			Vector vecBackward;
 			Vector vecLeft;
+			bool success = false;
 
 			m_lastMoveBlocker = 0;
 
+			const float waitTime = 2.0f;
 			UTIL_MakeVectorsPrivate( dir, vecBackward, vecLeft, NULL );
-			if( MoveToLocation( ACT_WALK, 2, pev->origin + vecBackward * pTask->flData, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
+			if( MoveToLocation( movementActivity, waitTime, pev->origin + vecBackward * pTask->flData, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 			{
-				TaskComplete();
+				success = true;
 			}
-			if( !TaskIsComplete() && MoveToLocation( ACT_WALK, 2, pev->origin + vecBackward * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
+			if( !success && MoveToLocation( movementActivity, waitTime, pev->origin + vecBackward * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 			{
-				TaskComplete();
+				success = true;
 			}
 			else
 			{
 				HandleBlocker(CBaseEntity::Instance( gpGlobals->trace_ent ), false);
 			}
 
-			if (!TaskIsComplete())
+			if (!success)
 			{
-				if( MoveToLocation( ACT_WALK, 2, pev->origin + vecLeft * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
+				if( MoveToLocation( movementActivity, waitTime, pev->origin + vecLeft * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
-					TaskComplete();
+					success = true;
 				}
-				if( !TaskIsComplete() && MoveToLocation( ACT_WALK, 2, pev->origin - vecLeft * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
+				if( !success && MoveToLocation( movementActivity, waitTime, pev->origin - vecLeft * pTask->flData * 0.5f, BUILDROUTE_NO_NODEROUTE|BUILDROUTE_NO_TRIANGULATION ) )
 				{
-					TaskComplete();
+					success = true;
 				}
 				else
 				{
@@ -394,13 +393,13 @@ void CFollowingMonster::StartTask( Task_t *pTask )
 				}
 			}
 
-			if( !TaskIsComplete() )
+			if( !success )
 			{
-				if ( FindSpotAway( pev->origin, 0, Q_max(256.0f, pTask->flData), FINDSPOTAWAY_WALK ) )
+				if ( FindSpotAway( pev->origin, 0, Q_max(256.0f, pTask->flData), pTask->iTask == TASK_MOVE_AWAY_PATH_RUNNING ? FINDSPOTAWAY_RUN : FINDSPOTAWAY_WALK ) )
 				{
 					// then try for plain ole cover
-					m_flMoveWaitFinished = gpGlobals->time + 2.0f;
-					TaskComplete();
+					m_flMoveWaitFinished = gpGlobals->time + waitTime;
+					success = true;
 				}
 				else
 				{
@@ -505,7 +504,8 @@ void CFollowingMonster::RunTask( Task_t *pTask )
 			}
 		}
 		break;
-	case TASK_WALK_PATH_FOR_UNITS:
+	case TASK_MOVE_AWAY_PATH:
+	case TASK_MOVE_AWAY_PATH_RUNNING:
 		{
 			float distance = ( m_vecLastPosition - pev->origin ).Length2D();
 
@@ -513,7 +513,7 @@ void CFollowingMonster::RunTask( Task_t *pTask )
 			if( distance > pTask->flData || MovementIsComplete() )
 			{
 				TaskComplete();
-				RouteClear();		// Stop moving
+				//RouteClear();		Called by TASK_STOP_MOVING
 			}
 		}
 		break;
