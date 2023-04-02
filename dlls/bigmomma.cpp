@@ -535,7 +535,7 @@ void CBigMomma::HandleAnimEvent( MonsterEvent_t *pEvent )
 			{
 				CBaseEntity *pTarget = m_hTargetEnt;
 				if( pTarget && pTarget->pev->message )
-					FireTargets( STRING( pTarget->pev->message ), this, this, USE_TOGGLE, 0 );
+					FireTargets( STRING( pTarget->pev->message ), this, this );
 				Remember( bits_MEMORY_FIRED_NODE );
 			}
 			break;
@@ -769,7 +769,7 @@ void CBigMomma::NodeReach( void )
 	if( !HasMemory( bits_MEMORY_FIRED_NODE ) )
 	{
 		if( pTarget->pev->message )
-			FireTargets( STRING( pTarget->pev->message ), this, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( pTarget->pev->message ), this, this );
 	}
 	Forget( bits_MEMORY_FIRED_NODE );
 

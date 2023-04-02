@@ -345,7 +345,7 @@ void CLocusBeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 	if (pev->target)
 	{
-		FireTargets( STRING(pev->target), pBeam, this, USE_TOGGLE, 0 );
+		FireTargets( STRING(pev->target), pBeam, this );
 	}
 }
 
@@ -968,7 +968,7 @@ void CLocusVariable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		pMark->pev->targetname = m_iszTargetName;
 		pMark->pev->nextthink = gpGlobals->time + m_fDuration;
 
-		FireTargets(STRING(m_iszFireOnSpawn), pMark, this, USE_TOGGLE, 0);
+		FireTargets(STRING(m_iszFireOnSpawn), pMark, this);
 	}
 	else
 	{
@@ -976,6 +976,6 @@ void CLocusVariable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		pev->movedir = vecDir;
 		pev->frags = fRatio;
 
-		FireTargets(STRING(m_iszFireOnSpawn), this, this, USE_TOGGLE, 0);
+		FireTargets(STRING(m_iszFireOnSpawn), this, this);
 	}
 }

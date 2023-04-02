@@ -388,7 +388,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	{
 		if (m_triggerOnFirstUse)
 		{
-			FireTargets( STRING( m_triggerOnFirstUse ), pPlayer, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( m_triggerOnFirstUse ), pPlayer, this );
 			m_triggerOnFirstUse = iStringNull;
 		}
 		m_iJuice--;
@@ -397,7 +397,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 			pev->skin = 1;
 			if (m_triggerOnEmpty)
 			{
-				FireTargets( STRING( m_triggerOnEmpty ), pPlayer, this, USE_TOGGLE, 0 );
+				FireTargets( STRING( m_triggerOnEmpty ), pPlayer, this );
 			}
 		}
 		pPlayer->pev->armorvalue += 1;

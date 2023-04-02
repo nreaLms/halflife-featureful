@@ -1848,7 +1848,7 @@ void CGibShooter::ShootThink( void )
 			}
 
 			if (m_iszSpawnTarget)
-				FireTargets( STRING(m_iszSpawnTarget), pGib, this, USE_TOGGLE, 0 );
+				FireTargets( STRING(m_iszSpawnTarget), pGib, this );
 		}
 
 		i--;

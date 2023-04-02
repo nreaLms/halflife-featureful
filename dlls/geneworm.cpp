@@ -724,7 +724,7 @@ void CGeneWorm::DyingThink(void)
 
 		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "geneworm/geneworm_death.wav", 1, 0.1, 0, 100);
 
-		FireTargets("GeneWormDead", this, this, USE_TOGGLE, 0);
+		FireTargets("GeneWormDead", this, this);
 
 		m_flDeathStart = gpGlobals->time;
 		pev->deadflag = DEAD_DYING;

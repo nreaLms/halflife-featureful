@@ -741,7 +741,7 @@ BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comple
 		if( !m_firedOnAnimStart && !FStringNull( m_iszFireOnAnimStart ) )
 		{
 			CBaseEntity* pActivator = GetActivator(pTarget);
-			FireTargets( STRING( m_iszFireOnAnimStart ), pActivator, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( m_iszFireOnAnimStart ), pActivator, this );
 		}
 		m_firedOnAnimStart = TRUE;
 	}
@@ -944,7 +944,7 @@ void CCineMonster::DelayStart( int state )
 		if (state == 0 && !FStringNull(m_iszFireOnBegin))
 		{
 			CBaseEntity* pActivator = GetActivator(m_hTargetEnt);
-			FireTargets(STRING(m_iszFireOnBegin), pActivator, this, USE_TOGGLE, 0);
+			FireTargets(STRING(m_iszFireOnBegin), pActivator, this);
 		}
 		return;
 	}
@@ -968,7 +968,7 @@ void CCineMonster::DelayStart( int state )
 					pTarget->m_startTime = gpGlobals->time + 0.05f;
 
 					CBaseEntity* pActivator = GetActivator(m_hTargetEnt);
-					FireTargets(STRING(m_iszFireOnBegin), pActivator, this, USE_TOGGLE, 0); //LRC
+					FireTargets(STRING(m_iszFireOnBegin), pActivator, this); //LRC
 				}
 			}
 		}

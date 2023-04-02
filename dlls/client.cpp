@@ -528,7 +528,7 @@ void ClientCommand( edict_t *pEntity )
 			CBaseEntity *pPlayer = CBaseEntity::Instance( pEntity );
 			if( CMD_ARGC() > 1 )
 			{
-				FireTargets( CMD_ARGV( 1 ), pPlayer, pPlayer, USE_TOGGLE, 0 );
+				FireTargets( CMD_ARGV( 1 ), pPlayer, pPlayer );
 			}
 			else
 			{

@@ -4668,12 +4668,12 @@ void CBasePlayer::UpdateClientData( void )
 
 			if( g_pGameRules->IsMultiplayer() )
 			{
-				FireTargets( "game_playerjoin", this, this, USE_TOGGLE, 0 );
+				FireTargets( "game_playerjoin", this, this );
 			}
 		}
 
 		if( g_pGameRules->IsMultiplayer() )
-			FireTargets( "game_playerspawn", this, this, USE_TOGGLE, 0 );
+			FireTargets( "game_playerspawn", this, this );
 
 		// Send flashlight status
 		MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );

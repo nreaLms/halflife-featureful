@@ -94,7 +94,7 @@ typedef enum
 	USE_TOGGLE = 3
 } USE_TYPE;
 
-extern void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+extern void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType = USE_TOGGLE, float value = 0.0f );
 extern void KillTargets( const char *targetName );
 
 typedef void(CBaseEntity::*BASEPTR)( void );

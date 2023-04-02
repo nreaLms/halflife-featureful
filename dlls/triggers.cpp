@@ -453,7 +453,7 @@ void CMultiManager::ManagerThink( void )
 				useType = USE_OFF;
 			else if (mmUseType == MM_USE_ON)
 				useType = USE_ON;
-			FireTargets( STRING( m_iTargetName[m_index] ), m_hActivator, this, useType, 0 );
+			FireTargets( STRING( m_iTargetName[m_index] ), m_hActivator, this, useType );
 		}
 		m_index++;
 	}
@@ -831,7 +831,7 @@ void CRenderFxManager::Affect( CBaseEntity *pTarget, bool bIsFirst, CBaseEntity 
 			pevTarget->scale = pev->scale;
 
 		if (bIsFirst)
-			FireTargets( STRING(pev->netname), pTarget, this, USE_TOGGLE, 0 );
+			FireTargets( STRING(pev->netname), pTarget, this );
 	}
 	else
 	{
@@ -2919,7 +2919,7 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 
 	if (!FStringNull(pev->message))
 	{
-		FireTargets(STRING(pev->message), pActivator, this, USE_TOGGLE, 0.0f);
+		FireTargets(STRING(pev->message), pActivator, this);
 	}
 }
 
@@ -3183,7 +3183,7 @@ void CTriggerCamera::Move()
 		// Fire the passtarget if there is one
 		if( m_pentPath->pev->message )
 		{
-			FireTargets( STRING( m_pentPath->pev->message ), this, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( m_pentPath->pev->message ), this, this );
 			if( FBitSet( m_pentPath->pev->spawnflags, SF_CORNER_FIREONCE ) )
 				m_pentPath->pev->message = 0;
 		}
@@ -3426,7 +3426,7 @@ void CTriggerRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	} else {
 		string_t chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
-			FireTargets(STRING(chosenTarget), pActivator, this, USE_TOGGLE, value);
+			FireTargets(STRING(chosenTarget), pActivator, this);
 		}
 		DoUnique();
 	}
@@ -3437,7 +3437,7 @@ void CTriggerRandom::TimedThink()
 	if (IsActive()) {
 		string_t chosenTarget = ChooseTarget();
 		if (!FStringNull(chosenTarget)) {
-			FireTargets(STRING(chosenTarget), this, this, USE_TOGGLE, 0);
+			FireTargets(STRING(chosenTarget), this, this);
 		}
 		DoUnique();
 
@@ -3448,7 +3448,7 @@ void CTriggerRandom::TimedThink()
 				m_triggerCounter = 0;
 
 				if (!FStringNull(m_triggerOnLimit))
-					FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
+					FireTargets(STRING(m_triggerOnLimit), this, this);
 			}
 		}
 
@@ -3538,7 +3538,7 @@ void CTriggerRandom::DoUnique()
 
 		if (!m_uniqueTargetsLeft) {
 			if (!FStringNull(m_triggerOnExhaust))
-				FireTargets(STRING(m_triggerOnExhaust), this, this, USE_TOGGLE, 0.0f);
+				FireTargets(STRING(m_triggerOnExhaust), this, this);
 			if ((pev->spawnflags & SF_TRIGGER_RANDOM_REUSABLE))
 				m_uniqueTargetsLeft = TargetCount();
 		}
@@ -3971,7 +3971,7 @@ void CTriggerTimer::TimerThink()
 {
 	if (m_active) {
 		if (!FStringNull(pev->target)) {
-			FireTargets(STRING(pev->target), this, this, USE_TOGGLE, 0);
+			FireTargets(STRING(pev->target), this, this);
 		}
 
 		if (m_triggerNumberLimit) {
@@ -3979,7 +3979,7 @@ void CTriggerTimer::TimerThink()
 			if (m_triggerCounter >= m_triggerNumberLimit) {
 				SetActive(FALSE);
 				if (!FStringNull(m_triggerOnLimit))
-					FireTargets(STRING(m_triggerOnLimit), this, this, USE_TOGGLE, 0.0f);
+					FireTargets(STRING(m_triggerOnLimit), this, this);
 				return;
 			}
 		}
@@ -5250,7 +5250,7 @@ void CTriggerEntityIterator::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 
 	if (!FStringNull(m_triggerAfterRun))
 	{
-		FireTargets(STRING(m_triggerAfterRun), pActivator, this, USE_TOGGLE, 0.0f);
+		FireTargets(STRING(m_triggerAfterRun), pActivator, this);
 	}
 
 	if (m_maxRuns > 0)

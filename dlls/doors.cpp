@@ -916,12 +916,12 @@ void CBaseDoor::DoorGoUp( void )
 	if ( pev->spawnflags & SF_DOOR_START_OPEN )
 	{
 		if (m_fireOnClosing)
-			FireTargets(STRING(m_fireOnClosing), m_hActivator, this, (USE_TYPE)m_fireOnClosingState, 0.0f);
+			FireTargets(STRING(m_fireOnClosing), m_hActivator, this, (USE_TYPE)m_fireOnClosingState);
 	}
 	else
 	{
 		if (m_fireOnOpening)
-			FireTargets(STRING(m_fireOnOpening), m_hActivator, this, (USE_TYPE)m_fireOnOpeningState, 0.0f);
+			FireTargets(STRING(m_fireOnOpening), m_hActivator, this, (USE_TYPE)m_fireOnOpeningState);
 	}
 }
 
@@ -961,17 +961,17 @@ void CBaseDoor::DoorHitTop( void )
 
 	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
 	if( pev->netname && ( pev->spawnflags & SF_DOOR_START_OPEN ) )
-		FireTargets( STRING( pev->netname ), m_hActivator, this, USE_TOGGLE, 0 );
+		FireTargets( STRING( pev->netname ), m_hActivator, this, USE_TOGGLE );
 
 	if ( pev->spawnflags & SF_DOOR_START_OPEN )
 	{
 		if (m_fireOnClosed)
-			FireTargets(STRING(m_fireOnClosed), m_hActivator, this, (USE_TYPE)m_fireOnClosedState, 0.0f);
+			FireTargets(STRING(m_fireOnClosed), m_hActivator, this, (USE_TYPE)m_fireOnClosedState);
 	}
 	else
 	{
 		if (m_fireOnOpened)
-			FireTargets(STRING(m_fireOnOpened), m_hActivator, this, (USE_TYPE)m_fireOnOpenedState, 0.0f);
+			FireTargets(STRING(m_fireOnOpened), m_hActivator, this, (USE_TYPE)m_fireOnOpenedState);
 	}
 
 	SUB_UseTargets( m_hActivator, USE_TOGGLE, 0 ); // this isn't finished
@@ -1036,17 +1036,17 @@ void CBaseDoor::DoorHitBottom( void )
 
 	// Fire the close target (if startopen is set, then "top" is closed) - netname is the close target
 	if( pev->netname && !( pev->spawnflags & SF_DOOR_START_OPEN ) )
-		FireTargets( STRING( pev->netname ), m_hActivator, this, USE_TOGGLE, 0 );
+		FireTargets( STRING( pev->netname ), m_hActivator, this, USE_TOGGLE );
 
 	if ( pev->spawnflags & SF_DOOR_START_OPEN )
 	{
 		if (m_fireOnOpened)
-			FireTargets(STRING(m_fireOnOpened), m_hActivator, this, (USE_TYPE)m_fireOnOpenedState, 0.0f);
+			FireTargets(STRING(m_fireOnOpened), m_hActivator, this, (USE_TYPE)m_fireOnOpenedState);
 	}
 	else
 	{
 		if (m_fireOnClosed)
-			FireTargets(STRING(m_fireOnClosed), m_hActivator, this, (USE_TYPE)m_fireOnClosedState, 0.0f);
+			FireTargets(STRING(m_fireOnClosed), m_hActivator, this, (USE_TYPE)m_fireOnClosedState);
 	}
 }
 

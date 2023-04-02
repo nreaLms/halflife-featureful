@@ -159,7 +159,7 @@ void CWallCharger::Recharge( void )
 {
 	if (m_triggerOnRecharged)
 	{
-		FireTargets( STRING( m_triggerOnRecharged ), this, this, USE_TOGGLE, 0 );
+		FireTargets( STRING( m_triggerOnRecharged ), this, this );
 	}
 	const char* rechargeSound = RechargeSound();
 	if (rechargeSound)
@@ -293,7 +293,7 @@ void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	{
 		if (m_triggerOnEmpty && pev->frame == OnStateFrame())
 		{
-			FireTargets( STRING( m_triggerOnEmpty ), this, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( m_triggerOnEmpty ), this, this );
 		}
 		pev->frame = OffStateFrame();
 		Off();
@@ -325,7 +325,7 @@ void CWallCharger::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	{
 		if (m_triggerOnFirstUse)
 		{
-			FireTargets( STRING( m_triggerOnFirstUse ), this, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( m_triggerOnFirstUse ), this, this );
 			m_triggerOnFirstUse = 0;
 		}
 		m_iJuice--;
@@ -758,7 +758,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	{
 		if (m_triggerOnFirstUse)
 		{
-			FireTargets( STRING( m_triggerOnFirstUse ), pPlayer, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( m_triggerOnFirstUse ), pPlayer, this );
 			m_triggerOnFirstUse = iStringNull;
 		}
 		m_iJuice--;
@@ -767,7 +767,7 @@ void CWallHealthDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 			pev->skin = 1;
 			if (m_triggerOnEmpty)
 			{
-				FireTargets( STRING( m_triggerOnEmpty ), pPlayer, this, USE_TOGGLE, 0 );
+				FireTargets( STRING( m_triggerOnEmpty ), pPlayer, this );
 			}
 		}
 		UpdateJar();

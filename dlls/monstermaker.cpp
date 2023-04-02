@@ -755,7 +755,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 			break;
 		}
 		// delay already overloaded for this entity, so can't call SUB_UseTargets()
-		FireTargets( STRING( pev->target ), pActivator, this, USE_TOGGLE, 0 );
+		FireTargets( STRING( pev->target ), pActivator, this );
 	}
 
 	return CBaseEntity::Instance(pevCreate);

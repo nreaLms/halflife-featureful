@@ -773,7 +773,7 @@ void CFuncTrain::Wait( void )
 	// Fire the pass target if there is one
 	if( m_pevCurrentTarget->message )
 	{
-		FireTargets( STRING( m_pevCurrentTarget->message ), this, this, USE_TOGGLE, 0 );
+		FireTargets( STRING( m_pevCurrentTarget->message ), this, this );
 		if( FBitSet( m_pevCurrentTarget->spawnflags, SF_CORNER_FIREONCE ) )
 			m_pevCurrentTarget->message = 0;
 	}
@@ -1309,7 +1309,7 @@ void CFuncTrackTrain::Next( void )
 			// Fire the pass target if there is one
 			if( pFire->pev->message )
 			{
-				FireTargets( STRING( pFire->pev->message ), this, this, USE_TOGGLE, 0 );
+				FireTargets( STRING( pFire->pev->message ), this, this );
 				if( FBitSet( pFire->pev->spawnflags, SF_PATH_FIREONCE ) )
 					pFire->pev->message = 0;
 			}
@@ -1399,7 +1399,7 @@ void CFuncTrackTrain::DeadEnd( void )
 	{
 		ALERT( at_aiconsole, "at %s\n", STRING( pTrack->pev->targetname ) );
 		if( pTrack->pev->netname )
-			FireTargets( STRING( pTrack->pev->netname ), this, this, USE_TOGGLE, 0 );
+			FireTargets( STRING( pTrack->pev->netname ), this, this );
 	}
 	else
 		ALERT( at_aiconsole, "\n" );
@@ -2289,7 +2289,7 @@ void CGunTarget::Wait( void )
 	// Fire the pass target if there is one
 	if( pTarget->pev->message )
 	{
-		FireTargets( STRING(pTarget->pev->message), this, this, USE_TOGGLE, 0 );
+		FireTargets( STRING(pTarget->pev->message), this, this );
 		if( FBitSet( pTarget->pev->spawnflags, SF_CORNER_FIREONCE ) )
 			pTarget->pev->message = 0;
 	}
@@ -2326,7 +2326,7 @@ int CGunTarget::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			pev->health = 0;
 			Stop();
 			if( pev->message )
-				FireTargets( STRING( pev->message ), this, this, USE_TOGGLE, 0 );
+				FireTargets( STRING( pev->message ), this, this );
 		}
 	}
 	return 0;

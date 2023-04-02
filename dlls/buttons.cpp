@@ -276,8 +276,8 @@ void CEnvState::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 					ALERT(at_console,": firing \"%s\"",STRING(m_fireWhenOff));
 				ALERT(at_console,".\n");
 			}
-			FireTargets(STRING(pev->target),pActivator,this,USE_OFF,0);
-			FireTargets(STRING(m_fireWhenOff),pActivator,this,USE_TOGGLE,0);
+			FireTargets(STRING(pev->target),pActivator,this,USE_OFF);
+			FireTargets(STRING(m_fireWhenOff),pActivator,this);
 			pev->nextthink = -1;
 		}
 		break;
@@ -308,8 +308,8 @@ void CEnvState::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 					ALERT(at_console,": firing \"%s\"", STRING(m_fireWhenOn));
 				ALERT(at_console,".\n");
 			}
-			FireTargets(STRING(pev->target),pActivator,this,USE_ON,0);
-			FireTargets(STRING(m_fireWhenOn),pActivator,this,USE_TOGGLE,0);
+			FireTargets(STRING(pev->target),pActivator,this,USE_ON);
+			FireTargets(STRING(m_fireWhenOn),pActivator,this);
 			pev->nextthink = -1;
 		}
 		break;
@@ -336,8 +336,8 @@ void CEnvState::Think( void )
 				ALERT(at_console,": firing %s",STRING(m_fireWhenOn));
 			ALERT(at_console,".\n");
 		}
-		FireTargets(STRING(pev->target),this,this,USE_ON,0);
-		FireTargets(STRING(m_fireWhenOn),this,this,USE_TOGGLE,0);
+		FireTargets(STRING(pev->target),this,this,USE_ON);
+		FireTargets(STRING(m_fireWhenOn),this,this);
 	}
 	else if (m_iState == STATE_TURN_OFF)
 	{
@@ -355,8 +355,8 @@ void CEnvState::Think( void )
 				ALERT(at_console,": firing %s",STRING(m_fireWhenOff));
 			ALERT(at_console,".\n");
 		}
-		FireTargets(STRING(pev->target),this,this,USE_OFF,0);
-		FireTargets(STRING(m_fireWhenOff),this,this,USE_TOGGLE,0);
+		FireTargets(STRING(pev->target),this,this,USE_OFF);
+		FireTargets(STRING(m_fireWhenOff),this,this);
 	}
 }
 
@@ -1083,7 +1083,7 @@ void CBaseButton::ButtonActivate()
 	
 	if (!FStringNull(m_triggerBeforeMove))
 	{
-		FireTargets(STRING(m_triggerBeforeMove), m_hActivator, this, USE_TOGGLE, 0.0f );
+		FireTargets(STRING(m_triggerBeforeMove), m_hActivator, this );
 	}
 
 	if (m_fNonMoving)
@@ -1106,7 +1106,7 @@ void CBaseButton::OnLocked()
 	{
 		if (m_targetOnLockedTime < gpGlobals->time)
 		{
-			FireTargets(STRING(m_targetOnLocked), m_hActivator, this, USE_TOGGLE, 0.0f);
+			FireTargets(STRING(m_targetOnLocked), m_hActivator, this);
 			m_targetOnLockedTime = gpGlobals->time + 2.0f;
 		}
 	}
@@ -1247,7 +1247,7 @@ void CBaseButton::ButtonBackHome( void )
 	}
 
 	if (!FStringNull(m_triggerOnReturn))
-		FireTargets(STRING(m_triggerOnReturn), m_hActivator, this, USE_TOGGLE, 0.0f);
+		FireTargets(STRING(m_triggerOnReturn), m_hActivator, this);
 }
 
 bool CBaseButton::IsSparkingButton()

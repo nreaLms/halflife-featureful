@@ -3139,7 +3139,7 @@ void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 		SENTENCEG_PlayRndSz( edict(), pEvent->options, 1.0, ATTN_IDLE, 0, 100 );
 		break;
 	case SCRIPT_EVENT_FIREEVENT:		// Fire a trigger
-		FireTargets( pEvent->options, this, this, USE_TOGGLE, 0 );
+		FireTargets( pEvent->options, this, this );
 		break;
 	case SCRIPT_EVENT_NOINTERRUPT:		// Can't be interrupted from now on
 		if( m_pCine )
@@ -3737,7 +3737,7 @@ BOOL CBaseMonster::FCheckAITrigger( short condition )
 		// fire the target, then set the trigger conditions to NONE so we don't fire again
 		if (m_iszTriggerTarget)
 			ALERT( at_aiconsole, "%s: AI Trigger Fire Target %s\n", STRING(pev->classname), STRING(m_iszTriggerTarget) );
-		FireTargets( STRING( m_iszTriggerTarget ), this, this, USE_TOGGLE, 0 );
+		FireTargets( STRING( m_iszTriggerTarget ), this, this );
 		m_iTriggerCondition = AITRIGGER_NONE;
 		m_iTriggerAltCondition = AITRIGGER_NONE;
 		return TRUE;

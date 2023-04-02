@@ -175,7 +175,7 @@ void CHalfLifeRules::PlayerThink( CBasePlayer *pPlayer )
 			}
 		}
 
-		FireTargets( "game_playerspawn", pPlayer, pPlayer, USE_TOGGLE, 0 );
+		FireTargets( "game_playerspawn", pPlayer, pPlayer );
 		pPlayer->m_settingsLoaded = true;
 	}
 }
