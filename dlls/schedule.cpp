@@ -2102,7 +2102,7 @@ Schedule_t *CBaseMonster::GetSchedule( void )
 
 			if ( HasConditions( bits_COND_ENEMY_LOST ) )
 			{
-				ALERT(at_aiconsole, "%s did not see an enemy for a while. Just forget about it\n", STRING(pev->classname));
+				ALERT(at_aiconsole, "%s did not see an enemy %s for a while. Just forget about it\n", STRING(pev->classname), m_hEnemy != 0 ? STRING(m_hEnemy->pev->classname) : "");
 				m_hEnemy = NULL;
 
 				if( GetEnemy(true) )
