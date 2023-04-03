@@ -4353,8 +4353,10 @@ public:
 	void EXPORT FadeInDone( void );
 	void EXPORT FadeOutDone( void );
 	void SendMessages(CBaseEntity *pClient);
-	void SendData( Vector col, int iFadeTime, int iStartDist, int iEndDist);
-	void SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int iStartDist, int iEndDist);
+	void SendData() { SendData(pev->rendercolor, 0, m_iStartDist, m_iEndDist, m_density); }
+	void SendDataDeactivate() { SendData(g_vecZero, 0, 0, 0, 0); }
+	void SendData(Vector col, int iFadeTime, int iStartDist, int iEndDist, float density);
+	void SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int iStartDist, int iEndDist, float density);
 	void KeyValue( KeyValueData *pkvd );
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -4456,14 +4458,14 @@ void CEnvFog :: TurnOn ( void )
 	if( m_iFadeIn )
 	{
 		pev->spawnflags |= SF_FOG_FADING;
-		SendData( pev->rendercolor, m_iFadeIn, m_iStartDist, m_iEndDist);
+		SendData( pev->rendercolor, m_iFadeIn, m_iStartDist, m_iEndDist, m_density);
 		pev->nextthink = gpGlobals->time + m_iFadeIn;
 		SetThink(&CEnvFog :: FadeInDone );
 	}
 	else
 	{
 		pev->spawnflags &= ~SF_FOG_FADING;
-		SendData( pev->rendercolor, 0, m_iStartDist, m_iEndDist);
+		SendData();
 		if (m_fHoldTime)
 		{
 			pev->nextthink = gpGlobals->time + m_fHoldTime;
@@ -4481,14 +4483,14 @@ void CEnvFog :: TurnOff ( void )
 	if( m_iFadeOut )
 	{
 		pev->spawnflags |= SF_FOG_FADING;
-		SendData( pev->rendercolor, -m_iFadeOut, m_iStartDist, m_iEndDist);
+		SendData( pev->rendercolor, -m_iFadeOut, m_iStartDist, m_iEndDist, m_density);
 		pev->nextthink = gpGlobals->time  + m_iFadeOut;
 		SetThink(&CEnvFog :: FadeOutDone );
 	}
 	else
 	{
 		pev->spawnflags &= ~SF_FOG_FADING;
-		SendData( g_vecZero, 0, 0, 0 );
+		SendDataDeactivate();
 		//DontThink();
 	}
 }
@@ -4507,7 +4509,7 @@ void CEnvFog :: ResumeThink ( void )
 void CEnvFog :: FadeInDone ( void )
 {
 	pev->spawnflags &= ~SF_FOG_FADING;
-	SendData( pev->rendercolor, 0, m_iStartDist, m_iEndDist);
+	SendData();
 
 	if (m_fHoldTime)
 	{
@@ -4519,7 +4521,7 @@ void CEnvFog :: FadeInDone ( void )
 void CEnvFog :: FadeOutDone ( void )
 {
 	pev->spawnflags &= ~SF_FOG_FADING;
-	SendData( g_vecZero, 0, 0, 0);
+	SendDataDeactivate();
 }
 
 void CEnvFog :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -4537,23 +4539,23 @@ void CEnvFog::SendMessages(CBaseEntity *pClient)
 {
 	if (FBitSet(pev->spawnflags, SF_FOG_ACTIVE) && pClient)
 	{
-		SendDataToOne(pClient, pev->rendercolor, 0, m_iStartDist, m_iEndDist);
+		SendDataToOne(pClient, pev->rendercolor, 0, m_iStartDist, m_iEndDist, m_density);
 	}
 }
 
-void CEnvFog::SendData ( Vector col, int iFadeTime, int iStartDist, int iEndDist )
+void CEnvFog::SendData ( Vector col, int iFadeTime, int iStartDist, int iEndDist, float density )
 {
 	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
 		if ( pPlayer )
 		{
-			SendDataToOne(pPlayer, col, iFadeTime, iStartDist, iEndDist);
+			SendDataToOne(pPlayer, col, iFadeTime, iStartDist, iEndDist, density);
 		}
 	}
 }
 
-void CEnvFog::SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int iStartDist, int iEndDist)
+void CEnvFog::SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int iStartDist, int iEndDist, float density)
 {
 	MESSAGE_BEGIN( MSG_ONE, gmsgSetFog, NULL, pClient->pev );
 		WRITE_BYTE ( col.x );
@@ -4562,7 +4564,7 @@ void CEnvFog::SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int
 		WRITE_SHORT ( iFadeTime );
 		WRITE_SHORT ( iStartDist );
 		WRITE_SHORT ( iEndDist );
-		WRITE_LONG ( m_density * 10000 );
+		WRITE_LONG ( density * 10000 );
 		WRITE_BYTE ( m_fogType );
 	MESSAGE_END();
 }
