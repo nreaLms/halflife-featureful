@@ -2791,7 +2791,14 @@ BOOL CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float fl
 			if( traceOk )
 			{
 				// ..and is also closer to me than the threat, or the same distance from myself and the threat the node is good.
-				if( ( iMyNode == iThreatNode ) || WorldGraph.PathLength( iMyNode, nodeNumber, iMyHullIndex, m_afCapability ) <= WorldGraph.PathLength( iThreatNode, nodeNumber, iMyHullIndex, m_afCapability ) )
+				bool distanceOk = iMyNode == iThreatNode;
+				if (!distanceOk)
+				{
+					float myPathLength = WorldGraph.PathLength( iMyNode, nodeNumber, iMyHullIndex, m_afCapability );
+					float threatPathLength = WorldGraph.PathLength( iThreatNode, nodeNumber, iMyHullIndex, m_afCapability );
+					distanceOk = myPathLength <= threatPathLength || threatPathLength < 0;
+				}
+				if( distanceOk )
 				{
 					if( (!FBitSet(flags, FINDSPOTAWAY_CHECK_SPOT) || FValidateCover( node.m_vecOrigin )) && MoveToLocation( FBitSet(flags, FINDSPOTAWAY_RUN) ? ACT_RUN : ACT_WALK, 0, node.m_vecOrigin ) )
 					{

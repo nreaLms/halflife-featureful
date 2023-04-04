@@ -445,14 +445,14 @@ float CGraph::PathLength( int iStart, int iDest, int iHull, int afCapMask )
 		if( iMaxLoop-- <= 0 )
 		{
 			ALERT( at_console, "Route Failure\n" );
-			return 0;
+			return -1;
 		}
 
 		iNext = NextNodeInRoute( iCurrentNode, iDest, iHull, iCap );
 		if( iCurrentNode == iNext )
 		{
 			//ALERT( at_aiconsole, "SVD: Can't get there from here..\n" );
-			return 0;
+			return -1;
 		}
 
 		int iLink;
@@ -460,7 +460,7 @@ float CGraph::PathLength( int iStart, int iDest, int iHull, int afCapMask )
 		if( iLink < 0 )
 		{
 			ALERT( at_console, "HashLinks is broken from %d to %d.\n", iCurrentNode, iDest );
-			return 0;
+			return -1;
 		}
 		CLink &link = Link( iLink );
 		distance += link.m_flWeight;
