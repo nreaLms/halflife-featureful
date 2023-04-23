@@ -29,8 +29,6 @@
 #include "gamerules.h"
 #include "game.h"
 
-extern CGraph WorldGraph;
-
 //=========================================================
 // FHaveSchedule - Returns TRUE if monster's m_pSchedule
 // is anything other than NULL.
