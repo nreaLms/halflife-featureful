@@ -1433,14 +1433,18 @@ void GameDLLInit( void )
 #endif
 
 	// Shock rifle
+#if FEATURE_SHOCKBEAM
 	if (g_modFeatures.ShockBeamEnabled())
 	{
 		REGISTER_SKILL_CVARS(sk_plr_shockroachs);
 		REGISTER_SKILL_CVARS(sk_plr_shockroachm);
 	}
+#endif
 
+#if FEATURE_SPOREGRENADE
 	if (g_modFeatures.SporesEnabled())
 		REGISTER_SKILL_CVARS(sk_plr_spore);
+#endif
 
 #if FEATURE_DISPLACER
 	if (g_modFeatures.DisplacerBallEnabled())
