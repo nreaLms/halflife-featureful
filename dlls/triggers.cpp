@@ -5582,6 +5582,7 @@ public:
 	float m_flLookTime;
 	float m_flLookTimeTotal;
 	float m_flLookTimeLast;
+	float m_flTouchTimeLast;
 	string_t m_sMaster;
 
 	virtual int Save( CSave &save );
@@ -5598,6 +5599,7 @@ TYPEDESCRIPTION	CTriggerLook::m_SaveData[] =
 	DEFINE_FIELD( CTriggerLook, m_flLookTime, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerLook, m_flLookTimeTotal, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerLook, m_flLookTimeLast, FIELD_TIME ),
+	DEFINE_FIELD( CTriggerLook, m_flTouchTimeLast, FIELD_TIME ),
 	DEFINE_FIELD( CTriggerLook, m_sMaster, FIELD_STRING ),
 };
 
@@ -5653,11 +5655,13 @@ void CTriggerLook::Touch(CBaseEntity *pOther)
 		}
 	}
 
-	if (m_flLookTimeLast && gpGlobals->time - m_flLookTimeLast >= 0.5f )
+	if (gpGlobals->time - m_flTouchTimeLast >= 0.2f )
 	{
 		// haven't been touched for a while
 		m_flLookTimeTotal = -1.0f;
 	}
+
+	m_flTouchTimeLast = gpGlobals->time;
 
 	UTIL_MakeVectors( pOther->pev->v_angle );
 	const Vector vLookDir = gpGlobals->v_forward;
