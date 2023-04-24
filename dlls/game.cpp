@@ -1442,11 +1442,13 @@ void GameDLLInit( void )
 	if (g_modFeatures.SporesEnabled())
 		REGISTER_SKILL_CVARS(sk_plr_spore);
 
+#if FEATURE_DISPLACER
 	if (g_modFeatures.DisplacerBallEnabled())
 	{
 		REGISTER_SKILL_CVARS(sk_plr_displacer_other);
 		REGISTER_SKILL_CVARS(sk_plr_displacer_radius);
 	}
+#endif
 
 #if FEATURE_UZI
 	if (g_modFeatures.IsWeaponEnabled(WEAPON_UZI))
