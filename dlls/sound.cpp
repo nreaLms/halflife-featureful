@@ -1220,7 +1220,7 @@ void CTriggerSound::Touch( CBaseEntity *pOther )
 				WRITE_SHORT( (short)m_Roomtype );					// sequence number
 			MESSAGE_END();
 
-			SUB_UseTargets(pPlayer, USE_TOGGLE, 0);
+			SUB_UseTargets(pPlayer);
 		}
 	}
 }

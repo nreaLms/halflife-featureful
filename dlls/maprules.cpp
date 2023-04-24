@@ -688,7 +688,7 @@ void CGameCounter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	if( HitLimit() )
 	{
-		SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
+		SUB_UseTargets( pActivator );
 		if( RemoveOnFire() )
 		{
 			UTIL_Remove( this );
@@ -1167,7 +1167,7 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	if (!hadWeapons)
 		player->SwitchToBestWeapon();
 
-	SUB_UseTargets(pPlayer, USE_TOGGLE, 0.0f);
+	SUB_UseTargets(pPlayer);
 }
 
 

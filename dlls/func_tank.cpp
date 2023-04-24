@@ -870,7 +870,7 @@ void CFuncTank::Fire( const Vector &barrelEnd, const Vector &forward, entvars_t 
 			// Hack Hack, make it stick around for at least 100 ms.
 			pSprite->pev->nextthink += 0.1f;
 		}
-		SUB_UseTargets( this, USE_TOGGLE, 0 );
+		SUB_UseTargets( this );
 	}
 	m_fireLast = gpGlobals->time;
 }

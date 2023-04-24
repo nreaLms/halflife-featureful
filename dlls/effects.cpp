@@ -2438,7 +2438,7 @@ void CFade::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			UTIL_ScreenFadeAll( pev->rendercolor, Duration(), HoldTime(), (int)pev->renderamt, fadeFlags );
 		}
 	}
-	SUB_UseTargets( this, USE_TOGGLE, 0 );
+	SUB_UseTargets( this );
 }
 
 class CMessage : public CPointEntity
@@ -2530,7 +2530,7 @@ void CMessage::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useT
 	if( pev->spawnflags & SF_MESSAGE_ONCE )
 		UTIL_Remove( this );
 
-	SUB_UseTargets( this, USE_TOGGLE, 0 );
+	SUB_UseTargets( this );
 }
 
 //=========================================================
@@ -3208,7 +3208,7 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	beamParams.alpha = 220;
 	DrawChaoticBeams(vecOrigin, ENT(pev), Radius(), beamParams, iBeams);
 
-	SUB_UseTargets( this, USE_TOGGLE, 0 );
+	SUB_UseTargets( this );
 
 	if( pev->spawnflags & SF_KILL_CENTER )
 	{

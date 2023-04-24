@@ -662,7 +662,7 @@ void CBasePlayerWeapon::TouchOrUse(CBaseEntity *pOther )
 		EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
 	}
 
-	SUB_UseTargets( pOther, USE_TOGGLE, 0 ); // UNDONE: when should this happen?
+	SUB_UseTargets( pOther );
 }
 
 void CBasePlayerWeapon::DestroyItem( void )
@@ -1257,7 +1257,7 @@ void CWeaponBox::TouchOrUse( CBaseEntity *pOther )
 	if (shouldRemove) {
 		EMIT_SOUND( pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
 		SetTouch( NULL );
-		SUB_UseTargets( pOther, USE_TOGGLE, 0 );
+		SUB_UseTargets( pOther );
 		UTIL_Remove(this);
 	}
 }

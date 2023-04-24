@@ -191,7 +191,7 @@ void CAutoTrigger::Think( void )
 {
 	if( !m_globalstate || gGlobalState.EntityGetState( m_globalstate ) == GLOBAL_ON )
 	{
-		SUB_UseTargets( this, triggerType, 0 );
+		SUB_UseTargets( this, triggerType );
 		if( pev->spawnflags & SF_AUTO_FIREONCE )
 			UTIL_Remove( this );
 	}
@@ -255,7 +255,7 @@ void CTriggerRelay::Spawn( void )
 
 void CTriggerRelay::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	SUB_UseTargets( FBitSet(pev->spawnflags, SF_RELAY_FORWARDACTIVATOR) ? pActivator : this, triggerType, 0 );
+	SUB_UseTargets( FBitSet(pev->spawnflags, SF_RELAY_FORWARDACTIVATOR) ? pActivator : this, triggerType );
 	if( pev->spawnflags & SF_RELAY_FIREONCE )
 		UTIL_Remove( this );
 }
@@ -729,7 +729,7 @@ void CRenderFxFader::FadeThink( void )
 		m_hTarget->pev->rendercolor = m_vecStartColor + m_vecOffsetColor;
 		m_hTarget->pev->scale = m_fStartScale + m_fOffsetScale;
 
-		SUB_UseTargets( m_hTarget, USE_TOGGLE, 0 );
+		SUB_UseTargets( m_hTarget );
 
 		if (pev->spawnflags & SF_RENDER_KILLTARGET)
 		{
@@ -1557,7 +1557,7 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 			}
 		}
 
-		SUB_UseTargets( pOther, USE_TOGGLE, 0 );
+		SUB_UseTargets( pOther );
 		if( pev->spawnflags & SF_TRIGGER_HURT_TARGETONCE )
 			pev->target = 0;
 	}
@@ -1684,7 +1684,7 @@ void CBaseTrigger::ActivateMultiTrigger( CBaseEntity *pActivator )
 	// pev->takedamage = DAMAGE_NO;
 
 	m_hActivator = pActivator;
-	SUB_UseTargets( m_hActivator, UseType(), 0 );
+	SUB_UseTargets( m_hActivator, UseType() );
 
 	if( pev->message && pActivator->IsPlayer() )
 	{
@@ -1839,7 +1839,7 @@ void CFireAndDie::Precache( void )
 
 void CFireAndDie::Think( void )
 {
-	SUB_UseTargets( this, USE_TOGGLE, 0 );
+	SUB_UseTargets( this );
 	UTIL_Remove( this );
 }
 
@@ -2054,7 +2054,7 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 	strcpy( st_szPrevMap, STRING(gpGlobals->mapname) );
 
 	m_hActivator = pActivator;
-	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
+	SUB_UseTargets( pActivator );
 	st_szNextSpot[0] = 0;	// Init landmark to NULL
 
 	// look for a landmark entity
@@ -3125,7 +3125,7 @@ void CTriggerCamera::FollowTarget()
 		player->m_hViewEntity = 0;
 		player->m_bResetViewEntity = false;
 
-		SUB_UseTargets( this, USE_TOGGLE, 0 );
+		SUB_UseTargets( this );
 		pev->avelocity = Vector( 0, 0, 0 );
 		m_state = 0;
 		return;
@@ -4174,7 +4174,7 @@ void CTriggerGenewormHit::GeneWormTouch(CBaseEntity *pOther)
 			}
 		}
 
-		SUB_UseTargets( pOther, USE_TOGGLE, 0 );
+		SUB_UseTargets( pOther );
 		if( pev->spawnflags & SF_TRIGGER_HURT_TARGETONCE )
 			pev->target = 0;
 	}
@@ -5289,7 +5289,7 @@ void CTriggerEntityIterator::Iterate(CBaseEntity *pEntity)
 		useType = USE_TOGGLE;
 		break;
 	}
-	SUB_UseTargets(pEntity, useType, 0.0f);
+	SUB_UseTargets(pEntity, useType);
 }
 #endif
 
@@ -5683,7 +5683,7 @@ void CTriggerLook::Touch(CBaseEntity *pOther)
 
 		if (m_flLookTimeTotal >= m_flLookTime)
 		{
-			SUB_UseTargets(pOther, USE_TOGGLE, 0.0f);
+			SUB_UseTargets(pOther);
 			m_flLookTimeTotal = -1.0f;
 			if (FBitSet(pev->spawnflags, SF_TRIGGERLOOK_FIREONCE))
 			{

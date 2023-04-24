@@ -237,7 +237,7 @@ void CNuclearBomb::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 			sound = "buttons/button6.wav";
 		}
 		EMIT_SOUND(ENT(pev), CHAN_VOICE, sound, VOL_NORM, ATTN_NORM);
-		SUB_UseTargets(pActivator, USE_TOGGLE, 0);
+		SUB_UseTargets(pActivator);
 		if (m_pButton)
 		{
 			m_pButton->SetNuclearBombButton(m_fOn);

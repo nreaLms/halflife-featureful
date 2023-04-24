@@ -439,7 +439,7 @@ void CItem::TouchOrUse(CBaseEntity *pOther)
 
 	if( MyTouch( pPlayer ) )
 	{
-		SUB_UseTargets( pOther, USE_TOGGLE, 0 );
+		SUB_UseTargets( pOther );
 		SetTouch( NULL );
 
 		// player grabbed the item.

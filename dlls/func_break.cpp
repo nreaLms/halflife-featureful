@@ -842,7 +842,7 @@ void CBreakable::DieToActivator( CBaseEntity* pActivator )
 	{
 		pTargetActivator = pActivator;
 	}
-	SUB_UseTargets( pTargetActivator, USE_TOGGLE, 0 );
+	SUB_UseTargets( pTargetActivator );
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = pev->ltime + 0.1f;

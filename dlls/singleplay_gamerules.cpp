@@ -168,7 +168,7 @@ void CHalfLifeRules::PlayerThink( CBasePlayer *pPlayer )
 			{
 				// If equiped from the config, just fire the game_player_settings target
 				if (readConfig)
-					pSettingEntity->SUB_UseTargets(pPlayer, USE_TOGGLE, 0.0f);
+					pSettingEntity->SUB_UseTargets(pPlayer);
 				else
 					pSettingEntity->Touch( pPlayer );
 				break;

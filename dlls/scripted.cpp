@@ -795,7 +795,7 @@ void CCineMonster::SequenceDone( CBaseMonster *pMonster )
 	// This may cause a sequence to attempt to grab this guy NOW, so we have to clear him out
 	// of the existing sequence
 	CBaseEntity* pActivator = GetActivator(pMonster);
-	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
+	SUB_UseTargets( pActivator );
 }
 
 //=========================================================
@@ -1581,7 +1581,7 @@ BOOL CScriptedSentence::StartSentence( CBaseMonster *pTarget )
 	{
 		pActivator = m_hActivator;
 	}
-	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
+	SUB_UseTargets( pActivator );
 
 	if (pListener)
 	{

@@ -327,7 +327,7 @@ void SetMovedir( entvars_t *pev )
 void CBaseDelay::DelayThink( void )
 {
 	// The use type is cached (and stashed) in pev->button
-	SUB_UseTargets( m_hActivator, (USE_TYPE)pev->button, 0 );
+	SUB_UseTargets( m_hActivator, (USE_TYPE)pev->button );
 	REMOVE_ENTITY( ENT( pev ) );
 }
 

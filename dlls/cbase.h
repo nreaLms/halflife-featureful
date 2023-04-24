@@ -297,7 +297,7 @@ public:
 
 	virtual CBaseEntity *Respawn( void ) { return NULL; }
 
-	void SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value );
+	void SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType = USE_TOGGLE, float value = 0.0f );
 	// Do the bounding boxes of these two intersect?
 	int Intersects( CBaseEntity *pOther );
 	void MakeDormant( void );
@@ -499,7 +499,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 	// common member functions
-	void SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value );
+	void SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType = USE_TOGGLE, float value = 0.0f );
 	static void DelayedUse(float delay, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, string_t target, string_t killTarget = iStringNull, float value = 0.0f );
 	void EXPORT DelayThink( void );
 };
