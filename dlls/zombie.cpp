@@ -45,6 +45,7 @@ public:
 	const char* DefaultDisplayName() { return "Zombie"; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int IgnoreConditions( void );
+	Schedule_t* GetScheduleOfType(int Type);
 
 	float m_flNextFlinch;
 
@@ -308,6 +309,15 @@ int CZombie::IgnoreConditions( void )
 	}
 
 	return iIgnore;
+}
+
+Schedule_t* CZombie::GetScheduleOfType(int Type)
+{
+	if (Type == SCHED_CHASE_ENEMY_FAILED && HasMemory(bits_MEMORY_BLOCKER_IS_ENEMY))
+	{
+		return CBaseMonster::GetScheduleOfType(SCHED_CHASE_ENEMY);
+	}
+	return CBaseMonster::GetScheduleOfType(Type);
 }
 
 class CDeadZombie : public CDeadMonster

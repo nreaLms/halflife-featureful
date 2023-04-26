@@ -2345,6 +2345,11 @@ void CBaseMonster::Move( float flInterval )
 				}
 				else
 				{
+					if (m_movementGoal == MOVEGOAL_ENEMY && pBlocker && pBlocker == m_hEnemy)
+					{
+						Remember(bits_MEMORY_BLOCKER_IS_ENEMY);
+					}
+
 					HandleBlocker(pBlocker, true);
 					if (m_pCine) {
 						m_pCine->OnMoveFail();
