@@ -1836,8 +1836,8 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				SENTENCEG_PlayRndSz(ENT(pev), SentenceByNumber(FGRUNT_SENT_ALERT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
 				JustSpoke();
 			}
-
 		}
+		break;
 
 		default:
 			CTalkMonster::HandleAnimEvent( pEvent );
