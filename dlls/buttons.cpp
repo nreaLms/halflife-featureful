@@ -740,7 +740,7 @@ void CBaseButton::KeyValue( KeyValueData *pkvd )
 		m_iDirectUse = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
-	if( FStrEq( pkvd->szKeyName, "usetype" ) )
+	else if( FStrEq( pkvd->szKeyName, "usetype" ) )
 	{
 		pev->impulse = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
