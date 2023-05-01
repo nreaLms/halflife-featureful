@@ -209,7 +209,8 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 	case MASSN_AE_DROP_GUN:
 	{
-		DropMyItems(FALSE);
+		if(GetBodygroup(MASSN_GUN_GROUP) != MASSN_GUN_NONE)
+			DropMyItems(FALSE);
 	}
 	break;
 
