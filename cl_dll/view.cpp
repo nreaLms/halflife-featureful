@@ -27,9 +27,6 @@
 #include "hltv.h"
 #include "view.h"
 
-extern cvar_t *cl_rollspeed;
-extern cvar_t *cl_rollangle;
-
 // Spectator Mode
 extern "C" 
 {
@@ -315,6 +312,9 @@ void V_AddIdle( struct ref_params_s *pparams )
 	pparams->viewangles[YAW] += v_idlescale * sin( pparams->time * v_iyaw_cycle.value ) * v_iyaw_level.value;
 }
 
+extern cvar_t *cl_rollspeed;
+extern cvar_t *cl_rollangle;
+
 /*
 ==============
 V_CalcViewRoll
@@ -324,6 +324,7 @@ Roll is induced by movement and damage
 */
 void V_CalcViewRoll( struct ref_params_s *pparams )
 {
+	float side;
 	cl_entity_t *viewentity;
 
 	viewentity = gEngfuncs.GetEntityByIndex( pparams->viewentity );
@@ -332,14 +333,14 @@ void V_CalcViewRoll( struct ref_params_s *pparams )
 
 	if (gHUD.ViewRollEnadled())
 	{
-		pparams->viewangles[ROLL] = V_CalcRoll (pparams->viewangles, pparams->simvel, cl_rollangle->value, cl_rollspeed->value ) * 4;
+		side = V_CalcRoll( viewentity->angles, pparams->simvel, cl_rollangle->value, cl_rollspeed->value );
 	}
 	else
 	{
-		float side;
 		side = V_CalcRoll( viewentity->angles, pparams->simvel, pparams->movevars->rollangle, pparams->movevars->rollspeed );
-		pparams->viewangles[ROLL] += side;
 	}
+
+	pparams->viewangles[ROLL] += side;
 
 	if( pparams->health <= 0 && ( pparams->viewheight[2] != 0 ) )
 	{

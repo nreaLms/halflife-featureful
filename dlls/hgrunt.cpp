@@ -593,7 +593,7 @@ void CHGrunt::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 	if( ptr->iHitgroup == 11 )
 	{
 		// make sure we're wearing one
-		if( GetBodygroup( 1 ) == HEAD_GRUNT && ( bitsDamageType & (DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB ) ) )
+		if( GetBodygroup( HEAD_GROUP ) == HEAD_GRUNT && ( bitsDamageType & (DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB ) ) )
 		{
 			// absorb damage
 			flDamage -= 20;
@@ -859,7 +859,8 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 		case HGRUNT_AE_DROP_GUN:
 		{
-			DropMyItems(FALSE);
+			if( GetBodygroup( GUN_GROUP ) != GUN_NONE )
+				DropMyItems(FALSE);
 		}
 			break;
 		case HGRUNT_AE_RELOAD:

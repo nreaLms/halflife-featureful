@@ -124,19 +124,9 @@ TeamFortressViewport *gViewPort = NULL;
 #endif
 mobile_engfuncs_t *gMobileEngfuncs = NULL;
 
-extern "C" int g_bhopcap;
 void InitInput( void );
 void EV_HookEvents( void );
 void IN_Commands( void );
-
-int __MsgFunc_Bhopcap( const char *pszName, int iSize, void *pbuf )
-{
-	BEGIN_READ( pbuf, iSize );
-
-	g_bhopcap = READ_BYTE();
-
-	return 1;
-}
 
 int __MsgFunc_UseSound( const char *pszName, int iSize, void *pbuf )
 {
@@ -424,7 +414,6 @@ void DLLEXPORT HUD_Init( void )
 	Scheme_Init();
 #endif
 
-	HOOK_MESSAGE( Bhopcap );
 	HOOK_MESSAGE( UseSound );
 
 	HookFXMessages();

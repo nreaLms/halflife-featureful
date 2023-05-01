@@ -141,6 +141,8 @@ extern cvar_t dmgperscore;
 extern cvar_t allydmgpenalty;
 extern cvar_t npckill;
 
+extern cvar_t bhopcap;
+
 extern cvar_t keepinventory;
 
 // Engine Cvars

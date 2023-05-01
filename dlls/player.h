@@ -432,7 +432,6 @@ public:
 	short m_movementState; // no need to save
 #endif
 
-	bool m_bSentBhopcap; // If false, the player just joined and needs a bhopcap message.
 	bool m_bSentMessages;
 
 #if FEATURE_ROPE
