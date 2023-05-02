@@ -313,7 +313,13 @@ void V_AddIdle( struct ref_params_s *pparams )
 }
 
 extern cvar_t *cl_rollspeed;
-extern cvar_t *cl_rollangle;
+
+static float GetRollAngle()
+{
+	extern cvar_t *cl_rollangle;
+	const float rollangle = cl_rollangle ? cl_rollangle->value : gHUD.clientFeatures.rollangle.defaultValue;
+	return rollangle;
+}
 
 /*
 ==============
@@ -333,7 +339,7 @@ void V_CalcViewRoll( struct ref_params_s *pparams )
 
 	if (gHUD.ViewRollEnadled())
 	{
-		side = V_CalcRoll( viewentity->angles, pparams->simvel, cl_rollangle->value, cl_rollspeed->value );
+		side = V_CalcRoll( viewentity->angles, pparams->simvel, GetRollAngle(), cl_rollspeed->value );
 	}
 	else
 	{

@@ -57,6 +57,8 @@ ConfigurableBoundedValue::ConfigurableBoundedValue(int defValue, int minimumValu
 
 ConfigurableIntegerValue::ConfigurableIntegerValue() : defaultValue(0), configurable(true) {}
 
+ConfigurableFloatValue::ConfigurableFloatValue() : defaultValue(0.0f), configurable(true) {}
+
 FlashlightFeatures::FlashlightFeatures() : color(0xFFFFFF), distance(2048)
 {
 	fade_distance.defaultValue = 600;
@@ -85,6 +87,9 @@ ClientFeatures::ClientFeatures()
 	hud_min_alpha_nvg = 192;
 
 	opfor_title = FEATURE_OPFOR_SPECIFIC ? true : false;
+
+	view_roll.configurable = false;
+	view_roll.enabled_by_default = true;
 
 	movemode.configurable = false;
 
@@ -127,6 +132,18 @@ static void CreateIntegerCvarConditionally(cvar_t*& cvarPtr, const char* name, c
 {
 	if (integerValue.configurable)
 		cvarPtr = CVAR_CREATE_INTVALUE( name, integerValue.defaultValue, FCVAR_ARCHIVE );
+	else
+		cvarPtr = 0;
+}
+
+static void CreateFloatCvarConditionally(cvar_t*& cvarPtr, const char* name, const ConfigurableFloatValue& floatValue)
+{
+	if (floatValue.configurable)
+	{
+		char valueStr[32];
+		sprintf(valueStr, "%g", floatValue.defaultValue);
+		cvarPtr = CVAR_CREATE(name, valueStr, FCVAR_ARCHIVE);
+	}
 	else
 		cvarPtr = 0;
 }
@@ -573,7 +590,7 @@ void CHud::Init( void )
 
 	CreateBooleanCvarConditionally(cl_viewbob, "cl_viewbob", clientFeatures.view_bob);
 	CreateBooleanCvarConditionally(cl_viewroll, "cl_viewroll", clientFeatures.view_roll);
-	cl_rollangle = gEngfuncs.pfnRegisterVariable ( "cl_rollangle", "2", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
+	CreateFloatCvarConditionally(cl_rollangle, "cl_rollangle", clientFeatures.rollangle);
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "200", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 	CreateBooleanCvarConditionally(cl_weapon_sparks, "cl_weapon_sparks", clientFeatures.weapon_sparks);
@@ -716,6 +733,19 @@ bool UpdateIntegerValue(ConfigurableIntegerValue& value, const char* key, const 
 	return false;
 }
 
+bool UpdateFloatValue(ConfigurableFloatValue& value, const char* key, const char* valueStr)
+{
+	if (strcmp("default", key) == 0)
+	{
+		return ParseFloat(valueStr, value.defaultValue);
+	}
+	else if (strcmp("configurable", key) == 0)
+	{
+		return ParseBoolean(valueStr, value.configurable);
+	}
+	return false;
+}
+
 bool UpdateNVGValue(NVGFeatures& nvg, const char* key, const char* valueStr)
 {
 	const char* subKey = 0;
@@ -781,6 +811,9 @@ void CHud::ParseClientFeatures()
 	KeyValueDefinition<ConfigurableBoundedValue> configurableBounds[] = {
 		{ "flashlight.radius.", clientFeatures.flashlight.radius },
 		{ "flashlight.fade_distance.", clientFeatures.flashlight.fade_distance },
+	};
+	KeyValueDefinition<ConfigurableFloatValue> configurableFloats[] = {
+		{ "rollangle.", clientFeatures.rollangle },
 	};
 	KeyValueDefinition<bool> booleans[] = {
 		{ "hud_draw_nosuit", clientFeatures.hud_draw_nosuit},
@@ -852,6 +885,15 @@ void CHud::ParseClientFeatures()
 				if ((subKey = strStartsWith(keyName, configurableBooleans[i].name)))
 				{
 					UpdateBooleanValue(configurableBooleans[i].value, subKey, valueBuf);
+					shouldContinue = false;
+					break;
+				}
+			}
+			for (i = 0; shouldContinue && i<sizeof(configurableFloats)/sizeof(configurableFloats[0]); ++i)
+			{
+				if ((subKey = strStartsWith(keyName, configurableFloats[i].name)))
+				{
+					UpdateFloatValue(configurableFloats[i].value, subKey, valueBuf);
 					shouldContinue = false;
 					break;
 				}

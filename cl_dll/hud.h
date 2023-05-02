@@ -664,6 +664,13 @@ struct ConfigurableIntegerValue
 	bool configurable;
 };
 
+struct ConfigurableFloatValue
+{
+	ConfigurableFloatValue();
+	float defaultValue;
+	bool configurable;
+};
+
 struct FlashlightFeatures
 {
 	FlashlightFeatures();
@@ -702,6 +709,7 @@ struct ClientFeatures
 
 	ConfigurableBooleanValue view_bob;
 	ConfigurableBooleanValue view_roll;
+	ConfigurableFloatValue rollangle;
 	ConfigurableBooleanValue weapon_wallpuff;
 	ConfigurableBooleanValue weapon_sparks;
 	ConfigurableBooleanValue muzzlelight;
