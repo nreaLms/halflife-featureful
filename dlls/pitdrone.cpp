@@ -1134,37 +1134,15 @@ void CPitdrone::StartTask(Task_t *pTask)
 	switch (pTask->iTask)
 	{
 	case TASK_PDRONE_HOPTURN:
-	{
-		m_flNextHopTime = gpGlobals->time + 5.0f;
-		SetActivity( ACT_HOP );
-		MakeIdealYaw( m_vecEnemyLKP );
-		break;
-	}
-	case TASK_GET_PATH_TO_ENEMY:
-	{
-		CBaseEntity *pEnemy = m_hEnemy;
-
-		if( pEnemy == NULL )
 		{
-			TaskFail("no enemy");
-			return;
+			m_flNextHopTime = gpGlobals->time + 5.0f;
+			SetActivity( ACT_HOP );
+			MakeIdealYaw( m_vecEnemyLKP );
+			break;
 		}
-
-		if( BuildRoute( pEnemy->pev->origin, bits_MF_TO_ENEMY, pEnemy ) )
-		{
-			TaskComplete();
-		}
-		else
-		{
-			TaskFail("can't build path to enemy");
-		}
-		break;
-	}
 	default:
-	{
 		CFollowingMonster::StartTask(pTask);
 		break;
-	}
 	}
 }
 

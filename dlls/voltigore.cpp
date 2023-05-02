@@ -972,27 +972,6 @@ void CVoltigore::StartTask(Task_t *pTask)
 			CSquadMonster::StartTask(pTask);
 		}
 		break;
-	case TASK_GET_PATH_TO_ENEMY:
-		{
-			CBaseEntity *pEnemy = m_hEnemy;
-
-			if( pEnemy == NULL )
-			{
-				TaskFail("no enemy");
-				return;
-			}
-
-			if( BuildRoute( pEnemy->pev->origin, bits_MF_TO_ENEMY, pEnemy ) )
-			{
-				TaskComplete();
-			}
-			else
-			{
-				TaskFail("can't build path to enemy");
-			}
-			break;
-		}
-		break;
 	default:
 		CSquadMonster::StartTask(pTask);
 		break;
