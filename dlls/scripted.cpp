@@ -843,7 +843,7 @@ BOOL CBaseMonster::ExitScriptedSequence()
 
 	if( m_pCine )
 	{
-		m_pCine->CancelScript();
+		m_pCine->CancelScript(SCRIPT_CANCELLATION_REASON_INTERRUPTED);
 	}
 
 	return TRUE;
@@ -886,7 +886,7 @@ int CCineMonster::IgnoreConditions( void )
 	return SCRIPT_BREAK_CONDITIONS;
 }
 
-void ScriptEntityCancel( edict_t *pentCine )
+void ScriptEntityCancel( edict_t *pentCine, int cancellationReason )
 {
 	// make sure they are a scripted_sequence
 	if( FClassnameIs( pentCine, "scripted_sequence" ) || FClassnameIs( pentCine, "scripted_action" ) )
@@ -913,7 +913,7 @@ void ScriptEntityCancel( edict_t *pentCine )
 			}
 		}
 
-		if (FBitSet(pCineTarget->pev->spawnflags, SF_REMOVE_ON_CANCEL))
+		if (cancellationReason && FBitSet(pCineTarget->pev->spawnflags, SF_REMOVE_ON_INTERRUPTION))
 		{
 			pCineTarget->SetThink(&CBaseEntity::SUB_Remove);
 			pCineTarget->pev->nextthink = gpGlobals->time;
@@ -922,13 +922,13 @@ void ScriptEntityCancel( edict_t *pentCine )
 }
 
 // find all the cinematic entities with my targetname and stop them from playing
-void CCineMonster::CancelScript( void )
+void CCineMonster::CancelScript(int cancellationReason)
 {
 	//ALERT( at_aiconsole, "Cancelling script: %s\n", STRING( m_iszPlay ) );
 
 	if( !pev->targetname )
 	{
-		ScriptEntityCancel( edict() );
+		ScriptEntityCancel( edict(), cancellationReason );
 		return;
 	}
 
@@ -936,7 +936,7 @@ void CCineMonster::CancelScript( void )
 
 	while( !FNullEnt( pentCineTarget ) )
 	{
-		ScriptEntityCancel( pentCineTarget );
+		ScriptEntityCancel( pentCineTarget, cancellationReason );
 		pentCineTarget = FIND_ENTITY_BY_TARGETNAME( pentCineTarget, STRING( pev->targetname ) );
 	}
 }

@@ -749,7 +749,7 @@ void CFollowingMonster::StopScript()
 {
 	if (m_pCine)
 	{
-		m_pCine->CancelScript();
+		m_pCine->CancelScript(SCRIPT_CANCELLATION_REASON_STARTED_FOLLOWING);
 		if (m_pCine) { // in case it was not cleared out for some reason
 			CineCleanup();
 		}

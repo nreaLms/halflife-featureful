@@ -37,7 +37,7 @@
 #define SF_SCRIPT_TRY_ONCE	4096
 #define SF_SCRIPT_DONT_RESET_HEAD	8192
 #define SF_SCRIPT_FORCE_IDLE_LOOPING 16384
-#define SF_REMOVE_ON_CANCEL	32768
+#define SF_REMOVE_ON_INTERRUPTION	32768
 
 #define SCRIPT_BREAK_CONDITIONS		(bits_COND_LIGHT_DAMAGE|bits_COND_HEAVY_DAMAGE)
 
@@ -108,6 +108,13 @@ enum
 	SCRIPT_TAKE_DAMAGE_POLICY_NONLETHAL = 2,
 };
 
+enum
+{
+	SCRIPT_CANCELLATION_REASON_GENERIC = 0,
+	SCRIPT_CANCELLATION_REASON_INTERRUPTED = 1,
+	SCRIPT_CANCELLATION_REASON_STARTED_FOLLOWING = 2,
+};
+
 // when a monster finishes an AI scripted sequence, we can choose
 // a schedule to place them in. These defines are the aliases to
 // resolve worldcraft input to real schedules (sjb)
@@ -159,7 +166,7 @@ public:
 
 
 	void ReleaseEntity( CBaseMonster *pEntity );
-	void CancelScript( void );
+	void CancelScript( int cancellationReason = SCRIPT_CANCELLATION_REASON_GENERIC );
 	virtual BOOL StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty );
 	virtual BOOL FCanOverrideState ( void );
 	void SequenceDone ( CBaseMonster *pMonster );

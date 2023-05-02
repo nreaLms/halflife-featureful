@@ -205,7 +205,7 @@ void CDisplacerBall::BallTouch(CBaseEntity *pOther)
 			CBaseEntity* pAttacker = CBaseEntity::Instance( pev->owner );
 
 			if (pMonster && pMonster->m_pCine)
-				pMonster->m_pCine->CancelScript();
+				pMonster->m_pCine->CancelScript(SCRIPT_CANCELLATION_REASON_INTERRUPTED);
 
 			pOther->pev->health = 0;
 			pOther->Killed(pev, pAttacker ? pAttacker->pev : pev, GIB_NEVER);
