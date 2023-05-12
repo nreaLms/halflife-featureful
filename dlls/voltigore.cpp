@@ -1183,6 +1183,12 @@ public:
 	void	StartTask(Task_t *pTask);
 	void	Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib);
 	void	GibMonster();
+	const char* DefaultGibModel() {
+		return CSquadMonster::DefaultGibModel();
+	}
+	int DefaultGibCount() {
+		return CSquadMonster::DefaultGibCount();
+	}
 	Schedule_t* GetSchedule();
 	Schedule_t* GetScheduleOfType(int Type);
 
