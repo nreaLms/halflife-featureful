@@ -656,7 +656,7 @@ void CHoundeye::StartTask( Task_t *pTask )
 		{
 			pev->skin = HOUNDEYE_EYE_HALFCLOSED;
 			m_iBlink = HOUNDEYE_HALF_BLINK;
-			m_iTaskStatus = TASKSTATUS_COMPLETE;
+			TaskComplete();
 			break;
 		}
 	case TASK_HOUND_FALL_ASLEEP:
@@ -672,20 +672,20 @@ void CHoundeye::StartTask( Task_t *pTask )
 			{
 				m_iAsleep = HOUNDEYE_SLEEPING; // signal that hound is lying down (must stand again before doing anything else!)
 			}
-			m_iTaskStatus = TASKSTATUS_COMPLETE;
+			TaskComplete();
 			break;
 		}
 	case TASK_HOUND_WAKE_UP:
 		{
 			m_iAsleep = HOUNDEYE_AWAKE; // signal that hound is standing again
-			m_iTaskStatus = TASKSTATUS_COMPLETE;
+			TaskComplete();
 			break;
 		}
 	case TASK_HOUND_OPEN_EYE:
 		{
 			pev->skin = HOUNDEYE_EYE_OPEN;
 			m_iBlink = HOUNDEYE_BLINK; // turn blinking back on and that code will automatically open the eye
-			m_iTaskStatus = TASKSTATUS_COMPLETE;
+			TaskComplete();
 			break;
 		}
 	case TASK_HOUND_CLOSE_EYE:

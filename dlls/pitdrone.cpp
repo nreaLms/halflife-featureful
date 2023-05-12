@@ -1160,7 +1160,7 @@ void CPitdrone::RunTask(Task_t *pTask)
 
 			if( m_fSequenceFinished )
 			{
-				m_iTaskStatus = TASKSTATUS_COMPLETE;
+				TaskComplete();
 			}
 			break;
 		}

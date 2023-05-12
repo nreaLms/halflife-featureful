@@ -1145,7 +1145,7 @@ void CHFGrunt :: RunTask( Task_t *pTask )
 
 			if ( FacingIdeal() )
 			{
-				m_iTaskStatus = TASKSTATUS_COMPLETE;
+				TaskComplete();
 			}
 			break;
 		}
