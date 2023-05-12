@@ -648,8 +648,6 @@ void CHoundeye::SonicAttack( void )
 //=========================================================
 void CHoundeye::StartTask( Task_t *pTask )
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch( pTask->iTask )
 	{
 	case TASK_HOUND_HALF_ASLEEP:

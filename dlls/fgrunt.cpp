@@ -1094,8 +1094,6 @@ IMPLEMENT_CUSTOM_SCHEDULES( CHFGrunt, CTalkMonster )
 
 void CHFGrunt :: StartTask( Task_t *pTask )
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch ( pTask->iTask )
 	{
 	case TASK_HGRUNT_ALLY_SPEAK_SENTENCE:

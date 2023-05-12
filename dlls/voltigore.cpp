@@ -952,7 +952,6 @@ Schedule_t* CVoltigore::GetScheduleOfType(int Type)
 //=========================================================
 void CVoltigore::StartTask(Task_t *pTask)
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
 	GlowOff();
 	DestroyBeams();
 	m_fShouldUpdateBeam = FALSE;
@@ -1310,8 +1309,6 @@ BOOL CBabyVoltigore::CheckMeleeAttack1(float flDot, float flDist)
 //=========================================================
 void CBabyVoltigore::StartTask(Task_t *pTask)
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch (pTask->iTask)
 	{
 	case TASK_MELEE_ATTACK1:

@@ -1129,8 +1129,6 @@ Schedule_t* CPitdrone::GetScheduleOfType(int Type)
 //=========================================================
 void CPitdrone::StartTask(Task_t *pTask)
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch (pTask->iTask)
 	{
 	case TASK_PDRONE_HOPTURN:

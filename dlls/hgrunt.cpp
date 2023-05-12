@@ -1085,8 +1085,6 @@ void CHGrunt::Precache()
 //=========================================================
 void CHGrunt::StartTask( Task_t *pTask )
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch( pTask->iTask )
 	{
 	case TASK_GRUNT_SPEAK_SENTENCE:

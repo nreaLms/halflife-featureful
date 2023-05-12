@@ -407,8 +407,6 @@ void CHeadCrab::PrescheduleThink( void )
 
 void CHeadCrab::StartTask( Task_t *pTask )
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch( pTask->iTask )
 	{
 	case TASK_RANGE_ATTACK1:
@@ -863,8 +861,6 @@ void CShockRoach::DeathSound(void)
 
 void CShockRoach::StartTask(Task_t *pTask)
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch (pTask->iTask)
 	{
 	case TASK_RANGE_ATTACK1:

@@ -1405,8 +1405,6 @@ Schedule_t *CBullsquid::GetScheduleOfType( int Type )
 //=========================================================
 void CBullsquid::StartTask( Task_t *pTask )
 {
-	m_iTaskStatus = TASKSTATUS_RUNNING;
-
 	switch( pTask->iTask )
 	{
 	case TASK_MELEE_ATTACK2:
