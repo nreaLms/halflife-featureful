@@ -120,7 +120,7 @@ public:
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
-	static CSprite *SpriteCreate( const char *pSpriteName, const Vector &origin, BOOL animate );
+	static CSprite *SpriteCreate(const char *pSpriteName, const Vector &origin, BOOL animate, int spawnflags = 0);
 
 private:
 	float m_lastTime;

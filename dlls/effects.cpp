@@ -1273,9 +1273,10 @@ void CSprite::SpriteInit( const char *pSpriteName, const Vector &origin )
 	Spawn();
 }
 
-CSprite *CSprite::SpriteCreate( const char *pSpriteName, const Vector &origin, BOOL animate )
+CSprite *CSprite::SpriteCreate( const char *pSpriteName, const Vector &origin, BOOL animate, int spawnflags )
 {
 	CSprite *pSprite = GetClassPtr( (CSprite *)NULL );
+	pSprite->pev->spawnflags = spawnflags;
 	pSprite->SpriteInit( pSpriteName, origin );
 	pSprite->pev->classname = MAKE_STRING( "env_sprite" );
 	pSprite->pev->solid = SOLID_NOT;
