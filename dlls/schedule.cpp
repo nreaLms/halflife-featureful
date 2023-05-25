@@ -675,7 +675,8 @@ void CBaseMonster::RunTask( Task_t *pTask )
 	case TASK_RUN_TO_SCRIPT_RADIUS:
 	case TASK_WALK_TO_SCRIPT_RADIUS:
 		{
-			if( m_pGoalEnt == 0 )
+			CBaseEntity* pGoalEnt = ScriptedMoveGoal();
+			if( pGoalEnt == 0 )
 				TaskFail("no target ent");
 			else
 			{
@@ -685,7 +686,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					checkDistance = m_pCine->m_flMoveToRadius;
 				}
 
-				float distance = ( m_pGoalEnt->pev->origin - pev->origin ).Length2D();
+				float distance = ( pGoalEnt->pev->origin - pev->origin ).Length2D();
 
 				if( distance <= checkDistance )
 				{
@@ -1136,10 +1137,11 @@ void CBaseMonster::StartTask( Task_t *pTask )
 	case TASK_WALK_TO_SCRIPT:
 		{
 			Activity newActivity;
+			CBaseEntity* pGoalEnt = ScriptedMoveGoal();
 
-			if ( m_pGoalEnt == 0 )
+			if ( pGoalEnt == 0 )
 				TaskFail("no move target ent");
-			else if( ( m_pGoalEnt->pev->origin - pev->origin ).Length() < 1 )
+			else if( ( pGoalEnt->pev->origin - pev->origin ).Length() < 1 )
 				TaskComplete();
 			else
 			{
@@ -1153,9 +1155,9 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					TaskComplete();
 				else 
 				{
-					if (m_pGoalEnt != 0)
+					if (pGoalEnt != 0)
 					{
-						const Vector vecDest = m_pGoalEnt->pev->origin;
+						const Vector vecDest = pGoalEnt->pev->origin;
 						if( !MoveToLocation( newActivity, 2, vecDest ) )
 						{
 							if (m_pCine) {
@@ -1187,10 +1189,11 @@ void CBaseMonster::StartTask( Task_t *pTask )
 				radius = 1.0f;
 
 			Activity newActivity;
+			CBaseEntity* pGoalEnt = ScriptedMoveGoal();
 
-			if ( m_pGoalEnt == 0 )
+			if ( pGoalEnt == 0 )
 				TaskFail("no move target ent");
-			else if( ( m_pGoalEnt->pev->origin - pev->origin ).Length2D() <= radius )
+			else if( ( pGoalEnt->pev->origin - pev->origin ).Length2D() <= radius )
 				TaskComplete();
 			else
 			{
@@ -1204,7 +1207,7 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					TaskComplete();
 				else
 				{
-					if( m_pGoalEnt == 0 || !MoveToLocationClosest( newActivity, 2, m_pGoalEnt->pev->origin ) )
+					if( pGoalEnt == 0 || !MoveToLocationClosest( newActivity, 2, pGoalEnt->pev->origin ) )
 					{
 						TaskFail("failed to reach move target ent");
 						RouteClear();
@@ -1622,9 +1625,10 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					}
 				}
 			}
-			if( m_pGoalEnt != 0 )
+			CBaseEntity* pGoalEnt = ScriptedMoveGoal();
+			if( pGoalEnt != 0 )
 			{
-				pev->origin = m_pGoalEnt->pev->origin;
+				pev->origin = pGoalEnt->pev->origin;
 			}
 
 			TaskComplete();
@@ -1646,10 +1650,11 @@ void CBaseMonster::StartTask( Task_t *pTask )
 					pev->velocity = Vector( 0, 0, 0 );
 					pev->effects |= EF_NOINTERP;
 				}
-				if( m_pGoalEnt != 0 )
+				CBaseEntity* pGoalEnt = ScriptedMoveGoal();
+				if( pGoalEnt != 0 )
 				{
 					ALERT(at_aiconsole, "Forcibly teleporting the monster to script after %d attempts\n", m_pCine->m_moveFailCount );
-					UTIL_SetOrigin( pev, m_pGoalEnt->pev->origin );
+					UTIL_SetOrigin( pev, pGoalEnt->pev->origin );
 				}
 				m_pCine->m_moveFailCount = 0;
 			}

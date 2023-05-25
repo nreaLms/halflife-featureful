@@ -1394,7 +1394,7 @@ void CGargantua::RunTask( Task_t *pTask )
 
 			if (m_pCine) // LRC- are we obeying a scripted_action?
 			{
-				if (m_hTargetEnt != 0 && m_hTargetEnt != m_pGoalEnt)
+				if (m_hTargetEnt != 0 && m_hTargetEnt.Get() != m_hMoveGoalEnt.Get())
 				{
 					dir = m_hTargetEnt->BodyTarget( org ) - org;
 				}

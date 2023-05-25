@@ -551,7 +551,7 @@ void CCineMonster::PossessEntity( void )
 			pTarget->m_pCine->CancelScript();
 		}
 
-		pTarget->m_pGoalEnt = this;
+		pTarget->SetScriptedMoveGoal(this);
 		pTarget->m_pCine = this;
 		pTarget->m_hTargetEnt = this;
 
@@ -589,7 +589,7 @@ void CCineMonster::PossessEntity( void )
 			{	// nothing. Oh well.
 				ALERT(at_console,"%s %s has a missing \"move target\": %s\n",STRING(pev->classname),STRING(pev->targetname),STRING(m_iszMoveTarget));
 			} else {
-				pTarget->m_pGoalEnt = pGoalEnt;
+				pTarget->SetScriptedMoveGoal(pGoalEnt);
 			}
 		}
 
@@ -1063,7 +1063,7 @@ BOOL CBaseMonster::CineCleanup()
 	}
 	m_pCine = NULL;
 	m_hTargetEnt = NULL;
-	m_pGoalEnt = NULL;
+	SetScriptedMoveGoal(NULL);
 	if( pev->deadflag == DEAD_DYING )
 	{
 		// last frame of death animation?
@@ -1171,6 +1171,16 @@ BOOL CBaseMonster::CineCleanup()
 	ClearBits( pev->spawnflags, SF_MONSTER_WAIT_FOR_SCRIPT );
 
 	return TRUE;
+}
+
+void CBaseMonster::SetScriptedMoveGoal(CBaseEntity *pEntity)
+{
+	m_hMoveGoalEnt = m_pGoalEnt = pEntity;
+}
+
+CBaseEntity* CBaseMonster::ScriptedMoveGoal()
+{
+	return m_hMoveGoalEnt;
 }
 
 void CCineMonster::OnMoveFail() {
