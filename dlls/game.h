@@ -76,6 +76,7 @@ struct ModFeatures
 
 	bool sentry_retract;
 
+	bool gonome_lock_player;
 	bool voltigore_lesser_size;
 
 	bool skill_opfor;
