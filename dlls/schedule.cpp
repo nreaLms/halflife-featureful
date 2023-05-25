@@ -1195,9 +1195,9 @@ void CBaseMonster::StartTask( Task_t *pTask )
 			else
 			{
 				if( pTask->iTask == TASK_RUN_TO_SCRIPT_RADIUS )
-					newActivity = ACT_WALK;
-				else
 					newActivity = ACT_RUN;
+				else
+					newActivity = ACT_WALK;
 
 				// This monster can't do this!
 				if( LookupActivity( newActivity ) == ACTIVITY_NOT_AVAILABLE )
