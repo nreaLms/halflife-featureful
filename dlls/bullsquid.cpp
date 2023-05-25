@@ -233,11 +233,11 @@ extern int gmsgSpriteTrail;
 void CSquidToxicSpit::Animate( void )
 {
 	CBaseEntity* pEntity = NULL;
+	CBaseMonster* spitOwner = GetSpitOwner();
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, 32)) != NULL) {
-		if ( pEntity->MyMonsterPointer() && !FClassnameIs(pEntity->pev, "monster_bullchicken")) {
-			CBaseMonster* bullsquid = GetBullsquid();
-			if (!bullsquid || bullsquid->IRelationship(pEntity) >= R_DL) {
-				pEntity->TakeDamage(pev, bullsquid ? bullsquid->pev : pev, gSkillData.bullsquidDmgToxicPoison, DMG_POISON | DMG_TIMEDNONLETHAL | DMG_IGNORE_ARMOR);
+		if ( pEntity != spitOwner && pEntity->MyMonsterPointer() && !FClassnameIs(pEntity->pev, "monster_bullchicken")) {
+			if (!spitOwner || spitOwner->IRelationship(pEntity) >= R_DL) {
+				pEntity->TakeDamage(pev, spitOwner ? spitOwner->pev : pev, gSkillData.bullsquidDmgToxicPoison, DMG_POISON | DMG_TIMEDNONLETHAL | DMG_IGNORE_ARMOR);
 			}
 		}
 	}
@@ -342,9 +342,9 @@ void CSquidToxicSpit::Touch( CBaseEntity *pOther )
 	}
 	else
 	{
-		CBaseMonster* bullsquid = GetBullsquid();
-		if (!bullsquid || bullsquid->IRelationship(pOther) >= R_DL) {
-			entvars_t* pevAttacker = bullsquid ? bullsquid->pev : pev;
+		CBaseMonster* spitOwner = GetSpitOwner();
+		if (!spitOwner || spitOwner->IRelationship(pOther) >= R_DL) {
+			entvars_t* pevAttacker = spitOwner ? spitOwner->pev : pev;
 			pOther->TakeDamage( pev, pevAttacker, gSkillData.bullsquidDmgToxicImpact, DMG_ACID );
 			pOther->TakeDamage( pev, pevAttacker, gSkillData.bullsquidDmgToxicPoison, DMG_POISON | DMG_TIMEDNONLETHAL | DMG_IGNORE_ARMOR);
 		}
@@ -354,7 +354,7 @@ void CSquidToxicSpit::Touch( CBaseEntity *pOther )
 	pev->nextthink = gpGlobals->time;
 }
 
-CBaseMonster* CSquidToxicSpit::GetBullsquid() {
+CBaseMonster* CSquidToxicSpit::GetSpitOwner() {
 	if (!FNullEnt(pev->owner))
 		return GetMonsterPointer(pev->owner);
 	return 0;

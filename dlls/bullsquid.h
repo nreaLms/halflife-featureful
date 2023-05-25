@@ -55,7 +55,7 @@ public:
 	static float SpitSpeed() { return 600.0f; }
 	void Touch( CBaseEntity *pOther );
 	void EXPORT Animate( void );
-	CBaseMonster* GetBullsquid();
+	CBaseMonster* GetSpitOwner();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
