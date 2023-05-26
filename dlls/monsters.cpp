@@ -4079,7 +4079,6 @@ void CBaseMonster::MonsterInitDead( void )
 	if (FBitSet(pev->spawnflags, SF_DEADMONSTER_DONT_DROP))
 	{
 		pev->movetype = MOVETYPE_FLY;
-		pev->effects |= EF_INVLIGHT;
 		SetThink(NULL);
 		SetSequenceBox();
 		UTIL_SetOrigin( pev, pev->origin );
