@@ -214,6 +214,11 @@
 		2 : "Don't drop to ground" : 0
 		4 : "Not solid"	: 0
 	]
+	effects(choices) : "Effects" =
+	[
+		0 : "No effects"
+		16 : "Invert light"
+	]
 	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
 	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
 	[

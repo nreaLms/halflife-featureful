@@ -4436,7 +4436,7 @@ void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int healt
 	PrecacheMyModel( modelName );
 	SetMyModel( modelName );
 
-	pev->effects		= 0;
+	pev->effects &= EF_INVLIGHT;
 	pev->yaw_speed		= 8;
 	pev->sequence		= 0;
 	SetMyBloodColor( bloodColor );

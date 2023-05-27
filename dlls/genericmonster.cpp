@@ -274,7 +274,7 @@ void CDeadGenericMonster::Spawn()
 		SET_MODEL( ENT( pev ), STRING( pev->model ) );
 	}
 
-	pev->effects		= 0;
+	pev->effects &= EF_INVLIGHT;
 	pev->yaw_speed		= 8;
 	pev->sequence		= 0;
 	SetMyBloodColor( BLOOD_COLOR_RED );
