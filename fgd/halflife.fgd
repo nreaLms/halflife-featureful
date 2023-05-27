@@ -6666,7 +6666,7 @@
 	]
 ]
 
-@PointClass base(Targetname, MultiManagerFlags) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager. Use type of targets can be configured by adding #0 (Off), #1 (On) or #2 (Kill) to their delay values." []
+@PointClass base(Targetname, MultiManagerFlags) color(255 128 0) iconsprite("sprites/multi_manager.spr") = multi_manager : "MultiTarget Manager. Use type of targets can be configured by adding #0 or #off (Off), #1 or #on (On), #2 or #kill (Kill) to their delay values." []
 
 @BaseClass = MultiTarget
 [

@@ -287,15 +287,15 @@ static void ParseMMDelay(const char* value, float& delay, short& mmUseType)
 	{
 		endPtr++;
 		const char digit = *endPtr;
-		if (digit == '0')
+		if (digit == '0' || strcmp(endPtr, "off") == 0)
 		{
 			mmUseType = MM_USE_OFF;
 		}
-		else if (digit == '1')
+		else if (digit == '1' || strcmp(endPtr, "on") == 0)
 		{
 			mmUseType = MM_USE_ON;
 		}
-		else if (digit == '2')
+		else if (digit == '2' || strcmp(endPtr, "kill") == 0)
 		{
 			mmUseType = MM_USE_KILL;
 		}
