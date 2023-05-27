@@ -214,6 +214,12 @@
 		2 : "Don't drop to ground" : 0
 		4 : "Not solid"	: 0
 	]
+	TriggerTarget(String) : "TriggerTarget" : : "The event to trigger when the TriggerCondition is met. Used by monsters."
+	TriggerCondition(Choices) : "Trigger Condition" : : "This controls the condition under which a monster will trigger its TriggerTarget. The options are:" =
+	[
+		0 : "No Trigger"
+		4 : "Corpse gibbing"
+	]
 ]
 
 @BaseClass = Classification
