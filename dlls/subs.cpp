@@ -201,12 +201,29 @@ void CBaseEntity::SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, flo
 	}
 }
 
+const char* UseTypeToString(USE_TYPE useType)
+{
+	switch (useType) {
+	case USE_OFF:
+		return "USE_OFF";
+	case USE_ON:
+		return "USE_ON";
+	case USE_TOGGLE:
+		return "USE_TOGGLE";
+	case USE_SET:
+		return "USE_SET";
+	default:
+		return "USE_UNKNOWN";
+	}
+}
+
 void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	CBaseEntity* pTarget = NULL;
 	if( !targetName || *targetName == '\0' )
 		return;
 
+	const char* useTypeString = UseTypeToString(useType);
 	ALERT( at_aiconsole, "Firing: (%s)\n", targetName );
 
 	for( ; ; )
@@ -217,7 +234,7 @@ void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *
 
 		if( pTarget && !( pTarget->pev->flags & FL_KILLME ) )	// Don't use dying ents
 		{
-			ALERT( at_aiconsole, "Found: %s, firing (%s)\n", STRING( pTarget->pev->classname ), targetName );
+			ALERT( at_aiconsole, "Found: %s, firing (%s, %s)\n", STRING( pTarget->pev->classname ), targetName, useTypeString );
 			pTarget->Use( pActivator, pCaller, useType, value );
 		}
 	}
@@ -232,7 +249,7 @@ void KillTargets(const char* targetName)
 	{
 		UTIL_Remove( CBaseEntity::Instance( pentKillTarget ) );
 
-		ALERT( at_aiconsole, "killing %s\n", STRING( pentKillTarget->v.classname ) );
+		ALERT( at_aiconsole, "killing %s (%s)\n", STRING( pentKillTarget->v.classname ), targetName );
 		pentKillTarget = FIND_ENTITY_BY_TARGETNAME( pentKillTarget, targetName );
 	}
 }

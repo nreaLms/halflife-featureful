@@ -94,6 +94,7 @@ typedef enum
 	USE_TOGGLE = 3
 } USE_TYPE;
 
+const char* UseTypeToString(USE_TYPE useType);
 extern void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType = USE_TOGGLE, float value = 0.0f );
 extern void KillTargets( const char *targetName );
 

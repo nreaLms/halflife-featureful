@@ -140,22 +140,6 @@ enum
 	STATE_TURN_ON,
 };
 
-static const char* GetStringForUseType(USE_TYPE useType)
-{
-	switch (useType) {
-	case USE_OFF:
-		return "USE_OFF";
-	case USE_ON:
-		return "USE_ON";
-	case USE_TOGGLE:
-		return "USE_TOGGLE";
-	case USE_SET:
-		return "USE_SET";
-	default:
-		return "USE_UNKNOWN";
-	}
-}
-
 class CEnvState : public CPointEntity
 {
 public:
@@ -237,13 +221,13 @@ void CEnvState::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 		{
 			ALERT(at_console,"DEBUG: env_state \"%s\" ",STRING(pev->targetname));
 			if (IsLockedByMaster())
-				ALERT(at_console,"ignored trigger %s; locked by master \"%s\".\n",GetStringForUseType(useType),STRING(m_sMaster));
+				ALERT(at_console,"ignored trigger %s; locked by master \"%s\".\n",UseTypeToString(useType),STRING(m_sMaster));
 			else if (useType == USE_ON)
 				ALERT(at_console,"ignored trigger USE_ON; already on\n");
 			else if (useType == USE_OFF)
 				ALERT(at_console,"ignored trigger USE_OFF; already off\n");
 			else
-				ALERT(at_console,"ignored trigger %s.\n",GetStringForUseType(useType));
+				ALERT(at_console,"ignored trigger %s.\n",UseTypeToString(useType));
 		}
 		return;
 	}
