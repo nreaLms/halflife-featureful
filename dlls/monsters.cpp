@@ -53,6 +53,7 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 {
 	DEFINE_FIELD( CBaseMonster, m_hEnemy, FIELD_EHANDLE ),
 	DEFINE_FIELD( CBaseMonster, m_hTargetEnt, FIELD_EHANDLE ),
+	DEFINE_FIELD( CBaseMonster, m_hMoveGoalEnt, FIELD_EHANDLE ),
 	DEFINE_ARRAY( CBaseMonster, m_hOldEnemy, FIELD_EHANDLE, MAX_OLD_ENEMIES ),
 	DEFINE_ARRAY( CBaseMonster, m_vecOldEnemy, FIELD_POSITION_VECTOR, MAX_OLD_ENEMIES ),
 	DEFINE_FIELD( CBaseMonster, m_flFieldOfView, FIELD_FLOAT ),
