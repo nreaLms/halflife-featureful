@@ -605,7 +605,7 @@ BOOL CFollowingMonster::CanFollow( void )
 
 BOOL CFollowingMonster::AbleToFollow()
 {
-	if( m_MonsterState == MONSTERSTATE_SCRIPT )
+	if( m_MonsterState == MONSTERSTATE_SCRIPT || m_IdealMonsterState == MONSTERSTATE_SCRIPT )
 	{
 		if( !m_pCine )
 			return FALSE;
