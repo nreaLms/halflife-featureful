@@ -7027,10 +7027,6 @@
 @PointClass base(Targetname) color(255 0 255) = scripted_following : "Scripted Following"
 [
 	entity(string) : "Affected Monster"
-	spawnflags(Flags) =
-	[
-		1 : "Fire Once" : 0
-	]
 ]
 
 @PointClass base(Targetname) color(255 0 255) = scripted_schedule : "Scripted Schedule"
