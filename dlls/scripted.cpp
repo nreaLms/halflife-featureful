@@ -171,6 +171,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_iszFireOnAnimStart = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "m_iszFireOnPossessed" ) )
+	{
+		m_iszFireOnPossessed = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "m_targetActivator" ) )
 	{
 		m_targetActivator = (short)atoi( pkvd->szValue );
@@ -265,6 +270,7 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_interruptable, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CCineMonster, m_firedOnAnimStart, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CCineMonster, m_iszFireOnAnimStart, FIELD_STRING ),
+	DEFINE_FIELD( CCineMonster, m_iszFireOnPossessed, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_targetActivator, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_fTurnType, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_fAction, FIELD_SHORT ),
@@ -643,6 +649,11 @@ void CCineMonster::PossessEntity( void )
 //				pTarget->pev->framerate = 0;
 //			}
 //		}
+		if( !FStringNull( m_iszFireOnPossessed ) )
+		{
+			CBaseEntity* pActivator = GetActivator(pTarget);
+			FireTargets( STRING( m_iszFireOnPossessed ), pActivator, this );
+		}
 	}
 }
 

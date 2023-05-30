@@ -206,6 +206,7 @@ public:
 	BOOL m_interruptable;
 	BOOL m_firedOnAnimStart;
 	string_t m_iszFireOnAnimStart;
+	string_t m_iszFireOnPossessed;
 	short m_targetActivator;
 	short m_fTurnType;
 	short m_fAction;

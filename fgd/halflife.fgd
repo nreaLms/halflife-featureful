@@ -962,6 +962,7 @@
 	m_iszIdle(string) : "Idle Animation"
 	m_iszFireOnBegin(target_destination): "Fire after moving"
 	m_iszFireOnAnimStart(target_destination) : "Fire on Animation start" : : "Fire at the beginning of Action Animation"
+	m_iszFireOnPossessed(target_destination) : "Fire on Possession" : : "Fire when monster is possessed by script"
 	m_flRadius(integer) : "Search Radius" : 512
 	m_iPriority(choices) : "Priority" =
 	[
