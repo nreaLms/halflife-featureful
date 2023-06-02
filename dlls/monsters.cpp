@@ -806,8 +806,32 @@ BOOL CBaseMonster::MoveToNode( Activity movementAct, float waitTime, const Vecto
 	return FRefreshRoute();
 }
 
-#if _DEBUG
-void DrawRoute( entvars_t *pev, WayPoint_t *m_Route, int m_iRouteIndex, int r, int g, int b )
+static void DrawRoutePart(const Vector& vecStart, const Vector& vecEnd, int r, int g, int b, int life, int width = 16)
+{
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_BEAMPOINTS);
+		WRITE_COORD( vecStart.x );
+		WRITE_COORD( vecStart.y );
+		WRITE_COORD( vecStart.z );
+		WRITE_COORD( vecEnd.x );
+		WRITE_COORD( vecEnd.y );
+		WRITE_COORD( vecEnd.z );
+
+		WRITE_SHORT( g_sModelIndexLaser );
+		WRITE_BYTE( 0 ); // frame start
+		WRITE_BYTE( 10 ); // framerate
+		WRITE_BYTE( life ); // life
+		WRITE_BYTE( width );  // width
+		WRITE_BYTE( 0 );   // noise
+		WRITE_BYTE( r );   // r, g, b
+		WRITE_BYTE( g );   // r, g, b
+		WRITE_BYTE( b );   // r, g, b
+		WRITE_BYTE( 255 );	// brightness
+		WRITE_BYTE( 10 );		// speed
+	MESSAGE_END();
+}
+
+void DrawRoute( entvars_t *pev, WayPoint_t *m_Route, int m_iRouteIndex, int r, int g, int b, int life = 1 )
 {
 	int i;
 
@@ -818,59 +842,35 @@ void DrawRoute( entvars_t *pev, WayPoint_t *m_Route, int m_iRouteIndex, int r, i
 	}
 
 	//UTIL_ParticleEffect ( m_Route[m_iRouteIndex].vecLocation, g_vecZero, 255, 25 );
-
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMPOINTS);
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
-		WRITE_COORD( m_Route[m_iRouteIndex].vecLocation.x );
-		WRITE_COORD( m_Route[m_iRouteIndex].vecLocation.y );
-		WRITE_COORD( m_Route[m_iRouteIndex].vecLocation.z );
-
-		WRITE_SHORT( g_sModelIndexLaser );
-		WRITE_BYTE( 0 ); // frame start
-		WRITE_BYTE( 10 ); // framerate
-		WRITE_BYTE( 1 ); // life
-		WRITE_BYTE( 16 );  // width
-		WRITE_BYTE( 0 );   // noise
-		WRITE_BYTE( r );   // r, g, b
-		WRITE_BYTE( g );   // r, g, b
-		WRITE_BYTE( b );   // r, g, b
-		WRITE_BYTE( 255 );	// brightness
-		WRITE_BYTE( 10 );		// speed
-	MESSAGE_END();
+	DrawRoutePart( pev->origin, m_Route[m_iRouteIndex].vecLocation, r, g, b, life, 16 );
 
 	for( i = m_iRouteIndex; i < ROUTE_SIZE - 1; i++ )
 	{
 		if( ( m_Route[i].iType & bits_MF_IS_GOAL ) || ( m_Route[i + 1].iType == 0 ) )
 			break;
 
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_BEAMPOINTS );
-			WRITE_COORD( m_Route[i].vecLocation.x );
-			WRITE_COORD( m_Route[i].vecLocation.y );
-			WRITE_COORD( m_Route[i].vecLocation.z );
-			WRITE_COORD( m_Route[i + 1].vecLocation.x );
-			WRITE_COORD( m_Route[i + 1].vecLocation.y );
-			WRITE_COORD( m_Route[i + 1].vecLocation.z );
-			WRITE_SHORT( g_sModelIndexLaser );
-			WRITE_BYTE( 0 ); // frame start
-			WRITE_BYTE( 10 ); // framerate
-			WRITE_BYTE( 1 ); // life
-			WRITE_BYTE( 8 );  // width
-			WRITE_BYTE( 0 );   // noise
-			WRITE_BYTE( r );   // r, g, b
-			WRITE_BYTE( g );   // r, g, b
-			WRITE_BYTE( b );   // r, g, b
-			WRITE_BYTE( 255 );	// brightness
-			WRITE_BYTE( 10 );		// speed
-		MESSAGE_END();
-
+		DrawRoutePart( m_Route[m_iRouteIndex].vecLocation, m_Route[i + 1].vecLocation, r, g, b, life, 8 );
 		//UTIL_ParticleEffect( m_Route[i].vecLocation, g_vecZero, 255, 25 );
 	}
 }
-#endif
+
+void DrawRoute(CBaseMonster* pMonster, int iMoveFlag)
+{
+	int r, g, b;
+	if (iMoveFlag & bits_MF_TO_ENEMY)
+	{
+		r = 255; g = 85; b = 0;
+	}
+	else if (iMoveFlag & bits_MF_TO_TARGETENT)
+	{
+		r = 0; g = 255; b = 127;
+	}
+	else
+	{
+		r = 255; g = 255; b = 255;
+	}
+	DrawRoute(pMonster->pev, pMonster->m_Route, pMonster->m_iRouteIndex, r, g, b, 25);
+}
 
 int ShouldSimplify( int routeType )
 {
@@ -2872,6 +2872,7 @@ BOOL CBaseMonster::BuildNearestRoute( Vector vecThreat, Vector vecViewOffset, fl
 	}
 
 	iMyNode = WorldGraph.FindNearestNode( pev->origin, this );
+
 	iMyHullIndex = WorldGraph.HullIndex( this );
 
 	if( iMyNode == NO_NODE )
@@ -3458,6 +3459,12 @@ const char* CBaseMonster::MonsterStateDisplayString(MONSTERSTATE monsterState)
 
 void CBaseMonster::ReportAIState( ALERT_TYPE level )
 {
+	const bool shouldReportRoute = g_psv_developer && g_psv_developer->value >= 4;
+	if (shouldReportRoute && !FRouteClear())
+	{
+		DrawRoute(this, m_movementGoal);
+	}
+
 	static const char *pDeadNames[] = {"No", "Dying", "Dead", "Respawnable", "DiscardBody"};
 
 	if (FStringNull(pev->targetname)) {
@@ -3558,6 +3565,22 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 		ALERT( level, "Can range attack 2; " );
 	if (HasConditions(bits_COND_SEE_ENEMY))
 		ALERT(level, "Sees enemy; ");
+
+	if (shouldReportRoute)
+	{
+		int iMyNode = WorldGraph.FindNearestNode( pev->origin, this );
+		if (iMyNode != NO_NODE)
+		{
+			ALERT(level, "Nearest node: %d. ", iMyNode);
+
+			CNode &node = WorldGraph.Node( iMyNode );
+			DrawRoutePart(node.m_vecOrigin, node.m_vecOrigin + Vector(0,0,72), 0, 0, 200, 25, 16);
+		}
+		else
+		{
+			ALERT(level, "No nearest node. ");
+		}
+	}
 }
 
 //=========================================================
