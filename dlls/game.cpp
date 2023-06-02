@@ -733,6 +733,8 @@ cvar_t pickup_policy = { "pickup_policy","0", FCVAR_SERVER };
 cvar_t grenade_jump = { "grenade_jump","1", FCVAR_SERVER };
 #endif
 
+cvar_t findnearestnodefix = { "findnearestnodefix", "0", FCVAR_SERVER };
+
 cvar_t keepinventory	= { "mp_keepinventory","0", FCVAR_SERVER }; // keep inventory across level transitions in multiplayer coop
 
 // Engine Cvars
@@ -1404,6 +1406,8 @@ void GameDLLInit( void )
 #if FEATURE_GRENADE_JUMP_CVAR
 	CVAR_REGISTER( &grenade_jump );
 #endif
+
+	CVAR_REGISTER( &findnearestnodefix );
 
 	CVAR_REGISTER( &keepinventory );
 
