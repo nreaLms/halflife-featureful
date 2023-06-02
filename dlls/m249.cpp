@@ -252,14 +252,7 @@ void CM249::ItemPostFrame()
 	{
 		if (m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
 		{
-			int maxClip;
-	#ifndef CLIENT_DLL
-			maxClip = iMaxClip();
-	#else
-			ItemInfo itemInfo;
-			GetItemInfo( &itemInfo );
-			maxClip = itemInfo.iMaxClip;
-	#endif
+			int maxClip = iMaxClip();
 			m_iVisibleClip = m_iClip + Q_min( maxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] );
 
 			UpdateTape(m_iVisibleClip);

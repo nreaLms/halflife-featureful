@@ -85,14 +85,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 {
 	if( ( m_fInReload ) && ( m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase() ) )
 	{
-#ifdef CLIENT_DLL
-		ItemInfo itemInfo;
-		memset( &itemInfo, 0, sizeof( itemInfo ) );
-		GetItemInfo( &itemInfo );
-		int maxClip = itemInfo.iMaxClip;
-#else
 		int maxClip = iMaxClip();
-#endif
 		// complete the reload.
 		int j = Q_min( maxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 
@@ -175,4 +168,17 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	{
 		WeaponIdle();
 	}
+}
+
+int CBasePlayerWeapon::iMaxClip()
+{
+	int maxClip;
+#ifdef CLIENT_DLL
+		ItemInfo itemInfo = {0};
+		GetItemInfo( &itemInfo );
+		maxClip = itemInfo.iMaxClip;
+#else
+	maxClip = ItemInfoArray[ m_iId ].iMaxClip;
+#endif
+	return maxClip;
 }
