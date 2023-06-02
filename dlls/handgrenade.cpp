@@ -68,7 +68,7 @@ int CHandGrenade::GetItemInfo( ItemInfo *p )
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 4;
 	p->iPosition = 0;
-	p->iId = m_iId = WEAPON_HANDGRENADE;
+	p->iId = WEAPON_HANDGRENADE;
 	p->iWeight = HANDGRENADE_WEIGHT;
 	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
 	p->pszAmmoEntity = STRING(pev->classname);

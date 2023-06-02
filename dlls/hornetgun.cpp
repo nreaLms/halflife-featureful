@@ -88,7 +88,7 @@ int CHgun::GetItemInfo( ItemInfo *p )
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 3;
 	p->iPosition = 3;
-	p->iId = m_iId = WEAPON_HORNETGUN;
+	p->iId = WEAPON_HORNETGUN;
 	p->iFlags = ITEM_FLAG_NOAUTOSWITCHEMPTY | ITEM_FLAG_NOAUTORELOAD;
 	p->iWeight = HORNETGUN_WEIGHT;
 	p->pszAmmoEntity = NULL;

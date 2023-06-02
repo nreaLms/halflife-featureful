@@ -81,7 +81,7 @@ int CShotgun::GetItemInfo( ItemInfo *p )
 	p->iSlot = 2;
 	p->iPosition = 1;
 	p->iFlags = 0;
-	p->iId = m_iId = WEAPON_SHOTGUN;
+	p->iId = WEAPON_SHOTGUN;
 	p->iWeight = SHOTGUN_WEIGHT;
 	p->pszAmmoEntity = "ammo_buckshot";
 	p->iDropAmmo = AMMO_BUCKSHOTBOX_GIVE;

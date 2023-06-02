@@ -101,7 +101,7 @@ int CSporelauncher::GetItemInfo(ItemInfo *p)
 	p->iPosition = 5;
 #endif
 	p->iFlags = 0;
-	p->iId = m_iId = WEAPON_SPORELAUNCHER;
+	p->iId = WEAPON_SPORELAUNCHER;
 	p->iWeight = SPORELAUNCHER_WEIGHT;
 	p->pszAmmoEntity = NULL;
 	p->iDropAmmo = 0;
