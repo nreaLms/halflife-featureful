@@ -1729,15 +1729,13 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 			CBasePlayerWeapon *gun = pPlayerItem;
 			if( gun && gun->UseDecrement() )
 			{
-				ItemInfo II = {0};
-				// Get The ID.
-				gun->GetItemInfo( &II );
+				int weaponId = gun->m_iId;
 
-				if( II.iId >= 0 && II.iId < MAX_WEAPONS )
+				if( weaponId >= 0 && weaponId < MAX_WEAPONS )
 				{
-					item = &info[II.iId];
+					item = &info[weaponId];
 
-					item->m_iId			= II.iId;
+					item->m_iId			= weaponId;
 					item->m_iClip			= gun->m_iClip;
 
 					item->m_flTimeWeaponIdle	= Q_max( gun->m_flTimeWeaponIdle, -0.001f );
@@ -1843,10 +1841,7 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 				CBasePlayerWeapon *gun = pl->m_pActiveItem;
 				if( gun && gun->UseDecrement() )
 				{
-					ItemInfo II = {0};
-					gun->GetItemInfo( &II );
-
-					cd->m_iId = II.iId;
+					cd->m_iId = gun->m_iId;
 
 					cd->vuser3.z = gun->m_iSecondaryAmmoType;
 					cd->vuser4.x = gun->m_iPrimaryAmmoType;
