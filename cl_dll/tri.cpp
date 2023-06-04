@@ -93,12 +93,6 @@ void Draw_Triangles( void )
 
 static void RenderFogImpl(short r, short g, short b, float startDist, float endDist, bool skyboxFog, float density, short type)
 {
-	const bool isXash = IsXashFWGS();
-	bool useTriApi = isXash;
-#ifdef CLDLL_FOG
-	useTriApi = useTriApi || (GL_glFogi != NULL);
-#endif
-
 	// Some default values for different fog modes, in case they're not provided
 	if (endDist == 0 && density > 0)
 	{
@@ -109,11 +103,13 @@ static void RenderFogImpl(short r, short g, short b, float startDist, float endD
 		density = 0.001f;
 	}
 
-	if (useTriApi)
+	if (gEngfuncs.pTriAPI->FogParams != NULL)
 	{
-		float fogColor[] = {(float)r, (float)g, (float)b};
-		gEngfuncs.pTriAPI->Fog ( fogColor, startDist, endDist, 1 );
+		gEngfuncs.pTriAPI->FogParams(density, skyboxFog);
 	}
+
+	float fogColor[] = {(float)r, (float)g, (float)b};
+	gEngfuncs.pTriAPI->Fog ( fogColor, startDist, endDist, 1 );
 
 #ifdef CLDLL_FOG
 	int glFogType = 0;
@@ -137,11 +133,6 @@ static void RenderFogImpl(short r, short g, short b, float startDist, float endD
 		GL_glFogi(GL_FOG_MODE, glFogType);
 	}
 #endif
-
-	if (gEngfuncs.pTriAPI->FogParams != NULL)
-	{
-		gEngfuncs.pTriAPI->FogParams(density,skyboxFog);
-	}
 }
 
 void RenderFog ( void )
