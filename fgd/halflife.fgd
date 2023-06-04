@@ -1551,6 +1551,7 @@
 	spawnflags(flags) =
 	[
 		1 : "Start active"   : 0
+		2 : "Affect skybox"   : 0
 	]
 	fogtype(Choices) : "GL Fog type" =
 	[

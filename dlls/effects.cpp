@@ -4341,6 +4341,7 @@ void CEnvDecal::Spawn( void )
 // LRC - env_fog, extended a bit from the DMC version
 //=========================================================
 #define SF_FOG_ACTIVE 1
+#define SF_FOG_AFFECT_SKYBOX 2
 #define SF_FOG_FADING 0x8000
 
 class CEnvFog : public CPointEntity
@@ -4566,6 +4567,7 @@ void CEnvFog::SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int
 		WRITE_SHORT ( iEndDist );
 		WRITE_LONG ( density * 10000 );
 		WRITE_BYTE ( m_fogType );
+		WRITE_BYTE ( FBitSet(pev->spawnflags, SF_FOG_AFFECT_SKYBOX) );
 	MESSAGE_END();
 }
 
