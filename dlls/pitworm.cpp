@@ -1,24 +1,17 @@
 /***
 *
-*   SPIRIT OF HALF-LIFE 1.9: OPPOSING-FORCE EDITION
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *
-*   Spirit of Half-Life and their logos are the property of their respective owners.
-*   Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
+*	All Rights Reserved.
 *
-*   This product contains software technology licensed from Id
-*   Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
+*   This source code contains proprietary and confidential information of
+*   Valve LLC and its suppliers.  Access to this code is restricted to
+*   persons who have executed a written SDK license with Valve.  Any access,
+*   use or distribution of this code by or to any unlicensed person is illegal.
 *
-*   Use, distribution, and modification of this source code and/or resulting
-*   object code is restricted to non-commercial enhancements to products from
-*   Valve LLC.  All other use, distribution, or modification is prohibited
-*   without written permission from Valve LLC.
-*
-*   All Rights Reserved.
-*
-*	Base Source-Code written by Marc-Antoine Lortie (https://github.com/malortie).
-*   Modifications by Hammermaps.de DEV Team (support@hammermaps.de).
-*
-***/
+****/
 
 #include	"extdll.h"
 #include	"util.h"
