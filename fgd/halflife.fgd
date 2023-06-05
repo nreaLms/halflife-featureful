@@ -993,7 +993,6 @@
 		256: "Continuous animation" : 0 : "Don't reset to idle between animations"
 		512: "Apply new angles" : 0 : "If the animation includes changing of monster's angles, set them after it finished. For smoother transition and better looks."
 		1024: "Auto-search" : 0 : "Act as if scripted sequence doesn't have a targetname: start searching for the monster in the script radius."
-		2048: "Force idle looping (old)" : 0
 		4096: "Try once" : 0 : "By default once triggered the script will continue to search for the target monster if it could not find one instantly. This flag prevents such behavior"
 		8192: "Don't reset head turn" : 0 : "Don't reset head turn for talk monsters"
 		16384: "Force idle looping" : 0 : "Force idle animation looping. Use it when you want to loop an animation that does not have a loop flag"
@@ -6613,7 +6612,6 @@
 		128 : "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Wait for script' flag"
 		256 : "Pre-Disaster" : 0 : "The spawned talkmonster (e.g. scientist) will use pre-disaster sentences"
 		1024: "Don't Drop Gun" : 0 : "The spawned monster won't drop items upon death."
-		2048 : "No ground check (old)" : 0
 		4096 : "Align to player" : 0 : "Spawned monsters will be aligned to the closest player increasing the chance of seeing the player right after the spawn."
 		8192 : "Monster Flag 64" : 0 : "Set spawnflag 64 for spawned monster. E.g. used by vortigaunts as 'wait until provoked'"
 		16384: "No ground check" : 0 : "Don't check if something prevents a monster to fall on ground upon spawning. Useful for spawning flying monsters and those who are supposed to fall on whatever underneath them"

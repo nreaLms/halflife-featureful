@@ -642,7 +642,7 @@ void CBaseMonster::RunTask( Task_t *pTask )
 					pev->framerate = 1.0;
 					//ALERT( at_aiconsole, "Script %s has begun for %s\n", STRING( m_pCine->m_iszPlay ), STRING( pev->classname ) );
 				}
-				else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING|SF_SCRIPT_FORCE_IDLE_LOOPING_OLD) && !FStringNull( m_pCine->m_iszIdle) && !m_pCine->IsAction() )
+				else if ( FBitSet(m_pCine->pev->spawnflags, SF_SCRIPT_FORCE_IDLE_LOOPING) && !FStringNull( m_pCine->m_iszIdle) && !m_pCine->IsAction() )
 				{
 					if ( m_fSequenceFinished )
 						m_pCine->StartSequence( this, m_pCine->m_iszIdle, FALSE );

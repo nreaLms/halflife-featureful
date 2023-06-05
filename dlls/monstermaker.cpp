@@ -37,7 +37,6 @@
 #define SF_MONSTERMAKER_WAIT_FOR_SCRIPT 128 // TODO: implement
 #define SF_MONSTERMAKER_PREDISASTER 256
 #define SF_MONSTERMAKER_DONT_DROP_GUN 1024 // Spawn monster won't drop gun upon death
-#define SF_MONSTERMAKER_NO_GROUND_CHECK_OLD 2048 // TODO: outdated, remove
 #define SF_MONSTERMAKER_ALIGN_TO_PLAYER 4096 // Align to closest player on spawn
 #define SF_MONSTERMAKER_WAIT_UNTIL_PROVOKED 8192
 #define SF_MONSTERMAKER_NO_GROUND_CHECK		( 1 << 14 ) // don't check if something on ground prevents a monster to fall on spawn
@@ -477,7 +476,7 @@ int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &te
 			if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_AUTOSIZEBBOX))
 				maxs.z = pCandidate->pev->origin.z;
 
-			if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK | SF_MONSTERMAKER_NO_GROUND_CHECK_OLD))
+			if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK ))
 			{
 				mins.z = MakerGroundLevel(pCandidate->pev->origin, pev);
 			}
@@ -528,7 +527,7 @@ int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &te
 			}
 		}
 
-		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK | SF_MONSTERMAKER_NO_GROUND_CHECK_OLD))
+		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK ))
 		{
 			if( !m_flGround
 					|| !FStringNull(m_iszPlacePosition) ) // The position could change, so we need to calculate the new ground level.
@@ -543,7 +542,7 @@ int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &te
 
 		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_AUTOSIZEBBOX))
 			maxs.z = placePosition.z;
-		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK | SF_MONSTERMAKER_NO_GROUND_CHECK_OLD))
+		if (!FBitSet(pev->spawnflags, SF_MONSTERMAKER_NO_GROUND_CHECK ))
 			mins.z = m_flGround;
 
 		CBaseEntity *pBlocker = MakerBlocker(mins, maxs);
