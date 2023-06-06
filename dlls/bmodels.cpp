@@ -247,6 +247,33 @@ void CFuncIllusionary::Spawn( void )
 	//	MAKE_STATIC(ENT(pev));
 }
 
+class CFuncIllusionaryToggle : public CFuncIllusionary
+{
+public:
+	void Spawn()
+	{
+		CFuncIllusionary::Spawn();
+		if( pev->spawnflags & SF_WALL_START_OFF )
+			TurnOff();
+	}
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+	{
+		bool status = IsOn();
+		if( ShouldToggle( useType, status ) )
+		{
+			if( status )
+				TurnOff();
+			else
+				TurnOn();
+		}
+	}
+	void TurnOff( void ) {  pev->effects |= EF_NODRAW; }
+	void TurnOn( void ) { pev->effects &= ~EF_NODRAW; }
+	BOOL IsOn( void ) { return !(pev->effects & EF_NODRAW); }
+};
+
+LINK_ENTITY_TO_CLASS( func_illusionary_toggle, CFuncIllusionaryToggle )
+
 // -------------------------------------------------------------------------------
 //
 // Monster only clip brush

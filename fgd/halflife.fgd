@@ -2246,6 +2246,14 @@
 	_minlight(string) : "Minimum light level"
 ]
 
+@SolidClass base(func_illusionary) = func_illusionary_toggle : "Fake toggleable Wall/Light"
+[
+	spawnflags(flags) =
+	[
+		1 : "Starts Invisible" : 0
+	]
+]
+
 @SolidClass base(Targetname) = func_ladder : "Ladder" []
 
 @SolidClass base(Targetname) = func_monsterclip : "Monster clip brush" []
