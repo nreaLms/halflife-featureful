@@ -109,6 +109,7 @@ enum
 
 #define ISLAVE_COIL_ATTACK_RADIUS 196
 
+#define ISLAVE_SPAWNFAMILIAR_SPRITE "sprites/bexplo.spr"
 #define ISLAVE_SPAWNFAMILIAR_DELAY 6
 
 enum {
@@ -1221,11 +1222,14 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 			CBaseMonster *pNewMonster = pNew->MyMonsterPointer( );
 
 			Remember(bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE);
-			CSprite *pSpr = CSprite::SpriteCreate( "sprites/bexplo.spr", origin, TRUE );
-			pSpr->AnimateAndDie( 20 );
-			pSpr->SetTransparency( kRenderTransAdd,  ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE,  255, kRenderFxNoDissipation );
+			CSprite *pSpr = CSprite::SpriteCreate( ISLAVE_SPAWNFAMILIAR_SPRITE, origin, TRUE, SF_SPRITE_ONCE_AND_REMOVE );
+			if (pSpr)
+			{
+				pSpr->pev->framerate = 20.0f;
+				pSpr->SetTransparency( kRenderTransAdd, ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE, 255, kRenderFxNoDissipation );
+			}
 			EMIT_SOUND( pNew->edict(), CHAN_BODY, "debris/beamstart7.wav", 0.9, ATTN_NORM );
-			
+
 			SetBits( pNew->pev->spawnflags, SF_MONSTER_FALL_TO_GROUND );
 			if (pNewMonster) {
 				pNewMonster->m_iClass = m_iClass;
@@ -1326,7 +1330,7 @@ void CISlave::Precache()
 		PRECACHE_SOUND_ARRAY(pGlowArmSounds);
 #endif
 #if FEATURE_ISLAVE_FAMILIAR
-	PRECACHE_MODEL( "sprites/bexplo.spr" );
+	PRECACHE_MODEL( ISLAVE_SPAWNFAMILIAR_SPRITE );
 	UTIL_PrecacheOther( "monster_snark" );
 	UTIL_PrecacheOther( "monster_headcrab" );
 #endif
