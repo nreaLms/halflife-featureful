@@ -3377,6 +3377,7 @@
 @PointClass base(Monster, FollowingMonster, Sequence) size(-32 -32 0, 32 32 64) studio("models/babygarg.mdl") = monster_babygarg : "Baby Gargantua" []
 @PointClass base(RenderFields, Sequence) size(-16 -16 -36, 16 16 0) studio("models/barnacle.mdl") = monster_barnacle : "Barnacle Monster"
 [
+	model(studio) : "Custom Model"
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
 		0 : "idle1"
