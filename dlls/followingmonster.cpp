@@ -127,9 +127,12 @@ Schedule_t slMoveAway[] =
 	{
 		tlMoveAway,
 		ARRAYSIZE( tlMoveAway ),
+		bits_COND_NEW_ENEMY|
+		bits_COND_HEAR_SOUND|
+		bits_COND_SCHEDULE_SUGGESTED|
 		bits_COND_LIGHT_DAMAGE|
 		bits_COND_HEAVY_DAMAGE,
-		0,
+		bits_SOUND_DANGER,
 		"MoveAway"
 	},
 };
@@ -145,8 +148,12 @@ Schedule_t slMoveAwayFail[] =
 	{
 		tlMoveAwayFail,
 		ARRAYSIZE( tlMoveAwayFail ),
-		0,
-		0,
+		bits_COND_NEW_ENEMY|
+		bits_COND_HEAR_SOUND|
+		bits_COND_SCHEDULE_SUGGESTED|
+		bits_COND_LIGHT_DAMAGE|
+		bits_COND_HEAVY_DAMAGE,
+		bits_SOUND_DANGER,
 		"MoveAwayFail"
 	},
 };
@@ -165,9 +172,12 @@ Schedule_t slMoveAwayFollow[] =
 	{
 		tlMoveAwayFollow,
 		ARRAYSIZE( tlMoveAwayFollow ),
+		bits_COND_NEW_ENEMY|
+		bits_COND_HEAR_SOUND|
+		bits_COND_SCHEDULE_SUGGESTED|
 		bits_COND_LIGHT_DAMAGE|
 		bits_COND_HEAVY_DAMAGE,
-		0,
+		bits_SOUND_DANGER,
 		"MoveAwayFollow"
 	},
 };
