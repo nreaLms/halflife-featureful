@@ -1335,10 +1335,11 @@ Schedule_t slGruntVictoryDance[] =
 		tlGruntVictoryDance,
 		ARRAYSIZE( tlGruntVictoryDance ),
 		bits_COND_NEW_ENEMY		|
+		bits_COND_HEAR_SOUND |
 		bits_COND_SCHEDULE_SUGGESTED |
 		bits_COND_LIGHT_DAMAGE	|
 		bits_COND_HEAVY_DAMAGE,
-		0,
+		bits_SOUND_DANGER,
 		"GruntVictoryDance"
 	},
 };
