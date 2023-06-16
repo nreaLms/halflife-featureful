@@ -61,6 +61,9 @@ ModFeatures::ModFeatures()
 	racex_dislike_alien_monsters = false;
 	shockroach_racex_classify = false;
 
+	scientist_random_heads =  4;
+	scientist_total_heads = FEATURE_OPFOR_SPECIFIC ? 6 : scientist_random_heads;
+
 	vortigaunt_coil_attack = true;
 	vortigaunt_idle_effects = false;
 	vortigaunt_arm_boost = true;
@@ -129,6 +132,19 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		if (strcmp(key, booleans[i].name) == 0)
 		{
 			return UpdateBoolean(value, booleans[i].value, key);
+		}
+	}
+
+	KeyValueDefinition<int> integers[] = {
+		KEY_VALUE_DEF(scientist_total_heads),
+		KEY_VALUE_DEF(scientist_random_heads),
+	};
+
+	for (i = 0; i<ARRAYSIZE(integers); ++i)
+	{
+		if (strcmp(key, integers[i].name) == 0)
+		{
+			return UpdateInteger(value, integers[i].value, key);
 		}
 	}
 

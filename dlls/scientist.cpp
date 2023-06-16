@@ -30,15 +30,6 @@
 
 #define FEATURE_SCIENTIST_PLFEAR 0
 
-#define		NUM_SCIENTIST_HEADS		4 // four heads available for scientist model, used when randoming a scientist head
-
-// used for body change when scientist uses the needle
-#if FEATURE_OPFOR_SCIENTIST_BODIES
-#define		NUM_SCIENTIST_BODIES		6
-#else
-#define		NUM_SCIENTIST_BODIES 4
-#endif
-
 #define SF_SCI_SITTING_DONT_DROP SF_MONSTER_SPECIAL_FLAG // Don't drop to the floor. We can re-use the same value as sitting scientists can't follow
 
 enum
@@ -139,9 +130,18 @@ public:
 	CUSTOM_SCHEDULES
 
 	void ReportAIState(ALERT_TYPE level);
+	virtual int RandomHeadCount() {
+		return g_modFeatures.scientist_random_heads;
+	}
+	virtual int TotalHeadCount() {
+		return g_modFeatures.scientist_total_heads;
+	}
+	bool NeedleIsEquiped() {
+		return pev->body >= TotalHeadCount();
+	}
 
 protected:
-	void SciSpawnHelper(const char* modelName, float health, int headCount = NUM_SCIENTIST_HEADS);
+	void SciSpawnHelper(const char* modelName, float health);
 	void PrecacheSounds();
 
 	virtual const char* HealSentence() { return "SC_HEAL"; }
@@ -533,7 +533,7 @@ void CScientist::StartTask( Task_t *pTask )
 		}
 		break;
 	case TASK_DRAW_NEEDLE:
-		if (pev->body >= NUM_SCIENTIST_BODIES)
+		if (NeedleIsEquiped())
 		{
 			TaskComplete();
 		}
@@ -543,7 +543,7 @@ void CScientist::StartTask( Task_t *pTask )
 		}
 		break;
 	case TASK_PUTAWAY_NEEDLE:
-		if (pev->body >= NUM_SCIENTIST_BODIES)
+		if (NeedleIsEquiped())
 		{
 			m_IdealActivity = ACT_DISARM;
 		}
@@ -698,14 +698,16 @@ void CScientist::HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 	case SCIENTIST_AE_NEEDLEON:
 		{
+			const int totalHeadCount = TotalHeadCount();
 			int oldBody = pev->body;
-			pev->body = ( oldBody % NUM_SCIENTIST_BODIES ) + NUM_SCIENTIST_BODIES * 1;
+			pev->body = ( oldBody % totalHeadCount ) + totalHeadCount * 1;
 		}
 		break;
 	case SCIENTIST_AE_NEEDLEOFF:
 		{
+			const int totalHeadCount = TotalHeadCount();
 			int oldBody = pev->body;
-			pev->body = ( oldBody % NUM_SCIENTIST_BODIES ) + NUM_SCIENTIST_BODIES * 0;
+			pev->body = ( oldBody % totalHeadCount ) + totalHeadCount * 0;
 		}
 		break;
 	default:
@@ -716,13 +718,13 @@ void CScientist::HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
-void CScientist::SciSpawnHelper(const char* modelName, float health, int headCount)
+void CScientist::SciSpawnHelper(const char* modelName, float health)
 {
 	// We need to set it before precache so the right voice will be chosen
 	if( pev->body == -1 )
 	{
 		// -1 chooses a random head
-		pev->body = RANDOM_LONG( 0, headCount - 1 );// pick a head, any head
+		pev->body = RANDOM_LONG( 0, RandomHeadCount() - 1 );// pick a head, any head
 	}
 
 	Precache();
@@ -822,7 +824,7 @@ void CScientist::TalkInit()
 #endif
 
 	// get voice for head
-	switch( pev->body % NUM_SCIENTIST_HEADS )
+	switch( pev->body % TotalHeadCount() )
 	{
 	default:
 	case HEAD_GLASSES:
@@ -961,7 +963,7 @@ Schedule_t *CScientist::GetSchedule( void )
 		}
 	}
 
-	const bool wantsToDisarm = (pev->body >= NUM_SCIENTIST_BODIES);
+	const bool wantsToDisarm = NeedleIsEquiped();
 
 	switch( m_MonsterState )
 	{
@@ -1227,7 +1229,7 @@ void CDeadScientist :: Spawn( )
 
 	if ( pev->body == -1 )
 	{// -1 chooses a random head
-		pev->body = RANDOM_LONG(0, NUM_SCIENTIST_HEADS-1);// pick a head, any head
+		pev->body = RANDOM_LONG(0, g_modFeatures.scientist_random_heads-1);// pick a head, any head
 	}
 	// Luther is black, make his hands black
 	if ( pev->body == HEAD_LUTHER )
@@ -1320,7 +1322,7 @@ void CSittingScientist::SciSpawnHelper(const char* modelName)
 	if( pev->body == -1 )
 	{
 		// -1 chooses a random head
-		pev->body = RANDOM_LONG( 0, NUM_SCIENTIST_HEADS - 1 );// pick a head, any head
+		pev->body = RANDOM_LONG( 0, g_modFeatures.scientist_random_heads - 1 );// pick a head, any head
 	}
 
 	// Luther is black, make his hands black
@@ -1578,7 +1580,7 @@ void CDeadCleansuitScientist::Spawn( )
 {
 	SpawnHelper("models/cleansuit_scientist.mdl");
 	if ( pev->body == -1 ) {
-		pev->body = RANDOM_LONG(0, NUM_SCIENTIST_HEADS-1);
+		pev->body = RANDOM_LONG(0, g_modFeatures.scientist_random_heads-1);
 	}
 	MonsterInitDead();
 }
@@ -1744,13 +1746,19 @@ public:
 	BOOL CanHeal();
 	bool ReadyToHeal() {return false;}
 	void ReportAIState(ALERT_TYPE level);
+	int RandomHeadCount() {
+		return 2;
+	}
+	int TotalHeadCount() {
+		return 2;
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_gus, CGus )
 
 void CGus::Spawn()
 {
-	SciSpawnHelper("models/gus.mdl", gSkillData.scientistHealth, 2);
+	SciSpawnHelper("models/gus.mdl", gSkillData.scientistHealth);
 	TalkMonsterInit();
 }
 
