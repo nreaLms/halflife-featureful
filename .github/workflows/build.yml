@@ -90,6 +90,8 @@ jobs:
       run: |
         cp fgd/halflife.fgd dist/${{ steps.extract_gamedir.outputs.gamedir }}/halflife_featureful.fgd
         cp fgd/halflife.fgd dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/halflife_featureful.fgd
+        cp -r features/ dist/${{ steps.extract_gamedir.outputs.gamedir }}/
+        cp -r features/ dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/
     - name: Delete .lib files from dist
       if: startsWith(matrix.os, 'windows')
       run: |
