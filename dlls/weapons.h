@@ -1251,6 +1251,8 @@ public:
 	void WeaponIdle(void);
 
 	int m_iShell;
+	int m_iLink;
+	bool m_bAlternatingEject;
 
 	virtual BOOL UseDecrement(void)
 	{
