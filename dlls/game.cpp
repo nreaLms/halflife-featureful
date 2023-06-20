@@ -342,11 +342,31 @@ bool ModFeatures::IsMonsterEnabled(const char *name) const
 	return false;
 }
 
+byte* LoadFileForMeWithBackup(const char* fileName, const char* fileNameBackup, int* pFileSize, const char** chosenFileName)
+{
+	*chosenFileName = fileName;
+
+	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, pFileSize );
+	if (!pMemFile)
+	{
+		pMemFile = g_engfuncs.pfnLoadFileForMe( fileNameBackup, pFileSize );
+		if (pMemFile)
+		{
+			*chosenFileName = fileNameBackup;
+		}
+	}
+	return pMemFile;
+}
+
+#define FEATUREFUL_WEAPONS_CONFIG "featureful_weapons.cfg"
+#define FEATUREFUL_MONSTERS_CONFIG "featureful_monsters.cfg"
+#define FEATUREFUL_SERVER_CONFIG "featureful_server.cfg"
+
 void ReadEnabledWeapons()
 {
-	const char* fileName = "featureful_weapons.cfg";
+	const char* fileName;
 	int filePos = 0, fileSize;
-	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	byte *pMemFile = LoadFileForMeWithBackup("features/"FEATUREFUL_WEAPONS_CONFIG, FEATUREFUL_WEAPONS_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
 	{
 		return;
@@ -383,9 +403,9 @@ void ReadEnabledWeapons()
 
 void ReadEnabledMonsters()
 {
-	const char* fileName = "featureful_monsters.cfg";
+	const char* fileName;
 	int filePos = 0, fileSize;
-	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	byte *pMemFile = LoadFileForMeWithBackup("features/"FEATUREFUL_MONSTERS_CONFIG, FEATUREFUL_MONSTERS_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
 	{
 		return;
@@ -420,9 +440,9 @@ void ReadEnabledMonsters()
 
 void ReadServerFeatures()
 {
-	const char* fileName = "featureful_server.cfg";
+	const char* fileName;
 	int filePos = 0, fileSize;
-	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	byte *pMemFile = LoadFileForMeWithBackup("features/"FEATUREFUL_SERVER_CONFIG, FEATUREFUL_SERVER_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
 		return;
 
@@ -1526,9 +1546,14 @@ void GameDLLInit( void )
 	if (g_modFeatures.skill_opfor)
 		SERVER_COMMAND( "exec skillopfor.cfg\n" );
 
-	const char* fileName = "featureful_exec.cfg";
+	const char* fileName = "features/featureful_exec.cfg";
 	int fileSize;
 	byte *pExecFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	if (!pExecFile)
+	{
+		pExecFile = g_engfuncs.pfnLoadFileForMe( "featureful_exec.cfg", &fileSize );
+	}
+
 	if (pExecFile)
 	{
 		SERVER_COMMAND((const char*)pExecFile);
