@@ -366,7 +366,7 @@ void ReadEnabledWeapons()
 {
 	const char* fileName;
 	int filePos = 0, fileSize;
-	byte *pMemFile = LoadFileForMeWithBackup("features/"FEATUREFUL_WEAPONS_CONFIG, FEATUREFUL_WEAPONS_CONFIG, &fileSize, &fileName);
+	byte *pMemFile = LoadFileForMeWithBackup("features/" FEATUREFUL_WEAPONS_CONFIG, FEATUREFUL_WEAPONS_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
 	{
 		return;
@@ -405,7 +405,7 @@ void ReadEnabledMonsters()
 {
 	const char* fileName;
 	int filePos = 0, fileSize;
-	byte *pMemFile = LoadFileForMeWithBackup("features/"FEATUREFUL_MONSTERS_CONFIG, FEATUREFUL_MONSTERS_CONFIG, &fileSize, &fileName);
+	byte *pMemFile = LoadFileForMeWithBackup("features/" FEATUREFUL_MONSTERS_CONFIG, FEATUREFUL_MONSTERS_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
 	{
 		return;
@@ -442,7 +442,7 @@ void ReadServerFeatures()
 {
 	const char* fileName;
 	int filePos = 0, fileSize;
-	byte *pMemFile = LoadFileForMeWithBackup("features/"FEATUREFUL_SERVER_CONFIG, FEATUREFUL_SERVER_CONFIG, &fileSize, &fileName);
+	byte *pMemFile = LoadFileForMeWithBackup("features/" FEATUREFUL_SERVER_CONFIG, FEATUREFUL_SERVER_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
 		return;
 
