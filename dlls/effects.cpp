@@ -3436,7 +3436,7 @@ void CEnvXenMaker::TrySpawn()
 		vecOrigin = pev->vuser1;
 	}
 
-	if (!FBitSet(pev->spawnflags, SF_XENMAKER_NOSPAWN)
+	if (!FBitSet(pev->spawnflags, SF_XENMAKER_NOSPAWN) && !FStringNull(m_iszMonsterClassname)
 			&& !asTemplate) // never spawn if xenmaker is used as a template for monstermaker
 	{
 		if( !m_flGround )

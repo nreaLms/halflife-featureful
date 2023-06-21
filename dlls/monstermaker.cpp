@@ -70,6 +70,7 @@ class CMonsterMaker : public CBaseMonster
 {
 public:
 	void Spawn( void );
+	bool CheckMonsterClassname();
 	void Precache( void );
 	void KeyValue( KeyValueData* pkvd);
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -334,6 +335,16 @@ void CMonsterMaker::Spawn()
 	m_flGround = 0;
 }
 
+bool CMonsterMaker::CheckMonsterClassname()
+{
+	if (FStringNull(m_iszMonsterClassname))
+	{
+		ALERT(at_error, "%s at (%g, %g, %g) has an empty monster classname!\n", STRING(pev->classname), pev->origin.x, pev->origin.y, pev->origin.z);
+		return false;
+	}
+	return true;
+}
+
 void CMonsterMaker::Precache( void )
 {
 	CBaseMonster::Precache();
@@ -343,7 +354,8 @@ void CMonsterMaker::Precache( void )
 	if (!FStringNull(m_gibModel))
 		PRECACHE_MODEL(STRING(m_gibModel));
 
-	UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize );
+	if (CheckMonsterClassname())
+		UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize );
 
 	UTIL_PrecacheOther("monstermaker_hull");
 }
@@ -589,6 +601,9 @@ int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &te
 
 CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vector &placeAngles)
 {
+	if (!CheckMonsterClassname())
+		return 0;
+
 	edict_t *pent = CREATE_NAMED_ENTITY( m_iszMonsterClassname );
 	if( FNullEnt( pent ) )
 	{
