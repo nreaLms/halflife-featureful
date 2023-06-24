@@ -2165,7 +2165,6 @@ void CISlave::ReportAIState(ALERT_TYPE level )
 	ALERT(level, "Current number of beams: %d. ", m_iBeams);
 }
 
-#if FEATURE_ISLAVE_DEAD
 class CDeadISlave : public CDeadMonster
 {
 public:
@@ -2187,9 +2186,17 @@ LINK_ENTITY_TO_CLASS( monster_alien_slave_dead, CDeadISlave )
 
 void CDeadISlave::Spawn( )
 {
+	bool shouldForceLastFrame = m_iPose != 0;
 	SpawnHelper("models/islave.mdl", BLOOD_COLOR_YELLOW);
+	if (pev->sequence == -1)
+	{
+		if (strcmp(getPos(m_iPose), "dead_on_stomach") == 0)
+		{
+			pev->sequence = LookupSequence( "dieheadshot" );
+			shouldForceLastFrame = true;
+		}
+	}
 	MonsterInitDead();
-	if (m_iPose)
+	if (shouldForceLastFrame)
 		pev->frame = 255;
 }
-#endif
