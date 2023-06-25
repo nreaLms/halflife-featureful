@@ -82,6 +82,8 @@ struct ModFeatures
 	bool gonome_lock_player;
 	bool voltigore_lesser_size;
 
+	bool doors_open_in_move_direction;
+
 	bool skill_opfor;
 	bool opfor_decals;
 	bool opfor_deadhaz;

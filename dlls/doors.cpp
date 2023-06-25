@@ -893,7 +893,7 @@ void CBaseDoor::DoorGoUp( void )
 			if( !FBitSet( pev->spawnflags, SF_DOOR_ONEWAY ) && pev->movedir.y ) 		// Y axis rotation, move away from the player
 			{
 				Vector vec = pevActivator->origin - pev->origin;
-				const bool allowOpenInMoveDirection = FEATURE_OPEN_ROTATING_DOOR_IN_MOVE_DIRECTION;
+				const bool allowOpenInMoveDirection = g_modFeatures.doors_open_in_move_direction;
 
 				Vector vnext;
 				if (!allowOpenInMoveDirection || FBitSet(pev->spawnflags, SF_DOOR_USE_ONLY))
