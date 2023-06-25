@@ -155,7 +155,7 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 				UnpackRGB( r,g,b, gHUD.HUDColor() );
 
 				if( !gWR.HasAmmo( weap ) )
-					UnpackRGB( r, g, b, RGB_REDISH );	// if the weapon doesn't have ammo, display it as red
+					UnpackRGB( r, g, b, gHUD.HUDColorCritical() );	// if the weapon doesn't have ammo, display it as red
 
 				float scale = ( rgAmmoHistory[i].DisplayTime - flTime ) * 80;
 				ScaleColors( r, g, b, Q_min( scale, 255 ) );
