@@ -1560,7 +1560,7 @@
 		2 : "Exponential2"
 		3 : "Linear"
 	]
-	density(integer) : "Density" : 0.001
+	density(string) : "Density" : 0.001
 ]
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = env_funnel : "Large Portal Funnel"
