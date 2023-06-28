@@ -1146,8 +1146,27 @@ int CBaseMonster::CheckEnemy( CBaseEntity *pEnemy )
 		return FALSE;
 	}
 
-	// The classify of enemy has been changed to an ally or neutral. Pretend to lose the enemy.
-	if (IRelationship(pEnemy) < R_DL)
+	// My enemy is not actually my enemy anymore or I became prisoner (e.g. via trigger_configure_monster)
+	bool shouldLoseEnemy = IRelationship(pEnemy) < R_DL || FBitSet(pev->spawnflags, SF_MONSTER_PRISONER) || (m_prisonerTo != 0 && m_prisonerTo == pEnemy->Classify());
+	if (!shouldLoseEnemy)
+	{
+		CBaseMonster* pMonster = pEnemy->MyMonsterPointer();
+		// Check if my enemy became prisoner
+		if (pMonster)
+		{
+			if (FBitSet(pMonster->pev->spawnflags, SF_MONSTER_PRISONER))
+			{
+				shouldLoseEnemy = true;
+			}
+			else if (pMonster->m_prisonerTo != 0 && pMonster->m_prisonerTo == Classify())
+			{
+				shouldLoseEnemy = true;
+			}
+		}
+	}
+
+	// Doesn't care about this enemy anymore. Pretend to lose the enemy.
+	if (shouldLoseEnemy)
 	{
 		SetConditions(bits_COND_ENEMY_LOST);
 		ClearConditions( bits_COND_SEE_ENEMY | bits_COND_ENEMY_OCCLUDED );
