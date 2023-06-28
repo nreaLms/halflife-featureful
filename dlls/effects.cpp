@@ -3831,8 +3831,6 @@ public:
 	virtual int		Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	void DoEffect( Vector vecPos );
-
 	int m_iTime;
 	int m_iRadius;
 	int	m_iHeight;
@@ -3947,7 +3945,7 @@ void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	// blast circle
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
+	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecPos );
 		WRITE_BYTE( type );
 		WRITE_COORD( vecPos.x );// coord coord coord (center position)
 		WRITE_COORD( vecPos.y );
