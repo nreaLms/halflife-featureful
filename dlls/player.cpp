@@ -5311,6 +5311,9 @@ void CBasePlayer::DropPlayerItemById(int iId)
 
 void CBasePlayer::DropPlayerItemImpl(CBasePlayerWeapon *pWeapon, int dropType, float speed)
 {
+	if (!pWeapon->CanBeDropped())
+		return;
+
 	if (!g_pGameRules->GetNextBestWeapon( this, pWeapon ))
 		return;
 

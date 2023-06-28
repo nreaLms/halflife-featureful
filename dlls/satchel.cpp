@@ -199,8 +199,7 @@ void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		{
 			CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
 
-			CSatchel* pSatchelWeapon = (CSatchel*)pPlayer->WeaponById(WEAPON_SATCHEL);
-			if (pSatchelWeapon) {
+			{
 				if (pPlayer->GiveAmmo(1, "Satchel Charge") > 0)
 				{
 					EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
@@ -215,12 +214,18 @@ void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 							break;
 						}
 					}
-					if (!anySatchelsLeft) {
-						if (pPlayer->m_pActiveItem == pSatchelWeapon) {
-							pSatchelWeapon->DrawSatchel();
+					CSatchel* pSatchelWeapon = (CSatchel*)pPlayer->WeaponById(WEAPON_SATCHEL);
+					if (pSatchelWeapon) {
+						if (!anySatchelsLeft)
+						{
+							if (pPlayer->m_pActiveItem == pSatchelWeapon) {
+								pSatchelWeapon->m_ForceSendAnimations = true;
+								pSatchelWeapon->DrawSatchel();
+								pSatchelWeapon->m_ForceSendAnimations = false;
+							}
+							else
+								pSatchelWeapon->m_chargeReady = SATCHEL_RELOAD;
 						}
-						else
-							pSatchelWeapon->m_chargeReady = SATCHEL_IDLE;
 					}
 
 					SetThink(&CBaseEntity::SUB_Remove);
@@ -335,6 +340,12 @@ int CSatchel::GetItemInfo( ItemInfo *p )
 BOOL CSatchel::IsUseable( void )
 {
 	return CanDeploy();
+}
+
+bool CSatchel::CanBeDropped()
+{
+	// Disallow drop if the only thing left is radio
+	return m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0;
 }
 
 BOOL CSatchel::CanDeploy( void )
@@ -520,6 +531,24 @@ void CSatchel::DrawSatchel()
 		m_flNextPrimaryAttack = GetNextAttackDelay( 0.5f );
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5f;
 		m_chargeReady = SATCHEL_IDLE;
+}
+
+void CSatchel::DrawRadio()
+{
+#if !CLIENT_DLL
+		m_pPlayer->pev->viewmodel = MAKE_STRING( "models/v_satchel_radio.mdl" );
+		m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel_radio.mdl" );
+#else
+		LoadVModel( "models/v_satchel_radio.mdl", m_pPlayer );
+#endif
+
+		SendWeaponAnim( SATCHEL_RADIO_DRAW );
+
+		strcpy( m_pPlayer->m_szAnimExtention, "hive" );
+
+		m_flNextPrimaryAttack = GetNextAttackDelay( 1.0f );
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5f;
+		m_chargeReady = SATCHEL_READY;
 }
 
 //=========================================================

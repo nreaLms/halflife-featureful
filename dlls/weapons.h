@@ -337,6 +337,7 @@ public:
 	void PrintState( void );
 
 	virtual CBasePlayerWeapon *MyWeaponPointer( void ) { return this; }
+	virtual bool CanBeDropped() { return true; }
 	float GetNextAttackDelay( float delay );
 
 	int		m_fInSpecialReload;									// Are we in the middle of a reload for the shotguns
@@ -941,11 +942,13 @@ public:
 	BOOL CanDeploy( void );
 	BOOL Deploy( void );
 	BOOL IsUseable( void );
+	bool CanBeDropped();
 
 	void Holster();
 	void WeaponIdle( void );
 	void Throw( void );
 	void DrawSatchel( void );
+	void DrawRadio();
 
 	virtual BOOL UseDecrement( void )
 	{
