@@ -5323,6 +5323,9 @@ public:
 	short m_actOutOfPVS;
 	int m_iClass;
 	int m_soundMask;
+
+	short m_prisonerTo;
+
 	short m_iTriggerCondition;
 	short m_iTriggerAltCondition;
 	string_t m_iszTriggerTarget;
@@ -5349,6 +5352,7 @@ TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
 	DEFINE_FIELD( CTriggerConfigureMonster, m_actOutOfPVS, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iClass, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_soundMask, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_prisonerTo, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerCondition, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerAltCondition, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iszTriggerTarget, FIELD_STRING ),
@@ -5402,6 +5406,11 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "classify"))
 	{
 		m_iClass = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "prisonerto"))
+	{
+		m_prisonerTo = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerTarget" ) )
@@ -5521,6 +5530,8 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		pMonster->m_customSoundMask = 0;
 	else if (m_soundMask)
 		pMonster->m_customSoundMask = m_soundMask;
+
+	MaySetResettableValue(pMonster->m_prisonerTo, m_prisonerTo);
 
 	MaySetResettableValue(pMonster->m_iTriggerCondition, m_iTriggerCondition);
 	MaySetResettableValue(pMonster->m_iTriggerAltCondition, m_iTriggerAltCondition);

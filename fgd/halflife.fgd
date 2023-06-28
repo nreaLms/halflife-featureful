@@ -7189,6 +7189,30 @@
 		18 : "Snark"
 		19 : "Gargantua"
 	]
+	prisonerto(choices) : "Act as Prisoner to" : : "Ignore and get ignored by this class" =
+	[
+		-1 : "Reset"
+		0 : "No change"
+		1 : "Machine"
+		2 : "Player"
+		3 : "Human passive"
+		4 : "Human military"
+		5 : "Alien military"
+		6 : "Alien passive"
+		7 : "Alien monster"
+		8 : "Alien prey"
+		9 : "Alien predator"
+		10 : "Insect"
+		11 : "Player ally"
+		12 : "Player bioweapon"
+		13 : "Alien bioweapon"
+		14 : "Race X predator"
+		15 : "Race X shock"
+		16 : "Opfor ally"
+		17 : "Blackops"
+		18 : "Snark"
+		19 : "Gargantua"
+	]
 	soundmask(choices) : "Sound Mask" : : "Types of sound the monster regards" =
 	[
 		-2 : "Reset to default"
