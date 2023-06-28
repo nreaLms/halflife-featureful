@@ -77,8 +77,6 @@
 #define FEATURE_SHOCKBEAM (FEATURE_SHOCKTROOPER || FEATURE_SHOCKRIFLE)
 #define FEATURE_SPOREGRENADE (FEATURE_SHOCKTROOPER || FEATURE_SPORELAUNCHER)
 
-// Re-check if blocking entity is destroyed by door's damage and continue moving the door
-#define FEATURE_DOOR_BLOCKED_RECHECK 0
 // Whether killed monsters are getting non-solid and fade if they block the door
 #define FEATURE_DOOR_BLOCKED_FADE_CORPSES 0
 

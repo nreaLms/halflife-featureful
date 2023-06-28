@@ -78,6 +78,7 @@ ModFeatures::ModFeatures()
 	voltigore_lesser_size = false;
 
 	doors_open_in_move_direction = false;
+	doors_blocked_recheck = false;
 
 	skill_opfor = FEATURE_OPFOR_SPECIFIC ? true : false;
 	opfor_decals = FEATURE_OPFOR_SPECIFIC ? true : false;
@@ -123,6 +124,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(gonome_lock_player),
 		KEY_VALUE_DEF(voltigore_lesser_size),
 		KEY_VALUE_DEF(doors_open_in_move_direction),
+		KEY_VALUE_DEF(doors_blocked_recheck),
 		KEY_VALUE_DEF(skill_opfor),
 		KEY_VALUE_DEF(opfor_decals),
 		KEY_VALUE_DEF(opfor_deadhaz),

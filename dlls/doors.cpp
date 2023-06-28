@@ -1059,11 +1059,12 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 	bool shouldProceed = false;
 	if( pev->dmg ) {
 		pOther->TakeDamage( pev, pev, pev->dmg, DMG_CRUSH );
-#if FEATURE_DOOR_BLOCKED_RECHECK
-		// Entity became unsolid or killed
-		if (pOther->pev->solid == SOLID_NOT || FBitSet(pev->flags, FL_KILLME))
-			shouldProceed = true;
-#endif
+		if (g_modFeatures.doors_blocked_recheck)
+		{
+			// Entity became unsolid or killed
+			if (pOther->pev->solid == SOLID_NOT || FBitSet(pev->flags, FL_KILLME))
+				shouldProceed = true;
+		}
 	}
 
 	if (!shouldProceed)

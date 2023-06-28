@@ -83,6 +83,7 @@ struct ModFeatures
 	bool voltigore_lesser_size;
 
 	bool doors_open_in_move_direction;
+	bool doors_blocked_recheck;
 
 	bool skill_opfor;
 	bool opfor_decals;
