@@ -7158,6 +7158,42 @@
 	]
 ]
 
+@PointClass base(Targetname) = player_capabilities : "Enable/disable certain player's capabilities"
+[
+	attack_capability(choices) : "Attack capability" =
+	[
+		-1 : "Off"
+		0 : "No change"
+		1 : "On"
+		2 : "Toggle"
+		3 : "Copy use input"
+	]
+	jump_capability(choices) : "Jump capability" =
+	[
+		-1 : "Off"
+		0 : "No change"
+		1 : "On"
+		2 : "Toggle"
+		3 : "Copy use input"
+	]
+	duck_capability(choices) : "Duck capability" =
+	[
+		-1 : "Off"
+		0 : "No change"
+		1 : "On"
+		2 : "Toggle"
+		3 : "Copy use input"
+	]
+	use_capability(choices) : "Use capability" =
+	[
+		-1 : "Off"
+		0 : "No change"
+		1 : "On"
+		2 : "Toggle"
+		3 : "Copy use input"
+	]
+]
+
 @PointClass base(Targetname) color(72 96 128) = player_hasitem : "Check if player has a specific item"
 [
 	item_type(choices) : "Item Type" : 0 =
@@ -7194,6 +7230,11 @@
 		2 : "Remove weapons" : 0
 		128 : "Return to menu" : 0 : "Return to menu instead of loading the save"
 	]
+]
+
+@PointClass base(Targetname) = player_speed : "Configure player's speed"
+[
+	maxspeed(string) : "Maxspeed multiplier [0=reset]" : 0
 ]
 
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_weaponstrip : "Strips player's weapons and items"

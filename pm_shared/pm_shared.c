@@ -2525,6 +2525,10 @@ void PM_Jump( void )
 		return;
 	}
 
+	// check if jump is disabled
+	if (atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "noj" ) ) == 1)
+		return;
+
 	if( pmove->flags & FL_FROZEN )
 		return;
 

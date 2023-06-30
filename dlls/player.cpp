@@ -128,6 +128,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_ARRAY(CBasePlayer, m_timeBasedDmgModifiers, FIELD_CHARACTER, CDMG_TIMEBASED),
 	DEFINE_FIELD(CBasePlayer, m_settingsLoaded, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBasePlayer, m_buddha, FIELD_BOOLEAN),
+	DEFINE_FIELD(CBasePlayer, m_suppressedCapabilities, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayer, m_maxSpeedFraction, FIELD_FLOAT),
 
 	DEFINE_FIELD(CBasePlayer, m_loopedMp3, FIELD_STRING),
 
@@ -1724,6 +1726,9 @@ void CBasePlayer::PlayerUse( void )
 	if( !( ( pev->button | m_afButtonPressed | m_afButtonReleased) & IN_USE ) )
 		return;
 
+	if (FBitSet(m_suppressedCapabilities, PLAYER_SUPRESS_USE))
+		return;
+
 	// Hit Use on a train?
 	if( m_afButtonPressed & IN_USE )
 	{
@@ -2341,6 +2346,7 @@ void CBasePlayer::PreThink( void )
 	m_afButtonReleased = buttonsChanged & ( ~pev->button );	// The ones not down are "released"
 
 	g_pGameRules->PlayerThink( this );
+	pev->maxspeed = m_maxSpeedFraction * g_psv_maxspeed->value;
 
 	if( g_fGameOver )
 		return;         // intermission or finale
@@ -3753,6 +3759,7 @@ int CBasePlayer::Restore( CRestore &restore )
 		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 	}
 
+	SetPhysicsKeyValues();
 	RenewItems();
 
 #if CLIENT_WEAPONS
@@ -3767,6 +3774,26 @@ int CBasePlayer::Restore( CRestore &restore )
 	m_bResetViewEntity = true;
 
 	return status;
+}
+
+void CBasePlayer::SetPhysicsKeyValues()
+{
+	if( FBitSet(m_suppressedCapabilities, PLAYER_SUPRESS_JUMP) )
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "noj", "1" );
+	}
+	else
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "noj", "0" );
+	}
+	if( FBitSet(m_suppressedCapabilities, PLAYER_SUPRESS_DUCK) )
+	{
+		pev->iuser3 = 1;
+	}
+	else
+	{
+		pev->iuser3 = 0;
+	}
 }
 
 void CBasePlayer::SelectItem( const char *pstr )
@@ -6127,6 +6154,137 @@ TYPEDESCRIPTION	CPlayerHasWeapon::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CPlayerHasWeapon, CPointEntity )
 
 LINK_ENTITY_TO_CLASS( player_hasweapon, CPlayerHasWeapon )
+
+
+enum
+{
+	PLAYER_ABILITY_DISABLE = -1,
+	PLAYER_ABILITY_NOCHANGE = 0,
+	PLAYER_ABILITY_ENABLE = 1,
+	PLAYER_ABILITY_TOGGLE = 2,
+	PLAYER_ABILITY_COPYINPUT = 3,
+};
+
+class CPlayerCapabilities : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+	{
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer)
+			return;
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_ATTACK, m_attackCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_JUMP, m_jumpCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_DUCK, m_duckCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_USE, m_useCapability, useType);
+
+		pPlayer->SetPhysicsKeyValues();
+	}
+
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if( FStrEq( pkvd->szKeyName, "attack_capability" ) )
+		{
+			m_attackCapability = atoi( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else if( FStrEq( pkvd->szKeyName, "jump_capability" ) )
+		{
+			m_jumpCapability = atoi( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else if( FStrEq( pkvd->szKeyName, "duck_capability" ) )
+		{
+			m_duckCapability = atoi( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else if( FStrEq( pkvd->szKeyName, "use_capability" ) )
+		{
+			m_useCapability = atoi( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+private:
+	void ConfigurePlayerCapability(CBasePlayer* pPlayer, int suppressCapability, short setting, USE_TYPE useType)
+	{
+		if (setting == PLAYER_ABILITY_COPYINPUT)
+		{
+			if (useType == USE_OFF)
+				setting = PLAYER_ABILITY_DISABLE;
+			else if (useType == USE_ON)
+				setting = PLAYER_ABILITY_ENABLE;
+			else
+				setting = PLAYER_ABILITY_TOGGLE;
+		}
+
+		if (setting == PLAYER_ABILITY_DISABLE)
+		{
+			SetBits(pPlayer->m_suppressedCapabilities, suppressCapability);
+		}
+		else if (setting == PLAYER_ABILITY_ENABLE)
+		{
+			ClearBits(pPlayer->m_suppressedCapabilities, suppressCapability);
+		}
+		else if (setting == PLAYER_ABILITY_TOGGLE)
+		{
+			if (FBitSet(pPlayer->m_suppressedCapabilities, suppressCapability))
+				ClearBits(pPlayer->m_suppressedCapabilities, suppressCapability);
+			else
+				SetBits(pPlayer->m_suppressedCapabilities, suppressCapability);
+		}
+	}
+
+	short m_attackCapability;
+	short m_jumpCapability;
+	short m_duckCapability;
+	short m_useCapability;
+};
+
+LINK_ENTITY_TO_CLASS( player_capabilities, CPlayerCapabilities )
+
+TYPEDESCRIPTION	CPlayerCapabilities::m_SaveData[] =
+{
+	DEFINE_FIELD( CPlayerCapabilities, m_attackCapability, FIELD_SHORT ),
+	DEFINE_FIELD( CPlayerCapabilities, m_jumpCapability, FIELD_SHORT ),
+	DEFINE_FIELD( CPlayerCapabilities, m_duckCapability, FIELD_SHORT ),
+	DEFINE_FIELD( CPlayerCapabilities, m_useCapability, FIELD_SHORT ),
+};
+
+IMPLEMENT_SAVERESTORE( CPlayerCapabilities, CPointEntity )
+
+class CPlayerSpeed : public CPointEntity
+{
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+	{
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer)
+			return;
+
+		pPlayer->m_maxSpeedFraction = pev->health;
+	}
+
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if( FStrEq( pkvd->szKeyName, "maxspeed" ) )
+		{
+			// pev->maxspeed is not saved by default. Use some other float variable
+			pev->health = atof( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+};
+
+LINK_ENTITY_TO_CLASS( player_speed, CPlayerSpeed )
 
 #define SF_PLAYER_LOAD_SAVED_FREEZE 1
 #define SF_PLAYER_LOAD_SAVED_WEAPONSTRIP 2

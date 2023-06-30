@@ -799,6 +799,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		player.m_pActiveItem = g_pWpns[from->client.m_iId];
 	}
 
+	player.m_suppressedCapabilities = from->client.vuser2[0];
+
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
 	if( ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) && 

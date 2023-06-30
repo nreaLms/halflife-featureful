@@ -107,6 +107,11 @@ enum sbar_data
 #define ARMOR_RATIO	0.2	// Armor Takes 80% of the damage
 #define ARMOR_BONUS	0.5	// Each Point of Armor is work 1/x points of health
 
+#define PLAYER_SUPRESS_ATTACK (1<<0)
+#define PLAYER_SUPRESS_JUMP (1<<1)
+#define PLAYER_SUPRESS_DUCK (1<<2)
+#define PLAYER_SUPRESS_USE (1<<5)
+
 class CBasePlayer : public CBaseMonster
 {
 public:
@@ -251,6 +256,7 @@ public:
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
+	void SetPhysicsKeyValues();
 	void RenewItems(void);
 	void PackDeadPlayerItems( void );
 	void RemoveAllItems( int stripFlags );
@@ -473,6 +479,9 @@ public:
 	BOOL m_buddha;
 	short m_iSatchelControl;
 	short m_iPreferNewGrenadePhysics;
+
+	int m_suppressedCapabilities;
+	float m_maxSpeedFraction;
 
 	void SetLoopedMp3(string_t loopedMp3);
 	string_t m_loopedMp3;
