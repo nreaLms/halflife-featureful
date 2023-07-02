@@ -1546,8 +1546,14 @@ void V_CalcSpectatorRefdef( struct ref_params_s * pparams )
 	VectorCopy( v_origin, pparams->vieworg );
 }
 
+extern void RenderFog();
+extern int g_iWaterLevel;
+
 void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
+	RenderFog();
+	g_iWaterLevel = pparams->waterlevel;
+
 	// intermission / finale rendering
 	if( pparams->intermission )
 	{

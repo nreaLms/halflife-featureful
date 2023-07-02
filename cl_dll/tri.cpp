@@ -20,7 +20,7 @@
 #include "cl_entity.h"
 #include "triangleapi.h"
 
-extern int g_iWaterLevel;
+int g_iWaterLevel;
 
 extern "C"
 {
@@ -159,7 +159,6 @@ Non-transparent triangles-- add them here
 */
 void DLLEXPORT HUD_DrawNormalTriangles( void )
 {
-	RenderFog();
 	gHUD.m_Spectator.DrawOverview();
 #if TEST_IT
 //	Draw_Triangles();
