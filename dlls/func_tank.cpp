@@ -542,8 +542,11 @@ void CFuncTank::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	if( pev->spawnflags & SF_TANK_CANCONTROL )
 	{
 		// player controlled turret
-		if( pActivator->Classify() != CLASS_PLAYER )
+		if( !pActivator || pActivator->Classify() != CLASS_PLAYER )
+		{
+			ALERT(at_warning, "Triggering a controllable %s with non-player activator. Probably a mapping error?\n", STRING(pev->classname));
 			return;
+		}
 
 		if( value == 2 && useType == USE_SET )
 		{
