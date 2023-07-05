@@ -455,9 +455,6 @@ void CBarney::TalkInit()
 
 	m_szGrp[TLK_KILL] = "BA_KILL";
 	m_szGrp[TLK_ATTACK] = "BA_ATTACK";
-
-	// get voice for head - just one barney voice for now
-	m_voicePitch = 100;
 }
 
 void CBarney::KeyValue(KeyValueData *pkvd)
@@ -790,8 +787,6 @@ void COtis::TalkInit()
 	
 	m_szGrp[TLK_KILL] = "OT_KILL";
 	m_szGrp[TLK_ATTACK] = "OT_ATTACK";
-
-	m_voicePitch = 100;
 }
 
 void COtis::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
@@ -981,8 +976,6 @@ void CBarniel::TalkInit()
 
 	m_szGrp[TLK_KILL] = "BN_KILL";
 	m_szGrp[TLK_ATTACK] = "BN_ATTACK";
-
-	m_voicePitch = 100;
 }
 
 void CBarniel::HandleAnimEvent( MonsterEvent_t *pEvent )
@@ -1153,8 +1146,6 @@ void CKate::TalkInit()
 
 	m_szGrp[TLK_KILL] = "KA_KILL";
 	m_szGrp[TLK_ATTACK] = "KA_ATTACK";
-
-	m_voicePitch = 100;
 }
 
 void CKate::HandleAnimEvent( MonsterEvent_t *pEvent )

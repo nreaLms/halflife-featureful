@@ -132,6 +132,7 @@ class CHFGrunt : public CTalkMonster
 {
 public:
 	void Spawn( void );
+	int GetDefaultVoicePitch();
 	void Precache( void );
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	void SetYawSpeed( void );
@@ -259,6 +260,7 @@ class CMedic : public CHFGrunt
 {
 public:
 	void Spawn( void );
+	int GetDefaultVoicePitch();
 	void Precache( void );
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* DefaultDisplayName() { return "Human Medic"; }
@@ -1852,6 +1854,18 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 //=========================================================
 // Spawn
 //=========================================================
+int CHFGrunt::GetDefaultVoicePitch()
+{
+	switch ( m_iHead ) {
+	case FG_HEAD_SHOTGUN:
+	case FG_HEAD_SAW_BLACK:
+	case FG_HEAD_BERET_BLACK:
+		return 98;
+	default:
+		return 100;
+	}
+}
+
 void CHFGrunt :: Spawn()
 {
 	Precache( );
@@ -1971,16 +1985,6 @@ void CHFGrunt :: Precache()
 	m_iM249Link = PRECACHE_MODEL ("models/saw_link.mdl");// saw link
 
 	TalkInit();
-	switch ( m_iHead ) {
-	case FG_HEAD_SHOTGUN:
-	case FG_HEAD_SAW_BLACK:
-	case FG_HEAD_BERET_BLACK:
-		m_voicePitch = 98;
-		break;
-	default:
-		m_voicePitch = 100;
-		break;
-	}
 
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
@@ -2907,6 +2911,7 @@ class CTorch : public CHFGrunt
 {
 public:
 	void Spawn( void );
+	int GetDefaultVoicePitch() { return 95; }
 	void Precache( void );
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* DefaultDisplayName() { return "Human Torch"; }
@@ -2974,7 +2979,6 @@ void CTorch::Precache()
 	PRECACHE_SOUND("weapons/desert_eagle_reload.wav");
 	PrecacheHelper();
 	TalkInit();
-	m_voicePitch = 95;
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
 }
@@ -3640,6 +3644,14 @@ bool CMedic::SetAnswerQuestion(CTalkMonster *pSpeaker)
 	return CTalkMonster::SetAnswerQuestion(pSpeaker);
 }
 
+int CMedic::GetDefaultVoicePitch()
+{
+	if (m_iHead == MEDIC_HEAD_BLACK)
+		return 100;
+	else
+		return 105;
+}
+
 void CMedic::Spawn()
 {
 	Precache( );
@@ -3687,10 +3699,6 @@ void CMedic::Precache()
 	PRECACHE_SOUND("fgrunt/medical.wav");
 	PrecacheHelper();
 	TalkInit();
-	if (m_iHead == MEDIC_HEAD_BLACK)
-		m_voicePitch = 100;
-	else
-		m_voicePitch = 105;
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
 	RegisterMedic();

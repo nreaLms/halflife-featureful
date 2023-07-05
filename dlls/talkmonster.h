@@ -147,6 +147,8 @@ public:
 
 	// Conversations / communication
 	int				GetVoicePitch( void );
+	virtual int GetDefaultVoicePitch() { return 100; }
+	void PrepareVoicePitch();
 	virtual void	IdleRespond( void );
 	virtual bool	AskQuestion( float duration );
 	virtual bool	SetAnswerQuestion( CTalkMonster *pSpeaker );

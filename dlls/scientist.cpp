@@ -79,6 +79,7 @@ enum
 class CScientist : public CTalkMonster
 {
 public:
+	int GetDefaultVoicePitch();
 	void Spawn( void );
 	void Precache( void );
 
@@ -745,6 +746,25 @@ void CScientist::SciSpawnHelper(const char* modelName, float health)
 	m_afCapability = bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_OPEN_DOORS | bits_CAP_AUTO_DOORS | bits_CAP_USE;
 }
 
+int CScientist::GetDefaultVoicePitch()
+{
+	// get voice for head
+	switch( pev->body % TotalHeadCount() )
+	{
+	default:
+	case HEAD_GLASSES:
+		return 105;
+	case HEAD_EINSTEIN:
+	case HEAD_EINSTEIN_WITH_BOOK:
+		return 100;
+	case HEAD_LUTHER:
+		return 95;
+	case HEAD_SLICK:
+	case HEAD_SLICK_WITH_STICK:
+		return 100;
+	}
+}
+
 void CScientist::Spawn()
 {
 	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
@@ -822,26 +842,6 @@ void CScientist::TalkInit()
 #else
 	m_szGrp[TLK_MAD] = NULL;
 #endif
-
-	// get voice for head
-	switch( pev->body % TotalHeadCount() )
-	{
-	default:
-	case HEAD_GLASSES:
-		m_voicePitch = 105;
-		break;	//glasses
-	case HEAD_EINSTEIN:
-	case HEAD_EINSTEIN_WITH_BOOK:
-		m_voicePitch = 100;
-		break;	//einstein
-	case HEAD_LUTHER:
-		m_voicePitch = 95;
-		break;	//luther
-	case HEAD_SLICK:
-	case HEAD_SLICK_WITH_STICK:
-		m_voicePitch = 100;
-		break;	//slick
-	}
 }
 
 //=========================================================
@@ -1607,6 +1607,7 @@ LINK_ENTITY_TO_CLASS( monster_sitting_cleansuit_scientist, CSittingCleansuitScie
 class CRosenberg : public CScientist
 {
 public:
+	int GetDefaultVoicePitch() { return 100; }
 	void Spawn();
 	void Precache();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("rosenberg"); }
@@ -1694,8 +1695,6 @@ void CRosenberg::TalkInit()
 #else
 	m_szGrp[TLK_MAD] = NULL;
 #endif
-
-	m_voicePitch = 100;
 }
 
 void CRosenberg::PlayPainSound()
@@ -1740,6 +1739,12 @@ void CRosenberg::PlayPainSound()
 class CGus : public CScientist
 {
 public:
+	int GetDefaultVoicePitch() {
+		if (pev->body)
+			return 95;
+		else
+			return 100;
+	}
 	void Spawn();
 	void Precache();
 	const char* DefaultDisplayName() { return "Construction Worker"; }
@@ -1767,10 +1772,6 @@ void CGus::Precache()
 	PrecacheMyModel("models/gus.mdl");
 	PrecacheSounds();
 	TalkInit();
-	if (pev->body)
-		m_voicePitch = 95;
-	else
-		m_voicePitch = 100;
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
 }
@@ -1834,6 +1835,7 @@ void CDeadGus :: Spawn( )
 class CKeller : public CScientist
 {
 public:
+	int GetDefaultVoicePitch() { return 100; }
 	void Spawn();
 	void Precache();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("keller"); }
@@ -1927,8 +1929,6 @@ void CKeller::TalkInit()
 
 	m_szGrp[TLK_SHOT] = "DK_PLFEAR";
 	m_szGrp[TLK_MAD] = NULL;
-
-	m_voicePitch = 100;
 }
 
 void CKeller::PainSound()

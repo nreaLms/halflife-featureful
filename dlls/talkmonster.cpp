@@ -45,8 +45,8 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_nSpeak, FIELD_INTEGER ),
 
 	// Recalc'ed in Precache()
-	//DEFINE_FIELD( CTalkMonster, m_voicePitch, FIELD_INTEGER ),
 	//DEFINE_FIELD( CTalkMonster, m_szGrp, FIELD_??? ),
+	DEFINE_FIELD( CTalkMonster, m_voicePitch, FIELD_INTEGER ),
 	DEFINE_FIELD( CTalkMonster, m_useTime, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_iszUse, FIELD_STRING ),
 	DEFINE_FIELD( CTalkMonster, m_iszUnUse, FIELD_STRING ),
@@ -784,8 +784,6 @@ void CTalkMonster::TalkInit( void )
 	// when a level is loaded, nobody will talk (time is reset to 0)
 	CTalkMonster::g_talkWaitTime = 0;
 
-	m_voicePitch = 100;
-
 	if (FBitSet(pev->spawnflags, SF_TALKMONSTER_DONTGREET_PLAYER))
 		SetBits(m_bitsSaid, bit_saidHelloPlayer);
 }	
@@ -873,7 +871,13 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 
 int CTalkMonster::GetVoicePitch( void )
 {
-	return m_voicePitch + RANDOM_LONG( 0, 3 );
+	return (m_voicePitch ? m_voicePitch : GetDefaultVoicePitch()) + RANDOM_LONG( 0, 3 );
+}
+
+void CTalkMonster::PrepareVoicePitch()
+{
+	if (m_voicePitch <= 0)
+		m_voicePitch = GetDefaultVoicePitch();
 }
 
 bool CTalkMonster::CanBePushed(CBaseEntity *pPusher)
@@ -1311,6 +1315,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 
 void CTalkMonster::TalkMonsterInit()
 {
+	PrepareVoicePitch();
 	MonsterInit();
 	if (IsFriendWithPlayerBeforeProvoked()) {
 		m_afCapability |= bits_CAP_USABLE;
@@ -1592,6 +1597,11 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 		m_iTolerance = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "voicepitch" ) )
+	{
+		m_voicePitch = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else 
 		CFollowingMonster::KeyValue( pkvd );
 }
@@ -1622,6 +1632,7 @@ void CTalkMonster::ReportAIState(ALERT_TYPE level)
 		ALERT( level, "Speaking to: %s. ", STRING( m_hTalkTarget->pev->classname ) );
 	if (m_fStartSuspicious)
 		ALERT( level, "Start pre-provoked. " );
+	ALERT( level, "Voice pitch: %d. ", m_voicePitch );
 }
 
 bool CTalkMonster::SomeoneIsTalking()
