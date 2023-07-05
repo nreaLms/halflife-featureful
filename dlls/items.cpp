@@ -557,8 +557,7 @@ public:
 
 		if( ( pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY ) && pPlayer->HasSuit() )
 		{
-			pPlayer->pev->armorvalue += pev->health > 0 ? pev->health : DefaultCapacity();
-			pPlayer->pev->armorvalue = Q_min( pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY );
+			pPlayer->TakeArmor(this, pev->health > 0 ? pev->health : DefaultCapacity());
 
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
 

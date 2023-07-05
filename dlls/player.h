@@ -232,6 +232,7 @@ public:
 	virtual void PostThink( void );
 	virtual Vector GetGunPosition( void );
 	virtual int TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamageType );
+	virtual int TakeArmor(CBaseEntity *pCharger, float flArmor);
 	virtual void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual void	Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );

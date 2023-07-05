@@ -259,6 +259,7 @@ bool CBaseMonster::HandleDoorBlockage(CBaseEntity* pDoor) { return false; }
 int TrainSpeed( int iSpeed, int iMax ) { return 0; }
 void CBasePlayer::DeathSound( void ) { }
 int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType ) { return 0; }
+int CBasePlayer::TakeArmor(CBaseEntity *pCharger, float flArmor) { return 0; }
 void CBasePlayer::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) { }
 int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 0; }
 void CBasePlayer::PackDeadPlayerItems( void ) { }

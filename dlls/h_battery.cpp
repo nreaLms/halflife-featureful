@@ -44,16 +44,7 @@ public:
 	float SoundVolume() { return 0.85f; }
 	bool GiveCharge(CBaseEntity* pActivator)
 	{
-		if (pActivator->pev->armorvalue < MAX_NORMAL_BATTERY)
-		{
-			pActivator->pev->armorvalue += 1;
-
-			if( pActivator->pev->armorvalue > MAX_NORMAL_BATTERY )
-				pActivator->pev->armorvalue = MAX_NORMAL_BATTERY;
-
-			return true;
-		}
-		return false;
+		return pActivator->TakeArmor(this, 1);
 	}
 };
 
@@ -400,13 +391,11 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 				FireTargets( STRING( m_triggerOnEmpty ), pPlayer, this );
 			}
 		}
-		pPlayer->pev->armorvalue += 1;
 		const float boneControllerValue = (m_iJuice / (float)ChargerCapacity()) * 360;
 		SetBoneController(RECHARGER_COIL_CONTROLLER, 360 - boneControllerValue);
 		SetBoneController(RECHARGER_COIL_CONTROLLER2,  boneControllerValue);
 
-		if( pPlayer->pev->armorvalue > MAX_NORMAL_BATTERY )
-			pPlayer->pev->armorvalue = MAX_NORMAL_BATTERY;
+		pPlayer->TakeArmor(this, 1);
 	}
 
 	// govern the rate of charge

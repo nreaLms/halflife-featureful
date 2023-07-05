@@ -444,6 +444,17 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 	return healed;
 }
 
+int CBasePlayer::TakeArmor(CBaseEntity *pCharger, float flArmor)
+{
+	if (pev->armorvalue >= MAX_NORMAL_BATTERY)
+		return false;
+	pev->armorvalue += flArmor;
+	pev->armorvalue = Q_min( pev->armorvalue, MAX_NORMAL_BATTERY );
+	if (pev->armorvalue < 0)
+		pev->armorvalue = 0;
+	return true;
+}
+
 Vector CBasePlayer::GetGunPosition()
 {
 	//UTIL_MakeVectors( pev->v_angle );
