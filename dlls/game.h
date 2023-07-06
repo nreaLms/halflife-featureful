@@ -67,7 +67,6 @@ struct ModFeatures
 	bool racex_dislike_alien_monsters;
 	bool shockroach_racex_classify;
 
-	int scientist_total_heads;
 	int scientist_random_heads;
 
 	bool vortigaunt_coil_attack;

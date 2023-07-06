@@ -62,7 +62,6 @@ ModFeatures::ModFeatures()
 	shockroach_racex_classify = false;
 
 	scientist_random_heads =  4;
-	scientist_total_heads = FEATURE_OPFOR_SPECIFIC ? 6 : scientist_random_heads;
 
 	vortigaunt_coil_attack = true;
 	vortigaunt_idle_effects = false;
@@ -141,7 +140,6 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	}
 
 	KeyValueDefinition<int> integers[] = {
-		KEY_VALUE_DEF(scientist_total_heads),
 		KEY_VALUE_DEF(scientist_random_heads),
 	};
 

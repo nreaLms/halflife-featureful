@@ -82,6 +82,7 @@ public:
 	int GetDefaultVoicePitch();
 	void Spawn( void );
 	void Precache( void );
+	void CalcTotalHeadCount();
 
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
@@ -135,7 +136,7 @@ public:
 		return g_modFeatures.scientist_random_heads;
 	}
 	virtual int TotalHeadCount() {
-		return g_modFeatures.scientist_total_heads;
+		return m_totalHeadCount > 0 ? m_totalHeadCount : 4;
 	}
 	bool NeedleIsEquiped() {
 		return pev->body >= TotalHeadCount();
@@ -153,6 +154,9 @@ protected:
 	float m_painTime;
 	float m_healTime;
 	float m_fearTime;
+
+	// Don't save
+	int m_totalHeadCount;
 };
 
 LINK_ENTITY_TO_CLASS( monster_scientist, CScientist )
@@ -768,6 +772,7 @@ int CScientist::GetDefaultVoicePitch()
 void CScientist::Spawn()
 {
 	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
+	CalcTotalHeadCount();
 
 	// White hands
 	pev->skin = 0;
@@ -795,6 +800,17 @@ void CScientist::Precache( void )
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
 	RegisterMedic();
+
+	CalcTotalHeadCount();
+}
+
+void CScientist::CalcTotalHeadCount()
+{
+	if (pev->modelindex)
+	{
+		// Divide by 2 to account for body variants with the needle
+		m_totalHeadCount = GetBodyCount( GET_MODEL_PTR(ENT(pev)) ) / 2;
+	}
 }
 
 void CScientist::PrecacheSounds()
@@ -1343,6 +1359,7 @@ void CSittingScientist::SciSpawnHelper(const char* modelName)
 void CSittingScientist::Spawn( )
 {
 	SciSpawnHelper("models/scientist.mdl");
+	CalcTotalHeadCount();
 	// Luther is black, make his hands black
 	if ( pev->body == HEAD_LUTHER )
 		pev->skin = 1;
@@ -1353,6 +1370,7 @@ void CSittingScientist::Precache( void )
 	m_baseSequence = LookupSequence( "sitlookleft" );
 	TalkInit();
 	RegisterTalkMonster(false);
+	CalcTotalHeadCount();
 }
 
 //=========================================================
@@ -1521,6 +1539,21 @@ int CSittingScientist::FIdleSpeak( void )
 class CCleansuitScientist : public CScientist
 {
 public:
+	int GetDefaultVoicePitch()
+	{
+		switch( pev->body )
+		{
+		default:
+		case HEAD_GLASSES:
+			return 105;
+		case HEAD_EINSTEIN:
+			return 100;
+		case HEAD_LUTHER:
+			return 95;
+		case HEAD_SLICK:
+			return 100;
+		}
+	}
 	void Spawn();
 	void Precache();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
@@ -1634,6 +1667,7 @@ void CRosenberg::Spawn()
 	SciSpawnHelper("models/scientist_rosenberg.mdl", gSkillData.scientistHealth * 2);
 #else
 	SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth * 2);
+	CalcTotalHeadCount();
 	pev->body = 3;
 #endif
 	TalkMonsterInit();
@@ -1645,6 +1679,7 @@ void CRosenberg::Precache()
 	PrecacheMyModel("models/scientist_rosenberg.mdl");
 #else
 	PrecacheMyModel("models/scientist.mdl");
+	CalcTotalHeadCount();
 #endif
 	PRECACHE_SOUND( "rosenberg/ro_pain0.wav" );
 	PRECACHE_SOUND( "rosenberg/ro_pain1.wav" );
