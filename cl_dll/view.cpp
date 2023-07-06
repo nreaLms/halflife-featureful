@@ -337,7 +337,8 @@ void V_CalcViewRoll( struct ref_params_s *pparams )
 	if( !viewentity )
 		return;
 
-	if (gHUD.ViewRollEnadled())
+	// TODO: Xash3D-FWGS supports setting rollangle and rollspeed via movevars. Do we need a way to support that?
+	if (true)
 	{
 		side = V_CalcRoll( viewentity->angles, pparams->simvel, GetRollAngle(), cl_rollspeed->value );
 	}

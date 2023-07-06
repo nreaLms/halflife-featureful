@@ -708,7 +708,6 @@ struct ClientFeatures
 	FlashlightFeatures flashlight;
 
 	ConfigurableBooleanValue view_bob;
-	ConfigurableBooleanValue view_roll;
 	ConfigurableFloatValue rollangle;
 	ConfigurableBooleanValue weapon_wallpuff;
 	ConfigurableBooleanValue weapon_sparks;
@@ -784,7 +783,6 @@ public:
 		return (m_iItemBits & PLAYER_ITEM_NIGHTVISION) != 0;
 	}
 	bool ViewBobEnabled();
-	bool ViewRollEnadled();
 	bool WeaponWallpuffEnabled();
 	bool WeaponSparksEnabled();
 	bool MuzzleLightEnabled();

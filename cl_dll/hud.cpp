@@ -88,9 +88,6 @@ ClientFeatures::ClientFeatures()
 
 	opfor_title = FEATURE_OPFOR_SPECIFIC ? true : false;
 
-	view_roll.configurable = false;
-	view_roll.enabled_by_default = true;
-
 	movemode.configurable = false;
 
 	nvgstyle.configurable = false;
@@ -220,7 +217,6 @@ extern client_sprite_t *GetSpriteList( client_sprite_t *pList, const char *psz, 
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
 cvar_t *cl_viewbob = NULL;
-cvar_t *cl_viewroll = NULL;
 cvar_t *cl_rollspeed = NULL;
 cvar_t *cl_rollangle = NULL;
 
@@ -590,7 +586,6 @@ void CHud::Init( void )
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer( "crosshair" );
 
 	CreateBooleanCvarConditionally(cl_viewbob, "cl_viewbob", clientFeatures.view_bob);
-	CreateBooleanCvarConditionally(cl_viewroll, "cl_viewroll", clientFeatures.view_roll);
 	CreateFloatCvarConditionally(cl_rollangle, "cl_rollangle", clientFeatures.rollangle);
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "200", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
@@ -808,7 +803,6 @@ void CHud::ParseClientFeatures()
 	KeyValueDefinition<ConfigurableBooleanValue> configurableBooleans[] = {
 		{ "flashlight.custom.", clientFeatures.flashlight.custom},
 		{ "view_bob.", clientFeatures.view_bob},
-		{ "view_roll.", clientFeatures.view_roll},
 		{ "weapon_wallpuff.", clientFeatures.weapon_wallpuff},
 		{ "weapon_sparks.", clientFeatures.weapon_sparks},
 		{ "muzzlelight.", clientFeatures.muzzlelight},
@@ -1362,11 +1356,6 @@ bool CHud::ClientFeatureEnabled(cvar_t* cVariable, bool defaultValue)
 bool CHud::ViewBobEnabled()
 {
 	return ClientFeatureEnabled(cl_viewbob, clientFeatures.view_bob.enabled_by_default);
-}
-
-bool CHud::ViewRollEnadled()
-{
-	return ClientFeatureEnabled(cl_viewroll, clientFeatures.view_roll.enabled_by_default);
 }
 
 bool CHud::WeaponWallpuffEnabled()
