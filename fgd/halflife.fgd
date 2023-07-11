@@ -1525,6 +1525,7 @@
 		1 : "On"
 		2 : "Dead"
 		3 : "Toggle"
+		4 : "Increment value"
 	]
 	initialstate(choices) : "Initial State" : 0 =
 	[

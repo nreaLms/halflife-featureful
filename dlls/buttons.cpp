@@ -93,36 +93,56 @@ void CEnvGlobal::Spawn( void )
 	}
 }
 
+enum
+{
+	GLOBAL_TRIGGER_MODE_OFF,
+	GLOBAL_TRIGGER_MODE_ON,
+	GLOBAL_TRIGGER_MODE_DEAD,
+	GLOBAL_TRIGGER_MODE_TOGGLE,
+	GLOBAL_TRIGGER_MODE_INCREMENT_VALUE,
+} GLOBAL_TRIGGER_MODE;
+
 void CEnvGlobal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	GLOBALESTATE oldState = gGlobalState.EntityGetState( m_globalstate );
-	GLOBALESTATE newState;
-
-	switch( m_triggermode )
+	if (m_triggermode == GLOBAL_TRIGGER_MODE_INCREMENT_VALUE)
 	{
-	case 0:
-		newState = GLOBAL_OFF;
-		break;
-	case 1:
-		newState = GLOBAL_ON;
-		break;
-	case 2:
-		newState = GLOBAL_DEAD;
-		break;
-	default:
-	case 3:
-		if( oldState == GLOBAL_ON )
-			newState = GLOBAL_OFF;
-		else if( oldState == GLOBAL_OFF )
-			newState = GLOBAL_ON;
-		else
-			newState = oldState;
+		if( !gGlobalState.EntityInTable( m_globalstate ) )
+		{
+			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, (GLOBALESTATE)m_initialstate );
+		}
+		gGlobalState.IncrementValue( m_globalstate );
 	}
-
-	if( gGlobalState.EntityInTable( m_globalstate ) )
-		gGlobalState.EntitySetState( m_globalstate, newState );
 	else
-		gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, newState );
+	{
+		GLOBALESTATE oldState = gGlobalState.EntityGetState( m_globalstate );
+		GLOBALESTATE newState;
+
+		switch( m_triggermode )
+		{
+		case GLOBAL_TRIGGER_MODE_OFF:
+			newState = GLOBAL_OFF;
+			break;
+		case GLOBAL_TRIGGER_MODE_ON:
+			newState = GLOBAL_ON;
+			break;
+		case GLOBAL_TRIGGER_MODE_DEAD:
+			newState = GLOBAL_DEAD;
+			break;
+		default:
+		case GLOBAL_TRIGGER_MODE_TOGGLE:
+			if( oldState == GLOBAL_ON )
+				newState = GLOBAL_OFF;
+			else if( oldState == GLOBAL_OFF )
+				newState = GLOBAL_ON;
+			else
+				newState = oldState;
+		}
+
+		if( gGlobalState.EntityInTable( m_globalstate ) )
+			gGlobalState.EntitySetState( m_globalstate, newState );
+		else
+			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, newState );
+	}
 }
 
 //==================================================

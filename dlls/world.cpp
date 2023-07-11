@@ -307,13 +307,13 @@ void CGlobalState::DumpGlobals( void )
 	pTest = m_pList;
 	while( pTest )
 	{
-		ALERT( at_console, "%s: %s (%s)\n", pTest->name, pTest->levelName, estates[pTest->state] );
+		ALERT( at_console, "%s: %s (state: %s, value: %d)\n", pTest->name, pTest->levelName, estates[pTest->state], pTest->value );
 		pTest = pTest->pNext;
 	}
 }
 //#endif
 
-void CGlobalState::EntityAdd( string_t globalname, string_t mapName, GLOBALESTATE state )
+void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state , int value)
 {
 	ASSERT( !Find( globalname ) );
 
@@ -324,6 +324,7 @@ void CGlobalState::EntityAdd( string_t globalname, string_t mapName, GLOBALESTAT
 	strcpy( pNewEntity->name, STRING( globalname ) );
 	strcpy( pNewEntity->levelName, STRING( mapName ) );
 	pNewEntity->state = state;
+	pNewEntity->value = value;
 	m_listCount++;
 }
 
@@ -333,6 +334,13 @@ void CGlobalState::EntitySetState( string_t globalname, GLOBALESTATE state )
 
 	if( pEnt )
 		pEnt->state = state;
+}
+
+void CGlobalState::IncrementValue(string_t globalname)
+{
+	globalentity_t *pEnt = Find( globalname );
+	if( pEnt )
+		pEnt->value += 1;
 }
 
 const globalentity_t *CGlobalState :: EntityFromTable( string_t globalname )
@@ -351,6 +359,14 @@ GLOBALESTATE CGlobalState::EntityGetState( string_t globalname )
 	return GLOBAL_OFF;
 }
 
+int CGlobalState::GetValue(string_t globalname)
+{
+	globalentity_t *pEnt = Find( globalname );
+	if( pEnt )
+		return pEnt->value;
+	return 0;
+}
+
 // Global Savedata for Delay
 TYPEDESCRIPTION	CGlobalState::m_SaveData[] =
 {
@@ -363,6 +379,7 @@ TYPEDESCRIPTION	gGlobalEntitySaveData[] =
 	DEFINE_ARRAY( globalentity_t, name, FIELD_CHARACTER, 64 ),
 	DEFINE_ARRAY( globalentity_t, levelName, FIELD_CHARACTER, 32 ),
 	DEFINE_FIELD( globalentity_t, state, FIELD_INTEGER ),
+	DEFINE_FIELD( globalentity_t, value, FIELD_INTEGER ),
 };
 
 int CGlobalState::Save( CSave &save )
@@ -401,7 +418,7 @@ int CGlobalState::Restore( CRestore &restore )
 	{
 		if( !restore.ReadFields( "GENT", &tmpEntity, gGlobalEntitySaveData, ARRAYSIZE( gGlobalEntitySaveData ) ) )
 			return 0;
-		EntityAdd( MAKE_STRING( tmpEntity.name ), MAKE_STRING( tmpEntity.levelName ), tmpEntity.state );
+		EntityAdd( MAKE_STRING( tmpEntity.name ), MAKE_STRING( tmpEntity.levelName ), tmpEntity.state, tmpEntity.value );
 	}
 	return 1;
 }
