@@ -1035,7 +1035,10 @@ BOOL CBaseMonster::CheckRangeAttack2( float flDot, float flDist )
 BOOL CBaseMonster::CheckMeleeAttack1( float flDot, float flDist )
 {
 	// Decent fix to keep folks from kicking/punching hornets and snarks is to check the onground flag(sjb)
-	if( flDist <= 64.0f && flDot >= 0.7f && m_hEnemy != 0 && FBitSet( m_hEnemy->pev->flags, FL_ONGROUND ) )
+	// Note: the check for FL_ONGROUND actually causes problems. E.g. zombies can't attack sentry turrets and flying enemies.
+	// Hornets are not seen as enemies by everything except the machines, so they're not a problem at all.
+	// Disabling this check for now.
+	if( flDist <= 64.0f && flDot >= 0.7f && m_hEnemy != 0 /*&& FBitSet( m_hEnemy->pev->flags, FL_ONGROUND )*/ )
 	{
 		return TRUE;
 	}
