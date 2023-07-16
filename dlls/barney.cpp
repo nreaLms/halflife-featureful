@@ -1230,21 +1230,7 @@ int CKate::LookupActivity(int activity)
 
 BOOL CKate::CheckMeleeAttack1(float flDot, float flDist)
 {
-	CBaseMonster *pEnemy = 0;
-	if( m_hEnemy != 0 )
-		pEnemy = m_hEnemy->MyMonsterPointer();
-
-	if( !pEnemy )
-		return FALSE;
-
-	const int enemyClassify = pEnemy->DefaultClassify();
-	if( flDist <= 64.0f && flDot >= 0.7f &&
-		 enemyClassify != CLASS_ALIEN_BIOWEAPON &&
-		 enemyClassify != CLASS_PLAYER_BIOWEAPON )
-	{
-		return TRUE;
-	}
-	return FALSE;
+	return CTalkMonster::CheckMeleeAttack1(flDot, flDist);
 }
 
 void CKate::DeathSound( void )

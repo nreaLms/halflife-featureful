@@ -1383,25 +1383,7 @@ BOOL CHFGrunt :: FCanCheckAttacks ( void )
 //=========================================================
 BOOL CHFGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 {
-	CBaseMonster *pEnemy;
-
-	if ( m_hEnemy != 0 )
-	{
-		pEnemy = m_hEnemy->MyMonsterPointer();
-	}
-
-	if ( !pEnemy )
-	{
-		return FALSE;
-	}
-
-	if ( flDist <= 64 && flDot >= 0.7	&&
-		 pEnemy->DefaultClassify() != CLASS_ALIEN_BIOWEAPON &&
-		 pEnemy->DefaultClassify() != CLASS_PLAYER_BIOWEAPON )
-	{
-		return TRUE;
-	}
-	return FALSE;
+	return CTalkMonster::CheckMeleeAttack1(flDot, flDist);
 }
 
 //=========================================================

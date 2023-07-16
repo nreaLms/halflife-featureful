@@ -353,25 +353,10 @@ BOOL CHGrunt::FCanCheckAttacks( void )
 //=========================================================
 BOOL CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
 {
-	CBaseMonster *pEnemy = 0;
-
-	if( m_hEnemy != 0 )
-	{
-		pEnemy = m_hEnemy->MyMonsterPointer();
-	}
-
-	if( !pEnemy )
-	{
-		return FALSE;
-	}
-
-	if( flDist <= 64.0f && flDot >= 0.7f &&
-		 pEnemy->DefaultClassify() != CLASS_ALIEN_BIOWEAPON &&
-		 pEnemy->DefaultClassify() != CLASS_PLAYER_BIOWEAPON )
-	{
-		return TRUE;
-	}
-	return FALSE;
+	// Note: this code used to have a check for CLASS_ALIEN_BIOWEAPON and CLASS_PLAYER_BIOWEAPON enemy classes.
+	// This code was probably outdated as human grunts don't see hornets as enemies anyway.
+	// TODO: remove this override altogether?
+	return CSquadMonster::CheckMeleeAttack1(flDot, flDist);
 }
 
 //=========================================================
