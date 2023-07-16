@@ -1170,7 +1170,7 @@
 @PointClass base(Ammo) studio("models/w_m40a1clip.mdl") = ammo_762 : "Sniper Ammo" []
 @PointClass base(Targetname, Appearflags, Angles, Global) size(-16 -16 -16, 16 16 16) studio("models/spore_ammo.mdl") = ammo_spore : "Spore" []
 
-@SolidClass base(Target, ZHLT, RenderFields) = button_target : "Target Button"
+@SolidClass base(Targetname, Target, ZHLT, RenderFields) = button_target : "Target Button"
 [
 	spawnflags(flags) =
 	[
