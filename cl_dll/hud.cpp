@@ -305,36 +305,42 @@ int __MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf )
 	return gHUD.MsgFunc_GameMode( pszName, iSize, pbuf );
 }
 
-int __MsgFunc_PlayMP3( const char *pszName, int iSize, void *pbuf )
+void PlayMP3( const char* pszMp3, bool loop = false )
 {
-	const char *pszSound;
-
-	BEGIN_READ( pbuf, iSize );
-	pszSound = READ_STRING();
-	const int loop = READ_BYTE();
-
 	if( !IsXashFWGS() && gEngfuncs.pfnGetCvarPointer( "gl_overbright" ) )
 	{
 		char cmd[256];
 
 		if (loop)
-			sprintf( cmd, "mp3 loop \"%s\"\n", pszSound );
+			sprintf( cmd, "mp3 loop \"%s\"\n", pszMp3 );
 		else
-			sprintf( cmd, "mp3 play \"%s\"\n", pszSound );
+			sprintf( cmd, "mp3 play \"%s\"\n", pszMp3 );
 		gEngfuncs.pfnClientCmd( cmd );
 	}
 	else
-		gEngfuncs.pfnPrimeMusicStream( pszSound, loop );
-
-	return 1;
+		gEngfuncs.pfnPrimeMusicStream( pszMp3, loop );
 }
 
-void __CmdFunc_StopMP3( void )
+void StopMp3()
 {
 	if( !IsXashFWGS() && gEngfuncs.pfnGetCvarPointer( "gl_overbright" ) )
 		gEngfuncs.pfnClientCmd( "mp3 stop\n" );
 	else
 		gEngfuncs.pfnPrimeMusicStream( 0, 0 );
+}
+
+int __MsgFunc_PlayMP3( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+	const char *pszSound = READ_STRING();
+	const int loop = READ_BYTE();
+
+	if (*pszSound == '\0')
+		StopMp3();
+	else
+		PlayMP3(pszSound, loop != 0);
+
+	return 1;
 }
 
 // TFFree Command Menu
@@ -570,7 +576,6 @@ void CHud::Init( void )
 	HOOK_MESSAGE( VGUIMenu );
 
 	HOOK_MESSAGE( PlayMP3 );
-	HOOK_COMMAND( "stopaudio", StopMP3 );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round

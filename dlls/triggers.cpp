@@ -1192,6 +1192,8 @@ void CTargetCDAudio::Play( void )
 #define SF_TRIGGER_MP3_AUDIO_LOOPED (1 << 1)
 #define SF_TRIGGER_MP3_AUDIO_PLAYING (1 << 24)
 
+extern int gmsgPlayMP3;
+
 class CTriggerMp3Audio : public CPointEntity
 {
 public:
@@ -1234,7 +1236,6 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 		return;
 	}
 
-	extern int gmsgPlayMP3;
 	if (gmsgPlayMP3)
 	{
 		const int looped = FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_LOOPED);
@@ -1258,7 +1259,13 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 
 void CTriggerMp3Audio::StopMp3(CBasePlayer *pPlayer)
 {
-	CLIENT_COMMAND( pPlayer->edict(), "stopaudio\n" );
+	if (gmsgPlayMP3)
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgPlayMP3, NULL, pPlayer->edict() );
+			WRITE_STRING( "" );
+			WRITE_BYTE( 0 );
+		MESSAGE_END();
+	}
 	pPlayer->SetLoopedMp3(iStringNull);
 }
 
