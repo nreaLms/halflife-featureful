@@ -2583,6 +2583,7 @@
 	[
 		1: "Remove On fire" : 0
 		2: "Reset On fire" : 1
+		4: "Fire if over limit" : 0
 	]
 	master(string) : "Master"
 	frags(integer) : "Initial Value" : 0

@@ -633,6 +633,7 @@ void CGamePlayerHurt::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 
 #define SF_GAMECOUNT_FIREONCE			0x0001
 #define SF_GAMECOUNT_RESET				0x0002
+#define SF_GAMECOUNT_FIREOVERLIMIT		0x0004
 
 class CGameCounter : public CRulePointEntity
 {
@@ -648,7 +649,14 @@ public:
 	inline int CountValue( void ) { return (int)pev->frags; }
 	inline int LimitValue( void ) { return (int)pev->health; }
 
-	inline BOOL HitLimit( void ) { return CountValue() == LimitValue(); }
+	inline BOOL HitLimit( void ) {
+		const int countValue = CountValue();
+		const int limitValue = LimitValue();
+		if (FBitSet(pev->spawnflags, SF_GAMECOUNT_FIREOVERLIMIT))
+			return countValue >= limitValue;
+		else
+			return countValue == limitValue;
+	}
 
 	bool CalcRatio( CBaseEntity *pLocus, float* outResult );
 
