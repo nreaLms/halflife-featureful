@@ -1212,8 +1212,6 @@ void CTriggerMp3Audio::Spawn( void )
 
 void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	char command[64];
-
 	CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 	if( !pPlayer || !pPlayer->IsNetClient())
 		return;

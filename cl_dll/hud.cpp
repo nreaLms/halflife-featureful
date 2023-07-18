@@ -317,10 +317,11 @@ int __MsgFunc_PlayMP3( const char *pszName, int iSize, void *pbuf )
 	{
 		char cmd[256];
 
-		sprintf( cmd, "mp3 play \"%s\"\n", pszSound );
-		gEngfuncs.pfnClientCmd( cmd );
 		if (loop)
-			gEngfuncs.pfnPrimeMusicStream( pszSound, loop );
+			sprintf( cmd, "mp3 loop \"%s\"\n", pszSound );
+		else
+			sprintf( cmd, "mp3 play \"%s\"\n", pszSound );
+		gEngfuncs.pfnClientCmd( cmd );
 	}
 	else
 		gEngfuncs.pfnPrimeMusicStream( pszSound, loop );

@@ -3258,15 +3258,6 @@ pt_end:
 	// Track button info so we can detect 'pressed' and 'released' buttons next frame
 	m_afButtonLast = pev->button;
 
-	if (!m_fInitHUD && !m_sendMp3 && (gpGlobals->time - m_precacheTime) > 1.0f && !FStringNull(m_loopedMp3) && gmsgPlayMP3)
-	{
-		m_sendMp3 = true;
-		MESSAGE_BEGIN( MSG_ONE, gmsgPlayMP3, NULL, pev );
-			WRITE_STRING( STRING( m_loopedMp3 ) );
-			WRITE_BYTE( 1 );
-		MESSAGE_END();
-	}
-
 #if CLIENT_WEAPONS
 	// Decay timers on weapons
 	// go through all of the weapons and make a list of the ones to pack
@@ -3585,8 +3576,6 @@ void CBasePlayer::Precache( void )
 #if FEATURE_MOVE_MODE
 	m_movementState = MovementStand;
 #endif
-
-	m_precacheTime = gpGlobals->time;
 }
 
 int CBasePlayer::Save( CSave &save )
@@ -4935,6 +4924,14 @@ void CBasePlayer::UpdateClientData( void )
 
 	if ( !m_bSentMessages && g_PlayerFullyInitialized[ENTINDEX(edict())-1] )
 	{
+		if (!FStringNull(m_loopedMp3) && gmsgPlayMP3)
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgPlayMP3, NULL, pev );
+				WRITE_STRING( STRING( m_loopedMp3 ) );
+				WRITE_BYTE( 1 );
+			MESSAGE_END();
+		}
+
 		m_bSentMessages = true;
 
 		const int startingIndex = 1;
