@@ -1224,33 +1224,39 @@ void CTriggerMp3Audio::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 		return;
 	}
 
-	if( !FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING) ) // if we're not playing, start playing!
+	bool shouldStop = false;
+	if (useType == USE_OFF)
 	{
-		SetBits(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING);
+		shouldStop = true;
 	}
-	else
+	else if (useType != USE_ON)
 	{
-		// if we're already playing, stop the mp3
+		shouldStop = FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING);
+	}
+
+	if (shouldStop)
+	{
 		ClearBits(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING);
 		StopMp3(pPlayer);
 		return;
 	}
 
+	SetBits(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_PLAYING);
+	const int looped = FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_LOOPED);
+
 	if (gmsgPlayMP3)
 	{
-		const int looped = FBitSet(pev->spawnflags, SF_TRIGGER_MP3_AUDIO_LOOPED);
-
 		// issue the play/loop command
 		MESSAGE_BEGIN( MSG_ONE, gmsgPlayMP3, NULL, pPlayer->edict() );
 			WRITE_STRING( STRING( pev->message ) );
 			WRITE_BYTE( looped );
 		MESSAGE_END();
-
-		if (looped)
-			pPlayer->SetLoopedMp3(pev->message);
-		else
-			pPlayer->SetLoopedMp3(iStringNull);
 	}
+
+	if (looped)
+		pPlayer->SetLoopedMp3(pev->message);
+	else
+		pPlayer->SetLoopedMp3(iStringNull);
 
 	// remove if set
 	if( FBitSet( pev->spawnflags, SF_TRIGGER_MP3_AUDIO_REMOVE_ON_FIRE ) )
