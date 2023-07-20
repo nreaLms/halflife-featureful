@@ -288,6 +288,7 @@ public:
 	void RemoveNVG();
 
 	void SetSuitAndDefaultLight();
+	void SetDefaultLight();
 	void SetLongjump(bool enabled);
 
 	// JOHN:  sends custom messages if player HUD data has changed  (eg health, ammo)

@@ -4165,7 +4165,8 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		break;
 	case 101:
 		gEvilImpulse101 = TRUE;
-		GiveNamedItem( "item_suit", SF_SUIT_FLASHLIGHT|SF_ITEM_NOFALL );
+		GiveNamedItem( "item_suit", SF_ITEM_NOFALL );
+		SetDefaultLight();
 		GiveNamedItem( "item_battery", SF_ITEM_NOFALL );
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_9mmhandgun" );
@@ -4692,7 +4693,7 @@ void CBasePlayer::UpdateClientData( void )
 		{
 			// Send Nightvision Off message.
 			MESSAGE_BEGIN( MSG_ONE, gmsgNightvision, NULL, pev );
-				WRITE_BYTE( SuitLightIsOn() ? 1 : 0 );
+				WRITE_BYTE( NVGIsOn() ? 1 : 0 );
 			MESSAGE_END();
 		}
 
@@ -5606,6 +5607,11 @@ void CBasePlayer::RemoveSuitLight() {
 void CBasePlayer::SetSuitAndDefaultLight()
 {
 	SetJustSuit();
+	SetDefaultLight();
+}
+
+void CBasePlayer::SetDefaultLight()
+{
 	switch (g_modFeatures.suit_light) {
 	case ModFeatures::SUIT_LIGHT_FLASHLIGHT:
 		SetFlashlight();
