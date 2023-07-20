@@ -928,7 +928,6 @@ void CGamePlayerTeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 #define SF_PLAYER_SETTINGS_DISPACER (1 << 18)
 #define SF_PLAYER_SETTINGS_SHOCKRIFLE (1 << 19)
 #define SF_PLAYER_SETTINGS_SPORELAUNCHER (1 << 20)
-#define SF_PLAYER_SETTINGS_FLASHLIGHT (1 << 22)
 #define SF_PLAYER_SETTINGS_LONGJUMP (1 << 23)
 
 class CGamePlayerSettings : public CRulePointEntity
@@ -1046,9 +1045,6 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	{
 		player->GiveNamedItem("item_longjump", SF_ITEM_NOFALL);
 	}
-
-	if (pev->spawnflags & SF_PLAYER_SETTINGS_FLASHLIGHT)
-		player->SetFlashlight();
 
 	switch (m_suitLight) {
 	case SUIT_LIGHT_NOTHING:
