@@ -2333,12 +2333,16 @@ void NextLevel( void )
 
 // ============================== LADDER =======================================
 
+#define SF_LADDER_OFF 1
+
 class CLadder : public CBaseTrigger
 {
 public:
 	void KeyValue( KeyValueData *pkvd );
 	void Spawn( void );
 	void Precache( void );
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void SetEnabled(bool enabled);
 };
 
 LINK_ENTITY_TO_CLASS( func_ladder, CLadder )
@@ -2355,7 +2359,10 @@ void CLadder::Precache( void )
 {
 	// Do all of this in here because we need to 'convert' old saved games
 	pev->solid = SOLID_NOT;
-	pev->skin = CONTENTS_LADDER;
+	if (FBitSet(pev->spawnflags, SF_LADDER_OFF))
+		pev->skin = CONTENTS_CLIP;
+	else
+		pev->skin = CONTENTS_LADDER;
 	if( CVAR_GET_FLOAT( "showtriggers" ) == 0 )
 	{
 		pev->rendermode = kRenderTransTexture;
@@ -2370,6 +2377,29 @@ void CLadder::Spawn( void )
 
 	SET_MODEL( ENT( pev ), STRING( pev->model ) );    // set size and link into world
 	pev->movetype = MOVETYPE_PUSH;
+}
+
+void CLadder::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	const bool ladderState = !FBitSet(pev->spawnflags, SF_LADDER_OFF);
+	if (ShouldToggle(useType, ladderState))
+	{
+		SetEnabled(!ladderState);
+	}
+}
+
+void CLadder::SetEnabled(bool enabled)
+{
+	if (enabled)
+	{
+		pev->skin = CONTENTS_LADDER;
+		ClearBits(pev->spawnflags, SF_LADDER_OFF);
+	}
+	else
+	{
+		pev->skin = CONTENTS_CLIP;
+		SetBits(pev->spawnflags, SF_LADDER_OFF);
+	}
 }
 
 // ========================== A TRIGGER THAT PUSHES YOU ===============================

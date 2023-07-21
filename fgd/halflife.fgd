@@ -2255,7 +2255,13 @@
 	]
 ]
 
-@SolidClass base(Targetname) = func_ladder : "Ladder" []
+@SolidClass base(Targetname) = func_ladder : "Ladder"
+[
+	spawnflags(flags) =
+	[
+		1 : "Start Off" : 0
+	]
+]
 
 @SolidClass base(Targetname) = func_monsterclip : "Monster clip brush" []
 
