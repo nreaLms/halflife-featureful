@@ -1238,7 +1238,7 @@ void CSprite::Spawn( void )
 		TurnOn();
 
 	// Worldcraft only sets y rotation, copy to Z
-	if( pev->angles.y != 0 && pev->angles.z == 0 )
+	if( !FBitSet(pev->spawnflags, SF_SPRITE_DONT_MESS_YAW) && pev->angles.y != 0 && pev->angles.z == 0 )
 	{
 		pev->angles.z = pev->angles.y;
 		pev->angles.y = 0;

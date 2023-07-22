@@ -1905,6 +1905,7 @@
 		1: "Start on" : 0
 		2: "Play Once" : 0
 		4: "Once + Remove" : 0
+		8: "Don't mess Yaw" : 0
 	]
 	impulse(integer) : "Start frame" : : "Start frame for animation, negative value means random frame."
 ]
