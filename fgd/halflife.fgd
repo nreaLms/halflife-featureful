@@ -654,6 +654,11 @@
 		10: "Buzz"
 		13: "Latch Unlocked"
 		14: "Lightswitch"
+		21: "Squeaky"
+		22: "Squeaky Pneumatic"
+		23: "Ratchet Groan"
+		24: "Clean Ratchet"
+		25: "Gas Clunk"
 	]
 	locked_sentence(choices) : "Locked Sentence" : 0 =
 	[
@@ -2360,6 +2365,7 @@
 	health(integer) : "Health (shootable if > 0)"
 	sounds(choices) : "Sounds" : 21 =
 	[
+		0: "None"
 		21: "Squeaky"
 		22: "Squeaky Pneumatic"
 		23: "Ratchet Groan"
