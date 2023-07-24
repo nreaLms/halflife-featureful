@@ -1304,6 +1304,8 @@ void CRotButton::Spawn( void )
 		}
 	}
 
+	Precache();
+
 	// set the axis of rotation
 	CBaseToggle::AxisDir( pev );
 
