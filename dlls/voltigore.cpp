@@ -502,7 +502,7 @@ BOOL CVoltigore::CheckRangeAttack1(float flDot, float flDist)
 
 		if( tr.flFraction == 1.0f || tr.pHit == m_hEnemy->edict() )
 		{
-			m_flNextBeamAttackCheck = gpGlobals->time + RANDOM_FLOAT( 5.0f, 10.0f );
+			m_flNextBeamAttackCheck = gpGlobals->time + 0.2;
 			return TRUE;
 		}
 		else
@@ -644,6 +644,8 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		//AttackSound();
 
 		CVoltigoreEnergyBall::Shoot(pev, vecBoltOrigin, vecShootDir * 1000);
+
+		m_flNextBeamAttackCheck = gpGlobals->time + RANDOM_FLOAT( 5.0f, 10.0f );
 
 		// turn the beam glow off.
 		DestroyBeams();
@@ -912,7 +914,10 @@ Schedule_t *CVoltigore::GetSchedule(void)
 			return GetScheduleOfType(SCHED_MELEE_ATTACK1);
 		}
 
-		return GetScheduleOfType(SCHED_CHASE_ENEMY);
+		if (m_flNextBeamAttackCheck - gpGlobals->time < 1.0)
+			return GetScheduleOfType(SCHED_STANDOFF);
+		else
+			return GetScheduleOfType(SCHED_CHASE_ENEMY);
 
 		break;
 	}
