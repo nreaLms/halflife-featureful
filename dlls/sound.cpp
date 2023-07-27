@@ -313,7 +313,6 @@ void CAmbientGeneric::Precache( void )
 
 void CAmbientGeneric :: StartPlayFrom( void )
 {
-	ALERT(at_console, "Inside start play from entity\n");
 	const char* szSoundFile = STRING(pev->message);
 
 	EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, //LRC
