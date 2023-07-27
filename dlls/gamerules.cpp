@@ -177,6 +177,7 @@ void CGameRules::RefreshSkillData ( void )
 
 	// Hassassin
 	gSkillData.hassassinHealth = GetSkillCvar( "sk_hassassin_health" );
+	gSkillData.hassassinCloaking = GetSkillCvarZeroable( "sk_hassassin_cloaking" );
 
 	// Headcrab
 	gSkillData.headcrabHealth = GetSkillCvar( "sk_headcrab_health" );

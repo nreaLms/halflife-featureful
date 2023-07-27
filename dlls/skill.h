@@ -81,6 +81,7 @@ struct skilldata_t
 	float gargantuaDmgStomp;
 
 	float hassassinHealth;
+	float hassassinCloaking;
 
 	float headcrabHealth;
 	float headcrabDmgBite;

@@ -642,6 +642,7 @@ DECLARE_SKILL_VALUE(sk_gargantua_dmg_stomp, "0")
 
 // Hassassin
 DECLARE_SKILL_VALUE(sk_hassassin_health, "0")
+DECLARE_SKILL_VALUE3(sk_hassassin_cloaking, "0", "0", "1")
 
 // Headcrab
 DECLARE_SKILL_VALUE(sk_headcrab_health, "0")
@@ -1152,6 +1153,7 @@ void GameDLLInit( void )
 
 	// Hassassin
 	REGISTER_SKILL_CVARS(sk_hassassin_health);
+	REGISTER_SKILL_CVARS(sk_hassassin_cloaking);
 
 	// Headcrab
 	REGISTER_SKILL_CVARS(sk_headcrab_health);
