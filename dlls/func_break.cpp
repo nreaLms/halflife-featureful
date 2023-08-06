@@ -734,6 +734,43 @@ static char PlayBreakableBustSound( entvars_t* pev, Materials material, float fv
 	return 0;
 }
 
+void CBreakable::BreakModel(const Vector& vecSpot, const Vector& size, const Vector& vecVelocity, int shardModelIndex, int iGibs, char cFlag)
+{
+	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
+		WRITE_BYTE( TE_BREAKMODEL );
+
+		// position
+		WRITE_COORD( vecSpot.x );
+		WRITE_COORD( vecSpot.y );
+		WRITE_COORD( vecSpot.z );
+
+		// size
+		WRITE_COORD( size.x );
+		WRITE_COORD( size.y );
+		WRITE_COORD( size.z );
+
+		// velocity
+		WRITE_COORD( vecVelocity.x );
+		WRITE_COORD( vecVelocity.y );
+		WRITE_COORD( vecVelocity.z );
+
+		// randomization
+		WRITE_BYTE( 10 );
+
+		// Model
+		WRITE_SHORT( shardModelIndex );	//model id#
+
+		// # of shards
+		WRITE_BYTE( iGibs );	// if 0, let client decide
+
+		// duration
+		WRITE_BYTE( 25 );// 2.5 seconds
+
+		// flags
+		WRITE_BYTE( cFlag );
+	MESSAGE_END();
+}
+
 void CBreakable::Die()
 {
 	DieToActivator(NULL);
@@ -775,39 +812,7 @@ void CBreakable::DieToActivator( CBaseEntity* pActivator )
 
 	if (m_iGibs >= 0)
 	{
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
-			WRITE_BYTE( TE_BREAKMODEL );
-
-			// position
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z );
-
-			// size
-			WRITE_COORD( pev->size.x );
-			WRITE_COORD( pev->size.y );
-			WRITE_COORD( pev->size.z );
-
-			// velocity
-			WRITE_COORD( vecVelocity.x );
-			WRITE_COORD( vecVelocity.y );
-			WRITE_COORD( vecVelocity.z );
-
-			// randomization
-			WRITE_BYTE( 10 );
-
-			// Model
-			WRITE_SHORT( m_idShard );	//model id#
-
-			// # of shards
-			WRITE_BYTE( m_iGibs );	// let client decide
-
-			// duration
-			WRITE_BYTE( 25 );// 2.5 seconds
-
-			// flags
-			WRITE_BYTE( cFlag );
-		MESSAGE_END();
+		BreakModel(vecSpot, pev->size, vecVelocity, m_idShard, m_iGibs, cFlag);
 	}
 
 	/*float size = pev->size.x;
@@ -1254,39 +1259,10 @@ void CFuncBreakableEffect::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 
 	Vector vecSpot = pev->origin + ( pev->mins + pev->maxs ) * 0.5f;
 
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
-		WRITE_BYTE( TE_BREAKMODEL );
-
-		// position
-		WRITE_COORD( vecSpot.x );
-		WRITE_COORD( vecSpot.y );
-		WRITE_COORD( vecSpot.z );
-
-		// size
-		WRITE_COORD( pev->size.x );
-		WRITE_COORD( pev->size.y );
-		WRITE_COORD( pev->size.z );
-
-		// velocity
-		WRITE_COORD( 0 );
-		WRITE_COORD( 0 );
-		WRITE_COORD( 0 );
-
-		// randomization
-		WRITE_BYTE( 10 );
-
-		// Model
-		WRITE_SHORT( m_idShard );	//model id#
-
-		// # of shards
-		WRITE_BYTE( m_iGibs );	// let client decide
-
-		// duration
-		WRITE_BYTE( 25 );// 2.5 seconds
-
-		// flags
-		WRITE_BYTE( cFlag );
-	MESSAGE_END();
+	if (m_iGibs >= 0)
+	{
+		CBreakable::BreakModel(vecSpot, pev->size, g_vecZero, m_idShard, m_iGibs, cFlag);
+	}
 
 	if (!FBitSet(pev->spawnflags, ENV_BREAKABLE_REPEATABLE))
 		UTIL_Remove(this);

@@ -52,6 +52,8 @@ public:
 	NODE_LINKENT HandleLinkEnt(int afCapMask, bool nodeQueryStatic);
 	void DamageSound( void );
 
+	static void BreakModel(const Vector& vecSpot, const Vector& size, const Vector &vecVelocity, int shardModelIndex, int iGibs, char cFlag);
+
 	// breakables use an overridden takedamage
 	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	// To spark when hit
