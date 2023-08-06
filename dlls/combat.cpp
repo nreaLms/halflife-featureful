@@ -1626,7 +1626,7 @@ void CBaseMonster::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker,
 	}
 }
 
-static float DamageByBulletType(int bulletType, float defaultDamge)
+static float DamageByBulletType(int bulletType, float defaultDamage)
 {
 	switch (bulletType) {
 	case BULLET_PLAYER_9MM:
@@ -1666,7 +1666,7 @@ static float DamageByBulletType(int bulletType, float defaultDamge)
 	case BULLET_MONSTER_762:
 		return gSkillData.monDmg762;
 	default:
-		return defaultDamge;
+		return defaultDamage;
 	}
 }
 
