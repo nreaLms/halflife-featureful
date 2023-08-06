@@ -1591,7 +1591,7 @@ void CEnvModel :: SetSequence( void )
 		if (pev->targetname)
 			ALERT( at_error, "env_model %s: unknown sequence \"%s\"\n", STRING( pev->targetname ), STRING( iszSeq ));
 		else
-			ALERT( at_error, "env_model: unknown sequence \"%s\"\n", STRING( pev->targetname ), STRING( iszSeq ));
+			ALERT( at_error, "env_model: unknown sequence \"%s\"\n", STRING( iszSeq ));
 		pev->sequence = 0;
 	}
 
