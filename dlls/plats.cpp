@@ -1018,6 +1018,7 @@ TYPEDESCRIPTION	CFuncTrackTrain::m_SaveData[] =
 	DEFINE_FIELD( CFuncTrackTrain, m_flBank, FIELD_FLOAT ),
 	DEFINE_FIELD( CFuncTrackTrain, m_oldSpeed, FIELD_FLOAT ),
 	DEFINE_FIELD( CFuncTrackTrain, m_customMoveSound, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CFuncTrackTrain, m_soundRadius, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTrackTrain, CBaseEntity )
@@ -1054,6 +1055,11 @@ void CFuncTrackTrain::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "bank" ) )
 	{
 		m_flBank = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
+	{
+		m_soundRadius = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1173,7 +1179,7 @@ void CFuncTrackTrain::StopSound( void )
 		else
 			STOP_SOUND( ENT( pev ), CHAN_STATIC, STRING( pev->noise ) );
 
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, STRING(pev->noise1), m_flVolume, ATTN_NORM, 0, 100 );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, STRING(pev->noise1), m_flVolume, SoundAttenuation(), 0, 100 );
 	}
 
 	m_soundPlaying = 0;
@@ -1194,8 +1200,8 @@ void CFuncTrackTrain::UpdateSound( void )
 	if( !m_soundPlaying )
 	{
 		// play startup sound for train
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, STRING(pev->noise2), m_flVolume, ATTN_NORM, 0, 100 );
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noise ), m_flVolume, ATTN_NORM, 0, (int)flpitch );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, STRING(pev->noise2), m_flVolume, SoundAttenuation(), 0, 100 );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noise ), m_flVolume, SoundAttenuation(), 0, (int)flpitch );
 		m_soundPlaying = 1;
 	} 
 	else
@@ -1203,7 +1209,7 @@ void CFuncTrackTrain::UpdateSound( void )
 		if (m_customMoveSound)
 		{
 			// update pitch
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noise ), m_flVolume, ATTN_NORM, SND_CHANGE_PITCH, (int)flpitch );
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, STRING( pev->noise ), m_flVolume, SoundAttenuation(), SND_CHANGE_PITCH, (int)flpitch );
 		}
 		else
 		{
@@ -1223,6 +1229,11 @@ void CFuncTrackTrain::UpdateSound( void )
 				g_vecZero, g_vecZero, 0.0f, 0.0f, us_encode, 0, 0, 0 );
 		}
 	}
+}
+
+float CFuncTrackTrain::SoundAttenuation() const
+{
+	return ::SoundAttenuation(m_soundRadius);
 }
 
 void CFuncTrackTrain::Next( void )

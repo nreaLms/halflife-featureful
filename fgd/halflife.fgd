@@ -2479,7 +2479,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, ZHLT) = func_tracktrain : "Track Train"
+@SolidClass base(Targetname, Global, RenderFields, ZHLT, SoundRadius) = func_tracktrain : "Track Train"
 [
 	spawnflags(flags) =
 	[
