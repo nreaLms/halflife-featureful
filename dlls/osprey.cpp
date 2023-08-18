@@ -962,12 +962,11 @@ void CBlkopOsprey::Precache()
 
 void CBlkopOsprey::PrepareGruntBeforeSpawn(CBaseEntity *pGrunt)
 {
-	KeyValueData kvd;
-	char buf[128] = {0};
-	sprintf(buf, "%d", -1);
-	kvd.szKeyName = "head";
-	kvd.szValue = buf;
-	pGrunt->KeyValue(&kvd);
+	CBaseMonster* pMonster = pGrunt->MyMonsterPointer();
+	if (pMonster)
+	{
+		pMonster->SetHead(-1);
+	}
 }
 
 const char* CBlkopOsprey::TrooperName()
