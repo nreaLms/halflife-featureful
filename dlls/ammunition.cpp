@@ -13,7 +13,10 @@ void CBasePlayerAmmo::Spawn( void )
 	Precache();
 	SET_MODEL( ENT( pev ), MyModel() );
 
-	pev->movetype = MOVETYPE_TOSS;
+	if (pev->movetype < 0)
+		pev->movetype = MOVETYPE_NONE;
+	else if (pev->movetype == 0)
+		pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );

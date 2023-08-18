@@ -386,13 +386,18 @@ void CItem::Spawn( void )
 	if (FBitSet(pev->spawnflags, SF_ITEM_NOFALL))
 		pev->movetype = MOVETYPE_NONE;
 	else
-		pev->movetype = MOVETYPE_TOSS;
+	{
+		if (pev->movetype < 0)
+			pev->movetype = MOVETYPE_NONE;
+		else if (pev->movetype == 0)
+			pev->movetype = MOVETYPE_TOSS;
+	}
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetOrigin( pev, pev->origin );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	SetTouch( &CItem::ItemTouch );
 
-	if (pev->movetype != MOVETYPE_NONE)
+	if (pev->movetype == MOVETYPE_TOSS)
 	{
 		if (g_modFeatures.items_instant_drop)
 		{

@@ -476,7 +476,10 @@ void CBasePlayerWeapon::SetObjectCollisionBox( void )
 //=========================================================
 void CBasePlayerWeapon::FallInit( void )
 {
-	pev->movetype = MOVETYPE_TOSS;
+	if (pev->movetype < 0)
+		pev->movetype = MOVETYPE_NONE;
+	else if (pev->movetype == 0)
+		pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_BBOX;
 
 	UTIL_SetOrigin( pev, pev->origin );
@@ -499,7 +502,7 @@ void CBasePlayerWeapon::FallThink( void )
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-	if( pev->flags & FL_ONGROUND )
+	if( (pev->flags & FL_ONGROUND) || pev->movetype != MOVETYPE_TOSS )
 	{
 		// clatter if we have an owner (i.e., dropped by someone)
 		// don't clatter if the gun is waiting to respawn (if it's waiting, it is invisible!)
@@ -1128,7 +1131,10 @@ void CWeaponBox::Spawn( void )
 {
 	Precache();
 
-	pev->movetype = MOVETYPE_TOSS;
+	if (pev->movetype < 0)
+		pev->movetype = MOVETYPE_NONE;
+	else if (pev->movetype == 0)
+		pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 
 	//UTIL_SetSize( pev, g_vecZero, g_vecZero );
@@ -1194,7 +1200,7 @@ void CWeaponBox::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 void CWeaponBox::TouchOrUse( CBaseEntity *pOther )
 {
-	if( !( pev->flags & FL_ONGROUND ) )
+	if( pev->movetype == MOVETYPE_TOSS && !( pev->flags & FL_ONGROUND ) )
 	{
 		return;
 	}
