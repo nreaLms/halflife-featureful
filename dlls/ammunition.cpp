@@ -11,7 +11,7 @@
 void CBasePlayerAmmo::Spawn( void )
 {
 	Precache();
-	SET_MODEL( ENT( pev ), MyModel() );
+	SET_MODEL( ENT( pev ), pev->model ? STRING(pev->model) : MyModel() );
 
 	if (pev->movetype < 0)
 		pev->movetype = MOVETYPE_NONE;
@@ -27,7 +27,7 @@ void CBasePlayerAmmo::Spawn( void )
 
 void CBasePlayerAmmo::Precache()
 {
-	PRECACHE_MODEL( MyModel() );
+	PRECACHE_MODEL( pev->model ? STRING(pev->model) : MyModel() );
 	PRECACHE_SOUND( AMMO_PICKUP_SOUND );
 }
 
