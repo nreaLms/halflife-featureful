@@ -45,7 +45,6 @@
 #define FEATURE_KATE 1
 
 #define FEATURE_HOUNDEYE_DEAD (0 || FEATURE_OPFOR_MONSTERS)
-#define FEATURE_OPFOR_DEADHAZ (0 || FEATURE_OPFOR_SPECIFIC)
 #define FEATURE_SKELETON (0 || FEATURE_OPFOR_MONSTERS)
 
 // enable reverse relationship models, like barnabus
