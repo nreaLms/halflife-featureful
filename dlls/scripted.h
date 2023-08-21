@@ -131,6 +131,12 @@ public:
 	virtual int	 ObjectCaps( void ) { return (CBaseDelay::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 	virtual void Activate( void );
 	virtual void UpdateOnRemove();
+	BOOL IsLockedByMaster() {
+		if( m_sMaster && !UTIL_IsMasterTriggered( m_sMaster, m_hActivator ) )
+			return TRUE;
+		else
+			return FALSE;
+	}
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -222,6 +228,8 @@ public:
 	short m_searchPolicy;
 	short m_requiredState;
 	short m_takeDamagePolicy;
+
+	string_t m_sMaster;
 
 	bool m_cantFindReported; // no need to save
 	bool m_cantPlayReported;

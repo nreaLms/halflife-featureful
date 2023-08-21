@@ -242,6 +242,11 @@ void CCineMonster::KeyValue( KeyValueData *pkvd )
 		m_requiredState = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if ( FStrEq(pkvd->szKeyName, "master") )
+	{
+		m_sMaster = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		CBaseDelay::KeyValue( pkvd );
@@ -290,6 +295,8 @@ TYPEDESCRIPTION	CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_searchPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_requiredState, FIELD_SHORT ),
 	DEFINE_FIELD( CCineMonster, m_takeDamagePolicy, FIELD_SHORT ),
+
+	DEFINE_FIELD( CCineMonster, m_sMaster, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseDelay )
