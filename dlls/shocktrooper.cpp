@@ -131,6 +131,9 @@ protected:
 	float SentenceAttn();
 	const char* SentenceByNumber(int sentence);
 	virtual int* GruntQuestionVar();
+	bool AlertSentenceIsForPlayerOnly() {
+		return false;
+	}
 };
 
 LINK_ENTITY_TO_CLASS(monster_shocktrooper, CShockTrooper)
@@ -161,6 +164,7 @@ const char *CShockTrooper::pTrooperSentences[] =
 	"ST_IDLE",
 	"ST_CLEAR",
 	"ST_ANSWER",
+	"ST_HOSTILE",
 };
 
 const char* CShockTrooper::SentenceByNumber(int sentence)
@@ -387,8 +391,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 		if (FOkToSpeak())
 		{
-			SENTENCEG_PlayRndSz(ENT(pev), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch);
-			JustSpoke();
+			SpeakCaughtEnemy();
 		}
 	}
 	break;

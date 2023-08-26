@@ -121,6 +121,7 @@ const char *CHGrunt::pGruntSentences[] =
 	"HG_IDLE",
 	"HG_CLEAR",
 	"HG_ANSWER",
+	"HG_HOSTILE",
 };
 
 //=========================================================
@@ -940,10 +941,8 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			if( FOkToSpeak() )
 			{
-				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-				JustSpoke();
+				SpeakCaughtEnemy();
 			}
-
 		}
 			break;
 		default:
@@ -1208,6 +1207,33 @@ int* CHGrunt::GruntQuestionVar()
 {
 	static int g_fGruntQuestion = 0; // true if an idle grunt asked a question. Cleared when someone answers.
 	return &g_fGruntQuestion;
+}
+
+void CHGrunt::SpeakCaughtEnemy()
+{
+	if ( m_hEnemy != 0 )
+	{
+		if ( m_hEnemy->IsPlayer() )
+			SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		else if( m_hEnemy->IsAlienMonster() )
+			SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_MONSTER), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		else
+		{
+			// Try HOSTILE sentense on non-player non-alien enemy
+			// Fallback to ALERT if allowed
+			const int result = SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_HOSTILE), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+			if (result == -1 && !AlertSentenceIsForPlayerOnly())
+			{
+				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+			}
+		}
+		JustSpoke();
+	}
+}
+
+bool CHGrunt::AlertSentenceIsForPlayerOnly()
+{
+	return true;
 }
 
 Schedule_t* CHGrunt::ScheduleOnRangeAttack1()
@@ -2017,15 +2043,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 						// before he starts pluggin away.
 						if( FOkToSpeak() )// && RANDOM_LONG( 0, 1 ) )
 						{
-							if ( m_hEnemy != 0 )
-							{
-								if( m_hEnemy->IsAlienMonster() )
-									SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_MONSTER), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-								else
-									SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-							}
-
-							JustSpoke();
+							SpeakCaughtEnemy();
 						}
 
 						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
@@ -2062,9 +2080,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 					//!!!KELLY - this grunt was hit and is going to run to cover.
 					if( FOkToSpeak() ) // && RANDOM_LONG( 0, 1 ) )
 					{
-						//SENTENCEG_PlayRndSz( ENT( pev ), "HG_COVER", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
 						m_iSentence = HGRUNT_SENT_COVER;
-						//JustSpoke();
 					}
 					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
 				}
@@ -2108,9 +2124,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 					// charge the enemy's position. 
 					if( FOkToSpeak() )// && RANDOM_LONG( 0, 1 ) )
 					{
-						//SENTENCEG_PlayRndSz( ENT( pev ), "HG_CHARGE", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
 						m_iSentence = HGRUNT_SENT_CHARGE;
-						//JustSpoke();
 					}
 
 					return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );

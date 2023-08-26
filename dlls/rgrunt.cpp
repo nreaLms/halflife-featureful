@@ -61,6 +61,9 @@ public:
 protected:
 	static const char *pRoboSentences[HGRUNT_SENT_COUNT];
 	virtual const char* SentenceByNumber(int sentence);
+	bool AlertSentenceIsForPlayerOnly() {
+		return false;
+	}
 
 	void DoSpark(const Vector& sparkLocation, float flVolume);
 };
@@ -88,6 +91,7 @@ const char *CRGrunt::pRoboSentences[] =
 	"RB_IDLE",
 	"RB_CLEAR",
 	"RB_ANSWER",
+	"RB_HOSTILE",
 };
 
 const char* CRGrunt::SentenceByNumber(int sentence)

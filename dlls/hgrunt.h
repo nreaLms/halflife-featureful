@@ -48,6 +48,7 @@ typedef enum
 	HGRUNT_SENT_IDLE,
 	HGRUNT_SENT_CLEAR,
 	HGRUNT_SENT_ANSWER,
+	HGRUNT_SENT_HOSTILE,
 	HGRUNT_SENT_COUNT,
 } HGRUNT_SENTENCE_TYPES;
 
@@ -147,6 +148,9 @@ protected:
 	virtual float SentenceAttn();
 	virtual const char* SentenceByNumber(int sentence);
 	virtual int* GruntQuestionVar();
+
+	virtual void SpeakCaughtEnemy();
+	virtual bool AlertSentenceIsForPlayerOnly();
 };
 
 class CHGruntRepel : public CFollowingMonster
