@@ -312,11 +312,6 @@ void CCineMonster::Spawn( void )
 	// UTIL_SetSize( pev, Vector( -8, -8, -8 ), Vector( 8, 8, 8 ) );
 	pev->solid = SOLID_NOT;
 
-	// REMOVE: The old side-effect
-#if 0
-	if( m_iszIdle )
-		m_fMoveTo = 4;
-#endif
 	// if no targetname, start now
 	if( IsAutoSearch() || !FStringNull( m_iszIdle ) )
 	{
