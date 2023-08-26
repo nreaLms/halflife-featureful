@@ -588,16 +588,14 @@ void CVoltigore::SetYawSpeed(void)
 {
 	int ys;
 
-	ys = 0;
-
 	switch (m_Activity)
 	{
-	case	ACT_WALK:			ys = 90;	break;
-	case	ACT_RUN:			ys = 90;	break;
-	case	ACT_IDLE:			ys = 90;	break;
-	case	ACT_RANGE_ATTACK1:	ys = 90;	break;
+	case	ACT_TURN_LEFT:
+	case	ACT_TURN_RIGHT:
+		ys = 80;
+		break;
 	default:
-		ys = 90;
+		ys = 70;
 		break;
 	}
 

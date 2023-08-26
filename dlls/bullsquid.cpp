@@ -699,9 +699,7 @@ void CBullsquid::AlertSound( void )
 //=========================================================
 void CBullsquid::SetYawSpeed( void )
 {
-	int ys;
-
-	ys = 0;
+	int ys = 0;
 
 	switch( m_Activity )
 	{

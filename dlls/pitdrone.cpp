@@ -434,21 +434,7 @@ BOOL CPitdrone::CheckRangeAttack1(float flDot, float flDist)
 //=========================================================
 void CPitdrone::SetYawSpeed(void)
 {
-	int ys;
-
-	ys = 0;
-
-	switch (m_Activity)
-	{
-	case	ACT_WALK:			ys = 120;	break;
-	case	ACT_RUN:			ys = 120;	break;
-	case	ACT_IDLE:			ys = 120;	break;
-	case	ACT_RANGE_ATTACK1:	ys = 120;	break;
-	default:
-		ys = 120;
-		break;
-	}
-
+	int ys = 90;
 	pev->yaw_speed = ys;
 }
 

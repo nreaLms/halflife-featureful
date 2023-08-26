@@ -232,9 +232,7 @@ void CBarney::AlertSound( void )
 //=========================================================
 void CBarney::SetYawSpeed( void )
 {
-	int ys;
-
-	ys = 0;
+	int ys = 0;
 
 	switch ( m_Activity )
 	{

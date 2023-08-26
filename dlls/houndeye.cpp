@@ -300,9 +300,7 @@ BOOL CHoundeye::CheckRangeAttack1( float flDot, float flDist )
 //=========================================================
 void CHoundeye::SetYawSpeed( void )
 {
-	int ys;
-
-	ys = 90;
+	int ys = 90;
 
 	switch( m_Activity )
 	{

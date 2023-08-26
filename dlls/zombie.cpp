@@ -134,15 +134,7 @@ int CZombie::DefaultClassify( void )
 //=========================================================
 void CZombie::SetYawSpeed( void )
 {
-	int ys;
-
-	ys = 120;
-#if 0
-	switch ( m_Activity )
-	{
-	}
-#endif
-	pev->yaw_speed = ys;
+	pev->yaw_speed = 120;
 }
 
 int CZombie::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
