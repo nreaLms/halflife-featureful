@@ -72,6 +72,8 @@ ModFeatures::ModFeatures()
 
 	sentry_retract = true;
 
+	bigmomma_wait_fix = false;
+
 	gonome_lock_player = false;
 
 	voltigore_lesser_size = false;
@@ -120,6 +122,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(vortigaunt_heal),
 		KEY_VALUE_DEF(vortigaunt_revive),
 		KEY_VALUE_DEF(sentry_retract),
+		KEY_VALUE_DEF(bigmomma_wait_fix),
 		KEY_VALUE_DEF(gonome_lock_player),
 		KEY_VALUE_DEF(voltigore_lesser_size),
 		KEY_VALUE_DEF(doors_open_in_move_direction),

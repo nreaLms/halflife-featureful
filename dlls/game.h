@@ -78,6 +78,8 @@ struct ModFeatures
 
 	bool sentry_retract;
 
+	bool bigmomma_wait_fix;
+
 	bool gonome_lock_player;
 	bool voltigore_lesser_size;
 

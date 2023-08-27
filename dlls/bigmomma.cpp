@@ -979,11 +979,21 @@ void CBigMomma::StartTask( Task_t *pTask )
 		TaskComplete();
 		break;
 	case TASK_WAIT_NODE:
-		m_flWaitFinished = gpGlobals->time + GetNodeDelay();
+	{
+		const float delay = GetNodeDelay();
+		if (g_modFeatures.bigmomma_wait_fix)
+		{
+			m_flWaitFinished = gpGlobals->time + delay;
+			if (delay > 0)
+				Stop();
+		}
+		else
+			m_flWait = gpGlobals->time + delay;
 		if( m_hTargetEnt->pev->spawnflags & SF_INFOBM_WAIT )
 			ALERT( at_aiconsole, "BM: Wait at node %s forever\n", STRING( pev->netname ) );
 		else
-			ALERT( at_aiconsole, "BM: Wait at node %s for %.2f\n", STRING( pev->netname ), (double)GetNodeDelay() );
+			ALERT( at_aiconsole, "BM: Wait at node %s for %.2f\n", STRING( pev->netname ), delay );
+	}
 		break;
 
 
