@@ -235,11 +235,12 @@ public:
 
 	CUSTOM_SCHEDULES
 
+	void PlayGruntSentence(int group);
 protected:
 	void PerformKick(float kickDamage);
 	void PrecacheHelper();
 	void SpawnHelper(const char* defaultModel, float defaultHealth);
-	const char* SentenceByNumber(int sentence);
+	void SpeakCaughtEnemy();
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
@@ -333,18 +334,6 @@ TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CHFGrunt, CTalkMonster )
 
-typedef enum
-{
-	FGRUNT_SENT_NONE = -1,
-	FGRUNT_SENT_GREN = 0,
-	FGRUNT_SENT_ALERT,
-	FGRUNT_SENT_MONSTER,
-	FGRUNT_SENT_COVER,
-	FGRUNT_SENT_THROW,
-	FGRUNT_SENT_CHARGE,
-	FGRUNT_SENT_TAUNT,
-} FGRUNT_SENTENCE_TYPES;
-
 //=========================================================
 // KeyValue
 //
@@ -399,7 +388,7 @@ BOOL CHFGrunt :: FOkToSpeak( void )
 void CHFGrunt :: JustSpoke( void )
 {
 	CTalkMonster::g_talkWaitTime = gpGlobals->time + RANDOM_FLOAT(1.5, 2.0);
-	m_iSentence = FGRUNT_SENT_NONE;
+	m_iSentence = -1;
 }
 //=========================================================
 // IRelationship - overridden because Male Assassins are
@@ -1230,7 +1219,7 @@ void CHFGrunt::DropMyItems(BOOL isGibbed)
 
 void CHFGrunt::SpeakSentence( void )
 {
-	if( m_iSentence == FGRUNT_SENT_NONE )
+	if( m_iSentence < 0 )
 	{
 		// no sentence cued up.
 		return;
@@ -1238,8 +1227,7 @@ void CHFGrunt::SpeakSentence( void )
 
 	if( FOkToSpeak() )
 	{
-		SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(m_iSentence), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch );
-		JustSpoke();
+		PlayGruntSentence(m_iSentence);
 	}
 }
 
@@ -1822,8 +1810,7 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			if ( FOkToSpeak() )
 			{
-				SENTENCEG_PlayRndSz(ENT(pev), SentenceByNumber(FGRUNT_SENT_ALERT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
-				JustSpoke();
+				SpeakCaughtEnemy();
 			}
 		}
 		break;
@@ -1937,6 +1924,7 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 	m_fFirstEncounter	= TRUE;// this is true when the grunt spawns, because he hasn't encountered an enemy yet.
 
 	m_HackedGunPos = Vector ( 0, 0, 55 );
+	m_iSentence = -1;
 }
 
 //=========================================================
@@ -2031,22 +2019,24 @@ const char* CHFGrunt::DefaultSentenceGroup(int group)
 	}
 }
 
-const char* CHFGrunt::SentenceByNumber(int sentence) {
-	int sentenceGroup = -1;
-	switch (sentence) {
-	case FGRUNT_SENT_GREN: sentenceGroup = TLK_GREN; break;
-	case FGRUNT_SENT_ALERT: sentenceGroup = TLK_ALERT; break;
-	case FGRUNT_SENT_MONSTER: sentenceGroup = TLK_MONSTER; break;
-	case FGRUNT_SENT_COVER: sentenceGroup = TLK_COVER; break;
-	case FGRUNT_SENT_THROW: sentenceGroup = TLK_THROW; break;
-	case FGRUNT_SENT_CHARGE: sentenceGroup = TLK_CHARGE; break;
-	case FGRUNT_SENT_TAUNT: sentenceGroup = TLK_TAUNT; break;
-	default: break;
+void CHFGrunt::PlayGruntSentence(int group)
+{
+	if (SENTENCEG_PlayRndSz( ENT(pev), SentenceGroup(group), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch) >= 0)
+		JustSpoke();
+}
+
+void CHFGrunt::SpeakCaughtEnemy()
+{
+	if ( m_hEnemy != 0 )
+	{
+		if (m_hEnemy != 0)
+		{
+			if (m_hEnemy->IsAlienMonster())
+				PlayGruntSentence(TLK_MONSTER);
+			else
+				PlayGruntSentence(TLK_ALERT);
+		}
 	}
-	if (sentenceGroup >= 0)
-		return SentenceGroup(sentenceGroup);
-	else
-		return NULL;
 }
 
 //=========================================================
@@ -2113,7 +2103,7 @@ void CHFGrunt::IdleSound()
 				break;
 			}
 		}
-		m_iSentence = FGRUNT_SENT_NONE;
+		m_iSentence = -1;
 	}
 }
 
@@ -2448,8 +2438,7 @@ Schedule_t* CHFGrunt::PrioritizedSchedule()
 
 				if (FOkToSpeak())
 				{
-					SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_GREN), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
-					JustSpoke();
+					PlayGruntSentence(TLK_GREN);
 				}
 				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 			}
@@ -2522,16 +2511,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 						// before he starts pluggin away.
 						if (FOkToSpeak())// && RANDOM_LONG(0,1))
 						{
-
-							if (m_hEnemy != 0)
-							{
-								if (m_hEnemy->IsAlienMonster())
-									SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_MONSTER), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
-								else
-									SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_ALERT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
-							}
-
-							JustSpoke();
+							SpeakCaughtEnemy();
 						}
 
 						if ( HasConditions ( bits_COND_CAN_RANGE_ATTACK1 ) )
@@ -2567,7 +2547,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 				{
 					if (FOkToSpeak())
 					{
-						m_iSentence = FGRUNT_SENT_COVER;
+						m_iSentence = TLK_COVER;
 					}
 					// only try to take cover if we actually have an enemy!
 
@@ -2628,8 +2608,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 					//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 					if (FOkToSpeak())
 					{
-						SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_THROW), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
-						JustSpoke();
+						PlayGruntSentence(TLK_THROW);
 					}
 					return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
 				}
@@ -2637,7 +2616,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 				{
 					if( FOkToSpeak() )
 					{
-						m_iSentence = FGRUNT_SENT_CHARGE;
+						m_iSentence = TLK_CHARGE;
 					}
 					return GetScheduleOfType( SCHED_HGRUNT_ALLY_ESTABLISH_LINE_OF_FIRE );
 				}
@@ -2648,8 +2627,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 					// grunt's covered position. Good place for a taunt, I guess?
 					if (FOkToSpeak() && RANDOM_LONG(0,1))
 					{
-						SENTENCEG_PlayRndSz( ENT(pev), SentenceByNumber(FGRUNT_SENT_TAUNT), FGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch);
-						JustSpoke();
+						PlayGruntSentence(TLK_TAUNT);
 					}
 					return GetScheduleOfType( SCHED_STANDOFF );
 				}
