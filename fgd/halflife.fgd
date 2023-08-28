@@ -482,6 +482,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	SpeakAs(string) : "Speech Group"
 	spawnflags(Flags) =
 	[
 		131072 : "Don't greet player" : 0 : "Don't say hello to player upon seeing him"

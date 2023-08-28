@@ -66,6 +66,15 @@ enum
 	TASK_PUTAWAY_NEEDLE
 };
 
+enum
+{
+	TLK_HEAL = TLK_CGROUPS,
+	TLK_SCREAM,
+	TLK_FEAR,
+	TLK_PLFEAR,
+	SC_TLK_CGROUPS,
+};
+
 //=========================================================
 // Monster's Anim Events Go Here
 //=========================================================
@@ -123,7 +132,7 @@ public:
 	void PainSound( void );
 	virtual void PlayPainSound();
 
-	void TalkInit( void );
+	const char* DefaultSentenceGroup(int group);
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -145,11 +154,6 @@ public:
 protected:
 	void SciSpawnHelper(const char* modelName, float health);
 	void PrecacheSounds();
-
-	virtual const char* HealSentence() { return "SC_HEAL"; }
-	virtual const char* ScreamSentence() { return "SC_SCREAM"; }
-	virtual const char* FearSentence() { return "SC_FEAR"; }
-	virtual const char* PlayerFearSentence() { return "SC_PLFEAR"; }
 
 	float m_painTime;
 	float m_healTime;
@@ -455,7 +459,7 @@ void CScientist::Scream( void )
 	if( FOkToSpeak(SPEAK_DISREGARD_ENEMY|SPEAK_DISREGARD_OTHER_SPEAKING) )
 	{
 		m_hTalkTarget = m_hEnemy;
-		PlaySentence( ScreamSentence(), RANDOM_FLOAT( 3.0f, 6.0f ), VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_SCREAM), RANDOM_FLOAT( 3.0f, 6.0f ), VOL_NORM, ATTN_NORM );
 	}
 }
 
@@ -483,7 +487,7 @@ void CScientist::StartTask( Task_t *pTask )
 			if (!InScriptedSentence())
 			{
 				m_hTalkTarget = m_hTargetEnt;
-				PlaySentence( HealSentence(), 2, VOL_NORM, ATTN_IDLE );
+				PlaySentence( SentenceGroup(TLK_HEAL), 2, VOL_NORM, ATTN_IDLE );
 			}
 			TaskComplete();
 		}
@@ -506,9 +510,9 @@ void CScientist::StartTask( Task_t *pTask )
 			//The enemy can be null here. - Solokiller
 			//Discovered while testing the barnacle grapple on headcrabs with scientists in view.
 			if( m_hEnemy != 0 && m_hEnemy->IsPlayer() )
-				PlaySentence( PlayerFearSentence(), 5, VOL_NORM, ATTN_NORM );
+				PlaySentence( SentenceGroup(TLK_PLFEAR), 5, VOL_NORM, ATTN_NORM );
 			else
-				PlaySentence( FearSentence(), 5, VOL_NORM, ATTN_NORM );
+				PlaySentence( SentenceGroup(TLK_FEAR), 5, VOL_NORM, ATTN_NORM );
 		}
 		TaskComplete();
 		break;
@@ -822,42 +826,40 @@ void CScientist::PrecacheSounds()
 	PRECACHE_SOUND( "scientist/sci_pain5.wav" );
 }
 
-// Init talk data
-void CScientist::TalkInit()
+const char* CScientist::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	// scientists speach group names (group names are in sentences.txt)
-
-	m_szGrp[TLK_ANSWER] = "SC_ANSWER";
-	m_szGrp[TLK_QUESTION] = "SC_QUESTION";
-	m_szGrp[TLK_IDLE] = "SC_IDLE";
-	m_szGrp[TLK_STARE] = "SC_STARE";
-	m_szGrp[TLK_USE] = "SC_OK";
-	m_szGrp[TLK_UNUSE] = "SC_WAIT";
-	m_szGrp[TLK_DECLINE] = "SC_POK";
-	m_szGrp[TLK_STOP] = "SC_STOP";
-	m_szGrp[TLK_NOSHOOT] = "SC_SCARED";
-	m_szGrp[TLK_HELLO] = "SC_HELLO";
-
-	m_szGrp[TLK_PLHURT1] = "!SC_CUREA";
-	m_szGrp[TLK_PLHURT2] = "!SC_CUREB"; 
-	m_szGrp[TLK_PLHURT3] = "!SC_CUREC";
-
-	m_szGrp[TLK_PHELLO] = "SC_PHELLO";
-	m_szGrp[TLK_PIDLE] = "SC_PIDLE";
-	m_szGrp[TLK_PQUESTION] = "SC_PQUEST";
-	m_szGrp[TLK_SMELL] = "SC_SMELL";
-
-	m_szGrp[TLK_WOUND] = "SC_WOUND";
-	m_szGrp[TLK_MORTAL] = "SC_MORTAL";
-
-	m_szGrp[TLK_SHOT] = NULL;
+	switch (group) {
+	case TLK_ANSWER: return "SC_ANSWER";
+	case TLK_QUESTION: return "SC_QUESTION";
+	case TLK_IDLE: return "SC_IDLE";
+	case TLK_STARE: return "SC_STARE";
+	case TLK_USE: return "SC_OK";
+	case TLK_UNUSE: return "SC_WAIT";
+	case TLK_DECLINE: return "SC_POK";
+	case TLK_STOP: return "SC_STOP";
+	case TLK_NOSHOOT: return "SC_SCARED";
+	case TLK_HELLO: return "SC_HELLO";
+	case TLK_PLHURT1: return "!SC_CUREA";
+	case TLK_PLHURT2: return "!SC_CUREB";
+	case TLK_PLHURT3: return "!SC_CUREC";
+	case TLK_PHELLO: return "SC_PHELLO";
+	case TLK_PIDLE: return "SC_PIDLE";
+	case TLK_PQUESTION: return "SC_PQUEST";
+	case TLK_SMELL: return "SC_SMELL";
+	case TLK_WOUND: return "SC_WOUND";
+	case TLK_MORTAL: return "SC_MORTAL";
+	case TLK_SHOT: return NULL;
 #if FEATURE_SCIENTIST_PLFEAR
-	m_szGrp[TLK_MAD] = "SC_PLFEAR";
+	case TLK_MAD: return "SC_PLFEAR";
 #else
-	m_szGrp[TLK_MAD] = NULL;
+	case TLK_MAD: return NULL;
 #endif
+	case TLK_HEAL: return "SC_HEAL";
+	case TLK_SCREAM: return "SC_SCREAM";
+	case TLK_FEAR: return "SC_FEAR";
+	case TLK_PLFEAR: return "SC_PLFEAR";
+	default: return NULL;
+	}
 }
 
 //=========================================================
@@ -1510,7 +1512,7 @@ int CSittingScientist::FIdleSpeak( void )
 
 	if( pFriend && RANDOM_LONG( 0, 1 ) )
 	{
-		PlaySentence( m_szGrp[TLK_PQUESTION], RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
+		PlaySentence( SentenceGroup(TLK_PQUESTION), RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
 
 		CBaseMonster* pMonster = pFriend->MyMonsterPointer();
 		if (pMonster)
@@ -1526,7 +1528,7 @@ int CSittingScientist::FIdleSpeak( void )
 	// otherwise, play an idle statement
 	if( RANDOM_LONG( 0, 1 ) )
 	{
-		PlaySentence( m_szGrp[TLK_PIDLE], RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
+		PlaySentence( SentenceGroup(TLK_PIDLE), RANDOM_FLOAT( 4.8, 5.2 ), VOL_NORM, ATTN_IDLE);
 		return TRUE;
 	}
 
@@ -1645,12 +1647,8 @@ public:
 	void Precache();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("rosenberg"); }
 	const char* DefaultDisplayName() { return "Dr. Rosenberg"; }
-	void TalkInit();
+	const char* DefaultSentenceGroup(int group);
 	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
-	const char* HealSentence() { return "RO_HEAL"; }
-	const char* ScreamSentence() { return "RO_SCREAM"; }
-	const char* FearSentence() { return "RO_FEAR"; }
-	const char* PlayerFearSentence() { return "RO_PLFEAR"; }
 	void PlayPainSound();
 
 #if FEATURE_ROSENBERG_DECAY
@@ -1697,39 +1695,40 @@ void CRosenberg::Precache()
 	CTalkMonster::Precache();
 }
 
-void CRosenberg::TalkInit()
+const char* CRosenberg::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	m_szGrp[TLK_ANSWER] = "RO_ANSWER";
-	m_szGrp[TLK_QUESTION] = "RO_QUESTION";
-	m_szGrp[TLK_IDLE] = "RO_IDLE";
-	m_szGrp[TLK_STARE] = "RO_STARE";
-	m_szGrp[TLK_USE] = "RO_OK";
-	m_szGrp[TLK_UNUSE] = "RO_WAIT";
-	m_szGrp[TLK_DECLINE] = "RO_POK";
-	m_szGrp[TLK_STOP] = "RO_STOP";
-	m_szGrp[TLK_NOSHOOT] = "RO_SCARED";
-	m_szGrp[TLK_HELLO] = "RO_HELLO";
-
-	m_szGrp[TLK_PLHURT1] = "!RO_CUREA";
-	m_szGrp[TLK_PLHURT2] = "!RO_CUREB";
-	m_szGrp[TLK_PLHURT3] = "!RO_CUREC";
-
-	m_szGrp[TLK_PHELLO] = "RO_PHELLO";
-	m_szGrp[TLK_PIDLE] = "RO_PIDLE";
-	m_szGrp[TLK_PQUESTION] = "RO_PQUEST";
-	m_szGrp[TLK_SMELL] = "RO_SMELL";
-
-	m_szGrp[TLK_WOUND] = "RO_WOUND";
-	m_szGrp[TLK_MORTAL] = "RO_MORTAL";
-
-	m_szGrp[TLK_SHOT] = NULL;
+	switch (group) {
+	case TLK_ANSWER: return "RO_ANSWER";
+	case TLK_QUESTION: return "RO_QUESTION";
+	case TLK_IDLE: return "RO_IDLE";
+	case TLK_STARE: return "RO_STARE";
+	case TLK_USE: return "RO_OK";
+	case TLK_UNUSE: return "RO_WAIT";
+	case TLK_DECLINE: return "RO_POK";
+	case TLK_STOP: return "RO_STOP";
+	case TLK_NOSHOOT: return "RO_SCARED";
+	case TLK_HELLO: return "RO_HELLO";
+	case TLK_PLHURT1: return "!RO_CUREA";
+	case TLK_PLHURT2: return "!RO_CUREB";
+	case TLK_PLHURT3: return "!RO_CUREC";
+	case TLK_PHELLO: return "RO_PHELLO";
+	case TLK_PIDLE: return "RO_PIDLE";
+	case TLK_PQUESTION: return "RO_PQUEST";
+	case TLK_SMELL: return "RO_SMELL";
+	case TLK_WOUND: return "RO_WOUND";
+	case TLK_MORTAL: return "RO_MORTAL";
+	case TLK_SHOT: return NULL;
 #if FEATURE_SCIENTIST_PLFEAR
-	m_szGrp[TLK_MAD] = "RO_PLFEAR";
+	case TLK_MAD: return "RO_PLFEAR";
 #else
-	m_szGrp[TLK_MAD] = NULL;
+	case TLK_MAD: return NULL;
 #endif
+	case TLK_HEAL: return "RO_HEAL";
+	case TLK_SCREAM: return "RO_SCREAM";
+	case TLK_FEAR: return "RO_FEAR";
+	case TLK_PLFEAR: return "RO_PLFEAR";
+	default: return NULL;
+	}
 }
 
 void CRosenberg::PlayPainSound()
@@ -1875,16 +1874,13 @@ public:
 	void Precache();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("keller"); }
 	const char* DefaultDisplayName() { return "Richard Keller"; }
-	void TalkInit();
+	const char* DefaultSentenceGroup(int group);
 	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
-	const char* ScreamSentence() { return "DK_SCREAM"; }
-	const char* FearSentence() { return "DK_FEAR"; }
-	const char* PlayerFearSentence() { return "DK_PLFEAR"; }
 	void PainSound();
 	void DeathSound();
 
 	BOOL CanHeal() { return false; }
-	bool ReadyToHeal() {return false; }
+	bool ReadyToHeal() { return false; }
 
 protected:
 	static const char* pPainSounds[];
@@ -1935,35 +1931,40 @@ void CKeller::Precache()
 	CTalkMonster::Precache();
 }
 
-void CKeller::TalkInit()
+const char* CKeller::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	m_szGrp[TLK_ANSWER] = NULL;
-	m_szGrp[TLK_QUESTION] = NULL;
-	m_szGrp[TLK_IDLE] = "DK_IDLE";
-	m_szGrp[TLK_STARE] = "DK_STARE";
-	m_szGrp[TLK_USE] = "DK_OK";
-	m_szGrp[TLK_UNUSE] = "DK_WAIT";
-	m_szGrp[TLK_DECLINE] = "DK_POK";
-	m_szGrp[TLK_STOP] = "DK_STOP";
-	m_szGrp[TLK_NOSHOOT] = "DK_SCARED";
-	m_szGrp[TLK_HELLO] = "DK_HELLO";
-
-	m_szGrp[TLK_PLHURT1] = NULL;
-	m_szGrp[TLK_PLHURT2] = NULL;
-	m_szGrp[TLK_PLHURT3] = NULL;
-
-	m_szGrp[TLK_PHELLO] = NULL;
-	m_szGrp[TLK_PIDLE] = NULL;
-	m_szGrp[TLK_PQUESTION] = NULL;
-	m_szGrp[TLK_SMELL] = NULL;
-
-	m_szGrp[TLK_WOUND] = NULL;
-	m_szGrp[TLK_MORTAL] = NULL;
-
-	m_szGrp[TLK_SHOT] = "DK_PLFEAR";
-	m_szGrp[TLK_MAD] = NULL;
+	switch (group) {
+	case TLK_ANSWER: return "DK_ANSWER";
+	case TLK_QUESTION: return "DK_QUESTION";
+	case TLK_IDLE: return "DK_IDLE";
+	case TLK_STARE: return "DK_STARE";
+	case TLK_USE: return "DK_OK";
+	case TLK_UNUSE: return "DK_WAIT";
+	case TLK_DECLINE: return "DK_POK";
+	case TLK_STOP: return "DK_STOP";
+	case TLK_NOSHOOT: return "DK_SCARED";
+	case TLK_HELLO: return "DK_HELLO";
+	case TLK_PLHURT1: return "!DK_CUREA";
+	case TLK_PLHURT2: return "!DK_CUREB";
+	case TLK_PLHURT3: return "!DK_CUREC";
+	case TLK_PHELLO: return "DK_PHELLO";
+	case TLK_PIDLE: return "DK_PIDLE";
+	case TLK_PQUESTION: return "DK_PQUEST";
+	case TLK_SMELL: return "DK_SMELL";
+	case TLK_WOUND: return "DK_WOUND";
+	case TLK_MORTAL: return "DK_MORTAL";
+	case TLK_SHOT: return "DK_PLFEAR";
+#if FEATURE_SCIENTIST_PLFEAR
+	case TLK_MAD: return "DK_PLFEAR";
+#else
+	case TLK_MAD: return NULL;
+#endif
+	case TLK_HEAL: return "DK_HEAL";
+	case TLK_SCREAM: return "DK_SCREAM";
+	case TLK_FEAR: return "DK_FEAR";
+	case TLK_PLFEAR: return "DK_PLFEAR";
+	default: return NULL;
+	}
 }
 
 void CKeller::PainSound()

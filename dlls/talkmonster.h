@@ -121,7 +121,6 @@ public:
 	void			StopTalking( void ) { SentenceStop(); }
 	
 	// Base Monster functions
-	void			Precache( void );
 	int 			TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	int 			TakeHealth(CBaseEntity* pHealer, float flHealth, int bitsDamageType);
 	bool			CanBePushed(CBaseEntity *pPusher);
@@ -164,7 +163,9 @@ public:
 	void			AlertFriends( void );
 	void			ShutUpFriends( void );
 	BOOL			IsTalking( void );
-	void			Talk( float flDuration );	
+	void			Talk( float flDuration );
+	virtual const char* DefaultSentenceGroup(int group) { return NULL; }
+	virtual const char* SentenceGroup(int group);
 
 	// Following related
 	virtual void	StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
@@ -223,11 +224,11 @@ public:
 	int			m_bitsSaid;						// set bits for sentences we don't want repeated
 	int			m_nSpeak;						// number of times initiated talking
 	int			m_voicePitch;					// pitch of voice for this head
-	const char	*m_szGrp[TLK_CGROUPS];			// sentence group names
 	float		m_useTime;						// Don't allow +USE until this time
 	string_t			m_iszUse;						// Custom +USE sentence group (follow)
 	string_t			m_iszUnUse;						// Custom +USE sentence group (stop following)
 	string_t			m_iszDecline;					// Custom +USE sentence group (decline following)
+	string_t			m_iszSpeakAs;
 
 	float		m_flLastSaidSmelled;// last time we talked about something that stinks
 	float		m_flStopTalkTime;// when in the future that I'll be done saying this sentence.

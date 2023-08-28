@@ -37,19 +37,16 @@ float CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: u
 
 #define FLINCH_DELAY 2
 
-// NOTE: m_voicePitch & m_szGrp should be fixed up by precache each save/restore
-
 TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 {
 	DEFINE_FIELD( CTalkMonster, m_bitsSaid, FIELD_INTEGER ),
 	DEFINE_FIELD( CTalkMonster, m_nSpeak, FIELD_INTEGER ),
 
-	// Recalc'ed in Precache()
-	//DEFINE_FIELD( CTalkMonster, m_szGrp, FIELD_??? ),
 	DEFINE_FIELD( CTalkMonster, m_voicePitch, FIELD_INTEGER ),
 	DEFINE_FIELD( CTalkMonster, m_useTime, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_iszUse, FIELD_STRING ),
 	DEFINE_FIELD( CTalkMonster, m_iszUnUse, FIELD_STRING ),
+	DEFINE_FIELD( CTalkMonster, m_iszSpeakAs, FIELD_STRING ),
 	DEFINE_FIELD( CTalkMonster, m_flLastSaidSmelled, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_flStopTalkTime, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_hTalkTarget, FIELD_EHANDLE ),
@@ -363,12 +360,12 @@ void CTalkMonster::PlayCallForMedic()
 {
 	if (IsHeavilyWounded() && !FBitSet( m_bitsSaid, bit_saidWoundHeavy ))
 	{
-		PlaySentence( m_szGrp[TLK_MORTAL], 2, VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_MORTAL), 2, VOL_NORM, ATTN_NORM );
 		SetBits( m_bitsSaid, bit_saidWoundHeavy );
 	}
 	else if (!FBitSet( m_bitsSaid, bit_saidWoundLight ))
 	{
-		PlaySentence( m_szGrp[TLK_WOUND], 2, VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_WOUND), 2, VOL_NORM, ATTN_NORM );
 		SetBits( m_bitsSaid, bit_saidWoundLight );
 	}
 }
@@ -435,12 +432,12 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		break;
 	case TASK_TLK_STOPSHOOTING:
 		// tell player to stop shooting
-		PlaySentence( m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_NOSHOOT), RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
 		TaskComplete();
 		break;
 	case TASK_CANT_FOLLOW:
 		StopFollowing( FALSE, false );
-		PlaySentence( m_szGrp[TLK_STOP], RANDOM_FLOAT( 2, 2.5 ), VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_STOP), RANDOM_FLOAT( 2, 2.5 ), VOL_NORM, ATTN_NORM );
 		TaskComplete();
 		break;
 	case TASK_PLAY_SCRIPT:
@@ -729,19 +726,19 @@ bool CTalkMonster::InScriptedSentence()
 
 void CTalkMonster::PlayUseSentence()
 {
-	if (PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
+	if (PlaySentence( SentenceGroup(TLK_USE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
 		m_hTalkTarget = FollowedPlayer();
 }
 
 void CTalkMonster::PlayUnUseSentence()
 {
-	if (PlaySentence( m_szGrp[TLK_UNUSE], RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
+	if (PlaySentence( SentenceGroup(TLK_UNUSE), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE ))
 		m_hTalkTarget = FollowedPlayer();
 }
 
 void CTalkMonster::DeclineFollowing(CBaseEntity *pCaller)
 {
-	if (PlaySentence( m_szGrp[TLK_DECLINE], 2.0f, VOL_NORM, ATTN_NORM ))
+	if (PlaySentence( SentenceGroup(TLK_DECLINE), 2.0f, VOL_NORM, ATTN_NORM ))
 		m_hTalkTarget = pCaller;
 }
 
@@ -895,7 +892,7 @@ void CTalkMonster::IdleRespond( void )
 	//int pitch = GetVoicePitch();
 
 	// play response
-	PlaySentence( m_szGrp[TLK_ANSWER], RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+	PlaySentence( SentenceGroup(TLK_ANSWER), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 }
 
 bool CTalkMonster::AskQuestion(float duration)
@@ -903,9 +900,9 @@ bool CTalkMonster::AskQuestion(float duration)
 	const char *szQuestionGroup;
 
 	if( FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) )
-		szQuestionGroup = m_szGrp[TLK_PQUESTION];
+		szQuestionGroup = SentenceGroup(TLK_PQUESTION);
 	else
-		szQuestionGroup = m_szGrp[TLK_QUESTION];
+		szQuestionGroup = SentenceGroup(TLK_QUESTION);
 
 	return PlaySentence( szQuestionGroup, duration, VOL_NORM, ATTN_IDLE );
 }
@@ -916,9 +913,9 @@ void CTalkMonster::MakeIdleStatement()
 
 	// set idle groups based on pre/post disaster
 	if( FBitSet( pev->spawnflags, SF_MONSTER_PREDISASTER ) )
-		szIdleGroup = m_szGrp[TLK_PIDLE];
+		szIdleGroup = SentenceGroup(TLK_PIDLE);
 	else
-		szIdleGroup = m_szGrp[TLK_IDLE];
+		szIdleGroup = SentenceGroup(TLK_IDLE);
 
 	PlaySentence( szIdleGroup, RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
 }
@@ -986,7 +983,7 @@ int CTalkMonster::FIdleStare( void )
 	if (FBitSet(pev->spawnflags, SF_TALKMONSTER_DONT_TALK_TO_PLAYER))
 		return FALSE;
 
-	PlaySentence( m_szGrp[TLK_STARE], RANDOM_FLOAT(5, 7.5), VOL_NORM, ATTN_IDLE );
+	PlaySentence( SentenceGroup(TLK_STARE), RANDOM_FLOAT(5, 7.5), VOL_NORM, ATTN_IDLE );
 
 	m_hTalkTarget = FindNearestFriend( TRUE );
 	return TRUE;
@@ -1014,9 +1011,9 @@ int CTalkMonster::FIdleHello( void )
 				m_hTalkTarget = pPlayer;
 
 				if( FBitSet(pev->spawnflags, SF_MONSTER_PREDISASTER ) )
-					PlaySentence( m_szGrp[TLK_PHELLO], RANDOM_FLOAT( 3.0f, 3.5f ), VOL_NORM,  ATTN_IDLE );
+					PlaySentence( SentenceGroup(TLK_PHELLO), RANDOM_FLOAT( 3.0f, 3.5f ), VOL_NORM,  ATTN_IDLE );
 				else
-					PlaySentence( m_szGrp[TLK_HELLO], RANDOM_FLOAT( 3.0f, 3.5f ), VOL_NORM,  ATTN_IDLE );
+					PlaySentence( SentenceGroup(TLK_HELLO), RANDOM_FLOAT( 3.0f, 3.5f ), VOL_NORM,  ATTN_IDLE );
 
 				SetBits( m_bitsSaid, bit_saidHelloPlayer );
 
@@ -1034,12 +1031,9 @@ int CTalkMonster::FIdleHello( void )
 int CTalkMonster::FIdleSpeak( void )
 { 
 	// try to start a conversation, or make statement
-	//int pitch;
 
 	if( !FOkToSpeak() )
 		return FALSE;
-
-	//pitch = GetVoicePitch();
 
 	// player using this entity is alive and wounded?
 	CBaseEntity *pTarget = m_hTargetEnt;
@@ -1054,24 +1048,21 @@ int CTalkMonster::FIdleSpeak( void )
 				if( !FBitSet(m_bitsSaid, bit_saidDamageHeavy ) && 
 					( m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health / 8 ) )
 				{
-					//EMIT_SOUND_DYN(ENT( pev ), CHAN_VOICE, m_szGrp[TLK_PLHURT3], 1.0, ATTN_IDLE, 0, pitch );
-					PlaySentence( m_szGrp[TLK_PLHURT3], RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+					PlaySentence( SentenceGroup(TLK_PLHURT3), RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidDamageHeavy );
 					return TRUE;
 				}
 				else if( !FBitSet( m_bitsSaid, bit_saidDamageMedium ) && 
 					( m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health / 4 ) )
 				{
-					//EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, m_szGrp[TLK_PLHURT2], 1.0, ATTN_IDLE, 0, pitch );
-					PlaySentence( m_szGrp[TLK_PLHURT2], RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+					PlaySentence( SentenceGroup(TLK_PLHURT2), RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidDamageMedium );
 					return TRUE;
 				}
 				else if( !FBitSet( m_bitsSaid, bit_saidDamageLight) &&
 					( m_hTargetEnt->pev->health <= m_hTargetEnt->pev->max_health / 2 ) )
 				{
-					//EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, m_szGrp[TLK_PLHURT1], 1.0, ATTN_IDLE, 0, pitch );
-					PlaySentence( m_szGrp[TLK_PLHURT1], RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
+					PlaySentence( SentenceGroup(TLK_PLHURT1), RandomSentenceDuraion(), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidDamageLight );
 					return TRUE;
 				}
@@ -1113,7 +1104,6 @@ int CTalkMonster::FIdleSpeak( void )
 	// otherwise, play an idle statement, try to face client when making a statement.
 	if( !FBitSet(pev->spawnflags, SF_TALKMONSTER_DONT_TALK_TO_PLAYER) && RANDOM_LONG( 0, 1 ) )
 	{
-		//SENTENCEG_PlayRndSz( ENT( pev ), szIdleGroup, 1.0, ATTN_IDLE, 0, pitch );
 		pFriend = FindNearestFriend( TRUE );
 
 		if( pFriend )
@@ -1181,6 +1171,46 @@ void CTalkMonster::Talk( float flDuration )
 	}
 }
 
+static const char* ConstructSentenceWithPrefix(const char* prefix, const char* defaultSentence)
+{
+	static char buf[32];
+	const char* foundUnderscore = strchr(defaultSentence, '_');
+	if (foundUnderscore)
+	{
+		char* str = buf;
+		int size = sizeof(buf);
+		if (defaultSentence && *defaultSentence == '!')
+		{
+			strcpy(buf, "!");
+			str++;
+			size--;
+		}
+		_snprintf( str, size, "%s%s", prefix, foundUnderscore );
+		return str;
+	}
+	else
+	{
+		ALERT(at_aiconsole, "Can't use Custom Speech Group '%s' because default sentence '%s' has no underscore character!\n", prefix, defaultSentence);
+		return NULL;
+	}
+}
+
+const char* CTalkMonster::SentenceGroup(int group)
+{
+	if (group == TLK_USE && m_iszUse)
+		return GetRedefinedSentence(m_iszUse);
+	if (group == TLK_UNUSE && m_iszUnUse)
+		return GetRedefinedSentence(m_iszUnUse);
+	if (group == TLK_DECLINE && m_iszDecline)
+		return GetRedefinedSentence(m_iszDecline);
+	const char* defaultSentence = DefaultSentenceGroup(group);
+	if (FStringNull(m_iszSpeakAs))
+		return defaultSentence;
+	if (!defaultSentence || *defaultSentence == '\0')
+		return defaultSentence;
+	return ConstructSentenceWithPrefix(STRING(m_iszSpeakAs), defaultSentence);
+}
+
 // Prepare this talking monster to answer question
 bool CTalkMonster::SetAnswerQuestion( CTalkMonster *pSpeaker )
 {
@@ -1212,7 +1242,7 @@ int CTalkMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 				{
 					CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
 					if (pTalkMonster && !pTalkMonster->IsTalking())
-						pTalkMonster->PlaySentence( pTalkMonster->m_szGrp[TLK_NOSHOOT], RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
+						pTalkMonster->PlaySentence( pTalkMonster->SentenceGroup(TLK_NOSHOOT), RANDOM_FLOAT( 2.8, 3.2 ), VOL_NORM, ATTN_NORM );
 				}
 			}
 
@@ -1253,7 +1283,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 	if ( myTolerance <= TOLERANCE_ZERO )
 	{
 		m_hTalkTarget = pAttacker;
-		PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_MAD), 4, VOL_NORM, ATTN_NORM );
 		Remember( bits_MEMORY_PROVOKED );
 		StopFollowing( TRUE );
 		return;
@@ -1285,7 +1315,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 		{
 			// Alright, now I'm pissed!
 			m_hTalkTarget = pAttacker;
-			PlaySentence( m_szGrp[TLK_MAD], 4, VOL_NORM, ATTN_NORM );
+			PlaySentence( SentenceGroup(TLK_MAD), 4, VOL_NORM, ATTN_NORM );
 
 			Remember( bits_MEMORY_PROVOKED );
 			StopFollowing( TRUE );
@@ -1301,7 +1331,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 			if (myTolerance < TOLERANCE_ABSOLUTE || !IsTalking())
 			{
 				m_hTalkTarget = pAttacker;
-				PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
+				PlaySentence( SentenceGroup(TLK_SHOT), 4, VOL_NORM, ATTN_NORM );
 			}
 			Remember( bits_MEMORY_SUSPICIOUS );
 		}
@@ -1309,7 +1339,7 @@ void CTalkMonster::ReactToPlayerHit(entvars_t *pevInflictor, entvars_t *pevAttac
 	else if( !m_hEnemy->IsPlayer() && pev->deadflag == DEAD_NO )
 	{
 		m_hTalkTarget = pAttacker;
-		PlaySentence( m_szGrp[TLK_SHOT], 4, VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_SHOT), 4, VOL_NORM, ATTN_NORM );
 	}
 }
 
@@ -1372,7 +1402,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			{
 				if (!IsTalking())
 				{
-					PlaySentence( m_szGrp[TLK_WOUND], RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+					PlaySentence( SentenceGroup(TLK_WOUND), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidWoundLight );
 					return slIdleTlkStand;
 				}
@@ -1382,7 +1412,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			{
 				if (!IsTalking())
 				{
-					PlaySentence( m_szGrp[TLK_MORTAL], RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+					PlaySentence( SentenceGroup(TLK_MORTAL), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 					SetBits( m_bitsSaid, bit_saidWoundHeavy );
 					return slIdleTlkStand;
 				}
@@ -1550,7 +1580,7 @@ void CTalkMonster::TrySmellTalk( void )
 	// smelled something?
 	if( !FBitSet( m_bitsSaid, bit_saidSmelled ) && HasConditions( bits_COND_SMELL ) )
 	{
-		PlaySentence( m_szGrp[TLK_SMELL], RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+		PlaySentence( SentenceGroup(TLK_SMELL), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 		m_flLastSaidSmelled = gpGlobals->time + 60.0f;// don't talk about the stinky for a while.
 		SetBits( m_bitsSaid, bit_saidSmelled );
 	}
@@ -1587,6 +1617,11 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 		m_iszDecline = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "SpeakAs")) //LRC
+	{
+		m_iszSpeakAs = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "suspicious" ) )
 	{
 		m_fStartSuspicious = atoi( pkvd->szValue );
@@ -1612,17 +1647,6 @@ const char* CTalkMonster::GetRedefinedSentence(string_t sentence)
 		return NULL;
 	else
 		return STRING(sentence);
-}
-
-void CTalkMonster::Precache( void )
-{
-	if( m_iszUse )
-		m_szGrp[TLK_USE] = GetRedefinedSentence(m_iszUse);
-	if( m_iszUnUse )
-		m_szGrp[TLK_UNUSE] = GetRedefinedSentence(m_iszUnUse);
-	if ( m_iszDecline )
-		m_szGrp[TLK_DECLINE] = GetRedefinedSentence(m_iszDecline);
-	CFollowingMonster::Precache();
 }
 
 void CTalkMonster::ReportAIState(ALERT_TYPE level)

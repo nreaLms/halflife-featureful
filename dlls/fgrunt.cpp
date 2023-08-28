@@ -128,6 +128,20 @@ enum
 	SCHED_MEDIC_RESTORE_TARGET,
 };
 
+enum
+{
+	TLK_CHECK = TLK_CGROUPS,
+	TLK_CLEAR,
+	TLK_GREN,
+	TLK_ALERT,
+	TLK_MONSTER,
+	TLK_COVER,
+	TLK_THROW,
+	TLK_CHARGE,
+	TLK_TAUNT,
+	FG_TLK_CGROUPS,
+};
+
 class CHFGrunt : public CTalkMonster
 {
 public:
@@ -174,7 +188,7 @@ public:
 
 	void GibMonster( void );
 	void SpeakSentence( void );
-	void TalkInit( void );
+	const char* DefaultSentenceGroup(int group);
 
 	BOOL FOkToSpeak( void );
 	void JustSpoke( void );
@@ -217,8 +231,6 @@ public:
 	int		m_iM249Shell;
 	int		m_iM249Link;
 
-	static const char *pGruntSentences[];
-
 	static int g_fGruntAllyQuestion;
 
 	CUSTOM_SCHEDULES
@@ -227,9 +239,7 @@ protected:
 	void PerformKick(float kickDamage);
 	void PrecacheHelper();
 	void SpawnHelper(const char* defaultModel, float defaultHealth);
-	const char* SentenceByNumber(int sentence) {
-		return pGruntSentences[sentence];
-	}
+	const char* SentenceByNumber(int sentence);
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
@@ -268,6 +278,7 @@ public:
 	BOOL CheckRangeAttack1 ( float flDot, float flDist );
 	BOOL CheckRangeAttack2 ( float flDot, float flDist );
 	void GibMonster();
+	const char* DefaultSentenceGroup(int group);
 
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
@@ -321,16 +332,6 @@ TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CHFGrunt, CTalkMonster )
-const char *CHFGrunt::pGruntSentences[] =
-{
-	"FG_GREN", // grenade scared grunt
-	"FG_ALERT", // sees player
-	"FG_MONSTER", // sees monster
-	"FG_COVER", // running to cover
-	"FG_THROW", // about to throw grenade
-	"FG_CHARGE",  // running out to get the enemy
-	"FG_TAUNT", // say rude things
-};
 
 typedef enum
 {
@@ -1983,40 +1984,69 @@ void CHFGrunt::PrecacheHelper()
 	m_iBrassShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 }
 
-// Init talk data
-void CHFGrunt :: TalkInit()
+const char* CHFGrunt::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	m_szGrp[TLK_ANSWER]  =	"FG_ANSWER";
-	m_szGrp[TLK_QUESTION] =	"FG_QUESTION";
-	m_szGrp[TLK_IDLE] =		"FG_IDLE";
-	m_szGrp[TLK_STARE] =	"FG_STARE";
-	m_szGrp[TLK_USE] =		"FG_OK";
-	m_szGrp[TLK_UNUSE] =	"FG_WAIT";
-	m_szGrp[TLK_DECLINE] =	"FG_STOP";
-	m_szGrp[TLK_STOP] =		"FG_STOP";
-
+	switch (group) {
+	case TLK_ANSWER: return "FG_ANSWER";
+	case TLK_QUESTION: return "FG_QUESTION";
+	case TLK_IDLE: return "FG_IDLE";
+	case TLK_STARE: return "FG_STARE";
+	case TLK_USE: return "FG_OK";
+	case TLK_UNUSE: return "FG_WAIT";
+	case TLK_DECLINE: return "FG_POK";
+	case TLK_STOP: return "FG_STOP";
 	/* FG_SCARED in opfor has sentences more suitable for FG_HEAR.
 	 * Disabling for now.
 	*/
-	//m_szGrp[TLK_NOSHOOT] =	"FG_SCARED";
-	m_szGrp[TLK_HELLO] =	"FG_HELLO";
+	//case TLK_NOSHOOT: return "FG_SCARED";
+	case TLK_HELLO: return "FG_HELLO";
 
-	m_szGrp[TLK_PLHURT1] =	"FG_CURE";
-	m_szGrp[TLK_PLHURT2] =	"FG_CURE";
-	m_szGrp[TLK_PLHURT3] =	"FG_CURE";
+	/* Note: cure sentences are different from other talk monsters.
+	 * Opfor has FG_CURE group, but not FG_CUREA, FG_CUREB and FG_CUREC sentences.
+	 */
+	case TLK_PLHURT1: return "FG_CURE";
+	case TLK_PLHURT2: return "FG_CURE";
+	case TLK_PLHURT3: return "FG_CURE";
 
-	m_szGrp[TLK_SMELL] =	"FG_SMELL";
+	case TLK_PHELLO: return "FG_PHELLO";
+	case TLK_PIDLE: return "FG_PIDLE";
+	case TLK_PQUESTION: return "FG_PQUEST";
+	case TLK_SMELL: return "FG_SMELL";
+	case TLK_WOUND: return "FG_WOUND";
+	case TLK_MORTAL: return "FG_MORTAL";
+	case TLK_SHOT: return "FG_SHOT";
+	case TLK_MAD: return "FG_MAD";
+	case TLK_KILL: return "FG_KILL";
+	case TLK_ATTACK: return "FG_ATTACK";
+	case TLK_CHECK: return "FG_CHECK";
+	case TLK_CLEAR: return "FG_CLEAR";
+	case TLK_GREN: return "FG_GREN";
+	case TLK_ALERT: return "FG_ALERT";
+	case TLK_MONSTER: return "FG_MONSTER";
+	case TLK_COVER: return "FG_COVER";
+	case TLK_THROW: return "FG_THROW";
+	case TLK_CHARGE: return "FG_CHARGE";
+	case TLK_TAUNT: return "FG_TAUNT";
+	default: return NULL;
+	}
+}
 
-	m_szGrp[TLK_WOUND] =	"FG_WOUND";
-	m_szGrp[TLK_MORTAL] =	"FG_MORTAL";
-
-	m_szGrp[TLK_SHOT] = "FG_SHOT";
-	m_szGrp[TLK_MAD] = "FG_MAD";
-
-	m_szGrp[TLK_KILL] = "FG_KILL";
-	m_szGrp[TLK_ATTACK] = "FG_ATTACK";
+const char* CHFGrunt::SentenceByNumber(int sentence) {
+	int sentenceGroup = -1;
+	switch (sentence) {
+	case FGRUNT_SENT_GREN: sentenceGroup = TLK_GREN; break;
+	case FGRUNT_SENT_ALERT: sentenceGroup = TLK_ALERT; break;
+	case FGRUNT_SENT_MONSTER: sentenceGroup = TLK_MONSTER; break;
+	case FGRUNT_SENT_COVER: sentenceGroup = TLK_COVER; break;
+	case FGRUNT_SENT_THROW: sentenceGroup = TLK_THROW; break;
+	case FGRUNT_SENT_CHARGE: sentenceGroup = TLK_CHARGE; break;
+	case FGRUNT_SENT_TAUNT: sentenceGroup = TLK_TAUNT; break;
+	default: break;
+	}
+	if (sentenceGroup >= 0)
+		return SentenceGroup(sentenceGroup);
+	else
+		return NULL;
 }
 
 //=========================================================
@@ -2035,7 +2065,7 @@ void CHFGrunt::AlertSound()
 {
 	if (m_hEnemy !=0 && FOkToSpeak())
 	{
-		PlaySentence(m_szGrp[TLK_ATTACK], RandomSentenceDuraion(), VOL_NORM, ATTN_NORM);
+		PlaySentence(SentenceGroup(TLK_ATTACK), RandomSentenceDuraion(), VOL_NORM, ATTN_NORM);
 	}
 }
 
@@ -2055,10 +2085,10 @@ void CHFGrunt::IdleSound()
 		{
 			switch (g_fGruntAllyQuestion) {
 			case 1:
-				PlaySentence( "FG_CLEAR", RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				PlaySentence( SentenceGroup(TLK_CLEAR), RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
 				break;
 			case 2:
-				PlaySentence( m_szGrp[TLK_ANSWER], RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				PlaySentence( SentenceGroup(TLK_ANSWER), RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
 				break;
 			default:
 				break;
@@ -2069,15 +2099,15 @@ void CHFGrunt::IdleSound()
 		{
 			switch (RANDOM_LONG(0,2)) {
 			case 0:
-				PlaySentence( "FG_CHECK", RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				PlaySentence( SentenceGroup(TLK_CHECK), RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
 				g_fGruntAllyQuestion = 1;
 				break;
 			case 1:
-				PlaySentence( m_szGrp[TLK_QUESTION], RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				PlaySentence( SentenceGroup(TLK_QUESTION), RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
 				g_fGruntAllyQuestion = 2;
 				break;
 			case 2:
-				PlaySentence( m_szGrp[TLK_IDLE], RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
+				PlaySentence( SentenceGroup(TLK_IDLE), RandomSentenceDuraion(), FGRUNT_SENTENCE_VOLUME, ATTN_IDLE );
 				break;
 			default:
 				break;
@@ -2449,7 +2479,7 @@ Schedule_t *CHFGrunt :: GetSchedule ( void )
 
 	if ( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak() )
 	{
-		PlaySentence( m_szGrp[TLK_KILL], 4, VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_KILL), 4, VOL_NORM, ATTN_NORM );
 	}
 
 	switch( m_MonsterState )
@@ -3313,6 +3343,12 @@ enum {
 
 enum
 {
+	TLK_HEAL = FG_TLK_CGROUPS,
+	TLK_NOTHEAL,
+};
+
+enum
+{
 	TASK_MEDIC_SAY_HEAL = LAST_HGRUNT_ALLY_TASK + 1,
 	TASK_MEDIC_HEAL,
 	TASK_MEDIC_RESTORE_TARGET_ENT,
@@ -3435,7 +3471,7 @@ void CMedic::StartTask(Task_t *pTask)
 			if (!m_fSaidHeal && !InScriptedSentence())
 			{
 				m_hTalkTarget = m_hTargetEnt;
-				PlaySentence( "MG_HEAL", 2, VOL_NORM, ATTN_IDLE );
+				PlaySentence( SentenceGroup(TLK_HEAL), 2, VOL_NORM, ATTN_IDLE );
 				m_fSaidHeal = TRUE;
 			}
 			TaskComplete();
@@ -3686,6 +3722,15 @@ void CMedic::Precache()
 	RegisterMedic();
 }
 
+const char* CMedic::DefaultSentenceGroup(int group)
+{
+	switch (group) {
+	case TLK_HEAL: return "MG_HEAL";
+	case TLK_NOTHEAL: return "MG_NOTHEAL";
+	default: return CHFGrunt::DefaultSentenceGroup(group);
+	}
+}
+
 void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
 {
 	switch ( pEvent->event )
@@ -3874,7 +3919,7 @@ bool CMedic::CheckHealCharge()
 		if ( !m_fDepleteLine && !IsTalking() )
 		{
 			m_hTalkTarget = m_hTargetEnt;
-			PlaySentence( "MG_NOTHEAL", 2, VOL_NORM, ATTN_IDLE );
+			PlaySentence( SentenceGroup(TLK_NOTHEAL), 2, VOL_NORM, ATTN_IDLE );
 			m_fDepleteLine = TRUE;
 		}
 		return false;

@@ -69,7 +69,7 @@ public:
 	void DeathSound( void );
 	void PainSound( void );
 
-	void TalkInit( void );
+	const char* DefaultSentenceGroup(int group);
 
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
@@ -221,7 +221,7 @@ void CBarney::AlertSound( void )
 	{
 		if( FOkToSpeak(SPEAK_DISREGARD_ENEMY) && !m_hEnemy->IsPlayer() )
 		{
-			PlaySentence( m_szGrp[TLK_ATTACK], RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
+			PlaySentence( SentenceGroup(TLK_ATTACK), RANDOM_FLOAT( 2.8f, 3.2f ), VOL_NORM, ATTN_IDLE );
 		}
 	}
 }
@@ -417,42 +417,34 @@ void CBarney::Precache()
 	RegisterTalkMonster();
 }	
 
-// Init talk data
-void CBarney::TalkInit()
+const char* CBarney::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	// scientists speach group names (group names are in sentences.txt)
-	m_szGrp[TLK_ANSWER] = "BA_ANSWER";
-	m_szGrp[TLK_QUESTION] =	"BA_QUESTION";
-	m_szGrp[TLK_IDLE] = "BA_IDLE";
-	m_szGrp[TLK_STARE] = "BA_STARE";
-	m_szGrp[TLK_USE] = "BA_OK";
-	m_szGrp[TLK_UNUSE] = "BA_WAIT";
-	m_szGrp[TLK_DECLINE] = "BA_POK";
-	m_szGrp[TLK_STOP] = "BA_STOP";
-
-	m_szGrp[TLK_NOSHOOT] = "BA_SCARED";
-	m_szGrp[TLK_HELLO] = "BA_HELLO";
-
-	m_szGrp[TLK_PLHURT1] = "!BA_CUREA";
-	m_szGrp[TLK_PLHURT2] = "!BA_CUREB"; 
-	m_szGrp[TLK_PLHURT3] = "!BA_CUREC";
-
-	m_szGrp[TLK_PHELLO] = "BA_PHELLO";
-	m_szGrp[TLK_PIDLE] = "BA_PIDLE";
-	m_szGrp[TLK_PQUESTION] = "BA_PQUEST";
-
-	m_szGrp[TLK_SMELL] = "BA_SMELL";
-	
-	m_szGrp[TLK_WOUND] = "BA_WOUND";
-	m_szGrp[TLK_MORTAL] = "BA_MORTAL";
-
-	m_szGrp[TLK_SHOT] = "BA_SHOT";
-	m_szGrp[TLK_MAD] = "BA_MAD";
-
-	m_szGrp[TLK_KILL] = "BA_KILL";
-	m_szGrp[TLK_ATTACK] = "BA_ATTACK";
+	switch (group) {
+	case TLK_ANSWER: return "BA_ANSWER";
+	case TLK_QUESTION: return "BA_QUESTION";
+	case TLK_IDLE: return "BA_IDLE";
+	case TLK_STARE: return "BA_STARE";
+	case TLK_USE: return "BA_OK";
+	case TLK_UNUSE: return "BA_WAIT";
+	case TLK_DECLINE: return "BA_POK";
+	case TLK_STOP: return "BA_STOP";
+	case TLK_NOSHOOT: return "BA_SCARED";
+	case TLK_HELLO: return "BA_HELLO";
+	case TLK_PLHURT1: return "!BA_CUREA";
+	case TLK_PLHURT2: return "!BA_CUREB";
+	case TLK_PLHURT3: return "!BA_CUREC";
+	case TLK_PHELLO: return "BA_PHELLO";
+	case TLK_PIDLE: return "BA_PIDLE";
+	case TLK_PQUESTION: return "BA_PQUEST";
+	case TLK_SMELL: return "BA_SMELL";
+	case TLK_WOUND: return "BA_WOUND";
+	case TLK_MORTAL: return "BA_MORTAL";
+	case TLK_SHOT: return "BA_SHOT";
+	case TLK_MAD: return "BA_MAD";
+	case TLK_KILL: return "BA_KILL";
+	case TLK_ATTACK: return "BA_ATTACK";
+	default: return NULL;
+	}
 }
 
 void CBarney::KeyValue(KeyValueData *pkvd)
@@ -604,7 +596,7 @@ Schedule_t *CBarney::GetSchedule()
 	}
 	if( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak(SPEAK_DISREGARD_ENEMY) )
 	{
-		PlaySentence( m_szGrp[TLK_KILL], 4, VOL_NORM, ATTN_NORM );
+		PlaySentence( SentenceGroup(TLK_KILL), 4, VOL_NORM, ATTN_NORM );
 	}
 
 	switch( m_MonsterState )
@@ -707,7 +699,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("otis"); }
-	void TalkInit( void );
+	const char* DefaultSentenceGroup(int group);
 	const char* DefaultDisplayName() { return "Otis"; }
 	const char* ReverseRelationshipModel() { return "models/otisf.mdl"; }
 
@@ -751,40 +743,34 @@ void COtis::Precache()
 	RegisterTalkMonster();
 }
 
-void COtis::TalkInit()
+const char* COtis::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-	
-	m_szGrp[TLK_ANSWER]  =	"OT_ANSWER";
-	m_szGrp[TLK_QUESTION] =	"OT_QUESTION";
-	m_szGrp[TLK_IDLE] =		"OT_IDLE";
-	m_szGrp[TLK_STARE] =	"OT_STARE";
-	m_szGrp[TLK_USE] =		"OT_OK";
-	m_szGrp[TLK_UNUSE] =	"OT_WAIT";
-	m_szGrp[TLK_DECLINE] =	"OT_POK";
-	m_szGrp[TLK_STOP] =		"OT_STOP";
-	
-	m_szGrp[TLK_NOSHOOT] =	"OT_SCARED";
-	m_szGrp[TLK_HELLO] =	"OT_HELLO";
-	
-	m_szGrp[TLK_PLHURT1] =	"!OT_CUREA";
-	m_szGrp[TLK_PLHURT2] =	"!OT_CUREB"; 
-	m_szGrp[TLK_PLHURT3] =	"!OT_CUREC";
-	
-	m_szGrp[TLK_PHELLO] =	"OT_PHELLO";
-	m_szGrp[TLK_PIDLE] =	"OT_PIDLE";
-	m_szGrp[TLK_PQUESTION] = "OT_PQUEST";
-	
-	m_szGrp[TLK_SMELL] =	"OT_SMELL";
-	
-	m_szGrp[TLK_WOUND] =	"OT_WOUND";
-	m_szGrp[TLK_MORTAL] =	"OT_MORTAL";
-
-	m_szGrp[TLK_SHOT] = "OT_SHOT";
-	m_szGrp[TLK_MAD] = "OT_MAD";
-	
-	m_szGrp[TLK_KILL] = "OT_KILL";
-	m_szGrp[TLK_ATTACK] = "OT_ATTACK";
+	switch (group) {
+	case TLK_ANSWER: return "BA_ANSWER";
+	case TLK_QUESTION: return "BA_QUESTION";
+	case TLK_IDLE: return "BA_IDLE";
+	case TLK_STARE: return "BA_STARE";
+	case TLK_USE: return "BA_OK";
+	case TLK_UNUSE: return "BA_WAIT";
+	case TLK_DECLINE: return "BA_POK";
+	case TLK_STOP: return "BA_STOP";
+	case TLK_NOSHOOT: return "BA_SCARED";
+	case TLK_HELLO: return "BA_HELLO";
+	case TLK_PLHURT1: return "!BA_CUREA";
+	case TLK_PLHURT2: return "!BA_CUREB";
+	case TLK_PLHURT3: return "!BA_CUREC";
+	case TLK_PHELLO: return "BA_PHELLO";
+	case TLK_PIDLE: return "BA_PIDLE";
+	case TLK_PQUESTION: return "BA_PQUEST";
+	case TLK_SMELL: return "BA_SMELL";
+	case TLK_WOUND: return "BA_WOUND";
+	case TLK_MORTAL: return "BA_MORTAL";
+	case TLK_SHOT: return "BA_SHOT";
+	case TLK_MAD: return "BA_MAD";
+	case TLK_KILL: return "BA_KILL";
+	case TLK_ATTACK: return "BA_ATTACK";
+	default: return NULL;
+	}
 }
 
 void COtis::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
@@ -899,7 +885,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("barniel"); }
-	void TalkInit( void );
+	const char* DefaultSentenceGroup(int group);
 	const char* DefaultDisplayName() { return "Barniel"; }
 	const char* ReverseRelationshipModel() { return NULL; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -940,40 +926,34 @@ void CBarniel::Precache()
 	RegisterTalkMonster();
 }
 
-void CBarniel::TalkInit()
+const char* CBarniel::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	m_szGrp[TLK_ANSWER] = "BN_ANSWER";
-	m_szGrp[TLK_QUESTION] =	"BN_QUESTION";
-	m_szGrp[TLK_IDLE] = "BN_IDLE";
-	m_szGrp[TLK_STARE] = "BN_STARE";
-	m_szGrp[TLK_USE] = "BN_OK";
-	m_szGrp[TLK_UNUSE] = "BN_WAIT";
-	m_szGrp[TLK_DECLINE] = "BN_POK";
-	m_szGrp[TLK_STOP] = "BN_STOP";
-
-	m_szGrp[TLK_NOSHOOT] = "BN_SCARED";
-	m_szGrp[TLK_HELLO] = "BN_HELLO";
-
-	m_szGrp[TLK_PLHURT1] = "!BN_CUREA";
-	m_szGrp[TLK_PLHURT2] = "!BN_CUREB";
-	m_szGrp[TLK_PLHURT3] = "!BN_CUREC";
-
-	m_szGrp[TLK_PHELLO] = "BN_PHELLO";
-	m_szGrp[TLK_PIDLE] = "BN_PIDLE";
-	m_szGrp[TLK_PQUESTION] = "BN_PQUEST";
-
-	m_szGrp[TLK_SMELL] = "BN_SMELL";
-
-	m_szGrp[TLK_WOUND] = "BN_WOUND";
-	m_szGrp[TLK_MORTAL] = "BN_MORTAL";
-
-	m_szGrp[TLK_SHOT] = "BN_SHOT";
-	m_szGrp[TLK_MAD] = "BN_MAD";
-
-	m_szGrp[TLK_KILL] = "BN_KILL";
-	m_szGrp[TLK_ATTACK] = "BN_ATTACK";
+	switch (group) {
+	case TLK_ANSWER: return "BN_ANSWER";
+	case TLK_QUESTION: return "BN_QUESTION";
+	case TLK_IDLE: return "BN_IDLE";
+	case TLK_STARE: return "BN_STARE";
+	case TLK_USE: return "BN_OK";
+	case TLK_UNUSE: return "BN_WAIT";
+	case TLK_DECLINE: return "BN_POK";
+	case TLK_STOP: return "BN_STOP";
+	case TLK_NOSHOOT: return "BN_SCARED";
+	case TLK_HELLO: return "BN_HELLO";
+	case TLK_PLHURT1: return "!BN_CUREA";
+	case TLK_PLHURT2: return "!BN_CUREB";
+	case TLK_PLHURT3: return "!BN_CUREC";
+	case TLK_PHELLO: return "BN_PHELLO";
+	case TLK_PIDLE: return "BN_PIDLE";
+	case TLK_PQUESTION: return "BN_PQUEST";
+	case TLK_SMELL: return "BN_SMELL";
+	case TLK_WOUND: return "BN_WOUND";
+	case TLK_MORTAL: return "BN_MORTAL";
+	case TLK_SHOT: return "BN_SHOT";
+	case TLK_MAD: return "BN_MAD";
+	case TLK_KILL: return "BN_KILL";
+	case TLK_ATTACK: return "BN_ATTACK";
+	default: return NULL;
+	}
 }
 
 void CBarniel::HandleAnimEvent( MonsterEvent_t *pEvent )
@@ -1052,7 +1032,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("kate"); }
-	void TalkInit( void );
+	const char* DefaultSentenceGroup(int group);
 	const char* DefaultDisplayName() { return "Kate"; }
 	const char* ReverseRelationshipModel() { return NULL; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -1110,40 +1090,34 @@ void CKate::Precache()
 	CTalkMonster::Precache();
 }
 
-void CKate::TalkInit()
+const char* CKate::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	m_szGrp[TLK_ANSWER] = "KA_ANSWER";
-	m_szGrp[TLK_QUESTION] =	"KA_QUESTION";
-	m_szGrp[TLK_IDLE] = "KA_IDLE";
-	m_szGrp[TLK_STARE] = "KA_STARE";
-	m_szGrp[TLK_USE] = "KA_OK";
-	m_szGrp[TLK_UNUSE] = "KA_WAIT";
-	m_szGrp[TLK_DECLINE] = "KA_POK";
-	m_szGrp[TLK_STOP] = "KA_STOP";
-
-	m_szGrp[TLK_NOSHOOT] = "KA_SCARED";
-	m_szGrp[TLK_HELLO] = "KA_HELLO";
-
-	m_szGrp[TLK_PLHURT1] = "!KA_CUREA";
-	m_szGrp[TLK_PLHURT2] = "!KA_CUREB";
-	m_szGrp[TLK_PLHURT3] = "!KA_CUREC";
-
-	m_szGrp[TLK_PHELLO] = "KA_PHELLO";
-	m_szGrp[TLK_PIDLE] = "KA_PIDLE";
-	m_szGrp[TLK_PQUESTION] = "KA_PQUEST";
-
-	m_szGrp[TLK_SMELL] = "KA_SMELL";
-
-	m_szGrp[TLK_WOUND] = "KA_WOUND";
-	m_szGrp[TLK_MORTAL] = "KA_MORTAL";
-
-	m_szGrp[TLK_SHOT] = "KA_SHOT";
-	m_szGrp[TLK_MAD] = "KA_MAD";
-
-	m_szGrp[TLK_KILL] = "KA_KILL";
-	m_szGrp[TLK_ATTACK] = "KA_ATTACK";
+	switch (group) {
+	case TLK_ANSWER: return "KA_ANSWER";
+	case TLK_QUESTION: return "KA_QUESTION";
+	case TLK_IDLE: return "KA_IDLE";
+	case TLK_STARE: return "KA_STARE";
+	case TLK_USE: return "KA_OK";
+	case TLK_UNUSE: return "KA_WAIT";
+	case TLK_DECLINE: return "KA_POK";
+	case TLK_STOP: return "KA_STOP";
+	case TLK_NOSHOOT: return "KA_SCARED";
+	case TLK_HELLO: return "KA_HELLO";
+	case TLK_PLHURT1: return "!KA_CUREA";
+	case TLK_PLHURT2: return "!KA_CUREB";
+	case TLK_PLHURT3: return "!KA_CUREC";
+	case TLK_PHELLO: return "KA_PHELLO";
+	case TLK_PIDLE: return "KA_PIDLE";
+	case TLK_PQUESTION: return "KA_PQUEST";
+	case TLK_SMELL: return "KA_SMELL";
+	case TLK_WOUND: return "KA_WOUND";
+	case TLK_MORTAL: return "KA_MORTAL";
+	case TLK_SHOT: return "KA_SHOT";
+	case TLK_MAD: return "KA_MAD";
+	case TLK_KILL: return "KA_KILL";
+	case TLK_ATTACK: return "KA_ATTACK";
+	default: return NULL;
+	}
 }
 
 void CKate::HandleAnimEvent( MonsterEvent_t *pEvent )

@@ -29,7 +29,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	void TalkInit();
+	const char* DefaultSentenceGroup(int group);
 
 	float m_painTime;
 };
@@ -154,37 +154,32 @@ void CRecruit::DeathSound( void )
 	}
 }
 
-void CRecruit::TalkInit()
+const char* CRecruit::DefaultSentenceGroup(int group)
 {
-	CTalkMonster::TalkInit();
-
-	m_szGrp[TLK_ANSWER] = "RC_ANSWER";
-	m_szGrp[TLK_QUESTION] = "RC_QUESTION";
-	m_szGrp[TLK_IDLE] = "RC_IDLE";
-	m_szGrp[TLK_STARE] = "RC_STARE";
-	m_szGrp[TLK_USE] = "RC_OK";
-	m_szGrp[TLK_UNUSE] = "RC_WAIT";
-	m_szGrp[TLK_DECLINE] = "RC_POK";
-	m_szGrp[TLK_STOP] = "RC_STOP";
-
-	m_szGrp[TLK_NOSHOOT] = "RC_SCARED";
-	m_szGrp[TLK_HELLO] = "RC_HELLO";
-
-	m_szGrp[TLK_PLHURT1] = "!RC_CUREA";
-	m_szGrp[TLK_PLHURT2] = "!RC_CUREB";
-	m_szGrp[TLK_PLHURT3] = "!RC_CUREC";
-
-	m_szGrp[TLK_PHELLO] = NULL;// UNDONE
-	m_szGrp[TLK_PIDLE] = NULL;// UNDONE
-	m_szGrp[TLK_PQUESTION] = "RC_PQUEST";		// UNDONE
-
-	m_szGrp[TLK_SMELL] = "RC_SMELL";
-
-	m_szGrp[TLK_WOUND] = "RC_WOUND";
-	m_szGrp[TLK_MORTAL] = "RC_MORTAL";
-
-	m_szGrp[TLK_SHOT] = "RC_SHOT";
-	m_szGrp[TLK_MAD] = "RC_MAD";
+	switch (group) {
+	case TLK_ANSWER: return "RC_ANSWER";
+	case TLK_QUESTION: return "RC_QUESTION";
+	case TLK_IDLE: return "RC_IDLE";
+	case TLK_STARE: return "RC_STARE";
+	case TLK_USE: return "RC_OK";
+	case TLK_UNUSE: return "RC_WAIT";
+	case TLK_DECLINE: return "RC_POK";
+	case TLK_STOP: return "RC_STOP";
+	case TLK_NOSHOOT: return "RC_SCARED";
+	case TLK_HELLO: return "RC_HELLO";
+	case TLK_PLHURT1: return "!RC_CUREA";
+	case TLK_PLHURT2: return "!RC_CUREB";
+	case TLK_PLHURT3: return "!RC_CUREC";
+	case TLK_PHELLO: return "RC_PHELLO";
+	case TLK_PIDLE: return "RC_PIDLE";
+	case TLK_PQUESTION: return "RC_PQUEST";
+	case TLK_SMELL: return "RC_SMELL";
+	case TLK_WOUND: return "RC_WOUND";
+	case TLK_MORTAL: return "RC_MORTAL";
+	case TLK_SHOT: return "RC_SHOT";
+	case TLK_MAD: return "RC_MAD";
+	default: return NULL;
+	}
 }
 
 Schedule_t* CRecruit::GetSchedule()

@@ -5629,19 +5629,16 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		if (!FStringNull(m_iszUse))
 		{
 			pTalkMonster->m_iszUse = m_iszUse;
-			pTalkMonster->m_szGrp[TLK_USE] = CTalkMonster::GetRedefinedSentence(m_iszUse);
 		}
 
 		if (!FStringNull(m_iszUnUse))
 		{
 			pTalkMonster->m_iszUnUse = m_iszUnUse;
-			pTalkMonster->m_szGrp[TLK_UNUSE] = CTalkMonster::GetRedefinedSentence(m_iszUnUse);
 		}
 
 		if (!FStringNull(m_iszDecline))
 		{
 			pTalkMonster->m_iszDecline = m_iszDecline;
-			pTalkMonster->m_szGrp[TLK_DECLINE] = CTalkMonster::GetRedefinedSentence(m_iszDecline);
 		}
 
 		MaySetResettableValue(pTalkMonster->m_iTolerance, m_iTolerance);
