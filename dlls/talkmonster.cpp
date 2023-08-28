@@ -450,6 +450,13 @@ void CTalkMonster::StartTask( Task_t *pTask )
 		m_flNextFlinch = gpGlobals->time + FLINCH_DELAY;
 		CFollowingMonster::StartTask( pTask );
 		break;
+	case TASK_MOVE_NEAREST_TO_TARGET_RANGE:
+		CFollowingMonster::StartTask( pTask );
+		if (!HasConditions(bits_COND_TASK_FAILED) && GotIdleSpeakChance())
+		{
+			FIdleSpeak();
+		}
+		break;
 	default:
 		CFollowingMonster::StartTask( pTask );
 		break;
@@ -533,7 +540,7 @@ void CTalkMonster::RunTask( Task_t *pTask )
 			IdleHeadTurn( pev->origin );
 			// override so that during walk, a scientist may talk and greet player
 			FIdleHello();
-			if( RANDOM_LONG( 0, m_nSpeak * 20 ) == 0)
+			if( GotIdleSpeakChance() )
 			{
 				FIdleSpeak();
 			}
@@ -1028,6 +1035,11 @@ int CTalkMonster::FIdleHello( void )
 // FIdleSpeak
 // ask question of nearby friend, or make statement
 //=========================================================
+bool CTalkMonster::GotIdleSpeakChance()
+{
+	return RANDOM_LONG( 0, m_nSpeak * 2 ) == 0;
+}
+
 int CTalkMonster::FIdleSpeak( void )
 { 
 	// try to start a conversation, or make statement
@@ -1419,7 +1431,7 @@ Schedule_t *CTalkMonster::GetScheduleOfType( int Type )
 			}
 
 			// talk about world
-			if( FOkToSpeak() && RANDOM_LONG( 0, m_nSpeak * 2 ) == 0 )
+			if( FOkToSpeak() && GotIdleSpeakChance() )
 			{
 				//ALERT ( at_console, "standing idle speak\n" );
 				return slIdleSpeak;

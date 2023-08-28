@@ -153,6 +153,7 @@ public:
 	virtual bool	SetAnswerQuestion( CTalkMonster *pSpeaker );
 	virtual void	MakeIdleStatement( void );
 	float			RandomSentenceDuraion( void );
+	bool			GotIdleSpeakChance();
 	int				FIdleSpeak( void );
 	int				FIdleStare( void );
 	int				FIdleHello( void );
