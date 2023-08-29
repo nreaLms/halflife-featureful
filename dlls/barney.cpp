@@ -746,29 +746,29 @@ void COtis::Precache()
 const char* COtis::DefaultSentenceGroup(int group)
 {
 	switch (group) {
-	case TLK_ANSWER: return "BA_ANSWER";
-	case TLK_QUESTION: return "BA_QUESTION";
-	case TLK_IDLE: return "BA_IDLE";
-	case TLK_STARE: return "BA_STARE";
-	case TLK_USE: return "BA_OK";
-	case TLK_UNUSE: return "BA_WAIT";
-	case TLK_DECLINE: return "BA_POK";
-	case TLK_STOP: return "BA_STOP";
-	case TLK_NOSHOOT: return "BA_SCARED";
-	case TLK_HELLO: return "BA_HELLO";
-	case TLK_PLHURT1: return "!BA_CUREA";
-	case TLK_PLHURT2: return "!BA_CUREB";
-	case TLK_PLHURT3: return "!BA_CUREC";
-	case TLK_PHELLO: return "BA_PHELLO";
-	case TLK_PIDLE: return "BA_PIDLE";
-	case TLK_PQUESTION: return "BA_PQUEST";
-	case TLK_SMELL: return "BA_SMELL";
-	case TLK_WOUND: return "BA_WOUND";
-	case TLK_MORTAL: return "BA_MORTAL";
-	case TLK_SHOT: return "BA_SHOT";
-	case TLK_MAD: return "BA_MAD";
-	case TLK_KILL: return "BA_KILL";
-	case TLK_ATTACK: return "BA_ATTACK";
+	case TLK_ANSWER: return "OT_ANSWER";
+	case TLK_QUESTION: return "OT_QUESTION";
+	case TLK_IDLE: return "OT_IDLE";
+	case TLK_STARE: return "OT_STARE";
+	case TLK_USE: return "OT_OK";
+	case TLK_UNUSE: return "OT_WAIT";
+	case TLK_DECLINE: return "OT_POK";
+	case TLK_STOP: return "OT_STOP";
+	case TLK_NOSHOOT: return "OT_SCARED";
+	case TLK_HELLO: return "OT_HELLO";
+	case TLK_PLHURT1: return "!OT_CUREA";
+	case TLK_PLHURT2: return "!OT_CUREB";
+	case TLK_PLHURT3: return "!OT_CUREC";
+	case TLK_PHELLO: return "OT_PHELLO";
+	case TLK_PIDLE: return "OT_PIDLE";
+	case TLK_PQUESTION: return "OT_PQUEST";
+	case TLK_SMELL: return "OT_SMELL";
+	case TLK_WOUND: return "OT_WOUND";
+	case TLK_MORTAL: return "OT_MORTAL";
+	case TLK_SHOT: return "OT_SHOT";
+	case TLK_MAD: return "OT_MAD";
+	case TLK_KILL: return "OT_KILL";
+	case TLK_ATTACK: return "OT_ATTACK";
 	default: return NULL;
 	}
 }
