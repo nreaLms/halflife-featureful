@@ -20,7 +20,7 @@
 #include "mod_features.h"
 #include "basemonster.h"
 #if FEATURE_ROPE
-#include "ropes.h"
+class CRope;
 #endif
 #include "com_model.h"
 

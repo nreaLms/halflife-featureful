@@ -38,6 +38,10 @@
 #include "hltv.h"
 #include "talkmonster.h"
 
+#if FEATURE_ROPE
+#include "ropes.h"
+#endif
+
 // #define DUCKFIX
 
 extern DLL_GLOBAL ULONG g_ulModelIndexPlayer;
