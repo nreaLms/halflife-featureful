@@ -605,14 +605,12 @@ void CShockTrooper::DropShockRoach(bool gibbed)
 
 void CShockTrooper::PlayUseSentence()
 {
-	SENTENCEG_PlayRndSz( ENT( pev ), "ST_IDLE", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-	JustSpoke();
+	PlaySentenceGroup("ST_IDLE");
 }
 
 void CShockTrooper::PlayUnUseSentence()
 {
-	SENTENCEG_PlayRndSz( ENT( pev ), "ST_ALERT", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-	JustSpoke();
+	PlaySentenceGroup("ST_ALERT");
 }
 
 class CDeadStrooper : public CDeadMonster

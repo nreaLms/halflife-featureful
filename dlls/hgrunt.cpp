@@ -146,9 +146,30 @@ void CHGrunt::SpeakSentence( void )
 
 	if( FOkToSpeak() )
 	{
-		SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(m_iSentence), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-		JustSpoke();
+		PlayGruntSentence( m_iSentence );
+		m_iSentence = HGRUNT_SENT_NONE;
 	}
+}
+
+bool CHGrunt::PlayGruntSentence(int sentence)
+{
+	return PlaySentenceGroup(SentenceByNumber(sentence));
+}
+
+bool CHGrunt::PlaySentenceGroup(const char *group)
+{
+	if (SENTENCEG_PlayRndSz( ENT(pev), group, SentenceVolume(), SentenceAttn(), 0, m_voicePitch) >= 0)
+	{
+		JustSpoke();
+		return true;
+	}
+	return false;
+}
+
+void CHGrunt::PlaySentenceSound(const char *sound)
+{
+	EMIT_SOUND_DYN( edict(), CHAN_VOICE, sound, SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+	JustSpoke();
 }
 
 void CHGrunt::PlayUseSentence()
@@ -156,17 +177,15 @@ void CHGrunt::PlayUseSentence()
 	switch(RANDOM_LONG(0,2))
 	{
 	case 0:
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER0", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		PlaySentenceSound("!HG_ANSWER0");
 		break;
 	case 1:
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER1", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		PlaySentenceSound("!HG_ANSWER1");
 		break;
 	case 2:
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER2", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		PlaySentenceSound("!HG_ANSWER2");
 		break;
 	}
-
-	JustSpoke();
 }
 
 void CHGrunt::PlayUnUseSentence()
@@ -174,14 +193,12 @@ void CHGrunt::PlayUnUseSentence()
 	switch(RANDOM_LONG(0,1))
 	{
 	case 0:
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_ANSWER5", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		PlaySentenceSound("!HG_ANSWER5");
 		break;
 	case 1:
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, "!HG_QUEST4", SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+		PlaySentenceSound("!HG_QUEST4");
 		break;
 	}
-
-	JustSpoke();
 }
 
 //=========================================================
@@ -665,17 +682,17 @@ void CHGrunt::IdleSound( void )
 			{
 			case 0:
 				// check in
-				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_CHECK), SentenceVolume(), ATTN_NORM, 0, m_voicePitch );
-				*GruntQuestionVar() = 1;
+				if (PlayGruntSentence(HGRUNT_SENT_CHECK))
+					*GruntQuestionVar() = 1;
 				break;
 			case 1:
 				// question
-				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_QUEST), SentenceVolume(), ATTN_NORM, 0, m_voicePitch );
-				*GruntQuestionVar() = 2;
+				if (PlayGruntSentence(HGRUNT_SENT_QUEST))
+					*GruntQuestionVar() = 2;
 				break;
 			case 2:
 				// statement
-				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_IDLE), SentenceVolume(), ATTN_NORM, 0, m_voicePitch );
+				PlayGruntSentence(HGRUNT_SENT_IDLE);
 				break;
 			}
 		}
@@ -685,16 +702,15 @@ void CHGrunt::IdleSound( void )
 			{
 			case 1:
 				// check in
-				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_CLEAR), SentenceVolume(), ATTN_NORM, 0, m_voicePitch );
+				PlayGruntSentence(HGRUNT_SENT_CLEAR);
 				break;
 			case 2:
 				// question 
-				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ANSWER), SentenceVolume(), ATTN_NORM, 0, m_voicePitch );
+				PlayGruntSentence(HGRUNT_SENT_ANSWER);
 				break;
 			}
 			*GruntQuestionVar() = 0;
 		}
-		JustSpoke();
 	}
 }
 
@@ -1214,20 +1230,19 @@ void CHGrunt::SpeakCaughtEnemy()
 	if ( m_hEnemy != 0 )
 	{
 		if ( m_hEnemy->IsPlayer() )
-			SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+			PlayGruntSentence(HGRUNT_SENT_ALERT);
 		else if( m_hEnemy->IsAlienMonster() )
-			SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_MONSTER), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+			PlayGruntSentence(HGRUNT_SENT_MONSTER);
 		else
 		{
 			// Try HOSTILE sentense on non-player non-alien enemy
 			// Fallback to ALERT if allowed
-			const int result = SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_HOSTILE), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-			if (result == -1 && !AlertSentenceIsForPlayerOnly())
+			const bool result = PlayGruntSentence(HGRUNT_SENT_HOSTILE);
+			if (!result && !AlertSentenceIsForPlayerOnly())
 			{
-				SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_ALERT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
+				PlayGruntSentence(HGRUNT_SENT_ALERT);
 			}
 		}
-		JustSpoke();
 	}
 }
 
@@ -1996,8 +2011,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 				// this may only affect a single individual in a squad.
 				if( FOkToSpeak() )
 				{
-					SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_GREN), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-					JustSpoke();
+					PlayGruntSentence(HGRUNT_SENT_GREN);
 				}
 				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 			}
@@ -2113,8 +2127,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 					//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 					if( FOkToSpeak() )
 					{
-						SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_THROW), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-						JustSpoke();
+						PlayGruntSentence(HGRUNT_SENT_THROW);
 					}
 					return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
 				}
@@ -2136,8 +2149,7 @@ Schedule_t *CHGrunt::GetSchedule( void )
 					// grunt's covered position. Good place for a taunt, I guess?
 					if( FOkToSpeak() && RANDOM_LONG( 0, 1 ) )
 					{
-						SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_TAUNT), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-						JustSpoke();
+						PlayGruntSentence(HGRUNT_SENT_TAUNT);
 					}
 					return GetScheduleOfType( SCHED_STANDOFF );
 				}
@@ -2185,8 +2197,7 @@ Schedule_t *CHGrunt::GetScheduleOfType( int Type )
 				{
 					if( FOkToSpeak() )
 					{
-						SENTENCEG_PlayRndSz( ENT( pev ), SentenceByNumber(HGRUNT_SENT_THROW), SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-						JustSpoke();
+						PlayGruntSentence(HGRUNT_SENT_THROW);
 					}
 					return slGruntTossGrenadeCover;
 				}

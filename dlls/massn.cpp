@@ -48,9 +48,6 @@ enum
 #define		MASSN_AE_CAUGHT_ENEMY	( 10 ) // grunt established sight with an enemy (player only) that had previously eluded the squad.
 #define		MASSN_AE_DROP_GUN		( 11 ) // grunt (probably dead) is dropping his mp5.
 
-//=========================================================
-// Purpose:
-//=========================================================
 class CMassn : public CHGrunt
 {
 public:
@@ -104,24 +101,15 @@ void CMassn::PlayUnUseSentence()
 	JustSpoke();
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 BOOL CMassn::FOkToSpeak(void)
 {
 	return FALSE;
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CMassn::IdleSound(void)
 {
 }
 
-//=========================================================
-// Shoot
-//=========================================================
 void CMassn::Sniperrifle(void)
 {
 	Vector vecShootOrigin = GetGunPosition();
