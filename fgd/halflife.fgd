@@ -6637,7 +6637,7 @@
 	new_model(studio) : "Custom model"
 ]
 
-@BaseClass base(MonsterMakerBase, MonsterExtra, FollowingMonsterProps, CustomSentences) flags(Angle) size(-16 -16 -16, 16 16 16) = MonsterMaker
+@BaseClass base(MonsterMakerBase, MonsterExtra, FollowingMonsterProps, CustomSentences) flags(Angle) size(-16 -16 0, 16 16 72) color(245 128 96) = MonsterMaker
 [
 	spawnflags(Flags) =
 	[
