@@ -1605,8 +1605,6 @@ void CHFGrunt :: Shoot ( void )
 
 	pev->effects |= EF_MUZZLEFLASH;
 
-	//WeaponFlash ( vecShootOrigin );
-
 	m_cAmmoLoaded--;// take away a bullet!
 
 	Vector angDir = UTIL_VecToAngles( vecShootDir );
@@ -1629,8 +1627,6 @@ void CHFGrunt :: Shotgun ( void )
 
 	pev->effects |= EF_MUZZLEFLASH;
 
-	//WeaponFlash ( vecShootOrigin );
-
 	m_cAmmoLoaded--;// take away a bullet!
 
 	Vector angDir = UTIL_VecToAngles( vecShootDir );
@@ -1641,32 +1637,37 @@ void CHFGrunt :: Shotgun ( void )
 //=========================================================
 void CHFGrunt :: M249 ( void )
 {
+	const char* sawFireSound = NULL;
 	switch ( RANDOM_LONG(0,2) )
 	{
-		case 0: EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/saw_fire1.wav", 1, ATTN_NORM ); break;
-		case 1: EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/saw_fire2.wav", 1, ATTN_NORM ); break;
-		case 2: EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/saw_fire3.wav", 1, ATTN_NORM ); break;
+		case 0: sawFireSound = "weapons/saw_fire1.wav"; break;
+		case 1: sawFireSound = "weapons/saw_fire2.wav"; break;
+		case 2: sawFireSound = "weapons/saw_fire3.wav"; break;
 	}
+	if (sawFireSound)
+		EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, sawFireSound, 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0, 15) );
 
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
 	UTIL_MakeVectors ( pev->angles );
 
-	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
-
 	m_flLinkToggle = !m_flLinkToggle;
 
 	if (!m_flLinkToggle)
-		EjectBrass ( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iM249Shell, TE_BOUNCE_SHELL);
+	{
+		Vector vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(100,250) + gpGlobals->v_up * RANDOM_FLOAT(100,150) + gpGlobals->v_forward * 25.0f;
+		EjectBrass ( vecShootOrigin - vecShootDir * 6, vecShellVelocity, pev->angles.y, m_iM249Shell, TE_BOUNCE_SHELL);
+	}
 	else
-		EjectBrass ( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iM249Link, TE_BOUNCE_SHELL);
+	{
+		Vector vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(75,200) + gpGlobals->v_up * RANDOM_FLOAT(150,200) + gpGlobals->v_forward * 25.0f;
+		EjectBrass ( vecShootOrigin - vecShootDir * 6, vecShellVelocity, pev->angles.y, m_iM249Link, TE_BOUNCE_SHELL);
+	}
 
 	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_6DEGREES, 2048, BULLET_MONSTER_556 ); // shoot +-5 degrees
 
 	pev->effects |= EF_MUZZLEFLASH;
-
-	//WeaponFlash ( vecShootOrigin );
 
 	m_cAmmoLoaded--;// take away a bullet!
 
