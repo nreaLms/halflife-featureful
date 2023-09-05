@@ -32,6 +32,7 @@
 #include "mod_features.h"
 #include "game.h"
 #include "particledef.h"
+#include "soundent.h"
 
 #define FEATURE_ENV_WARPBALL 1
 #define FEATURE_ENV_XENMAKER 1
@@ -2906,7 +2907,7 @@ public:
 	virtual int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
 	inline float Radius() { 
-		return pev->button ? pev->button : 192;
+		return m_baseRadius > 0 ? m_baseRadius : 192;
 	}
 	inline float Amplitude() {
 		return pev->friction ? pev->friction : 6;
@@ -2924,10 +2925,10 @@ public:
 		return pev->scale > 0 ? pev->scale : 1;
 	}
 	inline int MaxBeamCount() {
-		return pev->team > 0 ? pev->team : 20;
+		return m_maxBeamCount > 0 ? m_maxBeamCount : 20;
 	}
 	inline float SoundVolume() {
-		return (pev->armortype > 0.0f && pev->armortype <= 1.0f) ? pev->armortype : 1.0f;
+		return (m_soundVolume > 0.0f && m_soundVolume <= 1.0f) ? m_soundVolume : 1.0f;
 	}
 	inline string_t WarpTarget() {
 		return pev->message;
@@ -2947,7 +2948,7 @@ public:
 	}
 
 	inline void SetRadius( int radius ) {
-		pev->button = radius;
+		m_baseRadius = radius;
 	}
 	inline void SetAmplitude( float amplitude ) {
 		pev->friction = amplitude;
@@ -2962,10 +2963,10 @@ public:
 		pev->frags = delay;
 	}
 	inline void SetMaxBeamCount( int beamCount ) {
-		pev->team = beamCount;
+		m_maxBeamCount = beamCount;
 	}
 	inline void SetSoundVolume( float volume ) {
-		pev->armortype = volume;
+		m_soundVolume = volume;
 	}
 	inline void SetWarpTarget( string_t warpTarget ) {
 		pev->message = warpTarget;
@@ -2988,16 +2989,38 @@ public:
 			return STRING(pev->noise2);
 	}
 	inline float SoundAttenuation() {
-		return ::SoundAttenuation((short)pev->impulse);
+		return ::SoundAttenuation(m_soundRadius);
 	}
 	inline int SpriteFramerate() {
 		return pev->framerate ? pev->framerate : 12;
 	}
 
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	int m_maxBeamCount;
+	int m_baseRadius;
+	int m_aiSound;
+	float m_aiSoundDuration;
+	float m_soundVolume;
+	short m_soundRadius;
+
 	int m_beamTexture;
 };
 
 LINK_ENTITY_TO_CLASS( env_warpball, CEnvWarpBall )
+
+TYPEDESCRIPTION	CEnvWarpBall::m_SaveData[] =
+{
+	DEFINE_FIELD(CEnvWarpBall, m_maxBeamCount, FIELD_INTEGER),
+	DEFINE_FIELD(CEnvWarpBall, m_baseRadius, FIELD_INTEGER),
+	DEFINE_FIELD(CEnvWarpBall, m_aiSound, FIELD_INTEGER),
+	DEFINE_FIELD(CEnvWarpBall, m_aiSoundDuration, FIELD_FLOAT),
+	DEFINE_FIELD(CEnvWarpBall, m_soundVolume, FIELD_FLOAT),
+	DEFINE_FIELD(CEnvWarpBall, m_soundRadius, FIELD_SHORT),
+};
+IMPLEMENT_SAVERESTORE( CEnvWarpBall, CBaseEntity )
 
 void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 {
@@ -3046,12 +3069,22 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
 	{
-		pev->impulse = atoi( pkvd->szValue );
+		m_soundRadius = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "volume" ) )
 	{
 		SetSoundVolume( atof( pkvd->szValue ) );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "aisound" ) )
+	{
+		m_aiSound = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "aisound_duration" ) )
+	{
+		m_aiSoundDuration = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -3208,6 +3241,12 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	beamParams.blue = beamBlue;
 	beamParams.alpha = 220;
 	DrawChaoticBeams(vecOrigin, ENT(pev), Radius(), beamParams, iBeams);
+
+	if (m_aiSound)
+	{
+		const float soundDuration = m_aiSoundDuration > 0.0f ? m_aiSoundDuration : 0.3f;
+		CSoundEnt::InsertSound( m_aiSound, pev->origin, Radius(), soundDuration );
+	}
 
 	SUB_UseTargets( this );
 
