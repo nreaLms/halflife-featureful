@@ -250,12 +250,6 @@ const unsigned char colors[8][3] =
 
 int CHud::DrawHudString( int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b )
 {
-	if( hud_textmode->value == 2 )
-	{
-		gEngfuncs.pfnDrawSetTextColor( r / 255.0, g / 255.0, b / 255.0 );
-		return gEngfuncs.pfnDrawConsoleString( xpos, ypos, szIt );
-	}
-
 	// xash3d: reset unicode state
 	TextMessageDrawChar( 0, 0, 0, 0, 0, 0 );
 
@@ -280,49 +274,6 @@ int CHud::DrawHudString( int xpos, int ypos, int iMaxX, const char *szIt, int r,
 	}
 
 	return xpos;
-}
-
-int DrawUtfString( int xpos, int ypos, int iMaxX, const char *szIt, int r, int g, int b )
-{
-	if (IsXashFWGS())
-	{
-		// xash3d: reset unicode state
-		gEngfuncs.pfnVGUI2DrawCharacterAdditive( 0, 0, 0, 0, 0, 0, 0 );
-
-		// draw the string until we hit the null character or a newline character
-		for( ; *szIt != 0 && *szIt != '\n'; szIt++ )
-		{
-			int w = gHUD.m_scrinfo.charWidths['M'];
-			if( xpos + w  > iMaxX )
-				return xpos;
-			if( ( *szIt == '^' ) && ( *( szIt + 1 ) >= '0') && ( *( szIt + 1 ) <= '7') )
-			{
-				szIt++;
-				r = colors[*szIt - '0'][0];
-				g = colors[*szIt - '0'][1];
-				b = colors[*szIt - '0'][2];
-				if( !*(++szIt) )
-					return xpos;
-			}
-			int c = (unsigned int)(unsigned char)*szIt;
-			xpos += gEngfuncs.pfnVGUI2DrawCharacterAdditive( xpos, ypos, c, r, g, b, 0 );
-		}
-		return xpos;
-	}
-	else
-	{
-		return gHUD.DrawHudString(xpos, ypos, iMaxX, szIt, r, g, b);
-	}
-}
-
-int CHud::DrawHudStringLen( const char *szIt )
-{
-	int l = 0;
-	for( ; *szIt != 0 && *szIt != '\n'; szIt++ )
-	{
-		l += gHUD.m_scrinfo.charWidths[(unsigned char)*szIt];
-	}
-	return l;
 }
 
 int CHud::DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b )
@@ -408,6 +359,127 @@ int CHud::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, in
 	}
 
 	return x;
+}
+
+int CHud::ConsoleText::DrawString(int xpos, int ypos, int iMaxX, const char *szString, int r, int g, int b, int length)
+{
+	char buf[512] = {0};
+	const char* str = buf;
+
+	if (length < 0) {
+		str = szString;
+	} else {
+		length = Q_min(length, sizeof(buf) - 1);
+		strncpy(buf, szString, length);
+		buf[length] = '\0';
+	}
+
+	gEngfuncs.pfnDrawSetTextColor(r / 255.0f, g / 255.0f, b / 255.0f);
+	return gEngfuncs.pfnDrawConsoleString(xpos, ypos, str);
+}
+
+int CHud::ConsoleText::DrawNumberString(int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b)
+{
+	char szString[32];
+	sprintf( szString, "%d", iNumber );
+	return DrawStringReverse( xpos, ypos, iMinX, szString, r, g, b );
+}
+
+int CHud::ConsoleText::DrawStringReverse(int x, int ypos, int iMinX, const char *szString, int r, int g, int b, int length)
+{
+	x -= LineWidth(szString, length);
+	if (x < iMinX)
+		x = iMinX;
+	return DrawString(x, ypos, gHUD.m_scrinfo.iWidth, szString, r, g, b, length);
+}
+
+int CHud::ConsoleText::LineWidth(const char *szString, int length)
+{
+	char buf[512] = {0};
+	const char* str = buf;
+
+	if (length < 0) {
+		str = szString;
+	} else {
+		length = Q_min(length, sizeof(buf) - 1);
+		strncpy(buf, szString, length);
+		buf[length] = '\0';
+	}
+
+	int width, height;
+	gEngfuncs.pfnDrawConsoleStringLen(str, &width, &height);
+	return width;
+}
+
+int CHud::ConsoleText::WidestCharacterWidth()
+{
+	int width, height;
+	gEngfuncs.pfnDrawConsoleStringLen("M", &width, &height);
+	return height;
+}
+
+int CHud::ConsoleText::LineHeight()
+{
+	int width, height;
+	gEngfuncs.pfnDrawConsoleStringLen("YAW", &width, &height);
+	return height;
+}
+
+int CHud::AdditiveText::DrawString(int xpos, int ypos, int iMaxX, const char *szString, int r, int g, int b, int length)
+{
+	TextMessageDrawChar( 0, 0, 0, 0, 0, 0 );
+
+	const char* szStringStart = szString;
+	for( ; *szString != 0 && (length < 0 || szString < szStringStart + length); szString++ )
+	{
+		int w = gHUD.m_scrinfo.charWidths['M'];
+		if( xpos + w  > iMaxX )
+			return xpos;
+		int c = (unsigned int)(unsigned char)*szString;
+
+		xpos += TextMessageDrawChar( xpos, ypos, c, r, g, b );
+	}
+
+	return xpos;
+}
+
+int CHud::AdditiveText::DrawNumberString(int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b)
+{
+	char szString[32];
+	sprintf( szString, "%d", iNumber );
+	return DrawStringReverse( xpos, ypos, iMinX, szString, r, g, b );
+}
+
+int CHud::AdditiveText::DrawStringReverse(int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, int length)
+{
+	// find the end of the string
+	xpos -= LineWidth(szString, length);
+	if( xpos < iMinX )
+		xpos = iMinX;
+	DrawString( xpos, ypos, gHUD.m_scrinfo.iWidth, szString, r, g, b );
+	return xpos;
+}
+
+int CHud::AdditiveText::LineWidth(const char *szString, int length)
+{
+	int width = 0;
+	const char* szStringStart = szString;
+	while ((length < 0 || szString < szStringStart + length) && *szString != '\0')
+	{
+		width += gHUD.m_scrinfo.charWidths[(unsigned char)*szString];
+		szString++;
+	}
+	return width;
+}
+
+int CHud::AdditiveText::WidestCharacterWidth()
+{
+	return gHUD.m_scrinfo.charWidths['M'];
+}
+
+int CHud::AdditiveText::LineHeight()
+{
+	return gHUD.m_scrinfo.iCharHeight + 1;
 }
 
 int CHud::GetNumWidth( int iNumber, int iFlags )

@@ -107,7 +107,6 @@ We have a minimum width of 1-320 - we could have the field widths scale with it?
 int SCOREBOARD_WIDTH = 320;
 
 // Y positions
-#define ROW_GAP  (gHUD.m_scrinfo.iCharHeight)
 #define ROW_RANGE_MIN 15
 #define ROW_RANGE_MAX ( ScreenHeight - 50 )
 
@@ -140,8 +139,10 @@ int CHudScoreboard::Draw( float fTime )
 	float list_slot = 0;
 	int xpos_rel = ( ScreenWidth - SCOREBOARD_WIDTH ) / 2;
 
+	const int RowGap = CHud::UtfText::LineHeight();
+
 	// print the heading line
-	int ypos = ROW_RANGE_MIN + ( list_slot * ROW_GAP );
+	int ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
 	int xpos = NAME_RANGE_MIN + xpos_rel;
 
 	FAR_RIGHT = can_show_packetloss ? PL_RANGE_MAX : PING_RANGE_MAX;
@@ -156,22 +157,22 @@ int CHudScoreboard::Draw( float fTime )
 	if( cl_scoreboard_bg && cl_scoreboard_bg->value )
 		gHUD.DrawDarkRectangle( xpos - 5, ypos - 5, FAR_RIGHT, ROW_RANGE_MAX );
 	if( !gHUD.m_Teamplay )
-		DrawUtfString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, "Player", 255, 140, 0 );
+		CHud::UtfText::DrawString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, "Player", 255, 140, 0 );
 	else
-		DrawUtfString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, "Teams", 255, 140, 0 );
+		CHud::UtfText::DrawString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, "Teams", 255, 140, 0 );
 
-	gHUD.DrawHudStringReverse( KILLS_RANGE_MAX + xpos_rel, ypos, 0, "kills", 255, 140, 0 );
-	DrawUtfString( DIVIDER_POS + xpos_rel, ypos, ScreenWidth, "/", 255, 140, 0 );
-	DrawUtfString( DEATHS_RANGE_MIN + xpos_rel + 5, ypos, ScreenWidth, "deaths", 255, 140, 0 );
-	DrawUtfString( PING_RANGE_MAX + xpos_rel - 35, ypos, ScreenWidth, "latency", 255, 140, 0 );
+	CHud::UtfText::DrawStringReverse( KILLS_RANGE_MAX + xpos_rel, ypos, 0, "kills", 255, 140, 0 );
+	CHud::UtfText::DrawString( DIVIDER_POS + xpos_rel, ypos, ScreenWidth, "/", 255, 140, 0 );
+	CHud::UtfText::DrawString( DEATHS_RANGE_MIN + xpos_rel + 5, ypos, ScreenWidth, "deaths", 255, 140, 0 );
+	CHud::UtfText::DrawString( PING_RANGE_MAX + xpos_rel - 35, ypos, ScreenWidth, "latency", 255, 140, 0 );
 
 	if( can_show_packetloss )
 	{
-		DrawUtfString( PL_RANGE_MAX + xpos_rel - 35, ypos, ScreenWidth, "pkt loss", 255, 140, 0 );
+		CHud::UtfText::DrawString( PL_RANGE_MAX + xpos_rel - 35, ypos, ScreenWidth, "pkt loss", 255, 140, 0 );
 	}
 
 	list_slot += 1.2f;
-	ypos = ROW_RANGE_MIN + ( list_slot * ROW_GAP );
+	ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
 	// xpos = NAME_RANGE_MIN + xpos_rel;
 	FillRGBA( xpos - 4, ypos, FAR_RIGHT -2, 1, 255, 140, 0, 255 );  // draw the seperator line
 
@@ -266,7 +267,7 @@ int CHudScoreboard::Draw( float fTime )
 		// draw out the best team
 		team_info_t *team_info = &g_TeamInfo[best_team];
 
-		ypos = ROW_RANGE_MIN + ( list_slot * ROW_GAP );
+		ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
 
 		// check we haven't drawn too far down
 		if( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
@@ -284,23 +285,23 @@ int CHudScoreboard::Draw( float fTime )
 		if( team_info->ownteam ) // if it is their team, draw the background different color
 		{
 			// overlay the background in blue,  then draw the score text over it
-			FillRGBA( xpos - 5, ypos, FAR_RIGHT, ROW_GAP, 0, 0, 255, 70 );
+			FillRGBA( xpos - 5, ypos, FAR_RIGHT, RowGap, 0, 0, 255, 70 );
 		}
 
 		// draw their name (left to right)
-		DrawUtfString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, team_info->name, r, g, b );
+		CHud::UtfText::DrawString( xpos, ypos, NAME_RANGE_MAX + xpos_rel, team_info->name, r, g, b );
 
 		// draw kills (right to left)
 		xpos = KILLS_RANGE_MAX + xpos_rel;
-		gHUD.DrawHudNumberString( xpos, ypos, KILLS_RANGE_MIN + xpos_rel, team_info->frags, r, g, b );
+		CHud::UtfText::DrawNumberString( xpos, ypos, KILLS_RANGE_MIN + xpos_rel, team_info->frags, r, g, b );
 
 		// draw divider
 		xpos = DIVIDER_POS + xpos_rel;
-		DrawUtfString( xpos, ypos, xpos + 20, "/", r, g, b );
+		CHud::UtfText::DrawString( xpos, ypos, xpos + 20, "/", r, g, b );
 
 		// draw deaths
 		xpos = DEATHS_RANGE_MAX + xpos_rel;
-		gHUD.DrawHudNumberString( xpos, ypos, DEATHS_RANGE_MIN + xpos_rel, team_info->deaths, r, g, b );
+		CHud::UtfText::DrawNumberString( xpos, ypos, DEATHS_RANGE_MIN + xpos_rel, team_info->deaths, r, g, b );
 
 		// draw ping
 		// draw ping & packetloss
@@ -308,7 +309,7 @@ int CHudScoreboard::Draw( float fTime )
 		sprintf( buf, "%d", team_info->ping );
 		xpos = ( ( PING_RANGE_MAX - PING_RANGE_MIN ) / 2) + PING_RANGE_MIN + xpos_rel + 25;
 		UnpackRGB( r, g, b, RGB_YELLOWISH );
-		gHUD.DrawHudStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
+		CHud::UtfText::DrawStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
 
 		//  Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		if( can_show_packetloss )
@@ -316,7 +317,7 @@ int CHudScoreboard::Draw( float fTime )
 			xpos = ( ( PL_RANGE_MAX - PL_RANGE_MIN ) / 2) + PL_RANGE_MIN + xpos_rel + 25;
 
 			sprintf( buf, "  %d", team_info->packetloss );
-			DrawUtfString( xpos, ypos, xpos+50, buf, r, g, b );
+			CHud::UtfText::DrawString( xpos, ypos, xpos+50, buf, r, g, b );
 		}
 
 		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
@@ -360,6 +361,8 @@ int CHudScoreboard::DrawPlayers( int xpos_rel, float list_slot, int nameoffset, 
 		FAR_RIGHT += NAME_RANGE_MODIFIER;
 	}
 
+	const int RowGap = CHud::UtfText::LineHeight();
+
 	// draw the players, in order,  and restricted to team if set
 	while( 1 )
 	{
@@ -391,7 +394,7 @@ int CHudScoreboard::DrawPlayers( int xpos_rel, float list_slot, int nameoffset, 
 		// draw out the best player
 		hud_player_info_t *pl_info = &g_PlayerInfoList[best_player];
 
-		int ypos = ROW_RANGE_MIN + ( list_slot * ROW_GAP );
+		int ypos = ROW_RANGE_MIN + ( list_slot * RowGap );
 
 		// check we haven't drawn too far down
 		if( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
@@ -412,40 +415,40 @@ int CHudScoreboard::DrawPlayers( int xpos_rel, float list_slot, int nameoffset, 
 			if( pl_info->thisplayer )
 			{
 				// green is the suicide color? i wish this could do grey...
-				FillRGBA( xpos - 5, ypos, FAR_RIGHT, ROW_GAP, 80, 155, 0, 70 );
+				FillRGBA( xpos - 5, ypos, FAR_RIGHT, RowGap, 80, 155, 0, 70 );
 			}
 			else
 			{
 				// Highlight the killers name - overlay the background in red,  then draw the score text over it
-				FillRGBA( xpos - 5, ypos, FAR_RIGHT, ROW_GAP, 255, 0, 0, ( (float)15 * (float)( m_fLastKillTime - gHUD.m_flTime ) ) );
+				FillRGBA( xpos - 5, ypos, FAR_RIGHT, RowGap, 255, 0, 0, ( (float)15 * (float)( m_fLastKillTime - gHUD.m_flTime ) ) );
 			}
 		}
 		else if( pl_info->thisplayer ) // if it is their name, draw it a different color
 		{
 			// overlay the background in blue,  then draw the score text over it
-			FillRGBA( xpos - 5, ypos, FAR_RIGHT, ROW_GAP, 0, 0, 255, 70 );
+			FillRGBA( xpos - 5, ypos, FAR_RIGHT, RowGap, 0, 0, 255, 70 );
 		}
 
 		// draw their name (left to right)
-		DrawUtfString( xpos + nameoffset, ypos, NAME_RANGE_MAX + xpos_rel, pl_info->name, r, g, b );
+		CHud::UtfText::DrawString( xpos + nameoffset, ypos, NAME_RANGE_MAX + xpos_rel, pl_info->name, r, g, b );
 
 		// draw kills (right to left)
 		xpos = KILLS_RANGE_MAX + xpos_rel;
-		gHUD.DrawHudNumberString( xpos, ypos, KILLS_RANGE_MIN + xpos_rel, g_PlayerExtraInfo[best_player].frags, r, g, b );
+		CHud::UtfText::DrawNumberString( xpos, ypos, KILLS_RANGE_MIN + xpos_rel, g_PlayerExtraInfo[best_player].frags, r, g, b );
 
 		// draw divider
 		xpos = DIVIDER_POS + xpos_rel;
-		DrawUtfString( xpos, ypos, xpos + 20, "/", r, g, b );
+		CHud::UtfText::DrawString( xpos, ypos, xpos + 20, "/", r, g, b );
 
 		// draw deaths
 		xpos = DEATHS_RANGE_MAX + xpos_rel;
-		gHUD.DrawHudNumberString( xpos, ypos, DEATHS_RANGE_MIN + xpos_rel, g_PlayerExtraInfo[best_player].deaths, r, g, b );
+		CHud::UtfText::DrawNumberString( xpos, ypos, DEATHS_RANGE_MIN + xpos_rel, g_PlayerExtraInfo[best_player].deaths, r, g, b );
 
 		// draw ping & packetloss
 		static char buf[64];
 		sprintf( buf, "%d", g_PlayerInfoList[best_player].ping );
 		xpos = ( ( PING_RANGE_MAX - PING_RANGE_MIN ) / 2 ) + PING_RANGE_MIN + xpos_rel + 25;
-		gHUD.DrawHudStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
+		CHud::UtfText::DrawStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
 
 		//  Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		if( can_show_packetloss )
@@ -462,7 +465,7 @@ int CHudScoreboard::DrawPlayers( int xpos_rel, float list_slot, int nameoffset, 
 
 			xpos = ( ( PL_RANGE_MAX - PL_RANGE_MIN ) / 2 ) + PL_RANGE_MIN + xpos_rel + 25;
 
-			DrawUtfString( xpos, ypos, xpos+50, buf, r, g, b );
+			CHud::UtfText::DrawString( xpos, ypos, xpos+50, buf, r, g, b );
 		}
 
 		pl_info->name = NULL;  // set the name to be NULL, so this client won't get drawn again

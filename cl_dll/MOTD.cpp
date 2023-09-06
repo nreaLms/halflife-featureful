@@ -60,7 +60,6 @@ void CHudMOTD::Reset( void )
 	m_bShow = 0;
 }
 
-#define LINE_HEIGHT  (gHUD.m_scrinfo.iCharHeight)
 #define ROW_GAP  13
 #define ROW_RANGE_MIN 30
 #define ROW_RANGE_MAX ( ScreenHeight - 100 )
@@ -69,16 +68,18 @@ int CHudMOTD::Draw( float fTime )
 	gHUD.m_iNoConsolePrint &= ~( 1 << 1 );
 	if( !m_bShow )
 		return 1;
+	const int LineHeight = CHud::UtfText::LineHeight();
+	const int WidestCharacterWidth = CHud::UtfText::WidestCharacterWidth();
 	gHUD.m_iNoConsolePrint |= 1 << 1;
 	//bool bScroll;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
-	int ypos = ( ScreenHeight - LINE_HEIGHT * m_iLines ) / 2; // shift it up slightly
+	int ypos = ( ScreenHeight - LineHeight * m_iLines ) / 2; // shift it up slightly
 	char *ch = m_szMOTD;
-	int xpos = ( ScreenWidth - gHUD.m_scrinfo.charWidths['M'] * m_iMaxLength ) / 2;
+	int xpos = ( ScreenWidth - WidestCharacterWidth * m_iMaxLength ) / 2;
 	if( xpos < 30 )
 		xpos = 30;
-	int xmax = xpos + gHUD.m_scrinfo.charWidths['M'] * m_iMaxLength;
-	int height = LINE_HEIGHT * m_iLines;
+	int xmax = xpos + WidestCharacterWidth * m_iMaxLength;
+	int height = LineHeight * m_iLines;
 	int ypos_r=ypos;
 	if( height > ROW_RANGE_MAX )
 	{
@@ -106,10 +107,10 @@ int CHudMOTD::Draw( float fTime )
 			top = NULL;
 
 		// find where to start drawing the line
-		if( ( ypos > ROW_RANGE_MIN ) && ( ypos + LINE_HEIGHT <= ypos_r + height ) )
-			DrawUtfString( xpos, ypos, xmax, ch, 255, 180, 0 );
+		if( ( ypos > ROW_RANGE_MIN ) && ( ypos + LineHeight <= ypos_r + height ) )
+			CHud::UtfText::DrawString( xpos, ypos, xmax, ch, 255, 180, 0 );
 
-		ypos += LINE_HEIGHT;
+		ypos += LineHeight;
 
 		if( top )  // restore
 			*top = '\n';

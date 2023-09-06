@@ -762,8 +762,29 @@ public:
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b );
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth( int iNumber, int iFlags );
-	int DrawHudStringLen( const char *szIt );
 	void DrawDarkRectangle( int x, int y, int wide, int tall );
+
+	struct ConsoleText
+	{
+		static int DrawString( int xpos, int ypos, int iMaxX, const char *szString, int r, int g, int b, int length = -1 );
+		static int DrawNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
+		static int DrawStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, int length = -1 );
+		static int LineWidth( const char *szString, int length = -1 );
+		static int WidestCharacterWidth();
+		static int LineHeight();
+	};
+
+	struct AdditiveText
+	{
+		static int DrawString( int xpos, int ypos, int iMaxX, const char *szString, int r, int g, int b, int length = -1 );
+		static int DrawNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
+		static int DrawStringReverse( int xpos, int ypos, int iMinX, const char *szString, int r, int g, int b, int length = -1 );
+		static int LineWidth( const char *szString, int length = -1 );
+		static int WidestCharacterWidth();
+		static int LineHeight();
+	};
+
+	typedef ConsoleText UtfText;
 
 	int HUDColor();
 	int HUDColorCritical();
