@@ -2539,6 +2539,7 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 //
 //
 
+#define SF_TELEPORT_RELATIVE_TELEPORT 128
 #define SF_TELEPORT_KEEPANGLES 256
 #define SF_TELEPORT_KEEPVELOCITY 512
 
@@ -2640,6 +2641,15 @@ bool CTriggerTeleport::TeleportTouchImpl( CBaseEntity *pOther )
 		return false;
 
 	Vector tmp = VARS( pentTarget )->origin;
+
+	if (FBitSet(pev->spawnflags, SF_TELEPORT_RELATIVE_TELEPORT))
+	{
+		Vector subjectPos = pOther->pev->origin;
+		if (pOther->IsPlayer())
+			subjectPos.z += pOther->pev->mins.z;
+		Vector offset = subjectPos - pev->origin;
+		tmp = tmp + offset;
+	}
 
 	if( pOther->IsPlayer() )
 	{

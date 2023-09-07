@@ -7687,6 +7687,7 @@
 	]
 	spawnflags(flags) =
 	[
+		128 : "Relative Teleport" : 0 : ""
 		256 : "Keep Angles" : 0 : "Keep player's angles"
 		512 : "Keep velocity" : 0 : "Keep player's velocity"
 	]
