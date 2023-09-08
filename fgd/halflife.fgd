@@ -7677,7 +7677,22 @@
 	trigger_on_limit(target_destination) : "Trigger on limit" : : "Trigger when the trigger limit is reached"
 ]
 
-@BaseClass base(Targetname) = TriggerTeleport
+@BaseClass = TeleportRandomDest
+[
+	spawnflags(flags) = 
+	[
+		64 : "Random Destination" : 0 : "If multiple targets are set, one will be chosen as the destination randomly for every single player as he enters the trigger."
+	]
+]
+@BaseClass = TeleportKeepFlags
+[
+	spawnflags(flags) = 
+	[
+		256 : "Keep Angles" : 0 : "Keep player's angles"
+		512 : "Keep velocity" : 0 : "Keep player's velocity"
+	]
+]
+@BaseClass base(Targetname, TeleportKeepFlags) = TriggerTeleport
 [
 	master(string) : "Master"
 	teleport_start_inactive(choices) : "Start Inactive" =
@@ -7685,27 +7700,20 @@
 		0 : "No"
 		1 : "Yes"
 	]
-	spawnflags(flags) =
-	[
-		128 : "Relative Teleport" : 0 : ""
-		256 : "Keep Angles" : 0 : "Keep player's angles"
-		512 : "Keep velocity" : 0 : "Keep player's velocity"
-	]
 ]
 
-@SolidClass base(TriggerTeleport, TriggerCond) = trigger_teleport : "Trigger teleport"
+@SolidClass base(TriggerTeleport, TriggerCond, TeleportRandomDest) = trigger_teleport : "Trigger teleport"
 [
 	target(target_destination) : "Destination point" : : "Name of the entity which the player is teleported to. Ideally an info_teleport_destination entity."
-]
-
-@PointClass base(Targetname) = trigger_player_teleport : "Move player to the specified position."
-[
-	target(target_destination) : "Destination point" : : "Name of the entity which the player is teleported to. If omitted trigger_player_teleport acts as a teleport position itself."
 	spawnflags(flags) =
 	[
-		256 : "Keep Angles" : 0 : "Keep player's angles"
-		512 : "Keep velocity" : 0 : "Keep player's velocity"
+		128 : "Relative Teleport" : 0 : "The player's destination will be the location of the destination plus his offset from the trigger_teleport's origin in the moment of the player entering the trigger. trigger_teleport is expected to have an origin brush."
 	]
+]
+
+@PointClass base(Targetname, TeleportRandomDest, TeleportKeepFlags) = trigger_player_teleport : "Move player to the specified position."
+[
+	target(target_destination) : "Destination point" : : "Name of the entity which the player is teleported to. If omitted trigger_player_teleport acts as a teleport position itself."
 ]
 
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []

@@ -2539,6 +2539,7 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 //
 //
 
+#define SF_TELEPORT_RANDOM_DESTINATION 64
 #define SF_TELEPORT_RELATIVE_TELEPORT 128
 #define SF_TELEPORT_KEEPANGLES 256
 #define SF_TELEPORT_KEEPVELOCITY 512
@@ -2552,7 +2553,7 @@ public:
 	void EXPORT TeleportUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	virtual edict_t* GetTeleportTarget();
-	bool TeleportTouchImpl( CBaseEntity *pOther );
+	bool TeleportToDestination( CBaseEntity *pOther );
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -2603,7 +2604,7 @@ void CTriggerTeleport::TeleportUse(CBaseEntity *pActivator, CBaseEntity *pCaller
 	}
 }
 
-bool CTriggerTeleport::TeleportTouchImpl( CBaseEntity *pOther )
+bool CTriggerTeleport::TeleportToDestination( CBaseEntity *pOther )
 {
 	entvars_t *pevToucher = pOther->pev;
 	edict_t	*pentTarget = NULL;
@@ -2689,12 +2690,26 @@ bool CTriggerTeleport::TeleportTouchImpl( CBaseEntity *pOther )
 
 void CTriggerTeleport::TeleportTouch( CBaseEntity *pOther )
 {
-	TeleportTouchImpl(pOther);
+	TeleportToDestination(pOther);
 }
 
 edict_t* CTriggerTeleport::GetTeleportTarget()
 {
-	return FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) );
+	const char* szName = STRING( pev->target );
+	if (FBitSet(pev->spawnflags, SF_TELEPORT_RANDOM_DESTINATION))
+	{
+		int total = 0;
+		CBaseEntity *pEntity = NULL;
+		CBaseEntity *pNewEntity = NULL;
+		while( ( pNewEntity = UTIL_FindEntityByTargetname( pNewEntity, szName ) ) != NULL )
+		{
+			total++;
+			if( RANDOM_LONG( 0, total - 1 ) < 1 )
+				pEntity = pNewEntity;
+		}
+		return pEntity->edict();
+	}
+	return FIND_ENTITY_BY_TARGETNAME( NULL, szName );
 }
 
 class CTriggerTeleportPlayer : public CTriggerTeleport
@@ -2718,7 +2733,7 @@ void CTriggerTeleportPlayer::TeleportPlayerUse(CBaseEntity *pActivator, CBaseEnt
 {
 	CBaseEntity* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 	if (pPlayer) {
-		TeleportTouchImpl(pPlayer);
+		TeleportToDestination(pPlayer);
 	}
 }
 
@@ -2727,7 +2742,7 @@ edict_t* CTriggerTeleportPlayer::GetTeleportTarget()
 	if (FStringNull(pev->target)) {
 		return edict();
 	} else {
-		return FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) );
+		return CTriggerTeleport::GetTeleportTarget();
 	}
 }
 
@@ -3716,7 +3731,7 @@ void CTriggerXenReturn::Precache()
 
 void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
 {
-	if (TeleportTouchImpl(pOther))
+	if (TeleportToDestination(pOther))
 	{
 		if (pOther->IsPlayer())
 		{
