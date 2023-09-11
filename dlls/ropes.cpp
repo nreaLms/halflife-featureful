@@ -35,6 +35,9 @@
 #define SPRING_DAMPING	0.1f
 #define ROPE_IGNORE_SAMPLES	4		// integrator may be hanging if less than
 
+const float RopeFrameRate = 100.f;
+const float RopeForceMultiplier = 50.f;
+
 /**
 *	Data for a single rope joint.
 */
@@ -393,7 +396,7 @@ void CRope::RopeThink()
 		Creak();
 	}
 
-	pev->nextthink = gpGlobals->time + 0.001;
+	pev->nextthink = gpGlobals->time + (1 / RopeFrameRate);
 }
 
 void CRope::InitializeRopeSim()
@@ -1013,7 +1016,7 @@ void CRope::ApplyForceFromPlayer( const Vector& vecForce )
 	if( !mObjectAttached )
 		return;
 
-	float flForce = 20000.0;
+	float flForce = 20000.0 * RopeForceMultiplier * gpGlobals->frametime;
 
 	if( m_iSegments < 26 )
 		flForce *= ( m_iSegments / 26.0 );
