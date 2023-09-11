@@ -37,8 +37,13 @@ ModFeatures::ModFeatures()
 	memset(weapons, 0, sizeof(weapons));
 	monstersCount = 0;
 
-	memset(nvg_sound_on, 0, sizeof (nvg_sound_on));
-	memset(nvg_sound_off, 0, sizeof (nvg_sound_off));
+	memset(nvg_sound_on, 0, sizeof(StringBuf));
+	memset(nvg_sound_off, 0, sizeof(StringBuf));
+
+	strcpy(wall_puff1, "sprites/stmbal1.spr");
+	memset(wall_puff2, 0, sizeof(StringBuf));
+	memset(wall_puff3, 0, sizeof(StringBuf));
+	memset(wall_puff4, 0, sizeof(StringBuf));
 
 	suit_light = SUIT_LIGHT_FLASHLIGHT;
 	suit_light_allow_both = false;
@@ -169,17 +174,26 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		}
 		return true;
 	}
-	else if (strcmp(key, "nvg_sound_on") == 0)
+	else
 	{
-		strncpy(nvg_sound_on, value, ARRAYSIZE(nvg_sound_on));
-		nvg_sound_on[ARRAYSIZE(nvg_sound_on)-1] = '\0';
-		return true;
-	}
-	else if (strcmp(key, "nvg_sound_off") == 0)
-	{
-		strncpy(nvg_sound_off, value, ARRAYSIZE(nvg_sound_off));
-		nvg_sound_off[ARRAYSIZE(nvg_sound_off)-1] = '\0';
-		return true;
+		KeyValueDefinition<StringBuf> strings[] = {
+			KEY_VALUE_DEF(nvg_sound_on),
+			KEY_VALUE_DEF(nvg_sound_off),
+			KEY_VALUE_DEF(wall_puff1),
+			KEY_VALUE_DEF(wall_puff2),
+			KEY_VALUE_DEF(wall_puff3),
+			KEY_VALUE_DEF(wall_puff4),
+		};
+
+		for (i = 0; i<ARRAYSIZE(strings); ++i)
+		{
+			if (strcmp(key, strings[i].name) == 0)
+			{
+				strncpy(strings[i].value, value, sizeof(StringBuf));
+				strings[i].value[sizeof(StringBuf)-1] = '\0';
+				return true;
+			}
+		}
 	}
 
 	ALERT(at_console, "Unknown mod feature key '%s'\n", key);

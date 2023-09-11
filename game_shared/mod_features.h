@@ -91,9 +91,6 @@
 
 #define FEATURE_ROPE (1 || FEATURE_OPFOR_SPECIFIC)
 
-// Counter Strike effects
-#define FEATURE_WALLPUFF_CS 0
-
 // Experimental Cvars
 #define FEATURE_EXPERIMENTAL_CVARS 1
 

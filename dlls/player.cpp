@@ -201,6 +201,7 @@ int gmsgTeamNames = 0;
 int gmsgPlayMP3 = 0;
 int gmsgItems = 0;
 int gmsgHUDColor = 0;
+int gmsgWallPuffs = 0;
 
 int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
@@ -271,6 +272,7 @@ void LinkUserMessages( void )
 	gmsgPlayMP3 = REG_USER_MSG( "PlayMP3", -1 );
 	gmsgItems = REG_USER_MSG( "Items", 4 );
 	gmsgHUDColor = REG_USER_MSG( "HUDColor", 4 );
+	gmsgWallPuffs = REG_USER_MSG( "WallPuffs", 8 );
 
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
 	gmsgStatusValue = REG_USER_MSG( "StatusValue", 3 );
@@ -4683,6 +4685,13 @@ void CBasePlayer::UpdateClientData( void )
 				FireTargets( "game_playerjoin", this, this );
 			}
 		}
+
+		MESSAGE_BEGIN( MSG_ONE, gmsgWallPuffs, NULL, pev );
+			WRITE_SHORT(CWorld::wallPuffsIndices[0]);
+			WRITE_SHORT(CWorld::wallPuffsIndices[1]);
+			WRITE_SHORT(CWorld::wallPuffsIndices[2]);
+			WRITE_SHORT(CWorld::wallPuffsIndices[3]);
+		MESSAGE_END();
 
 		if( g_pGameRules->IsMultiplayer() )
 			FireTargets( "game_playerspawn", this, this );

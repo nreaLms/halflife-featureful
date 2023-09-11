@@ -269,6 +269,11 @@ int __MsgFunc_KeyedDLight(const char *pszName, int iSize, void *pbuf)
 	return gHUD.MsgFunc_KeyedDLight( pszName, iSize, pbuf );
 }
 
+int __MsgFunc_WallPuffs(const char *pszName, int iSize, void *pbuf)
+{
+	return gHUD.MsgFunc_WallPuffs( pszName, iSize, pbuf );
+}
+
 //DECLARE_MESSAGE( m_Logo, Logo )
 int __MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 {
@@ -536,6 +541,7 @@ void CHud::Init( void )
 	HOOK_MESSAGE( HUDColor );
 	HOOK_MESSAGE( SetFog );
 	HOOK_MESSAGE( KeyedDLight );
+	HOOK_MESSAGE( WallPuffs );
 
 	// TFFree CommandMenu
 	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );

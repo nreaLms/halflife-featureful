@@ -848,5 +848,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void KeyValue( KeyValueData *pkvd );
+
+	static int wallPuffsIndices[4];
 };
 #endif

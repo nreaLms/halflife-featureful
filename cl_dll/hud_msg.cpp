@@ -149,6 +149,26 @@ int CHud::MsgFunc_KeyedDLight( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int CHud::MsgFunc_WallPuffs(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ( pbuf, iSize );
+
+	wallPuffs[0] = READ_SHORT();
+	wallPuffs[1] = READ_SHORT();
+	wallPuffs[2] = READ_SHORT();
+	wallPuffs[3] = READ_SHORT();
+
+	wallPuffCount = 0;
+	for (int i=0; i<sizeof(wallPuffs)/sizeof(wallPuffs[0]); ++i)
+	{
+		if (wallPuffs[i])
+			wallPuffCount++;
+		else
+			break;
+	}
+	return 1;
+}
+
 int CHud::MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );

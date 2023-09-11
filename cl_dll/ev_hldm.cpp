@@ -324,29 +324,14 @@ void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float sc
 {
 	TEMPENTITY *te = NULL;
 	void ( *callback )( struct tempent_s *ent, float frametime, float currenttime ) = NULL;
-	char path[64];
+	int wallPuffSpriteIndex = 0;
 
 	switch( type )
 	{
 	case SMOKE_WALLPUFF:
-#if FEATURE_WALLPUFF_CS
-		strcpy( path, "sprites/wall_puff1.spr" );
-		path[17] += Com_RandomLong(0, 3); // randomize a bit
-#else
-		strcpy(path, "sprites/stmbal1.spr");
-#endif
-		break;
-	case SMOKE_RIFLE:
-		strcpy( path, "sprites/rifle_smoke1.spr" );
-		path[19] += Com_RandomLong(0, 2); // randomize a bit
-		break;
-	case SMOKE_PISTOL:
-		strcpy( path, "sprites/pistol_smoke1.spr" );
-		path[20] += Com_RandomLong(0, 1);  // randomize a bit
-		break;
-	case SMOKE_BLACK:
-		strcpy( path, "sprites/black_smoke1.spr" );
-		path[19] += Com_RandomLong(0, 3); // randomize a bit
+		if (gHUD.wallPuffCount <= 0)
+			return;
+		wallPuffSpriteIndex = gHUD.wallPuffs[Com_RandomLong(0, gHUD.wallPuffCount-1)];
 		break;
 	default:
 		gEngfuncs.Con_DPrintf("Unknown smoketype %d\n", type);
@@ -359,7 +344,7 @@ void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float sc
 		callback = EV_SmokeRise;
 
 
-	te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin, gEngfuncs.pEventAPI->EV_FindModelIndex( path ), framerate );
+	te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin, wallPuffSpriteIndex, framerate );
 
 	if( te )
 	{

@@ -28,6 +28,8 @@ struct ModFeatures
 		SUIT_LIGHT_NVG,
 	};
 
+	typedef char StringBuf[64];
+
 	ModFeatures();
 	bool SetValue(const char* key, const char* value);
 	bool EnableWeapon(const char* name);
@@ -92,8 +94,13 @@ struct ModFeatures
 	bool tentacle_opfor_height;
 
 	// Strings for nvg sounds
-	char nvg_sound_on[64];
-	char nvg_sound_off[64];
+	StringBuf nvg_sound_on;
+	StringBuf nvg_sound_off;
+
+	StringBuf wall_puff1;
+	StringBuf wall_puff2;
+	StringBuf wall_puff3;
+	StringBuf wall_puff4;
 private:
 	bool UpdateBoolean(const char* value, bool& result, const char* key);
 	bool UpdateInteger(const char* value, int& result, const char* key);
