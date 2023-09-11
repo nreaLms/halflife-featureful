@@ -492,6 +492,7 @@ void ReadServerFeatures()
 			}
 		}
 	}
+	g_engfuncs.pfnFreeFile( pMemFile );
 }
 
 cvar_t displaysoundlist = {"displaysoundlist","0"};
@@ -1565,6 +1566,7 @@ void GameDLLInit( void )
 	if (pExecFile)
 	{
 		SERVER_COMMAND((const char*)pExecFile);
+		g_engfuncs.pfnFreeFile( pExecFile );
 	}
 
 	// Register server commands
