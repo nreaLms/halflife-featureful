@@ -37,6 +37,7 @@
 #define SF_BUTTON_CHECK_MASTER_ON_TOGGLE_RETURN 1024 // Check master and play locked and unlocked sounds on toggle return
 
 #define SF_GLOBAL_SET			1	// Set global state to initial state on spawn
+#define SF_GLOBAL_ACT_AS_MASTER 4
 
 class CEnvGlobal : public CPointEntity
 {
@@ -48,7 +49,22 @@ public:
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
-	
+
+	int	ObjectCaps() {
+		int caps = CPointEntity::ObjectCaps();
+		if (FBitSet(pev->spawnflags, SF_GLOBAL_ACT_AS_MASTER))
+			caps |= FCAP_MASTER;
+		return caps;
+	}
+
+	BOOL IsTriggered(CBaseEntity *pActivator) {
+		if (FBitSet(pev->spawnflags, SF_GLOBAL_ACT_AS_MASTER))
+		{
+			return gGlobalState.EntityGetState( m_globalstate ) == GLOBAL_ON;
+		}
+		return CPointEntity::IsTriggered(pActivator);
+	}
+
 	string_t m_globalstate;
 	int m_triggermode;
 	int m_initialstate;

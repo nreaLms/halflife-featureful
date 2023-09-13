@@ -1538,6 +1538,7 @@
 	spawnflags(flags) =
 	[
 		1 : "Set Initial State" : 0
+		4 : "Act as Master" : 0
 	]
 ]
 
