@@ -5829,7 +5829,7 @@ public:
 		{
 			if (IsLikelyNumber(pkvd->szValue))
 			{
-				m_value = atoi( pkvd->szValue );
+				m_value = atof( pkvd->szValue );
 				m_valueIsNumber = 1;
 			}
 			else
@@ -5843,7 +5843,7 @@ public:
 		{
 			if (IsLikelyNumber(pkvd->szValue))
 			{
-				m_compareValue = atoi( pkvd->szValue );
+				m_compareValue = atof( pkvd->szValue );
 				m_compareValueIsNumber = 1;
 			}
 			else
@@ -5857,41 +5857,21 @@ public:
 			CPointEntity::KeyValue( pkvd );
 	}
 
-	int BaseValue(bool& success)
+	float BaseValue(bool& success)
 	{
-		if (m_valueIsNumber)
-		{
-			success = true;
-			return m_value;
-		}
-		else
-		{
-			float result = 0;
-			success = TryCalcLocus_Ratio(NULL, STRING(m_valueSource), result);
-			return result;
-		}
+		return CalcValue(m_value, m_valueSource, m_valueIsNumber, success);
 	}
-	int CompareValue(bool& success)
+	float CompareValue(bool& success)
 	{
-		if (m_compareValueIsNumber)
-		{
-			success = true;
-			return m_compareValue;
-		}
-		else
-		{
-			float result = 0;
-			success = TryCalcLocus_Ratio(NULL, STRING(m_compareValueSource), result);
-			return result;
-		}
+		return CalcValue(m_compareValue, m_compareValueSource, m_compareValueIsNumber, success);
 	}
 
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
 		bool valueSuccess;
-		const int baseValue = BaseValue(valueSuccess);
+		const float baseValue = BaseValue(valueSuccess);
 		bool compareValueSuccess;
-		const int compareValue = CompareValue(compareValueSuccess);
+		const float compareValue = CompareValue(compareValueSuccess);
 
 		if (!valueSuccess || !compareValueSuccess)
 		{
@@ -5921,8 +5901,8 @@ public:
 	string_t m_triggerOnLessThan;
 	string_t m_triggerOnGreaterThan;
 	string_t m_triggerOnFail;
-	int m_value;
-	int m_compareValue;
+	float m_value;
+	float m_compareValue;
 	string_t m_valueSource;
 	string_t m_compareValueSource;
 	byte m_valueIsNumber;
@@ -5931,6 +5911,22 @@ public:
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
+
+private:
+	float CalcValue(float numValue, string_t valueSource, byte valueIsNumber, bool& success)
+	{
+		if (valueIsNumber)
+		{
+			success = true;
+			return numValue;
+		}
+		else
+		{
+			float result = 0;
+			success = TryCalcLocus_Ratio(NULL, STRING(valueSource), result);
+			return result;
+		}
+	}
 };
 
 LINK_ENTITY_TO_CLASS( trigger_compare, CTriggerCompare )
@@ -5940,8 +5936,8 @@ TYPEDESCRIPTION	CTriggerCompare::m_SaveData[] =
 	DEFINE_FIELD( CTriggerCompare, m_triggerOnLessThan, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerCompare, m_triggerOnGreaterThan, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerCompare, m_triggerOnFail, FIELD_STRING ),
-	DEFINE_FIELD( CTriggerCompare, m_value, FIELD_INTEGER ),
-	DEFINE_FIELD( CTriggerCompare, m_compareValue, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerCompare, m_value, FIELD_FLOAT ),
+	DEFINE_FIELD( CTriggerCompare, m_compareValue, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCompare, m_valueSource, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerCompare, m_compareValueSource, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerCompare, m_valueIsNumber, FIELD_CHARACTER ),
