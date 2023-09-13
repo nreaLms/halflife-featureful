@@ -13,10 +13,14 @@
 #include "effects.h"
 #include "decals.h"
 
+bool IsLikelyNumber(const char* szText)
+{
+	return (*szText >= '0' && *szText <= '9') || *szText == '-';
+}
 
 bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result )
 {
-	if ((*szText >= '0' && *szText <= '9') || *szText == '-')
+	if (IsLikelyNumber(szText))
 	{ // it's a vector
 		Vector tmp;
 		UTIL_StringToRandomVector( (float *)tmp, szText );
@@ -37,7 +41,7 @@ bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const cha
 
 bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText , Vector& result)
 {
-	if ((*szText >= '0' && *szText <= '9') || *szText == '-')
+	if (IsLikelyNumber(szText))
 	{ // it's a vector
 		Vector tmp;
 		UTIL_StringToRandomVector( (float *)tmp, szText );
@@ -58,7 +62,7 @@ bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char
 
 bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText , float& result)
 {
-	if ((*szText >= '0' && *szText <= '9') || *szText == '-')
+	if (IsLikelyNumber(szText))
 	{ // assume it's a float
 		result = atof( szText );
 		return true;

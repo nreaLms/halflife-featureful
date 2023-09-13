@@ -5800,10 +5800,9 @@ void CTriggerLook::Touch(CBaseEntity *pOther)
 	}
 }
 
-class CTriggerCompareBase : public CPointEntity
+class CTriggerCompare : public CPointEntity
 {
 public:
-	virtual int MyValue() = 0;
 	void KeyValue(KeyValueData *pkvd)
 	{
 		if( FStrEq( pkvd->szKeyName, "trigger_on_not_equal" ) )
@@ -5821,67 +5820,113 @@ public:
 			m_triggerOnGreaterThan = ALLOC_STRING( pkvd->szValue );
 			pkvd->fHandled = TRUE;
 		}
+		else if( FStrEq( pkvd->szKeyName, "trigger_on_fail" ) )
+		{
+			m_triggerOnFail = ALLOC_STRING( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else if( FStrEq( pkvd->szKeyName, "initial_value" ) )
+		{
+			if (IsLikelyNumber(pkvd->szValue))
+			{
+				m_value = atoi( pkvd->szValue );
+				m_valueIsNumber = 1;
+			}
+			else
+			{
+				m_valueSource = ALLOC_STRING(pkvd->szValue);
+				m_valueIsNumber = 0;
+			}
+			pkvd->fHandled = TRUE;
+		}
 		else if( FStrEq( pkvd->szKeyName, "compare_value" ) )
 		{
-			m_compareValue = atoi( pkvd->szValue );
+			if (IsLikelyNumber(pkvd->szValue))
+			{
+				m_compareValue = atoi( pkvd->szValue );
+				m_compareValueIsNumber = 1;
+			}
+			else
+			{
+				m_compareValueSource = ALLOC_STRING(pkvd->szValue);
+				m_compareValueIsNumber = 0;
+			}
 			pkvd->fHandled = TRUE;
 		}
 		else
 			CPointEntity::KeyValue( pkvd );
 	}
+
+	int BaseValue(bool& success)
+	{
+		if (m_valueIsNumber)
+		{
+			success = true;
+			return m_value;
+		}
+		else
+		{
+			float result = 0;
+			success = TryCalcLocus_Ratio(NULL, STRING(m_valueSource), result);
+			return result;
+		}
+	}
+	int CompareValue(bool& success)
+	{
+		if (m_compareValueIsNumber)
+		{
+			success = true;
+			return m_compareValue;
+		}
+		else
+		{
+			float result = 0;
+			success = TryCalcLocus_Ratio(NULL, STRING(m_compareValueSource), result);
+			return result;
+		}
+	}
+
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
-		const int myValue = MyValue();
-		if (myValue == m_compareValue && pev->target)
+		bool valueSuccess;
+		const int baseValue = BaseValue(valueSuccess);
+		bool compareValueSuccess;
+		const int compareValue = CompareValue(compareValueSuccess);
+
+		if (!valueSuccess || !compareValueSuccess)
+		{
+			if (m_triggerOnFail)
+				FireTargets(STRING(m_triggerOnFail), pActivator, this);
+			return;
+		}
+
+		if (baseValue == compareValue && pev->target)
 		{
 			FireTargets(STRING(pev->target), pActivator, this);
 		}
-		if (myValue != m_compareValue && pev->message)
+		if (baseValue != compareValue && pev->message)
 		{
 			FireTargets(STRING(pev->message), pActivator, this);
 		}
-		if (myValue < m_compareValue && m_triggerOnLessThan)
+		if (baseValue < compareValue && m_triggerOnLessThan)
 		{
 			FireTargets(STRING(m_triggerOnLessThan), pActivator, this);
 		}
-		if (myValue > m_compareValue && m_triggerOnGreaterThan)
+		if (baseValue > compareValue && m_triggerOnGreaterThan)
 		{
 			FireTargets(STRING(m_triggerOnGreaterThan), pActivator, this);
 		}
 	}
 
-	int m_compareValue;
 	string_t m_triggerOnLessThan;
 	string_t m_triggerOnGreaterThan;
-
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
-	static TYPEDESCRIPTION m_SaveData[];
-};
-
-TYPEDESCRIPTION	CTriggerCompareBase::m_SaveData[] =
-{
-	DEFINE_FIELD( CTriggerCompareBase, m_compareValue, FIELD_INTEGER ),
-	DEFINE_FIELD( CTriggerCompareBase, m_triggerOnLessThan, FIELD_STRING ),
-	DEFINE_FIELD( CTriggerCompareBase, m_triggerOnGreaterThan, FIELD_STRING ),
-};
-IMPLEMENT_SAVERESTORE( CTriggerCompareBase, CPointEntity )
-
-class CTriggerCompare : public CTriggerCompareBase
-{
-public:
-	int MyValue() { return m_value; }
-	void KeyValue(KeyValueData *pkvd)
-	{
-		if( FStrEq( pkvd->szKeyName, "initial_value" ) )
-		{
-			m_value = atoi( pkvd->szValue );
-			pkvd->fHandled = TRUE;
-		}
-		else
-			CTriggerCompareBase::KeyValue( pkvd );
-	}
+	string_t m_triggerOnFail;
 	int m_value;
+	int m_compareValue;
+	string_t m_valueSource;
+	string_t m_compareValueSource;
+	byte m_valueIsNumber;
+	byte m_compareValueIsNumber;
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -5892,37 +5937,14 @@ LINK_ENTITY_TO_CLASS( trigger_compare, CTriggerCompare )
 
 TYPEDESCRIPTION	CTriggerCompare::m_SaveData[] =
 {
+	DEFINE_FIELD( CTriggerCompare, m_triggerOnLessThan, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_triggerOnGreaterThan, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_triggerOnFail, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerCompare, m_value, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerCompare, m_compareValue, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerCompare, m_valueSource, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_compareValueSource, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_valueIsNumber, FIELD_CHARACTER ),
+	DEFINE_FIELD( CTriggerCompare, m_compareValueIsNumber, FIELD_CHARACTER ),
 };
-IMPLEMENT_SAVERESTORE( CTriggerCompare, CTriggerCompareBase )
-
-class CTriggerCompareGlobal : public CTriggerCompareBase
-{
-public:
-	int MyValue() {
-		return gGlobalState.GetValue(m_globalstate);
-	}
-	void KeyValue(KeyValueData *pkvd)
-	{
-		if( FStrEq( pkvd->szKeyName, "globalstate" ) )
-		{
-			m_globalstate = ALLOC_STRING( pkvd->szValue );
-			pkvd->fHandled = TRUE;
-		}
-		else
-			CTriggerCompareBase::KeyValue( pkvd );
-	}
-	string_t m_globalstate;
-
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
-	static TYPEDESCRIPTION m_SaveData[];
-};
-
-LINK_ENTITY_TO_CLASS( trigger_compare_global, CTriggerCompareGlobal )
-
-TYPEDESCRIPTION	CTriggerCompareGlobal::m_SaveData[] =
-{
-	DEFINE_FIELD( CTriggerCompareGlobal, m_globalstate, FIELD_STRING ),
-};
-IMPLEMENT_SAVERESTORE( CTriggerCompareGlobal, CTriggerCompareBase )
+IMPLEMENT_SAVERESTORE( CTriggerCompare, CPointEntity )

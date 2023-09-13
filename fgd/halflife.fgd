@@ -7166,23 +7166,15 @@
 	netname(string) : "Command String"
 ]
 
-@BaseClass = TriggerCompareBase
+@PointClass base(Targetname) = trigger_compare : "Examine relationship between two numbers"
 [
+	initial_value(string) : "Base value [LR]" : 0
+	compare_value(string) : "Compare Value [LR]" : 0
 	target(target_destination) : "Trigger On Equal To"
 	trigger_on_not_equal(target_destination) : "Trigger On Not Equal To"
 	trigger_on_less(target_destination) : "Trigger On Less Than"
 	trigger_on_greater(target_destination) : "Trigger On Greater Than"
-	compare_value(integer) : "Compare Value" : 0
-]
-
-@PointClass base(Targetname, TriggerCompareBase) = trigger_compare : "Examine relationship between two numbers"
-[
-	initial_value(integer) : "Initial value" : 0
-]
-
-@PointClass base(Targetname, TriggerCompareBase) = trigger_compare_global : "Examine relationship between global variable value and local number"
-[
-	globalstate(string) : "Global Variable Name"
+	trigger_on_fail(target_destination) : "Trigger On Calc Fail"
 ]
 
 @BaseClass = TriggerConfigureMonsterBase
