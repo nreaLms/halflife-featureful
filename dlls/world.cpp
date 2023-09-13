@@ -313,7 +313,7 @@ void CGlobalState::DumpGlobals( void )
 }
 //#endif
 
-void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state , int value)
+void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state, int value)
 {
 	ASSERT( !Find( globalname ) );
 
@@ -341,6 +341,20 @@ void CGlobalState::IncrementValue(string_t globalname)
 	globalentity_t *pEnt = Find( globalname );
 	if( pEnt )
 		pEnt->value += 1;
+}
+
+void CGlobalState::DecrementValue(string_t globalname)
+{
+	globalentity_t *pEnt = Find( globalname );
+	if( pEnt )
+		pEnt->value -= 1;
+}
+
+void CGlobalState::SetValue(string_t globalname, int value)
+{
+	globalentity_t *pEnt = Find( globalname );
+	if( pEnt )
+		pEnt->value = value;
 }
 
 const globalentity_t *CGlobalState :: EntityFromTable( string_t globalname )

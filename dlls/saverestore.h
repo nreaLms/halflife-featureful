@@ -151,6 +151,8 @@ public:
 	void			EntityAdd( string_t globalname, string_t mapName, GLOBALESTATE state, int value = 0 );
 	void			EntitySetState( string_t globalname, GLOBALESTATE state );
 	void			IncrementValue( string_t globalname );
+	void			DecrementValue( string_t globalname );
+	void			SetValue( string_t globalname, int value );
 	void			EntityUpdate( string_t globalname, string_t mapname );
 	const globalentity_t	*EntityFromTable( string_t globalname );
 	GLOBALESTATE	EntityGetState( string_t globalname );

@@ -52,6 +52,7 @@ public:
 	string_t m_globalstate;
 	int m_triggermode;
 	int m_initialstate;
+	int m_initialvalue;
 };
 
 TYPEDESCRIPTION CEnvGlobal::m_SaveData[] =
@@ -59,6 +60,7 @@ TYPEDESCRIPTION CEnvGlobal::m_SaveData[] =
 	DEFINE_FIELD( CEnvGlobal, m_globalstate, FIELD_STRING ),
 	DEFINE_FIELD( CEnvGlobal, m_triggermode, FIELD_INTEGER ),
 	DEFINE_FIELD( CEnvGlobal, m_initialstate, FIELD_INTEGER ),
+	DEFINE_FIELD( CEnvGlobal, m_initialvalue, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvGlobal, CPointEntity )
@@ -75,6 +77,8 @@ void CEnvGlobal::KeyValue( KeyValueData *pkvd )
 		m_triggermode = atoi( pkvd->szValue );
 	else if( FStrEq( pkvd->szKeyName, "initialstate" ) )
 		m_initialstate = atoi( pkvd->szValue );
+	else if( FStrEq( pkvd->szKeyName, "initialvalue" ) )
+		m_initialvalue = atoi( pkvd->szValue );
 	else
 		CPointEntity::KeyValue( pkvd );
 }
@@ -89,28 +93,39 @@ void CEnvGlobal::Spawn( void )
 	if( FBitSet( pev->spawnflags, SF_GLOBAL_SET ) )
 	{
 		if( !gGlobalState.EntityInTable( m_globalstate ) )
-			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, (GLOBALESTATE)m_initialstate );
+			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, (GLOBALESTATE)m_initialstate, m_initialvalue );
 	}
 }
 
-enum
+typedef enum
 {
 	GLOBAL_TRIGGER_MODE_OFF,
 	GLOBAL_TRIGGER_MODE_ON,
 	GLOBAL_TRIGGER_MODE_DEAD,
 	GLOBAL_TRIGGER_MODE_TOGGLE,
-	GLOBAL_TRIGGER_MODE_INCREMENT_VALUE,
+	GLOBAL_TRIGGER_MODE_MODIFY_VALUE,
 } GLOBAL_TRIGGER_MODE;
 
 void CEnvGlobal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (m_triggermode == GLOBAL_TRIGGER_MODE_INCREMENT_VALUE)
+	if (m_triggermode == GLOBAL_TRIGGER_MODE_MODIFY_VALUE)
 	{
 		if( !gGlobalState.EntityInTable( m_globalstate ) )
 		{
 			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, (GLOBALESTATE)m_initialstate );
 		}
-		gGlobalState.IncrementValue( m_globalstate );
+		if (useType == USE_ON || useType == USE_TOGGLE)
+		{
+			gGlobalState.IncrementValue( m_globalstate );
+		}
+		else if (useType == USE_OFF)
+		{
+			gGlobalState.DecrementValue( m_globalstate );
+		}
+		else if (useType == USE_SET)
+		{
+			gGlobalState.SetValue( m_globalstate, value );
+		}
 	}
 	else
 	{
@@ -141,7 +156,7 @@ void CEnvGlobal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		if( gGlobalState.EntityInTable( m_globalstate ) )
 			gGlobalState.EntitySetState( m_globalstate, newState );
 		else
-			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, newState );
+			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, newState, m_initialvalue );
 	}
 }
 

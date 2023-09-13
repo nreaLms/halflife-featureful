@@ -1521,11 +1521,11 @@
 	globalstate(string) : "Global State to Set"
 	triggermode(choices) : "Trigger Mode" : 0 =
 	[
-		0 : "Off"
-		1 : "On"
-		2 : "Dead"
-		3 : "Toggle"
-		4 : "Increment value"
+		0 : "State Off"
+		1 : "State On"
+		2 : "State Dead"
+		3 : "Toggle State"
+		4 : "Modify/Set value"
 	]
 	initialstate(choices) : "Initial State" : 0 =
 	[
@@ -1533,6 +1533,7 @@
 		1 : "On"
 		2 : "Dead"
 	]
+	initialvalue(integer) : "Initial Value"
 	spawnflags(flags) =
 	[
 		1 : "Set Initial State" : 0
