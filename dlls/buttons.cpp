@@ -104,6 +104,7 @@ typedef enum
 	GLOBAL_TRIGGER_MODE_DEAD,
 	GLOBAL_TRIGGER_MODE_TOGGLE,
 	GLOBAL_TRIGGER_MODE_MODIFY_VALUE,
+	GLOBAL_TRIGGER_MODE_OBEY_USE_TYPE,
 } GLOBAL_TRIGGER_MODE;
 
 void CEnvGlobal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -132,7 +133,24 @@ void CEnvGlobal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		GLOBALESTATE oldState = gGlobalState.EntityGetState( m_globalstate );
 		GLOBALESTATE newState;
 
-		switch( m_triggermode )
+		int triggerMode = m_triggermode;
+		if (triggerMode == GLOBAL_TRIGGER_MODE_OBEY_USE_TYPE)
+		{
+			if (useType == USE_OFF)
+			{
+				triggerMode = GLOBAL_TRIGGER_MODE_OFF;
+			}
+			else if (useType == USE_ON)
+			{
+				triggerMode = GLOBAL_TRIGGER_MODE_ON;
+			}
+			else
+			{
+				triggerMode = GLOBAL_TRIGGER_MODE_TOGGLE;
+			}
+		}
+
+		switch( triggerMode )
 		{
 		case GLOBAL_TRIGGER_MODE_OFF:
 			newState = GLOBAL_OFF;
