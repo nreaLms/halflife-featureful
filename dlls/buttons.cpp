@@ -64,6 +64,15 @@ public:
 		}
 		return CPointEntity::IsTriggered(pActivator);
 	}
+	bool CalcRatio( CBaseEntity *pLocus, float* outResult ) {
+		const globalentity_t *pEnt = gGlobalState.EntityFromTable( m_globalstate );
+		if( pEnt )
+		{
+			*outResult = pEnt->value;
+			return true;
+		}
+		return false;
+	}
 
 	string_t m_globalstate;
 	int m_triggermode;
