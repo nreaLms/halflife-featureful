@@ -1966,7 +1966,7 @@
 	noise1(sound) : "Stop Sound"
 ]
 
-@PointClass base(Targetname) color(128 128 255) = env_state : "Local State"
+@PointClass base(Targetname) color(128 128 255) = env_state : "Local State. Can be used as Master entity"
 [
 	target(target_destination) : "Target (on & off)"
 	noise1(target_destination) : "Fire when turned on"
@@ -1977,6 +1977,40 @@
 	spawnflags(flags) =
 	[
 		1 : "Start On" : 0
+		2 : "Debug Mode" : 0
+	]
+]
+
+@PointClass base(Targetname) color(128 128 255) = calc_state : "Calculate State using logical operators ('On' state is True and 'Off' state if false). Can be used as Master entity"
+[
+	left_operand(string) : "Operand 1 [LE]"
+	right_operand(string) : "Operand 2 [LE]"
+	operation(choices) : "Operation" : 0 =
+	[
+		0: "AND"
+		1 : "OR"
+		2 : "NAND"
+		3 : "NOR"
+		4 : "XOR"
+		5 : "NXOR"
+	]
+	left_fallback(choices) : "Operand 1 fallback" =
+	[
+		0 : "Treat as error"
+		1 : "Treat as Off"
+		2 : "Treat as On"
+	]
+	right_fallback(choices) : "Operand 2 fallback" =
+	[
+		0 : "Treat as error"
+		1 : "Treat as Off"
+		2 : "Treat as On"
+	]
+	target(target_destination) : "Target (on & off)"
+	fire_when_false(target_destination) : "Fire when eval to False"
+	fire_when_true(target_destination) : "Fire when eval to True"
+	spawnflags(flags) =
+	[
 		2 : "Debug Mode" : 0
 	]
 ]

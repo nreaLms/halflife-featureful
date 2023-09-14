@@ -423,6 +423,229 @@ void CEnvState::Think( void )
 	}
 }
 
+class CCalcState : public CPointEntity
+{
+public:
+	enum {
+		STATE_LOGIC_AND = 0,
+		STATE_LOGIC_OR,
+		STATE_LOGIC_NAND,
+		STATE_LOGIC_NOR,
+		STATE_LOGIC_XOR,
+		STATE_LOGIC_NXOR
+	};
+
+	static const char* OperationDisplayName(int operationId)
+	{
+		switch (operationId) {
+		case STATE_LOGIC_AND:
+			return "AND";
+		case STATE_LOGIC_OR:
+			return "OR";
+		case STATE_LOGIC_NAND:
+			return "NAND";
+		case STATE_LOGIC_NOR:
+			return "NOR";
+		case STATE_LOGIC_XOR:
+			return "XOR";
+		case STATE_LOGIC_NXOR:
+			return "NXOR";
+		default:
+			return "Invalid";
+		}
+	}
+
+	enum {
+		STATE_FALLBACK_ERROR,
+		STATE_FALLBACK_OFF,
+		STATE_FALLBACK_ON
+	};
+
+	void KeyValue( KeyValueData *pkvd );
+	BOOL IsTriggered(CBaseEntity *pActivator) { return CalcState(pActivator, false); }
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	int	ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+protected:
+	bool CalcState(CBaseEntity *pActivator, bool isUse);
+	bool DoOperation(bool leftOp, bool rightOp, int operationId);
+
+	string_t m_left;
+	string_t m_right;
+	int m_operation;
+	byte m_leftFallback;
+	byte m_rightFallback;
+	string_t m_fireWhenFalse;
+	string_t m_fireWhenTrue;
+};
+
+TYPEDESCRIPTION CCalcState::m_SaveData[] =
+{
+	DEFINE_FIELD( CCalcState, m_left, FIELD_STRING ),
+	DEFINE_FIELD( CCalcState, m_right, FIELD_STRING ),
+	DEFINE_FIELD( CCalcState, m_operation, FIELD_INTEGER ),
+	DEFINE_FIELD( CCalcState, m_leftFallback, FIELD_CHARACTER ),
+	DEFINE_FIELD( CCalcState, m_rightFallback, FIELD_CHARACTER ),
+	DEFINE_FIELD( CCalcState, m_fireWhenFalse, FIELD_STRING ),
+	DEFINE_FIELD( CCalcState, m_fireWhenTrue, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CCalcState, CPointEntity )
+
+LINK_ENTITY_TO_CLASS( calc_state, CCalcState )
+
+void CCalcState::KeyValue(KeyValueData *pkvd)
+{
+	if(strcmp(pkvd->szKeyName, "operation") == 0)
+	{
+		m_operation = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(strcmp(pkvd->szKeyName, "left_operand") == 0)
+	{
+		m_left = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(strcmp(pkvd->szKeyName, "right_operand") == 0)
+	{
+		m_right = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(strcmp(pkvd->szKeyName, "left_fallback") == 0)
+	{
+		m_leftFallback = (byte)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(strcmp(pkvd->szKeyName, "right_fallback") == 0)
+	{
+		m_rightFallback = (byte)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(strcmp(pkvd->szKeyName, "fire_when_false") == 0)
+	{
+		m_fireWhenFalse = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(strcmp(pkvd->szKeyName, "fire_when_true") == 0)
+	{
+		m_fireWhenTrue = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue(pkvd);
+}
+
+void CCalcState::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	CalcState(pActivator, true);
+}
+
+bool CCalcState::CalcState(CBaseEntity* pActivator, bool isUse)
+{
+	if (FStringNull(m_left) || FStringNull(m_right))
+	{
+		ALERT(at_error, "%s needs both left and right operands defined\n", STRING(pev->classname));
+		return false;
+	}
+
+	CBaseEntity *pLeft = UTIL_FindEntityByTargetname(NULL, STRING(m_left), pActivator);
+	CBaseEntity *pRight = UTIL_FindEntityByTargetname(NULL, STRING(m_right), pActivator);
+
+	bool leftOp, rightOp;
+
+	if (pLeft)
+	{
+		leftOp = pLeft->IsTriggered(pActivator);
+	}
+	else
+	{
+		if (m_leftFallback == STATE_FALLBACK_OFF)
+		{
+			leftOp = false;
+		}
+		else if (m_leftFallback == STATE_FALLBACK_ON)
+		{
+			leftOp = true;
+		}
+		else
+		{
+			ALERT(at_error, "%s: left operand '%s' doesn't exist!\n", STRING(pev->classname), STRING(m_left));
+			return false;
+		}
+	}
+	if (isUse && FBitSet(pev->spawnflags, SF_ENVSTATE_DEBUG))
+	{
+		ALERT(at_console, "%s '%s': left operand ('%s') evaluated to %s\n", STRING(pev->classname), STRING(pev->targetname), STRING(m_left), leftOp ? "true" : "false");
+	}
+
+	if (pRight)
+	{
+		rightOp = pRight->IsTriggered(pActivator);
+	}
+	else
+	{
+		if (m_rightFallback == STATE_FALLBACK_OFF)
+		{
+			rightOp = false;
+		}
+		else if (m_rightFallback == STATE_FALLBACK_ON)
+		{
+			rightOp = true;
+		}
+		else
+		{
+			ALERT(at_error, "%s: right operand '%s' doesn't exist!\n", STRING(pev->classname), STRING(m_right));
+			return false;
+		}
+	}
+	if (isUse && FBitSet(pev->spawnflags, SF_ENVSTATE_DEBUG))
+	{
+		ALERT(at_console, "%s '%s': right operand ('%s') evaluated to %s\n", STRING(pev->classname), STRING(pev->targetname), STRING(m_right), rightOp ? "true" : "false");
+	}
+
+	const bool result = DoOperation(leftOp, rightOp, m_operation);
+
+	if (isUse && FBitSet(pev->spawnflags, SF_ENVSTATE_DEBUG))
+	{
+		ALERT(at_console, "%s '%s': operation %s evaluated to %s\n", STRING(pev->classname), STRING(pev->targetname), OperationDisplayName(m_operation), result ? "true" : "false");
+	}
+
+	if (isUse)
+	{
+		if (pev->target)
+			FireTargets(STRING(pev->target), pActivator, this, result ? USE_ON : USE_OFF);
+		if (m_fireWhenFalse && !result)
+			FireTargets(STRING(m_fireWhenFalse), pActivator, this);
+		if (m_fireWhenTrue && result)
+			FireTargets(STRING(m_fireWhenTrue), pActivator, this);
+	}
+	return result;
+}
+
+bool CCalcState::DoOperation(bool leftOp, bool rightOp, int operationId)
+{
+	switch (operationId) {
+	case STATE_LOGIC_AND:
+		return leftOp && rightOp;
+	case STATE_LOGIC_OR:
+		return leftOp || rightOp;
+	case STATE_LOGIC_NAND:
+		return !(leftOp && rightOp);
+	case STATE_LOGIC_NOR:
+		return !(leftOp || rightOp);
+	case STATE_LOGIC_XOR:
+		return leftOp ^ rightOp;
+	case STATE_LOGIC_NXOR:
+		return !(leftOp ^ rightOp);
+	default:
+		ALERT(at_error, "%s: unknown operation id %d\n", STRING(pev->classname), operationId);
+		return false;
+	}
+}
 
 TYPEDESCRIPTION CMultiSource::m_SaveData[] =
 {
