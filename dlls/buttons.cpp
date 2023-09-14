@@ -138,7 +138,7 @@ void CEnvGlobal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 	{
 		if( !gGlobalState.EntityInTable( m_globalstate ) )
 		{
-			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, (GLOBALESTATE)m_initialstate );
+			gGlobalState.EntityAdd( m_globalstate, gpGlobals->mapname, (GLOBALESTATE)m_initialstate, m_initialvalue );
 		}
 		if (useType == USE_ON || useType == USE_TOGGLE)
 		{
