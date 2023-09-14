@@ -2,7 +2,7 @@
 #ifndef PARSETEXT_H
 #define PARSETEXT_H
 
-#include <cstdlib>
+#include <cstddef>
 
 bool IsValidIdentifierCharacter(char c);
 void SkipSpaceCharacters(const char* text, int& i, const int length);
