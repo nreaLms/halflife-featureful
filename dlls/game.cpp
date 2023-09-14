@@ -190,8 +190,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		{
 			if (strcmp(key, strings[i].name) == 0)
 			{
-				strncpy(strings[i].value, value, sizeof(StringBuf));
-				strings[i].value[sizeof(StringBuf)-1] = '\0';
+				strncpyEnsureTermination(strings[i].value, value, sizeof(StringBuf));
 				return true;
 			}
 		}
@@ -345,8 +344,7 @@ void ModFeatures::EnableMonster(const char *name)
 		return;
 	}
 
-	strncpy(monsters[monstersCount], name, sizeof(monsters[0]));
-	monsters[monstersCount][sizeof(monsters[monstersCount])-1] = '\0';
+	strncpyEnsureTermination(monsters[monstersCount], name, sizeof(monsters[0]));
 	monstersCount++;
 }
 

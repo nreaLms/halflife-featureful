@@ -23,6 +23,7 @@
 #include	"scripted.h"
 #include	"soundent.h"
 #include	"animation.h"
+#include	"parsetext.h"
 
 //=========================================================
 // Talking monster base class
@@ -1683,8 +1684,7 @@ void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, sh
 	{
 		if (!m_szFriends[i].name[0])
 		{
-			strncpy(m_szFriends[i].name, className, sizeof(m_szFriends[i].name));
-			m_szFriends[i].name[sizeof(m_szFriends[i].name)-1] = '\0';
+			strncpyEnsureTermination(m_szFriends[i].name, className, sizeof(m_szFriends[i].name));
 			m_szFriends[i].canFollow = canFollow;
 			m_szFriends[i].category = followerCategory;
 
@@ -1714,8 +1714,7 @@ void CTalkMonster::RegisterMedic(const char* className)
 	{
 		if (!m_szMedics[i][0])
 		{
-			strncpy(m_szMedics[i], className, sizeof(m_szMedics[i]));
-			m_szMedics[i][sizeof(m_szMedics[i])-1] = '\0';
+			strncpyEnsureTermination(m_szMedics[i], className, sizeof(m_szMedics[i]));
 
 			ALERT(at_aiconsole, "Registered %s as medic\n", className);
 			return;

@@ -1,6 +1,7 @@
 #include "mapconfig.h"
 #include "util.h"
 #include "weapons.h"
+#include "parsetext.h"
 
 PickupEnt::PickupEnt(): entName(0), count(0) {}
 
@@ -24,13 +25,6 @@ const char* FixedAmmoName(const char* ammoName)
 	else if (stricmp(ammoName, "Trip_Mine") == 0)
 		return "Trip Mine";
 	return ammoName;
-}
-
-char *strncpyZ(char *dest, const char *src, size_t n)
-{
-	char* result = strncpy(dest, src, n);
-	dest[n-1] = '\0';
-	return result;
 }
 
 bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize)
@@ -85,7 +79,7 @@ bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize)
 				if (count > 0)
 				{
 					ammoName = FixedAmmoName(ammoName);
-					strncpy(mapConfig.ammo[mapConfig.ammoCount].name, ammoName, MAPCONFIG_ENTRY_LENGTH);
+					strncpyEnsureTermination(mapConfig.ammo[mapConfig.ammoCount].name, ammoName, MAPCONFIG_ENTRY_LENGTH);
 					mapConfig.ammo[mapConfig.ammoCount].count = count;
 					mapConfig.ammoCount++;
 				}
@@ -145,8 +139,8 @@ bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize)
 		{
 			if (mapConfig.cvarCount < 32)
 			{
-				strncpyZ(mapConfig.overrideCvars[mapConfig.cvarCount].name, key, MAPCONFIG_ENTRY_LENGTH);
-				strncpyZ(mapConfig.overrideCvars[mapConfig.cvarCount].value, value, MAPCONFIG_ENTRY_LENGTH);
+				strncpyEnsureTermination(mapConfig.overrideCvars[mapConfig.cvarCount].name, key, MAPCONFIG_ENTRY_LENGTH);
+				strncpyEnsureTermination(mapConfig.overrideCvars[mapConfig.cvarCount].value, value, MAPCONFIG_ENTRY_LENGTH);
 				mapConfig.cvarCount++;
 			}
 		}

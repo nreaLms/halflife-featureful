@@ -945,13 +945,11 @@ void CHud::ParseClientFeatures()
 				}
 				else if (strcmp(keyName, "nvg_empty_sprite") == 0)
 				{
-					strncpy(clientFeatures.nvg_empty_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
-					clientFeatures.nvg_empty_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
+					strncpyEnsureTermination(clientFeatures.nvg_empty_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
 				}
 				else if (strcmp(keyName, "nvg_full_sprite") == 0)
 				{
-					strncpy(clientFeatures.nvg_full_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
-					clientFeatures.nvg_full_sprite[MAX_SPRITE_NAME_LENGTH-1] = '\0';
+					strncpyEnsureTermination(clientFeatures.nvg_full_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
 				}
 			}
 		}
