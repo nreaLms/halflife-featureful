@@ -276,13 +276,13 @@ void CGlobalState::Reset( void )
 	m_listCount = 0;
 }
 
-globalentity_t *CGlobalState::Find( string_t globalname )
+globalentity_t *CGlobalState::Find( const char *globalname )
 {
-	if( !globalname )
+	if( !globalname || *globalname == '\0' )
 		return NULL;
 
 	globalentity_t *pTest;
-	const char *pEntityName = STRING( globalname );
+	const char *pEntityName = globalname;
 
 	pTest = m_pList;
 	while( pTest )
@@ -294,6 +294,13 @@ globalentity_t *CGlobalState::Find( string_t globalname )
 	}
 
 	return pTest;
+}
+
+globalentity_t *CGlobalState::Find( string_t globalname )
+{
+	if( !globalname )
+		return NULL;
+	return Find(STRING(globalname));
 }
 
 // This is available all the time now on impulse 104, remove later
@@ -313,7 +320,7 @@ void CGlobalState::DumpGlobals( void )
 }
 //#endif
 
-void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state, int value)
+void CGlobalState::EntityAdd(const char* globalname, string_t mapName, GLOBALESTATE state, int value)
 {
 	ASSERT( !Find( globalname ) );
 
@@ -321,17 +328,28 @@ void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE
 	ASSERT( pNewEntity != NULL );
 	pNewEntity->pNext = m_pList;
 	m_pList = pNewEntity;
-	strcpy( pNewEntity->name, STRING( globalname ) );
+	strcpy( pNewEntity->name, globalname );
 	strcpy( pNewEntity->levelName, STRING( mapName ) );
 	pNewEntity->state = state;
 	pNewEntity->value = value;
 	m_listCount++;
 }
 
+void CGlobalState::EntityAdd(string_t globalname, string_t mapName, GLOBALESTATE state, int value)
+{
+	return EntityAdd(STRING(globalname), mapName, state, value);
+}
+
+void CGlobalState::EntitySetState( const char* globalname, GLOBALESTATE state )
+{
+	globalentity_t *pEnt = Find( globalname );
+	if( pEnt )
+		pEnt->state = state;
+}
+
 void CGlobalState::EntitySetState( string_t globalname, GLOBALESTATE state )
 {
 	globalentity_t *pEnt = Find( globalname );
-
 	if( pEnt )
 		pEnt->state = state;
 }
@@ -350,6 +368,13 @@ void CGlobalState::DecrementValue(string_t globalname)
 		pEnt->value -= 1;
 }
 
+void CGlobalState::SetValue(const char* globalname, int value)
+{
+	globalentity_t *pEnt = Find( globalname );
+	if( pEnt )
+		pEnt->value = value;
+}
+
 void CGlobalState::SetValue(string_t globalname, int value)
 {
 	globalentity_t *pEnt = Find( globalname );
@@ -357,11 +382,14 @@ void CGlobalState::SetValue(string_t globalname, int value)
 		pEnt->value = value;
 }
 
-const globalentity_t *CGlobalState :: EntityFromTable( string_t globalname )
+const globalentity_t *CGlobalState::EntityFromTable( const char* globalname )
 {
-	globalentity_t *pEnt = Find( globalname );
+	return Find( globalname );
+}
 
-	return pEnt;
+const globalentity_t *CGlobalState::EntityFromTable( string_t globalname )
+{
+	return Find( globalname );
 }
 
 GLOBALESTATE CGlobalState::EntityGetState( string_t globalname )

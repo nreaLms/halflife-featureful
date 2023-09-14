@@ -19,6 +19,7 @@
 #include "mod_features.h"
 #include "parsetext.h"
 #include "weapon_ids.h"
+#include "saverestore.h"
 
 BOOL		g_fIsXash3D;
 
@@ -999,6 +1000,91 @@ void Cmd_NumberOfEntities()
 	ALERT(at_console, "%d / %d\n", NUMBER_OF_ENTITIES(), gpGlobals->maxEntities);
 }
 
+static bool CanRunCheatCommand()
+{
+	if (g_enable_cheats && g_enable_cheats->value)
+		return true;
+	ALERT(at_console, "%s is available only when cheats enabled\n", CMD_ARGV(0));
+	return false;
+}
+
+void Cmd_SetGlobalState()
+{
+	if (!CanRunCheatCommand())
+		return;
+	if (CMD_ARGC() < 3)
+	{
+		ALERT(at_console, "Usage: %s <globalname> <off|on|dead>\n", CMD_ARGV(0));
+		return;
+	}
+	const char* globalName = CMD_ARGV(1);
+	if (!globalName || !*globalName)
+	{
+		ALERT(at_console, "globalname must be non-empty string\n");
+		return;
+	}
+	const char* stateStr = CMD_ARGV(2);
+
+	GLOBALESTATE state;
+	if (stricmp(stateStr, "off") == 0)
+	{
+		state = GLOBAL_OFF;
+	}
+	else if (stricmp(stateStr, "on") == 0)
+	{
+		state = GLOBAL_ON;
+	}
+	else if (stricmp(stateStr, "dead") == 0)
+	{
+		state = GLOBAL_DEAD;
+	}
+	else
+	{
+		ALERT(at_console, "Unknown state '%s'. Available states: off, on, dead\n", stateStr);
+		return;
+	}
+
+	const globalentity_t *pGlobal = gGlobalState.EntityFromTable(globalName);
+	if (pGlobal)
+	{
+		gGlobalState.EntitySetState(globalName, state);
+	}
+	else
+	{
+		ALERT(at_console, "Global '%s' was not found. Creating a new one with '%s' state\n", globalName, stateStr);
+		gGlobalState.EntityAdd(globalName, gpGlobals->mapname, state);
+	}
+}
+
+void Cmd_SetGlobalValue()
+{
+	if (!CanRunCheatCommand())
+		return;
+	if (CMD_ARGC() < 3)
+	{
+		ALERT(at_console, "Usage: %s <globalname> <number>\n", CMD_ARGV(0));
+		return;
+	}
+	const char* globalName = CMD_ARGV(1);
+	if (!globalName || !*globalName)
+	{
+		ALERT(at_console, "globalname must be non-empty string\n");
+		return;
+	}
+	const int num = atoi(CMD_ARGV(2));
+
+	const globalentity_t *pGlobal = gGlobalState.EntityFromTable(globalName);
+	if (pGlobal)
+	{
+		gGlobalState.SetValue(globalName, num);
+	}
+	else
+	{
+		ALERT(at_console, "Global '%s' was not found. Creating a new one with 'off' state and value %d\n", globalName, num);
+		gGlobalState.EntityAdd(globalName, gpGlobals->mapname, GLOBAL_OFF, num);
+	}
+}
+
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
 	char valueStr[12];
@@ -1586,6 +1672,8 @@ void GameDLLInit( void )
 	// Register server commands
 	g_engfuncs.pfnAddServerCommand("report_ai_state", Cmd_ReportAIState);
 	g_engfuncs.pfnAddServerCommand("entities_count", Cmd_NumberOfEntities);
+	g_engfuncs.pfnAddServerCommand("set_global_state", Cmd_SetGlobalState);
+	g_engfuncs.pfnAddServerCommand("set_global_value", Cmd_SetGlobalValue);
 }
 
 bool ItemsPickableByTouch()
