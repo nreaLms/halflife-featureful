@@ -7684,6 +7684,8 @@
 	]
 	triggerstate(choices) : "Trigger State" : 2 =
 	[
+		-2: "Reverse Input"
+		-1: "Copy Input"
 		0: "Off"
 		1: "On"
 		2: "Toggle"

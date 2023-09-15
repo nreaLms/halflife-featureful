@@ -213,8 +213,11 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
+protected:
+	USE_TYPE MyTriggerType(USE_TYPE useType);
+
 private:
-	USE_TYPE triggerType;
+	int triggerType;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_relay, CTriggerRelay )
@@ -230,19 +233,7 @@ void CTriggerRelay::KeyValue( KeyValueData *pkvd )
 {
 	if( FStrEq( pkvd->szKeyName, "triggerstate" ) )
 	{
-		int type = atoi( pkvd->szValue );
-		switch( type )
-		{
-		case 0:
-			triggerType = USE_OFF;
-			break;
-		case 2:
-			triggerType = USE_TOGGLE;
-			break;
-		default:
-			triggerType = USE_ON;
-			break;
-		}
+		triggerType = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -255,9 +246,32 @@ void CTriggerRelay::Spawn( void )
 
 void CTriggerRelay::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	SUB_UseTargets( FBitSet(pev->spawnflags, SF_RELAY_FORWARDACTIVATOR) ? pActivator : this, triggerType );
+	SUB_UseTargets( FBitSet(pev->spawnflags, SF_RELAY_FORWARDACTIVATOR) ? pActivator : this, MyTriggerType(useType) );
 	if( pev->spawnflags & SF_RELAY_FIREONCE )
 		UTIL_Remove( this );
+}
+
+USE_TYPE CTriggerRelay::MyTriggerType(USE_TYPE useType)
+{
+	switch( triggerType )
+	{
+	case -2:
+	{
+		if (useType == USE_OFF)
+			return USE_ON;
+		else if (useType == USE_ON)
+			return USE_OFF;
+		return useType;
+	}
+	case -1:
+		return useType;
+	case 0:
+		return USE_OFF;
+	case 2:
+		return USE_TOGGLE;
+	default:
+		return USE_ON;
+	}
 }
 
 //**********************************************************
