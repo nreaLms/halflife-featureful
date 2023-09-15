@@ -378,6 +378,15 @@ public:
 
 	Schedule_t* StartPatrol( CBaseEntity* path );
 	CBaseEntity* DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+
+	bool CalcRatio(CBaseEntity* pLocus, float* outResult)
+	{
+		if (IsFullyAlive())
+			*outResult = pev->health / pev->max_health;
+		else
+			*outResult = 0;
+		return true;
+	}
 	
 	void SetMyHealth( const float health );
 	void SetMyModel( const char* model );
