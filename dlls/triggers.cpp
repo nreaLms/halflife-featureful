@@ -5814,6 +5814,77 @@ void CTriggerLook::Touch(CBaseEntity *pOther)
 	}
 }
 
+class CTriggerCheckState : public CPointEntity
+{
+public:
+	void KeyValue(KeyValueData *pkvd)
+	{
+		if(FStrEq(pkvd->szKeyName, "entity"))
+		{
+			m_entity = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if(FStrEq(pkvd->szKeyName, "fire_if_off"))
+		{
+			m_fireIfOff = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if(FStrEq(pkvd->szKeyName, "fire_if_on"))
+		{
+			m_fireIfOn = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if(FStrEq(pkvd->szKeyName, "fire_if_absent"))
+		{
+			m_fireIfAbsent = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+	{
+		if (FStringNull(m_entity))
+			return;
+		CBaseEntity* pEntity = UTIL_FindEntityByTargetname(NULL, STRING(m_entity), this);
+		if (pEntity)
+		{
+			const bool state = pEntity->IsTriggered(pActivator);
+			if (pev->target)
+				FireTargets(STRING(pev->target), pActivator, this, state ? USE_ON : USE_OFF);
+			if (m_fireIfOff && !state)
+				FireTargets(STRING(m_fireIfOff), pActivator, this);
+			if (m_fireIfOn && state)
+				FireTargets(STRING(m_fireIfOn), pActivator, this);
+		}
+		else
+		{
+			if (m_fireIfAbsent)
+				FireTargets(STRING(m_fireIfAbsent), pActivator, this);
+		}
+	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+protected:
+	string_t m_entity;
+	string_t m_fireIfOff;
+	string_t m_fireIfOn;
+	string_t m_fireIfAbsent;
+};
+
+TYPEDESCRIPTION CTriggerCheckState::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerCheckState, m_entity, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCheckState, m_fireIfOff, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCheckState, m_fireIfOn, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCheckState, m_fireIfAbsent, FIELD_STRING ),
+};
+IMPLEMENT_SAVERESTORE( CTriggerCheckState, CPointEntity )
+
+LINK_ENTITY_TO_CLASS( trigger_check_state, CTriggerCheckState )
+
 class CTriggerCompare : public CPointEntity
 {
 public:

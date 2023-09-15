@@ -7215,6 +7215,15 @@
 	message(target_destination) : "Trigger after operation" : : "Trigger entities after the value was set. This can call another trigger_changevalue without any delay so it's useful for chained operations."
 ]
 
+@PointClass base(Targetname) = trigger_check_state : "Check entity's state"
+[
+	entity(string) : "Entity to check"
+	target(target_destination) : "Target (on & off)"
+	fire_if_off(target_destination) : "Fire if off"
+	fire_if_on(target_destination) : "Fire if on"
+	fire_if_absent(target_destination) : "Fire if absent"
+]
+
 @PointClass base(Targetname) = trigger_command : "Console Command"
 [
 	netname(string) : "Command String"
