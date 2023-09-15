@@ -20,6 +20,7 @@
 #include "parsetext.h"
 #include "weapon_ids.h"
 #include "saverestore.h"
+#include "locus.h"
 
 BOOL		g_fIsXash3D;
 
@@ -1083,6 +1084,39 @@ void Cmd_SetGlobalValue()
 	}
 }
 
+void Cmd_CalcRatio()
+{
+	if (CMD_ARGC() < 2)
+	{
+		ALERT(at_console, "Usage: %s <targetname>\n", CMD_ARGV(0));
+		return;
+	}
+	const char* target = CMD_ARGV(1);
+	float r;
+	if (TryCalcLocus_Ratio(NULL, target, r))
+		ALERT(at_console, "%s calc_ratio is %g\n", target, r);
+}
+
+void Cmd_CalcState()
+{
+	if (CMD_ARGC() < 2)
+	{
+		ALERT(at_console, "Usage: %s <targetname>\n", CMD_ARGV(0));
+		return;
+	}
+	const char* target = CMD_ARGV(1);
+	CBaseEntity* pEntity = UTIL_FindEntityByTargetname(NULL, target);
+	if (pEntity)
+	{
+		const bool state = pEntity->IsTriggered(NULL);
+		ALERT(at_console, "%s state is %s\n", target, state ? "On" : "Off");
+	}
+	else
+	{
+		ALERT(at_console, "Couldn't find %s\n", target);
+	}
+}
+
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
 	char valueStr[12];
@@ -1672,6 +1706,8 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("entities_count", Cmd_NumberOfEntities);
 	g_engfuncs.pfnAddServerCommand("set_global_state", Cmd_SetGlobalState);
 	g_engfuncs.pfnAddServerCommand("set_global_value", Cmd_SetGlobalValue);
+	g_engfuncs.pfnAddServerCommand("calc_ratio", Cmd_CalcRatio);
+	g_engfuncs.pfnAddServerCommand("calc_state", Cmd_CalcState);
 }
 
 bool ItemsPickableByTouch()
