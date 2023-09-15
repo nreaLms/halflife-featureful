@@ -1204,3 +1204,33 @@ void CGameAutosave::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 }
 
 LINK_ENTITY_TO_CLASS( game_autosave, CGameAutosave )
+
+class CGameNumber : public CPointEntity
+{
+public:
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	bool CalcRatio( CBaseEntity *pLocus, float* outResult )
+	{
+		*outResult = pev->frags;
+		return true;
+	}
+};
+
+void CGameNumber::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	switch( useType )
+	{
+	case USE_ON:
+	case USE_TOGGLE:
+		pev->frags++;
+		break;
+	case USE_OFF:
+		pev->frags--;
+		break;
+	case USE_SET:
+		pev->frags = value;
+		break;
+	}
+}
+
+LINK_ENTITY_TO_CLASS( game_number, CGameNumber )

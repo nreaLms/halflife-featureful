@@ -1200,6 +1200,21 @@
 
 // calc entities
 
+@PointClass base(Targetname) color(170 221 85) size(-12 -12 -12, 12 12 12) = calc_eval_number : "Calculate number"
+[
+	left_operand(string) : "Left Operand [LR]"
+	right_operand(string) : "Right Operand [LR]"
+	operation(choices) : "Operation" : 0 =
+	[
+		0 : "Add"
+		1 : "Substruct"
+		2 : "Multiply"
+		3 : "Divide"
+	]
+	store_result(target_destination) : "Store result in"
+	target(target_destination) : "Trigger after operation"
+]
+
 @PointClass color(128 200 64) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_position : "Calculate position"
 [
 	netname(target_destination) : "Entity to use [LE]" : "*locus"
@@ -2835,6 +2850,11 @@
 		4 : "Channel 4"
 	]
 	master(string) : "Master"
+]
+
+@PointClass base(Targetname) = game_number : "Holds a floating point variable. Use it with calc_eval_number and trigger_compare"
+[
+	frags(string) : "Initial Value" : 0
 ]
 
 @SolidClass base(Targetname) = game_zone_player : "Player Zone brush"
