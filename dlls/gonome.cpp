@@ -338,14 +338,16 @@ int	CGonome::DefaultClassify(void)
 //=========================================================
 int CGonome::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
-	// Take 15% damage from bullets
 	if( bitsDamageType == DMG_BULLET )
 	{
 		Vector vecDir = pev->origin - (pevInflictor->absmin + pevInflictor->absmax) * 0.5;
 		vecDir = vecDir.Normalize();
 		float flForce = DamageForce( flDamage );
 		pev->velocity = pev->velocity + vecDir * flForce;
+#if 0
+		// Take 15% damage from bullets
 		flDamage *= 0.15;
+#endif
 	}
 
 	// HACK HACK -- until we fix this.

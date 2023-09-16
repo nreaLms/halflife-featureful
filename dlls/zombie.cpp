@@ -139,14 +139,16 @@ void CZombie::SetYawSpeed( void )
 
 int CZombie::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	// Take 30% damage from bullets
 	if( bitsDamageType == DMG_BULLET )
 	{
 		Vector vecDir = pev->origin - ( pevInflictor->absmin + pevInflictor->absmax ) * 0.5f;
 		vecDir = vecDir.Normalize();
 		float flForce = DamageForce( flDamage );
 		pev->velocity = pev->velocity + vecDir * flForce;
+#if 0
+		// Take 30% damage from bullets
 		flDamage *= 0.3f;
+#endif
 	}
 
 	// HACK HACK -- until we fix this.
