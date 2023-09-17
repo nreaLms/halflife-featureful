@@ -4686,13 +4686,6 @@ void CBasePlayer::UpdateClientData( void )
 			}
 		}
 
-		MESSAGE_BEGIN( MSG_ONE, gmsgWallPuffs, NULL, pev );
-			WRITE_SHORT(CWorld::wallPuffsIndices[0]);
-			WRITE_SHORT(CWorld::wallPuffsIndices[1]);
-			WRITE_SHORT(CWorld::wallPuffsIndices[2]);
-			WRITE_SHORT(CWorld::wallPuffsIndices[3]);
-		MESSAGE_END();
-
 		if( g_pGameRules->IsMultiplayer() )
 			FireTargets( "game_playerspawn", this, this );
 
@@ -4934,6 +4927,17 @@ void CBasePlayer::UpdateClientData( void )
 		MESSAGE_BEGIN(MSG_ONE, SVC_ROOMTYPE, NULL, edict());
 		WRITE_SHORT((short)m_SndRoomtype); // sequence number
 		MESSAGE_END();
+	}
+
+	if (!m_bSentSpriteIndices)
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgWallPuffs, NULL, pev );
+			WRITE_SHORT(CWorld::wallPuffsIndices[0]);
+			WRITE_SHORT(CWorld::wallPuffsIndices[1]);
+			WRITE_SHORT(CWorld::wallPuffsIndices[2]);
+			WRITE_SHORT(CWorld::wallPuffsIndices[3]);
+		MESSAGE_END();
+		m_bSentSpriteIndices = true;
 	}
 
 	if ( !m_bSentMessages && g_PlayerFullyInitialized[ENTINDEX(edict())-1] )

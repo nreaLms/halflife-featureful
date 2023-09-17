@@ -435,6 +435,7 @@ public:
 #endif
 
 	bool m_bSentMessages;
+	bool m_bSentSpriteIndices;
 
 #if FEATURE_ROPE
 	bool m_bIsClimbing;
