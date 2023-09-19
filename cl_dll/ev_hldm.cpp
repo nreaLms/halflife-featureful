@@ -300,24 +300,16 @@ void EV_HugWalls(TEMPENTITY *te, pmtrace_s *ptr)
 	Vector norm = te->entity.baseline.origin.Normalize();
 	float len = te->entity.baseline.origin.Length();
 
-	Vector v(
-		ptr->plane.normal.y * norm.x - norm.y * ptr->plane.normal.x,
-		ptr->plane.normal.x * norm.z - norm.x * ptr->plane.normal.z,
-		ptr->plane.normal.z * norm.y - norm.z * ptr->plane.normal.y
-	);
-	Vector v2(
-		ptr->plane.normal.y * v.z - v.y * ptr->plane.normal.x,
-		ptr->plane.normal.x * v.x - v.z * ptr->plane.normal.z,
-		ptr->plane.normal.z * v.y - v.x * ptr->plane.normal.y
-	);
+	/*const Vector innerNormal = ptr->plane.normal;
+	Vector v = CrossProduct(norm, innerNormal);
+	Vector projection = CrossProduct(innerNormal, v);*/
+	Vector projection = CrossProduct( CrossProduct(norm, ptr->plane.normal), ptr->plane.normal);
 
-	if( len <= 2000.0f )
+	/*if( len <= 2000.0f )
 		len *= 1.5;
-	else len = 3000.0f;
+	else len = 3000.0f;*/
 
-	te->entity.baseline.origin.x = v2.z * len * 1.5;
-	te->entity.baseline.origin.y = v2.y * len * 1.5;
-	te->entity.baseline.origin.z = v2.x * len * 1.5;
+	te->entity.baseline.origin = projection * len;
 }
 
 void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float scale, int r, int g, int b , bool wind, Vector velocity = Vector(0,0,0), int framerate = 35 )
@@ -355,15 +347,15 @@ void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float sc
 		te->entity.curstate.rendercolor.r = r;
 		te->entity.curstate.rendercolor.g = g;
 		te->entity.curstate.rendercolor.b = b;
-		te->entity.curstate.renderamt = gEngfuncs.pfnRandomLong( 100, 180 );
+		te->entity.curstate.renderamt = gEngfuncs.pfnRandomLong( 120, 180 );
 		te->entity.curstate.scale = scale;
 		te->entity.baseline.origin = speed * dir;
 
 		if( velocity != Vector(0,0,0) )
 		{
-			velocity.x *= 0.5;
-			velocity.y *= 0.5;
-			velocity.z *= 0.9;
+			velocity.x *= 0.9;
+			velocity.y *= 0.9;
+			velocity.z *= 0.5;
 			te->entity.baseline.origin = te->entity.baseline.origin + velocity;
 		}
 	}
@@ -395,7 +387,7 @@ void EV_HLDM_DecalGunshot( pmtrace_t *pTrace, int iBulletType, char cTextureType
 		{
 			int r_smoke, g_smoke, b_smoke;
 			EV_SmokeColorFromTextureType(cTextureType, r_smoke, g_smoke, b_smoke);
-			EV_CreateShotSmoke( SMOKE_WALLPUFF, pTrace->endpos, pTrace->plane.normal, 25, 0.5f, r_smoke, g_smoke, b_smoke, true );
+			EV_CreateShotSmoke( SMOKE_WALLPUFF, pTrace->endpos + pTrace->plane.normal * 5, pTrace->plane.normal, 25, 0.5f, r_smoke, g_smoke, b_smoke, true );
 		}
 	}
 }
