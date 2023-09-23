@@ -48,6 +48,8 @@ typedef enum
 #define SF_BREAK_OP4MORTAR_ONLY	1024 // can be damaged only by op4mortar rockets
 #define SF_BREAK_NOT_SOLID_OLD 2048 // TODO: outdated, remove
 #define SF_BREAK_NOT_SOLID 4096 // breakable is not solid
+#define SF_BREAK_SMOKE_TRAILS 8192
+#define SF_BREAK_TRANSPARENT_GIBS 16384
 
 // func_pushable (it's also func_breakable, so don't collide with those flags)
 #define SF_PUSH_BREAKABLE		128

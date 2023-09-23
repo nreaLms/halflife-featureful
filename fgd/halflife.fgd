@@ -2146,7 +2146,16 @@
 	m_vEndSpriteColor(color255) : "Sprite2 Color" : "159 240 214"
 ]
 
-@SolidClass base(Breakable, RenderFields, ZHLT) = func_breakable : "Breakable Object" 
+@BaseClass = BreakableSpawnFlags
+[
+	spawnflags(Flags) =
+	[
+		8192: "Smoke trails on gibs" : 0
+		16384 : "Transparent gibs" : 0
+	]
+]
+
+@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, ZHLT) = func_breakable : "Breakable Object"
 [
 	spawnflags(flags) =
 	[
@@ -2164,7 +2173,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname) = func_breakable_effect : "Effect similar to func_breakable destruction, but without visible object"
+@SolidClass base(Targetname, BreakableSpawnFlags) = func_breakable_effect : "Effect similar to func_breakable destruction, but without visible object"
 [
 	material(choices) :"Material type" : 0 =
 	[
@@ -2402,7 +2411,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Breakable, RenderFields, ZHLT) = func_pushable : "Pushable object"
+@SolidClass base(Breakable, BreakableSpawnFlags, RenderFields, ZHLT) = func_pushable : "Pushable object"
 [
 	size(choices) : "Hull Size" : 0 =
 	[

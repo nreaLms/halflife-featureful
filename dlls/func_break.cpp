@@ -734,6 +734,16 @@ static char PlayBreakableBustSound( entvars_t* pev, Materials material, float fv
 	return 0;
 }
 
+static char ExtraBreakableFlags(int spawnflags)
+{
+	char cFlag = 0;
+	if (FBitSet(spawnflags, SF_BREAK_SMOKE_TRAILS))
+		cFlag |= BREAK_SMOKE;
+	if (FBitSet(spawnflags, SF_BREAK_TRANSPARENT_GIBS))
+		cFlag |= BREAK_TRANS;
+	return cFlag;
+}
+
 void CBreakable::BreakModel(const Vector& vecSpot, const Vector& size, const Vector& vecVelocity, int shardModelIndex, int iGibs, char cFlag)
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
@@ -798,6 +808,7 @@ void CBreakable::DieToActivator( CBaseEntity* pActivator )
 		fvol = 1.0f;
 
 	cFlag = PlayBreakableBustSound(pev, m_Material, fvol, pitch);
+	cFlag |= ExtraBreakableFlags(pev->spawnflags);
 
 	if( m_Explosion == expDirected )
 		vecVelocity = -g_vecAttackDir * 100.0f;
@@ -1156,7 +1167,7 @@ int CPushable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 	return 1;
 }
 
-#define ENV_BREAKABLE_REPEATABLE 1
+#define FUNC_BREAKABLE_REPEATABLE 1
 
 class CFuncBreakableEffect : public CBaseEntity
 {
@@ -1256,6 +1267,7 @@ void CFuncBreakableEffect::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		fvol = 1.0f;
 
 	char cFlag = PlayBreakableBustSound(pev, m_Material, fvol, pitch);
+	cFlag |= ExtraBreakableFlags(pev->spawnflags);
 
 	Vector vecSpot = pev->origin + ( pev->mins + pev->maxs ) * 0.5f;
 
@@ -1264,6 +1276,6 @@ void CFuncBreakableEffect::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		CBreakable::BreakModel(vecSpot, pev->size, g_vecZero, m_idShard, m_iGibs, cFlag);
 	}
 
-	if (!FBitSet(pev->spawnflags, ENV_BREAKABLE_REPEATABLE))
+	if (!FBitSet(pev->spawnflags, FUNC_BREAKABLE_REPEATABLE))
 		UTIL_Remove(this);
 }
