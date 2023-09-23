@@ -90,6 +90,15 @@ int GetTextureMaterialProperties(char chTextureType, float* fvol, float* fvolbar
 		*fattn = 1.0f;
 		*cnt = 2;
 		break;
+	case CHAR_TEX_SNOW:
+	case CHAR_TEX_SNOW_OPFOR:
+		*fvol = 0.9;
+		*fvolbar = 0.1;
+		rgsz[0] = "player/pl_snow1.wav";
+		rgsz[1] = "player/pl_snow2.wav";
+		rgsz[2] = "player/pl_snow3.wav";
+		*cnt = 3;
+		break;
 	}
 	return 1;
 }

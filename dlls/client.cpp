@@ -880,6 +880,8 @@ void StartFrame( void )
 	g_ulFrameCount++;
 }
 
+extern "C" int PM_IsThereSnowTexture();
+
 void ClientPrecache( void )
 {
 	// setup precaches always needed
@@ -945,6 +947,14 @@ void ClientPrecache( void )
 	PRECACHE_SOUND( "player/pl_wade2.wav" );
 	PRECACHE_SOUND( "player/pl_wade3.wav" );
 	PRECACHE_SOUND( "player/pl_wade4.wav" );
+
+	if (PM_IsThereSnowTexture())
+	{
+		PRECACHE_SOUND( "player/pl_snow1.wav" );
+		PRECACHE_SOUND( "player/pl_snow2.wav" );
+		PRECACHE_SOUND( "player/pl_snow3.wav" );
+		PRECACHE_SOUND( "player/pl_snow4.wav" );
+	}
 
 	PRECACHE_SOUND( "debris/wood1.wav" );			// hit wood texture
 	PRECACHE_SOUND( "debris/wood2.wav" );

@@ -75,6 +75,7 @@ playermove_t *pmove = NULL;
 #define STEP_SLOSH		6		// shallow liquid puddle
 #define STEP_WADE		7		// wading in liquid
 #define STEP_LADDER		8		// climbing ladder
+#define STEP_SNOW		9
 
 #define PLAYER_FATAL_FALL_SPEED		1024// approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED	580// approx 20 feet
@@ -148,6 +149,17 @@ void PM_SwapTextures( int i, int j )
 
 	strcpy( grgszTextureName[j], szTemp );
 	grgchTextureType[j] = chTemp;
+}
+
+int PM_IsThereSnowTexture()
+{
+	int i;
+	for (i = 0; i < gcTextures; ++i)
+	{
+		if (grgchTextureType[i] == CHAR_TEX_SNOW || grgchTextureType[i] == CHAR_TEX_SNOW_OPFOR)
+			return 1;
+	}
+	return 0;
 }
 
 void PM_SortTextures( void )
@@ -492,6 +504,25 @@ void PM_PlayStepSound( int step, float fvol )
 			break;
 		}
 		break;
+	case STEP_SNOW:
+		switch (irand)
+		{
+		// right foot
+		case 0:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_snow1.wav", fvol, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		case 1:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_snow3.wav", fvol, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		// left foot
+		case 2:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_snow2.wav", fvol, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		case 3:
+			pmove->PM_PlaySound(CHAN_BODY, "player/pl_snow4.wav", fvol, ATTN_NORM, 0, PITCH_NORM);
+			break;
+		}
+		break;
 	}
 }	
 
@@ -514,6 +545,9 @@ int PM_MapTextureTypeStepType( char chTextureType )
 			return STEP_TILE;
 		case CHAR_TEX_SLOSH:
 			return STEP_SLOSH;
+		case CHAR_TEX_SNOW:
+		case CHAR_TEX_SNOW_OPFOR:
+			return STEP_SNOW;
 	}
 }
 
