@@ -40,6 +40,18 @@ typedef enum
 
 #define	NUM_SHARDS 6 // this many shards spawned when breakable objects break;
 
+#define SF_BREAK_TRIGGER_ONLY	1// may only be broken by trigger
+#define	SF_BREAK_TOUCH			2// can be 'crashed through' by running player (plate glass)
+#define SF_BREAK_PRESSURE		4// can be broken by a player standing on it
+#define SF_BREAK_CROWBAR		256// instant break if hit with crowbar
+#define SF_BREAK_EXPLOSIVES_ONLY		512// can be damaged only by DMG_BLAST
+#define SF_BREAK_OP4MORTAR_ONLY	1024 // can be damaged only by op4mortar rockets
+#define SF_BREAK_NOT_SOLID_OLD 2048 // TODO: outdated, remove
+#define SF_BREAK_NOT_SOLID 4096 // breakable is not solid
+
+// func_pushable (it's also func_breakable, so don't collide with those flags)
+#define SF_PUSH_BREAKABLE		128
+
 class CBreakable : public CBaseDelay
 {
 public:
