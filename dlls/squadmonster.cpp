@@ -525,10 +525,11 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 		return FALSE;
 	}
 
-	const Vector enemyCenter = m_hEnemy->Center();
+	CBaseEntity* pEnemy = m_hEnemy;
+	const Vector enemyCenter = pEnemy->Center();
 	const Vector gunPos = GetGunPosition();
 	const Vector posVecs[3] = {gunPos, gunPos + gpGlobals->v_right * pev->size.x * 1, gpGlobals->v_right * pev->size.x * (-1)};
-	const Vector enemyVec[3] = {enemyCenter, enemyCenter + gpGlobals->v_right * m_hEnemy->pev->size.x * 0.5, enemyCenter + gpGlobals->v_right * m_hEnemy->pev->size.x * -0.5};
+	const Vector enemyVec[3] = {enemyCenter, enemyCenter + gpGlobals->v_right * pEnemy->pev->size.x * 0.5, enemyCenter + gpGlobals->v_right * pEnemy->pev->size.x * -0.5};
 	for (int j=0; j<3; ++j)
 	{
 		TraceResult tr;
@@ -571,12 +572,13 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 	leftPlane.InitializePlane( gpGlobals->v_right, vecLeftSide );
 	rightPlane.InitializePlane( v_left, vecRightSide );
 	backPlane.InitializePlane( gpGlobals->v_forward, pev->origin );
-	frontPlane.InitializePlane( gpGlobals->v_forward * -1, enemyCenter + gpGlobals->v_forward * m_hEnemy->pev->size.Length2D() );
+	frontPlane.InitializePlane( gpGlobals->v_forward * -1, enemyCenter + gpGlobals->v_forward * pEnemy->pev->size.Length2D() / 2 );
 /*
 	ALERT( at_console, "LeftPlane: %f %f %f : %f\n", leftPlane.m_vecNormal.x, leftPlane.m_vecNormal.y, leftPlane.m_vecNormal.z, leftPlane.m_flDist );
 	ALERT( at_console, "RightPlane: %f %f %f : %f\n", rightPlane.m_vecNormal.x, rightPlane.m_vecNormal.y, rightPlane.m_vecNormal.z, rightPlane.m_flDist );
 	ALERT( at_console, "BackPlane: %f %f %f : %f\n", backPlane.m_vecNormal.x, backPlane.m_vecNormal.y, backPlane.m_vecNormal.z, backPlane.m_flDist );
 */
+	const bool enemyIsAlive = pEnemy->IsFullyAlive();
 	if (inSquad)
 	{
 		CSquadMonster *pSquadLeader = MySquadLeader();
@@ -587,11 +589,13 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 			{
 				if( backPlane.PointInFront( pMember->pev->origin ) &&
 					leftPlane.PointInFront( pMember->pev->origin ) &&
-					rightPlane.PointInFront( pMember->pev->origin ) &&
-					frontPlane.PointInFront( pMember->pev->origin ) )
+					rightPlane.PointInFront( pMember->pev->origin ) )
 				{
 					// this guy is in the check volume! Don't shoot!
-					return FALSE;
+					if (frontPlane.PointInFront( pMember->pev->origin ))
+						return FALSE;
+					else if (!enemyIsAlive) // don't shoot when ally is behind the dying enemy
+						return FALSE;
 				}
 			}
 		}
@@ -603,12 +607,14 @@ BOOL CSquadMonster::NoFriendlyFire( void )
 		{
 			if( backPlane.PointInFront( pPlayer->pev->origin ) &&
 				leftPlane.PointInFront( pPlayer->pev->origin ) &&
-				rightPlane.PointInFront( pPlayer->pev->origin ) &&
-				frontPlane.PointInFront( pPlayer->pev->origin ) )
+				rightPlane.PointInFront( pPlayer->pev->origin ) )
 			{
 				//ALERT(at_aiconsole, "%s: Ally player at fire plane!\n", STRING(pev->classname));
 				// player is in the check volume! Don't shoot!
-				return FALSE;
+				if (frontPlane.PointInFront( pPlayer->pev->origin ))
+					return FALSE;
+				else if (!enemyIsAlive) // don't shoot when ally is behind the dying enemy
+					return FALSE;
 			}
 		}
 	}
