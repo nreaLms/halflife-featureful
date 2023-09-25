@@ -1527,7 +1527,8 @@
 		64: "No Sound" : 0
 		128: "Activator is attacker" : 0
 	]
-	model(sprite) : "Fireball Sprite"
+	model(sprite) : "Custom Fireball Sprite"
+	smokesprite(sprite) : "Custom Smoke Sprite"
 	scale(string) : "Custom sprite scale"
 ]
 

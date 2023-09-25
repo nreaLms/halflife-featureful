@@ -98,8 +98,10 @@ public:
 	int m_iMagnitude;// how large is the fireball? how much damage?
 	int m_spriteScale; // what's the exact fireball sprite scale? 
 	int m_iRadius;
+	string_t m_smokeSprite;
 
 	int m_iFireball;
+	int m_iSmoke;
 };
 
 TYPEDESCRIPTION	CEnvExplosion::m_SaveData[] =
@@ -124,6 +126,11 @@ void CEnvExplosion::KeyValue( KeyValueData *pkvd )
 		m_iRadius = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq(pkvd->szKeyName, "smokesprite") )
+	{
+		m_smokeSprite = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -132,6 +139,8 @@ void CEnvExplosion::Precache()
 {
 	if (!FStringNull(pev->model))
 		m_iFireball = PRECACHE_MODEL(STRING(pev->model));
+	if (!FStringNull(m_smokeSprite))
+		m_iSmoke = PRECACHE_MODEL(STRING(m_smokeSprite));
 }
 
 void CEnvExplosion::Spawn( void )
@@ -290,7 +299,7 @@ void CEnvExplosion::Smoke( void )
 			WRITE_COORD( pev->origin.x );
 			WRITE_COORD( pev->origin.y );
 			WRITE_COORD( pev->origin.z );
-			WRITE_SHORT( g_sModelIndexSmoke );
+			WRITE_SHORT( m_iSmoke ? m_iSmoke : g_sModelIndexSmoke );
 			WRITE_BYTE( (BYTE)m_spriteScale ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate
 		MESSAGE_END();
