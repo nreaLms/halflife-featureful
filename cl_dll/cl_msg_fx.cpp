@@ -284,7 +284,10 @@ void FX_Sprite_Trail( Vector start, Vector end, int modelIndex, int count, float
 		TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( pos, pmodel );
 		if( !pTemp ) return;
 
-		pTemp->flags = (FTENT_COLLIDEWORLD|FTENT_SPRCYCLE|FTENT_FADEOUT|FTENT_SLOWGRAVITY);
+		pTemp->flags = (FTENT_COLLIDEWORLD|FTENT_FADEOUT|FTENT_SLOWGRAVITY);
+		pTemp->frameMax = pmodel->numframes;
+		if (pmodel->numframes > 1)
+			pTemp->flags |= FTENT_SPRCYCLE;
 
 		VectorScale( dir, speed, vel );
 		vel[0] += Com_RandomFloat( -127.0f, 128.0f ) * amp;
@@ -301,7 +304,8 @@ void FX_Sprite_Trail( Vector start, Vector end, int modelIndex, int count, float
 		pTemp->entity.curstate.rendercolor.g = g;
 		pTemp->entity.curstate.rendercolor.b = b;
 
-		pTemp->entity.curstate.frame = Com_RandomLong( 0, pTemp->frameMax );
+		if (pmodel->numframes > 1)
+			pTemp->entity.curstate.frame = Com_RandomLong( 0, pmodel->numframes-1 );
 		pTemp->die = clientTime + life;
 		if (extraLifeMax)
 			pTemp->die += Com_RandomFloat( 0.0f, extraLifeMax );
