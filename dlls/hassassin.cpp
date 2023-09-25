@@ -1090,3 +1090,33 @@ Schedule_t *CHAssassin::GetScheduleOfType( int Type )
 
 	return CFollowingMonster::GetScheduleOfType( Type );
 }
+
+class CDeadHAssassin : public CDeadMonster
+{
+public:
+	void Spawn( void );
+	int	DefaultClassify ( void )
+	{
+		if (g_modFeatures.blackops_classify)
+			return CLASS_HUMAN_BLACKOPS;
+		return CLASS_HUMAN_MILITARY;
+	}
+	const char* getPos(int pos) const;
+	static const char *m_szPoses[3];
+};
+
+const char *CDeadHAssassin::m_szPoses[] = { "death_during_run", "die_backwards", "die_simple" };
+
+const char* CDeadHAssassin::getPos(int pos) const
+{
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
+}
+
+LINK_ENTITY_TO_CLASS( monster_human_assassin_dead, CDeadHAssassin )
+
+void CDeadHAssassin::Spawn()
+{
+	SpawnHelper("models/hassassin.mdl");
+	MonsterInitDead();
+	pev->frame = 255;
+}

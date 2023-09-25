@@ -4399,23 +4399,38 @@
 	]
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
 	[
-		0 : "fly_up"
-		1 : "idle1"
-		2 : "idle3"
-		3 : "idle2"
-		4 : "run"
-		5 : "walk"
-		6 : "shoot"
-		7 : "grenadethrow"
-		8 : "kick"
-		9 : "kickshort"
-		10 : "death_during_run"
-		11 : "die_backwards"
-		12 : "die_simple"
-		13 : "jump"
+		0 : "idle1"
+		1 : "idle3"
+		2 : "idle2"
+		3 : "run"
+		4 : "walk"
+		5 : "shoot"
+		6 : "grenadethrow"
+		7 : "kick"
+		8 : "kickshort"
+		9 : "death_during_run"
+		10 : "die_backwards"
+		11 : "die_simple"
+		12 : "jump"
+		13 : "fly_up"
 		14 : "fly_down"
 		15 : "fly_attack"
 		16 : "landfromjump"
+	]
+]
+@PointClass base(DeadMonster) size(-16 -16 0, 16 16 72) studio("models/hassassin.mdl") = monster_human_assassin_dead : "Dead Human Assassin"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 9 =
+	[
+		9 : "death_during_run"
+		10 : "die_backwards"
+		11 : "die_simple"
+	]
+	pose(Choices) : "Pose" : 0 =
+	[
+		0 : "On side"
+		1 : "On back"
+		2 : "On stomach"
 	]
 ]
 @PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/hgrunt.mdl") = monster_human_grunt : "Human Grunt (camo)"
