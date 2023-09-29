@@ -3518,6 +3518,9 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	if ( m_hTargetEnt != 0 )
 		ALERT( level, "Target ent: %s. ", STRING( m_hTargetEnt->pev->classname ) );
 
+	if ( m_pCine )
+		ALERT( level, "Scripted sequence entity: \"%s\". ", STRING(m_pCine->pev->targetname) );
+
 	if( IsMoving() )
 	{
 		ALERT( level, "Moving" );
