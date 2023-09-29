@@ -996,6 +996,11 @@ void CBaseMonster::RouteSimplify( CBaseEntity *pTargetEnt )
 //=========================================================
 BOOL CBaseMonster::FBecomeProne( void )
 {
+	if (m_pCine && !m_pCine->CanInterruptByBarnacle())
+	{
+		return FALSE;
+	}
+
 	if( FBitSet( pev->flags, FL_ONGROUND ) )
 	{
 		pev->flags -= FL_ONGROUND;

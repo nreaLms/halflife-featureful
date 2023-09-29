@@ -179,6 +179,7 @@ public:
 	bool ForcedNoInterruptions();
 	BOOL	CanInterrupt( void );
 	bool	CanInterruptByPlayerCall();
+	bool	CanInterruptByBarnacle();
 	void	AllowInterrupt( BOOL fAllow );
 	int		IgnoreConditions( void );
 	virtual bool	ShouldResetOnGroundFlag();

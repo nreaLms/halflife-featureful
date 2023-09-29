@@ -893,6 +893,13 @@ bool CCineMonster::CanInterruptByPlayerCall()
 	return m_interruptionPolicy != SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH && CanInterrupt();
 }
 
+bool CCineMonster::CanInterruptByBarnacle()
+{
+	// Same as CanInterruptByPlayerCall for now.
+	// Barnacle actually can kill its victim, but might be killed before that as well.
+	return m_interruptionPolicy != SCRIPT_INTERRUPTION_POLICY_ONLY_DEATH && CanInterrupt();
+}
+
 int CCineMonster::IgnoreConditions( void )
 {
 	if( CanInterrupt() )
