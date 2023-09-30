@@ -1079,6 +1079,7 @@ float CBasePlayerWeapon::GetNextAttackDelay( float delay )
 	//OutputDebugString( szMsg );
 	return flNextAttack;
 }
+
 //*********************************************************
 // weaponbox code:
 //*********************************************************

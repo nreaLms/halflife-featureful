@@ -105,7 +105,7 @@ void CSniperrifle::Holster()
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 1.0;
 	SendWeaponAnim( SNIPER_HOLSTER );
 
-	if ( m_fInZoom )
+	if ( InZoom() )
 	{
 		SecondaryAttack( );
 	}
@@ -116,12 +116,10 @@ void CSniperrifle::SecondaryAttack()
 	if ( m_pPlayer->pev->fov != 0 )
 	{
 		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
-		m_fInZoom = FALSE;
 	}
 	else if ( m_pPlayer->pev->fov != 15 )
 	{
 		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 15;
-		m_fInZoom = TRUE;
 	}
 
 	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/sniper_zoom.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
@@ -196,7 +194,7 @@ void CSniperrifle::Reload( void )
 
 	int iResult;
 
-	if ( m_pPlayer->pev->fov != 0 )
+	if ( InZoom() )
 	{
 		SecondaryAttack();
 	}

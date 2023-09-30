@@ -339,6 +339,7 @@ public:
 	virtual CBasePlayerWeapon *MyWeaponPointer( void ) { return this; }
 	virtual bool CanBeDropped() { return true; }
 	float GetNextAttackDelay( float delay );
+	bool InZoom();
 
 	int		m_fInSpecialReload;									// Are we in the middle of a reload for the shotguns
 	float	m_flNextPrimaryAttack;								// soonest time ItemPostFrame will call PrimaryAttack
@@ -543,8 +544,6 @@ public:
 	void WeaponIdle( void );
 	float m_flSoundDelay;
 
-	BOOL m_fInZoom;// don't save this.
-
 	virtual BOOL UseDecrement( void )
 	{
 #if CLIENT_WEAPONS
@@ -555,7 +554,6 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_357.mdl"; }
-
 private:
 	unsigned short m_usFirePython;
 };
@@ -608,8 +606,6 @@ public:
 	void Holster();
 	void Reload( void );
 	void WeaponIdle( void );
-
-	int m_fInZoom; // don't save this
 
 	virtual BOOL UseDecrement( void )
 	{
@@ -1304,8 +1300,6 @@ public:
 	void Reload(void);
 	void WeaponIdle(void);
 	//void ItemPostFrame(void);
-
-	BOOL m_fInZoom;// don't save this.
 
 	virtual BOOL UseDecrement(void)
 	{

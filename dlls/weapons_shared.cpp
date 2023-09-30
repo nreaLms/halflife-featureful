@@ -182,3 +182,8 @@ int CBasePlayerWeapon::iMaxClip()
 #endif
 	return maxClip;
 }
+
+bool CBasePlayerWeapon::InZoom()
+{
+	return m_pPlayer->pev->fov != 0;
+}
