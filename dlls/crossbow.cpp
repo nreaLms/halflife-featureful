@@ -302,7 +302,7 @@ void CCrossbow::Holster()
 {
 	m_fInReload = FALSE;// cancel any reload in progress.
 
-	if( m_fInZoom )
+	if( m_pPlayer->pev->fov != 0 )
 	{
 		SecondaryAttack();
 	}
