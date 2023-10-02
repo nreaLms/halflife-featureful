@@ -610,7 +610,7 @@ CBaseEntity *CTalkMonster::EnumFriends( CBaseEntity *pPrevious, const char* pszF
 	TraceResult tr;
 	Vector vecCheck;
 
-	if (!pszFriend)
+	if (!pszFriend || !*pszFriend)
 		return NULL;
 
 	while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
@@ -805,7 +805,6 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 	TraceResult tr;
 	Vector vecStart = pev->origin;
 	Vector vecCheck;
-	int i;
 	const char *pszFriend;
 	int cfriends;
 
@@ -822,15 +821,15 @@ CBaseEntity *CTalkMonster::FindNearestFriend( BOOL fPlayer )
 	}
 
 	// for each type of friend...
-	for( i = cfriends-1; i > -1; i-- )
+	for( int i = 0; i < cfriends; ++i )
 	{
 		if( fPlayer )
 			pszFriend = "player";
 		else
 			pszFriend = m_szFriends[ i ].name;
 
-		if( !pszFriend )
-			continue;
+		if( !pszFriend || !*pszFriend )
+			break;
 
 		// for each friend in this bsp...
 		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
@@ -1542,8 +1541,8 @@ bool CTalkMonster::FindAndCallMedic()
 		for( int i = 0; i < NUM_MEDICS; i++ )
 		{
 			const char* medicName = m_szMedics[i];
-			if (!medicName)
-				continue;
+			if (!medicName || !*medicName)
+				break;
 			CBaseEntity *pFriend = NULL;
 			while ((pFriend = EnumFriends( pFriend, medicName, TRUE )) != NULL)
 			{
