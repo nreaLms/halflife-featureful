@@ -621,15 +621,8 @@ void CHud::Init( void )
 #endif
 
 	CreateBooleanCvarConditionally(cl_flashlight_custom, "cl_flashlight_custom", clientFeatures.flashlight.custom);
-
-	if (clientFeatures.flashlight.radius.configurable)
-	{
-		cl_flashlight_radius = CVAR_CREATE_INTVALUE( "cl_flashlight_radius", clientFeatures.flashlight.radius.defaultValue, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
-	}
-	if (clientFeatures.flashlight.fade_distance.configurable)
-	{
-		cl_flashlight_fade_distance = CVAR_CREATE_INTVALUE( "cl_flashlight_fade_distance", clientFeatures.flashlight.radius.defaultValue, FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
-	}
+	CreateIntegerCvarConditionally(cl_flashlight_radius, "cl_flashlight_radius", clientFeatures.flashlight.radius);
+	CreateIntegerCvarConditionally(cl_flashlight_fade_distance, "cl_flashlight_fade_distance", clientFeatures.flashlight.fade_distance);
 
 	m_pSpriteList = NULL;
 
