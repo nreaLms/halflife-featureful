@@ -127,6 +127,9 @@ int CHudFlashlight::Draw( float flTime )
 	if (!hasFlashlight && !hasNightVision)
 		return 1;
 
+	const bool nvgIsOn = gHUD.m_Nightvision.IsOn();
+	const bool shouldDrawNvg = nvgIsOn || (!hasFlashlight && hasNightVision);
+
 	if( m_fOn )
 		a = 225;
 	else
@@ -139,14 +142,14 @@ int CHudFlashlight::Draw( float flTime )
 
 	ScaleColors( r, g, b, a );
 
-	int emptySprite = hasNightVision ? m_hSprite3 : m_hSprite1;
-	int fullSprite = hasNightVision ? m_hSprite4 : m_hSprite2;
+	int emptySprite = shouldDrawNvg ? m_hSprite3 : m_hSprite1;
+	int fullSprite = shouldDrawNvg ? m_hSprite4 : m_hSprite2;
 
 	if (!emptySprite || !fullSprite)
 		return 1;
 
-	wrect_t* emptyFlash = hasNightVision ? m_prc3 : m_prc1;
-	wrect_t* fullFlash = hasNightVision ? m_prc4 : m_prc2;
+	wrect_t* emptyFlash = shouldDrawNvg ? m_prc3 : m_prc1;
+	wrect_t* fullFlash = shouldDrawNvg ? m_prc4 : m_prc2;
 
 	y = ( emptyFlash->bottom - fullFlash->top ) / 2;
 	x = ScreenWidth - m_iWidth - m_iWidth / 2 ;
@@ -155,7 +158,8 @@ int CHudFlashlight::Draw( float flTime )
 	SPR_Set( emptySprite, r, g, b );
 	SPR_DrawAdditive( 0,  x, y, emptyFlash );
 
-	if( m_fOn && m_hBeam && hasFlashlight && !hasNightVision )
+	// Don't draw a beam for nvg
+	if( m_fOn && m_hBeam && !nvgIsOn )
 	{
 		// draw the flashlight beam
 		x = ScreenWidth - m_iWidth / 2;

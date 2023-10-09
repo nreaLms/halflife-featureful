@@ -3959,8 +3959,8 @@ void CBasePlayer::FlashlightTurnOn()
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
 		SetBits( pev->effects, EF_DIMLIGHT );
 
-		UpdateSuitLightBattery(true);
 		NVGTurnOff(false);
+		UpdateSuitLightBattery(true);
 	}
 }
 
@@ -4005,8 +4005,8 @@ void CBasePlayer::NVGTurnOn()
 			WRITE_BYTE( 1 );
 		MESSAGE_END();
 
-		UpdateSuitLightBattery(true);
 		FlashlightTurnOff(false);
+		UpdateSuitLightBattery(true);
 	}
 }
 

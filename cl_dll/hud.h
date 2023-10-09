@@ -479,7 +479,6 @@ private:
 	HSPRITE m_hSprite;
 	int m_iFrame, m_nFrameCount;
 #endif
-	bool m_filterModeSet;
 };
 //
 //-----------------------------------------------------
