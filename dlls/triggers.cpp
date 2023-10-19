@@ -56,6 +56,7 @@
 #define SF_TRIGGER_HURT_AFFECT_NON_MOVING_MONSTERS 64 // hack to affect non-moving monsters
 #define SF_TRIGGER_HURT_FULL_DAMAGE_EVERY_HALF_SECOND 128
 #define SF_TRIGGER_HURT_IGNORE_ARMOR 256
+#define SF_TRIGGER_HURT_NO_PUNCH 512
 
 extern DLL_GLOBAL BOOL		g_fGameOver;
 
@@ -996,6 +997,8 @@ public:
 		}
 		if (pev->spawnflags & SF_TRIGGER_HURT_IGNORE_ARMOR)
 			damageType |= DMG_IGNORE_ARMOR;
+		if (pev->spawnflags & SF_TRIGGER_HURT_NO_PUNCH)
+			damageType |= DMG_NO_PUNCH;
 		return damageType;
 	}
 };
@@ -5075,6 +5078,7 @@ void CTriggerChangeClass::Affect(CBaseEntity *pEntity, USE_TYPE useType)
 #define SF_TRIGGER_HURT_REMOTE_STARTON 4
 
 #define SF_TRIGGER_HURT_REMOTE_IGNORE_ARMOR 256
+#define SF_TRIGGER_HURT_REMOTE_NO_PUNCH 512
 
 class CTriggerHurtRemote : public CPointEntity
 {
@@ -5109,6 +5113,8 @@ protected:
 		}
 		if (pev->spawnflags & SF_TRIGGER_HURT_REMOTE_IGNORE_ARMOR)
 			damageType |= DMG_IGNORE_ARMOR;
+		if (pev->spawnflags & SF_TRIGGER_HURT_REMOTE_NO_PUNCH)
+			damageType |= DMG_NO_PUNCH;
 		return damageType;
 	}
 	float Delay() const { return pev->frags ? pev->frags : 0.1; }

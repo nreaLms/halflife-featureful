@@ -740,7 +740,8 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 		}
 	}
 
-	pev->punchangle.x = -2;
+	if (!FBitSet(bitsDamageType, DMG_NO_PUNCH))
+		pev->punchangle.x = -2;
 
 	if( fTookDamage && !ftrivial && fmajor && flHealthPrev >= 75 )
 	{

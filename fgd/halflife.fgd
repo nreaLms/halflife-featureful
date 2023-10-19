@@ -7523,6 +7523,7 @@
 		64:"Affect non-moving NPC's" : 0 : "Uses entity's bounding box to find and hurt non-moving monsters. Will produce wrong results on non-cuboid brush shapes."
 		128:"Full dmg every 0.5 seconds" : 0 : "Do full damage (or healing) instead of halving the value. Recommended to use with odd values."
 		256:"Ignore Armor" : 0
+		512:"No Camera Punch" : 0
 	]
 	master(string) : "Master"
 	dmg(integer) : "Damage" : 10 : "The damage is applied every 0.5 seconds. Negative value means healing. The value is getting halved, unless 'Full dmg every 0.5 seconds' spawnflag is set."
@@ -7539,6 +7540,7 @@
 		2 : "Constant" : 0
 		4 : "Start On" : 0
 		256:"Ignore Armor" : 0
+		512:"No Camera Punch" : 0
 	]
 	target(string) : "Target [LE]"
 	targetclass(string) : "Target Class" : : "If specified, all entities with the given class will be affected. This is independent from Target, which means the entity might cause damage twice to the same entity if Target is class of Target Class."
