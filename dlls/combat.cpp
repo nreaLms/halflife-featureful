@@ -459,7 +459,7 @@ void CBaseMonster::GibMonster( void )
 	{
 		if (HasHumanGibs())
 		{
-			if( CVAR_GET_FLOAT( "violence_hgibs" ) != 0 )
+			if( violence_hgibs->value != 0 )
 			{
 				if (FStrEq(gibModel, "models/hgibs.mdl"))
 				{
@@ -475,7 +475,7 @@ void CBaseMonster::GibMonster( void )
 		}
 		else if (HasAlienGibs())
 		{
-			if( CVAR_GET_FLOAT( "violence_agibs" ) != 0 )
+			if( violence_agibs->value != 0 )
 			{
 				CGib::SpawnRandomGibs( pev, GibCount(), gibModel );
 			}
@@ -707,12 +707,12 @@ void CBaseMonster::CallGibMonster( void )
 
 	if( HasHumanGibs() )
 	{
-		if( CVAR_GET_FLOAT( "violence_hgibs" ) == 0.0f )
+		if( violence_hgibs->value == 0.0f )
 			fade = TRUE;
 	}
 	else if( HasAlienGibs() )
 	{
-		if( CVAR_GET_FLOAT( "violence_agibs" ) == 0.0f )
+		if( violence_agibs->value == 0.0f )
 			fade = TRUE;
 	}
 

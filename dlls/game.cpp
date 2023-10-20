@@ -1140,6 +1140,11 @@ static void CVAR_REGISTER_FLOAT( cvar_t* cvar, float value )
 	CVAR_REGISTER(cvar);
 }
 
+cvar_t* violence_hblood = NULL;
+cvar_t* violence_ablood = NULL;
+cvar_t* violence_hgibs = NULL;
+cvar_t* violence_agibs = NULL;
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
@@ -1160,6 +1165,11 @@ void GameDLLInit( void )
 	g_psv_developer = CVAR_GET_POINTER( "developer" );
 
 	g_enable_cheats = CVAR_GET_POINTER( "sv_cheats" );
+
+	violence_hblood = CVAR_GET_POINTER( "violence_hblood" );
+	violence_ablood = CVAR_GET_POINTER( "violence_ablood" );
+	violence_hgibs = CVAR_GET_POINTER( "violence_hgibs" );
+	violence_agibs = CVAR_GET_POINTER( "violence_agibs" );
 
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );

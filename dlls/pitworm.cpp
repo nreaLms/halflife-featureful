@@ -1507,7 +1507,7 @@ void CPitwormGibShooter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 
 CPitwormGib *CPitwormGibShooter::CreateGib(void)
 {
-	if (CVAR_GET_FLOAT("violence_hgibs") == 0)
+	if (violence_hgibs->value == 0)
 		return NULL;
 
 	CPitwormGib *pGib = GetClassPtr((CPitwormGib *)NULL);

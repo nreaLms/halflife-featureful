@@ -1756,7 +1756,7 @@ void CGibShooter::Spawn( void )
 
 CGib *CGibShooter::CreateGib( float lifeTime )
 {
-	if( CVAR_GET_FLOAT( "violence_hgibs" ) == 0 )
+	if( violence_hgibs->value == 0 )
 		return NULL;
 
 	CGib *pGib = GetClassPtr( (CGib *)NULL );

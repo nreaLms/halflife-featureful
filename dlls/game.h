@@ -169,4 +169,7 @@ extern cvar_t *g_enable_cheats;
 
 extern cvar_t *g_psv_developer;
 
+extern cvar_t* violence_hgibs;
+extern cvar_t* violence_agibs;
+
 #endif // GAME_H

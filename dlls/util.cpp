@@ -1176,16 +1176,18 @@ bool UTIL_TargetnameIsActivator(string_t targetName)
 
 BOOL UTIL_ShouldShowBlood( int color )
 {
+	extern cvar_t* violence_hblood;
+	extern cvar_t* violence_ablood;
 	if( color != DONT_BLEED )
 	{
 		if( color == BLOOD_COLOR_RED )
 		{
-			if( CVAR_GET_FLOAT( "violence_hblood" ) != 0 )
+			if( violence_hblood->value != 0 )
 				return TRUE;
 		}
 		else
 		{
-			if( CVAR_GET_FLOAT( "violence_ablood" ) != 0 )
+			if( violence_ablood->value != 0 )
 				return TRUE;
 		}
 	}
