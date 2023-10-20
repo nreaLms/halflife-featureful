@@ -49,6 +49,7 @@ void V_PunchAxis( int axis, float punch );
 void VectorAngles( const float *forward, float *angles );
 
 extern cvar_t *cl_lw;
+extern cvar_t *r_decals;
 
 #define VECTOR_CONE_1DEGREES Vector( 0.00873f, 0.00873f, 0.00873f )
 #define VECTOR_CONE_2DEGREES Vector( 0.01745f, 0.01745f, 0.01745f )
@@ -225,7 +226,7 @@ void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 	// Only decal brush models such as the world etc.
 	if(  decalName && decalName[0] && pe && ( pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP ) )
 	{
-		if( CVAR_GET_FLOAT( "r_decals" ) )
+		if( r_decals->value )
 		{
 			gEngfuncs.pEfxAPI->R_DecalShoot(
 				gEngfuncs.pEfxAPI->Draw_DecalIndex( gEngfuncs.pEfxAPI->Draw_DecalIndexFromName( decalName ) ),

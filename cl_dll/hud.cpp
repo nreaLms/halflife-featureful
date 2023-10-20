@@ -213,6 +213,7 @@ extern client_sprite_t *GetSpriteList( client_sprite_t *pList, const char *psz, 
 
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
+cvar_t *r_decals = NULL;
 cvar_t *cl_viewbob = NULL;
 cvar_t *cl_rollspeed = NULL;
 cvar_t *cl_rollangle = NULL;
@@ -596,6 +597,7 @@ void CHud::Init( void )
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	CreateBooleanCvarConditionally(m_pCvarDrawMoveMode, "hud_draw_movemode", clientFeatures.movemode);
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
+	r_decals = gEngfuncs.pfnGetCvarPointer( "r_decals" );
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer( "crosshair" );
 
 	CreateBooleanCvarConditionally(cl_viewbob, "cl_viewbob", clientFeatures.view_bob);
