@@ -53,6 +53,7 @@ struct ModFeatures
 	bool suit_sentences;
 	bool nosuit_allow_healthcharger;
 	bool items_instant_drop;
+	bool items_physics_fix;
 	bool tripmines_solid;
 	bool satchels_pickable;
 	bool alien_teleport_sound;

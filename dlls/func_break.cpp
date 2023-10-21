@@ -886,7 +886,30 @@ void CBreakable::DieToActivator( CBaseEntity* pActivator )
 	}
 	else if( !FStringNull(m_iszSpawnObject) )
 	{
-		CBaseEntity::Create( STRING( m_iszSpawnObject ), VecBModelOrigin( pev ), pev->angles, edict() );
+		const Vector bmodelOrigin = VecBModelOrigin( pev );
+		bool shouldApplyPhysicsFix = false;
+		if (g_modFeatures.items_physics_fix)
+		{
+			TraceResult tr;
+			UTIL_TraceLine(bmodelOrigin, pev->absmin - Vector(0,0,1), ignore_monsters, edict(), &tr);
+			if (tr.pHit)
+			{
+				//ALERT(at_console, "%s is under the %s\n", STRING(tr.pHit->v.classname), STRING(pev->classname));
+				const int contents = UTIL_PointContents( tr.vecEndPos );
+				//ALERT(at_console, "Contents: %d\n", contents);
+				shouldApplyPhysicsFix = contents == 0;
+			}
+		}
+		CBaseEntity* pEntity = CBaseEntity::CreateNoSpawn( STRING( m_iszSpawnObject ), bmodelOrigin, pev->angles, edict() );
+		if (pEntity)
+		{
+			if (shouldApplyPhysicsFix)
+				pEntity->pev->spawnflags |= SF_ITEM_FIX_PHYSICS;
+			if (DispatchSpawn( pEntity->edict() ) == -1 )
+			{
+				REMOVE_ENTITY(pEntity->edict());
+			}
+		}
 	}
 
 	if( Explodable() )

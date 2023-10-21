@@ -327,8 +327,15 @@ int CPickup::ObjectCaps()
 
 void CPickup::SetObjectCollisionBox()
 {
-	pev->absmin = pev->origin + Vector( -16, -16, 0 );
-	pev->absmax = pev->origin + Vector( 16, 16, 16 );
+	if (FBitSet(pev->spawnflags, SF_ITEM_FIX_PHYSICS))
+	{
+		pev->absmin = pev->origin + Vector( -16, -16, 0 );
+		pev->absmax = pev->origin + Vector( 16, 16, 16 );
+	}
+	else
+	{
+		CBaseDelay::SetObjectCollisionBox();
+	}
 }
 
 bool CPickup::IsPickableByTouch()
@@ -394,7 +401,10 @@ void CItem::Spawn( void )
 	}
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetOrigin( pev, pev->origin );
-	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
+	if (FBitSet(pev->spawnflags, SF_ITEM_FIX_PHYSICS))
+		UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
+	else
+		UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
 	SetTouch( &CItem::ItemTouch );
 
 	if (pev->movetype == MOVETYPE_TOSS)

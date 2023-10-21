@@ -52,6 +52,7 @@ ModFeatures::ModFeatures()
 	suit_sentences = true;
 	nosuit_allow_healthcharger = false;
 	items_instant_drop = true;
+	items_physics_fix = false;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
 	alien_teleport_sound = false;
@@ -110,6 +111,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(suit_sentences),
 		KEY_VALUE_DEF(nosuit_allow_healthcharger),
 		KEY_VALUE_DEF(items_instant_drop),
+		KEY_VALUE_DEF(items_physics_fix),
 		KEY_VALUE_DEF(tripmines_solid),
 		KEY_VALUE_DEF(satchels_pickable),
 		KEY_VALUE_DEF(alien_teleport_sound),

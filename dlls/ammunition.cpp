@@ -19,7 +19,10 @@ void CBasePlayerAmmo::Spawn( void )
 		pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 
-	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
+	if (FBitSet(pev->spawnflags, SF_ITEM_FIX_PHYSICS))
+		UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
+	else
+		UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
 	SetTouch( &CBasePlayerAmmo::DefaultTouch );
