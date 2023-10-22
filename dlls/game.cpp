@@ -60,6 +60,7 @@ ModFeatures::ModFeatures()
 	monsters_stop_attacking_dying_monsters = false;
 	monsters_delegate_squad_leadership = true;
 	monsters_eat_for_health = true;
+	monsters_spawned_named_wait_trigger = true;
 
 	blackops_classify = false;
 	opfor_grunts_dislike_civilians = FEATURE_OPFOR_SPECIFIC ? true : false;
@@ -118,6 +119,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(monsters_stop_attacking_dying_monsters),
 		KEY_VALUE_DEF(monsters_delegate_squad_leadership),
 		KEY_VALUE_DEF(monsters_eat_for_health),
+		KEY_VALUE_DEF(monsters_spawned_named_wait_trigger),
 		KEY_VALUE_DEF(blackops_classify),
 		KEY_VALUE_DEF(opfor_grunts_dislike_civilians),
 		KEY_VALUE_DEF(racex_dislike_alien_military),

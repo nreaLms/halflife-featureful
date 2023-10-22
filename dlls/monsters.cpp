@@ -2590,9 +2590,10 @@ void CBaseMonster::StartMonster( void )
 	pev->nextthink += RANDOM_FLOAT( 0.1f, 0.4f ); // spread think times.
 
 	// Vit_amiN: fixed -- now it doesn't touch any scripted_sequence target
-	if( !FStringNull( pev->targetname ) && !m_pCine // wait until triggered
-			&& m_Activity != ACT_GLIDE /* Don't affect repel grunts */
-			&& pev->owner == 0 ) // Don't affect monsters coming from monstermaker
+	bool shouldWaitTrigger = !FStringNull( pev->targetname ) && !m_pCine // wait until triggered
+							&& m_Activity != ACT_GLIDE; /* Don't affect repel grunts */
+	shouldWaitTrigger = shouldWaitTrigger && (g_modFeatures.monsters_spawned_named_wait_trigger || pev->owner == 0); // Don't affect monsters coming from monstermaker
+	if( shouldWaitTrigger )
 	{
 		SetState( MONSTERSTATE_IDLE );
 		// UNDONE: Some scripted sequence monsters don't have an idle?

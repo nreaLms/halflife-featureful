@@ -61,6 +61,7 @@ struct ModFeatures
 	bool monsters_stop_attacking_dying_monsters;
 	bool monsters_delegate_squad_leadership;
 	bool monsters_eat_for_health;
+	bool monsters_spawned_named_wait_trigger;
 
 	bool blackops_classify;
 	bool opfor_grunts_dislike_civilians;
