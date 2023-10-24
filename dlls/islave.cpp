@@ -43,8 +43,6 @@
 // whether vortigaunt marked as squadleader has a different beam color
 #define FEATURE_ISLAVE_LEADER_COLOR 1
 
-#define FEATURE_ISLAVE_CAP_SQUAD 0
-
 // wheter vortigaunt can charge ally player's suit
 #define FEATURE_ISLAVE_CHARGE_TOKEN (0 && FEATURE_ISLAVE_ENERGY)
 
@@ -1273,9 +1271,8 @@ void CISlave::Spawn()
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability		= bits_CAP_HEAR | bits_CAP_TURN_HEAD | bits_CAP_RANGE_ATTACK2 | bits_CAP_DOORS_GROUP;
 
-#if FEATURE_ISLAVE_CAP_SQUAD
-	m_afCapability |= bits_CAP_SQUAD;
-#endif
+	if (g_modFeatures.vortigaunt_squad)
+		m_afCapability |= bits_CAP_SQUAD;
 
 	m_voicePitch		= RANDOM_LONG( 85, 110 );
 

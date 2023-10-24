@@ -78,6 +78,7 @@ ModFeatures::ModFeatures()
 	vortigaunt_selfheal = true;
 	vortigaunt_heal = true;
 	vortigaunt_revive = true;
+	vortigaunt_squad = false;
 
 	sentry_retract = true;
 
@@ -132,6 +133,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(vortigaunt_selfheal),
 		KEY_VALUE_DEF(vortigaunt_heal),
 		KEY_VALUE_DEF(vortigaunt_revive),
+		KEY_VALUE_DEF(vortigaunt_squad),
 		KEY_VALUE_DEF(sentry_retract),
 		KEY_VALUE_DEF(bigmomma_wait_fix),
 		KEY_VALUE_DEF(gonome_lock_player),
