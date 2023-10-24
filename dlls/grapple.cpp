@@ -623,7 +623,7 @@ void CBarnacleGrapple::PrimaryAttack( void )
 	else
 	*/
 	{
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.1;
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.01;
 	}
 }
 
