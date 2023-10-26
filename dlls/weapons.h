@@ -70,8 +70,6 @@ public:
 #define ITEM_SECURITY		3
 #define ITEM_BATTERY		4
 
-#define SF_ITEM_NOFALL (1<<9)
-
 #define MAX_NORMAL_BATTERY	100
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)

@@ -886,21 +886,20 @@ void CBreakable::DieToActivator( CBaseEntity* pActivator )
 	}
 	else if( !FStringNull(m_iszSpawnObject) )
 	{
+		const char* spawnObject = STRING(m_iszSpawnObject);
 		const Vector bmodelOrigin = VecBModelOrigin( pev );
 		bool shouldApplyPhysicsFix = false;
-		if (g_modFeatures.items_physics_fix)
+		if (ItemsPhysicsFix() > 0 && (strncmp(spawnObject, "item_", 5) == 0 || strncmp(spawnObject, "ammo_", 5) == 0))
 		{
 			TraceResult tr;
-			UTIL_TraceLine(bmodelOrigin, pev->absmin - Vector(0,0,1), ignore_monsters, edict(), &tr);
+			UTIL_TraceLine(bmodelOrigin, Vector(bmodelOrigin.x, bmodelOrigin.y, pev->absmin.z - 1), ignore_monsters, edict(), &tr);
 			if (tr.pHit)
 			{
-				//ALERT(at_console, "%s is under the %s\n", STRING(tr.pHit->v.classname), STRING(pev->classname));
 				const int contents = UTIL_PointContents( tr.vecEndPos );
-				//ALERT(at_console, "Contents: %d\n", contents);
 				shouldApplyPhysicsFix = contents == 0;
 			}
 		}
-		CBaseEntity* pEntity = CBaseEntity::CreateNoSpawn( STRING( m_iszSpawnObject ), bmodelOrigin, pev->angles, edict() );
+		CBaseEntity* pEntity = CBaseEntity::CreateNoSpawn( spawnObject, bmodelOrigin, pev->angles, edict() );
 		if (pEntity)
 		{
 			if (shouldApplyPhysicsFix)

@@ -353,11 +353,11 @@ bool CPickup::IsPickableByUse()
 void CPickup::FallThink()
 {
 	pev->nextthink = gpGlobals->time + 0.1;
-	if( pev->flags & FL_ONGROUND )
+	if( (pev->flags & FL_ONGROUND) || pev->groundentity != NULL )
 	{
 		pev->solid = SOLID_TRIGGER;
 		UTIL_SetOrigin( pev, pev->origin );
-		ResetThink();
+		SetThink( NULL );
 	}
 }
 
@@ -400,6 +400,23 @@ void CItem::Spawn( void )
 			pev->movetype = MOVETYPE_TOSS;
 	}
 	pev->solid = SOLID_TRIGGER;
+
+	bool instantDrop = g_modFeatures.items_instant_drop;
+	const bool comesFromBreakable = pev->owner != NULL;
+	if (!comesFromBreakable && ItemsPhysicsFix() == 2)
+	{
+		pev->solid = SOLID_BBOX;
+		SetThink( &CPickup::FallThink );
+		pev->nextthink = gpGlobals->time + 0.1f;
+		SetBits(pev->spawnflags, SF_ITEM_FIX_PHYSICS);
+
+		instantDrop = false;
+	}
+	if (ItemsPhysicsFix() == 3)
+	{
+		SetBits(pev->spawnflags, SF_ITEM_FIX_PHYSICS);
+	}
+
 	UTIL_SetOrigin( pev, pev->origin );
 	if (FBitSet(pev->spawnflags, SF_ITEM_FIX_PHYSICS))
 		UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
@@ -409,7 +426,7 @@ void CItem::Spawn( void )
 
 	if (pev->movetype == MOVETYPE_TOSS)
 	{
-		if (g_modFeatures.items_instant_drop)
+		if (instantDrop)
 		{
 			if( DROP_TO_FLOOR(ENT( pev ) ) == 0 )
 			{

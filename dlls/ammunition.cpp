@@ -19,6 +19,19 @@ void CBasePlayerAmmo::Spawn( void )
 		pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
 
+	const bool comesFromBreakable = pev->owner != NULL;
+	if (!comesFromBreakable && ItemsPhysicsFix() == 2)
+	{
+		pev->solid = SOLID_BBOX;
+		SetThink( &CPickup::FallThink );
+		pev->nextthink = gpGlobals->time + 0.1f;
+		SetBits(pev->spawnflags, SF_ITEM_FIX_PHYSICS);
+	}
+	if (ItemsPhysicsFix() == 3)
+	{
+		SetBits(pev->spawnflags, SF_ITEM_FIX_PHYSICS);
+	}
+
 	if (FBitSet(pev->spawnflags, SF_ITEM_FIX_PHYSICS))
 		UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	else

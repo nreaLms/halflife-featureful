@@ -52,7 +52,6 @@ ModFeatures::ModFeatures()
 	suit_sentences = true;
 	nosuit_allow_healthcharger = false;
 	items_instant_drop = true;
-	items_physics_fix = false;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
 	alien_teleport_sound = false;
@@ -113,7 +112,6 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(suit_sentences),
 		KEY_VALUE_DEF(nosuit_allow_healthcharger),
 		KEY_VALUE_DEF(items_instant_drop),
-		KEY_VALUE_DEF(items_physics_fix),
 		KEY_VALUE_DEF(tripmines_solid),
 		KEY_VALUE_DEF(satchels_pickable),
 		KEY_VALUE_DEF(alien_teleport_sound),
@@ -567,6 +565,7 @@ cvar_t multibyte_only = { "mp_multibyte_only", "0", FCVAR_SERVER };
 #if FEATURE_USE_THROUGH_WALLS_CVAR
 cvar_t use_through_walls = { "use_through_walls", "1", FCVAR_SERVER };
 #endif
+cvar_t items_physics_fix = { "items_physics_fix", "0", FCVAR_SERVER };
 cvar_t npc_tridepth = { "npc_tridepth", "1", FCVAR_SERVER };
 cvar_t npc_tridepth_all = { "npc_tridepth_all", "0", FCVAR_SERVER };
 #if FEATURE_NPC_NEAREST_CVAR
@@ -1182,6 +1181,7 @@ void GameDLLInit( void )
 #if FEATURE_USE_THROUGH_WALLS_CVAR
 	CVAR_REGISTER( &use_through_walls );
 #endif
+	CVAR_REGISTER( &items_physics_fix );
 	CVAR_REGISTER( &npc_tridepth );
 	CVAR_REGISTER( &npc_tridepth_all );
 #if FEATURE_NPC_NEAREST_CVAR
@@ -1734,4 +1734,9 @@ bool ItemsPickableByTouch()
 bool ItemsPickableByUse()
 {
 	return pickup_policy.value >= 1;
+}
+
+int ItemsPhysicsFix()
+{
+	return static_cast<int>(items_physics_fix.value);
 }
