@@ -78,7 +78,9 @@ ClientFeatures::ClientFeatures()
 {
 	hud_color = RGB_HUD_DEFAULT;
 	hud_color_critical = RGB_REDISH;
-	hud_min_alpha = MIN_ALPHA;
+	hud_min_alpha.defaultValue = MIN_ALPHA;
+	hud_min_alpha.minValue = 100;
+	hud_min_alpha.maxValue = 200;
 
 	hud_draw_nosuit = false;
 	hud_color_nosuit = RGB_HUD_NOSUIT;
@@ -159,6 +161,16 @@ static void CreateBooleanCvarConditionally(cvar_t*& cvarPtr, const char* name, c
 		cvarPtr = CVAR_CREATE_BOOLVALUE( name, booleanValue.enabled_by_default, FCVAR_ARCHIVE );
 	else
 		cvarPtr = 0;
+}
+
+template<typename T>
+static T boundValue(T min, T value, T max)
+{
+	if (value < min)
+		return min;
+	if (value > max)
+		return max;
+	return value;
 }
 
 #if USE_VGUI
@@ -604,6 +616,8 @@ void CHud::Init( void )
 	CreateFloatCvarConditionally(cl_rollangle, "cl_rollangle", clientFeatures.rollangle);
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "200", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
+	CreateIntegerCvarConditionally(m_pCvarMinAlpha, "hud_min_alpha", clientFeatures.hud_min_alpha);
+
 	CreateBooleanCvarConditionally(cl_weapon_sparks, "cl_weapon_sparks", clientFeatures.weapon_sparks);
 	CreateBooleanCvarConditionally(cl_weapon_wallpuff, "cl_weapon_wallpuff", clientFeatures.weapon_wallpuff);
 
@@ -804,7 +818,6 @@ void CHud::ParseClientFeatures()
 		{ "flashlight.color", clientFeatures.flashlight.color},
 	};
 	KeyValueDefinition<int> integers[] = {
-		{ "hud_min_alpha", clientFeatures.hud_min_alpha },
 		{ "hud_min_alpha_nvg", clientFeatures.hud_min_alpha_nvg },
 		{ "flashlight.distance", clientFeatures.flashlight.distance },
 	};
@@ -817,6 +830,7 @@ void CHud::ParseClientFeatures()
 		{ "movemode.", clientFeatures.movemode},
 	};
 	KeyValueDefinition<ConfigurableBoundedValue> configurableBounds[] = {
+		{ "hud_min_alpha.", clientFeatures.hud_min_alpha },
 		{ "flashlight.radius.", clientFeatures.flashlight.radius },
 		{ "flashlight.fade_distance.", clientFeatures.flashlight.fade_distance },
 	};
@@ -1364,6 +1378,19 @@ bool CHud::ViewBobEnabled()
 	return ClientFeatureEnabled(cl_viewbob, clientFeatures.view_bob.enabled_by_default);
 }
 
+int CHud::CalcMinHUDAlpha()
+{
+#if FEATURE_NIGHTVISION
+	if (m_Nightvision.IsOn()) {
+		return clientFeatures.hud_min_alpha_nvg;
+	}
+#endif
+
+	const ConfigurableBoundedValue& min_alpha = clientFeatures.hud_min_alpha;
+	const int value = m_pCvarMinAlpha ? m_pCvarMinAlpha->value : min_alpha.defaultValue;
+	return boundValue(min_alpha.minValue, value, min_alpha.maxValue);
+}
+
 bool CHud::WeaponWallpuffEnabled()
 {
 	return ClientFeatureEnabled(cl_weapon_wallpuff, clientFeatures.weapon_wallpuff.enabled_by_default);
@@ -1382,6 +1409,37 @@ bool CHud::MuzzleLightEnabled()
 bool CHud::CustomFlashlightEnabled()
 {
 	return ClientFeatureEnabled(cl_flashlight_custom, clientFeatures.flashlight.custom.enabled_by_default);
+}
+
+float CHud::FlashlightRadius()
+{
+	const FlashlightFeatures& flashlight = clientFeatures.flashlight;
+	const int radius = cl_flashlight_radius && cl_flashlight_radius->value > 0.0f ? cl_flashlight_radius->value : flashlight.radius.defaultValue;
+	return boundValue(flashlight.radius.minValue, radius, flashlight.radius.maxValue);
+}
+
+float CHud::FlashlightDistance()
+{
+	return clientFeatures.flashlight.distance;
+}
+
+float CHud::FlashlightFadeDistance()
+{
+	const FlashlightFeatures& flashlight = clientFeatures.flashlight;
+	const int distance = cl_flashlight_fade_distance && cl_flashlight_fade_distance->value > 0.0f ? cl_flashlight_fade_distance->value : flashlight.fade_distance.defaultValue;
+	return boundValue(flashlight.fade_distance.minValue, distance, flashlight.fade_distance.maxValue);
+}
+
+color24 CHud::FlashlightColor()
+{
+	int r, g, b;
+	UnpackRGB(r,g,b, clientFeatures.flashlight.color);
+
+	color24 color;
+	color.r = boundValue(0, r, 255);
+	color.g = boundValue(0, g, 255);
+	color.b = boundValue(0, b, 255);
+	return color;
 }
 
 int CHud::NVGStyle()

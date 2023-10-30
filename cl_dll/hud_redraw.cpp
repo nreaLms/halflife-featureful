@@ -94,6 +94,8 @@ void CHud::Think( void )
 // returns 1 if they've changed, 0 otherwise
 int CHud::Redraw( float flTime, int intermission )
 {
+	m_cachedMinAlpha = CalcMinHUDAlpha();
+
 	m_fOldTime = m_flTime;	// save time of previous redraw
 	m_flTime = flTime;
 	m_flTimeDelta = (double)( m_flTime - m_fOldTime );
@@ -533,13 +535,7 @@ int CHud::HUDColorCritical()
 	return clientFeatures.hud_color_critical;
 }
 
-int CHud::MinHUDAlpha()
+int CHud::MinHUDAlpha() const
 {
-	int result = clientFeatures.hud_min_alpha;
-#if FEATURE_NIGHTVISION
-	if (this == &gHUD && gHUD.m_Nightvision.IsOn()) {
-		result = clientFeatures.hud_min_alpha_nvg;
-	}
-#endif
-	return result;
+	return m_cachedMinAlpha;
 }

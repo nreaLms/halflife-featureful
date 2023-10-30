@@ -50,24 +50,9 @@ static float boundValue(float min, float value, float max)
 	return value;
 }
 
-static float GetFlashlightRadius()
-{
-	const FlashlightFeatures& flashlight = gHUD.clientFeatures.flashlight;
-	const float radius = cl_flashlight_radius && cl_flashlight_radius->value > 0.0f ? cl_flashlight_radius->value : flashlight.radius.defaultValue;
-	return boundValue(flashlight.radius.minValue, radius, flashlight.radius.maxValue);
-}
-
-static float GetFadeDistance()
-{
-	const FlashlightFeatures& flashlight = gHUD.clientFeatures.flashlight;
-	const float distance = cl_flashlight_fade_distance && cl_flashlight_fade_distance->value > 0.0f ? cl_flashlight_fade_distance->value : flashlight.fade_distance.defaultValue;
-	return boundValue(flashlight.fade_distance.minValue, distance, flashlight.fade_distance.maxValue);
-}
-
 void DrawFlashlight()
 {
-	const FlashlightFeatures& flashlight = gHUD.clientFeatures.flashlight;
-	const float distance = flashlight.distance;
+	const float distance = gHUD.FlashlightDistance();
 
 	Vector forward, vecSrc, vecEnd, origin, angles;
 	Vector view_ofs;
@@ -101,7 +86,7 @@ void DrawFlashlight()
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 
-	const float fadeDistance = GetFadeDistance();
+	const float fadeDistance = gHUD.FlashlightFadeDistance();
 
 	float falloff = tr.fraction * distance;
 	if( falloff < fadeDistance ) falloff = 1.0f;
@@ -111,14 +96,12 @@ void DrawFlashlight()
 	dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(idx); // Create the flashlight using the player's index as key
 	if (dl)
 	{
-		int r, g, b;
-		UnpackRGB(r,g,b, flashlight.color);
-
 		dl->origin = tr.endpos;
-		dl->color.r = boundValue(0, falloff * r, 255);
-		dl->color.g = boundValue(0, falloff * g, 255);
-		dl->color.b = boundValue(0, falloff * b, 255);
-		dl->radius = GetFlashlightRadius();
+		dl->color = gHUD.FlashlightColor();
+		dl->color.r *= falloff;
+		dl->color.g *= falloff;
+		dl->color.b *= falloff;
+		dl->radius = gHUD.FlashlightRadius();
 		dl->decay = 512; // Flashlight fade speed
 		dl->die = gEngfuncs.GetClientTime() + 0.1f;
 	}

@@ -71,10 +71,6 @@ typedef struct cvar_s cvar_t;
 
 extern cvar_t* cl_muzzlelight_monsters;
 
-extern cvar_t* cl_flashlight_custom;
-extern cvar_t* cl_flashlight_radius;
-extern cvar_t* cl_flashlight_fade_distance;
-
 #define HUD_ACTIVE	1
 #define HUD_INTERMISSION 2
 
@@ -694,7 +690,7 @@ struct ClientFeatures
 	ClientFeatures();
 
 	int hud_color;
-	int hud_min_alpha;
+	ConfigurableBoundedValue hud_min_alpha;
 	int hud_color_critical;
 
 	bool hud_draw_nosuit;
@@ -736,7 +732,9 @@ private:
 	int							m_iSpriteCount;
 	int							m_iSpriteCountAllRes;
 	float						m_flMouseSensitivity;
-	int							m_iConcussionEffect; 
+	int							m_iConcussionEffect;
+
+	int m_cachedMinAlpha; // cache per frame
 
 public:
 	HSPRITE						m_hsprCursor;
@@ -754,6 +752,8 @@ public:
 	cvar_t	*m_pCvarDraw;
 	cvar_t	*m_pCvarDrawMoveMode;
 	cvar_t	*m_pCvarCrosshair;
+
+	cvar_t	*m_pCvarMinAlpha;
 
 	int m_iFontHeight;
 	int DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -787,7 +787,7 @@ public:
 
 	int HUDColor();
 	int HUDColorCritical();
-	int MinHUDAlpha();
+	int MinHUDAlpha() const;
 	ClientFeatures clientFeatures;
 
 	bool HasSuit() const
@@ -803,10 +803,15 @@ public:
 		return (m_iItemBits & PLAYER_ITEM_NIGHTVISION) != 0;
 	}
 	bool ViewBobEnabled();
+	int CalcMinHUDAlpha();
 	bool WeaponWallpuffEnabled();
 	bool WeaponSparksEnabled();
 	bool MuzzleLightEnabled();
 	bool CustomFlashlightEnabled();
+	float FlashlightRadius();
+	float FlashlightDistance();
+	float FlashlightFadeDistance();
+	color24 FlashlightColor();
 	int NVGStyle();
 	bool MoveModeEnabled();
 private:
