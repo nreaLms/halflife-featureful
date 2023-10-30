@@ -95,6 +95,10 @@ void CHud::Think( void )
 int CHud::Redraw( float flTime, int intermission )
 {
 	m_cachedMinAlpha = CalcMinHUDAlpha();
+	int hudR = m_pCvarHudRed->value;
+	int hudG = m_pCvarHudGreen->value;
+	int hudB = m_pCvarHudBlue->value;
+	m_cachedHudColor = ((hudR & 0xFF) << 16) | ((hudG & 0xFF) << 8) | (hudB & 0xFF);
 
 	m_fOldTime = m_flTime;	// save time of previous redraw
 	m_flTime = flTime;
@@ -521,7 +525,7 @@ void CHud::DrawDarkRectangle( int x, int y, int wide, int tall )
 
 int CHud::HUDColor()
 {
-	int result = HasSuit() ? clientFeatures.hud_color : clientFeatures.hud_color_nosuit;
+	int result = HasSuit() ? m_cachedHudColor : clientFeatures.hud_color_nosuit;
 #if FEATURE_NIGHTVISION
 	if (this == &gHUD && gHUD.m_Nightvision.IsOn()) {
 		result = clientFeatures.hud_color_nvg;

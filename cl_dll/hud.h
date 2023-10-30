@@ -735,6 +735,7 @@ private:
 	int							m_iConcussionEffect;
 
 	int m_cachedMinAlpha; // cache per frame
+	int m_cachedHudColor;
 
 public:
 	HSPRITE						m_hsprCursor;
@@ -754,6 +755,9 @@ public:
 	cvar_t	*m_pCvarCrosshair;
 
 	cvar_t	*m_pCvarMinAlpha;
+	cvar_t	*m_pCvarHudRed;
+	cvar_t	*m_pCvarHudGreen;
+	cvar_t	*m_pCvarHudBlue;
 
 	int m_iFontHeight;
 	int DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -785,6 +789,7 @@ public:
 
 	typedef ConsoleText UtfText;
 
+	void HUDColorCmd();
 	int HUDColor();
 	int HUDColorCritical();
 	int MinHUDAlpha() const;
@@ -891,7 +896,6 @@ public:
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
 
 	int _cdecl MsgFunc_Items(const char* pszName, int iSize, void* pbuf);
-	int _cdecl MsgFunc_HUDColor( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_KeyedDLight( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_WallPuffs( const char *pszName, int iSize, void *pbuf );

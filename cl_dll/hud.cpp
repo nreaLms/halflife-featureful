@@ -265,11 +265,6 @@ int __MsgFunc_Items(const char* pszName, int iSize, void* pbuf)
 	return gHUD.MsgFunc_Items(pszName, iSize, pbuf);
 }
 
-int __MsgFunc_HUDColor(const char *pszName, int iSize, void *pbuf)
-{
-	return gHUD.MsgFunc_HUDColor(pszName, iSize, pbuf );
-}
-
 //LRC
 int __MsgFunc_SetFog(const char *pszName, int iSize, void *pbuf)
 {
@@ -539,6 +534,11 @@ int __MsgFunc_AllowSpec( const char *pszName, int iSize, void *pbuf )
 #endif
 	return 0;
 }
+
+void __CmdFunc_HUDColor()
+{
+	gHUD.HUDColorCmd();
+}
  
 // This is called every time the DLL is loaded
 void CHud::Init( void )
@@ -551,7 +551,6 @@ void CHud::Init( void )
 	HOOK_MESSAGE( SetFOV );
 	HOOK_MESSAGE( Concuss );
 	HOOK_MESSAGE( Items );
-	HOOK_MESSAGE( HUDColor );
 	HOOK_MESSAGE( SetFog );
 	HOOK_MESSAGE( KeyedDLight );
 	HOOK_MESSAGE( WallPuffs );
@@ -593,6 +592,8 @@ void CHud::Init( void )
 
 	HOOK_MESSAGE( PlayMP3 );
 
+	HOOK_COMMAND( "hud_color", HUDColor );
+
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 
@@ -617,6 +618,11 @@ void CHud::Init( void )
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "200", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 	CreateIntegerCvarConditionally(m_pCvarMinAlpha, "hud_min_alpha", clientFeatures.hud_min_alpha);
+	int hudR, hudG, hudB;
+	UnpackRGB(hudR, hudG, hudB, clientFeatures.hud_color);
+	m_pCvarHudRed = CVAR_CREATE_INTVALUE("hud_color_r", hudR, FCVAR_ARCHIVE);
+	m_pCvarHudGreen = CVAR_CREATE_INTVALUE("hud_color_g", hudG, FCVAR_ARCHIVE);
+	m_pCvarHudBlue = CVAR_CREATE_INTVALUE("hud_color_b", hudB, FCVAR_ARCHIVE);
 
 	CreateBooleanCvarConditionally(cl_weapon_sparks, "cl_weapon_sparks", clientFeatures.weapon_sparks);
 	CreateBooleanCvarConditionally(cl_weapon_wallpuff, "cl_weapon_wallpuff", clientFeatures.weapon_wallpuff);
@@ -1174,15 +1180,6 @@ int CHud::MsgFunc_Items(const char *pszName,  int iSize, void *pbuf)
 	return 1;
 }
 
-int CHud::MsgFunc_HUDColor(const char *pszName,  int iSize, void *pbuf)
-{
-	BEGIN_READ( pbuf, iSize );
-
-	clientFeatures.hud_color = READ_LONG();
-
-	return 1;
-}
-
 float g_lastFOV = 0.0;
 
 /*
@@ -1454,6 +1451,81 @@ int CHud::NVGStyle()
 bool CHud::MoveModeEnabled()
 {
 	return ClientFeatureEnabled(m_pCvarDrawMoveMode, clientFeatures.movemode.enabled_by_default);
+}
+
+void CHud::HUDColorCmd()
+{
+	int r, g, b;
+	bool shouldPrintHelp = false;
+
+	if ( gEngfuncs.Cmd_Argc() == 4 )
+	{
+		r = atoi(gEngfuncs.Cmd_Argv(1));
+		g = atoi(gEngfuncs.Cmd_Argv(2));
+		b = atoi(gEngfuncs.Cmd_Argv(3));
+	}
+	else if ( gEngfuncs.Cmd_Argc() == 2 )
+	{
+		const char* param = gEngfuncs.Cmd_Argv(1);
+		if (param && *param)
+		{
+			if (strcmp(param, "default") == 0)
+			{
+				UnpackRGB(r, g, b, clientFeatures.hud_color);
+			}
+			else if (strncmp(param, "0x", 2) == 0)
+			{
+				if (strlen(param) != 8)
+				{
+					gEngfuncs.Con_Printf("6 hex digits expected after 0x\n");
+					shouldPrintHelp = true;
+				}
+				else
+				{
+					char* endPtr;
+					long color = strtol(param+2, &endPtr, 16);
+					UnpackRGB(r, g, b, color);
+					if (*endPtr != '\0')
+					{
+						gEngfuncs.Con_Printf("Error parsing hex value\n");
+						shouldPrintHelp = true;
+					}
+				}
+			}
+			else
+			{
+				if (sscanf(param, "%d %d %d", &r, &g, &b) != 3)
+				{
+					gEngfuncs.Con_Printf("Expected three integer values\n");
+					shouldPrintHelp = true;
+				}
+			}
+		}
+		else
+		{
+			shouldPrintHelp = true;
+		}
+	}
+	else
+	{
+		shouldPrintHelp = true;
+	}
+
+	if (shouldPrintHelp)
+	{
+		gEngfuncs.Con_Printf( "usage:\n"
+							  "hud_color RRR GGG BBB\n"
+							  "hud_color \"RRR GGG BBB\"\n"
+							  "hud_color 0xRRGGBB\n"
+							  "hud_color default\n" );
+	}
+	else
+	{
+		gEngfuncs.Cvar_SetValue("hud_color_r", r);
+		gEngfuncs.Cvar_SetValue("hud_color_g", g);
+		gEngfuncs.Cvar_SetValue("hud_color_b", b);
+		gEngfuncs.Con_Printf("Set hud color to (%d, %d, %d)\n", r, g, b);
+	}
 }
 
 #if FEATURE_MOVE_MODE
