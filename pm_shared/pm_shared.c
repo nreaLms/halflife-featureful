@@ -483,9 +483,6 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_LADDER:
-		if (pmove->flags & FL_IMMUNE_SLIME) {
-			break;
-		}
 		switch( irand )
 		{
 		// right foot
@@ -609,7 +606,7 @@ void PM_UpdateStepSound( void )
 	speed = Length( pmove->velocity );
 
 	// determine if we are on a ladder
-	fLadder = ( pmove->movetype == MOVETYPE_FLY );// IsOnLadder();
+	fLadder = ( pmove->movetype == MOVETYPE_FLY ) && (pmove->flags & FL_IMMUNE_SLIME) == 0;// IsOnLadder();
 
 	// UNDONE: need defined numbers for run, walk, crouch, crouch run velocities!!!!	
 	if( ( pmove->flags & FL_DUCKING) || fLadder )
