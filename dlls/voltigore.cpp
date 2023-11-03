@@ -914,10 +914,7 @@ Schedule_t *CVoltigore::GetSchedule(void)
 			return GetScheduleOfType(SCHED_MELEE_ATTACK1);
 		}
 
-		if (m_flNextBeamAttackCheck - gpGlobals->time < 1.0)
-			return GetScheduleOfType(SCHED_STANDOFF);
-		else
-			return GetScheduleOfType(SCHED_CHASE_ENEMY);
+		return GetScheduleOfType(SCHED_CHASE_ENEMY);
 
 		break;
 	}
