@@ -5728,7 +5728,7 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 	if( pPlayer ) {
 		int stripFlags = pev->spawnflags;
-		if (g_modFeatures.suit_light != ModFeatures::SUIT_LIGHT_NOTHING)
+		if (FBitSet(pev->spawnflags, STRIP_SUIT) && g_modFeatures.suit_light != ModFeatures::SUIT_LIGHT_NOTHING)
 			stripFlags |= STRIP_SUITLIGHT;
 		pPlayer->RemoveAllItems( stripFlags );
 		if (!FStringNull(pev->noise))
