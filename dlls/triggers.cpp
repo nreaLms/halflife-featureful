@@ -3233,8 +3233,10 @@ void CTriggerCamera::FollowTarget()
 	if( m_hTarget == 0 || m_flReturnTime < gpGlobals->time )
 	{
 		CBasePlayer* player = static_cast<CBasePlayer*>(static_cast<CBaseEntity*>(m_hPlayer));
+		const bool playerIsAlive = player->IsAlive();
+		const bool shouldReset = !playerIsAlive && FBitSet( pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL );
 
-		if( player->IsAlive() )
+		if( playerIsAlive || shouldReset )
 		{
 			SET_VIEW( player->edict(), player->edict() );
 			player->EnableControl( TRUE );
