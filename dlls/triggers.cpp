@@ -2082,8 +2082,14 @@ void CChangeLevel::ChangeLevelNow( CBaseEntity *pActivator )
 	pev->dmgtime = gpGlobals->time;
 
 	CBaseEntity *pPlayer = g_pGameRules->EffectivePlayer(pActivator);
-	if (!pPlayer) {
-		ALERT(at_aiconsole, "Could not find a player who activated the change level, aborting\n");
+	if (!pPlayer)
+	{
+		ALERT(at_aiconsole, "Could not find a player who activated the changelevel, transition not allowed\n");
+		return;
+	}
+	if (!pPlayer->IsAlive() && !g_pGameRules->IsMultiplayer())
+	{
+		ALERT(at_aiconsole, "The player who activated the changelevel has died, transition not allowed\n");
 		return;
 	}
 
