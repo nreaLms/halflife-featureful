@@ -7179,6 +7179,7 @@
 		1: "Start At Player" : 1
 		2: "Follow Player" : 1
 		4: "Freeze Player" : 0
+		1024: "Alive player only" : 0
 	]
 	speed(string) : "Initial Speed" : "0"
 	acceleration(string) : "Acceleration units/sec^2" : "500"
