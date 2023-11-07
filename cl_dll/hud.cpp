@@ -1513,11 +1513,17 @@ void CHud::HUDColorCmd()
 
 	if (shouldPrintHelp)
 	{
-		gEngfuncs.Con_Printf( "usage:\n"
+		const int hudR = m_pCvarHudRed->value;
+		const int hudG = m_pCvarHudGreen->value;
+		const int hudB = m_pCvarHudBlue->value;
+		const int currentHudColor = ((hudR & 0xFF) << 16) | ((hudG & 0xFF) << 8) | (hudB & 0xFF);
+		gEngfuncs.Con_Printf( "Current HUD color: %d %d %d (%06X)\n"
+							  "usage:\n"
 							  "hud_color RRR GGG BBB\n"
 							  "hud_color \"RRR GGG BBB\"\n"
 							  "hud_color 0xRRGGBB\n"
-							  "hud_color default\n" );
+							  "hud_color default\n",
+							  hudR, hudG, hudB, currentHudColor);
 	}
 	else
 	{
