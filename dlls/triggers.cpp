@@ -3064,6 +3064,8 @@ public:
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	virtual int ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	void UpdateOnRemove();
+	void ReleasePlayer();
 	static TYPEDESCRIPTION m_SaveData[];
 
 	EHANDLE m_hPlayer;
@@ -3250,8 +3252,7 @@ void CTriggerCamera::FollowTarget()
 
 		if( playerIsAlive || shouldReset || shouldTurnOff )
 		{
-			SET_VIEW( player->edict(), player->edict() );
-			player->EnableControl( TRUE );
+			ReleasePlayer();
 		}
 
 		player->m_hViewEntity = 0;
@@ -3347,6 +3348,27 @@ void CTriggerCamera::Move()
 
 	float fraction = 2 * gpGlobals->frametime;
 	pev->velocity = ( ( pev->movedir * pev->speed ) * fraction ) + ( pev->velocity * ( 1 - fraction ) );
+}
+
+void CTriggerCamera::UpdateOnRemove()
+{
+	if (m_state)
+	{
+		ReleasePlayer();
+		m_state = 0;
+	}
+	CBaseDelay::UpdateOnRemove();
+}
+
+void CTriggerCamera::ReleasePlayer()
+{
+	CBasePlayer* player = static_cast<CBasePlayer*>(static_cast<CBaseEntity*>(m_hPlayer));
+	if (player)
+	{
+		SET_VIEW( player->edict(), player->edict() );
+		if (FBitSet( pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL ))
+			player->EnableControl( TRUE );
+	}
 }
 
 #if FEATURE_TRIGGER_RANDOM
