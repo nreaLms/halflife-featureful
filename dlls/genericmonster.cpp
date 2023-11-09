@@ -75,7 +75,7 @@ IMPLEMENT_SAVERESTORE( CGenericMonster, CBaseMonster )
 //=========================================================
 int CGenericMonster::DefaultClassify( void )
 {
-	return (pev->spawnflags & SF_GENERICMONSTER_NOTSOLID) ? CLASS_NONE : CLASS_PLAYER_ALLY;
+	return pev->takedamage ? CLASS_PLAYER_ALLY : CLASS_NONE;
 }
 
 //=========================================================
