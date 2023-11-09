@@ -241,6 +241,8 @@ protected:
 	void PrecacheHelper();
 	void SpawnHelper(const char* defaultModel, float defaultHealth);
 	void SpeakCaughtEnemy();
+
+	virtual bool HasWeaponEquiped();
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
@@ -318,6 +320,9 @@ public:
 	BOOL m_fHealing;
 	EHANDLE m_hLeadingPlayer;
 	BOOL m_fSaidHeal;
+
+protected:
+	bool HasWeaponEquiped();
 };
 
 TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
@@ -1251,7 +1256,7 @@ int CHFGrunt :: DefaultISoundMask ( void)
 //=========================================================
 void CHFGrunt :: CheckAmmo ( void )
 {
-	if ( m_cAmmoLoaded <= 0 )
+	if ( m_cClipSize > 0 && m_cAmmoLoaded <= 0 )
 	{
 		SetConditions(bits_COND_NO_AMMO_LOADED);
 	}
@@ -1383,9 +1388,14 @@ BOOL CHFGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 // occluded (throw grenade over wall, etc). We must
 // disqualify the machine gun attack if the enemy is occluded.
 //=========================================================
+bool CHFGrunt::HasWeaponEquiped()
+{
+	return GetBodygroup( FG_GUN_GROUP ) != FG_GUN_NONE;
+}
+
 BOOL CHFGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 {
-	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 2048 && flDot >= 0.5 && NoFriendlyFire() && ( GetBodygroup( 3 ) != 3 ) )
+	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 2048 && flDot >= 0.5 && HasWeaponEquiped() && NoFriendlyFire() )
 	{
 		TraceResult	tr;
 
@@ -1869,32 +1879,37 @@ void CHFGrunt :: Spawn()
 		{
 			m_iHead = RANDOM_LONG(FG_HEAD_SAW, FG_HEAD_SAW_BLACK);
 		}
+		else if (pev->weapons == 0)
+		{
+			m_iHead = FG_HEAD_MP;
+		}
 		else
 			m_iHead = FG_HEAD_MASK;
 	}
 	else if ( m_iHead >= FG_HEAD_COUNT )
 		m_iHead = FG_HEAD_MASK;
 
-	if ( pev->weapons <= 0 )
-	{
-		pev->weapons = FGRUNT_9MMAR;
-	}
-	if (FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
-	{
-		SetBodygroup( FG_GUN_GROUP, FG_GUN_SHOTGUN );
-		SetBodygroup( FG_TORSO_GROUP, FG_TORSO_SHOTGUN );
-		m_cClipSize		= 8;
-	}
 	if (FBitSet( pev->weapons, FGRUNT_9MMAR ))
 	{
 		SetBodygroup( FG_GUN_GROUP, FG_GUN_MP5 );
 		m_cClipSize	= FGRUNT_CLIP_SIZE;
 	}
-	if (FBitSet( pev->weapons, FGRUNT_M249 ))
+	else if (FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
+	{
+		SetBodygroup( FG_GUN_GROUP, FG_GUN_SHOTGUN );
+		SetBodygroup( FG_TORSO_GROUP, FG_TORSO_SHOTGUN );
+		m_cClipSize		= 8;
+	}
+	else if (FBitSet( pev->weapons, FGRUNT_M249 ))
 	{
 		SetBodygroup( FG_GUN_GROUP, FG_GUN_SAW );
 		SetBodygroup( FG_TORSO_GROUP, FG_TORSO_M249 );
 		m_cClipSize	= FGRUNT_CLIP_SIZE;
+	}
+	else
+	{
+		SetBodygroup( FG_GUN_GROUP, FG_GUN_NONE );
+		m_cClipSize = 0;
 	}
 
 	SetBodygroup( FG_HEAD_GROUP, m_iHead );
@@ -2454,7 +2469,7 @@ Schedule_t *CHFGrunt::GetReloadSchedule()
 	{
 		return GetScheduleOfType ( SCHED_RELOAD );
 	}
-	else if ( m_cAmmoLoaded <= m_cClipSize/2 )
+	else if ( m_cClipSize > 0 && m_cAmmoLoaded <= m_cClipSize/2 )
 	{
 		return GetScheduleOfType( SCHED_HGRUNT_ALLY_RELOAD_NOT_EMPTY );
 	}
@@ -2928,6 +2943,9 @@ public:
 	CBeam *m_pBeam;
 	BOOL m_torchActive;
 	BOOL m_gasTankExploded;
+
+protected:
+	bool HasWeaponEquiped();
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_torch_ally, CTorch )
@@ -3049,9 +3067,14 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 	}
 }
 
+bool CTorch::HasWeaponEquiped()
+{
+	return FBitSet( pev->weapons, TORCH_EAGLE );
+}
+
 BOOL CTorch::CheckRangeAttack1(float flDot, float flDist)
 {
-	return FBitSet( pev->weapons, TORCH_EAGLE ) && CHFGrunt::CheckRangeAttack1(flDot, flDist);
+	return CHFGrunt::CheckRangeAttack1(flDot, flDist);
 }
 
 BOOL CTorch::CheckRangeAttack2(float flDot, float flDist)
@@ -3771,9 +3794,14 @@ void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
 	}
 }
 
+bool CMedic::HasWeaponEquiped()
+{
+	return FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN );
+}
+
 BOOL CMedic::CheckRangeAttack1(float flDot, float flDist)
 {
-	return FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && CHFGrunt::CheckRangeAttack1(flDot, flDist);
+	return CHFGrunt::CheckRangeAttack1(flDot, flDist);
 }
 
 BOOL CMedic::CheckRangeAttack2(float flDot, float flDist)
