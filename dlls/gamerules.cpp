@@ -197,7 +197,7 @@ void CGameRules::RefreshSkillData ( void )
 	{
 		gSkillData.medicHealth = GetSkillCvar( "sk_medic_ally_health", "sk_hgrunt_health" );
 		gSkillData.medicDmgKick = GetSkillCvar( "sk_medic_ally_kick", "sk_hgrunt_kick" );
-		gSkillData.medicGrenadeSpeed = GetSkillCvar( "sk_medic_ally_gspeed", "sk_hgrunt_gspeed" );
+		gSkillData.medicGrenadeSpeed = GetSkillCvar( "sk_medic_ally_gspeed", gSkillData.fgruntGrenadeSpeed );
 		gSkillData.medicHeal = GetSkillCvar( "sk_medic_ally_heal" );
 	}
 
@@ -206,7 +206,7 @@ void CGameRules::RefreshSkillData ( void )
 	{
 		gSkillData.torchHealth = GetSkillCvar( "sk_torch_ally_health", "sk_hgrunt_health" );
 		gSkillData.torchDmgKick = GetSkillCvar( "sk_torch_ally_kick", "sk_hgrunt_kick" );
-		gSkillData.torchGrenadeSpeed = GetSkillCvar( "sk_torch_ally_gspeed", "sk_hgrunt_gspeed" );
+		gSkillData.torchGrenadeSpeed = GetSkillCvar( "sk_torch_ally_gspeed", gSkillData.fgruntGrenadeSpeed );
 	}
 #endif
 	// Hgrunt 

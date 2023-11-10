@@ -243,6 +243,7 @@ protected:
 	void SpeakCaughtEnemy();
 
 	virtual bool HasWeaponEquiped();
+	BOOL CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist , bool contact = false);
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_grunt_ally, CHFGrunt )
@@ -283,6 +284,7 @@ public:
 	void GibMonster();
 	const char* DefaultSentenceGroup(int group);
 
+	int LookupActivity(int activity);
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	Schedule_t *GetSchedule ( void );
@@ -1423,13 +1425,17 @@ BOOL CHFGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 // CheckRangeAttack2 - this checks the Grunt's grenade
 // attack.
 //=========================================================
-BOOL CHFGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
+BOOL CHFGrunt::CheckRangeAttack2 ( float flDot, float flDist )
 {
-	if (! FBitSet(pev->weapons, (FGRUNT_HANDGRENADE | FGRUNT_GRENADELAUNCHER)) )
+	if ( !FBitSet(pev->weapons, (FGRUNT_HANDGRENADE | FGRUNT_GRENADELAUNCHER)) )
 	{
 		return FALSE;
 	}
+	return CheckRangeAttack2Impl(gSkillData.fgruntGrenadeSpeed, flDot, flDist, FBitSet(pev->weapons, FGRUNT_GRENADELAUNCHER));
+}
 
+BOOL CHFGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist, bool contact )
+{
 	// if the grunt isn't moving, it's ok to check.
 	if ( m_flGroundSpeed != 0 )
 	{
@@ -1478,7 +1484,7 @@ BOOL CHFGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 		vecTarget = m_vecEnemyLKP + (m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin);
 		// estimate position
 		if (HasConditions( bits_COND_SEE_ENEMY))
-			vecTarget = vecTarget + ((vecTarget - pev->origin).Length() / gSkillData.fgruntGrenadeSpeed) * m_hEnemy->pev->velocity;
+			vecTarget = vecTarget + ((vecTarget - pev->origin).Length() / grenadeSpeed) * m_hEnemy->pev->velocity;
 	}
 
 	// are any of my allies near the intended grenade impact area?
@@ -1487,7 +1493,7 @@ BOOL CHFGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 		// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
 		m_fThrowGrenade = FALSE;
-		return m_fThrowGrenade;	//AJH need this or it is overridden later.
+		return m_fThrowGrenade;
 	}
 
 	if ( ( vecTarget - pev->origin ).Length2D() <= 256 )
@@ -1499,7 +1505,7 @@ BOOL CHFGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 	}
 
 
-	if (FBitSet( pev->weapons, FGRUNT_HANDGRENADE))
+	if ( !contact )
 	{
 		Vector vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.5 );
 
@@ -2365,15 +2371,14 @@ int CHFGrunt::LookupActivity(int activity)
 	case ACT_RANGE_ATTACK2:
 		// grunt is going to a secondary long range attack. This may be a thrown
 		// grenade or fired grenade, we must determine which and pick proper sequence
-		if ( pev->weapons & FGRUNT_HANDGRENADE )
-		{
-			// get toss anim
-			return LookupSequence( "throwgrenade" );
-		}
-		else if ( pev->weapons & FGRUNT_GRENADELAUNCHER )
+		if ( pev->weapons & FGRUNT_GRENADELAUNCHER )
 		{
 			// get launch anim
 			return LookupSequence( "launchgrenade" );
+		}
+		else
+		{
+			return LookupSequence( "throwgrenade" );
 		}
 	case ACT_RUN:
 		if ( pev->health <= FGRUNT_LIMP_HEALTH )
@@ -2899,6 +2904,7 @@ void CDeadFGrunt :: Spawn( )
 
 #define TORCH_EAGLE				( 1 << 0)
 #define TORCH_BLOWTORCH			( 1 << 1)
+#define TORCH_HANDGRENADE		( 1 << 2)
 
 // Weapon group
 #define TORCH_GUN_GROUP					2
@@ -2922,6 +2928,7 @@ public:
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	const char* DefaultDisplayName() { return "Human Torch"; }
 	void HandleAnimEvent( MonsterEvent_t* pEvent );
+	int LookupActivity(int activity);
 	BOOL CheckRangeAttack1(float flDot, float flDist);
 	BOOL CheckRangeAttack2(float flDot, float flDist);
 	void GibMonster();
@@ -3079,7 +3086,29 @@ BOOL CTorch::CheckRangeAttack1(float flDot, float flDist)
 
 BOOL CTorch::CheckRangeAttack2(float flDot, float flDist)
 {
-	return FALSE;
+	if (!FBitSet(pev->weapons, TORCH_HANDGRENADE))
+		return FALSE;
+	return CheckRangeAttack2Impl(gSkillData.torchGrenadeSpeed, flDot, flDist);
+}
+
+int CTorch::LookupActivity(int activity)
+{
+	switch ( activity )
+	{
+	case ACT_RANGE_ATTACK1:
+		if ( m_fStanding )
+		{
+			return LookupSequence( "standing_mp5" );
+		}
+		else
+		{
+			return LookupSequence( "crouching_mp5" );
+		}
+	case ACT_RANGE_ATTACK2:
+		return LookupSequence( "throwgrenade" );
+	default:
+		return CHFGrunt::LookupActivity(activity);
+	}
 }
 
 void CTorch::GibMonster()
@@ -3316,9 +3345,10 @@ void CDeadTorch::Spawn( )
 #define MEDIC_CLIP_SIZE 17
 #define MEDIC_CLIP_SIZE_EAGLE 7
 
-#define MEDIC_EAGLE 1 << 0
-#define MEDIC_HANDGUN 1 << 1
-#define MEDIC_NEEDLE 1 << 2
+#define MEDIC_EAGLE (1 << 0)
+#define MEDIC_HANDGUN (1 << 1)
+#define MEDIC_NEEDLE (1 << 2)
+#define MEDIC_HANDGRENADE (1 << 3)
 
 // Weapon group
 #define MEDIC_GUN_GROUP					3
@@ -3634,6 +3664,26 @@ void CMedic::OnChangeSchedule( Schedule_t *pNewSchedule )
 	CHFGrunt::OnChangeSchedule( pNewSchedule );
 }
 
+int CMedic::LookupActivity(int activity)
+{
+	switch ( activity )
+	{
+	case ACT_RANGE_ATTACK1:
+		if ( m_fStanding )
+		{
+			return LookupSequence( "standing_mp5" );
+		}
+		else
+		{
+			return LookupSequence( "crouching_mp5" );
+		}
+	case ACT_RANGE_ATTACK2:
+		return LookupSequence( "throwgrenade" );
+	default:
+		return CHFGrunt::LookupActivity(activity);
+	}
+}
+
 CBaseEntity* CMedic::FollowedPlayer()
 {
 	if (m_hLeadingPlayer != 0 && m_hLeadingPlayer->IsPlayer())
@@ -3806,7 +3856,10 @@ BOOL CMedic::CheckRangeAttack1(float flDot, float flDist)
 
 BOOL CMedic::CheckRangeAttack2(float flDot, float flDist)
 {
-	return FALSE;
+	if (!FBitSet(pev->weapons, MEDIC_HANDGRENADE))
+		return FALSE;
+	ALERT(at_console, "Checking for handgrenade attack! Grenade speed: %g\n", gSkillData.medicGrenadeSpeed);
+	return CheckRangeAttack2Impl(gSkillData.medicGrenadeSpeed, flDot, flDist);
 }
 
 void CMedic::GibMonster()

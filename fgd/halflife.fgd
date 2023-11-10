@@ -4884,7 +4884,9 @@
 	[
 		0 : "Default (Desert eagle)"
 		1 : "Desert Eagle"
+		9 : "Desert Eagle + HG"
 		2 : "9mm Handgun"
+		10 : "9mm Handgun + HG"
 		4 : "Hypodermic Needle"
 	]
 ]
@@ -5057,6 +5059,7 @@
 	weapons(Choices) : "Weapons" : 1 =
 	[
 		1 : "Desert Eagle"
+		5 : "Desert Eagle + HG"
 		2 : "Blow Torch"
 	]
 ]
