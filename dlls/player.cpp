@@ -2545,28 +2545,6 @@ void CBasePlayer::LetGoRope(float delay)
 		m_pRope = NULL;
 	}
 	m_bIsClimbing = false;
-
-//	TraceResult trace;
-//	UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, human_hull, edict(), &trace );
-//	if( trace.fStartSolid )
-//	{
-//		ALERT(at_aiconsole, "Player stuck. Trying to unstuck downwards\n");
-//		const float originZ = pev->origin.z;
-
-//		int i;
-//		for( i = 0; i < 8; i++ )
-//		{
-//			pev->origin.z -= 4;
-//			UTIL_TraceHull( pev->origin, pev->origin, ignore_monsters, human_hull, edict(), &trace );
-//			if( !trace.fStartSolid )
-//				break;
-//		}
-
-//		if (trace.fStartSolid)
-//		{
-//			pev->origin.z = originZ;
-//		}
-//	}
 }
 
 bool CBasePlayer::SetClosestOriginOnRope(const Vector &vecPos)

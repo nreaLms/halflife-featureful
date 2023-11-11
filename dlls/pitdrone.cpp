@@ -589,31 +589,24 @@ void CPitdrone::BodyChange(int horns)
 {
 	if (horns <= 0)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS0);
-	//		pev->body = PITDRONE_HORNS0;
 
 	if (horns == 1)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS6);
-	//		pev->body = PITDRONE_HORNS6;
 
 	if (horns == 2)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS5);
-	//		pev->body = PITDRONE_HORNS5;
 
 	if (horns == 3)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS4);
-	//		pev->body = PITDRONE_HORNS4;
 
 	if (horns == 4)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS3);
-	//		pev->body = PITDRONE_HORNS3;
 
 	if (horns == 5)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS2);
-	//		pev->body = PITDRONE_HORNS2;
 
 	if (horns >= 6)
 		SetBodygroup(HORNGROUP, PITDRONE_HORNS1);
-	//		pev->body = PITDRONE_HORNS1;
 
 	return;
 }
