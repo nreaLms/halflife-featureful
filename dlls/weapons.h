@@ -1470,12 +1470,6 @@ public:
 class CSporelauncher : public CShotgun
 {
 public:
-//#ifndef CLIENT_DLL
-//	int		Save(CSave &save);
-//	int		Restore(CRestore &restore);
-//	static	TYPEDESCRIPTION m_SaveData[];
-//#endif
-
 	void Spawn( void );
 	void Precache( void );
 	bool IsEnabledInMod();

@@ -2138,7 +2138,6 @@ void EV_SporeFire( event_args_t *args )
 
 	Vector	vecSpitOffset;
 	Vector	vecSpitDir;
-	int	iSpitModelIndex;
 
 	vecSpitDir.x = forward.x;
 	vecSpitDir.y = forward.y;
@@ -2150,10 +2149,10 @@ void EV_SporeFire( event_args_t *args )
 	vecSpitOffset = vecSpitOffset + right * 8;
 	vecSpitOffset = vecSpitOffset + up * 4;
 
-	iSpitModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/tinyspit.spr" );
-
+	int iSpitModelIndex = args->iparam2;
 	// spew the spittle temporary ents.
-	gEngfuncs.pEfxAPI->R_Sprite_Spray( (float*)&vecSpitOffset, (float*)&vecSpitDir, iSpitModelIndex, 8, 210, 25 );
+	if (iSpitModelIndex)
+		gEngfuncs.pEfxAPI->R_Sprite_Spray( (float*)&vecSpitOffset, (float*)&vecSpitDir, iSpitModelIndex, 8, 210, 25 );
 }
 //======================
 //	   SPORELAUNCHER END

@@ -27,10 +27,6 @@
 
 #if FEATURE_SPORELAUNCHER
 
-// special deathmatch shotgun spreads
-#define VECTOR_CONE_DM_SHOTGUN	Vector( 0.08716, 0.04362, 0.00  )// 10 degrees by 5 degrees
-#define VECTOR_CONE_DM_DOUBLESHOTGUN Vector( 0.17365, 0.04362, 0.00 ) // 20 degrees by 5 degrees
-
 LINK_ENTITY_TO_CLASS(weapon_sporelauncher, CSporelauncher)
 
 void CSporelauncher::Spawn()
@@ -149,11 +145,11 @@ void CSporelauncher::PrimaryAttack()
 		m_pPlayer->edict(),
 		m_usSporeFire,
 		0.0,
-		(float *)&g_vecZero,
-		(float *)&g_vecZero,
+		g_vecZero,
+		g_vecZero,
 		vecSrc.x,
 		vecSrc.y,
-		*(int*)&vecSrc.z,
+		(int)vecSrc.z,
 		m_iSquidSpitSprite,
 		0,
 		TRUE);
@@ -213,11 +209,11 @@ void CSporelauncher::SecondaryAttack(void)
 		m_pPlayer->edict(),
 		m_usSporeFire,
 		0.0,
-		(float *)&g_vecZero,
-		(float *)&g_vecZero,
+		g_vecZero,
+		g_vecZero,
 		vecSrc.x,
 		vecSrc.y,
-		*(int*)&vecSrc.z,
+		(int)vecSrc.z,
 		m_iSquidSpitSprite,
 		0,
 		0);
