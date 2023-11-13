@@ -208,6 +208,7 @@ int CHalfLifeRules::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled
 //=========================================================
 void CHalfLifeRules::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor )
 {
+	FireTargets( "game_playerdie", pVictim, pVictim );
 }
 
 //=========================================================
