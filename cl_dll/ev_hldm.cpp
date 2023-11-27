@@ -1789,7 +1789,11 @@ void EV_FireEagle( event_args_t *args )
 	vec3_t origin;
 	vec3_t angles;
 	vec3_t velocity;
+	int empty;
 
+	vec3_t ShellVelocity;
+	vec3_t ShellOrigin;
+	int shell;
 	vec3_t vecSrc, vecAiming;
 	vec3_t up, right, forward;
 	float flSpread = 0.01;
@@ -1799,16 +1803,23 @@ void EV_FireEagle( event_args_t *args )
 	VectorCopy( args->angles, angles );
 	VectorCopy( args->velocity, velocity );
 
+	empty = args->bparam1;
 	AngleVectors( angles, forward, right, up );
+
+	shell = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/shell.mdl" );
 
 	if( EV_IsLocal( idx ) )
 	{
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( EAGLE_SHOOT, 0 );
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( empty ? EAGLE_SHOOT_EMPTY : EAGLE_SHOOT, 0 );
 
 		V_PunchAxis( 0, -4.0 );
 	}
+
+	EV_GetDefaultShellInfo( args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, -9, 14, 9 );
+
+	EV_EjectBrass( ShellOrigin, ShellVelocity, angles[YAW], shell, TE_BOUNCE_SHELL );
 
 	// Play fire sound.
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/desert_eagle_fire.wav", gEngfuncs.pfnRandomFloat(0.8, 0.9), ATTN_NORM, 0, PITCH_NORM );
