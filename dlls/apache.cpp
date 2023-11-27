@@ -220,6 +220,7 @@ void CApache::NullThink( void )
 	StudioFrameAdvance();
 	FCheckAITrigger();
 	pev->nextthink = gpGlobals->time + 0.5f;
+	GlowShellUpdate();
 }
 
 void CApache::StartupUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -259,6 +260,7 @@ void CApache::DyingThink( void )
 {
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1f;
+	GlowShellUpdate();
 
 	pev->avelocity = pev->avelocity * 1.02f;
 
@@ -478,6 +480,7 @@ void CApache::HuntThink( void )
 {
 	StudioFrameAdvance();
 	pev->nextthink = gpGlobals->time + 0.1f;
+	GlowShellUpdate();
 
 	ShowDamage();
 

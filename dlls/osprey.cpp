@@ -916,6 +916,7 @@ void COsprey::Update()
 
 	ShowDamage();
 	FCheckAITrigger();
+	GlowShellUpdate();
 }
 
 int COsprey::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
