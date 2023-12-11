@@ -151,14 +151,14 @@ void CHGrunt::SpeakSentence( void )
 	}
 }
 
-bool CHGrunt::PlayGruntSentence(int sentence)
+bool CHGrunt::PlayGruntSentence(int sentence, int flags)
 {
-	return PlaySentenceGroup(SentenceByNumber(sentence));
+	return PlaySentenceGroup(SentenceByNumber(sentence), flags);
 }
 
-bool CHGrunt::PlaySentenceGroup(const char *group)
+bool CHGrunt::PlaySentenceGroup(const char *group, int flags)
 {
-	if (SENTENCEG_PlayRndSz( ENT(pev), group, SentenceVolume(), SentenceAttn(), 0, m_voicePitch) >= 0)
+	if (SENTENCEG_PlayRndSz( ENT(pev), group, SentenceVolume(), SentenceAttn(), flags, m_voicePitch) >= 0)
 	{
 		JustSpoke();
 		return true;
@@ -1237,7 +1237,7 @@ void CHGrunt::SpeakCaughtEnemy()
 		{
 			// Try HOSTILE sentense on non-player non-alien enemy
 			// Fallback to ALERT if allowed
-			const bool result = PlayGruntSentence(HGRUNT_SENT_HOSTILE);
+			const bool result = PlayGruntSentence(HGRUNT_SENT_HOSTILE, SND_DONT_REPORT_MISSING);
 			if (!result && !AlertSentenceIsForPlayerOnly())
 			{
 				PlayGruntSentence(HGRUNT_SENT_ALERT);

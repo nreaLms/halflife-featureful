@@ -446,6 +446,8 @@ extern DLL_GLOBAL int			g_Language;
 #define SND_CHANGE_VOL		(1<<6)		// duplicated in protocol.h change sound vol
 #define SND_CHANGE_PITCH	(1<<7)		// duplicated in protocol.h change sound pitch
 
+#define SND_DONT_REPORT_MISSING (1 << 16) // game library level flag, not part of a protocol
+
 #define	LFO_SQUARE			1
 #define LFO_TRIANGLE		2
 #define LFO_RANDOM			3

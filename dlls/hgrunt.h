@@ -80,8 +80,8 @@ public:
 	void PrescheduleThink( void );
 	void GibMonster( void );
 	virtual void SpeakSentence( void );
-	bool PlayGruntSentence(int sentence);
-	bool PlaySentenceGroup(const char* group);
+	bool PlayGruntSentence(int sentence, int flags = 0);
+	bool PlaySentenceGroup(const char* group, int flags = 0);
 	void PlaySentenceSound(const char* sound);
 	void PlayUseSentence();
 	void PlayUnUseSentence();

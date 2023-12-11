@@ -1432,13 +1432,17 @@ int SENTENCEG_PlayRndSz( edict_t *entity, const char *szgroupname, float volume,
 	isentenceg = SENTENCEG_GetIndex( szgroupname );
 	if( isentenceg < 0 )
 	{
-		ALERT( at_console, "No such sentence group %s\n", szgroupname );
+		if (!FBitSet(flags, SND_DONT_REPORT_MISSING))
+			ALERT( at_console, "No such sentence group %s\n", szgroupname );
 		return -1;
 	}
 
 	ipick = USENTENCEG_Pick( isentenceg, name );
 	if( ipick >= 0 && name[0] )
+	{
+		ClearBits(flags, SND_DONT_REPORT_MISSING);
 		EMIT_SOUND_DYN( entity, CHAN_VOICE, name, volume, attenuation, flags, pitch );
+	}
 
 	return ipick;
 }
