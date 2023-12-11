@@ -150,6 +150,18 @@ int CHudHealth::MsgFunc_Damage( const char *pszName, int iSize, void *pbuf )
 
 // Returns back a color from the
 // Green <-> Yellow <-> Red ramp
+void CHudHealth::GetHealthColor( int &r, int &g, int &b )
+{
+	if( m_iHealth > 25 )
+	{
+		UnpackRGB( r, g, b, gHUD.HUDColor() );
+	}
+	else
+	{
+		UnpackRGB( r, g, b, gHUD.HUDColorCritical() );
+	}
+}
+
 void CHudHealth::GetPainColor( int &r, int &g, int &b )
 {
 #if 0
@@ -166,11 +178,11 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #else
 	if( m_iHealth > 25 )
 	{
-		UnpackRGB( r, g, b, gHUD.HUDColor() );
+		UnpackRGB( r, g, b, RGB_YELLOWISH );
 	}
 	else
 	{
-		UnpackRGB( r, g, b, gHUD.HUDColorCritical() );
+		UnpackRGB( r, g, b, RGB_REDISH );
 	}
 #endif
 }
@@ -207,7 +219,7 @@ int CHudHealth::Draw( float flTime )
 	if( m_iHealth <= 15 )
 		a = 255;
 
-	GetPainColor( r, g, b );
+	GetHealthColor( r, g, b );
 	ScaleColors( r, g, b, a );
 
 	// Only draw health if we have the suit.
