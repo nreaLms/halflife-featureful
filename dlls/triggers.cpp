@@ -5473,6 +5473,14 @@ public:
 		else if (value > 0)
 			lvalue = value;
 	}
+	template<typename T>
+	static void MaySetResettableValue2(T& lvalue, T value)
+	{
+		if (value == -2)
+			lvalue = 0;
+		else if (value != 0)
+			lvalue = value;
+	}
 	void Affect(CBaseEntity* pEntity);
 
 	// For all these variables zero means no change
@@ -5486,6 +5494,9 @@ public:
 	int m_soundMask;
 
 	short m_prisonerTo;
+	short m_freeRoam;
+	short m_sizeForGrapple;
+	short m_gibPolicy;
 
 	short m_iTriggerCondition;
 	short m_iTriggerAltCondition;
@@ -5514,6 +5525,9 @@ TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iClass, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_soundMask, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_prisonerTo, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_freeRoam, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_sizeForGrapple, FIELD_SHORT ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_gibPolicy, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerCondition, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iTriggerAltCondition, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iszTriggerTarget, FIELD_STRING ),
@@ -5572,6 +5586,21 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "prisonerto"))
 	{
 		m_prisonerTo = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "freeroam" ) )
+	{
+		m_freeRoam = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "size_for_grapple" ) )
+	{
+		m_sizeForGrapple = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "gib_policy" ) )
+	{
+		m_gibPolicy = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "TriggerTarget" ) )
@@ -5682,17 +5711,13 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 		SetBits(pMonster->pev->flags, FL_MONSTERCLIP);
 	}
 
-	if (m_iClass == -2)
-		pMonster->m_iClass = 0;
-	else if (m_iClass)
-		pMonster->m_iClass = m_iClass;
-
-	if (m_soundMask == -2)
-		pMonster->m_customSoundMask = 0;
-	else if (m_soundMask)
-		pMonster->m_customSoundMask = m_soundMask;
+	MaySetResettableValue2(pMonster->m_iClass, m_iClass);
+	MaySetResettableValue2(pMonster->m_customSoundMask, m_soundMask);
 
 	MaySetResettableValue(pMonster->m_prisonerTo, m_prisonerTo);
+	MaySetResettableValue(pMonster->m_freeRoam, m_freeRoam);
+	MaySetResettableValue2(pMonster->m_sizeForGrapple, m_sizeForGrapple);
+	MaySetResettableValue(pMonster->m_gibPolicy, m_gibPolicy);
 
 	MaySetResettableValue(pMonster->m_iTriggerCondition, m_iTriggerCondition);
 	MaySetResettableValue(pMonster->m_iTriggerAltCondition, m_iTriggerAltCondition);

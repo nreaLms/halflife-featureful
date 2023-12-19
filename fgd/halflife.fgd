@@ -7432,6 +7432,30 @@
 		0 : "No change"
 		1 : "Add flag"
 	]
+	freeroam(choices) : "Monster Roaming (nodes)" =
+	[
+		-1 : "Reset to Map Default"
+		0 : "No change"
+		1 : "Never"
+		2 : "Always"
+	]
+	size_for_grapple(choices) : "Size For Grapple" =
+	[
+		-2 : "Reset to default"
+		-1 : "Not a Target"
+		0 : "No change"
+		1 : "Small"
+		2 : "Medium"
+		3 : "Large"
+		4 : "Fixed"
+	]
+	gib_policy(choices) : "Gibbing policy" =
+	[
+		-1 : "Reset to default"
+		0 : "No change"
+		1 : "Always gib"
+		2 : "Never gib"
+	]
 ]
 
 @PointClass base(Targetname, TriggerConfigureMonsterBase, CustomSentences) = trigger_configure_monster : "Change some monster's parameters and flags" []
