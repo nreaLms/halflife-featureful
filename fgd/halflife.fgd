@@ -5249,6 +5249,9 @@
 		7 : "death_end"
 	]
 ]
+
+@BaseClass base(Targetname, RenderFields, Angles) = DeadTurret []
+
 @PointClass base(Monster, Sequence) size(-16 -16 -32, 16 16 32) studio("models/miniturret.mdl") = monster_miniturret : "Mini Auto Turret"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -5269,6 +5272,24 @@
 	[
 		32 : "Autostart" : 0
 		64 : "Start Inactive" : 0
+	]
+]
+@PointClass base(DeadTurret) size(-16 -16 -32, 16 16 32) studio("models/miniturret.mdl") = monster_miniturret_dead : "Dead Mini Auto Turret"
+[
+	model(studio) : "Custom Model"
+	sequence(Choices) : "Animation Sequence (editor)" : 5 =
+	[
+		0 : "idle_off"
+		1 : "fire"
+		2 : "spin"
+		3 : "deploy"
+		4 : "retire"
+		5 : "die"
+	]
+	orientation(Choices) : "Orientation" : 0 =
+	[
+		0 : "Floor Mount"
+		1 : "Ceiling Mount"
 	]
 ]
 
@@ -6322,6 +6343,18 @@
 		64 : "Start Inactive" : 0
 	]
 ]
+@PointClass base(DeadTurret) size(-16 -16 0, 16 16 72) studio("models/sentry.mdl") = monster_sentry_dead : "Dead Sentry Turret Gun"
+[
+	sequence(Choices) : "Animation Sequence (editor)" : 5 =
+	[
+		0 : "idle_off"
+		1 : "fire"
+		2 : "spin"
+		3 : "deploy"
+		4 : "retire"
+		5 : "die"
+	]
+]
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 36) studio("models/w_squeak.mdl") = monster_snark : "Armed Snark" []
 
 @BaseClass color(0 200 200) base(Targetname) size(-16 -16 -16, 16 16 16) = MonsterTarget
@@ -6450,6 +6483,24 @@
 	[
 		32 : "Autostart" : 0
 		64 : "Start Inactive" : 0
+	]
+]
+@PointClass base(DeadTurret) size(-32 -32 -32, 32 32 32) studio("models/turret.mdl") = monster_turret_dead : "Dead Auto Turret"
+[
+	model(studio) : "Custom Model"
+	sequence(Choices) : "Animation Sequence (editor)" : 5 =
+	[
+		0 : "idle_off"
+		1 : "fire"
+		2 : "spin"
+		3 : "deploy"
+		4 : "retire"
+		5 : "die"
+	]
+	orientation(Choices) : "Orientation" : 0 =
+	[
+		0 : "Floor Mount"
+		1 : "Ceiling Mount"
 	]
 ]
 @PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/wheelchair_sci.mdl") = monster_wheelchair : "Dr. Keller" []

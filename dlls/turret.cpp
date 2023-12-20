@@ -1349,3 +1349,146 @@ void CSentry::SentryDeath( void )
 		SetThink( NULL );
 	}
 }
+
+class CBaseDeadTurret : public CBaseAnimating
+{
+public:
+	void Spawn();
+	void Precache();
+	void KeyValue( KeyValueData *pkvd );
+	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
+
+protected:
+	virtual void SetMyModel();
+	virtual const char* DefaultModel() = 0;
+
+	int m_iOrientation; // no need to save
+};
+
+void CBaseDeadTurret::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "orientation" ) )
+	{
+		m_iOrientation = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseAnimating::KeyValue(pkvd);
+}
+
+void CBaseDeadTurret::Precache()
+{
+	if (FStringNull(pev->model)) {
+		PRECACHE_MODEL( DefaultModel() );
+	} else {
+		PRECACHE_MODEL( STRING(pev->model) );
+	}
+}
+
+void CBaseDeadTurret::Spawn()
+{
+	Precache();
+	pev->movetype = MOVETYPE_FLY;
+	pev->solid		= SOLID_SLIDEBOX;
+	pev->sequence = TURRET_ANIM_DIE;
+	pev->frame = 255.0f;
+	pev->takedamage	= DAMAGE_NO;
+
+	ResetSequenceInfo();
+
+	SetMyModel();
+
+	SetBoneController( 0, 0 );
+	if (m_iOrientation == 0)
+		SetBoneController( 1, 0 );
+	else
+		SetBoneController( 1, -90 );
+
+	if( m_iOrientation == 1 )
+	{
+		pev->idealpitch = 180;
+		pev->angles.x = 180;
+		pev->effects |= EF_INVLIGHT;
+		pev->angles.y = pev->angles.y + 180;
+		if( pev->angles.y > 360 )
+			pev->angles.y = pev->angles.y - 360;
+	}
+}
+
+void CBaseDeadTurret::SetMyModel()
+{
+	if (FStringNull(pev->model)) {
+		SET_MODEL( ENT( pev ), DefaultModel() );
+	} else {
+		SET_MODEL( ENT( pev ), STRING(pev->model) );
+	}
+}
+
+void CBaseDeadTurret::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+{
+	if( ptr->iHitgroup == 10 )
+	{
+		// hit armor
+		if( pev->dmgtime != gpGlobals->time || (RANDOM_LONG( 0, 10 ) < 1 ) )
+		{
+			UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT( 1, 2 ) );
+			pev->dmgtime = gpGlobals->time;
+		}
+	}
+}
+
+class CDeadTurret : public CBaseDeadTurret
+{
+public:
+	void Spawn();
+protected:
+	const char* DefaultModel() {
+		return "models/turret.mdl";
+	}
+};
+
+LINK_ENTITY_TO_CLASS( monster_turret_dead, CDeadTurret )
+
+void CDeadTurret::Spawn()
+{
+	CBaseDeadTurret::Spawn();
+	UTIL_SetSize( pev, Vector( -32, -32, -16 ), Vector( 32, 32, 16 ) );
+}
+
+class CDeadMiniTurret : public CBaseDeadTurret
+{
+public:
+	void Spawn();
+protected:
+	const char* DefaultModel() {
+		return "models/miniturret.mdl";
+	}
+};
+
+LINK_ENTITY_TO_CLASS( monster_miniturret_dead, CDeadMiniTurret )
+
+void CDeadMiniTurret::Spawn()
+{
+	CBaseDeadTurret::Spawn();
+	UTIL_SetSize( pev, Vector( -16, -16, -16 ), Vector( 16, 16, 16 ) );
+}
+
+class CDeadSentry : public CBaseDeadTurret
+{
+public:
+	void Spawn();
+protected:
+	const char* DefaultModel() {
+		return "models/sentry.mdl";
+	}
+};
+
+LINK_ENTITY_TO_CLASS( monster_sentry_dead, CDeadSentry )
+
+void CDeadSentry::Spawn()
+{
+	CBaseDeadTurret::Spawn();
+	pev->solid = SOLID_NOT;
+	SetBoneController( 1, 0 );
+	UTIL_SetSize( pev, Vector( -16, -16, -64 ), Vector( 16, 16, 64 ) );
+}
