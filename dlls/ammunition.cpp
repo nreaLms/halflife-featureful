@@ -47,6 +47,17 @@ void CBasePlayerAmmo::Precache()
 	PRECACHE_SOUND( AMMO_PICKUP_SOUND );
 }
 
+void CBasePlayerAmmo::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "ammo_amount"))
+	{
+		SetCustomAmount(atoi(pkvd->szValue));
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPickup::KeyValue(pkvd);
+}
+
 Vector CBasePlayerAmmo::MyRespawnSpot()
 {
 	return g_pGameRules->VecAmmoRespawnSpot( this );
@@ -116,13 +127,13 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 	}
 }
 
-BOOL CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
+bool CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
 {
-	int amount = MyAmount();
 	const char* ammoName = AmmoName();
-
 	if (!ammoName)
 		return FALSE;
+
+	const int amount = MyAmount();
 
 	if ( pOther->GiveAmmo( amount, ammoName ) != -1 )
 	{
@@ -130,6 +141,17 @@ BOOL CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+int CBasePlayerAmmo::MyAmount()
+{
+	return pev->impulse > 0 ? pev->impulse : DefaultAmount();
+}
+
+void CBasePlayerAmmo::SetCustomAmount(int amount)
+{
+	if (amount >= 0)
+		pev->impulse = amount;
 }
 
 // Ammo entities
@@ -140,7 +162,7 @@ class CGlockAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_9mmclip.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_GLOCKCLIP_GIVE;
 	}
 	const char* AmmoName() {
@@ -156,7 +178,7 @@ class CPythonAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_357ammobox.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_357BOX_GIVE;
 	}
 	const char* AmmoName() {
@@ -171,7 +193,7 @@ class CMP5AmmoClip : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_9mmARclip.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_MP5CLIP_GIVE;
 	}
 	const char* AmmoName() {
@@ -187,7 +209,7 @@ class CMP5Chainammo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_chainammo.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_CHAINBOX_GIVE;
 	}
 	const char* AmmoName() {
@@ -202,7 +224,7 @@ class CMP5AmmoGrenade : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_ARgrenade.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_M203BOX_GIVE;
 	}
 	const char* AmmoName() {
@@ -218,7 +240,7 @@ class CShotgunAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_shotbox.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_BUCKSHOTBOX_GIVE;
 	}
 	const char* AmmoName() {
@@ -233,7 +255,7 @@ class CCrossbowAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_crossbow_clip.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_CROSSBOWCLIP_GIVE;
 	}
 	const char* AmmoName() {
@@ -248,7 +270,7 @@ class CRpgAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_rpgammo.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		int iGive;
 #ifdef CLIENT_DLL
 	if( bIsMultiplayer() )
@@ -277,7 +299,7 @@ class CGaussAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_gaussammo.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_URANIUMBOX_GIVE;
 	}
 	const char* AmmoName() {
@@ -290,7 +312,7 @@ class CEgonAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_chainammo.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_URANIUMBOX_GIVE;
 	}
 	const char* AmmoName() {
@@ -311,7 +333,7 @@ class CSniperrifleAmmo : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_m40a1clip.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_762BOX_GIVE;
 	}
 	const char* AmmoName() {
@@ -330,7 +352,7 @@ class CM249AmmoClip : public CBasePlayerAmmo
 	const char* MyModel() {
 		return "models/w_saw_clip.mdl";
 	}
-	int MyAmount() {
+	int DefaultAmount() {
 		return AMMO_556CLIP_GIVE;
 	}
 	const char* AmmoName() {

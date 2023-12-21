@@ -132,6 +132,7 @@ enum
 class CBaseEntity;
 class CBaseMonster;
 class CBasePlayerWeapon;
+class CBasePlayerAmmo;
 class CSquadMonster;
 
 #define SF_ITEM_TOUCH_ONLY 128
@@ -399,6 +400,7 @@ public:
 	virtual int SizeForGrapple() { return DefaultSizeForGrapple(); }
 	virtual bool IsDisplaceable() { return false; }
 	virtual CBasePlayerWeapon* MyWeaponPointer() {return NULL;}
+	virtual CBasePlayerAmmo* MyAmmoPointer() {return NULL;}
 
 	virtual bool IsAlienMonster() { return false; }
 	virtual bool IsMachine() { return DefaultClassify() == CLASS_MACHINE; }
