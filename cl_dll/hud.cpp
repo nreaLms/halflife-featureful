@@ -852,7 +852,7 @@ void CHud::ParseClientFeatures()
 	int i = 0;
 	while ( i<fileSize )
 	{
-		if (pfile[i] == ' ' || pfile[i] == '\r' || pfile[i] == '\n')
+		if (IsSpaceCharacter(pfile[i]))
 		{
 			++i;
 		}

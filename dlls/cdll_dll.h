@@ -24,14 +24,6 @@
 
 #define MAX_WEAPONS		32
 
-#if FEATURE_OPFOR_WEAPON_SLOTS
-#define MAX_WEAPON_SLOTS		7
-#define MAX_ITEM_TYPES			8
-#else
-#define MAX_WEAPON_SLOTS		5	// hud item selection slots
-#define MAX_ITEM_TYPES			6	// hud item selection slots
-#endif
-
 #define MAX_ITEMS				5	// hard coded item types
 
 #define	HIDEHUD_WEAPONS		( 1<<0 )

@@ -5,8 +5,9 @@
 #include <cstddef>
 
 bool IsValidIdentifierCharacter(char c);
+bool IsSpaceCharacter(char c);
 void SkipSpaceCharacters(const char* text, int& i, const int length);
-void SkipSpaces(const char* text, int& i, const int length);
+bool SkipSpaces(const char* text, int& i, const int length);
 void ConsumeNonSpaceCharacters(const char* text, int& i, const int length);
 void ConsumeLine(const char* text, int& i, const int length);
 void ConsumeLineSignificantOnly(const char* text, int& i, const int length);

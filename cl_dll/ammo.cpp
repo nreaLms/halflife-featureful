@@ -31,6 +31,8 @@
 #include "vgui_TeamFortressViewport.h"
 #endif
 
+#include "parsetext.h"
+
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
 						// this points to the active weapon menu item
 WEAPON *gpLastSel;		// Last weapon menu selection 
@@ -40,6 +42,161 @@ client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes
 WeaponsResource gWR;
 
 int g_weaponselect = 0;
+
+void WeaponsResource::Init()
+{
+	memset( rgWeapons, 0, sizeof rgWeapons );
+	memset( bucketPreferences, 0, sizeof bucketPreferences );
+	Reset();
+
+	const char* fileName = "features/hud_weapon_layout.cfg";
+	int fileSize = 0;
+	char* pfile = (char *)gEngfuncs.COM_LoadFile(fileName , 5, &fileSize );
+	if (pfile)
+	{
+		gEngfuncs.Con_DPrintf("Parsing HUD weapon positions from %s\n", fileName);
+
+		int weaponCount = 0;
+		int i = 0;
+		while ( i<fileSize )
+		{
+			if (IsSpaceCharacter(pfile[i]))
+			{
+				++i;
+			}
+			else if (pfile[i] == '/')
+			{
+				++i;
+				ConsumeLine(pfile, i, fileSize);
+			}
+			else
+			{
+				BucketPreference& preference = bucketPreferences[weaponCount];
+				const int weaponNameStart = i;
+				ConsumeNonSpaceCharacters(pfile, i, fileSize);
+				const int weaponNameLength = i - weaponNameStart;
+				if (weaponNameLength > 0 && weaponNameLength < MAX_WEAPON_NAME)
+				{
+					if (weaponCount >= MAX_WEAPONS)
+					{
+						gEngfuncs.Con_DPrintf("Too many entries in %s. Max is %d\n", fileName, MAX_WEAPONS);
+						break;
+					}
+					else
+					{
+						strncpy(preference.szName, pfile + weaponNameStart, weaponNameLength);
+						preference.szName[weaponNameLength] = '\0';
+
+						if (SkipSpaces(pfile, i, fileSize))
+						{
+							if (pfile[i] >= '0' && pfile[i] <= '0' + WEAPON_SLOTS_HARDLIMIT)
+							{
+								const int slotNumber = pfile[i] - '0';
+								preference.iPreferredSlot = slotNumber;
+								++i;
+
+								if (SkipSpaces(pfile, i, fileSize))
+								{
+									if (pfile[i] >= '0' && pfile[i] <= '0' + WEAPON_SLOTS_HARDLIMIT)
+									{
+										const int slotPosNumber = pfile[i] - '0';
+										preference.iPreferredSlotPos = slotPosNumber;
+										++i;
+									}
+									else
+									{
+										gEngfuncs.Con_DPrintf("Bad position in slot value for %s in %s\n", preference.szName, fileName);
+									}
+								}
+							}
+							else
+							{
+								gEngfuncs.Con_DPrintf("Bad slot value for %s in %s\n", preference.szName, fileName);
+							}
+						}
+						weaponCount++;
+					}
+				}
+				else
+				{
+					gEngfuncs.Con_DPrintf("Bad weapon name length in %s\n", fileName);
+				}
+				ConsumeLine(pfile, i, fileSize);
+			}
+		}
+		gEngfuncs.COM_FreeFile(pfile);
+	}
+
+	m_maxWeaponSlots = 5;
+}
+
+void WeaponsResource::Reset( void )
+{
+	iOldWeaponBits = 0;
+	memset( rgSlots, 0, sizeof rgSlots );
+	memset( riAmmo, 0, sizeof riAmmo );
+	memset( weaponTable, 0, sizeof weaponTable );
+}
+
+void WeaponsResource::AddWeapon(WEAPON *wp)
+{
+	// Check user preferences
+	bool foundUserPreference = false;
+	for (int i=0; i<sizeof(bucketPreferences)/sizeof(bucketPreferences[0]); ++i)
+	{
+		const BucketPreference& pref = bucketPreferences[i];
+		if (pref.szName[0] == '\0')
+			break;
+
+		if (pref.iPreferredSlot > 0 && strcmp(pref.szName, wp->szName) == 0)
+		{
+			// The user has preferred slot for this weapon
+			wp->iSlot = pref.iPreferredSlot - 1;
+			if (pref.iPreferredSlotPos > 0)
+				wp->iSlotPos = pref.iPreferredSlotPos - 1;
+			else // is position is not specified, to to the end of the bucket
+				wp->iSlotPos = MAX_WEAPON_POSITIONS-1;
+			foundUserPreference = true;
+			break;
+		}
+	}
+
+	// Check if there's a registered weapon with such position
+	WEAPON* registeredWeapon = weaponTable[wp->iSlot][wp->iSlotPos];
+	if (registeredWeapon && registeredWeapon->iId != wp->iId)
+	{
+		const char* weaponName = foundUserPreference ? registeredWeapon->szName : wp->szName;
+		gEngfuncs.Con_DPrintf("Searching unoccupied position for %s at slot %d\n", weaponName, wp->iSlot + 1);
+		int j;
+		for (j=0; j< MAX_WEAPON_POSITIONS; ++j)
+		{
+			if (weaponTable[wp->iSlot][j] == NULL)
+			{
+				// If it's user preference move the existing weapon to the unoccupied position
+				if (foundUserPreference)
+				{
+					registeredWeapon->iSlotPos = j;
+					weaponTable[wp->iSlot][j] = registeredWeapon;
+				}
+				// otherwise just find unoccupied position for this weapon
+				else
+				{
+					wp->iSlotPos = j;
+				}
+				break;
+			}
+		}
+		if (j >= MAX_WEAPON_POSITIONS)
+		{
+			gEngfuncs.Con_DPrintf("Coulnd't find unoccupied position for %s at slot %d\n", weaponName, wp->iSlot + 1);
+		}
+	}
+
+	rgWeapons[wp->iId] = *wp;
+	WEAPON* newWeapon = &rgWeapons[wp->iId];
+	weaponTable[newWeapon->iSlot][newWeapon->iSlotPos] = newWeapon;
+	LoadWeaponSprites( newWeapon );
+}
 
 void WeaponsResource::LoadAllWeaponSprites( void )
 {
@@ -214,7 +371,7 @@ WEAPON *WeaponsResource::GetFirstPos( int iSlot )
 
 WEAPON* WeaponsResource::GetNextActivePos( int iSlot, int iSlotPos )
 {
-	if ( iSlotPos >= MAX_WEAPON_POSITIONS || iSlot >= MAX_WEAPON_SLOTS )
+	if ( iSlotPos >= MAX_WEAPON_POSITIONS || iSlot >= m_maxWeaponSlots )
 		return NULL;
 
 	WEAPON *p = gWR.rgSlots[iSlot][iSlotPos + 1];
@@ -316,8 +473,17 @@ void CHudAmmo::Reset( void )
 int CHudAmmo::VidInit( void )
 {
 	// Load sprites for buckets (top row of weapon menu)
-	m_HUD_bucket0 = gHUD.GetSpriteIndex( "bucket1" );
 	m_HUD_selection = gHUD.GetSpriteIndex( "selection" );
+
+	char bucketName[8] = "bucket";
+	for (int i=0; i<sizeof(m_HUD_buckets)/sizeof(m_HUD_buckets[0]); ++i)
+	{
+		bucketName[6] = '0' + i + 1;
+		bucketName[7] = '\0';
+		m_HUD_buckets[i] = gHUD.GetSpriteIndex(bucketName);
+	}
+	m_HUD_bucket0 = m_HUD_buckets[0];
+	m_HUD_bucket_none = gHUD.GetSpriteIndex( "bucket0" );
 
 	ghsprBuckets = gHUD.GetSprite( m_HUD_bucket0 );
 	giBucketWidth = gHUD.GetSpriteRect( m_HUD_bucket0 ).right - gHUD.GetSpriteRect( m_HUD_bucket0 ).left;
@@ -422,7 +588,7 @@ void WeaponsResource::SelectSlot( int iSlot, int fAdvance, int iDirection )
 		return;
 	}
 
-	if( iSlot > MAX_WEAPON_SLOTS )
+	if( iSlot > m_maxWeaponSlots )
 		return;
 
 	if( gHUD.m_fPlayerDead || gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL ) )
@@ -667,6 +833,9 @@ int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 
 	gWR.AddWeapon( &Weapon );
 
+	if (Weapon.iSlot >= gWR.m_maxWeaponSlots)
+		gWR.m_maxWeaponSlots = Weapon.iSlot + 1;
+
 	return 1;
 }
 
@@ -766,7 +935,7 @@ void CHudAmmo::UserCmd_NextWeapon( void )
 
 	for( int loop = 0; loop <= 1; loop++ )
 	{
-		for( ; slot < MAX_WEAPON_SLOTS; slot++ )
+		for( ; slot < gWR.m_maxWeaponSlots; slot++ )
 		{
 			for( ; pos < MAX_WEAPON_POSITIONS; pos++ )
 			{
@@ -798,7 +967,7 @@ void CHudAmmo::UserCmd_PrevWeapon( void )
 		gpActiveSel = m_pWeapon;
 
 	int pos = MAX_WEAPON_POSITIONS - 1;
-	int slot = MAX_WEAPON_SLOTS - 1;
+	int slot = gWR.m_maxWeaponSlots - 1;
 	if( gpActiveSel )
 	{
 		pos = gpActiveSel->iSlotPos - 1;
@@ -823,7 +992,7 @@ void CHudAmmo::UserCmd_PrevWeapon( void )
 			pos = MAX_WEAPON_POSITIONS - 1;
 		}
 		
-		slot = MAX_WEAPON_SLOTS - 1;
+		slot = gWR.m_maxWeaponSlots - 1;
 	}
 
 	gpActiveSel = NULL;
@@ -1004,6 +1173,20 @@ void DrawAmmoBar( WEAPON *p, int x, int y, int width, int height )
 //
 // Draw Weapon Menu
 //
+int CHudAmmo::SpriteIndexForSlot(int iSlot)
+{
+	int result = -1;
+	if (iSlot >=0 && iSlot < sizeof(m_HUD_buckets)/sizeof(m_HUD_buckets[0]))
+	{
+		result = m_HUD_buckets[iSlot];
+	}
+	if (result == -1)
+	{
+		return m_HUD_bucket_none;
+	}
+	return result;
+}
+
 int CHudAmmo::DrawWList( float flTime )
 {
 	int r, g, b, x, y, a, i;
@@ -1032,7 +1215,7 @@ int CHudAmmo::DrawWList( float flTime )
 	}
 
 	// Draw top line
-	for( i = 0; i < MAX_WEAPON_SLOTS; i++ )
+	for( i = 0; i < gWR.m_maxWeaponSlots; i++ )
 	{
 		int iWidth;
 
@@ -1044,7 +1227,11 @@ int CHudAmmo::DrawWList( float flTime )
 			a = 192;
 
 		ScaleColors( r, g, b, 255 );
-		SPR_Set( gHUD.GetSprite( m_HUD_bucket0 + i ), r, g, b );
+
+		const int HUD_bucket = SpriteIndexForSlot(i);
+
+		if ( HUD_bucket != -1 )
+			SPR_Set( gHUD.GetSprite( HUD_bucket ), r, g, b );
 
 		// make active slot wide enough to accomodate gun pictures
 		if( i == iActiveSlot )
@@ -1058,7 +1245,10 @@ int CHudAmmo::DrawWList( float flTime )
 		else
 			iWidth = giBucketWidth;
 
-		SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( m_HUD_bucket0 + i ) );
+		if ( HUD_bucket != -1 )
+			SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( HUD_bucket ) );
+		else
+			FillRGBA( x, y, iWidth, giBucketHeight, r, g, b, 128 );
 		
 		x += iWidth + 5;
 	}
@@ -1067,7 +1257,7 @@ int CHudAmmo::DrawWList( float flTime )
 	x = 10;
 
 	// Draw all of the buckets
-	for( i = 0; i < MAX_WEAPON_SLOTS; i++ )
+	for( i = 0; i < gWR.m_maxWeaponSlots; i++ )
 	{
 		y = giBucketHeight + 10;
 

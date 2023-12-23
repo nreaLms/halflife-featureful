@@ -22,6 +22,8 @@
 
 #define WEAPON_IS_ONTARGET 0x40
 
+#define WEAPON_SLOTS_HARDLIMIT 7
+
 struct WEAPON
 {
 	char	szName[MAX_WEAPON_NAME];

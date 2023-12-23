@@ -19,8 +19,17 @@
 #if !defined(AMMOHISTORY_H)
 #define AMMOHISTORY_H
 
+#include "ammo.h"
+
 // this is the max number of items in each bucket
-#define MAX_WEAPON_POSITIONS		7
+#define MAX_WEAPON_POSITIONS		8
+
+struct BucketPreference
+{
+	char szName[MAX_WEAPON_NAME];
+	int iPreferredSlot;
+	int iPreferredSlotPos;
+};
 
 class WeaponsResource
 {
@@ -29,32 +38,21 @@ private:
 	WEAPON		rgWeapons[MAX_WEAPONS];	// Weapons Array
 
 	// counts of weapons * ammo
-	WEAPON*		rgSlots[MAX_WEAPON_SLOTS + 1][MAX_WEAPON_POSITIONS + 1];	// The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
+	WEAPON*		rgSlots[WEAPON_SLOTS_HARDLIMIT][MAX_WEAPON_POSITIONS + 1];	// The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
 	int			riAmmo[MAX_AMMO_TYPES];					// count of each ammo type
 
+	WEAPON*	weaponTable[WEAPON_SLOTS_HARDLIMIT][MAX_WEAPON_POSITIONS + 1]; // Unlike rgSlots this is always filled with registered weapons
+	BucketPreference bucketPreferences[MAX_WEAPONS];
 public:
-	void Init( void )
-	{
-		memset( rgWeapons, 0, sizeof rgWeapons );
-		Reset();
-	}
+	void Init( void );
 
-	void Reset( void )
-	{
-		iOldWeaponBits = 0;
-		memset( rgSlots, 0, sizeof rgSlots );
-		memset( riAmmo, 0, sizeof riAmmo );
-	}
+	void Reset( void );
 
 ///// WEAPON /////
 	int			iOldWeaponBits;
 
 	WEAPON *GetWeapon( int iId ) { return &rgWeapons[iId]; }
-	void AddWeapon( WEAPON *wp ) 
-	{ 
-		rgWeapons[wp->iId] = *wp;	
-		LoadWeaponSprites( &rgWeapons[wp->iId] );
-	}
+	void AddWeapon( WEAPON *wp );
 
 	void PickupWeapon( WEAPON *wp )
 	{
@@ -93,6 +91,8 @@ public:
 	int CountAmmo( int iId );
 
 	HSPRITE* GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect );
+
+	int m_maxWeaponSlots;
 };
 
 extern WeaponsResource gWR;

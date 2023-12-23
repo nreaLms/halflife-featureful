@@ -7,20 +7,27 @@ bool IsValidIdentifierCharacter(char c)
 	return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
 }
 
+bool IsSpaceCharacter(char c)
+{
+	return c == ' ' || c == '\r' || c == '\n';
+}
+
 void SkipSpaceCharacters(const char* text, int& i, const int length)
 {
-	while (i<length && (text[i] == ' ' || text[i] == '\r' || text[i] == '\n'))
+	while (i<length && IsSpaceCharacter(text[i]))
 	{
 		++i;
 	}
 }
 
-void SkipSpaces(const char *text, int& i, const int length)
+bool SkipSpaces(const char *text, int& i, const int length)
 {
+	int start = i;
 	while (i<length && text[i] == ' ')
 	{
 		++i;
 	}
+	return i > start;
 }
 
 void ConsumeNonSpaceCharacters(const char *text, int& i, const int length)

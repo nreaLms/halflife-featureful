@@ -123,6 +123,7 @@ public:
 	int Draw( float flTime );
 	void Think( void );
 	void Reset( void );
+	int SpriteIndexForSlot(int iSlot);
 	int DrawWList( float flTime );
 	int MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf );
@@ -153,6 +154,8 @@ private:
 	WEAPON *m_pWeapon;
 	int m_HUD_bucket0;
 	int m_HUD_selection;
+	int m_HUD_buckets[WEAPON_SLOTS_HARDLIMIT];
+	int m_HUD_bucket_none;
 };
 
 //
