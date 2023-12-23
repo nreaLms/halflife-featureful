@@ -123,6 +123,8 @@ public:
 
 	float m_spawnDelay;
 	int m_delayedCount;
+
+	float m_delayAfterBlocked;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -156,6 +158,7 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_iszDecline, FIELD_STRING ),
 	DEFINE_FIELD( CMonsterMaker, m_spawnDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CMonsterMaker, m_delayedCount, FIELD_INTEGER ),
+	DEFINE_FIELD( CMonsterMaker, m_delayAfterBlocked, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -265,6 +268,11 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "spawndelay" ) )
 	{
 		m_spawnDelay = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "delay_after_blocked" ) )
+	{
+		m_delayAfterBlocked = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -895,7 +903,10 @@ void CMonsterMaker::CyclicUse( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_CYCLIC_BACKLOG))
 		{
 			m_cyclicBacklogSize++;
-			pev->nextthink = gpGlobals->time + m_flDelay;
+			if (m_delayAfterBlocked > 0)
+				pev->nextthink = gpGlobals->time + m_delayAfterBlocked;
+			else
+				pev->nextthink = gpGlobals->time + m_flDelay;
 		}
 	}
 }
@@ -931,7 +942,11 @@ void CMonsterMaker::MakerThink( void )
 {
 	pev->nextthink = gpGlobals->time + m_flDelay;
 
-	MakeMonster();
+	if (MakeMonster() == MONSTERMAKER_BLOCKED )
+	{
+		if (m_delayAfterBlocked > 0)
+			pev->nextthink = gpGlobals->time + m_delayAfterBlocked;
+	}
 }
 
 void CMonsterMaker::CyclicBacklogThink()
