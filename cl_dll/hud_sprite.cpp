@@ -51,24 +51,8 @@ void ScaledRenderer::DisableCustomRendering() {
 	ResetCrosshair();
 }
 
-float ScaledRenderer::GetHUDScale() {
-	if (gHUD.hasHudScaleInEngine)
-		return 1.0f;
-	if (gHUD.m_iHardwareMode == 0)
-		return 1.0f;
-
-	assert(hud_renderer != NULL && hud_scale != NULL);
-
-	float scale = 1.0f;
-
-	if (hud_renderer->value > 0.0f) {
-		if (hud_scale->value > 0.0f)
-			scale = hud_scale->value;
-		else
-			scale = hud_auto_scale_value;
-	}
-
-	return scale;
+float ScaledRenderer::GetHUDScale() const {
+	return cachedHudScale;
 }
 
 int ScaledRenderer::ScreenWidthScaled() {
@@ -231,6 +215,7 @@ void ScaledRenderer::HUD_Frame(double time) {
 			DisableCustomRendering();
 		}
 	}
+	RecalcHUDScale();
 }
 
 void ScaledRenderer::SPR_Set(HSPRITE hPic, int r, int g, int b) {
@@ -312,4 +297,26 @@ void ScaledRenderer::ResetCrosshair()
 			}
 		}
 	}
+}
+
+void ScaledRenderer::RecalcHUDScale()
+{
+	if (gHUD.hasHudScaleInEngine || gHUD.m_iHardwareMode == 0)
+	{
+		cachedHudScale = 1.0f;
+		return;
+	}
+
+	assert(hud_renderer != NULL && hud_scale != NULL);
+
+	float scale = 1.0f;
+
+	if (hud_renderer->value > 0.0f) {
+		if (hud_scale->value > 0.0f)
+			scale = hud_scale->value;
+		else
+			scale = hud_auto_scale_value;
+	}
+
+	cachedHudScale = scale;
 }

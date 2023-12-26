@@ -25,7 +25,7 @@ public:
 	void EnableCustomRendering();
 	void DisableCustomRendering();
 
-	float GetHUDScale();
+	float GetHUDScale() const;
 
 	int ScreenWidthScaled();
 	int ScreenHeightScaled();
@@ -50,6 +50,7 @@ public:
 
 private:
 	void ResetCrosshair();
+	void RecalcHUDScale();
 
 	OriginalSpriteEngfuncs origSpriteEngfuncs;
 
@@ -64,6 +65,7 @@ private:
 
 	float hud_renderer_value;
 	float hud_auto_scale_value;
+	float cachedHudScale;
 };
 
 #endif
