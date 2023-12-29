@@ -1081,6 +1081,7 @@ BOOL CBaseMonster::CineCleanup()
 		pev->movetype = m_pCine->m_saved_movetype;
 		pev->solid = m_pCine->m_saved_solid;
 		pev->effects = m_pCine->m_saved_effects;
+		m_pCine->m_iDelay = 0;
 	}
 	else
 	{
