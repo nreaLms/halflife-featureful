@@ -3051,6 +3051,7 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 #define SF_CAMERA_PLAYER_TARGET		2
 #define SF_CAMERA_PLAYER_TAKECONTROL 4
 #define SF_CAMERA_PLAYER_ALIVE_ONLY 1024
+#define SF_CAMERA_DONT_FIRE_LOOK_TARGET 4096
 
 class CTriggerCamera : public CBaseDelay
 {
@@ -3258,7 +3259,8 @@ void CTriggerCamera::FollowTarget()
 		player->m_hViewEntity = 0;
 		player->m_bResetViewEntity = false;
 
-		SUB_UseTargets( this );
+		if (!FBitSet(pev->spawnflags, SF_CAMERA_DONT_FIRE_LOOK_TARGET))
+			SUB_UseTargets( this );
 		pev->avelocity = Vector( 0, 0, 0 );
 		m_state = 0;
 		return;

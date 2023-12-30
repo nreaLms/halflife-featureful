@@ -7235,7 +7235,15 @@
 		1: "Start At Player" : 1
 		2: "Follow Player" : 1
 		4: "Freeze Player" : 0
+		8: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'All Players' flag"
+		16: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Force View' flag"
+		32: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'No Instant Turn' flag"
+		64: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Instant Move' flag"
+		128: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Mouse Cursor' flag"
+		256: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Player Invulnerable' flag"
+		512: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Ignore Hold Time' flag"
 		1024: "Alive player only" : 0
+		4096: "Don't fire look target" : 0 : "By default trigger_camera triggers the Target it uses to look at when it releases the player's view. Tick this flag to prevent this weird behavior."
 	]
 	speed(string) : "Initial Speed" : "0"
 	acceleration(string) : "Acceleration units/sec^2" : "500"
