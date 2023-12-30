@@ -610,6 +610,7 @@ void CCineMonster::PossessEntity( void )
 		switch( m_fMoveTo )
 		{
 		case SCRIPT_MOVE_NO:
+		case SCRIPT_MOVE_FACE:
 			pTarget->m_scriptState = CBaseMonster::SCRIPT_WAIT;
 			break;
 		case SCRIPT_MOVE_WALK:
