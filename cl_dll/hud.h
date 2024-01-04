@@ -795,6 +795,7 @@ struct ClientFeatures
 	ConfigurableBooleanValue weapon_sparks;
 	ConfigurableBooleanValue muzzlelight;
 
+	ConfigurableBooleanValue crosshair_colorable;
 	ConfigurableBooleanValue movemode;
 
 	ConfigurableIntegerValue nvgstyle;
@@ -824,6 +825,10 @@ private:
 	int m_cachedMinAlpha; // cache per frame
 	int m_cachedHudColor;
 
+	// this is solely to track whether we need to reset the crosshair
+	bool m_colorableCrosshair;
+	int m_lastCrosshairColor;
+
 public:
 	HSPRITE						m_hsprCursor;
 	float m_flTime;	   // the current client time
@@ -840,6 +845,7 @@ public:
 	cvar_t	*m_pCvarDraw;
 	cvar_t	*m_pCvarDrawMoveMode;
 	cvar_t	*m_pCvarCrosshair;
+	cvar_t	*m_pCvarCrosshairColorable;
 
 	cvar_t	*m_pCvarMinAlpha;
 	cvar_t	*m_pCvarHudRed;
@@ -880,6 +886,9 @@ public:
 	int HUDColor();
 	int HUDColorCritical();
 	int MinHUDAlpha() const;
+	void RecacheValues();
+	int GetCrosshairColor();
+	void ResetCrosshair();
 	ClientFeatures clientFeatures;
 
 	bool HasSuit() const
@@ -906,6 +915,7 @@ public:
 	color24 FlashlightColor();
 	int NVGStyle();
 	bool MoveModeEnabled();
+	bool CrosshairColorable();
 private:
 	void ParseClientFeatures();
 	static bool ClientFeatureEnabled(cvar_t *cVariable, bool defaultValue);
@@ -973,6 +983,8 @@ public:
 	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}  
 	~CHud();			// destructor, frees allocated memory
 
+	static HudSpriteRenderer& Renderer();
+
 	// user messages
 	int _cdecl MsgFunc_Damage( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf );
@@ -1015,6 +1027,7 @@ public:
 
 	bool m_bFlashlight;
 
+	HudSpriteRenderer hudRenderer;
 	bool hasHudScaleInEngine;
 
 	static bool ShouldUseConsoleFont();

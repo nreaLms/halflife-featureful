@@ -56,7 +56,9 @@ inline void SPR_Set(HSPRITE hPic, int r, int g, int b) {
 // SPR_Draw  draws a the current sprite as solid
 #define SPR_Draw ( *gEngfuncs.pfnSPR_Draw )
 // SPR_DrawHoles  draws the current sprites, with color index255 not drawn (transparent)
-#define SPR_DrawHoles ( *gEngfuncs.pfnSPR_DrawHoles )
+inline void SPR_DrawHoles(int frame, int x, int y, const wrect_t *prc) {
+	gEngfuncs.pfnSPR_DrawHoles(frame, x, y, prc);
+}
 
 // SPR_DrawAdditive  adds the sprites RGB values to the background  (additive transulency)
 inline void SPR_DrawAdditive(int frame, int x, int y, const wrect_t *prc) {

@@ -91,6 +91,7 @@ ClientFeatures::ClientFeatures()
 	opfor_title = FEATURE_OPFOR_SPECIFIC ? true : false;
 
 	movemode.configurable = false;
+	crosshair_colorable.configurable = false;
 
 	nvgstyle.configurable = false;
 	nvgstyle.defaultValue = 1;
@@ -663,6 +664,8 @@ void CHud::Init( void )
 		hud_sprite_offset = CVAR_CREATE("hud_sprite_offset", "0.5", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 	}
 
+	CreateBooleanCvarConditionally(m_pCvarCrosshairColorable, "crosshair_colorable", clientFeatures.crosshair_colorable);
+
 	m_pSpriteList = NULL;
 
 	// Clear any old HUD list
@@ -713,6 +716,8 @@ void CHud::Init( void )
 	m_Menu.Init();
 
 	m_Caption.Init();
+
+	hudRenderer.Init();
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
 }
@@ -853,6 +858,7 @@ void CHud::ParseClientFeatures()
 		{ "weapon_sparks.", clientFeatures.weapon_sparks},
 		{ "muzzlelight.", clientFeatures.muzzlelight},
 		{ "movemode.", clientFeatures.movemode},
+		{ "crosshair_colorable.", clientFeatures.crosshair_colorable},
 	};
 	KeyValueDefinition<ConfigurableBoundedValue> configurableBounds[] = {
 		{ "hud_min_alpha.", clientFeatures.hud_min_alpha },
@@ -1181,7 +1187,12 @@ void CHud::VidInit( void )
 
 	m_Caption.VidInit();
 
+	hudRenderer.VidInit();
 	memset(&fog, 0, sizeof(fog));
+
+	RecacheValues();
+	m_colorableCrosshair = CrosshairColorable();
+	m_lastCrosshairColor = m_cachedHudColor;
 }
 
 int CHud::MsgFunc_Logo( const char *pszName,  int iSize, void *pbuf )
@@ -1474,6 +1485,11 @@ bool CHud::MoveModeEnabled()
 	return ClientFeatureEnabled(m_pCvarDrawMoveMode, clientFeatures.movemode.enabled_by_default);
 }
 
+bool CHud::CrosshairColorable()
+{
+	return ClientFeatureEnabled(m_pCvarCrosshairColorable, clientFeatures.crosshair_colorable.enabled_by_default);
+}
+
 void CHud::HUDColorCmd()
 {
 	int r, g, b;
@@ -1555,6 +1571,11 @@ void CHud::HUDColorCmd()
 	}
 }
 
+HudSpriteRenderer& CHud::Renderer()
+{
+	return gHUD.hudRenderer.DefaultScale();
+}
+
 #if FEATURE_MOVE_MODE
 DECLARE_MESSAGE( m_MoveMode, MoveMode )
 
@@ -1631,10 +1652,10 @@ int CHudMoveMode::Draw(float flTime)
 	const wrect_t rc = *prc;
 	int width = rc.right - rc.left;
 	y = ( rc.bottom - rc.top ) * 2;
-	x = ScaledRenderer::Instance().ScreenWidthScaled() - width - width / 2;
+	x = CHud::Renderer().PerceviedScreenWidth() - width - width / 2;
 
-	ScaledRenderer::Instance().SPR_Set( sprite, r, g, b );
-	ScaledRenderer::Instance().SPR_DrawAdditive( 0,  x, y, &rc );
+	CHud::Renderer().SPR_Set( sprite, r, g, b );
+	CHud::Renderer().SPR_DrawAdditive( 0,  x, y, &rc );
 	return 1;
 }
 

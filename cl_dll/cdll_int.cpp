@@ -338,6 +338,7 @@ so the HUD can reinitialize itself.
 
 int DLLEXPORT HUD_VidInit( void )
 {
+	gHUD.m_iHardwareMode = IEngineStudio.IsHardware();
 	gHUD.VidInit();
 #if USE_FAKE_VGUI
 	vgui::Panel* root=(vgui::Panel*)gEngfuncs.VGui_GetPanel();
@@ -362,7 +363,6 @@ int DLLEXPORT HUD_VidInit( void )
 #endif
 
 #ifdef CLDLL_FOG
-	gHUD.m_iHardwareMode = IEngineStudio.IsHardware();
 	gEngfuncs.Con_DPrintf("Hardware Mode: %d\n", gHUD.m_iHardwareMode);
 	if (gHUD.m_iHardwareMode == 1)
 	{
@@ -395,8 +395,6 @@ int DLLEXPORT HUD_VidInit( void )
 	}
 #endif
 
-	ScaledRenderer::Instance().HUD_VidInit();
-
 	return 1;
 }
 
@@ -421,8 +419,6 @@ void DLLEXPORT HUD_Init( void )
 	HOOK_MESSAGE( UseSound );
 
 	HookFXMessages();
-
-	ScaledRenderer::Instance().HUD_Init();
 }
 
 /*
@@ -497,7 +493,7 @@ void DLLEXPORT HUD_Frame( double time )
 	gEngfuncs.VGui_ViewportPaintBackground(HUD_GetRect());
 #endif
 
-	ScaledRenderer::Instance().HUD_Frame(time);
+	CHud::Renderer().HUD_Frame(time);
 }
 
 /*

@@ -15,10 +15,10 @@ extern cvar_t *hud_sprite_offset;
 
 static void ScaledSetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b)
 {
-	ScaledRenderer::Instance().SetCrosshair(hspr, rc, r, g, b);
+	CHud::Renderer().SetCrosshair(hspr, rc, r, g, b);
 }
 
-ScaledRenderer::ScaledRenderer() {
+HudSpriteRenderer::HudSpriteRenderer() {
 	origSpriteEngfuncs.pfnSetCrosshair = NULL;
 
 	sprite = -1;
@@ -41,37 +41,53 @@ ScaledRenderer::ScaledRenderer() {
 	hud_renderer_value = 0.0f;
 }
 
-void ScaledRenderer::EnableCustomRendering() {
+void HudSpriteRenderer::EnableCustomCrosshair() {
+	if (gEngfuncs.pfnSetCrosshair == ScaledSetCrosshair)
+		return;
 	gEngfuncs.pfnSetCrosshair = ScaledSetCrosshair;
-	ResetCrosshair();
+	gEngfuncs.Con_DPrintf("Enabling custom crosshair rendering\n");
+	gHUD.ResetCrosshair();
 }
 
-void ScaledRenderer::DisableCustomRendering() {
+void HudSpriteRenderer::DisableCustomCrosshair() {
+	if (gEngfuncs.pfnSetCrosshair == origSpriteEngfuncs.pfnSetCrosshair)
+		return;
 	gEngfuncs.pfnSetCrosshair = origSpriteEngfuncs.pfnSetCrosshair;
-	ResetCrosshair();
+	gEngfuncs.Con_DPrintf("Disabling custom crosshair rendering\n");
+	gHUD.ResetCrosshair();
 }
 
-float ScaledRenderer::GetHUDScale() const {
-	return cachedHudScale;
+float HudSpriteRenderer::GetHUDScale() const {
+	return currentScale;
 }
 
-int ScaledRenderer::ScreenWidthScaled() {
-	return static_cast<int>(gHUD.m_scrinfo.iWidth / GetHUDScale());
+bool HudSpriteRenderer::IsCustomScale() const {
+	return currentScale != 1.0f;
 }
 
-int ScaledRenderer::ScreenHeightScaled() {
-	return static_cast<int>(gHUD.m_scrinfo.iHeight / GetHUDScale());
+int HudSpriteRenderer::PerceviedScreenWidth() {
+	if (IsCustomScale())
+		return static_cast<int>(gHUD.m_scrinfo.iWidth / GetHUDScale());
+	else
+		return gHUD.m_scrinfo.iWidth;
 }
 
-int ScaledRenderer::ScaleScreen(int value) {
+int HudSpriteRenderer::PerceviedScreenHeight() {
+	if (IsCustomScale())
+		return static_cast<int>(gHUD.m_scrinfo.iHeight / GetHUDScale());
+	else
+		return gHUD.m_scrinfo.iHeight;
+}
+
+int HudSpriteRenderer::ScaleScreen(int value) {
 	return static_cast<int>(value * GetHUDScale());
 }
 
-int ScaledRenderer::UnscaleScreen(int value) {
+int HudSpriteRenderer::UnscaleScreen(int value) {
 	return static_cast<int>(value / GetHUDScale());
 }
 
-void ScaledRenderer::SPR_DrawInternal(int frame, float x, float y, float width, float height, const wrect_t *dimensions, int mode) {
+void HudSpriteRenderer::SPR_DrawInternal(int frame, float x, float y, float width, float height, const wrect_t *dimensions, int mode) {
 	if (!sprite_model) {
 		return;
 	}
@@ -152,17 +168,9 @@ void ScaledRenderer::SPR_DrawInternal(int frame, float x, float y, float width, 
 	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
 }
 
-int ScaledRenderer::HUD_VidInit() {
+int HudSpriteRenderer::VidInit() {
 	if (gHUD.hasHudScaleInEngine)
 		return 1;
-	if (gHUD.m_iHardwareMode == 0)
-		DisableCustomRendering();
-	else if (hud_renderer) {
-		hud_renderer_value = hud_renderer->value;
-		if (hud_renderer_value > 0.0f) {
-			EnableCustomRendering();
-		}
-	}
 
 	assert(hud_scale != NULL);
 
@@ -200,33 +208,35 @@ int ScaledRenderer::HUD_VidInit() {
 	return 1;
 }
 
-void ScaledRenderer::HUD_Init() {
+void HudSpriteRenderer::Init() {
 	origSpriteEngfuncs.pfnSetCrosshair = gEngfuncs.pfnSetCrosshair;
 }
 
-void ScaledRenderer::HUD_Frame(double time) {
+void HudSpriteRenderer::HUD_Frame(double time) {
 	(void)time;
+	RecalcHUDScale();
+
 	if (hud_renderer && hud_renderer->value != hud_renderer_value) {
 		hud_renderer_value = hud_renderer->value;
-
-		if (hud_renderer->value > 0.0f) {
-			EnableCustomRendering();
-		} else {
-			DisableCustomRendering();
-		}
 	}
-	RecalcHUDScale();
+
+	if (hud_renderer_value > 0.0f && cachedHudScale != 1.0f) {
+		EnableCustomCrosshair();
+	} else {
+		DisableCustomCrosshair();
+	}
 }
 
-void ScaledRenderer::SPR_Set(HSPRITE hPic, int r, int g, int b) {
-	if (GetHUDScale() == 1.0f) {
+void HudSpriteRenderer::SPR_Set(HSPRITE hPic, int r, int g, int b) {
+	if (IsCustomScale()) {
+		SPR_SetInternal(hPic, r, g, b);
+	} else {
 		::SPR_Set(hPic, r, g, b);
-		return;
 	}
-	SPR_SetInternal(hPic, r, g, b);
+
 }
 
-void ScaledRenderer::SPR_SetInternal(HSPRITE hPic, int r, int g, int b) {
+void HudSpriteRenderer::SPR_SetInternal(HSPRITE hPic, int r, int g, int b) {
 	sprite = hPic;
 	sprite_model = const_cast<model_t *>(gEngfuncs.GetSpritePointer(sprite));
 	sprite_color.r = r;
@@ -234,24 +244,23 @@ void ScaledRenderer::SPR_SetInternal(HSPRITE hPic, int r, int g, int b) {
 	sprite_color.b = b;
 }
 
-void ScaledRenderer::SPR_DrawAdditive(int frame, int x, int y, const wrect_t *prc) {
-	if (GetHUDScale() == 1.0f) {
+void HudSpriteRenderer::SPR_DrawAdditive(int frame, int x, int y, const wrect_t *prc) {
+	if (IsCustomScale()) {
+		SPR_DrawInternal(frame, x, y, -1.0f, -1.0f, prc, kRenderTransAdd);
+	} else {
 		::SPR_DrawAdditive(frame, x, y, prc);
-		return;
 	}
-	SPR_DrawInternal(frame, x, y, -1.0f, -1.0f, prc, kRenderTransAdd);
 }
 
-void ScaledRenderer::FillRGBA(int x, int y, int width, int height, int r, int g, int b, int a) {
-	if (GetHUDScale() == 1.0f) {
+void HudSpriteRenderer::FillRGBA(int x, int y, int width, int height, int r, int g, int b, int a) {
+	if (IsCustomScale()) {
+		::FillRGBA(ScaleScreen(x), ScaleScreen(y), ScaleScreen(width), ScaleScreen(height), r, g, b, a);
+	} else {
 		::FillRGBA(x, y, width, height, r, g, b, a);
-		return;
 	}
-
-	gEngfuncs.pfnFillRGBA(ScaleScreen(x), ScaleScreen(y), ScaleScreen(width), ScaleScreen(height), r, g, b, a);
 }
 
-void ScaledRenderer::SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b) {
+void HudSpriteRenderer::SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b) {
 	crosshair = hspr;
 	crosshair_model = const_cast<model_t *>(gEngfuncs.GetSpritePointer(crosshair));
 	crosshair_dimensions = rc;
@@ -268,38 +277,34 @@ void ScaledRenderer::SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b)
 	origSpriteEngfuncs.pfnSetCrosshair(0, crosshair_rect, 0, 0, 0);
 }
 
-void ScaledRenderer::QueryCrosshairInfo(HSPRITE *sprite, model_t **sprite_model, wrect_t *sprite_dimensions, color24 *sprite_color) {
-	assert(sprite);
-	assert(sprite_model);
-	assert(sprite_dimensions);
-	assert(sprite_color);
-
-	*sprite = crosshair;
-	*sprite_model = crosshair_model;
-	*sprite_dimensions = crosshair_dimensions;
-	*sprite_color = crosshair_color;
-}
-
-void ScaledRenderer::ResetCrosshair()
+void HudSpriteRenderer::DrawCrosshair()
 {
-	if( !( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL ) ) )
+	// using original crosshair rendering
+	if (gEngfuncs.pfnSetCrosshair == origSpriteEngfuncs.pfnSetCrosshair)
+		return;
+
+	if (crosshair <= 0)
+		return;
+
+	const int width = crosshair_dimensions.right - crosshair_dimensions.left;
+	const int height = crosshair_dimensions.bottom - crosshair_dimensions.top;
+
+	const int x = PerceviedScreenWidth() >> 1;
+	const int y = PerceviedScreenHeight() >> 1;
+
+	if (IsCustomScale())
 	{
-		WEAPON* pWeapon = gHUD.m_Ammo.GetWeapon();
-		if (pWeapon)
-		{
-			if( gHUD.m_iFOV >= 90 )
-			{
-				gEngfuncs.pfnSetCrosshair( pWeapon->hCrosshair, pWeapon->rcCrosshair, 255, 255, 255 );
-			}
-			else
-			{
-				gEngfuncs.pfnSetCrosshair( pWeapon->hZoomedCrosshair, pWeapon->rcZoomedCrosshair, 255, 255, 255 );
-			}
-		}
+		SPR_SetInternal(crosshair, crosshair_color.r, crosshair_color.g, crosshair_color.b);
+		SPR_DrawInternal(0, x - 0.5f * width, y - 0.5f * height, -1.0f, -1.0f, &crosshair_dimensions, kRenderTransTexture);
+	}
+	else
+	{
+		::SPR_Set(crosshair, crosshair_color.r, crosshair_color.g, crosshair_color.b);
+		::SPR_DrawHoles(0, x - 0.5f * width, y - 0.5f * height, &crosshair_dimensions);
 	}
 }
 
-void ScaledRenderer::RecalcHUDScale()
+void HudSpriteRenderer::RecalcHUDScale()
 {
 	if (gHUD.hasHudScaleInEngine || gHUD.m_iHardwareMode == 0)
 	{
@@ -319,4 +324,19 @@ void ScaledRenderer::RecalcHUDScale()
 	}
 
 	cachedHudScale = scale;
+}
+
+HudSpriteRenderer& HudSpriteRenderer::DefaultScale()
+{
+	currentScale = cachedHudScale;
+	return *this;
+}
+
+HudSpriteRenderer& HudSpriteRenderer::RelativeScale(float multiplier)
+{
+	if (gHUD.m_iHardwareMode != 0)
+		currentScale = cachedHudScale * multiplier;
+	else
+		currentScale = 1.0f;
+	return *this;
 }

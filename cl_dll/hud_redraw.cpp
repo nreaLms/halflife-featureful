@@ -40,8 +40,6 @@ float HUD_GetFOV( void );
 
 extern cvar_t *sensitivity;
 
-extern cvar_t *hud_renderer;
-
 // Think
 void CHud::Think( void )
 {
@@ -96,11 +94,7 @@ void CHud::Think( void )
 // returns 1 if they've changed, 0 otherwise
 int CHud::Redraw( float flTime, int intermission )
 {
-	m_cachedMinAlpha = CalcMinHUDAlpha();
-	int hudR = m_pCvarHudRed->value;
-	int hudG = m_pCvarHudGreen->value;
-	int hudB = m_pCvarHudBlue->value;
-	m_cachedHudColor = ((hudR & 0xFF) << 16) | ((hudG & 0xFF) << 8) | (hudB & 0xFF);
+	RecacheValues();
 
 	m_fOldTime = m_flTime;	// save time of previous redraw
 	m_flTime = flTime;
@@ -232,22 +226,28 @@ int CHud::Redraw( float flTime, int intermission )
 	}
 	*/
 
-	if (gHUD.m_iHardwareMode != 0 && hud_renderer && hud_renderer->value > 0.0f && m_pCvarCrosshair->value > 0.0f) {
-		HSPRITE crosshair = -1;
-		model_t *crosshair_model = NULL;
-		wrect_t crosshair_dimensions = {0, 0, 0, 0};
-		color24 crosshair_color = {0, 0, 0};
+	bool shouldResetCrosshair = false;
 
-		ScaledRenderer::Instance().QueryCrosshairInfo(&crosshair, &crosshair_model, &crosshair_dimensions, &crosshair_color);
+	if (m_colorableCrosshair != CrosshairColorable())
+	{
+		m_colorableCrosshair = !m_colorableCrosshair;
+		gEngfuncs.Con_DPrintf("Will reset crosshair because colorable_crosshair changed\n");
+		shouldResetCrosshair = true;
+	}
+	int crosshairColor = GetCrosshairColor();
+	if (m_lastCrosshairColor != crosshairColor)
+	{
+		m_lastCrosshairColor = crosshairColor;
+		gEngfuncs.Con_DPrintf("Will reset crosshair because hud color changed\n");
+		shouldResetCrosshair = true;
+	}
+	if (shouldResetCrosshair) {
+		gEngfuncs.Con_DPrintf("Resetting crosshair\n");
+		ResetCrosshair();
+	}
 
-		const int width = crosshair_dimensions.right - crosshair_dimensions.left;
-		const int height = crosshair_dimensions.bottom - crosshair_dimensions.top;
-
-		const int x = ScaledRenderer::Instance().ScreenWidthScaled() >> 1;
-		const int y = ScaledRenderer::Instance().ScreenHeightScaled() >> 1;
-
-		ScaledRenderer::Instance().SPR_SetInternal(crosshair, crosshair_color.r, crosshair_color.g, crosshair_color.b);
-		ScaledRenderer::Instance().SPR_DrawInternal(0, x - 0.5f * width, y - 0.5f * height, -1.0f, -1.0f, &crosshair_dimensions, kRenderTransTexture);
+	if (m_pCvarCrosshair->value > 0.0f) {
+		CHud::Renderer().DrawCrosshair();
 	}
 
 	return 1;
@@ -335,8 +335,8 @@ int CHud::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, in
 		if( iNumber >= 100 )
 		{
 			k = iNumber / 100;
-			ScaledRenderer::Instance().SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
-			ScaledRenderer::Instance().SPR_DrawAdditive( 0, x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
+			CHud::Renderer().SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
+			CHud::Renderer().SPR_DrawAdditive( 0, x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
 			x += iWidth;
 		}
 		else if( iFlags & ( DHN_3DIGITS ) )
@@ -349,8 +349,8 @@ int CHud::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, in
 		if( iNumber >= 10 )
 		{
 			k = ( iNumber % 100 ) / 10;
-			ScaledRenderer::Instance().SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
-			ScaledRenderer::Instance().SPR_DrawAdditive( 0, x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
+			CHud::Renderer().SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
+			CHud::Renderer().SPR_DrawAdditive( 0, x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
 			x += iWidth;
 		}
 		else if( iFlags & ( DHN_3DIGITS | DHN_2DIGITS ) )
@@ -361,13 +361,13 @@ int CHud::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, in
 
 		// SPR_Draw ones
 		k = iNumber % 10;
-		ScaledRenderer::Instance().SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
-		ScaledRenderer::Instance().SPR_DrawAdditive( 0,  x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
+		CHud::Renderer().SPR_Set( GetSprite( m_HUD_number_0 + k ), r, g, b );
+		CHud::Renderer().SPR_DrawAdditive( 0,  x, y, &GetSpriteRect( m_HUD_number_0 + k ) );
 		x += iWidth;
 	}
 	else if( iFlags & DHN_DRAWZERO )
 	{
-		ScaledRenderer::Instance().SPR_Set( GetSprite( m_HUD_number_0 ), r, g, b );
+		CHud::Renderer().SPR_Set( GetSprite( m_HUD_number_0 ), r, g, b );
 
 		// SPR_Draw 100's
 		if( iFlags & ( DHN_3DIGITS ) )
@@ -383,7 +383,7 @@ int CHud::DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, in
 		}
 
 		// SPR_Draw ones
-		ScaledRenderer::Instance().SPR_DrawAdditive( 0,  x, y, &GetSpriteRect( m_HUD_number_0 ) );
+		CHud::Renderer().SPR_DrawAdditive( 0,  x, y, &GetSpriteRect( m_HUD_number_0 ) );
 		x += iWidth;
 	}
 
@@ -565,4 +565,47 @@ int CHud::HUDColorCritical()
 int CHud::MinHUDAlpha() const
 {
 	return m_cachedMinAlpha;
+}
+
+void CHud::RecacheValues()
+{
+	m_cachedMinAlpha = CalcMinHUDAlpha();
+	int hudR = m_pCvarHudRed->value;
+	int hudG = m_pCvarHudGreen->value;
+	int hudB = m_pCvarHudBlue->value;
+	m_cachedHudColor = ((hudR & 0xFF) << 16) | ((hudG & 0xFF) << 8) | (hudB & 0xFF);
+}
+
+int CHud::GetCrosshairColor()
+{
+	if (CrosshairColorable())
+	{
+		return gHUD.HUDColor();
+	}
+	else
+	{
+		return 0xFFFFFF;
+	}
+}
+
+void CHud::ResetCrosshair()
+{
+	if( !( m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL ) ) )
+	{
+		WEAPON* pWeapon = m_Ammo.GetWeapon();
+		if (pWeapon)
+		{
+			int crosshairColor = gHUD.GetCrosshairColor();
+			int r,g,b;
+			UnpackRGB(r,g,b,crosshairColor);
+			if( m_iFOV >= 90 )
+			{
+				gEngfuncs.pfnSetCrosshair( pWeapon->hCrosshair, pWeapon->rcCrosshair, r, g, b );
+			}
+			else
+			{
+				gEngfuncs.pfnSetCrosshair( pWeapon->hZoomedCrosshair, pWeapon->rcZoomedCrosshair, r, g, b );
+			}
+		}
+	}
 }

@@ -12,23 +12,18 @@ struct OriginalSpriteEngfuncs
 	void	(*pfnSetCrosshair)( HSPRITE hspr, wrect_t rc, int r, int g, int b );
 };
 
-class ScaledRenderer {
+class HudSpriteRenderer {
 public:
-	static ScaledRenderer &Instance() {
-		static ScaledRenderer instance;
+	HudSpriteRenderer();
 
-		return instance;
-	}
-
-	ScaledRenderer();
-
-	void EnableCustomRendering();
-	void DisableCustomRendering();
+	void EnableCustomCrosshair();
+	void DisableCustomCrosshair();
 
 	float GetHUDScale() const;
+	bool IsCustomScale() const;
 
-	int ScreenWidthScaled();
-	int ScreenHeightScaled();
+	int PerceviedScreenWidth();
+	int PerceviedScreenHeight();
 
 	int ScaleScreen(int value);
 	int UnscaleScreen(int value);
@@ -36,8 +31,8 @@ public:
 	void SPR_SetInternal(HSPRITE hPic, int r, int g, int b);
 	void SPR_DrawInternal(int frame, float x, float y, float width, float height, const wrect_t *dimensions, int mode);
 
-	int HUD_VidInit();
-	void HUD_Init();
+	int VidInit();
+	void Init();
 	void HUD_Frame(double time);
 
 	void SPR_Set(HSPRITE hPic, int r, int g, int b);
@@ -46,10 +41,11 @@ public:
 	void FillRGBA(int x, int y, int width, int height, int r, int g, int b, int a);
 
 	void SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b);
-	void QueryCrosshairInfo(HSPRITE *sprite, model_t **sprite_model, wrect_t *sprite_dimensions, color24 *sprite_color);
+	void DrawCrosshair();
 
+	HudSpriteRenderer& DefaultScale();
+	HudSpriteRenderer& RelativeScale(float multiplier);
 private:
-	void ResetCrosshair();
 	void RecalcHUDScale();
 
 	OriginalSpriteEngfuncs origSpriteEngfuncs;
@@ -66,6 +62,7 @@ private:
 	float hud_renderer_value;
 	float hud_auto_scale_value;
 	float cachedHudScale;
+	float currentScale;
 };
 
 #endif
