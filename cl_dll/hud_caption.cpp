@@ -18,6 +18,11 @@ int CHudCaption::Init()
 	memset(profiles, 0, sizeof(profiles));
 	memset(captions, 0, sizeof(captions));
 	profileCount = captionCount = 0;
+	defaultProfile.r = 255;
+	defaultProfile.g = 255;
+	defaultProfile.b = 255;
+	defaultProfile.firstLetter = '_';
+	defaultProfile.secondLetter = '_';
 
 	gHUD.AddHudElem( this );
 	HOOK_MESSAGE(Caption);
@@ -74,9 +79,18 @@ int CHudCaption::MsgFunc_Caption(const char *pszName, int iSize, void *pbuf)
 
 	sub.caption = caption;
 
-	sub.r = caption->profile->r;
-	sub.g = caption->profile->g;
-	sub.b = caption->profile->b;
+	if (caption->profile)
+	{
+		sub.r = caption->profile->r;
+		sub.g = caption->profile->g;
+		sub.b = caption->profile->b;
+	}
+	else
+	{
+		sub.r = defaultProfile.r;
+		sub.g = defaultProfile.g;
+		sub.b = defaultProfile.b;
+	}
 
 	sub.radio = radio != 0;
 
@@ -559,8 +573,6 @@ bool CHudCaption::ParseCaptionsFile()
 					if (!caption.profile)
 					{
 						gEngfuncs.Con_Printf("Could not find a caption profile %c%c for %s\n", firstLetter, secondLetter, caption.name);
-						ConsumeLine(pfile, i, length);
-						continue;
 					}
 
 					SkipSpaces(pfile, i, length);

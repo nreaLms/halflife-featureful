@@ -308,6 +308,7 @@ public:
 protected:
 	CaptionProfile_t *CaptionProfileLookup(char firstLetter, char secondLetter);
 
+	CaptionProfile_t defaultProfile;
 	CaptionProfile_t profiles[CAPTION_PROFILES_MAX];
 	Caption_t captions[CAPTIONS_MAX];
 	int profileCount;
