@@ -256,7 +256,7 @@ struct CaptionProfile_t
 struct Caption_t
 {
 	char name[32];
-	CaptionProfile_t* profile;
+	const CaptionProfile_t* profile;
 	char message[CAPTION_SIZE];
 	float delay;
 };
@@ -300,11 +300,14 @@ public:
 
 	void UserCmd_DumpCaptions();
 
+	bool ParseCaptionsProfilesFile();
 	bool ParseCaptionsFile();
 	void SortCaptions();
 	const Caption_t* CaptionLookup(const char* name);
 
 protected:
+	CaptionProfile_t *CaptionProfileLookup(char firstLetter, char secondLetter);
+
 	CaptionProfile_t profiles[CAPTION_PROFILES_MAX];
 	Caption_t captions[CAPTIONS_MAX];
 	int profileCount;

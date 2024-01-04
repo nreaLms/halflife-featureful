@@ -32,6 +32,7 @@ int CHudCaption::VidInit()
 {
 	if (!captionsInit)
 	{
+		ParseCaptionsProfilesFile();
 		ParseCaptionsFile();
 		captionsInit = true;
 	}
@@ -342,6 +343,104 @@ static bool IsLatinLowerCase(char c)
 	return c >= 'a' && c <= 'z';
 }
 
+static void ParseCaptionColor(const char* pfile, int& i, int length, CaptionProfile_t& profile)
+{
+	int rgb[3];
+	for (int j=0; j<3; ++j)
+	{
+		SkipSpaces(pfile, i, length);
+		rgb[j] = atoi(pfile + i);
+		ConsumeNonSpaceCharacters(pfile, i, length);
+	}
+	profile.r = rgb[0];
+	profile.g = rgb[1];
+	profile.b = rgb[2];
+}
+
+static void ReportParsedCaptionProfile(const CaptionProfile_t& profile)
+{
+	gEngfuncs.Con_DPrintf("Parsed a caption profile. ID: %c%c. Color: (%d, %d, %d)\n", profile.firstLetter, profile.secondLetter, profile.r, profile.g, profile.b);
+}
+
+bool CHudCaption::ParseCaptionsProfilesFile()
+{
+	const char* fileName = "sound/captions_profiles.txt";
+	int length = 0;
+	char* pfile = (char *)gEngfuncs.COM_LoadFile( fileName, 5, &length );
+
+	if( !pfile )
+	{
+		gEngfuncs.Con_Printf( "Couldn't open file %s.\n", fileName );
+		return false;
+	}
+
+	int currentIdStart = 0;
+	int i = 0;
+	while ( i<length )
+	{
+		if (IsSpaceCharacter(pfile[i]))
+		{
+			++i;
+		}
+		else if (pfile[i] == '/')
+		{
+			++i;
+			ConsumeLine(pfile, i, length);
+		}
+		else
+		{
+			currentIdStart = i;
+			ConsumeNonSpaceCharacters(pfile, i, length);
+			int tokenLength = i-currentIdStart;
+
+			if (tokenLength == 2)
+			{
+				char firstLetter = *(pfile + currentIdStart);
+				char secondLetter = *(pfile + currentIdStart + 1);
+				if (IsLatinLowerCase(firstLetter) && IsLatinLowerCase(secondLetter))
+				{
+					if (profileCount >= CAPTION_PROFILES_MAX)
+					{
+						gEngfuncs.Con_Printf("Too many caption profiles! Max is %d\n", CAPTION_PROFILES_MAX);
+						break;
+					}
+					else
+					{
+						CaptionProfile_t* existingProfile = CaptionProfileLookup(firstLetter, secondLetter);
+						if (existingProfile)
+						{
+							gEngfuncs.Con_Printf("Multiple definitions of caption profile with ID '%c%c'! Skipping.\n", firstLetter, secondLetter);
+							ConsumeLine(pfile, i, length);
+							continue;
+						}
+
+						CaptionProfile_t& profile = profiles[profileCount];
+						profile.firstLetter = firstLetter;
+						profile.secondLetter = secondLetter;
+
+						ParseCaptionColor(pfile, i, length, profile);
+
+						profileCount++;
+						ReportParsedCaptionProfile(profile);
+					}
+				}
+				else
+				{
+					gEngfuncs.Con_Printf("Both characters in caption profile ID must be lowercase latin characters!\n");
+					break;
+				}
+			}
+			else
+			{
+				gEngfuncs.Con_Printf("Caption profile ID must be 2 characters!\n");
+				break;
+			}
+		}
+	}
+	gEngfuncs.COM_FreeFile(pfile);
+	return true;
+}
+
 bool CHudCaption::ParseCaptionsFile()
 {
 	const char* fileName = "sound/captions.txt";
@@ -355,13 +454,12 @@ bool CHudCaption::ParseCaptionsFile()
 	}
 
 	char captionName[sizeof(captions[0].name)];
-	int rgb[3];
 
 	int currentTokenStart = 0;
 	int i = 0;
 	while ( i<length )
 	{
-		if (pfile[i] == ' ' || pfile[i] == '\r' || pfile[i] == '\n')
+		if (IsSpaceCharacter(pfile[i]))
 		{
 			++i;
 		}
@@ -385,6 +483,7 @@ bool CHudCaption::ParseCaptionsFile()
 			strncpy(captionName, pfile + currentTokenStart, tokenLength);
 			captionName[tokenLength] = '\0';
 
+			// This code is left for compatibility with existing mods. We should define caption profiles in captions_profiles.txt now instead!
 			if (tokenLength == 2 && IsLatinLowerCase(captionName[0]) && IsLatinLowerCase(captionName[1]))
 			{
 				if (profileCount >= CAPTION_PROFILES_MAX)
@@ -394,25 +493,26 @@ bool CHudCaption::ParseCaptionsFile()
 				}
 				else
 				{
-					CaptionProfile_t& profile = profiles[profileCount];
-					profile.firstLetter = captionName[0];
-					profile.secondLetter = captionName[1];
-
-					for (int j=0; j<3; ++j)
+					char firstLetter = captionName[0];
+					char secondLetter = captionName[1];
+					CaptionProfile_t* existingProfile = CaptionProfileLookup(firstLetter, secondLetter);
+					if (existingProfile)
 					{
-						SkipSpaces(pfile, i, length);
-						rgb[j] = atoi(pfile + i);
-						ConsumeNonSpaceCharacters(pfile, i, length);
+						gEngfuncs.Con_Printf("Redefining caption profile with ID '%c%c'!.\n", firstLetter, secondLetter);
 					}
 
-					profile.r = rgb[0];
-					profile.g = rgb[1];
-					profile.b = rgb[2];
+					CaptionProfile_t& profile = existingProfile ? *existingProfile : profiles[profileCount];
+					profile.firstLetter = firstLetter;
+					profile.secondLetter = secondLetter;
 
-					profileCount++;
-					//gEngfuncs.Con_DPrintf("Parsed a caption profile. ID: %c%c. Color: (%d, %d, %d)\n", profile.firstLetter, profile.secondLetter, profile.r, profile.g, profile.b);
+					ParseCaptionColor(pfile, i, length, profile);
+
+					if (!existingProfile)
+						profileCount++;
+					ReportParsedCaptionProfile(profile);
 				}
 			}
+			//
 			else
 			{
 				if (captionCount >= CAPTIONS_MAX)
@@ -454,14 +554,7 @@ bool CHudCaption::ParseCaptionsFile()
 
 					char firstLetter = pfile[currentTokenStart];
 					char secondLetter = pfile[currentTokenStart+1];
-					for (int k=0; k<profileCount; ++k)
-					{
-						if (profiles[k].firstLetter == firstLetter && profiles[k].secondLetter == secondLetter)
-						{
-							caption.profile = &profiles[k];
-							break;
-						}
-					}
+					caption.profile = CaptionProfileLookup(firstLetter, secondLetter);
 
 					if (!caption.profile)
 					{
@@ -539,6 +632,18 @@ const Caption_t* CHudCaption::CaptionLookup(const char *name)
 		else if( val < 0 )
 		{
 			right = pivot - 1;
+		}
+	}
+	return NULL;
+}
+
+CaptionProfile_t* CHudCaption::CaptionProfileLookup(char firstLetter, char secondLetter)
+{
+	for (int k=0; k<profileCount; ++k)
+	{
+		if (profiles[k].firstLetter == firstLetter && profiles[k].secondLetter == secondLetter)
+		{
+			return &profiles[k];
 		}
 	}
 	return NULL;
