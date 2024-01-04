@@ -209,17 +209,22 @@ void CHudCaption::Update(float flTime, float flTimeDelta)
 	if (!sub_count)
 		return;
 
-	if(subtitles[0].timeLeft <= 0)
+	int i;
+	for (i=0; i<sub_count; ++i)
 	{
-		for (int j=0; j<sub_count-1; ++j)
+		if(subtitles[i].timeLeft <= 0)
 		{
-			subtitles[j] = subtitles[j+1];
+			for (int j=i; j<sub_count-1; ++j)
+			{
+				subtitles[j] = subtitles[j+1];
+			}
+			memset(&subtitles[sub_count-1], 0, sizeof(subtitles[0]));
+			sub_count--;
+			break;
 		}
-		memset(&subtitles[sub_count-1], 0, sizeof(subtitles[0]));
-		sub_count--;
 	}
 
-	for (int i=0; i<sub_count; ++i)
+	for (i=0; i<sub_count; ++i)
 	{
 		if (subtitles[i].timeBeforeStart <= 0.0f) {
 			subtitles[i].timeLeft -= flTimeDelta;
