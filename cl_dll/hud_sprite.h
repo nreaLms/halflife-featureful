@@ -59,7 +59,6 @@ private:
 	wrect_t crosshair_dimensions;
 	color24 crosshair_color;
 
-	float hud_renderer_value;
 	float hud_auto_scale_value;
 	float cachedHudScale;
 	float currentScale;

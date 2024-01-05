@@ -256,7 +256,6 @@ cvar_t* cl_flashlight_fade_distance = NULL;
 
 cvar_t *cl_subtitles = NULL;
 
-cvar_t *hud_renderer = NULL;
 cvar_t *hud_scale = NULL;
 cvar_t *hud_sprite_offset = NULL;
 
@@ -660,7 +659,6 @@ void CHud::Init( void )
 
 	if (!hasHudScaleInEngine)
 	{
-		hud_renderer = CVAR_CREATE("hud_renderer", "1.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 		hud_scale = CVAR_CREATE("hud_scale", clientFeatures.hud_autoscale_by_default ? "0" : "1.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 		hud_sprite_offset = CVAR_CREATE("hud_sprite_offset", "0.5", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 	}

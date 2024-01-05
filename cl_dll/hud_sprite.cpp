@@ -9,7 +9,6 @@
 
 // Note: TriAPI rendering won't work in software!
 
-extern cvar_t *hud_renderer;
 extern cvar_t *hud_scale;
 extern cvar_t *hud_sprite_offset;
 
@@ -37,8 +36,6 @@ HudSpriteRenderer::HudSpriteRenderer() {
 	crosshair_color.r = 0;
 	crosshair_color.g = 0;
 	crosshair_color.b = 0;
-
-	hud_renderer_value = 0.0f;
 }
 
 void HudSpriteRenderer::EnableCustomCrosshair() {
@@ -216,11 +213,7 @@ void HudSpriteRenderer::HUD_Frame(double time) {
 	(void)time;
 	RecalcHUDScale();
 
-	if (hud_renderer && hud_renderer->value != hud_renderer_value) {
-		hud_renderer_value = hud_renderer->value;
-	}
-
-	if (hud_renderer_value > 0.0f && cachedHudScale != 1.0f) {
+	if (cachedHudScale != 1.0f) {
 		EnableCustomCrosshair();
 	} else {
 		DisableCustomCrosshair();
@@ -312,16 +305,14 @@ void HudSpriteRenderer::RecalcHUDScale()
 		return;
 	}
 
-	assert(hud_renderer != NULL && hud_scale != NULL);
+	assert(hud_scale != NULL);
 
 	float scale = 1.0f;
 
-	if (hud_renderer->value > 0.0f) {
-		if (hud_scale->value > 0.0f)
-			scale = hud_scale->value;
-		else
-			scale = hud_auto_scale_value;
-	}
+	if (hud_scale->value > 0.0f)
+		scale = hud_scale->value;
+	else
+		scale = hud_auto_scale_value;
 
 	cachedHudScale = scale;
 }
