@@ -82,6 +82,7 @@ ClientFeatures::ClientFeatures()
 	hud_min_alpha.minValue = 100;
 	hud_min_alpha.maxValue = 200;
 
+	hud_autoscale_by_default = false;
 	hud_draw_nosuit = false;
 	hud_color_nosuit = RGB_HUD_NOSUIT;
 
@@ -660,7 +661,7 @@ void CHud::Init( void )
 	if (!hasHudScaleInEngine)
 	{
 		hud_renderer = CVAR_CREATE("hud_renderer", "1.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
-		hud_scale = CVAR_CREATE("hud_scale", "0.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+		hud_scale = CVAR_CREATE("hud_scale", clientFeatures.hud_autoscale_by_default ? "0" : "1.0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 		hud_sprite_offset = CVAR_CREATE("hud_sprite_offset", "0.5", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 	}
 
@@ -869,8 +870,9 @@ void CHud::ParseClientFeatures()
 		{ "rollangle.", clientFeatures.rollangle },
 	};
 	KeyValueDefinition<bool> booleans[] = {
-		{ "hud_draw_nosuit", clientFeatures.hud_draw_nosuit},
-		{ "opfor_title", clientFeatures.opfor_title},
+		{ "hud_autoscale_by_default", clientFeatures.hud_autoscale_by_default },
+		{ "hud_draw_nosuit", clientFeatures.hud_draw_nosuit },
+		{ "opfor_title", clientFeatures.opfor_title },
 	};
 
 	char valueBuf[CLIENT_FEATURE_VALUE_LENGTH+1];
