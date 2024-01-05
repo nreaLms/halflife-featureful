@@ -266,7 +266,7 @@ int CHudCaption::Draw(float flTime)
 
 	const int xpos = SUB_START_XPOS;
 	const int xmax = SUB_MAX_XPOS;
-	int ypos = ScreenHeight - hudNumberHeight - lineHeight - SUB_BORDER_LENGTH;
+	int ypos = ScreenHeight - CHud::Renderer().ScaleScreen(hudNumberHeight) - lineHeight - SUB_BORDER_LENGTH;
 
 	int i, j;
 
