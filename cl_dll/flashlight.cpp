@@ -155,7 +155,7 @@ int CHudFlashlight::Draw( float flTime )
 	x = CHud::Renderer().PerceviedScreenWidth() - m_iWidth - m_iWidth / 2 ;
 
 	// Draw the flashlight casing
-	CHud::Renderer().SPR_Set( m_hSprite1, r, g, b );
+	CHud::Renderer().SPR_Set( emptySprite, r, g, b );
 	CHud::Renderer().SPR_DrawAdditive( 0,  x, y, emptyFlash );
 
 	// Don't draw a beam for nvg
