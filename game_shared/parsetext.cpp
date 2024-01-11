@@ -103,6 +103,11 @@ bool ParseColor(const char *valueText, int& result)
 		const char* colorStart = valueText + 2;
 		return sscanf(colorStart, "%x", &result) == 1;
 	}
+	else if (*valueText == '#')
+	{
+		const char* colorStart = valueText + 1;
+		return sscanf(colorStart, "%x", &result) == 1;
+	}
 	else
 	{
 		int r, g, b;

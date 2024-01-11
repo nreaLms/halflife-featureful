@@ -1510,17 +1510,20 @@ void CHud::HUDColorCmd()
 			{
 				UnpackRGB(r, g, b, clientFeatures.hud_color);
 			}
-			else if (strncmp(param, "0x", 2) == 0)
+			else if (strncmp(param, "0x", 2) == 0 || *param == '#')
 			{
-				if (strlen(param) != 8)
+				const bool sharp = *param == '#';
+				const int expectedLength = sharp ? 7 : 8;
+				const int shift = sharp ? 1 : 2;
+				if (strlen(param) != expectedLength)
 				{
-					gEngfuncs.Con_Printf("6 hex digits expected after 0x\n");
+					gEngfuncs.Con_Printf("6 hex digits expected after 0x or #\n");
 					shouldPrintHelp = true;
 				}
 				else
 				{
 					char* endPtr;
-					long color = strtol(param+2, &endPtr, 16);
+					long color = strtol(param+shift, &endPtr, 16);
 					UnpackRGB(r, g, b, color);
 					if (*endPtr != '\0')
 					{
@@ -1559,6 +1562,7 @@ void CHud::HUDColorCmd()
 							  "hud_color RRR GGG BBB\n"
 							  "hud_color \"RRR GGG BBB\"\n"
 							  "hud_color 0xRRGGBB\n"
+							  "hud_color #RRGGBB\n"
 							  "hud_color default\n",
 							  hudR, hudG, hudB, currentHudColor);
 	}
