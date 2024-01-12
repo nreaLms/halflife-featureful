@@ -632,7 +632,7 @@ const Caption_t* CHudCaption::CaptionLookup(const char *name)
 	{
 		pivot = ( left + right ) / 2;
 
-		val = strcmp( name, captions[pivot].name );
+		val = stricmp( name, captions[pivot].name );
 		if( val == 0 )
 		{
 			return &captions[pivot];
