@@ -259,14 +259,12 @@ int CHudCaption::Draw(float flTime)
 	if (!sub_count)
 		return 0;
 
-	const int hudNumberHeight = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).bottom - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).top;
-
 	const int lineHeight = CHud::UtfText::LineHeight();
 	const int distanceBetweenSubs = Q_max(lineHeight / 5, 1);
 
 	const int xpos = SUB_START_XPOS;
 	const int xmax = SUB_MAX_XPOS;
-	int ypos = ScreenHeight - CHud::Renderer().ScaleScreen(hudNumberHeight) - lineHeight - SUB_BORDER_LENGTH;
+	int ypos = ScreenHeight - CHud::Renderer().ScaleScreen(gHUD.m_iFontHeight + gHUD.m_iFontHeight/2) - lineHeight - SUB_BORDER_LENGTH;
 
 	int i, j;
 
