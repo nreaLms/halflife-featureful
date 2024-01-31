@@ -1,6 +1,5 @@
 BARNACLE_FIX_VISIBILITY=OFF # Barnacle tongue length fix
 CLIENT_WEAPONS=ON # Client local weapons prediction
-SATCHEL_OLD_BEHAVIOUR=OFF # Old pre-HL 25th satchel's behaviour
 OEM_BUILD=OFF # OEM Build
 HLDEMO_BUILD=OFF # Demo Build
 
