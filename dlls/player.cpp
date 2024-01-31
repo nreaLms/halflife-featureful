@@ -5098,6 +5098,12 @@ void CBasePlayer::SetPrefsFromUserinfo( char *infobuffer )
 		m_iAutoWepSwitch = atoi( pszKeyVal );
 	else
 		m_iAutoWepSwitch = 1;
+
+	pszKeyVal = g_engfuncs.pfnInfoKeyValue( infobuffer, "cl_satchelcontrol" );
+	if( pszKeyVal[0] != '\0' )
+		m_iSatchelControl = atoi( pszKeyVal );
+	else
+		m_iSatchelControl = 1;
 }
 
 void CBasePlayer::EnableControl( BOOL fControl )

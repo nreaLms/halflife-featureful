@@ -956,6 +956,7 @@ public:
 	void WeaponIdle( void );
 	void Throw( void );
 	void Detonate(bool allowThrow);
+	int ControlBehavior();
 	void DrawSatchel( void );
 	void DrawRadio();
 

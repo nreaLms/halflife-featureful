@@ -441,26 +441,25 @@ void CSatchel::Holster()
 
 void CSatchel::PrimaryAttack( void )
 {
-#if SATCHEL_OLD_BEHAVIOUR
-	Detonate(true);
-#else
-	if( m_chargeReady != SATCHEL_RELOAD )
+	if (ControlBehavior() == 0)
+		Detonate(true);
+	else if( m_chargeReady != SATCHEL_RELOAD )
 	{
 		Throw();
 	}
-#endif
 }
 
 void CSatchel::SecondaryAttack( void )
 {
-#if SATCHEL_OLD_BEHAVIOUR
-	if( m_chargeReady != SATCHEL_RELOAD )
+	if (ControlBehavior() == 0)
 	{
-		Throw();
+		if( m_chargeReady != SATCHEL_RELOAD )
+		{
+			Throw();
+		}
 	}
-#else
-	Detonate(false);
-#endif
+	else
+		Detonate(false);
 }
 
 void CSatchel::Throw( void )
@@ -532,6 +531,23 @@ void CSatchel::Detonate(bool allowThrow)
 		// we're reloading, don't allow fire
 		break;
 	}
+}
+
+#if CLIENT_DLL
+extern cvar_t *cl_satchelcontrol;
+#endif
+
+int CSatchel::ControlBehavior()
+{
+#if CLIENT_DLL
+	if (cl_satchelcontrol)
+		return (int)cl_satchelcontrol->value;
+	return 1;
+#else
+	if (m_pPlayer)
+		return m_pPlayer->m_iSatchelControl;
+	return 1;
+#endif
 }
 
 void CSatchel::WeaponIdle( void )
