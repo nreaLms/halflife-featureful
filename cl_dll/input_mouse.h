@@ -48,7 +48,7 @@ protected:
 #if GOLDSOURCE_SUPPORT && (_WIN32 || (__linux__ && !__ANDROID__) || __APPLE__) && (__i386 || _M_IX86)
 #define SUPPORT_GOLDSOURCE_INPUT	1
 
-#if _WIN32
+#if XASH_WIN32
 #define HSPRITE WINDOWS_HSPRITE
 #include <windows.h>
 #undef HSPRITE

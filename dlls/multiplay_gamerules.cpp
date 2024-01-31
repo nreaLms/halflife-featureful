@@ -34,6 +34,7 @@
 #endif
 #include	"hltv.h"
 #include	"mapconfig.h"
+#include	"trains.h"
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -328,7 +329,7 @@ void CHalfLifeMultiplay::RefreshSkillData( void )
 	gSkillData.plrDmg9MM = 12;
 
 	// 357 Round
-	gSkillData.plrDmg357 = 40;
+	gSkillData.plrDmg357 = 50;
 
 	// MP5 Round
 	gSkillData.plrDmgMP5 = 12;
@@ -868,6 +869,16 @@ void CHalfLifeMultiplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller,
 	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
 	if( ktmp && (ktmp->Classify() == CLASS_PLAYER ) )
 		peKiller = (CBasePlayer*)ktmp;
+	else if( ktmp && ktmp->Classify() == CLASS_VEHICLE )
+	{
+		CBasePlayer *pDriver = (CBasePlayer *)( (CFuncVehicle *)ktmp )->m_pDriver;
+
+		if( pDriver != NULL )
+		{
+			pKiller = pDriver->pev;
+			peKiller = (CBasePlayer *)pDriver;
+		}
+	}
 
 	if( pVictim->pev == pKiller )
 	{

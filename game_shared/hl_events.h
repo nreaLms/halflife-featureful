@@ -27,6 +27,7 @@ void EV_TripmineFire( struct event_args_s *args );
 void EV_SnarkFire( struct event_args_s *args );
 
 void EV_TrainPitchAdjust( struct event_args_s *args );
+void EV_VehiclePitchAdjust( struct event_args_s *args );
 
 #if FEATURE_DESERT_EAGLE
 void EV_FireEagle( struct event_args_s *args );

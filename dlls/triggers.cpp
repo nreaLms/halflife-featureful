@@ -1593,7 +1593,12 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 	}
 #endif
 	if( fldmg < 0 )
-		pOther->TakeHealth( this, -fldmg, m_bitsDamageInflict );
+	{
+		if( !( g_pGameRules->IsMultiplayer()
+		    && pOther->IsPlayer()
+		    && pOther->pev->deadflag ))
+			pOther->TakeHealth( this, -fldmg, m_bitsDamageInflict );
+	}
 	else
 	{
 		if (pev->dmg_save > 0) {

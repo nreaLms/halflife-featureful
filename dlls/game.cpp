@@ -1150,12 +1150,14 @@ cvar_t* violence_ablood = NULL;
 cvar_t* violence_hgibs = NULL;
 cvar_t* violence_agibs = NULL;
 
+cvar_t sv_pushable_fixed_tick_fudge = { "sv_pushable_fixed_tick_fudge", "15" };
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
 {
 	// Register cvars here:
-	if( CVAR_GET_POINTER( "build" ) )
+	if( !CVAR_GET_POINTER( "sv_language" ) )
 		g_fIsXash3D = TRUE;
 
 	ReadServerFeatures();
@@ -1697,6 +1699,8 @@ void GameDLLInit( void )
 	REGISTER_SKILL_CVARS(sk_flashlight_drain_time);
 	REGISTER_SKILL_CVARS(sk_flashlight_charge_time);
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
+
+	CVAR_REGISTER( &sv_pushable_fixed_tick_fudge );
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 

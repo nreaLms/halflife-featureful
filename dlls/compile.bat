@@ -133,6 +133,7 @@ set SOURCES=agrunt.cpp ^
 	tripmine.cpp ^
 	turret.cpp ^
 	util.cpp ^
+	vehicle.cpp ^
 	voltigore.cpp ^
 	weapons.cpp ^
 	weapons_shared.cpp ^

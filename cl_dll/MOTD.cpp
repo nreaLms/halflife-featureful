@@ -74,7 +74,7 @@ int CHudMOTD::Draw( float fTime )
 	//bool bScroll;
 	// find the top of where the MOTD should be drawn,  so the whole thing is centered in the screen
 	int ypos = ( ScreenHeight - LineHeight * m_iLines ) / 2; // shift it up slightly
-	char *ch = m_szMOTD;
+	unsigned char *ch = (unsigned char*)m_szMOTD;
 	int xpos = ( ScreenWidth - WidestCharacterWidth * m_iMaxLength ) / 2;
 	if( xpos < 30 )
 		xpos = 30;
@@ -96,11 +96,13 @@ int CHudMOTD::Draw( float fTime )
 	gHUD.DrawDarkRectangle( xpos - 5, ypos_r - 5, xmax - xpos + 10, height + 10 );
 	while( *ch )
 	{
-		char *next_line;
-		int line_length = 0;  // count the length of the current line
+		unsigned char *next_line;
 		for( next_line = ch; *next_line != '\n' && *next_line != 0; next_line++ )
-			line_length += gHUD.m_scrinfo.charWidths[*next_line];
-		char *top = next_line;
+			;
+		// int line_length = 0;  // count the length of the current line
+		// for( next_line = ch; *next_line != '\n' && *next_line != 0; next_line++ )
+		//	line_length += gHUD.m_scrinfo.charWidths[*next_line];
+		unsigned char *top = next_line;
 		if( *top == '\n' )
 			*top = 0;
 		else
@@ -108,7 +110,7 @@ int CHudMOTD::Draw( float fTime )
 
 		// find where to start drawing the line
 		if( ( ypos > ROW_RANGE_MIN ) && ( ypos + LineHeight <= ypos_r + height ) )
-			CHud::UtfText::DrawString( xpos, ypos, xmax, ch, 255, 180, 0 );
+			CHud::UtfText::DrawString( xpos, ypos, xmax, (const char*)ch, 255, 180, 0 );
 
 		ypos += LineHeight;
 

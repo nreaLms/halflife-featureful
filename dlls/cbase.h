@@ -126,6 +126,7 @@ enum
 	CLASS_SNARK,
 	CLASS_GARGANTUA,
 	CLASS_NUMBER_OF_CLASSES,
+	CLASS_VEHICLE = 98,
 	CLASS_BARNACLE = 99 // special because no one pays attention to it, and it eats a wide cross-section of creatures.
 };
 
