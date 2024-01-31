@@ -955,6 +955,7 @@ public:
 	void Holster();
 	void WeaponIdle( void );
 	void Throw( void );
+	void Detonate(bool allowThrow);
 	void DrawSatchel( void );
 	void DrawRadio();
 
