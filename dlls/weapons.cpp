@@ -640,7 +640,7 @@ void CBasePlayerWeapon::DefaultTouch( CBaseEntity *pOther )
 int CBasePlayerWeapon::ObjectCaps()
 {
 	if (IsPickableByUse(this) && !(pev->effects & EF_NODRAW)) {
-		return CBaseAnimating::ObjectCaps() | FCAP_IMPULSE_USE;
+		return CBaseAnimating::ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	} else {
 		return CBaseAnimating::ObjectCaps();
 	}

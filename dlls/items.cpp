@@ -319,7 +319,7 @@ void CInfoItemRandom::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 int CPickup::ObjectCaps()
 {
 	if (IsPickableByUse() && !(pev->effects & EF_NODRAW)) {
-		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE;
+		return CBaseEntity::ObjectCaps() | FCAP_IMPULSE_USE | FCAP_ONLYVISIBLE_USE;
 	} else {
 		return CBaseEntity::ObjectCaps();
 	}
