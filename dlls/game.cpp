@@ -83,6 +83,8 @@ ModFeatures::ModFeatures()
 
 	bigmomma_wait_fix = false;
 
+	gargantua_larger_size = false;
+
 	gonome_lock_player = false;
 
 	voltigore_lesser_size = false;
@@ -134,6 +136,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(vortigaunt_squad),
 		KEY_VALUE_DEF(sentry_retract),
 		KEY_VALUE_DEF(bigmomma_wait_fix),
+		KEY_VALUE_DEF(gargantua_larger_size),
 		KEY_VALUE_DEF(gonome_lock_player),
 		KEY_VALUE_DEF(voltigore_lesser_size),
 		KEY_VALUE_DEF(doors_open_in_move_direction),

@@ -364,8 +364,16 @@ public:
 	CUSTOM_SCHEDULES
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
-	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, 0.0f ); }
-	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 64.0f ); }
+	Vector DefaultMinHullSize() {
+		if (g_modFeatures.gargantua_larger_size)
+			return Vector( -40.0f, -40.0f, 0.0f );
+		return Vector( -32.0f, -32.0f, 0.0f );
+	}
+	Vector DefaultMaxHullSize() {
+		if (g_modFeatures.gargantua_larger_size)
+			return Vector( 40.0f, 40.0f, 214.0f );
+		return Vector( 32.0f, 32.0f, 64.0f );
+	}
 
 	int m_stompSprite;
 	int m_GargGibModel;
@@ -1832,6 +1840,8 @@ public:
 		pev->absmin = pev->origin + Vector( -32, -32, 0 );
 		pev->absmax = pev->origin + Vector( 32, 32, 100 );
 	}
+	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, 0.0f ); }
+	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 64.0f ); }
 
 	static const char *pBeamAttackSounds[];
 	static const char *pFootSounds[];
