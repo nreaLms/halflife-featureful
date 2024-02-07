@@ -2173,7 +2173,7 @@
 		8: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Repairable' flag"
 		32: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Show HUD Info' flag"
 		64: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Immune To Clients' flag"
-		256: "Instant Crowbar" : 0
+		256: "Instant break by melee" : 0
 		512: "Explosives only": 0
 		1024: "Op4Mortar only" : 0
 		4096: "Not solid" : 0
@@ -2214,13 +2214,13 @@
 		3 : "Off/On (for Toggle buttons)"
 	]
 ]
-@BaseClass = ButtonUsePolicy
+@BaseClass = EntityUsePolicy
 [
 	directuse(choices) : "Player use policy" =
 	[
 		0 : "Default"
 		1 : "Direct only"
-		2 : "Visible only"
+		2 : "Reachable only"
 	]
 ]
 @BaseClass = ButtonTrigger
@@ -2233,7 +2233,7 @@
 	wait_toggle(string) : "Delay before toggling again"
 ]
 
-@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_button : "Button"
+@SolidClass base(Global, Targetname, Targetx, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, EntityUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_button : "Button"
 [
 	speed(integer) : "Speed" : 5
 	health(integer) : "Health (shootable if > 0)"
@@ -2282,24 +2282,10 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Door, ZHLT) = func_door : "Basic door"
-[
-	directuse(choices) : "Player use policy" =
-	[
-		0 : "No"
-		1 : "Direct only"
-		2 : "Visible only"
-	]
-]
+@SolidClass base(Door, ZHLT, EntityUsePolicy) = func_door : "Basic door" []
 
-@SolidClass base(Door, ZHLT) = func_door_rotating : "Rotating door"
+@SolidClass base(Door, ZHLT, EntityUsePolicy) = func_door_rotating : "Rotating door"
 [
-	directuse(choices) : "Player use policy" =
-	[
-		0 : "No"
-		1 : "Direct only"
-		2 : "Visible only"
-	]
 	spawnflags(flags) =
 	[
 		2 : "Reverse Dir" : 0
@@ -2446,7 +2432,7 @@
 	_minlight(string) : "Minimum light level"
 ]
 
-@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, ButtonUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_rot_button : "RotatingButton"
+@SolidClass base(Targetname, Global, RenderFields, Angles, ZHLT, BaseLockable, ButtonUseType, EntityUsePolicy, ButtonTrigger, ButtonWaitToggle) = func_rot_button : "RotatingButton"
 [
 	target(target_destination) : "Targetted object"
 	// changetarget will change the button's target's TARGET field to the button's changetarget.
@@ -6735,7 +6721,7 @@
 	netname(target_source) : "Childrens' Name" : : "The spawned monster will receive it as its targetname."
 
 	monstercount(integer) : "Number of Monsters" : 1 : "How many monsters the monstermaker can create (-1 = unlimited)"
-	delay(string) : "Frequency" : "5" : "How often (seconds) a new monster will be made"
+	delay(string) : "Delay between spawns" : "5" : "How often (seconds) a new monster will be made"
 	m_imaxlivechildren(integer) : "Max live children" : 5 : "Maximum number of live children allowed at one time. (New ones will not be made until one dies, -1 = no limit)"
 
     spawnorigin(string) : "Spawn position [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
@@ -6751,7 +6737,7 @@
 		8 : "Attachment point 3"
 	]
 	spawndelay(string) : "Delay before spawn" : : "If larger then zero, the monster spawn will be delayed by specified amount of time (in seconds). The hull is created in place of the future monster's spawn to make sure that monster will have enough place to spawn. Recommended to use with 'Auto size BBox' flag and 'Warpball template'. Does not work well with 'Warp at monster's...'"
-	delay_after_blocked(string) : "Delay after blocked" : : "Delay before the next spawn attempt if previous was blocked by another monster. If not specified, the Frequency parameter is used as a delay"
+	delay_after_blocked(string) : "Delay after blocked" : : "Delay before the next spawn attempt if previous was blocked by another monster. If not specified, the 'Delay between spawns' parameter is used as a delay"
 	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
 	[
 		-1 : "Don't pass activator"
