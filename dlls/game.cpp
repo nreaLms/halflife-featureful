@@ -83,7 +83,7 @@ ModFeatures::ModFeatures()
 
 	bigmomma_wait_fix = false;
 
-	gargantua_larger_size = false;
+	gargantua_larger_size = FEATURE_OPFOR_SPECIFIC ? true : false;
 
 	gonome_lock_player = false;
 
