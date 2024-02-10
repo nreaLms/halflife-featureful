@@ -783,7 +783,7 @@ int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 		int crosshairColor = gHUD.GetCrosshairColor();
 		int r,g,b;
 		UnpackRGB(r,g,b,crosshairColor);
-		if( gHUD.m_iFOV >= 90 )
+		if( !gHUD.ShouldUseZoomedCrosshair() )
 		{
 			// normal crosshairs
 			if( fOnTarget && m_pWeapon->hAutoaim )

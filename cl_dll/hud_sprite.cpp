@@ -39,7 +39,7 @@ HudSpriteRenderer::HudSpriteRenderer() {
 }
 
 void HudSpriteRenderer::EnableCustomCrosshair() {
-	if (gEngfuncs.pfnSetCrosshair == ScaledSetCrosshair)
+	if (CustomCrosshairRenderingEnabled())
 		return;
 	gEngfuncs.pfnSetCrosshair = ScaledSetCrosshair;
 	gEngfuncs.Con_DPrintf("Enabling custom crosshair rendering\n");
@@ -47,11 +47,16 @@ void HudSpriteRenderer::EnableCustomCrosshair() {
 }
 
 void HudSpriteRenderer::DisableCustomCrosshair() {
-	if (gEngfuncs.pfnSetCrosshair == origSpriteEngfuncs.pfnSetCrosshair)
+	if (!CustomCrosshairRenderingEnabled())
 		return;
 	gEngfuncs.pfnSetCrosshair = origSpriteEngfuncs.pfnSetCrosshair;
 	gEngfuncs.Con_DPrintf("Disabling custom crosshair rendering\n");
 	gHUD.ResetCrosshair();
+}
+
+bool HudSpriteRenderer::CustomCrosshairRenderingEnabled()
+{
+	return gEngfuncs.pfnSetCrosshair != origSpriteEngfuncs.pfnSetCrosshair;
 }
 
 float HudSpriteRenderer::GetHUDScale() const {
@@ -253,13 +258,9 @@ void HudSpriteRenderer::FillRGBA(int x, int y, int width, int height, int r, int
 	}
 }
 
-void HudSpriteRenderer::SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b) {
-	crosshair = hspr;
-	crosshair_model = const_cast<model_t *>(gEngfuncs.GetSpritePointer(crosshair));
-	crosshair_dimensions = rc;
-	crosshair_color.r = r;
-	crosshair_color.g = g;
-	crosshair_color.b = b;
+void HudSpriteRenderer::SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b)
+{
+	SetCrosshairData(hspr, rc, r, g, b);
 
 	wrect_t crosshair_rect;
 	crosshair_rect.left = 0;
@@ -270,10 +271,20 @@ void HudSpriteRenderer::SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int
 	origSpriteEngfuncs.pfnSetCrosshair(0, crosshair_rect, 0, 0, 0);
 }
 
+void HudSpriteRenderer::SetCrosshairData(HSPRITE hspr, wrect_t rc, int r, int g, int b)
+{
+	crosshair = hspr;
+	crosshair_model = const_cast<model_t *>(gEngfuncs.GetSpritePointer(crosshair));
+	crosshair_dimensions = rc;
+	crosshair_color.r = r;
+	crosshair_color.g = g;
+	crosshair_color.b = b;
+}
+
 void HudSpriteRenderer::DrawCrosshair()
 {
 	// using original crosshair rendering
-	if (gEngfuncs.pfnSetCrosshair == origSpriteEngfuncs.pfnSetCrosshair)
+	if (!CustomCrosshairRenderingEnabled())
 		return;
 
 	if (crosshair <= 0)

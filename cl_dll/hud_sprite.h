@@ -18,6 +18,7 @@ public:
 
 	void EnableCustomCrosshair();
 	void DisableCustomCrosshair();
+	bool CustomCrosshairRenderingEnabled();
 
 	float GetHUDScale() const;
 	bool IsCustomScale() const;
@@ -41,6 +42,7 @@ public:
 	void FillRGBA(int x, int y, int width, int height, int r, int g, int b, int a);
 
 	void SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b);
+	void SetCrosshairData(HSPRITE hspr, wrect_t rc, int r, int g, int b);
 	void DrawCrosshair();
 
 	HudSpriteRenderer& DefaultScale();

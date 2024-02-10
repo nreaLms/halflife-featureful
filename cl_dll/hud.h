@@ -916,6 +916,7 @@ public:
 	color24 FlashlightColor();
 	int NVGStyle();
 	bool MoveModeEnabled();
+	inline bool ShouldUseZoomedCrosshair() { return m_iFOV < 90; }
 	bool CrosshairColorable();
 private:
 	void ParseClientFeatures();

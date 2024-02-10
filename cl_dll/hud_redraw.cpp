@@ -231,18 +231,20 @@ int CHud::Redraw( float flTime, int intermission )
 	if (m_colorableCrosshair != CrosshairColorable())
 	{
 		m_colorableCrosshair = !m_colorableCrosshair;
-		gEngfuncs.Con_DPrintf("Will reset crosshair because colorable_crosshair changed\n");
+		gEngfuncs.Con_DPrintf("Resetting crosshair because colorable_crosshair changed\n");
 		shouldResetCrosshair = true;
 	}
 	int crosshairColor = GetCrosshairColor();
 	if (m_lastCrosshairColor != crosshairColor)
 	{
 		m_lastCrosshairColor = crosshairColor;
-		gEngfuncs.Con_DPrintf("Will reset crosshair because hud color changed\n");
-		shouldResetCrosshair = true;
+		if (!shouldResetCrosshair)
+		{
+			gEngfuncs.Con_DPrintf("Resetting crosshair because hud color changed\n");
+			shouldResetCrosshair = true;
+		}
 	}
 	if (shouldResetCrosshair) {
-		gEngfuncs.Con_DPrintf("Resetting crosshair\n");
 		ResetCrosshair();
 	}
 
@@ -598,13 +600,13 @@ void CHud::ResetCrosshair()
 			int crosshairColor = gHUD.GetCrosshairColor();
 			int r,g,b;
 			UnpackRGB(r,g,b,crosshairColor);
-			if( m_iFOV >= 90 )
+			if( !ShouldUseZoomedCrosshair() )
 			{
-				gEngfuncs.pfnSetCrosshair( pWeapon->hCrosshair, pWeapon->rcCrosshair, r, g, b );
+				SetCrosshair( pWeapon->hCrosshair, pWeapon->rcCrosshair, r, g, b );
 			}
 			else
 			{
-				gEngfuncs.pfnSetCrosshair( pWeapon->hZoomedCrosshair, pWeapon->rcZoomedCrosshair, r, g, b );
+				SetCrosshair( pWeapon->hZoomedCrosshair, pWeapon->rcZoomedCrosshair, r, g, b );
 			}
 		}
 	}
