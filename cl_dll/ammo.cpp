@@ -715,7 +715,12 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 	else
 	{
 		if( m_pWeapon )
-			SetCrosshair( m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, 255, 255, 255 );
+		{
+			const int crosshairColor = gHUD.GetCrosshairColor();
+			int r, g, b;
+			UnpackRGB(r, g, b, crosshairColor);
+			SetCrosshair( m_pWeapon->hCrosshair, m_pWeapon->rcCrosshair, r, g, b );
+		}
 	}
 
 	return 1;
