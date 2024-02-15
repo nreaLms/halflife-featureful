@@ -891,25 +891,25 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 #if FEATURE_DESERT_EAGLE
 	else if( player.m_pActiveItem->m_iId == WEAPON_EAGLE )
 	{
-		from->client.vuser2[1] = ( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive;
+		to->client.vuser2[1] = ( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive;
 	}
 #endif
 #if FEATURE_PIPEWRENCH
 	else if( player.m_pActiveItem->m_iId == WEAPON_PIPEWRENCH )
 	{
-		from->client.vuser2[1] = ( (CPipeWrench *)player.m_pActiveItem )->m_iSwingMode;
+		to->client.vuser2[1] = ( (CPipeWrench *)player.m_pActiveItem )->m_iSwingMode;
 	}
 #endif
 #if FEATURE_KNIFE
 	else if( player.m_pActiveItem->m_iId == WEAPON_KNIFE )
 	{
-		from->client.vuser2[1] = ( (CKnife *)player.m_pActiveItem )->m_iSwingMode;
+		to->client.vuser2[1] = ( (CKnife *)player.m_pActiveItem )->m_iSwingMode;
 	}
 #endif
 #if FEATURE_M249
 	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
 	{
-		from->client.vuser2[1] = ( (CM249 *)player.m_pActiveItem )->m_iVisibleClip;
+		to->client.vuser2[1] = ( (CM249 *)player.m_pActiveItem )->m_iVisibleClip;
 	}
 #endif
 
