@@ -919,6 +919,7 @@ public:
 	BOOL CanHolster( void );
 	void Holster();
 	void WeaponIdle( void );
+	bool PreferNewPhysics();
 
 	virtual BOOL UseDecrement( void )
 	{

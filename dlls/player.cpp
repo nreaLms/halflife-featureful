@@ -5104,6 +5104,12 @@ void CBasePlayer::SetPrefsFromUserinfo( char *infobuffer )
 		m_iSatchelControl = atoi( pszKeyVal );
 	else
 		m_iSatchelControl = 1;
+
+	pszKeyVal = g_engfuncs.pfnInfoKeyValue( infobuffer, "cl_grenadephysics" );
+	if( pszKeyVal[0] != '\0' )
+		m_iPreferNewGrenadePhysics = atoi( pszKeyVal );
+	else
+		m_iPreferNewGrenadePhysics = 1;
 }
 
 void CBasePlayer::EnableControl( BOOL fControl )

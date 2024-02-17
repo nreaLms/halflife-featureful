@@ -472,6 +472,7 @@ public:
 	BOOL m_settingsLoaded;
 	BOOL m_buddha;
 	short m_iSatchelControl;
+	short m_iPreferNewGrenadePhysics;
 
 	void SetLoopedMp3(string_t loopedMp3);
 	string_t m_loopedMp3;

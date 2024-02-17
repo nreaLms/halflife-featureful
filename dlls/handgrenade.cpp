@@ -125,6 +125,20 @@ void CHandGrenade::PrimaryAttack()
 	}
 }
 
+bool CHandGrenade::PreferNewPhysics()
+{
+#if CLIENT_DLL
+	extern cvar_t *cl_grenadephysics;
+	if (cl_grenadephysics)
+		return (int)cl_grenadephysics->value;
+	return 1;
+#else
+	if (m_pPlayer)
+		return m_pPlayer->m_iPreferNewGrenadePhysics;
+	return 1;
+#endif
+}
+
 void CHandGrenade::WeaponIdle( void )
 {
 	if( m_flReleaseThrow == 0.0f && m_flStartThrow )
@@ -142,9 +156,17 @@ void CHandGrenade::WeaponIdle( void )
 		else
 			angThrow.x = -10.0f + angThrow.x * ( ( 90.0f + 10.0f ) / 90.0f );
 
-		float flVel = ( 90.0f - angThrow.x ) * 6.5f;
-		if( flVel > 1000.0f )
-			flVel = 1000.0f;
+		float maxVel = 1000.0f;
+		float velVultiplier = 6.5f;
+		if (!PreferNewPhysics())
+		{
+			maxVel = 500.0f;
+			velVultiplier = 4.0f;
+		}
+
+		float flVel = ( 90.0f - angThrow.x ) * velVultiplier;
+		if( flVel > maxVel )
+			flVel = maxVel;
 
 		UTIL_MakeVectors( angThrow );
 
