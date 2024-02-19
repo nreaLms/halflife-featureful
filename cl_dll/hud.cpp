@@ -615,7 +615,6 @@ void CHud::Init( void )
 	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	cl_satchelcontrol = CVAR_CREATE( "cl_satchelcontrol", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	cl_grenadephysics = CVAR_CREATE( "cl_grenadephysics", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );
-	CVAR_CREATE( "cl_save_mapname", "0", FCVAR_ARCHIVE | FCVAR_USERINFO );
 	default_fov = CVAR_CREATE( "default_fov", "90", FCVAR_ARCHIVE );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );

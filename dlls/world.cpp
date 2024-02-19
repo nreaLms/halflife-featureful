@@ -909,8 +909,6 @@ extern "C" EXPORT void SV_SaveGameComment( char *text, int maxlength )
 	unsigned long i;
 	const char *mapname = STRING( gpGlobals->mapname );
 
-	bool justMapName = false;
-
 	for( i = 0; i < ARRAYSIZE( gTitleComments ); i++ )
 	{
 		// compare if strings are equal at beginning
@@ -935,26 +933,6 @@ extern "C" EXPORT void SV_SaveGameComment( char *text, int maxlength )
 		{
 			// or use mapname
 			pName = STRING( gpGlobals->mapname );
-			justMapName = true;
-		}
-	}
-
-	char buf[65];
-	if (!justMapName)
-	{
-		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(NULL);
-		if (pPlayer)
-		{
-			const char* keyVal = g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "cl_save_mapname" );
-			if (keyVal && *keyVal)
-			{
-				const int saveMapName = atoi(keyVal);
-				if (saveMapName)
-				{
-					_snprintf(buf, sizeof(buf), "%s [%s]", pName, STRING(gpGlobals->mapname));
-					pName = buf;
-				}
-			}
 		}
 	}
 
