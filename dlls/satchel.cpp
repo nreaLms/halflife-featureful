@@ -542,11 +542,11 @@ int CSatchel::ControlBehavior()
 #if CLIENT_DLL
 	if (cl_satchelcontrol)
 		return (int)cl_satchelcontrol->value;
-	return 1;
+	return 0;
 #else
 	if (m_pPlayer)
 		return m_pPlayer->m_iSatchelControl;
-	return 1;
+	return 0;
 #endif
 }
 

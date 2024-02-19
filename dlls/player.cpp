@@ -5099,17 +5099,17 @@ void CBasePlayer::SetPrefsFromUserinfo( char *infobuffer )
 	else
 		m_iAutoWepSwitch = 1;
 
-	pszKeyVal = g_engfuncs.pfnInfoKeyValue( infobuffer, "cl_satchelcontrol" );
+	pszKeyVal = g_engfuncs.pfnInfoKeyValue( infobuffer, "_satctrl" );
 	if( pszKeyVal[0] != '\0' )
 		m_iSatchelControl = atoi( pszKeyVal );
 	else
-		m_iSatchelControl = 1;
+		m_iSatchelControl = 0;
 
-	pszKeyVal = g_engfuncs.pfnInfoKeyValue( infobuffer, "cl_grenadephysics" );
+	pszKeyVal = g_engfuncs.pfnInfoKeyValue( infobuffer, "_grenphys" );
 	if( pszKeyVal[0] != '\0' )
 		m_iPreferNewGrenadePhysics = atoi( pszKeyVal );
 	else
-		m_iPreferNewGrenadePhysics = 1;
+		m_iPreferNewGrenadePhysics = 0;
 }
 
 void CBasePlayer::EnableControl( BOOL fControl )

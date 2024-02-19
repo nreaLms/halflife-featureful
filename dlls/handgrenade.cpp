@@ -130,12 +130,12 @@ bool CHandGrenade::PreferNewPhysics()
 #if CLIENT_DLL
 	extern cvar_t *cl_grenadephysics;
 	if (cl_grenadephysics)
-		return (int)cl_grenadephysics->value;
-	return 1;
+		return (int)cl_grenadephysics->value != 0;
+	return false;
 #else
 	if (m_pPlayer)
-		return m_pPlayer->m_iPreferNewGrenadePhysics;
-	return 1;
+		return m_pPlayer->m_iPreferNewGrenadePhysics != 0;
+	return false;
 #endif
 }
 
@@ -156,12 +156,12 @@ void CHandGrenade::WeaponIdle( void )
 		else
 			angThrow.x = -10.0f + angThrow.x * ( ( 90.0f + 10.0f ) / 90.0f );
 
-		float maxVel = 1000.0f;
-		float velVultiplier = 6.5f;
-		if (!PreferNewPhysics())
+		float maxVel = 500.0f;
+		float velVultiplier = 4.0f;
+		if (PreferNewPhysics())
 		{
-			maxVel = 500.0f;
-			velVultiplier = 4.0f;
+			maxVel = 1000.0f;
+			velVultiplier = 6.5f;
 		}
 
 		float flVel = ( 90.0f - angThrow.x ) * velVultiplier;
