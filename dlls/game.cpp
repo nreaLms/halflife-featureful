@@ -22,7 +22,6 @@
 #include "saverestore.h"
 #include "locus.h"
 
-BOOL		g_fIsXash3D;
 
 ModFeatures g_modFeatures;
 
@@ -1160,8 +1159,6 @@ cvar_t sv_pushable_fixed_tick_fudge = { "sv_pushable_fixed_tick_fudge", "15" };
 void GameDLLInit( void )
 {
 	// Register cvars here:
-	if( !CVAR_GET_POINTER( "sv_language" ) )
-		g_fIsXash3D = TRUE;
 
 	ReadServerFeatures();
 	ReadEnabledMonsters();
