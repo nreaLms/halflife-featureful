@@ -954,6 +954,7 @@ void CFuncVehicle::Precache()
 
 	PRECACHE_SOUND( "plats/vehicle_brake1.wav" );
 	PRECACHE_SOUND( "plats/vehicle_start1.wav" );
+	PRECACHE_SOUND( "plats/vehicle_ignition.wav" );
 
 	m_usAdjustPitch = PRECACHE_EVENT( 1, "events/vehicle.sc" );
 }
