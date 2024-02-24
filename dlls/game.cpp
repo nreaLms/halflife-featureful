@@ -22,7 +22,6 @@
 #include "saverestore.h"
 #include "locus.h"
 
-
 ModFeatures g_modFeatures;
 
 struct WeaponNameAndId
@@ -1153,6 +1152,7 @@ cvar_t* violence_hgibs = NULL;
 cvar_t* violence_agibs = NULL;
 
 cvar_t sv_pushable_fixed_tick_fudge = { "sv_pushable_fixed_tick_fudge", "15" };
+cvar_t sv_busters = { "sv_busters", "0" };
 
 // Register your console variables here
 // This gets called one time when the game is initialied
@@ -1246,6 +1246,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &mp_chattime );
 
 	CVAR_REGISTER( &pickup_policy );
+
+	CVAR_REGISTER( &sv_busters );
 
 #if FEATURE_GRENADE_JUMP_CVAR
 	CVAR_REGISTER( &grenade_jump );

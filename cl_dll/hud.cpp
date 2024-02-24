@@ -722,6 +722,8 @@ void CHud::Init( void )
 	hudRenderer.Init();
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
+	ClientCmd( "richpresence_gamemode\n" );
+	ClientCmd( "richpresence_update\n" );
 }
 
 const char* strStartsWith(const char* str, const char* start)

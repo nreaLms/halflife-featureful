@@ -836,8 +836,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	int iWeaponRules;
 	int iAmmoRules;
 	int i;
-	CBasePlayerWeapon *rgpPackWeapons[MAX_WEAPONS] = {0};
-	memset(rgpPackWeapons, 0, sizeof(rgpPackWeapons));
+	CBasePlayerWeapon *rgpPackWeapons[MAX_WEAPONS] = {0,};
 	AmmoCountInfo iPackAmmo[MAX_AMMO_SLOTS];
 	int iPW = 0;// index into packweapons array
 
@@ -883,14 +882,29 @@ void CBasePlayer::PackDeadPlayerItems( void )
 				if( m_pActiveItem && pPlayerItem == m_pActiveItem )
 				{
 					// this is the active item. Pack it.
-					rgpPackWeapons[iPW++] = pPlayerItem;
+					rgpPackWeapons[iPW] = pPlayerItem;
 				}
 				break;
 			case GR_PLR_DROP_GUN_ALL:
-				rgpPackWeapons[iPW++] = pPlayerItem;
+				rgpPackWeapons[iPW] = pPlayerItem;
 				break;
 			default:
 				break;
+			}
+
+			if( rgpPackWeapons[iPW] )
+			{
+				if (rgpPackWeapons[iPW]->iMaxClip() != WEAPON_NOCLIP)
+				{
+					// complete the reload.
+					// TODO: make it depend on the game rules
+					const int j = Q_min( rgpPackWeapons[iPW]->iMaxClip() - rgpPackWeapons[iPW]->m_iClip, iPackAmmo[rgpPackWeapons[iPW]->m_iPrimaryAmmoType].ammoCount );
+
+					// Add them to the clip
+					rgpPackWeapons[iPW]->m_iClip += j;
+					iPackAmmo[rgpPackWeapons[iPW]->m_iPrimaryAmmoType].ammoCount -= j;
+				}
+				iPW++;
 			}
 		}
 	}
@@ -927,8 +941,18 @@ void CBasePlayer::PackDeadPlayerItems( void )
 		pWeaponBox->pev->velocity = weaponVelocity;// weaponbox has player's velocity, then some.
 
 		CBasePlayerWeapon* weapon = rgpPackWeapons[iPW];
-		if (pWeaponBox->PackWeapon( weapon )) {
+		if (pWeaponBox->PackWeapon( weapon ))
+		{
 			pWeaponBox->SetWeaponModel(weapon);
+
+			if (g_pGameRules->IsBustingGame() && FClassnameIs( weapon->pev, "weapon_egon" ))
+			{
+				pWeaponBox->pev->velocity = g_vecZero;
+				pWeaponBox->pev->renderfx = kRenderFxGlowShell;
+				pWeaponBox->pev->renderamt = 25;
+				pWeaponBox->pev->rendercolor = Vector( 0, 75, 250 );
+			}
+
 			int ammoIndex = GetAmmoIndex( weapon->pszAmmo1() );
 			if (ammoIndex >= 0 && iPackAmmo[ammoIndex].ammoCount && iPackAmmo[ammoIndex].weaponCount) {
 				const int toPack = iPackAmmo[ammoIndex].ammoCount / iPackAmmo[ammoIndex].weaponCount;
@@ -1451,7 +1475,7 @@ void CBasePlayer::PlayerDeathThink( void )
 		PackDeadPlayerItems();
 	}
 
-	if( pev->modelindex && ( !m_fSequenceFinished ) && ( pev->deadflag == DEAD_DYING ) )
+	if( pev->modelindex && ( !m_fSequenceFinished ) && ( pev->deadflag == DEAD_DYING ))
 	{
 		StudioFrameAdvance();
 
@@ -1460,20 +1484,20 @@ void CBasePlayer::PlayerDeathThink( void )
 			return;
 	}
 
-	// once we're done animating our death and we're on the ground, we want to set movetype to None so our dead body won't do collisions and stuff anymore
-	// this prevents a bug where the dead body would go to a player's head if he walked over it while the dead player was clicking their button to respawn
-	if( pev->movetype != MOVETYPE_NONE && FBitSet( pev->flags, FL_ONGROUND ) )
-		pev->movetype = MOVETYPE_NONE;
-
 	if( pev->deadflag == DEAD_DYING )
 	{
-		if( g_pGameRules->IsMultiplayer() && pev->movetype == MOVETYPE_NONE )
+		if( g_pGameRules->IsMultiplayer() && m_fSequenceFinished && pev->movetype == MOVETYPE_NONE )
 		{
 			CopyToBodyQue( pev );
 			pev->modelindex = 0;
 		}
 		pev->deadflag = DEAD_DEAD;
 	}
+
+	// once we're done animating our death and we're on the ground, we want to set movetype to None so our dead body won't do collisions and stuff anymore
+	// this prevents a bug where the dead body would go to a player's head if he walked over it while the dead player was clicking their button to respawn
+	if( pev->movetype != MOVETYPE_NONE && FBitSet( pev->flags, FL_ONGROUND ) )
+		pev->movetype = MOVETYPE_NONE;
 
 	StopAnimation();
 
@@ -3915,13 +3939,11 @@ void CBloodSplat::Spray( void )
 {
 	TraceResult tr;	
 
-	if( g_Language != LANGUAGE_GERMAN )
-	{
-		UTIL_MakeVectors( pev->angles );
-		UTIL_TraceLine( pev->origin, pev->origin + gpGlobals->v_forward * 128, ignore_monsters, pev->owner, & tr );
+	UTIL_MakeVectors( pev->angles );
+	UTIL_TraceLine( pev->origin, pev->origin + gpGlobals->v_forward * 128, ignore_monsters, pev->owner, & tr );
 
-		UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
-	}
+	UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
+
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1f;
 }

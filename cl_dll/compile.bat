@@ -66,6 +66,7 @@ set SOURCES=../dlls/weapons_shared.cpp ^
 	input_goldsource.cpp ^
 	input_mouse.cpp ^
 	input_xash3d.cpp ^
+	interpolation.cpp ^
 	menu.cpp ^
 	message.cpp ^
 	nightvision.cpp ^

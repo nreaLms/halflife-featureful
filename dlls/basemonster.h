@@ -133,6 +133,7 @@ public:
 	virtual CBaseMonster *MyMonsterPointer( void ) { return this; }
 	virtual CFollowingMonster* MyFollowingMonsterPointer() { return NULL; }
 	virtual CTalkMonster* MyTalkMonsterPointer() { return NULL; }
+	virtual BOOL IsAllowedToSpeak( void ) { return IsAlive(); }
 	virtual void Look( int iDistance );// basic sight function for monsters
 	virtual void RunAI( void );// core ai function!	
 	void Listen( void );
@@ -217,10 +218,6 @@ public:
 	// virtual int CanPlaySequence( void ) { return ((m_pCine == NULL) && (m_MonsterState == MONSTERSTATE_NONE || m_MonsterState == MONSTERSTATE_IDLE || m_IdealMonsterState == MONSTERSTATE_IDLE)); }
 	virtual int CanPlaySequence( int interruptFlags );
 	virtual int CanPlaySentence( BOOL fDisregardState ) { return m_MonsterState == MONSTERSTATE_SCRIPT ? IsAlive() : IsFullyAlive(); }
-	virtual bool PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle = false );
-	virtual void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
-
-	virtual void SentenceStop( void );
 
 	Task_t *GetTask( void );
 	virtual MONSTERSTATE GetIdealState( void );

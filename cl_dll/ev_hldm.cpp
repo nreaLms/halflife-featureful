@@ -87,6 +87,7 @@ char EV_HLDM_GetTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vec
 	char chTextureType = CHAR_TEX_CONCRETE;
 
 	int entity;
+	cl_entity_t *ent;
 	const char *pTextureName;
 	char texname[64];
 	char szbuffer[64];
@@ -99,7 +100,8 @@ char EV_HLDM_GetTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *vec
 	isSky = false;
 
 	// Player
-	if( entity >= 1 && entity <= gEngfuncs.GetMaxClients() )
+	if( ( entity >= 1 && entity <= gEngfuncs.GetMaxClients() )
+	    || ( ( ent = gEngfuncs.GetEntityByIndex( entity )) && ( ent->curstate.eflags & EFLAG_MONSTER )))
 	{
 		// hit body
 		chTextureType = CHAR_TEX_FLESH;

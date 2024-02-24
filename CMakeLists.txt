@@ -47,6 +47,7 @@ option(USE_NOVGUI_SCOREBOARD "Prefer non-VGUI Scoreboard when USE_VGUI is enable
 option(USE_VOICEMGR "Enable VOICE MANAGER." OFF)
 option(BUILD_CLIENT "Build client dll" ON)
 option(BUILD_SERVER "Build server dll" ON)
+option(LTO "Enable interprocedural optimization" OFF)
 option(POLLY "Enable pollyhedral optimization" OFF)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 4 OR
@@ -88,12 +89,12 @@ endif()
 # MAIN BUILD CODE \
 ###################\
 
-file(STRINGS "mod_options.txt" MOD_OPTIONS_STRINGS REGEX "^([A-Za-z0-9_]+)=([A-Za-z0-9_]+)\ \#\ (.*)$")
+file(STRINGS "mod_options.txt" MOD_OPTIONS_STRINGS REGEX "^([A-Za-z0-9_-]+)=([A-Za-z0-9_-]+)\ \#\ (.*)$")
 foreach(LINE IN LISTS MOD_OPTIONS_STRINGS)
 	# file() itself doesn't populate CMAKE_MATCH_<n>, so
 	# reparse the string
 
-	if(${LINE} MATCHES "^([A-Za-z0-9_]+)=([A-Za-z0-9_]+)\ \#\ (.*)$")
+	if(${LINE} MATCHES "^([A-Za-z0-9_-]+)=([A-Za-z0-9_-]+)\ \#\ (.*)$")
 		# detect boolean options
 		if(${CMAKE_MATCH_2} STREQUAL "ON" OR ${CMAKE_MATCH_2} STREQUAL "OFF")
 			option(${CMAKE_MATCH_1} "${CMAKE_MATCH_3}" ${CMAKE_MATCH_2})
@@ -156,11 +157,13 @@ if(VITA)
 	add_compile_options(-fno-use-cxa-atexit)
 endif()
 
-check_ipo_supported(RESULT HAVE_LTO OUTPUT LTO_ERROR)
-if(HAVE_LTO)
-	message(STATUS "IPO / LTO enabled")
-else()
-	message(STATUS "IPO / LTO not supported: <${LTO_ERROR}>")
+if(LTO)
+	check_ipo_supported(RESULT HAVE_LTO OUTPUT LTO_ERROR)
+	if(HAVE_LTO)
+		message(STATUS "IPO / LTO enabled")
+	else()
+		message(STATUS "IPO / LTO not supported: ${LTO_ERROR}")
+	endif()
 endif()
 
 check_include_file("tgmath.h" HAVE_TGMATH_H)

@@ -410,7 +410,7 @@ int CRpg::GetItemInfo( ItemInfo *p )
 	p->iSlot = 3;
 	p->iPosition = 0;
 	p->iId = WEAPON_RPG;
-	p->iFlags = 0;
+	p->iFlags = ITEM_FLAG_NOCHOICE;
 	p->iWeight = RPG_WEIGHT;
 	p->pszAmmoEntity = "ammo_rpgclip";
 #ifdef CLIENT_DLL

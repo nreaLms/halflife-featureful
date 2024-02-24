@@ -174,10 +174,12 @@ public:
 	virtual CBasePlayer* EffectivePlayer( CBaseEntity* pActivator );
 
 	bool EquipPlayerFromMapConfig(CBasePlayer* pPlayer, const MapConfig& mapConfig);
+
+	virtual BOOL IsBustingGame( void ){ return FALSE; }
 };
 
 extern CGameRules *InstallGameRules( void );
-
+BOOL HLGetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon );
 
 //=========================================================
 // CHalfLifeRules - rules for the single player Half-Life 
@@ -384,6 +386,31 @@ protected:
 	void SendMOTDToClient( edict_t *client );
 
 	MapConfig mapConfig;
+};
+
+bool IsPlayerBusting( CBaseEntity *pPlayer );
+BOOL BustingCanHaveItem( CBasePlayer *pPlayer, CBaseEntity *pItem );
+
+class CMultiplayBusters : public CHalfLifeMultiplay
+{
+public:
+	CMultiplayBusters();
+	void Think();
+	void PlayerSpawn( CBasePlayer *pPlayer );
+	void ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer );
+	int IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled );
+	void PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor );
+	void DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pevInflictor );
+	BOOL CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerWeapon *pItem );
+	void PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon *pWeapon );
+	int WeaponShouldRespawn( CBasePlayerWeapon *pWeapon );
+	BOOL CanHaveItem( CBasePlayer *pPlayer, CItem *pItem );
+	void CheckForEgons();
+	void SetPlayerModel( CBasePlayer *pPlayer, BOOL bKnownBuster );
+	BOOL IsBustingGame( void ){ return TRUE; }
+
+protected:
+	float m_flEgonBustingCheckTime;
 };
 
 extern DLL_GLOBAL CGameRules *g_pGameRules;

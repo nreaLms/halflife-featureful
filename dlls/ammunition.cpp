@@ -98,7 +98,7 @@ extern int gEvilImpulse101;
 
 void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 {
-	if( !pOther->IsPlayer() || !pOther->IsAlive() )
+	if( !pOther->IsPlayer() || !pOther->IsAlive() || IsPlayerBusting( pOther ) )
 	{
 		return;
 	}

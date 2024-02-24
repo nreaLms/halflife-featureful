@@ -547,6 +547,38 @@ float CBaseToggle::AxisDelta( int flags, const Vector &angle1, const Vector &ang
 	return angle1.y - angle2.y;
 }
 
+bool CBaseToggle::PlaySentence(const char *pszSentence, float duration, float volume, float attenuation , bool subtitle)
+{
+	if( pszSentence && IsAllowedToSpeak() )
+	{
+		if( pszSentence[0] == '!' )
+		{
+			if (subtitle)
+				return EMIT_SOUND_DYN_SUB( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, PITCH_NORM, ceil(duration)+1 );
+			else
+				return EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, PITCH_NORM );
+		}
+		else
+		{
+			if (subtitle)
+				return SENTENCEG_PlayRndSzSub( edict(), pszSentence, volume, attenuation, 0, PITCH_NORM, ceil(duration)+1 ) >= 0;
+			else
+				return SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, PITCH_NORM ) >= 0;
+		}
+	}
+	return false;
+}
+
+void CBaseToggle::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
+{
+	PlaySentence( pszSentence, duration, volume, attenuation, true );
+}
+
+void CBaseToggle::SentenceStop( void )
+{
+	EMIT_SOUND( edict(), CHAN_VOICE, "common/null.wav", 1.0, ATTN_IDLE );
+}
+
 /*
 =============
 FEntIsVisible

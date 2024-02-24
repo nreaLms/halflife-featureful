@@ -529,6 +529,19 @@ void CBasePlayerWeapon::FallThink( void )
 
 		Materialize(); 
 	}
+	else if( m_pPlayer )
+	{
+		SetThink( NULL );
+	}
+
+	if( g_pGameRules->IsBustingGame())
+	{
+		if( !FNullEnt( pev->owner ))
+			return;
+
+		if( FClassnameIs( pev, "weapon_egon" ))
+			UTIL_Remove( this );
+	}
 }
 
 //=========================================================
