@@ -1053,13 +1053,26 @@ int CHudAmmo::Draw( float flTime )
 	// Does weapon have any ammo at all?
 	if( m_pWeapon->iAmmoType > 0 )
 	{
+		int ammoWidths = 8;
+		int drawNumberFlag = DHN_3DIGITS;
+		if (m_pWeapon->iMax1 >= 1000) {
+			ammoWidths++;
+			drawNumberFlag |= DHN_4DIGITS;
+		}
+
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 
 		if( pw->iClip >= 0 )
 		{
+			int drawNumberClipFlag = DHN_3DIGITS;
+			if (m_pWeapon->iClip >= 1000) {
+				ammoWidths++;
+				drawNumberClipFlag |= DHN_4DIGITS;
+			}
+
 			// room for the number and the '|' and the current ammo
-			x = CHud::Renderer().PerceviedScreenWidth() - ( 8 * AmmoWidth ) - iIconWidth;
-			x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b );
+			x = CHud::Renderer().PerceviedScreenWidth() - ( ammoWidths * AmmoWidth ) - iIconWidth;
+			x = gHUD.DrawHudNumber( x, y, iFlags | drawNumberClipFlag, pw->iClip, r, g, b );
 
 			/*wrect_t rc;
 			rc.top = 0;
@@ -1080,13 +1093,18 @@ int CHudAmmo::Draw( float flTime )
 
 			// GL Seems to need this
 			ScaleColors( r, g, b, a );
-			x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
+			x = gHUD.DrawHudNumber( x, y, iFlags | drawNumberFlag, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
 		}
 		else
 		{
+			ammoWidths = 4;
+			if (m_pWeapon->iMax1 >= 1000) {
+				ammoWidths++;
+			}
+
 			// SPR_Draw a bullets only line
-			x = CHud::Renderer().PerceviedScreenWidth() - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
+			x = CHud::Renderer().PerceviedScreenWidth() - ammoWidths * AmmoWidth - iIconWidth;
+			x = gHUD.DrawHudNumber( x, y, iFlags | drawNumberFlag, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
 		}
 
 		// Draw the ammo Icon
@@ -1102,9 +1120,16 @@ int CHudAmmo::Draw( float flTime )
 		// Do we have secondary ammo?
 		if( ( pw->iAmmo2Type != 0 ) && ( gWR.CountAmmo( pw->iAmmo2Type ) > 0 ) )
 		{
+			int ammoWidths = 4;
+			int drawNumberFlag = DHN_3DIGITS;
+			if (m_pWeapon->iMax2 >= 1000) {
+				ammoWidths++;
+				drawNumberFlag |= DHN_4DIGITS;
+			}
+
 			y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4;
-			x = CHud::Renderer().PerceviedScreenWidth() - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo( pw->iAmmo2Type ), r, g, b );
+			x = CHud::Renderer().PerceviedScreenWidth() - ammoWidths * AmmoWidth - iIconWidth;
+			x = gHUD.DrawHudNumber( x, y, iFlags | drawNumberFlag, gWR.CountAmmo( pw->iAmmo2Type ), r, g, b );
 
 			// Draw the ammo Icon
 			int iOffset = ( m_pWeapon->rcAmmo2.bottom - m_pWeapon->rcAmmo2.top) / 8;
