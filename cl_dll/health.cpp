@@ -233,8 +233,7 @@ int CHudHealth::Draw( float flTime )
 		y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 		x = CrossWidth / 2;
 
-		CHud::Renderer().SPR_Set( gHUD.GetSprite( m_HUD_cross ), r, g, b );
-		CHud::Renderer().SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
+		CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite( m_HUD_cross ), r, g, b, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
 
 		x = CrossWidth + HealthWidth / 2;
 
@@ -407,8 +406,7 @@ int CHudHealth::DrawDamage( float flTime )
 			pdmg = &m_dmg[i];
 
 			// Draw all the items
-			CHud::Renderer().SPR_Set( gHUD.GetSprite( m_HUD_dmg_bio + i ), r, g, b );
-			CHud::Renderer().SPR_DrawAdditive( 0, pdmg->x, pdmg->y, &gHUD.GetSpriteRect( m_HUD_dmg_bio + i ) );
+			CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite( m_HUD_dmg_bio + i ), r, g, b, pdmg->x, pdmg->y, &gHUD.GetSpriteRect( m_HUD_dmg_bio + i ) );
 
 			pdmg->fExpire = Q_min( flTime + DMG_IMAGE_LIFE, pdmg->fExpire );
 

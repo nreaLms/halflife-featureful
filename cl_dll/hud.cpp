@@ -1663,8 +1663,7 @@ int CHudMoveMode::Draw(float flTime)
 	y = ( rc.bottom - rc.top ) * 2;
 	x = CHud::Renderer().PerceviedScreenWidth() - width - width / 2;
 
-	CHud::Renderer().SPR_Set( sprite, r, g, b );
-	CHud::Renderer().SPR_DrawAdditive( 0,  x, y, &rc );
+	CHud::Renderer().SPR_DrawAdditive( sprite, r, g, b,  x, y, &rc );
 	return 1;
 }
 

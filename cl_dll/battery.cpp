@@ -117,13 +117,11 @@ int CHudBattery::Draw( float flTime )
 	if( !m_hSprite2 )
 		m_hSprite2 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_full" ) );
 
-	CHud::Renderer().SPR_Set( m_hSprite1, r, g, b );
-	CHud::Renderer().SPR_DrawAdditive( 0,  x, y - iOffset, m_prc1 );
+	CHud::Renderer().SPR_DrawAdditive( m_hSprite1, r, g, b,  x, y - iOffset, m_prc1 );
 
 	if( rc.bottom > rc.top )
 	{
-		CHud::Renderer().SPR_Set( m_hSprite2, r, g, b );
-		CHud::Renderer().SPR_DrawAdditive( 0, x, y - iOffset + ( rc.top - m_prc2->top ), &rc );
+		CHud::Renderer().SPR_DrawAdditive( m_hSprite2, r, g, b, x, y - iOffset + ( rc.top - m_prc2->top ), &rc );
 	}
 
 	x += ( m_prc1->right - m_prc1->left );

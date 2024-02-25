@@ -155,8 +155,7 @@ int CHudFlashlight::Draw( float flTime )
 	x = CHud::Renderer().PerceviedScreenWidth() - m_iWidth - m_iWidth / 2 ;
 
 	// Draw the flashlight casing
-	CHud::Renderer().SPR_Set( emptySprite, r, g, b );
-	CHud::Renderer().SPR_DrawAdditive( 0,  x, y, emptyFlash );
+	CHud::Renderer().SPR_DrawAdditive( emptySprite, r, g, b,  x, y, emptyFlash );
 
 	// Don't draw a beam for nvg
 	if( m_fOn && m_hBeam && !nvgIsOn )
@@ -164,8 +163,7 @@ int CHudFlashlight::Draw( float flTime )
 		// draw the flashlight beam
 		x = CHud::Renderer().PerceviedScreenWidth() - m_iWidth / 2;
 
-		CHud::Renderer().SPR_Set( m_hBeam, r, g, b );
-		CHud::Renderer().SPR_DrawAdditive( 0, x, y, m_prcBeam );
+		CHud::Renderer().SPR_DrawAdditive( m_hBeam, r, g, b, x, y, m_prcBeam );
 	}
 
 	// draw the flashlight energy level
@@ -176,8 +174,7 @@ int CHudFlashlight::Draw( float flTime )
 		rc = *fullFlash;
 		rc.left += iOffset;
 
-		CHud::Renderer().SPR_Set( fullSprite, r, g, b );
-		CHud::Renderer().SPR_DrawAdditive( 0, x + iOffset, y, &rc );
+		CHud::Renderer().SPR_DrawAdditive( fullSprite, r, g, b, x + iOffset, y, &rc );
 	}
 
 	return 1;
