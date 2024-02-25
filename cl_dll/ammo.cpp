@@ -667,7 +667,7 @@ int CHudAmmo::MsgFunc_AmmoPickup( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 	int iIndex = READ_BYTE();
-	int iCount = READ_BYTE();
+	int iCount = READ_SHORT();
 
 	// Add ammo to the history
 	gHR.AddToHistory( HISTSLOT_AMMO, iIndex, abs( iCount ) );
@@ -740,7 +740,7 @@ int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 
 	int iState = READ_BYTE();
 	int iId = READ_CHAR();
-	int iClip = READ_CHAR();
+	int iClip = READ_SHORT();
 
 	// detect if we're also on target
 	if( iState > 1 )

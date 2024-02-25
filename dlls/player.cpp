@@ -233,7 +233,7 @@ void LinkUserMessages( void )
 	}
 
 	gmsgSelAmmo = REG_USER_MSG( "SelAmmo", sizeof(SelAmmo) );
-	gmsgCurWeapon = REG_USER_MSG( "CurWeapon", 3 );
+	gmsgCurWeapon = REG_USER_MSG( "CurWeapon", 4 );
 	gmsgGeigerRange = REG_USER_MSG( "Geiger", 1 );
 	gmsgFlashlight = REG_USER_MSG( "Flashlight", 2 );
 	gmsgFlashBattery = REG_USER_MSG( "FlashBat", 1 );
@@ -260,7 +260,7 @@ void LinkUserMessages( void )
 	gmsgGameMode = REG_USER_MSG( "GameMode", 1 );
 	gmsgMOTD = REG_USER_MSG( "MOTD", -1 );
 	gmsgServerName = REG_USER_MSG( "ServerName", -1 );
-	gmsgAmmoPickup = REG_USER_MSG( "AmmoPickup", 2 );
+	gmsgAmmoPickup = REG_USER_MSG( "AmmoPickup", 3 );
 	gmsgWeapPickup = REG_USER_MSG( "WeapPickup", 1 );
 	gmsgItemPickup = REG_USER_MSG( "ItemPickup", -1 );
 	gmsgHideWeapon = REG_USER_MSG( "HideWeapon", 1 );
@@ -438,7 +438,7 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 				{
 					MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
 						WRITE_BYTE( medAmmoIndex );		// ammo ID
-						WRITE_BYTE( toAdd );		// amount
+						WRITE_SHORT( toAdd );		// amount
 					MESSAGE_END();
 
 					if (healed == 0) {
@@ -1030,7 +1030,7 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
 		WRITE_BYTE( 0 );
 		WRITE_BYTE( 0 );
-		WRITE_BYTE( 0 );
+		WRITE_SHORT( 0 );
 	MESSAGE_END();
 }
 
@@ -1092,7 +1092,7 @@ void CBasePlayer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int i
 	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
 		WRITE_BYTE( 0 );
 		WRITE_BYTE( 0XFF );
-		WRITE_BYTE( 0xFF );
+		WRITE_SHORT( -1 );
 	MESSAGE_END();
 
 	// reset FOV
@@ -1654,7 +1654,7 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
 		WRITE_BYTE( 0 );
 		WRITE_BYTE( 0XFF );
-		WRITE_BYTE( 0xFF );
+		WRITE_SHORT( -1 );
 	MESSAGE_END();
 
 	// reset FOV
@@ -4622,7 +4622,7 @@ int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 			// Send the message that ammo has been picked up
 			MESSAGE_BEGIN( MSG_ONE, gmsgAmmoPickup, NULL, pev );
 				WRITE_BYTE( i );		// ammo ID
-				WRITE_BYTE( iAdd );		// amount
+				WRITE_SHORT( iAdd );		// amount
 			MESSAGE_END();
 		}
 	}
