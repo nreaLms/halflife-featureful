@@ -741,7 +741,7 @@ typedef enum
 } SCRIPT_TARGET_ACTIVATOR;
 
 // lookup a sequence name and setup the target monster to play it
-BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty )
+BOOL CCineMonster::StartSequence( CBaseMonster *pTarget, string_t iszSeq, BOOL completeOnEmpty )
 {
 	if( !iszSeq && completeOnEmpty )
 	{

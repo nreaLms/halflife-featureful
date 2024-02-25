@@ -172,7 +172,7 @@ public:
 
 	void ReleaseEntity( CBaseMonster *pEntity );
 	void CancelScript( int cancellationReason = SCRIPT_CANCELLATION_REASON_GENERIC );
-	virtual BOOL StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL completeOnEmpty );
+	virtual BOOL StartSequence( CBaseMonster *pTarget, string_t iszSeq, BOOL completeOnEmpty );
 	virtual BOOL FCanOverrideState ( void );
 	void SequenceDone ( CBaseMonster *pMonster );
 	virtual void FixScriptMonsterSchedule( CBaseMonster *pMonster );

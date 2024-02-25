@@ -1334,7 +1334,7 @@ BOOL CWeaponBox::PackWeapon( CBasePlayerWeapon *pWeapon )
 //=========================================================
 // CWeaponBox - PackAmmo
 //=========================================================
-BOOL CWeaponBox::PackAmmo( int iszName, int iCount )
+BOOL CWeaponBox::PackAmmo( string_t iszName, int iCount )
 {
 	if( FStringNull( iszName ) )
 	{

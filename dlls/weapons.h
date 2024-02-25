@@ -454,7 +454,7 @@ public:
 
 	BOOL HasWeapon( CBasePlayerWeapon *pCheckItem );
 	BOOL PackWeapon( CBasePlayerWeapon *pWeapon );
-	BOOL PackAmmo( int iszName, int iCount );
+	BOOL PackAmmo( string_t iszName, int iCount );
 
 	void SetWeaponModel( CBasePlayerWeapon* pItem );
 
