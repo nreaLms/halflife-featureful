@@ -268,7 +268,7 @@ void LinkUserMessages( void )
 	gmsgShowMenu = REG_USER_MSG( "ShowMenu", -1 );
 	gmsgShake = REG_USER_MSG( "ScreenShake", sizeof(ScreenShake) );
 	gmsgFade = REG_USER_MSG( "ScreenFade", sizeof(ScreenFade) );
-	gmsgAmmoX = REG_USER_MSG( "AmmoX", 2 );
+	gmsgAmmoX = REG_USER_MSG( "AmmoX", 3 );
 	gmsgTeamNames = REG_USER_MSG( "TeamNames", -1 );
 	gmsgPlayMP3 = REG_USER_MSG( "PlayMP3", -1 );
 	gmsgItems = REG_USER_MSG( "Items", 4 );
@@ -4725,13 +4725,14 @@ void CBasePlayer::SendAmmoUpdate( void )
 		{
 			m_rgAmmoLast[i] = m_rgAmmo[i];
 
+			const int maxPossibleAmmoCount = (1 << 15) - 1;
 			ASSERT( m_rgAmmo[i] >= 0 );
-			ASSERT( m_rgAmmo[i] < 255 );
+			ASSERT( m_rgAmmo[i] <= maxPossibleAmmoCount );
 
 			// send "Ammo" update message
 			MESSAGE_BEGIN( MSG_ONE, gmsgAmmoX, NULL, pev );
 				WRITE_BYTE( i );
-				WRITE_BYTE( Q_max( Q_min( m_rgAmmo[i], 254 ), 0 ) );  // clamp the value to one byte
+				WRITE_SHORT( Q_max( Q_min( m_rgAmmo[i], maxPossibleAmmoCount ), 0 ) );
 			MESSAGE_END();
 		}
 	}
@@ -4977,9 +4978,9 @@ void CBasePlayer::UpdateClientData( void )
 			MESSAGE_BEGIN( MSG_ONE, gmsgWeaponList, NULL, pev );  
 				WRITE_STRING( pszName );			// string	weapon name
 				WRITE_BYTE( GetAmmoIndex( II.pszAmmo1 ) );	// byte		Ammo Type
-				WRITE_BYTE( II.iMaxAmmo1 );				// byte     Max Ammo 1
+				WRITE_SHORT( II.iMaxAmmo1 );				// byte     Max Ammo 1
 				WRITE_BYTE( GetAmmoIndex( II.pszAmmo2 ) );	// byte		Ammo2 Type
-				WRITE_BYTE( II.iMaxAmmo2 );				// byte     Max Ammo 2
+				WRITE_SHORT( II.iMaxAmmo2 );				// byte     Max Ammo 2
 				WRITE_BYTE( II.iSlot );					// byte		bucket
 				WRITE_BYTE( II.iPosition );				// byte		bucket pos
 				WRITE_BYTE( II.iId );						// byte		id (bit index into pev->weapons)

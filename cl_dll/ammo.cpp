@@ -656,7 +656,7 @@ int CHudAmmo::MsgFunc_AmmoX( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 
 	int iIndex = READ_BYTE();
-	int iCount = READ_BYTE();
+	int iCount = READ_SHORT();
 
 	gWR.SetAmmo( iIndex, abs( iCount ) );
 
@@ -824,14 +824,10 @@ int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 	strcpy( Weapon.szName, READ_STRING() );
 	Weapon.iAmmoType = (int)READ_CHAR();	
 	
-	Weapon.iMax1 = READ_BYTE();
-	if( Weapon.iMax1 == 255 )
-		Weapon.iMax1 = -1;
+	Weapon.iMax1 = READ_SHORT();
 
 	Weapon.iAmmo2Type = READ_CHAR();
-	Weapon.iMax2 = READ_BYTE();
-	if( Weapon.iMax2 == 255 )
-		Weapon.iMax2 = -1;
+	Weapon.iMax2 = READ_SHORT();
 
 	Weapon.iSlot = READ_CHAR();
 	Weapon.iSlotPos = READ_CHAR();
