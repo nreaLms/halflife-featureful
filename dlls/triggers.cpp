@@ -220,6 +220,8 @@ protected:
 
 private:
 	int triggerType;
+	float m_flDelayBeforeReset;
+	float m_flResetTime;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_relay, CTriggerRelay )
@@ -227,6 +229,8 @@ LINK_ENTITY_TO_CLASS( trigger_relay, CTriggerRelay )
 TYPEDESCRIPTION	CTriggerRelay::m_SaveData[] =
 {
 	DEFINE_FIELD( CTriggerRelay, triggerType, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerRelay, m_flDelayBeforeReset, FIELD_FLOAT ),
+	DEFINE_FIELD( CTriggerRelay, m_flResetTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CTriggerRelay, CBaseDelay )
@@ -236,6 +240,11 @@ void CTriggerRelay::KeyValue( KeyValueData *pkvd )
 	if( FStrEq( pkvd->szKeyName, "triggerstate" ) )
 	{
 		triggerType = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "m_flDelayBeforeReset" ) )
+	{
+		m_flDelayBeforeReset = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -248,7 +257,14 @@ void CTriggerRelay::Spawn( void )
 
 void CTriggerRelay::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	if (m_flDelayBeforeReset > 0 && m_flResetTime > gpGlobals->time)
+	{
+		return;
+	}
 	SUB_UseTargets( FBitSet(pev->spawnflags, SF_RELAY_FORWARDACTIVATOR) ? pActivator : this, MyTriggerType(useType) );
+	if (m_flDelayBeforeReset > 0) {
+		m_flResetTime = gpGlobals->time + m_flDelayBeforeReset;
+	}
 	if( pev->spawnflags & SF_RELAY_FIREONCE )
 		UTIL_Remove( this );
 }

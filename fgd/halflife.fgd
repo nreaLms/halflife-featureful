@@ -7847,6 +7847,7 @@
 		1: "On"
 		2: "Toggle"
 	]
+	m_flDelayBeforeReset(string) : "Delay Before Reset"
 ]
 
 @PointClass base(Target, Targetname) size(-16 -16 -16,16 16 16) = trigger_respawn :"Trigger Respawn. Sven Co-op compatibility entity"
