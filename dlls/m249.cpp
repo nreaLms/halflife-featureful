@@ -82,9 +82,7 @@ int CM249::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "556";
-	p->iMaxAmmo1 = _556_MAX_CARRY;
 	p->pszAmmo2 = NULL;
-	p->iMaxAmmo2 = -1;
 	p->iMaxClip = M249_MAX_CLIP;
 #if FEATURE_OPFOR_WEAPON_SLOTS
 	p->iSlot = 5;

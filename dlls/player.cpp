@@ -96,7 +96,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD( CBasePlayer, m_pActiveItem, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CBasePlayer, m_pLastItem, FIELD_CLASSPTR ),
 
-	DEFINE_ARRAY( CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS ),
+	DEFINE_ARRAY( CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_TYPES ),
 	DEFINE_FIELD( CBasePlayer, m_idrowndmg, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_idrownrestored, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_tSneaking, FIELD_TIME ),
@@ -177,6 +177,7 @@ int gmsgDamage = 0;
 int gmsgBattery = 0;
 int gmsgTrain = 0;
 int gmsgLogo = 0;
+int gmsgAmmoList = 0;
 int gmsgWeaponList = 0;
 int gmsgAmmoX = 0;
 int gmsgHudText = 0;
@@ -245,6 +246,7 @@ void LinkUserMessages( void )
 	gmsgHudText = REG_USER_MSG( "HudText", -1 ); // we don't use the message but 3rd party addons may!
 	gmsgSayText = REG_USER_MSG( "SayText", -1 );
 	gmsgTextMsg = REG_USER_MSG( "TextMsg", -1 );
+	gmsgAmmoList = REG_USER_MSG( "AmmoList", -1 );
 	gmsgWeaponList = REG_USER_MSG( "WeaponList", -1 );
 	gmsgResetHUD = REG_USER_MSG( "ResetHUD", 1 );		// called every respawn
 	gmsgInitHUD = REG_USER_MSG( "InitHUD", 0 );		// called every time a new player joins the server
@@ -837,7 +839,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	int iAmmoRules;
 	int i;
 	CBasePlayerWeapon *rgpPackWeapons[MAX_WEAPONS] = {0,};
-	AmmoCountInfo iPackAmmo[MAX_AMMO_SLOTS];
+	AmmoCountInfo iPackAmmo[MAX_AMMO_TYPES];
 	int iPW = 0;// index into packweapons array
 
 	memset( iPackAmmo, 0, sizeof(iPackAmmo) );
@@ -953,19 +955,27 @@ void CBasePlayer::PackDeadPlayerItems( void )
 				pWeaponBox->pev->rendercolor = Vector( 0, 75, 250 );
 			}
 
-			int ammoIndex = GetAmmoIndex( weapon->pszAmmo1() );
-			if (ammoIndex >= 0 && iPackAmmo[ammoIndex].ammoCount && iPackAmmo[ammoIndex].weaponCount) {
-				const int toPack = iPackAmmo[ammoIndex].ammoCount / iPackAmmo[ammoIndex].weaponCount;
-				iPackAmmo[ammoIndex].ammoCount -= toPack;
-				pWeaponBox->PackAmmo( MAKE_STRING( CBasePlayerWeapon::AmmoInfoArray[ammoIndex].pszName ), toPack );
-				iPackAmmo[ammoIndex].weaponCount--;
+			const AmmoType* ammoType = g_AmmoRegistry.GetByName( weapon->pszAmmo1() );
+			if (ammoType)
+			{
+				const int ammoIndex = ammoType->id;
+				if (iPackAmmo[ammoIndex].ammoCount && iPackAmmo[ammoIndex].weaponCount) {
+					const int toPack = iPackAmmo[ammoIndex].ammoCount / iPackAmmo[ammoIndex].weaponCount;
+					iPackAmmo[ammoIndex].ammoCount -= toPack;
+					pWeaponBox->PackAmmo( MAKE_STRING( ammoType->name ), toPack );
+					iPackAmmo[ammoIndex].weaponCount--;
+				}
 			}
-			int ammo2Index = GetAmmoIndex( weapon->pszAmmo2() );
-			if (ammo2Index >= 0 && iPackAmmo[ammo2Index].ammoCount && iPackAmmo[ammo2Index].weaponCount) {
-				const int toPack = iPackAmmo[ammo2Index].ammoCount / iPackAmmo[ammo2Index].weaponCount;
-				iPackAmmo[ammo2Index].ammoCount -= toPack;
-				pWeaponBox->PackAmmo( MAKE_STRING( CBasePlayerWeapon::AmmoInfoArray[ammo2Index].pszName ), toPack );
-				iPackAmmo[ammo2Index].weaponCount--;
+			const AmmoType* ammo2Type = g_AmmoRegistry.GetByName( weapon->pszAmmo2() );
+			if (ammo2Type)
+			{
+				const int ammo2Index = ammo2Type->id;
+				if (iPackAmmo[ammo2Index].ammoCount && iPackAmmo[ammo2Index].weaponCount) {
+					const int toPack = iPackAmmo[ammo2Index].ammoCount / iPackAmmo[ammo2Index].weaponCount;
+					iPackAmmo[ammo2Index].ammoCount -= toPack;
+					pWeaponBox->PackAmmo( MAKE_STRING( ammo2Type->name ), toPack );
+					iPackAmmo[ammo2Index].weaponCount--;
+				}
 			}
 		}
 		iPW++;
@@ -1018,7 +1028,7 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 		SetLongjump(false);
 	}
 
-	for( i = 0; i < MAX_AMMO_SLOTS; i++ )
+	for( i = 0; i < MAX_AMMO_TYPES; i++ )
 		m_rgAmmo[i] = 0;
 
 	if( satchelfix.value )
@@ -3623,7 +3633,7 @@ void CBasePlayer::Spawn( void )
 	m_iClientBattery = -1;
 
 	// reset all ammo values to 0
-	for( int i = 0; i < MAX_AMMO_SLOTS; i++ )
+	for( int i = 0; i < MAX_AMMO_TYPES; i++ )
 	{
 		m_rgAmmo[i] = 0;
 		m_rgAmmoLast[i] = 0;  // client ammo values also have to be reset  (the death hud clear messages does on the client side)
@@ -4557,26 +4567,25 @@ int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 		return -1;
 	}
 
-	const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(szName);
+	const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(szName);
+	if (!ammoType)
+		return -1;
 
-	if( !g_pGameRules->CanHaveAmmo( this, ammoInfo.pszName ) )
+	if( !g_pGameRules->CanHaveAmmo( this, ammoType->name ) )
 	{
 		// game rules say I can't have any more of this ammo type.
 		return -1;
 	}
 
-	int i = ammoInfo.iId;
+	int i = ammoType->id;
 
-	if( i < 0 || i >= MAX_AMMO_SLOTS )
-		return -1;
-
-	int iAdd = Q_min( iCount, ammoInfo.iMaxAmmo - m_rgAmmo[i] );
+	int iAdd = Q_min( iCount, ammoType->maxAmmo - m_rgAmmo[i] );
 	if( iAdd < 1 )
 		return i;
 
 	// horrific HACK to give player an exhaustible weapon as a real weapon, not just ammo
 	bool addedAsWeapon = false;
-	if (ammoInfo.isExhaustible)
+	if (ammoType->exhaustible)
 	{
 		for (int j=0; j<MAX_WEAPONS; ++j) {
 			const ItemInfo& II = CBasePlayerWeapon::ItemInfoArray[j];
@@ -4698,28 +4707,14 @@ int CBasePlayer::AmmoInventory( int iAmmoIndex )
 
 int CBasePlayer::GetAmmoIndex( const char *psz )
 {
-	int i;
-
-	if( !psz )
-		return -1;
-
-	for( i = 1; i < MAX_AMMO_SLOTS; i++ )
-	{
-		if( !CBasePlayerWeapon::AmmoInfoArray[i].pszName )
-			continue;
-
-		if( stricmp( psz, CBasePlayerWeapon::AmmoInfoArray[i].pszName ) == 0 )
-			return i;
-	}
-
-	return -1;
+	return g_AmmoRegistry.IndexOf(psz);
 }
 
 // Called from UpdateClientData
 // makes sure the client has all the necessary ammo info,  if values have changed
 void CBasePlayer::SendAmmoUpdate( void )
 {
-	for( int i = 0; i < MAX_AMMO_SLOTS; i++ )
+	for( int i = 0; i < MAX_AMMO_TYPES; i++ )
 	{
 		if( m_rgAmmo[i] != m_rgAmmoLast[i] )
 		{
@@ -4962,6 +4957,19 @@ void CBasePlayer::UpdateClientData( void )
 		// Send ALL the weapon info now
 		int i;
 
+		for (i = 1; i < MAX_AMMO_TYPES; ++i)
+		{
+			const AmmoType* ammoType = g_AmmoRegistry.GetByIndex(i);
+			if (ammoType)
+			{
+				MESSAGE_BEGIN( MSG_ONE, gmsgAmmoList, NULL, pev );
+					WRITE_STRING( ammoType->name );
+					WRITE_SHORT( ammoType->maxAmmo );
+					WRITE_BYTE( ammoType->id | (ammoType->exhaustible ? AMMO_EXHAUSTIBLE_NETWORK_BIT : 0) );
+				MESSAGE_END();
+			}
+		}
+
 		for( i = 0; i < MAX_WEAPONS; i++ )
 		{
 			ItemInfo& II = CBasePlayerWeapon::ItemInfoArray[i];
@@ -4978,9 +4986,7 @@ void CBasePlayer::UpdateClientData( void )
 			MESSAGE_BEGIN( MSG_ONE, gmsgWeaponList, NULL, pev );  
 				WRITE_STRING( pszName );			// string	weapon name
 				WRITE_BYTE( GetAmmoIndex( II.pszAmmo1 ) );	// byte		Ammo Type
-				WRITE_SHORT( II.iMaxAmmo1 );				// byte     Max Ammo 1
 				WRITE_BYTE( GetAmmoIndex( II.pszAmmo2 ) );	// byte		Ammo2 Type
-				WRITE_SHORT( II.iMaxAmmo2 );				// byte     Max Ammo 2
 				WRITE_BYTE( II.iSlot );					// byte		bucket
 				WRITE_BYTE( II.iPosition );				// byte		bucket pos
 				WRITE_BYTE( II.iId );						// byte		id (bit index into pev->weapons)

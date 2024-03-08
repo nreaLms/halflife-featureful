@@ -27,6 +27,8 @@
 #include <stdio.h>
 
 #include "ammohistory.h"
+#include "ammoregistry.h"
+
 #if USE_VGUI
 #include "vgui_TeamFortressViewport.h"
 #endif
@@ -221,9 +223,6 @@ int WeaponsResource::HasAmmo( WEAPON *p )
 		return FALSE;
 
 	// weapons with no max ammo can always be selected
-	if( p->iMax1 == -1 )
-		return TRUE;
-
 	return ( p->iAmmoType == -1 ) || p->iClip > 0 || CountAmmo( p->iAmmoType ) 
 		|| CountAmmo( p->iAmmo2Type ) || ( p->iFlags & WEAPON_FLAGS_SELECTONEMPTY );
 }
@@ -387,6 +386,7 @@ int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and 
 HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
 
 DECLARE_MESSAGE( m_Ammo, CurWeapon )	// Current weapon and clip
+DECLARE_MESSAGE( m_Ammo, AmmoList )	// new ammo type
 DECLARE_MESSAGE( m_Ammo, WeaponList )	// new weapon type
 DECLARE_MESSAGE( m_Ammo, AmmoX )		// update known ammo type's count
 DECLARE_MESSAGE( m_Ammo, AmmoPickup )	// flashes an ammo pickup record
@@ -419,6 +419,7 @@ int CHudAmmo::Init( void )
 	gHUD.AddHudElem( this );
 
 	HOOK_MESSAGE( CurWeapon );
+	HOOK_MESSAGE( AmmoList );
 	HOOK_MESSAGE( WeaponList );
 	HOOK_MESSAGE( AmmoPickup );
 	HOOK_MESSAGE( WeapPickup );
@@ -815,6 +816,20 @@ int CHudAmmo::MsgFunc_CurWeapon( const char *pszName, int iSize, void *pbuf )
 //
 // WeaponList -- Tells the hud about a new weapon type.
 //
+int CHudAmmo::MsgFunc_AmmoList( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	const char* ammoName = READ_STRING();
+	int maxAmmo = READ_SHORT();
+	int idAndExhaustibleByte = READ_CHAR();
+	bool exhaustible = idAndExhaustibleByte & AMMO_EXHAUSTIBLE_NETWORK_BIT;
+	int id = idAndExhaustibleByte & ~AMMO_EXHAUSTIBLE_NETWORK_BIT;
+	g_AmmoRegistry.RegisterOnClient(ammoName, maxAmmo, id, exhaustible);
+
+	return 1;
+}
+
 int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
@@ -823,12 +838,7 @@ int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 
 	strcpy( Weapon.szName, READ_STRING() );
 	Weapon.iAmmoType = (int)READ_CHAR();	
-	
-	Weapon.iMax1 = READ_SHORT();
-
 	Weapon.iAmmo2Type = READ_CHAR();
-	Weapon.iMax2 = READ_SHORT();
-
 	Weapon.iSlot = READ_CHAR();
 	Weapon.iSlotPos = READ_CHAR();
 	Weapon.iId = READ_CHAR();
@@ -1051,11 +1061,12 @@ int CHudAmmo::Draw( float flTime )
 	y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 
 	// Does weapon have any ammo at all?
-	if( m_pWeapon->iAmmoType > 0 )
+	const AmmoType* ammoType = g_AmmoRegistry.GetByIndex(m_pWeapon->iAmmoType);
+	if( ammoType )
 	{
 		int ammoWidths = 8;
 		int drawNumberFlag = DHN_3DIGITS;
-		if (m_pWeapon->iMax1 >= 1000) {
+		if (ammoType->maxAmmo >= 1000) {
 			ammoWidths++;
 			drawNumberFlag |= DHN_4DIGITS;
 		}
@@ -1098,7 +1109,7 @@ int CHudAmmo::Draw( float flTime )
 		else
 		{
 			ammoWidths = 4;
-			if (m_pWeapon->iMax1 >= 1000) {
+			if (ammoType->maxAmmo >= 1000) {
 				ammoWidths++;
 			}
 
@@ -1118,11 +1129,12 @@ int CHudAmmo::Draw( float flTime )
 		int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
 
 		// Do we have secondary ammo?
-		if( ( pw->iAmmo2Type != 0 ) && ( gWR.CountAmmo( pw->iAmmo2Type ) > 0 ) )
+		const AmmoType* ammo2Type = g_AmmoRegistry.GetByIndex(m_pWeapon->iAmmo2Type);
+		if( ammo2Type && ( gWR.CountAmmo( pw->iAmmo2Type ) > 0 ) )
 		{
 			int ammoWidths = 4;
 			int drawNumberFlag = DHN_3DIGITS;
-			if (m_pWeapon->iMax2 >= 1000) {
+			if (ammo2Type->maxAmmo >= 1000) {
 				ammoWidths++;
 				drawNumberFlag |= DHN_4DIGITS;
 			}
@@ -1176,19 +1188,21 @@ void DrawAmmoBar( WEAPON *p, int x, int y, int width, int height )
 	if( !p )
 		return;
 
-	if( p->iAmmoType != -1 )
+	const AmmoType* ammoType = g_AmmoRegistry.GetByIndex(p->iAmmoType);
+	if( ammoType )
 	{
 		if( !gWR.CountAmmo( p->iAmmoType ) )
 			return;
 
-		float f = (float)gWR.CountAmmo( p->iAmmoType ) / (float)p->iMax1;
+		float f = (float)gWR.CountAmmo( p->iAmmoType ) / (float)ammoType->maxAmmo;
 		
 		x = DrawBar( x, y, width, height, f );
 
 		// Do we have secondary ammo too?
-		if( p->iAmmo2Type != -1 )
+		const AmmoType* ammo2Type = g_AmmoRegistry.GetByIndex(p->iAmmo2Type);
+		if( ammo2Type )
 		{
-			f = (float)gWR.CountAmmo( p->iAmmo2Type ) / (float)p->iMax2;
+			f = (float)gWR.CountAmmo( p->iAmmo2Type ) / (float)ammo2Type->maxAmmo;
 
 			x += 5; //!!!
 

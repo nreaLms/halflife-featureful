@@ -82,7 +82,7 @@ struct PlayerState
 	float armor;
 	char weapons[MAX_WEAPONS][32];
 	short clips[MAX_WEAPONS];
-	int ammo[MAX_AMMO_SLOTS];
+	int ammo[MAX_AMMO_TYPES];
 	char currentWeapon[32];
 	char nickname[32];
 	char uid[33];
@@ -154,7 +154,7 @@ void SavePlayerStates()
 					state->clips[k] = pWeapon->m_iClip;
 				}
 			}
-			for( k = 0; k < MAX_AMMO_SLOTS; k++ )
+			for( k = 0; k < MAX_AMMO_TYPES; k++ )
 				state->ammo[k] = player->m_rgAmmo[k];
 			j++;
 		}
@@ -205,7 +205,7 @@ bool RestorePlayerState(CBasePlayer* player)
 					}
 				}
 			}
-			for( k = 0; k < MAX_AMMO_SLOTS; ++k )
+			for( k = 0; k < MAX_AMMO_TYPES; ++k )
 				player->m_rgAmmo[k] = state->ammo[k];
 			if (*state->currentWeapon)
 				player->SelectItem(state->currentWeapon);

@@ -40,7 +40,7 @@ struct MapConfig
 	PickupEnt pickupEnts[64];
 	int pickupEntCount;
 
-	AmmoQuantity ammo[MAX_AMMO_SLOTS];
+	AmmoQuantity ammo[MAX_AMMO_TYPES];
 	int ammoCount;
 
 	OverrideCvar overrideCvars[MAPCONFIG_MAX_OVERRIDE_CVARS];

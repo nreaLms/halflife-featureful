@@ -500,9 +500,7 @@ int CSqueak::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
 	p->pszAmmo1 = AmmoName();
-	p->iMaxAmmo1 = MaxCarry();
 	p->pszAmmo2 = NULL;
-	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = 4;
 	p->iPosition = PositionInSlot();
@@ -700,11 +698,6 @@ int CSqueak::DefaultGive() const
 	return SNARK_DEFAULT_GIVE;
 }
 
-int CSqueak::MaxCarry() const
-{
-	return SNARK_MAX_CARRY;
-}
-
 const char* CSqueak::AmmoName() const
 {
 	return "Snarks";
@@ -760,11 +753,6 @@ int CPenguin::PositionInSlot() const
 int CPenguin::DefaultGive() const
 {
 	return PENGUIN_DEFAULT_GIVE;
-}
-
-int CPenguin::MaxCarry() const
-{
-	return PENGUIN_MAX_CARRY;
 }
 
 const char* CPenguin::AmmoName() const

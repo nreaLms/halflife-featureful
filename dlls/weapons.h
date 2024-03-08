@@ -22,6 +22,7 @@
 #include "bullet_types.h"
 #include "weapon_animations.h"
 #include "player_items.h"
+#include "ammoregistry.h"
 
 class CBasePlayer;
 extern int gmsgWeapPickup;
@@ -206,9 +207,7 @@ typedef struct
 	int		iSlot;
 	int		iPosition;
 	const char	*pszAmmo1;	// ammo 1 type
-	int		iMaxAmmo1;		// max ammo 1
 	const char	*pszAmmo2;	// ammo 2 type
-	int		iMaxAmmo2;		// max ammo 2
 	const char	*pszName;
 	int		iMaxClip;
 	int		iId;
@@ -217,14 +216,6 @@ typedef struct
 	const char* pszAmmoEntity;
 	int iDropAmmo;
 } ItemInfo;
-
-typedef struct
-{
-	const char *pszName;
-	int iId;
-	int iMaxAmmo;
-	bool isExhaustible;
-} AmmoInfo;
 
 class CBasePlayerWeapon : public CBaseAnimating
 {
@@ -263,19 +254,33 @@ public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void TouchOrUse( CBaseEntity* other );
 
-	static const AmmoInfo& GetAmmoInfo( const char* name );
+	static const AmmoType* GetAmmoType( const char* name );
 
 	static ItemInfo ItemInfoArray[ MAX_WEAPONS ];
-	static AmmoInfo AmmoInfoArray[ MAX_AMMO_SLOTS ];
 
 	CBasePlayer	*m_pPlayer;
 	int		m_iId;												// WEAPON_???
 
 	int			iItemPosition( void ) { return ItemInfoArray[ m_iId ].iPosition; }
-	const char	*pszAmmo1( void )	{ return ItemInfoArray[ m_iId ].pszAmmo1; }
-	int			iMaxAmmo1( void )	{ return ItemInfoArray[ m_iId ].iMaxAmmo1; }
-	const char	*pszAmmo2( void )	{ return ItemInfoArray[ m_iId ].pszAmmo2; }
-	int			iMaxAmmo2( void )	{ return ItemInfoArray[ m_iId ].iMaxAmmo2; }
+	const char	*pszAmmo1( void ) const { return ItemInfoArray[ m_iId ].pszAmmo1; }
+	int			iMaxAmmo1( void )	{
+		if (m_iPrimaryAmmoType > 0)
+			return g_AmmoRegistry.GetMaxAmmo(m_iPrimaryAmmoType);
+		return g_AmmoRegistry.GetMaxAmmo(pszAmmo1());
+	}
+	bool UsesAmmo() const {
+		return m_iPrimaryAmmoType > 0 || pszAmmo1() != NULL;
+	}
+	const char	*pszAmmo2( void ) const { return ItemInfoArray[ m_iId ].pszAmmo2; }
+	int			iMaxAmmo2( void )	{
+		if (m_iSecondaryAmmoType > 0)
+			return g_AmmoRegistry.GetMaxAmmo(m_iSecondaryAmmoType);
+		return g_AmmoRegistry.GetMaxAmmo(pszAmmo2());
+	}
+	bool UsesSecondaryAmmo() const {
+		return m_iSecondaryAmmoType > 0 || pszAmmo2() != NULL;
+	}
+
 	const char	*pszName( void )	{ return ItemInfoArray[ m_iId ].pszName; }
 	int			iMaxClip( void );
 	int			iWeight( void )		{ return ItemInfoArray[ m_iId ].iWeight; }
@@ -463,8 +468,8 @@ public:
 
 	CBasePlayerWeapon	*m_rgpPlayerWeapons[MAX_WEAPONS];// one slot for each
 
-	string_t m_rgiszAmmo[MAX_AMMO_SLOTS];// ammo names
-	int	m_rgAmmo[MAX_AMMO_SLOTS];// ammo quantities
+	string_t m_rgiszAmmo[MAX_AMMO_TYPES];// ammo names
+	int	m_rgAmmo[MAX_AMMO_TYPES];// ammo quantities
 
 	int m_cAmmoTypes;// how many ammo types packed into this box (if packed by a level designer)
 };
@@ -1036,7 +1041,6 @@ public:
 	virtual const char* VModel() const;
 	virtual int PositionInSlot() const;
 	virtual int DefaultGive() const;
-	virtual int MaxCarry() const;
 	virtual const char* AmmoName() const;
 	virtual const char* EventsFile() const;
 
@@ -1478,7 +1482,6 @@ public:
 	virtual const char* VModel() const;
 	virtual int PositionInSlot() const;
 	virtual int DefaultGive() const;
-	virtual int MaxCarry() const;
 	virtual const char* AmmoName() const;
 	virtual const char* EventsFile() const;
 };

@@ -31,6 +31,7 @@
 #include "decals.h"
 #include "game.h"
 #include "gamerules.h"
+#include "ammoregistry.h"
 
 extern int gEvilImpulse101;
 
@@ -47,7 +48,6 @@ DLL_GLOBAL	short g_sModelIndexBloodDrop;// holds the sprite index for the initia
 DLL_GLOBAL	short g_sModelIndexBloodSpray;// holds the sprite index for splattered blood
 
 ItemInfo CBasePlayerWeapon::ItemInfoArray[MAX_WEAPONS];
-AmmoInfo CBasePlayerWeapon::AmmoInfoArray[MAX_AMMO_SLOTS];
 
 extern int gmsgCurWeapon;
 
@@ -211,32 +211,6 @@ void ExplodeModel( const Vector &vecOrigin, float speed, int model, int count )
 }
 #endif
 
-int giAmmoIndex = 0;
-
-// Precaches the ammo and queues the ammo info for sending to clients
-void AddAmmoNameToAmmoRegistry( const char *szAmmoname, int maxAmmo, bool isExhaustible )
-{
-	// make sure it's not already in the registry
-	for( int i = 0; i < MAX_AMMO_SLOTS; i++ )
-	{
-		if( !CBasePlayerWeapon::AmmoInfoArray[i].pszName)
-			continue;
-
-		if( stricmp( CBasePlayerWeapon::AmmoInfoArray[i].pszName, szAmmoname ) == 0 )
-			return; // ammo already in registry, just quite
-	}
-
-	giAmmoIndex++;
-	ASSERT( giAmmoIndex < MAX_AMMO_SLOTS );
-	if( giAmmoIndex >= MAX_AMMO_SLOTS )
-		giAmmoIndex = 0;
-
-	CBasePlayerWeapon::AmmoInfoArray[giAmmoIndex].pszName = szAmmoname;
-	CBasePlayerWeapon::AmmoInfoArray[giAmmoIndex].iId = giAmmoIndex;
-	CBasePlayerWeapon::AmmoInfoArray[giAmmoIndex].iMaxAmmo = maxAmmo;
-	CBasePlayerWeapon::AmmoInfoArray[giAmmoIndex].isExhaustible = isExhaustible;
-}
-
 // Precaches the weapon and queues the weapon info for sending to clients
 bool UTIL_PrecacheOtherWeapon( const char *szClassname )
 {
@@ -265,16 +239,6 @@ bool UTIL_PrecacheOtherWeapon( const char *szClassname )
 				if (pWeapon->GetItemInfo( &II ))
 				{
 					CBasePlayerWeapon::ItemInfoArray[II.iId] = II;
-
-					if( II.pszAmmo1 && *II.pszAmmo1 )
-					{
-						AddAmmoNameToAmmoRegistry( II.pszAmmo1, II.iMaxAmmo1, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
-					}
-
-					if( II.pszAmmo2 && *II.pszAmmo2 )
-					{
-						AddAmmoNameToAmmoRegistry( II.pszAmmo2, II.iMaxAmmo2, (II.iFlags & ITEM_FLAG_EXHAUSTIBLE) );
-					}
 				}
 			}
 			else
@@ -295,13 +259,25 @@ bool UTIL_PrecacheOtherWeapon( const char *szClassname )
 void W_Precache( void )
 {
 	memset( CBasePlayerWeapon::ItemInfoArray, 0, sizeof(CBasePlayerWeapon::ItemInfoArray) );
-	memset( CBasePlayerWeapon::AmmoInfoArray, 0, sizeof(CBasePlayerWeapon::AmmoInfoArray) );
-	giAmmoIndex = 0;
 
-	AmmoInfo& ammoInfo = CBasePlayerWeapon::AmmoInfoArray[0];
-	ammoInfo.iId = -1;
-	ammoInfo.iMaxAmmo = -1;
-	ammoInfo.pszName = NULL;
+	g_AmmoRegistry.Register("buckshot", BUCKSHOT_MAX_CARRY);
+	g_AmmoRegistry.Register("9mm", _9MM_MAX_CARRY);
+	g_AmmoRegistry.Register("ARgrenades", M203_GRENADE_MAX_CARRY);
+	g_AmmoRegistry.Register("357", _357_MAX_CARRY);
+	g_AmmoRegistry.Register("uranium", URANIUM_MAX_CARRY);
+	g_AmmoRegistry.Register("rockets", ROCKET_MAX_CARRY);
+	g_AmmoRegistry.Register("bolts", BOLT_MAX_CARRY);
+	g_AmmoRegistry.Register("Trip Mine", TRIPMINE_MAX_CARRY, true);
+	g_AmmoRegistry.Register("Satchel Charge", SATCHEL_MAX_CARRY, true);
+	g_AmmoRegistry.Register("Hand Grenade", HANDGRENADE_MAX_CARRY, true);
+	g_AmmoRegistry.Register("Snarks", SNARK_MAX_CARRY, true);
+	g_AmmoRegistry.Register("Hornets", HORNET_MAX_CARRY);
+	g_AmmoRegistry.Register("Medicine", MEDKIT_MAX_CARRY);
+	g_AmmoRegistry.Register("Penguins", PENGUIN_MAX_CARRY, true);
+	g_AmmoRegistry.Register("556", _556_MAX_CARRY);
+	g_AmmoRegistry.Register("762", _762_MAX_CARRY);
+	g_AmmoRegistry.Register("Shocks", SHOCK_MAX_CARRY);
+	g_AmmoRegistry.Register("spores", SPORE_MAX_CARRY);
 
 	// custom items...
 
@@ -733,22 +709,9 @@ void CBasePlayerWeapon::AttachToPlayer( CBasePlayer *pPlayer )
 	SetThink( NULL );
 }
 
-const AmmoInfo& CBasePlayerWeapon::GetAmmoInfo(const char *name)
+const AmmoType* CBasePlayerWeapon::GetAmmoType(const char *name)
 {
-	if (!name)
-	{
-		return CBasePlayerWeapon::AmmoInfoArray[0];
-	}
-	for( int i = 1; i < MAX_AMMO_SLOTS; i++ )
-	{
-		const AmmoInfo& ammoInfo = CBasePlayerWeapon::AmmoInfoArray[i];
-		if( !ammoInfo.pszName )
-			continue;
-
-		if( stricmp( name, ammoInfo.pszName ) == 0 )
-			return ammoInfo;
-	}
-	return CBasePlayerWeapon::AmmoInfoArray[0];
+	return g_AmmoRegistry.GetByName(name);
 }
 
 // CALLED THROUGH the newly-touched weapon's instance. The existing player weapon is pOriginal
@@ -936,7 +899,7 @@ BOOL CBasePlayerWeapon::IsUseable( void )
 		return TRUE;
 	}
 
-	if( pszAmmo2() )
+	if( UsesSecondaryAmmo() )
 	{
 		// Player has unlimited ammo for this weapon or does not use magazines
 		if( iMaxAmmo2() == WEAPON_NOCLIP )
@@ -1015,7 +978,7 @@ int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 {
 	int iReturn = 0;
 
-	if( pszAmmo1() != NULL )
+	if( UsesAmmo() )
 	{
 		// blindly call with m_iDefaultAmmo. It's either going to be a value or zero. If it is zero,
 		// we only get the ammo in the weapon's clip, which is what we want. 
@@ -1023,7 +986,7 @@ int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 		m_iDefaultAmmo = 0;
 	}
 
-	if( pszAmmo2() != NULL )
+	if( UsesSecondaryAmmo() )
 	{
 		iReturn |= pWeapon->AddSecondaryAmmo( 0 );
 	}
@@ -1112,8 +1075,8 @@ LINK_ENTITY_TO_CLASS( weaponbox, CWeaponBox )
 
 TYPEDESCRIPTION	CWeaponBox::m_SaveData[] =
 {
-	DEFINE_ARRAY( CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS ),
-	DEFINE_ARRAY( CWeaponBox, m_rgiszAmmo, FIELD_STRING, MAX_AMMO_SLOTS ),
+	DEFINE_ARRAY( CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_TYPES ),
+	DEFINE_ARRAY( CWeaponBox, m_rgiszAmmo, FIELD_STRING, MAX_AMMO_TYPES ),
 	DEFINE_ARRAY( CWeaponBox, m_rgpPlayerWeapons, FIELD_CLASSPTR, MAX_WEAPONS ),
 	DEFINE_FIELD( CWeaponBox, m_cAmmoTypes, FIELD_INTEGER ),
 };
@@ -1135,7 +1098,7 @@ void CWeaponBox::KeyValue( KeyValueData *pkvd )
 	CBaseDelay::KeyValue(pkvd);
 	if (!pkvd->fHandled)
 	{
-		if( m_cAmmoTypes < MAX_AMMO_SLOTS )
+		if( m_cAmmoTypes < MAX_AMMO_TYPES )
 		{
 			PackAmmo( ALLOC_STRING( pkvd->szKeyName ), atoi( pkvd->szValue ) );
 			m_cAmmoTypes++;// count this new ammo type.
@@ -1144,7 +1107,7 @@ void CWeaponBox::KeyValue( KeyValueData *pkvd )
 		}
 		else
 		{
-			ALERT( at_console, "WeaponBox too full! only %d ammotypes allowed\n", MAX_AMMO_SLOTS );
+			ALERT( at_console, "WeaponBox too full! only %d ammotypes allowed\n", MAX_AMMO_TYPES );
 		}
 	}
 }
@@ -1252,7 +1215,7 @@ void CWeaponBox::TouchOrUse( CBaseEntity *pOther )
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
 
 	// dole out ammo
-	for( i = 0; i < MAX_AMMO_SLOTS; i++ )
+	for( i = 0; i < MAX_AMMO_TYPES; i++ )
 	{
 		if( !FStringNull( m_rgiszAmmo[i] ) )
 		{
@@ -1343,18 +1306,17 @@ BOOL CWeaponBox::PackAmmo( string_t iszName, int iCount )
 		return FALSE;
 	}
 
-	const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(STRING(iszName));
-
-	if( ammoInfo.iMaxAmmo != -1 && iCount > 0 )
+	const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(STRING(iszName));
+	if( ammoType && iCount > 0 )
 	{
 		//ALERT( at_console, "Packed %d rounds of %s\n", iCount, STRING( iszName ) );
 		int i;
 
-		for( i = 1; i < MAX_AMMO_SLOTS && !FStringNull( m_rgiszAmmo[i] ); i++ )
+		for( i = 1; i < MAX_AMMO_TYPES && !FStringNull( m_rgiszAmmo[i] ); i++ )
 		{
-			if( stricmp( ammoInfo.pszName, STRING( m_rgiszAmmo[i] ) ) == 0 )
+			if( stricmp( ammoType->name, STRING( m_rgiszAmmo[i] ) ) == 0 )
 			{
-				int iAdd = Q_min( iCount, ammoInfo.iMaxAmmo - m_rgAmmo[i] );
+				int iAdd = Q_min( iCount, ammoType->maxAmmo - m_rgAmmo[i] );
 				if( iCount == 0 || iAdd > 0 )
 				{
 					m_rgAmmo[i] += iAdd;
@@ -1364,9 +1326,9 @@ BOOL CWeaponBox::PackAmmo( string_t iszName, int iCount )
 				return FALSE;
 			}
 		}
-		if( i < MAX_AMMO_SLOTS )
+		if( i < MAX_AMMO_TYPES )
 		{
-			m_rgiszAmmo[i] = MAKE_STRING( ammoInfo.pszName );
+			m_rgiszAmmo[i] = MAKE_STRING( ammoType->name );
 			m_rgAmmo[i] = iCount;
 
 			return TRUE;
@@ -1402,7 +1364,7 @@ BOOL CWeaponBox::IsEmpty( void )
 		}
 	}
 
-	for( i = 0; i < MAX_AMMO_SLOTS; i++ )
+	for( i = 0; i < MAX_AMMO_TYPES; i++ )
 	{
 		if( !FStringNull( m_rgiszAmmo[i] ) )
 		{

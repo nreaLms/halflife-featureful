@@ -40,10 +40,10 @@ int g_teamplay = 0;
 //=========================================================
 BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName )
 {
-	const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(pszAmmoName);
-	if( ammoInfo.pszName )
+	const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(pszAmmoName);
+	if( ammoType )
 	{
-		if( pPlayer->AmmoInventory( ammoInfo.iId ) < ammoInfo.iMaxAmmo )
+		if( pPlayer->AmmoInventory( ammoType->id ) < ammoType->maxAmmo )
 		{
 			// player has room for more of this type of ammo
 			return TRUE;
@@ -613,10 +613,10 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 
 		for (i=0; i<mapConfig.ammoCount; ++i)
 		{
-			const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(mapConfig.ammo[i].name);
-			if (mapConfig.ammo[i].count > 0 && ammoInfo.pszName)
+			const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(mapConfig.ammo[i].name);
+			if (ammoType && mapConfig.ammo[i].count > 0)
 			{
-				pPlayer->GiveAmmo(mapConfig.ammo[i].count, ammoInfo.pszName);
+				pPlayer->GiveAmmo(mapConfig.ammo[i].count, ammoType->name);
 			}
 		}
 

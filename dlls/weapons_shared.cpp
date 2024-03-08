@@ -9,17 +9,17 @@ BOOL CBasePlayerWeapon::CanDeploy( void )
 {
 	BOOL bHasAmmo = 0;
 
-	if( !pszAmmo1() )
+	if( !UsesAmmo() )
 	{
 		// this weapon doesn't use ammo, can always deploy.
 		return TRUE;
 	}
 
-	if( pszAmmo1() )
+	if( UsesAmmo() )
 	{
 		bHasAmmo |= ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] != 0 );
 	}
-	if( pszAmmo2() )
+	if( UsesSecondaryAmmo() )
 	{
 		bHasAmmo |= ( m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] != 0 );
 	}
@@ -105,7 +105,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 
 	if( ( m_pPlayer->pev->button & IN_ATTACK2 ) && CanAttack( m_flNextSecondaryAttack, gpGlobals->time, UseDecrement() ) )
 	{
-		if( pszAmmo2() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] )
+		if( UsesSecondaryAmmo() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] )
 		{
 			m_fFireOnEmpty = TRUE;
 		}
@@ -115,7 +115,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	}
 	else if( ( m_pPlayer->pev->button & IN_ATTACK ) && CanAttack( m_flNextPrimaryAttack, gpGlobals->time, UseDecrement() ) )
 	{
-		if( ( m_iClip == 0 && pszAmmo1() ) || ( iMaxClip() == -1 && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) )
+		if( ( m_iClip == 0 && UsesAmmo() ) || ( iMaxClip() == -1 && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) )
 		{
 			m_fFireOnEmpty = TRUE;
 		}

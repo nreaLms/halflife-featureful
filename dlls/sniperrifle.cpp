@@ -69,9 +69,7 @@ int CSniperrifle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "762";
-	p->iMaxAmmo1 = _762_MAX_CARRY;
 	p->pszAmmo2 = NULL;
-	p->iMaxAmmo2 = -1;
 	p->iMaxClip = 5;
 #if FEATURE_OPFOR_WEAPON_SLOTS
 	p->iSlot = 5;

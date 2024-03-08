@@ -962,7 +962,7 @@ private:
 		SuitShortLogon,
 		SuitNoLogon
 	};
-	int m_ammoCounts[MAX_AMMO_SLOTS];
+	int m_ammoCounts[MAX_AMMO_TYPES];
 	short m_suitLogon;
 	short m_suitLight;
 };
@@ -971,7 +971,7 @@ LINK_ENTITY_TO_CLASS( game_player_settings, CGamePlayerSettings )
 
 TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
 {
-	DEFINE_ARRAY( CGamePlayerSettings, m_ammoCounts, FIELD_INTEGER, MAX_AMMO_SLOTS ),
+	DEFINE_ARRAY( CGamePlayerSettings, m_ammoCounts, FIELD_INTEGER, MAX_AMMO_TYPES ),
 	DEFINE_FIELD( CGamePlayerSettings, m_suitLogon, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_suitLight, FIELD_SHORT ),
 };
@@ -986,10 +986,10 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 	else
 		ammoName = FixedAmmoName(ammoName);
 
-	const AmmoInfo& ammoInfo = CBasePlayerWeapon::GetAmmoInfo(ammoName);
-	if (ammoInfo.pszName)
+	const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(ammoName);
+	if (ammoType)
 	{
-		m_ammoCounts[ammoInfo.iId] = atoi(pkvd->szValue);
+		m_ammoCounts[ammoType->id] = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "suitlogon"))
@@ -1147,12 +1147,12 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	const bool hadWeapons = player->m_pActiveItem != NULL;
 
 	int i;
-	for (i=0; i<MAX_AMMO_SLOTS; ++i)
+	for (i=1; i<MAX_AMMO_TYPES; ++i)
 	{
-		const AmmoInfo& ammoInfo = CBasePlayerWeapon::AmmoInfoArray[i];
-		if (m_ammoCounts[i] && ammoInfo.pszName)
+		const AmmoType* ammoInfo = g_AmmoRegistry.GetByIndex(i);
+		if (ammoInfo && m_ammoCounts[i])
 		{
-			player->GiveAmmo(m_ammoCounts[i], ammoInfo.pszName);
+			player->GiveAmmo(m_ammoCounts[i], ammoInfo->name);
 		}
 	}
 
