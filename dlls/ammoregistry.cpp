@@ -66,8 +66,6 @@ int AmmoRegistry::Register(const char *name, int maxAmmo, bool exhaustible)
 	type.maxAmmo = maxAmmo;
 	type.exhaustible = exhaustible;
 
-	ReportRegisteredType(type);
-
 	return type.id;
 }
 
@@ -135,6 +133,27 @@ int AmmoRegistry::GetMaxAmmo(int index) const
 	if (ammoType)
 		return ammoType->maxAmmo;
 	return -1;
+}
+
+void AmmoRegistry::SetMaxAmmo(const char *name, int maxAmmo)
+{
+	int id = IndexOf(name);
+	if (id > 0 && id <= MAX_AMMO_TYPES)
+	{
+		AmmoType& ammoType = ammoTypes[id-1];
+		if (ammoType.IsValid())
+		{
+			ammoType.maxAmmo = maxAmmo;
+		}
+	}
+}
+
+void AmmoRegistry::ReportRegisteredTypes()
+{
+	for (int i = 0; i<lastAmmoIndex; ++i)
+	{
+		ReportRegisteredType(ammoTypes[i]);
+	}
 }
 
 void AmmoRegistry::ReportRegisteredType(const AmmoType& ammoType)

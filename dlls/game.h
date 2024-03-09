@@ -17,6 +17,7 @@
 #define GAME_H
 
 #include "cvardef.h"
+#include "cdll_dll.h"
 
 extern void GameDLLInit( void );
 
@@ -113,6 +114,16 @@ private:
 	bool weapons[64];
 	char monsters[64][64];
 	unsigned int monstersCount;
+
+public:
+	struct MaxAmmo
+	{
+		char name[32];
+		int maxAmmo;
+	};
+	MaxAmmo maxAmmos[MAX_AMMO_TYPES];
+	void SetMaxAmmo(const char* name, int maxAmmo);
+	unsigned int maxAmmoCount;
 };
 
 extern ModFeatures g_modFeatures;
@@ -120,6 +131,7 @@ extern ModFeatures g_modFeatures;
 bool ItemsPickableByTouch();
 bool ItemsPickableByUse();
 int ItemsPhysicsFix();
+const char* FixedAmmoName(const char* ammoName);
 
 extern cvar_t displaysoundlist;
 

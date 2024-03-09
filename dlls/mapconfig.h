@@ -68,8 +68,6 @@ struct MapConfig
 	bool valid;
 };
 
-const char* FixedAmmoName(const char* ammoName);
-
 bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize);
 bool ReadMapConfigFromFile(MapConfig& mapConfig, const char* fileName);
 bool ReadMapConfigByMapName(MapConfig& mapConfig, const char* mapName);

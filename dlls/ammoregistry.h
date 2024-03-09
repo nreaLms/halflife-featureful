@@ -29,6 +29,8 @@ public:
 	int IndexOf(const char* name) const;
 	int GetMaxAmmo(const char* name) const;
 	int GetMaxAmmo(int index) const;
+	void SetMaxAmmo(const char* name, int maxAmmo);
+	void ReportRegisteredTypes();
 private:
 	void ReportRegisteredType(const AmmoType &ammoType);
 

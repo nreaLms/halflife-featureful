@@ -35,7 +35,9 @@ ModFeatures::ModFeatures()
 {
 	memset(monsters, 0, sizeof(monsters));
 	memset(weapons, 0, sizeof(weapons));
+	memset(maxAmmos, 0, sizeof(maxAmmos));
 	monstersCount = 0;
+	maxAmmoCount = 0;
 
 	memset(nvg_sound_on, 0, sizeof(StringBuf));
 	memset(nvg_sound_off, 0, sizeof(StringBuf));
@@ -204,6 +206,31 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 
 	ALERT(at_console, "Unknown mod feature key '%s'\n", key);
 	return false;
+}
+
+void ModFeatures::SetMaxAmmo(const char *name, int maxAmmo)
+{
+	if (maxAmmo <= 0)
+	{
+		ALERT(at_console, "Invalid max ammo value for ammo '%s'\n", name);
+		return;
+	}
+	for (int i = 0; i<MAX_AMMO_TYPES; ++i)
+	{
+		if (stricmp(name, maxAmmos[i].name) == 0)
+		{
+			maxAmmos[i].maxAmmo = maxAmmo;
+			return;
+		}
+	}
+	if (maxAmmoCount >= MAX_AMMO_TYPES)
+	{
+		ALERT(at_console, "Can't add a new ammo type '%s', max count is reached\n", name);
+		return;
+	}
+	strncpyEnsureTermination(maxAmmos[maxAmmoCount].name, name, sizeof(maxAmmos[maxAmmoCount].name));
+	maxAmmos[maxAmmoCount].maxAmmo = maxAmmo;
+	maxAmmoCount++;
 }
 
 bool ModFeatures::UpdateBoolean(const char *value, bool &result, const char *key)
@@ -511,6 +538,58 @@ void ReadServerFeatures()
 			}
 		}
 	}
+	g_engfuncs.pfnFreeFile( pMemFile );
+}
+
+void ReadMaxAmmos()
+{
+	const char* fileName = "features/maxammo.cfg";
+	int filePos = 0, fileSize;
+	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	if (!pMemFile)
+		return;
+
+	ALERT(at_console, "Parsing max ammo values from %s\n", fileName);
+
+	char buffer[512];
+	memset(buffer, 0, sizeof(buffer));
+
+	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
+	{
+		int i = 0;
+		SkipSpaces(buffer, i, sizeof(buffer));
+
+		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
+			continue;
+
+		const int keyStart = i;
+		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
+		const int keyLength = i - keyStart;
+		SkipSpaces(buffer, i, sizeof(buffer));
+		const int valueStart = i;
+		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
+		const int valueLength = i - valueStart;
+
+		if (keyLength > 0)
+		{
+			char* key = buffer + keyStart;
+			key[keyLength] = '\0';
+
+			if (valueLength > 0)
+			{
+				char* value = buffer + valueStart;
+				value[valueLength] = '\0';
+
+				ALERT(at_console, "Ammo name: %s, maxAmmo value: %s\n", key, value);
+				g_modFeatures.SetMaxAmmo(FixedAmmoName(key), atoi(value));
+			}
+			else
+			{
+				ALERT(at_warning, "Key '%s' without value!\n", key);
+			}
+		}
+	}
+
 	g_engfuncs.pfnFreeFile( pMemFile );
 }
 
@@ -1163,6 +1242,7 @@ void GameDLLInit( void )
 	ReadServerFeatures();
 	ReadEnabledMonsters();
 	ReadEnabledWeapons();
+	ReadMaxAmmos();
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
 	g_psv_maxspeed = CVAR_GET_POINTER( "sv_maxspeed" );
