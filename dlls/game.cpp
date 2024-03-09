@@ -410,6 +410,70 @@ byte* LoadFileForMeWithBackup(const char* fileName, const char* fileNameBackup, 
 	return pMemFile;
 }
 
+bool IsNonSignificantLine(const char* line)
+{
+	return !*line || *line == '/' || !IsValidIdentifierCharacter(*line);
+}
+
+char* TryConsumeToken(char* buffer, const int length)
+{
+	int i = 0;
+	SkipSpaces(buffer, i, length);
+
+	if (IsNonSignificantLine(buffer + i))
+		return NULL;
+
+	int tokenStart = i;
+	ConsumeNonSpaceCharacters(buffer, i, length);
+	int tokenLength = i - tokenStart;
+
+	if (tokenLength > 0)
+	{
+		char* token = buffer + tokenStart;
+		token[tokenLength] = '\0';
+		return token;
+	}
+	return NULL;
+}
+
+enum
+{
+	CONSUME_VALUE_ONLY_FIRST_TOKEN,
+	CONSUME_VALUE_THE_WHOLE,
+};
+
+void TryConsumeKeyAndValue(char* buffer, const int length, char*& key, char*& value, int consumeValuePolicy = CONSUME_VALUE_ONLY_FIRST_TOKEN)
+{
+	int i = 0;
+	SkipSpaces(buffer, i, length);
+
+	if (IsNonSignificantLine(buffer + i))
+		return;
+
+	const int keyStart = i;
+	ConsumeNonSpaceCharacters(buffer, i, length);
+	const int keyLength = i - keyStart;
+	SkipSpaces(buffer, i, length);
+	const int valueStart = i;
+	if (consumeValuePolicy == CONSUME_VALUE_ONLY_FIRST_TOKEN)
+		ConsumeNonSpaceCharacters(buffer, i, length);
+	else
+		ConsumeLineSignificantOnly(buffer, i, length);
+	const int valueLength = i - valueStart;
+
+	if (keyLength > 0)
+	{
+		key = buffer + keyStart;
+		key[keyLength] = '\0';
+
+		if (valueLength > 0)
+		{
+			value = buffer + valueStart;
+			value[valueLength] = '\0';
+		}
+	}
+}
+
 #define FEATUREFUL_WEAPONS_CONFIG "featureful_weapons.cfg"
 #define FEATUREFUL_MONSTERS_CONFIG "featureful_monsters.cfg"
 #define FEATUREFUL_SERVER_CONFIG "featureful_server.cfg"
@@ -420,9 +484,7 @@ void ReadEnabledWeapons()
 	int filePos = 0, fileSize;
 	byte *pMemFile = LoadFileForMeWithBackup("features/" FEATUREFUL_WEAPONS_CONFIG, FEATUREFUL_WEAPONS_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
-	{
 		return;
-	}
 
 	ALERT(at_console, "Parsing enabled weapons from %s\n", fileName);
 
@@ -430,20 +492,9 @@ void ReadEnabledWeapons()
 	memset(buffer, 0, sizeof(buffer));
 	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
 	{
-		int i = 0;
-		SkipSpaces(buffer, i, sizeof(buffer));
-
-		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
-			continue;
-
-		int tokenStart = i;
-		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
-		int tokenLength = i - tokenStart;
-		if (tokenLength > 0)
+		char* weaponName = TryConsumeToken(buffer, sizeof(buffer));
+		if (weaponName)
 		{
-			char* weaponName = buffer + tokenStart;
-			weaponName[tokenLength] = '\0';
-
 			if (g_modFeatures.EnableWeapon(weaponName))
 				ALERT(at_console, "Enabled weapon '%s'\n", weaponName);
 			else
@@ -459,9 +510,7 @@ void ReadEnabledMonsters()
 	int filePos = 0, fileSize;
 	byte *pMemFile = LoadFileForMeWithBackup("features/" FEATUREFUL_MONSTERS_CONFIG, FEATUREFUL_MONSTERS_CONFIG, &fileSize, &fileName);
 	if (!pMemFile)
-	{
 		return;
-	}
 
 	ALERT(at_console, "Parsing enabled monsters from %s\n", fileName);
 
@@ -469,20 +518,9 @@ void ReadEnabledMonsters()
 	memset(buffer, 0, sizeof(buffer));
 	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
 	{
-		int i = 0;
-		SkipSpaces(buffer, i, sizeof(buffer));
-
-		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
-			continue;
-
-		int tokenStart = i;
-		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
-		int tokenLength = i - tokenStart;
-		if (tokenLength > 0)
+		char* monsterName = TryConsumeToken(buffer, sizeof(buffer));
+		if (monsterName)
 		{
-			char* monsterName = buffer + tokenStart;
-			monsterName[tokenLength] = '\0';
-
 			ALERT(at_console, "Enabling monster '%s'\n", monsterName);
 			g_modFeatures.EnableMonster(monsterName);
 		}
@@ -505,31 +543,15 @@ void ReadServerFeatures()
 
 	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
 	{
-		int i = 0;
-		SkipSpaces(buffer, i, sizeof(buffer));
+		char* key = NULL;
+		char* value = NULL;
+		TryConsumeKeyAndValue(buffer, sizeof(buffer), key, value, CONSUME_VALUE_THE_WHOLE);
 
-		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
-			continue;
-
-		const int keyStart = i;
-		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
-		const int keyLength = i - keyStart;
-		SkipSpaces(buffer, i, sizeof(buffer));
-		const int valueStart = i;
-		ConsumeLineSignificantOnly(buffer, i, sizeof(buffer));
-		const int valueLength = i - valueStart;
-
-		if (keyLength > 0)
+		if (key)
 		{
-			char* key = buffer + keyStart;
-			key[keyLength] = '\0';
-
-			if (valueLength > 0)
+			if (value)
 			{
-				char* value = buffer + valueStart;
-				value[valueLength] = '\0';
-
-				//ALERT(at_console, "Key: '%s'. Value: '%s'\n", key, value);
+				// ALERT(at_console, "Key: '%s'. Value: '%s'\n", key, value);
 				g_modFeatures.SetValue(key, value);
 			}
 			else
@@ -556,31 +578,15 @@ void ReadMaxAmmos()
 
 	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
 	{
-		int i = 0;
-		SkipSpaces(buffer, i, sizeof(buffer));
+		char* key = NULL;
+		char* value = NULL;
+		TryConsumeKeyAndValue(buffer, sizeof(buffer), key, value, CONSUME_VALUE_ONLY_FIRST_TOKEN);
 
-		if (!buffer[i] || buffer[i] == '/' || !IsValidIdentifierCharacter(buffer[i]))
-			continue;
-
-		const int keyStart = i;
-		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
-		const int keyLength = i - keyStart;
-		SkipSpaces(buffer, i, sizeof(buffer));
-		const int valueStart = i;
-		ConsumeNonSpaceCharacters(buffer, i, sizeof(buffer));
-		const int valueLength = i - valueStart;
-
-		if (keyLength > 0)
+		if (key)
 		{
-			char* key = buffer + keyStart;
-			key[keyLength] = '\0';
-
-			if (valueLength > 0)
+			if (value)
 			{
-				char* value = buffer + valueStart;
-				value[valueLength] = '\0';
-
-				ALERT(at_console, "Ammo name: %s, maxAmmo value: %s\n", key, value);
+				// ALERT(at_console, "Ammo name: %s, maxAmmo value: %s\n", key, value);
 				g_modFeatures.SetMaxAmmo(FixedAmmoName(key), atoi(value));
 			}
 			else
