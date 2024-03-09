@@ -215,7 +215,7 @@ void CGrenade::DangerSoundThink( void )
 		return;
 	}
 
-	CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5f, pev->dmg * DEFAULT_EXPLOSTION_RADIUS_MULTIPLIER, 0.2 );
+	CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin + pev->velocity * 0.5f, pev->dmg * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER, 0.2 );
 	pev->nextthink = gpGlobals->time + 0.2f;
 
 	if( pev->waterlevel != 0 )

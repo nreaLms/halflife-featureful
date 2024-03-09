@@ -271,7 +271,7 @@ void CEnvExplosion::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		if (FBitSet(pev->spawnflags, SF_ENVEXPLOSION_ACTIVATOR_IS_ATTACKER) && pActivator) {
 			pevAttacker = pActivator->pev;
 		}
-		const float radius = m_iRadius > 0 ? m_iRadius : m_iMagnitude * DEFAULT_EXPLOSTION_RADIUS_MULTIPLIER;
+		const float radius = m_iRadius > 0 ? m_iRadius : m_iMagnitude * DEFAULT_EXPLOSION_RADIUS_MULTIPLIER;
 		::RadiusDamage( pev->origin, pev, pevAttacker, m_iMagnitude, radius, CLASS_NONE, DMG_BLAST );
 	}
 

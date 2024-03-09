@@ -27,7 +27,7 @@
 class CBasePlayer;
 extern int gmsgWeapPickup;
 
-#define DEFAULT_EXPLOSTION_RADIUS_MULTIPLIER 2.5f
+#define DEFAULT_EXPLOSION_RADIUS_MULTIPLIER 2.5f
 
 void DeactivateSatchels( CBasePlayer *pOwner );
 
