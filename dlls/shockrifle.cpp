@@ -36,7 +36,10 @@ void CShockrifle::Spawn()
 	m_iId = WEAPON_SHOCKRIFLE;
 	SET_MODEL(ENT(pev), MyWModel());
 
-	InitDefaultAmmo(SHOCKRIFLE_DEFAULT_GIVE);
+	int defaultAmmoGive = g_AmmoRegistry.GetMaxAmmo("shocks");
+	if (defaultAmmoGive <= 0)
+		defaultAmmoGive = SHOCKRIFLE_DEFAULT_GIVE;
+	InitDefaultAmmo(defaultAmmoGive);
 	m_iFirePhase = 0;
 
 	FallInit();// get ready to fall down.
@@ -85,7 +88,7 @@ int CShockrifle::AddToPlayer(CBasePlayer *pPlayer)
 		if (g_pGameRules->IsMultiplayer())
 		{
 			// in multiplayer, all hivehands come full.
-			pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = SHOCK_MAX_CARRY;
+			pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = g_AmmoRegistry.GetMaxAmmo(PrimaryAmmoIndex());
 		}
 #endif
 
@@ -222,10 +225,10 @@ void CShockrifle::SecondaryAttack( void )
 
 void CShockrifle::Reload(void)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= SHOCK_MAX_CARRY)
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= g_AmmoRegistry.GetMaxAmmo(m_iPrimaryAmmoType))
 		return;
 
-	while (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < SHOCK_MAX_CARRY && m_flRechargeTime < gpGlobals->time)
+	while (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < g_AmmoRegistry.GetMaxAmmo(m_iPrimaryAmmoType) && m_flRechargeTime < gpGlobals->time)
 	{
 		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/shock_recharge.wav", 1, ATTN_NORM);
 

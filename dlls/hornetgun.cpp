@@ -42,7 +42,10 @@ void CHgun::Spawn()
 	m_iId = WEAPON_HORNETGUN;
 	SET_MODEL( ENT( pev ), MyWModel() );
 
-	InitDefaultAmmo(HIVEHAND_DEFAULT_GIVE);
+	int defaultAmmoGive = g_AmmoRegistry.GetMaxAmmo("hornets");
+	if (defaultAmmoGive <= 0)
+		defaultAmmoGive = HIVEHAND_DEFAULT_GIVE;
+	InitDefaultAmmo(defaultAmmoGive);
 	m_iFirePhase = 0;
 
 	FallInit();// get ready to fall down.
@@ -67,7 +70,7 @@ int CHgun::AddToPlayer( CBasePlayer *pPlayer )
 		if( g_pGameRules->IsMultiplayer() )
 		{
 			// in multiplayer, all hivehands come full. 
-			pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = HORNET_MAX_CARRY;
+			pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = g_AmmoRegistry.GetMaxAmmo(PrimaryAmmoIndex());
 		}
 #endif
 		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
@@ -246,10 +249,10 @@ void CHgun::SecondaryAttack( void )
 
 void CHgun::Reload( void )
 {
-	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= HORNET_MAX_CARRY )
+	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] >= g_AmmoRegistry.GetMaxAmmo(m_iPrimaryAmmoType) )
 		return;
 
-	while( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < HORNET_MAX_CARRY && m_flRechargeTime < gpGlobals->time )
+	while( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < g_AmmoRegistry.GetMaxAmmo(m_iPrimaryAmmoType) && m_flRechargeTime < gpGlobals->time )
 	{
 		float flRechargeTimePause = 0.5f;
 #if CLIENT_DLL
