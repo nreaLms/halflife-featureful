@@ -3,6 +3,8 @@
 #include "parsemsg.h"
 #include "parsetext.h"
 
+#include <algorithm>
+
 extern cvar_t *cl_subtitles;
 
 DECLARE_MESSAGE( m_Caption, Caption )
@@ -14,8 +16,7 @@ int CHudCaption::Init()
 	captionsInit = false;
 	memset(subtitles, 0, sizeof(subtitles));
 	memset(profiles, 0, sizeof(profiles));
-	memset(captions, 0, sizeof(captions));
-	profileCount = captionCount = 0;
+	profileCount = 0;
 	defaultProfile.r = 255;
 	defaultProfile.g = 255;
 	defaultProfile.b = 255;
@@ -525,124 +526,90 @@ bool CHudCaption::ParseCaptionsFile()
 			//
 			else
 			{
-				if (captionCount >= CAPTIONS_MAX)
+				Caption_t caption;
+				strncpyEnsureTermination(caption.name, captionName, sizeof(caption.name));
+
+				SkipSpaces(pfile, i, length);
+				currentTokenStart = i;
+				ConsumeNonSpaceCharacters(pfile, i, length);
+
+				tokenLength = i-currentTokenStart;
+				if (tokenLength > 0 && pfile[currentTokenStart] >= '1' && pfile[currentTokenStart] <= '9')
 				{
-					ConsumeLine(pfile, i, length);
-					gEngfuncs.Con_Printf("Too many captions! Max is %d\n", CAPTIONS_MAX);
-				}
-				else
-				{
-					Caption_t& caption = captions[captionCount];
-					strncpy(caption.name, captionName, sizeof(caption.name));
+					char numbuf[8];
+					strncpy(numbuf, pfile + currentTokenStart, Q_max(tokenLength, sizeof(numbuf)-1));
+					numbuf[sizeof(numbuf)-1] = '\0';
+
+					caption.delay = atof(numbuf);
 
 					SkipSpaces(pfile, i, length);
 					currentTokenStart = i;
 					ConsumeNonSpaceCharacters(pfile, i, length);
 
 					tokenLength = i-currentTokenStart;
-					if (tokenLength > 0 && pfile[currentTokenStart] >= '1' && pfile[currentTokenStart] <= '9')
-					{
-						char numbuf[8];
-						strncpy(numbuf, pfile + currentTokenStart, Q_max(tokenLength, sizeof(numbuf)-1));
-						numbuf[sizeof(numbuf)-1] = '\0';
-
-						caption.delay = atof(numbuf);
-
-						SkipSpaces(pfile, i, length);
-						currentTokenStart = i;
-						ConsumeNonSpaceCharacters(pfile, i, length);
-
-						tokenLength = i-currentTokenStart;
-					}
-
-					if (tokenLength != 2 || !IsLatinLowerCase(pfile[currentTokenStart]) || !IsLatinLowerCase(pfile[currentTokenStart+1]))
-					{
-						gEngfuncs.Con_Printf("invalid caption profile for %s! Must be 2 lowercase latin characters\n", caption.name);
-						ConsumeLine(pfile, i, length);
-						continue;
-					}
-
-					char firstLetter = pfile[currentTokenStart];
-					char secondLetter = pfile[currentTokenStart+1];
-					caption.profile = CaptionProfileLookup(firstLetter, secondLetter);
-
-					if (!caption.profile)
-					{
-						gEngfuncs.Con_Printf("Could not find a caption profile %c%c for %s\n", firstLetter, secondLetter, caption.name);
-					}
-
-					SkipSpaces(pfile, i, length);
-					currentTokenStart = i;
-					ConsumeLine(pfile, i, length);
-
-					tokenLength = i-currentTokenStart;
-
-					if (!tokenLength || tokenLength >= sizeof(caption.message))
-					{
-						gEngfuncs.Con_Printf("Invalid caption message length for %s! Max is %d\n", caption.name, sizeof(caption.message)-1);
-						continue;
-					}
-
-					strncpy(caption.message, pfile + currentTokenStart, tokenLength);
-					caption.message[tokenLength] = '\0';
-
-					captionCount++;
-					//gEngfuncs.Con_DPrintf("Parsed a caption. Name: %s. Profile: %c%c. Text: %s\n", caption.name, caption.profile->firstLetter, caption.profile->secondLetter, caption.message);
 				}
+
+				if (tokenLength != 2 || !IsLatinLowerCase(pfile[currentTokenStart]) || !IsLatinLowerCase(pfile[currentTokenStart+1]))
+				{
+					gEngfuncs.Con_Printf("invalid caption profile for %s! Must be 2 lowercase latin characters\n", caption.name);
+					ConsumeLine(pfile, i, length);
+					continue;
+				}
+
+				char firstLetter = pfile[currentTokenStart];
+				char secondLetter = pfile[currentTokenStart+1];
+				caption.profile = CaptionProfileLookup(firstLetter, secondLetter);
+
+				if (!caption.profile)
+				{
+					gEngfuncs.Con_Printf("Could not find a caption profile %c%c for %s\n", firstLetter, secondLetter, caption.name);
+				}
+
+				SkipSpaces(pfile, i, length);
+				currentTokenStart = i;
+				ConsumeLine(pfile, i, length);
+
+				tokenLength = i-currentTokenStart;
+
+				if (!tokenLength || tokenLength >= sizeof(caption.message))
+				{
+					gEngfuncs.Con_Printf("Invalid caption message length for %s! Max is %d\n", caption.name, sizeof(caption.message)-1);
+					continue;
+				}
+
+				strncpyEnsureTermination(caption.message, pfile + currentTokenStart, tokenLength);
+
+				captions.push_back(caption);
+				//gEngfuncs.Con_DPrintf("Parsed a caption. Name: %s. Profile: %c%c. Text: %s\n", caption.name, caption.profile->firstLetter, caption.profile->secondLetter, caption.message);
 			}
 		}
 	}
-	SortCaptions();
+	std::sort(captions.begin(), captions.end(), [](const Caption_t& a, const Caption_t& b) {
+		return strcmp(a.name, b.name) < 0;
+	});
 
 	gEngfuncs.COM_FreeFile(pfile);
 	return true;
 }
 
-void CHudCaption::SortCaptions()
+struct CaptionCompare
 {
-	int i, j;
-
-	for( i = 0; i < captionCount; i++ )
+	bool operator ()(const Caption_t& lhs, const char* rhs)
 	{
-		for( j = i + 1; j < captionCount; j++ )
-		{
-			if( strcmp( captions[i].name, captions[j].name ) > 0 )
-			{
-				Caption_t tmp = captions[i];
-				captions[i] = captions[j];
-				captions[j] = tmp;
-			}
-		}
+		return stricmp(lhs.name, rhs) < 0;
 	}
-}
+	bool operator ()(const char* lhs, const Caption_t& rhs)
+	{
+		return stricmp(lhs, rhs.name) < 0;
+	}
+};
 
 const Caption_t* CHudCaption::CaptionLookup(const char *name)
 {
-	int left, right, pivot;
-	int val;
-
-	left = 0;
-	right = captionCount - 1;
-
-	while( left <= right )
-	{
-		pivot = ( left + right ) / 2;
-
-		val = stricmp( name, captions[pivot].name );
-		if( val == 0 )
-		{
-			return &captions[pivot];
-		}
-		else if( val > 0 )
-		{
-			left = pivot + 1;
-		}
-		else if( val < 0 )
-		{
-			right = pivot - 1;
-		}
-	}
-	return NULL;
+	auto result = std::equal_range(captions.begin(), captions.end(), name, CaptionCompare());
+	if (result.first != result.second)
+		return &(*result.first);
+	return nullptr;
 }
 
 CaptionProfile_t* CHudCaption::CaptionProfileLookup(char firstLetter, char secondLetter)

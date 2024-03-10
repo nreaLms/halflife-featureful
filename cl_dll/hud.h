@@ -45,6 +45,8 @@
 
 #include "hud_sprite.h"
 
+#include <vector>
+
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
 #define DHN_3DIGITS  4
@@ -284,7 +286,6 @@ struct Subtitle_t
 };
 
 #define CAPTION_PROFILES_MAX 32
-#define CAPTIONS_MAX 256
 
 struct WordBoundary
 {
@@ -310,7 +311,6 @@ public:
 
 	bool ParseCaptionsProfilesFile();
 	bool ParseCaptionsFile();
-	void SortCaptions();
 	const Caption_t* CaptionLookup(const char* name);
 
 protected:
@@ -318,9 +318,8 @@ protected:
 
 	CaptionProfile_t defaultProfile;
 	CaptionProfile_t profiles[CAPTION_PROFILES_MAX];
-	Caption_t captions[CAPTIONS_MAX];
+	std::vector<Caption_t> captions;
 	int profileCount;
-	int captionCount;
 
 	Subtitle_t subtitles[4];
 	int sub_count;
