@@ -308,6 +308,8 @@ enum
 	MM_USE_ON,
 	MM_USE_OFF,
 	MM_USE_KILL,
+	MM_USE_FORWARD,
+	MM_USE_REVERSE,
 };
 
 static void ParseMMDelay(const char* value, float& delay, short& mmUseType)
@@ -330,6 +332,18 @@ static void ParseMMDelay(const char* value, float& delay, short& mmUseType)
 		else if (digit == '2' || strcmp(endPtr, "kill") == 0)
 		{
 			mmUseType = MM_USE_KILL;
+		}
+		else if (strcmp(endPtr, "toggle") == 0)
+		{
+			mmUseType = MM_USE_TOGGLE;
+		}
+		else if (strcmp(endPtr, "forward") == 0)
+		{
+			mmUseType = MM_USE_FORWARD;
+		}
+		else if (strcmp(endPtr, "reverse") == 0)
+		{
+			mmUseType = MM_USE_REVERSE;
 		}
 	}
 }
@@ -360,6 +374,7 @@ public:
 	string_t m_iTargetName[MAX_MULTI_TARGETS];// list if indexes into global string array
 	float m_flTargetDelay[MAX_MULTI_TARGETS];// delay (in seconds) from time of manager fire to target fire
 	short m_iTargetUseType[MAX_MULTI_TARGETS];
+	int m_inputUseType;
 private:
 	inline BOOL IsClone( void ) { return ( pev->spawnflags & SF_MULTIMAN_CLONE ) ? TRUE : FALSE; }
 	inline BOOL ShouldClone( void )
@@ -384,6 +399,7 @@ TYPEDESCRIPTION	CMultiManager::m_SaveData[] =
 	DEFINE_ARRAY( CMultiManager, m_iTargetName, FIELD_STRING, MAX_MULTI_TARGETS ),
 	DEFINE_ARRAY( CMultiManager, m_flTargetDelay, FIELD_FLOAT, MAX_MULTI_TARGETS ),
 	DEFINE_ARRAY( CMultiManager, m_iTargetUseType, FIELD_SHORT, MAX_MULTI_TARGETS ),
+	DEFINE_FIELD( CMultiManager, m_inputUseType, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CMultiManager, CBaseToggle )
@@ -485,6 +501,15 @@ void CMultiManager::ManagerThink( void )
 				useType = USE_OFF;
 			else if (mmUseType == MM_USE_ON)
 				useType = USE_ON;
+			else if (mmUseType == MM_USE_FORWARD)
+				useType = (USE_TYPE)m_inputUseType;
+			else if (mmUseType == MM_USE_REVERSE)
+			{
+				if (m_inputUseType == USE_ON)
+					useType = USE_OFF;
+				else if (m_inputUseType == USE_OFF)
+					useType = USE_ON;
+			}
 			FireTargets( STRING( m_iTargetName[m_index] ), m_hActivator, this, useType );
 		}
 		m_index++;
@@ -517,6 +542,7 @@ CMultiManager *CMultiManager::Clone( void )
 	memcpy( pMulti->m_iTargetName, m_iTargetName, sizeof( m_iTargetName ) );
 	memcpy( pMulti->m_flTargetDelay, m_flTargetDelay, sizeof( m_flTargetDelay ) );
 	memcpy( pMulti->m_iTargetUseType, m_iTargetUseType, sizeof( m_iTargetUseType ) );
+	pMulti->m_inputUseType = m_inputUseType;
 
 	return pMulti;
 }
@@ -536,6 +562,7 @@ void CMultiManager::ManagerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	m_hActivator = pActivator;
 	m_index = 0;
 	m_startTime = gpGlobals->time;
+	m_inputUseType = useType;
 
 	SetUse( NULL );// disable use until all targets have fired
 
