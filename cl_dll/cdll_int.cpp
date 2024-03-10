@@ -642,6 +642,12 @@ void DLLEXPORT HUD_Shutdown( void )
 	UnloadOpenGL();
 #endif
 #if USE_PARTICLEMAN
+	auto miniMem = CMiniMem::Instance();
+	if (miniMem)
+	{
+		miniMem->Reset();
+		miniMem->Shutdown();
+	}
 	CL_UnloadParticleMan();
 #endif
 }
