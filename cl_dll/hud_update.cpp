@@ -19,7 +19,6 @@
 #include <cmath>
 #include "hud.h"
 #include "cl_util.h"
-#include <stdlib.h>
 
 int CL_ButtonBits( int );
 void CL_ResetButtonBits( int bits );

@@ -23,8 +23,6 @@
 #include "parsemsg.h"
 #include "kbutton.h"
 #include "triangleapi.h"
-#include <string.h>
-#include <stdio.h>
 
 #if !USE_VGUI || USE_NOVGUI_MOTD
 DECLARE_MESSAGE( m_MOTD, MOTD )

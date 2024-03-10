@@ -22,9 +22,6 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 
-#include <string.h>
-#include <stdio.h>
-
 #if USE_VGUI
 #include "vgui_TeamFortressViewport.h"
 #endif

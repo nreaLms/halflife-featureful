@@ -32,8 +32,6 @@
 #include "event_args.h"
 #include "in_defs.h"
 
-#include <string.h>
-
 #include "r_studioint.h"
 #include "com_model.h"
 #include "mod_features.h"

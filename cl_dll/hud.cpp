@@ -20,8 +20,6 @@
 
 #include "hud.h"
 #include "cl_util.h"
-#include <cstring>
-#include <cstdio>
 #include "parsemsg.h"
 #include "parsetext.h"
 #if USE_VGUI

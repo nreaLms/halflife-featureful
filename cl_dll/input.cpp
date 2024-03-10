@@ -25,8 +25,7 @@ extern "C"
 #include "camera.h"
 #include "in_defs.h"
 //#include "view.h"
-#include <string.h>
-#include <ctype.h>
+#include <cctype>
 
 #if USE_VGUI
 #include "vgui_TeamFortressViewport.h"

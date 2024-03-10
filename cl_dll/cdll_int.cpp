@@ -84,7 +84,7 @@ HMODULE libOpenGL = NULL;
 
 HMODULE LoadOpenGL()
 {
-	return GetModuleHandle("opengl32.dll");
+	return GetModuleHandleA("opengl32.dll");
 }
 
 void UnloadOpenGL()

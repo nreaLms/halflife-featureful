@@ -28,8 +28,7 @@
 #include "enginecallback.h"
 #endif
 
-#include <string.h>
-#include <ctype.h>
+#include <cctype>
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent );  // implementation later in this file
 
 extern globalvars_t				*gpGlobals;

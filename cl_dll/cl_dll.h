@@ -45,11 +45,7 @@ typedef float vec_t;
 #endif
 #include "exportdef.h"
 #include <cstring>
-#if HAVE_CMATH
 #include <cmath>
-#else
-#include <math.h>
-#endif
 
 extern cl_enginefunc_t gEngfuncs;
 #include "../engine/mobility_int.h"

@@ -23,9 +23,6 @@
 #include "parsemsg.h"
 #include "mod_features.h"
 
-#include <string.h>
-#include <stdio.h>
-
 DECLARE_MESSAGE( m_Flash, FlashBat )
 DECLARE_MESSAGE( m_Flash, Flashlight )
 

@@ -2,8 +2,6 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "parsetext.h"
-#include <string.h>
-#include <stdio.h>
 
 extern cvar_t *cl_subtitles;
 

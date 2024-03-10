@@ -18,13 +18,12 @@
 // implementation of class-less helper functions
 //
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <cmath>
 
 #include "hud.h"
 #include "cl_util.h"
-#include <string.h>
 
 #if !defined(M_PI)
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h

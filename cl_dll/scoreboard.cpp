@@ -23,9 +23,6 @@
 #include "parsemsg.h"
 #include "triangleapi.h"
 
-#include <string.h>
-#include <stdio.h>
-
 cvar_t *cl_scoreboard_bg;
 cvar_t *cl_showpacketloss;
 

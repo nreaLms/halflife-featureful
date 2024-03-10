@@ -25,9 +25,6 @@
 #include "r_efx.h"
 #include "mod_features.h"
 
-#include <string.h>
-#include <stdio.h>
-
 #if FEATURE_CS_NIGHTVISION
 extern cvar_t *cl_nvgradius_cs;
 #endif

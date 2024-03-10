@@ -18,9 +18,6 @@
 #include "dlight.h"
 #include "triangleapi.h"
 
-#include <stdio.h>
-#include <string.h>
-
 #include "studio_util.h"
 #include "r_studioint.h"
 
