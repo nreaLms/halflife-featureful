@@ -1678,11 +1678,11 @@ bool CHud::ShouldUseConsoleFont()
 	return true;
 }
 
-unsigned int CHud::SplitIntoWordBoundaries(WordBoundary* boundaries, const char *message)
+unsigned int CHud::SplitIntoWordBoundaries(std::vector<WordBoundary>& boundaries, const std::string& message)
 {
 	unsigned int wordCount = 0;
 
-	const unsigned int len = strlen(message);
+	const unsigned int len = message.size();
 
 	bool searchingForWordStart = true;
 	for (unsigned int i = 0; i<len; ++i)

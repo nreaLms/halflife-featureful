@@ -46,6 +46,7 @@
 #include "hud_sprite.h"
 
 #include <vector>
+#include <string>
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
@@ -261,13 +262,11 @@ struct CaptionProfile_t
 	int r, g, b;
 };
 
-#define CAPTION_SIZE 600
-
 struct Caption_t
 {
 	char name[32];
 	const CaptionProfile_t* profile;
-	char message[CAPTION_SIZE];
+	std::string message;
 	float delay;
 };
 
@@ -1034,7 +1033,7 @@ public:
 	bool hasHudScaleInEngine;
 
 	static bool ShouldUseConsoleFont();
-	static unsigned int SplitIntoWordBoundaries(WordBoundary* boundaries, const char* message);
+	static unsigned int SplitIntoWordBoundaries(std::vector<WordBoundary> &boundaries, const std::string &message);
 };
 
 extern CHud gHUD;

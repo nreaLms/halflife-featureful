@@ -96,13 +96,12 @@ int CHudCaption::MsgFunc_Caption(const char *pszName, int iSize, void *pbuf)
 	if (holdTime <= 0)
 	{
 		int perceivedLength = 0;
-		const char* ptr = caption->message;
-		while(*ptr != '\0') {
-			if (*ptr >= 0 && *ptr <= 127)
+		for (auto it = caption->message.begin(); it != caption->message.end(); ++it)
+		{
+			if (*it >= 0 && *it <= 127)
 				perceivedLength += 2;
 			else
 				perceivedLength ++;
-			++ptr;
 		}
 		holdTime = 2 + perceivedLength/32.0f;
 	}
@@ -128,12 +127,13 @@ void CHudCaption::AddSubtitle(const Subtitle_t &sub)
 
 void CHudCaption::CalculateLineOffsets(Subtitle_t &sub)
 {
-	const char* str = sub.caption->message;
+	const char* start = sub.caption->message.c_str();
+	const char* str = start;
 	const int xmax = SUB_MAX_XPOS - SUB_START_XPOS;
 
 	if (CHud::ShouldUseConsoleFont())
 	{
-		WordBoundary boundaries[sizeof(sub.caption->message)/2];
+		std::vector<WordBoundary> boundaries(sub.caption->message.size()/2 + 1);
 		unsigned int wordCount = CHud::SplitIntoWordBoundaries(boundaries, sub.caption->message);
 
 		unsigned int startWordIndex = 0;
@@ -177,8 +177,8 @@ void CHudCaption::CalculateLineOffsets(Subtitle_t &sub)
 		{
 			if (*str == '\0')
 			{
-				sub.lineOffsets[sub.lineCount] = currentLine - sub.caption->message;
-				sub.lineEndOffsets[sub.lineCount] = str - sub.caption->message;
+				sub.lineOffsets[sub.lineCount] = currentLine - start;
+				sub.lineEndOffsets[sub.lineCount] = str - start;
 				sub.lineCount++;
 				break;
 			}
@@ -193,8 +193,8 @@ void CHudCaption::CalculateLineOffsets(Subtitle_t &sub)
 			}
 			if (*str == '\n' || lineWidth > xmax)
 			{
-				sub.lineOffsets[sub.lineCount] = currentLine - sub.caption->message;
-				sub.lineEndOffsets[sub.lineCount] = str - sub.caption->message;
+				sub.lineOffsets[sub.lineCount] = currentLine - start;
+				sub.lineEndOffsets[sub.lineCount] = str - start;
 				sub.lineCount++;
 				lineWidth = 0;
 				currentLine = str + 1;
@@ -281,12 +281,12 @@ int CHudCaption::Draw(float flTime)
 
 			if (CHud::ShouldUseConsoleFont())
 			{
-				lineWidth += CHud::UtfText::LineWidth(subtitles[i].caption->message + subtitles[i].lineOffsets[j], subtitles[i].lineEndOffsets[j] - subtitles[i].lineOffsets[j]);
+				lineWidth += CHud::UtfText::LineWidth(subtitles[i].caption->message.c_str() + subtitles[i].lineOffsets[j], subtitles[i].lineEndOffsets[j] - subtitles[i].lineOffsets[j]);
 			}
 			else
 			{
-				const char* str = subtitles[i].caption->message + subtitles[i].lineOffsets[j];
-				while( str != subtitles[i].caption->message + subtitles[i].lineEndOffsets[j] )
+				const char* str = subtitles[i].caption->message.c_str() + subtitles[i].lineOffsets[j];
+				while( str != subtitles[i].caption->message.c_str() + subtitles[i].lineEndOffsets[j] )
 				{
 					lineWidth += gHUD.m_scrinfo.charWidths[(unsigned char)*str];
 					str++;
@@ -325,7 +325,7 @@ int CHudCaption::Draw(float flTime)
 				SPR_DrawAdditive( 0, xpos-SUB_BORDER_LENGTH-voiceIconWidth-Q_max(voiceIconWidth/8, 1), ypos + lineHeight/2 - voiceIconWidth/2, NULL );
 			}
 
-			CHud::UtfText::DrawString( xpos, ypos, xmax, sub.caption->message + sub.lineOffsets[j], sub.r, sub.g, sub.b, sub.lineEndOffsets[j] - sub.lineOffsets[j] );
+			CHud::UtfText::DrawString( xpos, ypos, xmax, sub.caption->message.c_str() + sub.lineOffsets[j], sub.r, sub.g, sub.b, sub.lineEndOffsets[j] - sub.lineOffsets[j] );
 			ypos += lineHeight;
 		}
 		ypos += distanceBetweenSubs;
@@ -342,7 +342,7 @@ void CHudCaption::UserCmd_DumpCaptions()
 		if (subtitle.caption)
 		{
 			gEngfuncs.Con_DPrintf("Caption %d: `%s`. Line count: %d. Time left: %f\n",
-							i+1, subtitle.caption->message, subtitle.lineCount, subtitle.timeLeft);
+							i+1, subtitle.caption->message.c_str(), subtitle.lineCount, subtitle.timeLeft);
 		}
 	}
 }
@@ -571,14 +571,7 @@ bool CHudCaption::ParseCaptionsFile()
 
 				tokenLength = i-currentTokenStart;
 
-				if (!tokenLength || tokenLength >= sizeof(caption.message))
-				{
-					gEngfuncs.Con_Printf("Invalid caption message length for %s! Max is %d\n", caption.name, sizeof(caption.message)-1);
-					continue;
-				}
-
-				strncpyEnsureTermination(caption.message, pfile + currentTokenStart, tokenLength);
-
+				caption.message = std::string(pfile + currentTokenStart, tokenLength);
 				captions.push_back(caption);
 				//gEngfuncs.Con_DPrintf("Parsed a caption. Name: %s. Profile: %c%c. Text: %s\n", caption.name, caption.profile->firstLetter, caption.profile->secondLetter, caption.message);
 			}
