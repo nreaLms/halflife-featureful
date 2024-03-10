@@ -15,7 +15,6 @@
 //
 // hud_redraw.cpp
 //
-#include <cmath>
 
 #include "hud.h"
 #include "cl_util.h"

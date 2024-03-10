@@ -67,11 +67,7 @@ typedef int BOOL;
 #include <cstdio>
 #include <cstdlib>
 #include <cstddef>
-#if HAVE_CMATH
 #include <cmath>
-#else
-#include <cmath>
-#endif
 
 #if !defined(M_PI_F)
 #define M_PI_F          (float)M_PI

@@ -16,7 +16,6 @@
 //  hud_update.cpp
 //
 
-#include <cmath>
 #include "hud.h"
 #include "cl_util.h"
 
