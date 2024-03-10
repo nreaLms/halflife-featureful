@@ -34,8 +34,6 @@ static cvar_t* cl_pmanstats = nullptr;
 
 static std::vector<ForceMember> g_pForceList;
 
-EXPOSE_INTERFACE(IParticleMan_Active, IParticleMan, PARTICLEMAN_INTERFACE);
-
 IParticleMan_Active::IParticleMan_Active()
 {
 	g_pForceList.reserve(MaxForceElements);

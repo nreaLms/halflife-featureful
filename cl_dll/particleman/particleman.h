@@ -2,17 +2,10 @@
 #ifndef PARTICLEMAN_H
 #define PARTICLEMAN_H
 
-#include "interface.h"
 #include "CBaseParticle.h"
 
-#define PARTICLEMAN_INTERFACE "create_particleman"
-
-class IParticleMan : public IBaseInterface
+class IParticleMan
 {
-
-protected:
-	virtual ~IParticleMan() {}
-
 public:
 	virtual void SetUp(cl_enginefunc_t* pEnginefuncs) = 0;
 	virtual void Update() = 0;

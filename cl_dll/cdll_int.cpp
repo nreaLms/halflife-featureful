@@ -42,8 +42,7 @@
 #endif
 
 #if USE_PARTICLEMAN
-#include "interface.h"
-#include "particleman.h"
+#include "IParticleMan_Active.h"
 #include "CBaseParticle.h"
 
 IParticleMan *g_pParticleMan = NULL;
@@ -593,15 +592,17 @@ void TestParticlesCmd()
 
 void CL_UnloadParticleMan( void )
 {
-	g_pParticleMan = NULL;
+	if (g_pParticleMan)
+	{
+		delete g_pParticleMan;
+		g_pParticleMan = NULL;
+	}
 }
 
 void CL_LoadParticleMan( void )
 {
 	//Now implemented in the client library.
-	auto particleManFactory = Sys_GetFactoryThis();
-
-	g_pParticleMan = (IParticleMan*)particleManFactory(PARTICLEMAN_INTERFACE, nullptr);
+	g_pParticleMan = new IParticleMan_Active();
 
 	if (g_pParticleMan)
 	{
