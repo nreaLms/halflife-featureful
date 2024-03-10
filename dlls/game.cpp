@@ -1239,6 +1239,8 @@ cvar_t* violence_agibs = NULL;
 cvar_t sv_pushable_fixed_tick_fudge = { "sv_pushable_fixed_tick_fudge", "15" };
 cvar_t sv_busters = { "sv_busters", "0" };
 
+extern void RegisterAmmoTypes();
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
@@ -1249,6 +1251,8 @@ void GameDLLInit( void )
 	ReadEnabledMonsters();
 	ReadEnabledWeapons();
 	ReadMaxAmmos();
+
+	RegisterAmmoTypes();
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
 	g_psv_maxspeed = CVAR_GET_POINTER( "sv_maxspeed" );

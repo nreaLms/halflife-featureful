@@ -255,11 +255,8 @@ bool UTIL_PrecacheOtherWeapon( const char *szClassname )
 	return result;
 }
 
-// called by worldspawn
-void W_Precache( void )
+void RegisterAmmoTypes()
 {
-	memset( CBasePlayerWeapon::ItemInfoArray, 0, sizeof(CBasePlayerWeapon::ItemInfoArray) );
-
 	g_AmmoRegistry.Register("buckshot", BUCKSHOT_MAX_CARRY);
 	g_AmmoRegistry.Register("9mm", _9MM_MAX_CARRY);
 	g_AmmoRegistry.Register("ARgrenades", M203_GRENADE_MAX_CARRY);
@@ -284,6 +281,12 @@ void W_Precache( void )
 		g_AmmoRegistry.SetMaxAmmo(g_modFeatures.maxAmmos[i].name, g_modFeatures.maxAmmos[i].maxAmmo);
 	}
 	g_AmmoRegistry.ReportRegisteredTypes();
+}
+
+// called by worldspawn
+void W_Precache( void )
+{
+	memset( CBasePlayerWeapon::ItemInfoArray, 0, sizeof(CBasePlayerWeapon::ItemInfoArray) );
 
 	// custom items...
 
