@@ -13,6 +13,8 @@
 
 #include "r_studioint.h"
 
+#include "fx_flags.h"
+
 #if USE_PARTICLEMAN
 #include "particleman.h"
 #endif
@@ -542,19 +544,19 @@ int __MsgFunc_Particle( const char *pszName, int iSize, void *pbuf )
 				if (fadeSpeed > 0)
 					particle->m_flFadeSpeed = fadeSpeed;
 				particle->m_flScaleSpeed = scaleSpeed;
-				if (flags & 16)
+				if (flags & SF_PARTICLESHOOTER_ANIMATED)
 				{
 					particle->m_iFramerate = frameRate > 0 ? frameRate : 10;
 					particle->m_iNumFrames = sprite->numframes;
 				}
 
-				if (flags & 2)
+				if (flags & SF_PARTICLESHOOTER_SPIRAL)
 					particle->SetCollisionFlags(TRI_SPIRAL);
-				if (flags & 4)
+				if (flags & SF_PARTICLESHOOTER_COLLIDE_WITH_WORLD)
 					particle->SetCollisionFlags(TRI_COLLIDEWORLD);
-				if (flags & 8)
+				if (flags & SF_PARTICLESHOOTER_AFFECTED_BY_FORCE)
 					particle->m_bAffectedByForce = true;
-				if (flags & 64)
+				if (flags & SF_PARTICLESHOOTER_KILLED_ON_COLLIDE)
 					particle->SetCollisionFlags(TRI_COLLIDEKILL);
 
 				particle->m_flDieTime = clTime + particleLife;

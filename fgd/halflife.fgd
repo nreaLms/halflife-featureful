@@ -7012,7 +7012,7 @@
 		16 : "Animate" : 0
 		32 : "Start on" : 0
 		64 : "Kill on collide" : 0
-		128 : "Ripple when hitting water" : 0
+		128 : "Reserved (don't use)" : 0 : "Reserved for 'Ripple when hitting water'"
 	]
 
 	model(sprite) : "Sprite" : "sprites/xsmoke1.spr"

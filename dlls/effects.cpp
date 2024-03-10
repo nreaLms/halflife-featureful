@@ -33,6 +33,7 @@
 #include "game.h"
 #include "particledef.h"
 #include "soundent.h"
+#include "fx_flags.h"
 
 #define FEATURE_ENV_WARPBALL 1
 #define FEATURE_ENV_XENMAKER 1
@@ -4702,16 +4703,6 @@ void CEnvBeamTrail::Spawn( void )
 		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 }
-
-
-#define SF_PARTICLESHOOTER_REPEATABLE 1
-#define SF_PARTICLESHOOTER_SPIRAL 2
-#define SF_PARTICLESHOOTER_COLLIDE_WITH_WORLD 4
-#define SF_PARTICLESHOOTER_AFFECTED_BY_FORCE 8
-#define SF_PARTICLESHOOTER_ANIMATED 16
-#define SF_PARTICLESHOOTER_STARTON 32
-#define SF_PARTICLESHOOTER_KILLED_ON_COLLIDE 64
-#define SF_PARTICLESHOOTER_RIPPLE_WHEN_HITTING_WATER 128
 
 class CParticleShooter : public CPointEntity
 {
