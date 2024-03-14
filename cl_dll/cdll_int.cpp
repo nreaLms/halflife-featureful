@@ -24,7 +24,6 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
-#include "interface.h"
 #include "parsemsg.h"
 
 #include "r_efx.h"
