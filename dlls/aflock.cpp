@@ -160,7 +160,7 @@ void CFlockingFlyerFlock::Spawn()
 void CFlockingFlyerFlock::Precache()
 {
 	//PRECACHE_MODEL( "models/aflock.mdl" );		
-	PRECACHE_MODEL( "models/boid.mdl" );
+	PrecacheMyModel( "models/boid.mdl" );
 
 	PrecacheFlockSounds();
 }
@@ -203,6 +203,7 @@ void CFlockingFlyerFlock::SpawnFlock( void )
 		vecSpot.z = RANDOM_FLOAT( 0.0f, 16.0f );
 		vecSpot = pev->origin + vecSpot;
 
+		pBoid->pev->model = pev->model;
 		UTIL_SetOrigin( pBoid->pev, vecSpot );
 		pBoid->pev->movetype = MOVETYPE_FLY;
 		pBoid->SpawnCommonCode();
@@ -238,7 +239,7 @@ void CFlockingFlyer::Spawn()
 void CFlockingFlyer::Precache()
 {
 	//PRECACHE_MODEL( "models/aflock.mdl" );
-	PRECACHE_MODEL( "models/boid.mdl" );
+	PrecacheMyModel( "models/boid.mdl" );
 	CFlockingFlyerFlock::PrecacheFlockSounds();
 }
 
@@ -337,7 +338,7 @@ void CFlockingFlyer::SpawnCommonCode()
 	SetMyFieldOfView(0.2f);
 
 	//SET_MODEL( ENT( pev ), "models/aflock.mdl" );
-	SET_MODEL( ENT( pev ), "models/boid.mdl" );
+	SetMyModel( "models/boid.mdl" );
 
 	//UTIL_SetSize( pev, Vector( 0.0f, 0.0f, 0.0f ), Vector( 0.0f, 0.0f, 0.0f ) );
 	UTIL_SetSize( pev, Vector( -5.0f, -5.0f, 0.0f ), Vector( 5.0f, 5.0f, 2.0f ) );
