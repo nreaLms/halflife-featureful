@@ -7078,6 +7078,13 @@
 // player effects
 //
 
+@PointClass base(Targetname) color(72 96 128) = player_hasweapon : "Check if player has a specific weapon"
+[
+	weapon_name(string) : "Weapon name" : : "The entity name of the weapon to check. If omitted, it will check if player has any weapon"
+	pass_target(target_destination) : "Pass Target"
+	fail_target(target_destination) : "Fail Target"
+]
+
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_loadsaved : "Load Auto-Saved game"
 [
 	duration(string) : "Fade Duration (seconds)" : "2"

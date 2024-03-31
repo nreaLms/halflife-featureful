@@ -5827,6 +5827,70 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 }
 
+class CPlayerHasWeapon : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "pass_target"))
+		{
+			m_PassTarget = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "fail_target"))
+		{
+			m_FailTarget = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "weapon_name"))
+		{
+			m_WeaponName = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CBaseEntity::KeyValue(pkvd);
+	}
+
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+	{
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer) {
+			return;
+		}
+		bool success;
+		if (FStringNull(m_WeaponName)) {
+			success = pPlayer->HasWeapons();
+		} else {
+			success = pPlayer->HasNamedPlayerItem(STRING(m_WeaponName));
+		}
+		if (success && !FStringNull(m_PassTarget)) {
+			FireTargets(STRING(m_PassTarget), pActivator, this);
+		}
+		if (!success && !FStringNull(m_FailTarget)) {
+			FireTargets(STRING(m_FailTarget), pActivator, this);
+		}
+	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+private:
+	string_t m_PassTarget;
+	string_t m_FailTarget;
+	string_t m_WeaponName;
+};
+
+TYPEDESCRIPTION	CPlayerHasWeapon::m_SaveData[] =
+{
+	DEFINE_FIELD( CPlayerHasWeapon, m_PassTarget, FIELD_STRING ),
+	DEFINE_FIELD( CPlayerHasWeapon, m_FailTarget, FIELD_STRING ),
+	DEFINE_FIELD( CPlayerHasWeapon, m_WeaponName, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CPlayerHasWeapon, CPointEntity )
+
+LINK_ENTITY_TO_CLASS( player_hasweapon, CPlayerHasWeapon )
+
 #define SF_PLAYER_LOAD_SAVED_FREEZE 1
 #define SF_PLAYER_LOAD_SAVED_WEAPONSTRIP 2
 #define SF_PLAYER_LOAD_SAVED_RETURN_TO_MENU 128
