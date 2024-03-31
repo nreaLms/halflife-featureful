@@ -48,12 +48,19 @@ public:
 
 	int m_cFlockSize;
 	float m_flFlockRadius;
+
+	float m_customFlySpeed;
+	float m_customTurnRate;
+	float m_customCheckDist;
 };
 
 TYPEDESCRIPTION	CFlockingFlyerFlock::m_SaveData[] =
 {
 	DEFINE_FIELD( CFlockingFlyerFlock, m_cFlockSize, FIELD_INTEGER ),
 	DEFINE_FIELD( CFlockingFlyerFlock, m_flFlockRadius, FIELD_FLOAT ),
+	DEFINE_FIELD( CFlockingFlyerFlock, m_customFlySpeed, FIELD_FLOAT ),
+	DEFINE_FIELD( CFlockingFlyerFlock, m_customTurnRate, FIELD_FLOAT ),
+	DEFINE_FIELD( CFlockingFlyerFlock, m_customCheckDist, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CFlockingFlyerFlock, CBaseMonster )
@@ -106,6 +113,20 @@ public:
 	float m_flFakeBlockedTime;
 	float m_flAlertTime;
 	float m_flFlockNextSoundTime;
+
+	float m_customFlySpeed;
+	float m_customTurnRate;
+	float m_customCheckDist;
+
+	float FlySpeed() const {
+		return m_customFlySpeed > 0 ? m_customFlySpeed : AFLOCK_FLY_SPEED;
+	}
+	float TurnRate() const {
+		return m_customTurnRate > 0 ? m_customTurnRate : AFLOCK_TURN_RATE;
+	}
+	float CheckDist() const {
+		return m_customCheckDist > 0 ? m_customCheckDist : AFLOCK_CHECK_DIST;
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_flyer, CFlockingFlyer )
@@ -124,6 +145,9 @@ TYPEDESCRIPTION	CFlockingFlyer::m_SaveData[] =
 	DEFINE_FIELD( CFlockingFlyer, m_flLastBlockedTime, FIELD_TIME ),
 	DEFINE_FIELD( CFlockingFlyer, m_flFakeBlockedTime, FIELD_TIME ),
 	DEFINE_FIELD( CFlockingFlyer, m_flAlertTime, FIELD_TIME ),
+	DEFINE_FIELD( CFlockingFlyer, m_customFlySpeed, FIELD_FLOAT ),
+	DEFINE_FIELD( CFlockingFlyer, m_customTurnRate, FIELD_FLOAT ),
+	DEFINE_FIELD( CFlockingFlyer, m_customCheckDist, FIELD_FLOAT ),
 	//DEFINE_FIELD( CFlockingFlyer, m_flFlockNextSoundTime, FIELD_TIME ),	// don't need to save
 };
 
@@ -141,6 +165,21 @@ void CFlockingFlyerFlock::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "flFlockRadius" ) )
 	{
 		m_flFlockRadius = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "flySpeed" ) )
+	{
+		m_customFlySpeed = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "turnRate" ) )
+	{
+		m_customTurnRate = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "checkDist" ) )
+	{
+		m_customCheckDist = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 }
@@ -204,8 +243,12 @@ void CFlockingFlyerFlock::SpawnFlock( void )
 		vecSpot = pev->origin + vecSpot;
 
 		pBoid->pev->model = pev->model;
+		pBoid->pev->scale = pev->scale;
 		UTIL_SetOrigin( pBoid->pev, vecSpot );
 		pBoid->pev->movetype = MOVETYPE_FLY;
+		pBoid->m_customFlySpeed = m_customFlySpeed;
+		pBoid->m_customTurnRate = m_customTurnRate;
+		pBoid->m_customCheckDist = m_customCheckDist;
 		pBoid->SpawnCommonCode();
 		pBoid->pev->flags &= ~FL_ONGROUND;
 		pBoid->pev->velocity = g_vecZero;
@@ -416,7 +459,7 @@ void CFlockingFlyer::Start( void )
 	ResetSequenceInfo();
 	BoidAdvanceFrame();
 
-	pev->speed = AFLOCK_FLY_SPEED;// no delay!
+	pev->speed = FlySpeed();// no delay!
 }
 
 //=========================================================
@@ -528,8 +571,10 @@ BOOL CFlockingFlyer::FPathBlocked()
 
 	fBlocked = FALSE;// assume the way ahead is clear
 
+	const float checkDist = CheckDist();
+
 	// check for obstacle ahead
-	UTIL_TraceLine( pev->origin, pev->origin + gpGlobals->v_forward * AFLOCK_CHECK_DIST, ignore_monsters, ENT( pev ), &tr );
+	UTIL_TraceLine( pev->origin, pev->origin + gpGlobals->v_forward * checkDist, ignore_monsters, ENT( pev ), &tr );
 	if( tr.flFraction != 1.0f )
 	{
 		m_flLastBlockedTime = gpGlobals->time;
@@ -537,14 +582,14 @@ BOOL CFlockingFlyer::FPathBlocked()
 	}
 
 	// extra wide checks
-	UTIL_TraceLine( pev->origin + gpGlobals->v_right * 12.0f, pev->origin + gpGlobals->v_right * 12.0f + gpGlobals->v_forward * AFLOCK_CHECK_DIST, ignore_monsters, ENT( pev ), &tr );
+	UTIL_TraceLine( pev->origin + gpGlobals->v_right * 12.0f, pev->origin + gpGlobals->v_right * 12.0f + gpGlobals->v_forward * checkDist, ignore_monsters, ENT( pev ), &tr );
 	if( tr.flFraction != 1.0f )
 	{
 		m_flLastBlockedTime = gpGlobals->time;
 		fBlocked = TRUE;
 	}
 
-	UTIL_TraceLine( pev->origin - gpGlobals->v_right * 12.0f, pev->origin - gpGlobals->v_right * 12.0f + gpGlobals->v_forward * AFLOCK_CHECK_DIST, ignore_monsters, ENT( pev ), &tr );
+	UTIL_TraceLine( pev->origin - gpGlobals->v_right * 12.0f, pev->origin - gpGlobals->v_right * 12.0f + gpGlobals->v_forward * checkDist, ignore_monsters, ENT( pev ), &tr );
 	if( tr.flFraction != 1.0f )
 	{
 		m_flLastBlockedTime = gpGlobals->time;
@@ -587,7 +632,7 @@ void CFlockingFlyer::FlockLeaderThink( void )
 
 		m_fPathBlocked = FALSE;
 
-		if( pev->speed <= AFLOCK_FLY_SPEED )
+		if( pev->speed <= FlySpeed() )
 			pev->speed += 5.0f;
 
 		pev->velocity = gpGlobals->v_forward * pev->speed;
@@ -602,25 +647,27 @@ void CFlockingFlyer::FlockLeaderThink( void )
 
 	if( !m_fTurning )// something in the way and boid is not already turning to avoid
 	{
+		const float checkDist = CheckDist();
+
 		// measure clearance on left and right to pick the best dir to turn
-		UTIL_TraceLine( pev->origin, pev->origin + gpGlobals->v_right * AFLOCK_CHECK_DIST, ignore_monsters, ENT( pev ), &tr );
+		UTIL_TraceLine( pev->origin, pev->origin + gpGlobals->v_right * checkDist, ignore_monsters, ENT( pev ), &tr );
 		vecDist = ( tr.vecEndPos - pev->origin );
 		flRightSide = vecDist.Length();
 
-		UTIL_TraceLine( pev->origin, pev->origin - gpGlobals->v_right * AFLOCK_CHECK_DIST, ignore_monsters, ENT( pev ), &tr );
+		UTIL_TraceLine( pev->origin, pev->origin - gpGlobals->v_right * checkDist, ignore_monsters, ENT( pev ), &tr );
 		vecDist = tr.vecEndPos - pev->origin;
 		flLeftSide = vecDist.Length();
 
 		// turn right if more clearance on right side
 		if( flRightSide > flLeftSide )
 		{
-			pev->avelocity.y = -AFLOCK_TURN_RATE;
+			pev->avelocity.y = -TurnRate();
 			m_fTurning = TRUE;
 		}
 		// default to left turn :)
 		else if( flLeftSide > flRightSide )
 		{
-			pev->avelocity.y = AFLOCK_TURN_RATE;
+			pev->avelocity.y = TurnRate();
 			m_fTurning = TRUE;
 		}
 		else
@@ -630,11 +677,11 @@ void CFlockingFlyer::FlockLeaderThink( void )
 
 			if( RANDOM_LONG( 0, 1 ) == 0 )
 			{
-				pev->avelocity.y = AFLOCK_TURN_RATE;
+				pev->avelocity.y = TurnRate();
 			}
 			else
 			{
-				pev->avelocity.y = -AFLOCK_TURN_RATE;
+				pev->avelocity.y = -TurnRate();
 			}
 		}
 	}
@@ -727,9 +774,9 @@ void CFlockingFlyer::FlockFollowerThink( void )
 	}
 
 	// clamp speeds and handle acceleration
-	if( m_flGoalSpeed > AFLOCK_FLY_SPEED * 2.0f )
+	if( m_flGoalSpeed > FlySpeed() * 2.0f )
 	{
-		m_flGoalSpeed  = AFLOCK_FLY_SPEED * 2.0f;
+		m_flGoalSpeed  = FlySpeed() * 2.0f;
 	}
 
 	if( pev->speed < m_flGoalSpeed )
