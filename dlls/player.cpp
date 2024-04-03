@@ -5877,10 +5877,10 @@ public:
 
 	int	ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
 
-	BOOL IsTriggered(CBaseEntity *pActivator) {
+	bool IsTriggered(CBaseEntity *pActivator) {
 		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if (!pPlayer) {
-			return FALSE;
+			return false;
 		}
 		return HasItem(pPlayer, ItemType());
 	}
@@ -5962,10 +5962,10 @@ public:
 
 	int	ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
 
-	BOOL IsTriggered(CBaseEntity *pActivator) {
+	bool IsTriggered(CBaseEntity *pActivator) {
 		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if (!pPlayer) {
-			return FALSE;
+			return false;
 		}
 		return HasWeapon(pPlayer, m_WeaponName);
 	}

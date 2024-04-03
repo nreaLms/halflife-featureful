@@ -57,7 +57,7 @@ public:
 		return caps;
 	}
 
-	BOOL IsTriggered(CBaseEntity *pActivator) {
+	bool IsTriggered(CBaseEntity *pActivator) {
 		if (FBitSet(pev->spawnflags, SF_GLOBAL_ACT_AS_MASTER))
 		{
 			return gGlobalState.EntityGetState( m_globalstate ) == GLOBAL_ON;
@@ -232,7 +232,7 @@ public:
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
 
-	BOOL			IsTriggered(CBaseEntity *pActivator) { return m_iState == STATE_ON; }
+	bool			IsTriggered(CBaseEntity *pActivator) { return m_iState == STATE_ON; }
 
 	static	TYPEDESCRIPTION m_SaveData[];
 
@@ -462,7 +462,7 @@ public:
 	};
 
 	void KeyValue( KeyValueData *pkvd );
-	BOOL IsTriggered(CBaseEntity *pActivator) { return CalcState(pActivator, false); }
+	bool IsTriggered(CBaseEntity *pActivator) { return CalcState(pActivator, false); }
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	int	ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
 
@@ -724,7 +724,7 @@ void CMultiSource::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 }
 
-BOOL CMultiSource::IsTriggered( CBaseEntity * )
+bool CMultiSource::IsTriggered( CBaseEntity * )
 {
 	// Is everything triggered?
 	int i = 0;

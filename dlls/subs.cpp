@@ -75,7 +75,7 @@ class CBaseDMStart : public CSpawnPoint
 {
 public:
 	void KeyValue( KeyValueData *pkvd );
-	BOOL IsTriggered( CBaseEntity *pEntity );
+	bool IsTriggered( CBaseEntity *pEntity );
 
 private:
 };
@@ -97,9 +97,9 @@ void CBaseDMStart::KeyValue( KeyValueData *pkvd )
 		CSpawnPoint::KeyValue( pkvd );
 }
 
-BOOL CBaseDMStart::IsTriggered( CBaseEntity *pEntity )
+bool CBaseDMStart::IsTriggered( CBaseEntity *pEntity )
 {
-	BOOL master = UTIL_IsMasterTriggered( pev->netname, pEntity );
+	bool master = UTIL_IsMasterTriggered( pev->netname, pEntity );
 
 	return master;
 }

@@ -234,7 +234,7 @@ public:
 	virtual void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	virtual int BloodColor( void ) { return DONT_BLEED; }
 	virtual void TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
-	virtual BOOL IsTriggered( CBaseEntity *pActivator ) {return TRUE; }
+	virtual bool IsTriggered( CBaseEntity *pActivator ) {return true; }
 	virtual CBaseToggle *MyTogglePointer( void ) { return NULL; }
 	virtual CBaseMonster *MyMonsterPointer( void ) { return NULL; }
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return NULL; }
@@ -483,7 +483,7 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int ObjectCaps( void ) { return ( CPointEntity::ObjectCaps() | FCAP_MASTER ); }
-	BOOL IsTriggered( CBaseEntity *pActivator );
+	bool IsTriggered( CBaseEntity *pActivator );
 	void EXPORT Register( void );
 
 	virtual int Save( CSave &save );
