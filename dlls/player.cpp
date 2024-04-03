@@ -5827,6 +5827,89 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 }
 
+enum
+{
+	PLAYER_HAS_SUIT = 0,
+	PLAYER_HAS_FLASHLIGHT = 1,
+	PLAYER_HAS_NVG = 2,
+	PLAYER_HAS_ANYLIGHT = 3,
+	PLAYER_HAS_LONGJUMP = 4
+};
+
+class CPlayerHasItem : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "pass_target"))
+		{
+			m_PassTarget = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "fail_target"))
+		{
+			m_FailTarget = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "item_type"))
+		{
+			pev->impulse = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CBaseEntity::KeyValue(pkvd);
+	}
+
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+	{
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer) {
+			return;
+		}
+		const bool success = HasItem(pPlayer, pev->impulse);
+		if (success && !FStringNull(m_PassTarget)) {
+			FireTargets(STRING(m_PassTarget), pActivator, this);
+		}
+		if (!success && !FStringNull(m_FailTarget)) {
+			FireTargets(STRING(m_FailTarget), pActivator, this);
+		}
+	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+private:
+	bool HasItem(CBasePlayer* pPlayer, int itemType) {
+		switch (itemType) {
+		case PLAYER_HAS_SUIT:
+			return pPlayer->HasSuit();
+		case PLAYER_HAS_FLASHLIGHT:
+			return pPlayer->HasFlashlight();
+		case PLAYER_HAS_NVG:
+			return pPlayer->HasNVG();
+		case PLAYER_HAS_ANYLIGHT:
+			return pPlayer->HasSuitLight();
+		case PLAYER_HAS_LONGJUMP:
+			return pPlayer->m_fLongJump;
+		default:
+			return false;
+		}
+	}
+
+	string_t m_PassTarget;
+	string_t m_FailTarget;
+};
+
+TYPEDESCRIPTION	CPlayerHasItem::m_SaveData[] =
+{
+	DEFINE_FIELD( CPlayerHasItem, m_PassTarget, FIELD_STRING ),
+	DEFINE_FIELD( CPlayerHasItem, m_FailTarget, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CPlayerHasItem, CPointEntity )
+
+LINK_ENTITY_TO_CLASS( player_hasitem, CPlayerHasItem )
+
 class CPlayerHasWeapon : public CPointEntity
 {
 public:
