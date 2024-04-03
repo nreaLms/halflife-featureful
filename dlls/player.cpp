@@ -5866,7 +5866,7 @@ public:
 		if (!pPlayer) {
 			return;
 		}
-		const bool success = HasItem(pPlayer, pev->impulse);
+		const bool success = HasItem(pPlayer, ItemType());
 		if (success && !FStringNull(m_PassTarget)) {
 			FireTargets(STRING(m_PassTarget), pActivator, this);
 		}
@@ -5875,10 +5875,21 @@ public:
 		}
 	}
 
+	int	ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
+
+	BOOL IsTriggered(CBaseEntity *pActivator) {
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer) {
+			return FALSE;
+		}
+		return HasItem(pPlayer, ItemType());
+	}
+
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 private:
+	int ItemType() const { return pev->impulse; }
 	bool HasItem(CBasePlayer* pPlayer, int itemType) {
 		switch (itemType) {
 		case PLAYER_HAS_SUIT:
@@ -5940,12 +5951,7 @@ public:
 		if (!pPlayer) {
 			return;
 		}
-		bool success;
-		if (FStringNull(m_WeaponName)) {
-			success = pPlayer->HasWeapons();
-		} else {
-			success = pPlayer->HasNamedPlayerItem(STRING(m_WeaponName));
-		}
+		const bool success = HasWeapon(pPlayer, m_WeaponName);
 		if (success && !FStringNull(m_PassTarget)) {
 			FireTargets(STRING(m_PassTarget), pActivator, this);
 		}
@@ -5954,10 +5960,28 @@ public:
 		}
 	}
 
+	int	ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
+
+	BOOL IsTriggered(CBaseEntity *pActivator) {
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer) {
+			return FALSE;
+		}
+		return HasWeapon(pPlayer, m_WeaponName);
+	}
+
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 private:
+	bool HasWeapon(CBasePlayer* pPlayer, string_t weaponName) {
+		if (FStringNull(weaponName)) {
+			return pPlayer->HasWeapons();
+		} else {
+			return pPlayer->HasNamedPlayerItem(STRING(weaponName));
+		}
+	}
+
 	string_t m_PassTarget;
 	string_t m_FailTarget;
 	string_t m_WeaponName;
