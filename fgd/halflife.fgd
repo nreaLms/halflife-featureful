@@ -1849,7 +1849,7 @@
 		1 : "Start On" : 0
 		4 : "Repeatable" : 0
 		8 : "Directed" : 0
-		16 : "Fade" : 0
+		16 : "Fade sprite" : 0
 	]
 ]
 

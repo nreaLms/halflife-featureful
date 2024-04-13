@@ -34,6 +34,7 @@
 #include	"gamerules.h"
 #include	"game.h"
 #include	"mod_features.h"
+#include	"fx_flags.h"
 
 //=========================================================
 // Gargantua Monster
@@ -1687,9 +1688,9 @@ void CSmoker::Think( void )
 	{
 		int flags = 0;
 		if (directed)
-			flags |= 1;
+			flags |= SMOKER_FLAG_DIRECTED;
 		if (FBitSet(pev->spawnflags, SF_SMOKER_FADE))
-			flags |= 2;
+			flags |= SMOKER_FLAG_FADE_SPRITE;
 
 		MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
 			WRITE_BYTE( flags );

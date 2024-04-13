@@ -454,8 +454,8 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	int rendermode, renderamt, r, g, b;
 
 	const int flags = READ_BYTE();
-	const bool directed = (flags & 1) != 0;
-	const bool fade = (flags & 2) != 0;
+	const bool directed = (flags & SMOKER_FLAG_DIRECTED) != 0;
+	const bool fade = (flags & SMOKER_FLAG_FADE_SPRITE) != 0;
 	pos[0] = READ_COORD();
 	pos[1] = READ_COORD();
 	pos[2] = READ_COORD();
