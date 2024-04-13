@@ -12,7 +12,7 @@ public:
 	void Precache();
 	void EXPORT DefaultTouch( CBaseEntity *pOther ); // default weapon touch
 	virtual bool AddAmmo( CBaseEntity *pOther );
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void EXPORT DefaultUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void TouchOrUse( CBaseEntity* other );
 
 	virtual const char* MyModel() = 0;
@@ -26,6 +26,11 @@ public:
 	void OnMaterialize();
 
 	CBasePlayerAmmo* MyAmmoPointer() {return this;}
+
+protected:
+	void SetTouchAndUse();
+	void ClearTouchAndUse();
+	void RemoveMyself();
 };
 
 #endif

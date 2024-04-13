@@ -38,7 +38,7 @@ void CBasePlayerAmmo::Spawn( void )
 		UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
-	SetTouch( &CBasePlayerAmmo::DefaultTouch );
+	SetTouchAndUse();
 }
 
 void CBasePlayerAmmo::Precache()
@@ -70,7 +70,7 @@ float CBasePlayerAmmo::MyRespawnTime()
 
 void CBasePlayerAmmo::OnMaterialize()
 {
-	SetTouch( &CBasePlayerAmmo::DefaultTouch );
+	SetTouchAndUse();
 	SetThink( NULL );
 }
 
@@ -87,7 +87,7 @@ void CBasePlayerAmmo::DefaultTouch( CBaseEntity *pOther )
 	}
 }
 
-void CBasePlayerAmmo::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+void CBasePlayerAmmo::DefaultUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	if (IsPickableByUse() && !(pev->effects & EF_NODRAW) ) {
 		TouchOrUse(pCaller);
@@ -113,17 +113,15 @@ void CBasePlayerAmmo::TouchOrUse( CBaseEntity *pOther )
 		}
 		else
 		{
-			SetTouch( NULL );
-			SetThink( &CBaseEntity::SUB_Remove );
-			pev->nextthink = gpGlobals->time + 0.1f;
+			ClearTouchAndUse();
+			RemoveMyself();
 		}
 	}
 	else if( gEvilImpulse101 )
 	{
 		// evil impulse 101 hack, kill always
-		SetTouch( NULL );
-		SetThink( &CBaseEntity::SUB_Remove );
-		pev->nextthink = gpGlobals->time + 0.1f;
+		ClearTouchAndUse();
+		RemoveMyself();
 	}
 }
 
@@ -152,6 +150,24 @@ void CBasePlayerAmmo::SetCustomAmount(int amount)
 {
 	if (amount >= 0)
 		pev->impulse = amount;
+}
+
+void CBasePlayerAmmo::SetTouchAndUse()
+{
+	SetTouch( &CBasePlayerAmmo::DefaultTouch );
+	SetUse( &CBasePlayerAmmo::DefaultUse );
+}
+
+void CBasePlayerAmmo::ClearTouchAndUse()
+{
+	SetTouch( NULL );
+	SetUse( NULL );
+}
+
+void CBasePlayerAmmo::RemoveMyself()
+{
+	SetThink( &CBaseEntity::SUB_Remove );
+	pev->nextthink = gpGlobals->time + 0.1f;
 }
 
 // Ammo entities
