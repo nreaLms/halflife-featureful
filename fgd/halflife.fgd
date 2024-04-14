@@ -7132,6 +7132,8 @@
 @PointClass base(Targetname) color(255 0 255) = scripted_following : "Scripted Following"
 [
 	entity(string) : "Affected Monster"
+	on_start_following(target_destination) : "Fire on start following"
+	on_stop_following(target_destination) : "Fire on stop following"
 ]
 
 @PointClass base(Targetname) color(255 0 255) = scripted_schedule : "Scripted Schedule"

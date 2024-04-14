@@ -1895,6 +1895,8 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	EHANDLE m_hActivator;
+	string_t m_onStartFollowing;
+	string_t m_onStopFollowing;
 };
 
 LINK_ENTITY_TO_CLASS( scripted_following, CScriptedFollowing )
@@ -1902,6 +1904,8 @@ LINK_ENTITY_TO_CLASS( scripted_following, CScriptedFollowing )
 TYPEDESCRIPTION	CScriptedFollowing::m_SaveData[] =
 {
 	DEFINE_FIELD( CScriptedFollowing, m_hActivator, FIELD_EHANDLE ),
+	DEFINE_FIELD( CScriptedFollowing, m_onStartFollowing, FIELD_STRING ),
+	DEFINE_FIELD( CScriptedFollowing, m_onStopFollowing, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CScriptedFollowing, CPointEntity )
@@ -1911,6 +1915,16 @@ void  CScriptedFollowing::KeyValue(KeyValueData *pkvd)
 	if ( FStrEq( pkvd->szKeyName, "entity" ) )
 	{
 		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "on_start_following" ) )
+	{
+		m_onStartFollowing = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "on_stop_following" ) )
+	{
+		m_onStopFollowing = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1934,7 +1948,19 @@ bool CScriptedFollowing::MakeFollowing(CBasePlayer* pPlayer, USE_TYPE useType)
 		}
 	}
 	if (result == FOLLOWING_NOTALLOWED)
+	{
 		return false;
+	}
+	else if (result == FOLLOWING_STARTED)
+	{
+		if (!FStringNull(m_onStartFollowing))
+			FireTargets(STRING(m_onStartFollowing), pPlayer, this);
+	}
+	else if (result == FOLLOWING_STOPPED)
+	{
+		if (!FStringNull(m_onStopFollowing))
+			FireTargets(STRING(m_onStopFollowing), pPlayer, this);
+	}
 	return true;
 }
 
