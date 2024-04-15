@@ -460,7 +460,10 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	pos[1] = READ_COORD();
 	pos[2] = READ_COORD();
 	modelIndex = READ_SHORT();
-	scale = (float)(READ_BYTE() * 0.1f);
+
+	const float scaleVal = READ_COORD();
+	scale = (flags & SMOKER_FLAG_SCALE_VALUE_IS_NORMAL) ? scaleVal : (float)(scaleVal * 0.1f);
+
 	frameRate = READ_BYTE();
 	speed = READ_SHORT();
 	zOffset = READ_SHORT();

@@ -1559,6 +1559,12 @@ void CGargantua::PlayUnUseSentence()
 #define SF_SMOKER_FADE 16
 #define SF_SMOKER_MAXHEALTH_SET (1 << 24)
 
+enum
+{
+	SMOKER_SPRITE_SCALE_DECILE = 0,
+	SMOKER_SPRITE_SCALE_NORMAL = 1
+};
+
 class CSmoker : public CBaseEntity
 {
 public:
@@ -1627,6 +1633,11 @@ void CSmoker::KeyValue(KeyValueData *pkvd)
 		pev->armorvalue = atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "scale_unit_type"))
+	{
+		pev->impulse = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -1691,6 +1702,8 @@ void CSmoker::Think( void )
 			flags |= SMOKER_FLAG_DIRECTED;
 		if (FBitSet(pev->spawnflags, SF_SMOKER_FADE))
 			flags |= SMOKER_FLAG_FADE_SPRITE;
+		if (pev->impulse == SMOKER_SPRITE_SCALE_NORMAL)
+			flags |= SMOKER_FLAG_SCALE_VALUE_IS_NORMAL;
 
 		MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
 			WRITE_BYTE( flags );
@@ -1698,7 +1711,7 @@ void CSmoker::Think( void )
 			WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 			WRITE_COORD( pev->origin.z);
 			WRITE_SHORT( smokeIndex ? smokeIndex : g_sModelIndexSmoke );
-			WRITE_BYTE( RANDOM_LONG(pev->scale, pev->scale * 1.1f ) );
+			WRITE_COORD( RANDOM_FLOAT(pev->scale, pev->scale * 1.1f ) );
 			WRITE_BYTE( RANDOM_LONG( minFramerate, maxFramerate ) ); // framerate
 			WRITE_SHORT( pev->speed );
 			WRITE_SHORT( pev->frags );

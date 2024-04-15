@@ -13,5 +13,6 @@
 
 #define SMOKER_FLAG_DIRECTED (1 << 0)
 #define SMOKER_FLAG_FADE_SPRITE (1 << 1)
+#define SMOKER_FLAG_SCALE_VALUE_IS_NORMAL (1 << 2)
 
 #endif

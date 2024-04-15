@@ -1834,7 +1834,7 @@
 @PointClass base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_smoker : "Smoker"
 [
 	health(integer) : "Times to smoke" : 1
-	scale(string) : "Smoke Scale (decile)" : 10
+	scale(string) : "Smoke Scale" : 1
 	dmg(string) : "Dispersion of smoke particles" : "0"
 	dmg_take(string) : "Min delay between smokes" : "0.4"
 	dmg_save(string) : "Max delay between smokes" : "0.6"
@@ -1844,6 +1844,11 @@
 	model(sprite) : "Sprite"
 	frags(integer) : "Z offset"
 	target(target_destination) : "Target to smoke at"
+	scale_unit_type(choices) :"Scale unit type" : 1 =
+	[
+		0: "Decile (tenth)"
+		1: "Normal"
+	]
 	spawnflags(Flags) =
 	[
 		1 : "Start On" : 0
