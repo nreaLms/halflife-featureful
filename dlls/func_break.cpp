@@ -306,7 +306,7 @@ void CBreakable::MaterialSoundPrecache( Materials precacheMaterial )
 
 	for( i = 0; i < soundCount; i++ )
 	{
-		PRECACHE_SOUND( pSoundList[i] );
+		::PRECACHE_SOUND( pSoundList[i] );
 	}
 }
 

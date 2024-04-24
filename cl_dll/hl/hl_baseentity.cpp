@@ -45,6 +45,7 @@ bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float vol
 int CBaseEntity::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType ) { return 1; }
 int CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType ) { return 1; }
 CBaseEntity *CBaseEntity::GetNextTarget( void ) { return NULL; }
+void CBaseEntity::KeyValue( KeyValueData* pkvd ) { pkvd->fHandled = FALSE; }
 int CBaseEntity::Save( CSave &save ) { return 1; }
 int CBaseEntity::Restore( CRestore &restore ) { return 1; }
 void CBaseEntity::SetObjectCollisionBox( void ) { }

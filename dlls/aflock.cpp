@@ -206,11 +206,11 @@ void CFlockingFlyerFlock::Precache()
 
 void CFlockingFlyerFlock::PrecacheFlockSounds( void )
 {
-	PRECACHE_SOUND( "boid/boid_alert1.wav" );
-	PRECACHE_SOUND( "boid/boid_alert2.wav" );
+	::PRECACHE_SOUND( "boid/boid_alert1.wav" );
+	::PRECACHE_SOUND( "boid/boid_alert2.wav" );
 
-	PRECACHE_SOUND( "boid/boid_idle1.wav" );
-	PRECACHE_SOUND( "boid/boid_idle2.wav" );
+	::PRECACHE_SOUND( "boid/boid_idle1.wav" );
+	::PRECACHE_SOUND( "boid/boid_idle2.wav" );
 }
 
 //=========================================================

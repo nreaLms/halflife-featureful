@@ -602,7 +602,43 @@ TYPEDESCRIPTION	CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD( CBaseEntity, m_pfnTouch, FIELD_FUNCTION ),
 	DEFINE_FIELD( CBaseEntity, m_pfnUse, FIELD_FUNCTION ),
 	DEFINE_FIELD( CBaseEntity, m_pfnBlocked, FIELD_FUNCTION ),
+
+	DEFINE_FIELD( CBaseEntity, m_soundList, FIELD_STRING ),
 };
+
+void CBaseEntity::KeyValue(KeyValueData* pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "soundlist")) {
+		m_soundList = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	} else {
+		pkvd->fHandled = FALSE;
+	}
+}
+
+int CBaseEntity::PRECACHE_SOUND(const char *soundName)
+{
+	if (!FStringNull(m_soundList)) {
+		if (g_soundReplacement.EnsureReplacementFile(STRING(m_soundList))) {
+			auto replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), soundName);
+			if (!replacement.empty()) {
+				return ::PRECACHE_SOUND(replacement.c_str());
+			}
+		}
+	}
+	return ::PRECACHE_SOUND(soundName);
+}
+
+bool CBaseEntity::EmitSoundDyn(int channel, const char *sample, float volume, float attenuation, int flags, int pitch)
+{
+	if (!FStringNull(m_soundList)) {
+		auto replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
+		if (!replacement.empty()) {
+			return EMIT_SOUND_DYN(edict(), channel, replacement.c_str(), volume, attenuation, flags, pitch);
+		}
+	}
+	return EMIT_SOUND_DYN(edict(), channel, sample, volume, attenuation, flags, pitch);
+}
 
 int CBaseEntity::Save( CSave &save )
 {

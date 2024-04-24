@@ -209,7 +209,7 @@ public:
 	virtual void Spawn( void ) { return; }
 	virtual void Precache( void ) { return; }
 	virtual bool IsEnabledInMod() { return true; }
-	virtual void KeyValue( KeyValueData* pkvd ) { pkvd->fHandled = FALSE; }
+	virtual void KeyValue( KeyValueData* pkvd );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	virtual int ObjectCaps( void ) { return FCAP_ACROSS_TRANSITION; }
@@ -281,6 +281,10 @@ public:
 			( this->*m_pfnUse )( pActivator, pCaller, useType, value );
 	}
 	virtual void Blocked( CBaseEntity *pOther ) { if( m_pfnBlocked ) ( this->*m_pfnBlocked )( pOther ); };
+
+	string_t m_soundList; // sound replacement list file name
+	int PRECACHE_SOUND(const char* soundName);
+	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )

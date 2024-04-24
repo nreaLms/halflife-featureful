@@ -18,6 +18,7 @@
 
 #include "cvardef.h"
 #include "cdll_dll.h"
+#include "soundreplacement.h"
 
 extern void GameDLLInit( void );
 
@@ -130,6 +131,7 @@ public:
 };
 
 extern ModFeatures g_modFeatures;
+extern SoundReplacementSystem g_soundReplacement;
 
 bool ItemsPickableByTouch();
 bool ItemsPickableByUse();

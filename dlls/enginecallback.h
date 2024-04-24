@@ -16,6 +16,7 @@
 #if !defined(ENGINECALLBACK_H)
 #define ENGINECALLBACK_H
 
+#include "eiface.h"
 #include "event_flags.h"
 
 // Fix warning in MSVC8
@@ -27,7 +28,9 @@ extern enginefuncs_t g_engfuncs;
 // The actual engine callbacks
 #define GETPLAYERUSERID (*g_engfuncs.pfnGetPlayerUserId)
 #define PRECACHE_MODEL	(*g_engfuncs.pfnPrecacheModel)
-#define PRECACHE_SOUND	(*g_engfuncs.pfnPrecacheSound)
+inline int PRECACHE_SOUND(const char* name) {
+	return g_engfuncs.pfnPrecacheSound(name);
+}
 #define PRECACHE_GENERIC	(*g_engfuncs.pfnPrecacheGeneric)
 #define SET_MODEL		(*g_engfuncs.pfnSetModel)
 #define MODEL_INDEX		(*g_engfuncs.pfnModelIndex)
