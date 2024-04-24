@@ -153,7 +153,7 @@ public:
 
 protected:
 	void SciSpawnHelper(const char* modelName, float health);
-	void PrecacheSounds();
+	void PrecachePainSounds();
 
 	float m_painTime;
 	float m_healTime;
@@ -161,6 +161,8 @@ protected:
 
 	// Don't save
 	int m_totalHeadCount;
+
+	static const char* pPainSounds[];
 };
 
 LINK_ENTITY_TO_CLASS( monster_scientist, CScientist )
@@ -173,6 +175,14 @@ TYPEDESCRIPTION	CScientist::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CScientist, CTalkMonster )
+
+const char* CScientist::pPainSounds[] = {
+	"scientist/sci_pain1.wav",
+	"scientist/sci_pain2.wav",
+	"scientist/sci_pain3.wav",
+	"scientist/sci_pain4.wav",
+	"scientist/sci_pain5.wav",
+};
 
 //=========================================================
 // AI Schedules Specific to this monster
@@ -794,7 +804,7 @@ void CScientist::Spawn()
 void CScientist::Precache( void )
 {
 	PrecacheMyModel( "models/scientist.mdl" );
-	PrecacheSounds();
+	PrecachePainSounds();
 	PRECACHE_SOUND( "items/medshot4.wav" );
 
 	// every new scientist must call this, otherwise
@@ -817,13 +827,9 @@ void CScientist::CalcTotalHeadCount()
 	}
 }
 
-void CScientist::PrecacheSounds()
+void CScientist::PrecachePainSounds()
 {
-	PRECACHE_SOUND( "scientist/sci_pain1.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain2.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain3.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain4.wav" );
-	PRECACHE_SOUND( "scientist/sci_pain5.wav" );
+	PRECACHE_SOUND_ARRAY(pPainSounds);
 }
 
 const char* CScientist::DefaultSentenceGroup(int group)
@@ -892,24 +898,7 @@ void CScientist::PainSound( void )
 
 void CScientist::PlayPainSound()
 {
-	switch( RANDOM_LONG( 0, 4 ) )
-	{
-	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "scientist/sci_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "scientist/sci_pain2.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 2:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "scientist/sci_pain3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 3:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "scientist/sci_pain4.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 4:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "scientist/sci_pain5.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 //=========================================================
@@ -1576,7 +1565,7 @@ void CCleansuitScientist::Spawn()
 void CCleansuitScientist::Precache()
 {
 	PrecacheMyModel("models/cleansuit_scientist.mdl");
-	PrecacheSounds();
+	PrecachePainSounds();
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
@@ -1655,9 +1644,23 @@ public:
 	BOOL CanHeal() { return false; }
 	bool ReadyToHeal() {return false; }
 #endif
+
+	static const char* pPainSounds[];
 };
 
 LINK_ENTITY_TO_CLASS( monster_rosenberg, CRosenberg )
+
+const char* CRosenberg::pPainSounds[] = {
+	"rosenberg/ro_pain0.wav",
+	"rosenberg/ro_pain1.wav",
+	"rosenberg/ro_pain2.wav",
+	"rosenberg/ro_pain3.wav",
+	"rosenberg/ro_pain4.wav",
+	"rosenberg/ro_pain5.wav",
+	"rosenberg/ro_pain6.wav",
+	"rosenberg/ro_pain7.wav",
+	"rosenberg/ro_pain8.wav",
+};
 
 void CRosenberg::Spawn()
 {
@@ -1679,15 +1682,7 @@ void CRosenberg::Precache()
 	PrecacheMyModel("models/scientist.mdl");
 	CalcTotalHeadCount();
 #endif
-	PRECACHE_SOUND( "rosenberg/ro_pain0.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain1.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain2.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain3.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain4.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain5.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain6.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain7.wav" );
-	PRECACHE_SOUND( "rosenberg/ro_pain8.wav" );
+	PRECACHE_SOUND_ARRAY(pPainSounds);
 
 	PRECACHE_SOUND( "items/medshot4.wav" );
 
@@ -1733,38 +1728,7 @@ const char* CRosenberg::DefaultSentenceGroup(int group)
 
 void CRosenberg::PlayPainSound()
 {
-	const char* painSound = NULL;
-	switch( RANDOM_LONG( 0, 8 ) )
-	{
-	case 0:
-		painSound ="rosenberg/ro_pain0.wav";
-		break;
-	case 1:
-		painSound ="rosenberg/ro_pain1.wav";
-		break;
-	case 2:
-		painSound ="rosenberg/ro_pain2.wav";
-		break;
-	case 3:
-		painSound ="rosenberg/ro_pain3.wav";
-		break;
-	case 4:
-		painSound ="rosenberg/ro_pain4.wav";
-		break;
-	case 5:
-		painSound ="rosenberg/ro_pain5.wav";
-		break;
-	case 6:
-		painSound ="rosenberg/ro_pain6.wav";
-		break;
-	case 7:
-		painSound ="rosenberg/ro_pain7.wav";
-		break;
-	case 8:
-		painSound ="rosenberg/ro_pain8.wav";
-		break;
-	}
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, painSound, 1, ATTN_NORM, 0, GetVoicePitch() );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 #endif
@@ -1876,7 +1840,7 @@ public:
 	const char* DefaultDisplayName() { return "Richard Keller"; }
 	const char* DefaultSentenceGroup(int group);
 	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
-	void PainSound();
+	void PlayPainSound();
 	void DeathSound();
 
 	BOOL CanHeal() { return false; }
@@ -1967,18 +1931,13 @@ const char* CKeller::DefaultSentenceGroup(int group)
 	}
 }
 
-void CKeller::PainSound()
+void CKeller::PlayPainSound()
 {
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
-
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1, ATTN_NORM, 0, GetVoicePitch() );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 void CKeller::DeathSound()
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1, ATTN_NORM, 0, GetVoicePitch() );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 #endif
