@@ -54,6 +54,8 @@ ModFeatures::ModFeatures()
 	items_instant_drop = true;
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
+	gauss_fidget = false;
+
 	alien_teleport_sound = false;
 
 	monsters_stop_attacking_dying_monsters = false;
@@ -116,6 +118,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(items_instant_drop),
 		KEY_VALUE_DEF(tripmines_solid),
 		KEY_VALUE_DEF(satchels_pickable),
+		KEY_VALUE_DEF(gauss_fidget),
 		KEY_VALUE_DEF(alien_teleport_sound),
 		KEY_VALUE_DEF(monsters_stop_attacking_dying_monsters),
 		KEY_VALUE_DEF(monsters_delegate_squad_leadership),

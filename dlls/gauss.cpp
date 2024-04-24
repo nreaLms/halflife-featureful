@@ -557,13 +557,19 @@ void CGauss::WeaponIdle( void )
 	else
 	{
 		int iAnim;
+		bool canPlayFidgetAnimation = false;
+#if !CLIENT_DLL
+		canPlayFidgetAnimation = g_modFeatures.gauss_fidget;
+#endif
+		const float idleRand = canPlayFidgetAnimation ? 0.5f : 0.66f;
+
 		float flRand = RANDOM_FLOAT( 0.0f, 1.0f );
-		if( flRand <= 0.5f )
+		if( flRand <= idleRand )
 		{
 			iAnim = GAUSS_IDLE;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10.0f, 15.0f );
 		}
-		else if( flRand <= 0.75f )
+		else if( flRand <= 0.75f || !canPlayFidgetAnimation )
 		{
 			iAnim = GAUSS_IDLE2;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10.0f, 15.0f );
