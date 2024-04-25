@@ -8,6 +8,16 @@
 
 extern cvar_t *cl_subtitles;
 
+Caption_t::Caption_t(): profile(NULL), delay(0.0f), duration(0.0f)
+{
+	memset(name, 0, sizeof(name));
+}
+
+Caption_t::Caption_t(const char *captionName): profile(NULL), delay(0.0f), duration(0.0f)
+{
+	strncpyEnsureTermination(name, captionName, sizeof(name));
+}
+
 DECLARE_MESSAGE( m_Caption, Caption )
 
 DECLARE_COMMAND( m_Caption, DumpCaptions )
@@ -94,21 +104,28 @@ int CHudCaption::MsgFunc_Caption(const char *pszName, int iSize, void *pbuf)
 
 	sub.radio = radio != 0;
 
-	if (holdTime <= 0)
+	if (caption->duration > 0)
 	{
-		int perceivedLength = 0;
-		for (auto it = caption->message.begin(); it != caption->message.end(); ++it)
-		{
-			if (*it >= 0 && *it <= 127)
-				perceivedLength += 2;
-			else
-				perceivedLength ++;
-		}
-		holdTime = 2 + perceivedLength/32.0f;
+		sub.timeLeft = caption->duration;
 	}
-	sub.timeLeft = holdTime;
+	else
+	{
+		if (holdTime <= 0)
+		{
+			int perceivedLength = 0;
+			for (auto it = caption->message.begin(); it != caption->message.end(); ++it)
+			{
+				if (*it >= 0 && *it <= 127)
+					perceivedLength += 2;
+				else
+					perceivedLength ++;
+			}
+			holdTime = 2 + perceivedLength/32.0f;
+		}
+		sub.timeLeft = holdTime;
+	}
 	sub.timeBeforeStart = caption->delay;
-	gEngfuncs.Con_DPrintf("New caption: Hold time: %f. Current time: %f\n", sub.timeLeft, gHUD.m_flTime);
+	gEngfuncs.Con_DPrintf("New caption: Hold time: %g. Current time: %g. Delay: %g\n", sub.timeLeft, gHUD.m_flTime, caption->delay);
 
 	CalculateLineOffsets(sub);
 
@@ -527,28 +544,15 @@ bool CHudCaption::ParseCaptionsFile()
 			//
 			else
 			{
-				Caption_t caption;
-				strncpyEnsureTermination(caption.name, captionName, sizeof(caption.name));
+				Caption_t caption(captionName);
 
-				SkipSpaces(pfile, i, length);
-				currentTokenStart = i;
-				ConsumeNonSpaceCharacters(pfile, i, length);
-
-				tokenLength = i-currentTokenStart;
-				if (tokenLength > 0 && pfile[currentTokenStart] >= '1' && pfile[currentTokenStart] <= '9')
-				{
-					char numbuf[8];
-					strncpy(numbuf, pfile + currentTokenStart, Q_max(tokenLength, sizeof(numbuf)-1));
-					numbuf[sizeof(numbuf)-1] = '\0';
-
-					caption.delay = atof(numbuf);
-
+				do {
 					SkipSpaces(pfile, i, length);
 					currentTokenStart = i;
 					ConsumeNonSpaceCharacters(pfile, i, length);
 
 					tokenLength = i-currentTokenStart;
-				}
+				} while (ParseFloatParameter(pfile, currentTokenStart, tokenLength, caption));
 
 				if (tokenLength != 2 || !IsLatinLowerCase(pfile[currentTokenStart]) || !IsLatinLowerCase(pfile[currentTokenStart+1]))
 				{
@@ -583,6 +587,55 @@ bool CHudCaption::ParseCaptionsFile()
 	});
 
 	gEngfuncs.COM_FreeFile(pfile);
+	return true;
+}
+
+bool CHudCaption::ParseFloatParameter(char* pfile, int& currentTokenStart, int& tokenLength, Caption_t& caption)
+{
+	if (tokenLength <= 0)
+		return false;
+	char c = pfile[currentTokenStart];
+
+	bool expectDuration = false;
+	bool expectDelay = false;
+	if (c == '!')
+	{
+		if (tokenLength <= 1)
+			return false;
+		currentTokenStart++;
+		tokenLength--;
+		expectDuration = true;
+	}
+	else if (c == '^')
+	{
+		if (tokenLength <= 1)
+			return false;
+		currentTokenStart++;
+		tokenLength--;
+		expectDelay = true;
+	}
+	// deprecated way to set delay, used in Induction, left for compatibility
+	else if (c >= '1' && c <= '9')
+	{
+		expectDelay = true;
+	}
+
+	if (!expectDelay && !expectDuration) {
+		return false;
+	}
+
+	char numbuf[8];
+	strncpyEnsureTermination(numbuf, pfile + currentTokenStart, Q_min(tokenLength+1, sizeof(numbuf)));
+
+	float value = atof(numbuf);
+	if (expectDuration)
+	{
+		caption.duration = value;
+	}
+	else if (expectDelay)
+	{
+		caption.delay = value;
+	}
 	return true;
 }
 

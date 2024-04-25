@@ -264,10 +264,13 @@ struct CaptionProfile_t
 
 struct Caption_t
 {
+	Caption_t();
+	Caption_t(const char* captionName);
 	char name[32];
 	const CaptionProfile_t* profile;
 	std::string message;
 	float delay;
+	float duration;
 };
 
 #define SUB_MAX_LINES 5
@@ -313,6 +316,8 @@ public:
 	const Caption_t* CaptionLookup(const char* name);
 
 protected:
+	bool ParseFloatParameter(char* pfile, int& currentTokenStart, int& tokenLength, Caption_t &caption);
+
 	CaptionProfile_t *CaptionProfileLookup(char firstLetter, char secondLetter);
 
 	CaptionProfile_t defaultProfile;
