@@ -4,6 +4,7 @@
 
 #include <cstddef>
 
+#undef ARRAYSIZE
 template <typename T, size_t N>
 constexpr size_t ARRAYSIZE(T (&arr)[N]) noexcept
 {
