@@ -418,7 +418,7 @@ const char *CDeadZombieSoldier::m_szPoses[] = { "dead_on_back", "dead_on_stomach
 
 const char* CDeadZombieSoldier::getPos(int pos) const
 {
-	return m_szPoses[pos % (sizeof(m_szPoses)/sizeof(const char*))];
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
 }
 
 LINK_ENTITY_TO_CLASS( monster_zombie_soldier_dead, CDeadZombieSoldier )

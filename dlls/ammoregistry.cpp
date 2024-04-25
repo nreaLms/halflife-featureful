@@ -11,6 +11,7 @@
 #define AMMO_LOG(...) ALERT(at_aiconsole, ##__VA_ARGS__ )
 #define AMMO_ERROR(...) ALERT(at_error, ##__VA_ARGS__ )
 #endif
+#include "arraysize.h"
 
 
 void AmmoType::SetName(const char *ammoName)
@@ -107,7 +108,7 @@ int AmmoRegistry::IndexOf(const char *name) const
 {
 	if (!name)
 		return -1;
-	for (int i = 0; i<sizeof(ammoTypes)/sizeof(ammoTypes[0]); ++i)
+	for (int i = 0; i<ARRAYSIZE(ammoTypes); ++i)
 	{
 		if (!ammoTypes[i].IsValid())
 			continue;

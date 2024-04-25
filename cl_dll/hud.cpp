@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "parsetext.h"
+#include "arraysize.h"
 #if USE_VGUI
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
@@ -183,7 +184,7 @@ public:
 	{
 		color[0] = color[1] = color[2] = 255;
 
-		if( entindex >= 0 && entindex < sizeof(g_PlayerExtraInfo)/sizeof(g_PlayerExtraInfo[0]) )
+		if( entindex >= 0 && entindex < ARRAYSIZE(g_PlayerExtraInfo) )
 		{
 			int iTeam = g_PlayerExtraInfo[entindex].teamnumber;
 
@@ -918,7 +919,7 @@ void CHud::ParseClientFeatures()
 
 			unsigned int i = 0;
 			bool shouldContinue = true;
-			for (i = 0; shouldContinue && i<sizeof(colors)/sizeof(colors[0]); ++i)
+			for (i = 0; shouldContinue && i<ARRAYSIZE(colors); ++i)
 			{
 				if (strcmp(keyName, colors[i].name) == 0)
 				{
@@ -927,7 +928,7 @@ void CHud::ParseClientFeatures()
 					break;
 				}
 			}
-			for (i = 0; shouldContinue && i<sizeof(integers)/sizeof(integers[0]); ++i)
+			for (i = 0; shouldContinue && i<ARRAYSIZE(integers); ++i)
 			{
 				if (strcmp(keyName, integers[i].name) == 0)
 				{
@@ -936,7 +937,7 @@ void CHud::ParseClientFeatures()
 					break;
 				}
 			}
-			for (i = 0; shouldContinue && i<sizeof(configurableBooleans)/sizeof(configurableBooleans[0]); ++i)
+			for (i = 0; shouldContinue && i<ARRAYSIZE(configurableBooleans); ++i)
 			{
 				if ((subKey = strStartsWith(keyName, configurableBooleans[i].name)))
 				{
@@ -945,7 +946,7 @@ void CHud::ParseClientFeatures()
 					break;
 				}
 			}
-			for (i = 0; shouldContinue && i<sizeof(configurableFloats)/sizeof(configurableFloats[0]); ++i)
+			for (i = 0; shouldContinue && i<ARRAYSIZE(configurableFloats); ++i)
 			{
 				if ((subKey = strStartsWith(keyName, configurableFloats[i].name)))
 				{
@@ -954,7 +955,7 @@ void CHud::ParseClientFeatures()
 					break;
 				}
 			}
-			for (i = 0; shouldContinue && i<sizeof(configurableBounds)/sizeof(configurableBounds[0]); ++i)
+			for (i = 0; shouldContinue && i<ARRAYSIZE(configurableBounds); ++i)
 			{
 				if ((subKey = strStartsWith(keyName, configurableBounds[i].name)))
 				{
@@ -963,7 +964,7 @@ void CHud::ParseClientFeatures()
 					break;
 				}
 			}
-			for (i = 0; shouldContinue && i<sizeof(booleans)/sizeof(booleans[0]); ++i)
+			for (i = 0; shouldContinue && i<ARRAYSIZE(booleans); ++i)
 			{
 				if (strcmp(keyName, booleans[i].name) == 0)
 				{

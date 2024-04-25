@@ -22,6 +22,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "pm_shared.h"
+#include "arraysize.h"
 
 #include "ammohistory.h"
 #include "ammoregistry.h"
@@ -141,7 +142,7 @@ void WeaponsResource::AddWeapon(WEAPON *wp)
 {
 	// Check user preferences
 	bool foundUserPreference = false;
-	for (int i=0; i<sizeof(bucketPreferences)/sizeof(bucketPreferences[0]); ++i)
+	for (int i=0; i<ARRAYSIZE(bucketPreferences); ++i)
 	{
 		const BucketPreference& pref = bucketPreferences[i];
 		if (pref.szName[0] == '\0')
@@ -474,7 +475,7 @@ int CHudAmmo::VidInit( void )
 	m_HUD_selection = gHUD.GetSpriteIndex( "selection" );
 
 	char bucketName[8] = "bucket";
-	for (int i=0; i<sizeof(m_HUD_buckets)/sizeof(m_HUD_buckets[0]); ++i)
+	for (int i=0; i<ARRAYSIZE(m_HUD_buckets); ++i)
 	{
 		bucketName[6] = '0' + i + 1;
 		bucketName[7] = '\0';
@@ -1214,7 +1215,7 @@ void DrawAmmoBar( WEAPON *p, int x, int y, int width, int height )
 int CHudAmmo::SpriteIndexForSlot(int iSlot)
 {
 	int result = -1;
-	if (iSlot >=0 && iSlot < sizeof(m_HUD_buckets)/sizeof(m_HUD_buckets[0]))
+	if (iSlot >=0 && iSlot < ARRAYSIZE(m_HUD_buckets))
 	{
 		result = m_HUD_buckets[iSlot];
 	}

@@ -9,6 +9,7 @@
 // 02/21/97 JCB Added extended DirectInput code to support external controllers.
 
 #include "input_mouse.h"
+#include "arraysize.h"
 
 #if SUPPORT_GOLDSOURCE_INPUT
 
@@ -28,7 +29,6 @@
 #endif
 
 #if USE_SDL2
-#define ARRAYSIZE(p)		( sizeof(p) /sizeof(p[0]) )
 #include <dlfcn.h>
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>

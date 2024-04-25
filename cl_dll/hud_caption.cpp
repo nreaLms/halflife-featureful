@@ -2,6 +2,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "parsetext.h"
+#include "arraysize.h"
 
 #include <algorithm>
 
@@ -118,7 +119,7 @@ int CHudCaption::MsgFunc_Caption(const char *pszName, int iSize, void *pbuf)
 
 void CHudCaption::AddSubtitle(const Subtitle_t &sub)
 {
-	if ((unsigned)sub_count < sizeof(subtitles)/sizeof(subtitles[0]))
+	if ((unsigned)sub_count < ARRAYSIZE(subtitles))
 	{
 		subtitles[sub_count] = sub;
 		sub_count++;

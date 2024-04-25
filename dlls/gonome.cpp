@@ -891,7 +891,7 @@ const char *CDeadGonome::m_szPoses[] = { "dead_on_stomach1", "dead_on_back", "de
 
 const char* CDeadGonome::getPos(int pos) const
 {
-	return m_szPoses[pos % (sizeof(m_szPoses)/sizeof(const char*))];
+	return m_szPoses[pos % ARRAYSIZE(m_szPoses)];
 }
 
 LINK_ENTITY_TO_CLASS(monster_gonome_dead, CDeadGonome)

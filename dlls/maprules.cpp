@@ -1080,7 +1080,7 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 		SF_PLAYER_SETTINGS_SPORELAUNCHER,
 		SF_PLAYER_SETTINGS_MEDKIT
 	};
-	const int weaponIds[sizeof(weaponFlags)/sizeof(int)] = {
+	const int weaponIds[ARRAYSIZE(weaponFlags)] = {
 		WEAPON_CROWBAR,
 		WEAPON_GLOCK,
 		WEAPON_PYTHON,
@@ -1156,7 +1156,7 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 		}
 	}
 
-	for (i=0; i<sizeof(weaponFlags)/sizeof(int); ++i)
+	for (i=0; i<ARRAYSIZE(weaponFlags); ++i)
 	{
 		if (pev->spawnflags & weaponFlags[i])
 		{

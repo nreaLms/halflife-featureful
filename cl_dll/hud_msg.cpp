@@ -20,6 +20,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "r_efx.h"
+#include "arraysize.h"
 
 #define MAX_CLIENTS 32
 
@@ -159,7 +160,7 @@ int CHud::MsgFunc_WallPuffs(const char *pszName, int iSize, void *pbuf)
 	wallPuffs[3] = READ_SHORT();
 
 	wallPuffCount = 0;
-	for (int i=0; i<sizeof(wallPuffs)/sizeof(wallPuffs[0]); ++i)
+	for (int i=0; i<ARRAYSIZE(wallPuffs); ++i)
 	{
 		if (wallPuffs[i])
 			wallPuffCount++;
