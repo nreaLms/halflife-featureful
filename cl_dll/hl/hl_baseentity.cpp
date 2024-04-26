@@ -181,7 +181,7 @@ int CBaseAnimating::LookupActivityHeaviest( int activity ) { return 0; }
 void CBaseMonster::SetEyePosition( void ) { }
 int CBaseAnimating::LookupSequence( const char *label ) { return 0; }
 void CBaseAnimating::ResetSequenceInfo() { }
-BOOL CBaseAnimating::GetSequenceFlags() { return FALSE; }
+int CBaseAnimating::GetSequenceFlags() { return 0; }
 void CBaseAnimating::DispatchAnimEvents( float flInterval ) { }
 void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent ) { }
 float CBaseAnimating::SetBoneController ( int iController, float flValue ) { return 0.0; }
