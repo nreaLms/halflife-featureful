@@ -1688,6 +1688,7 @@ void CRosenberg::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 const char* CRosenberg::DefaultSentenceGroup(int group)
@@ -1893,6 +1894,7 @@ void CKeller::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 const char* CKeller::DefaultSentenceGroup(int group)

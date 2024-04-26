@@ -1086,6 +1086,7 @@ void CKate::Precache()
 
 	TalkInit();
 	CTalkMonster::Precache();
+	RegisterTalkMonster();
 }
 
 const char* CKate::DefaultSentenceGroup(int group)

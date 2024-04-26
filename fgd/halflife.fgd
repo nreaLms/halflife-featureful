@@ -480,8 +480,21 @@
 		2 : "Low" : "Get provoked by direct hit or on second hit"
 		3 : "Average" : "Get provoked by some hits"
 		4 : "High" : "Get provoked by some hits, but tends to forgive after some time"
-		5 : "Absolute" : "Never get provoked"
-		6 : "Absolute, don't alert friends" : "Never get provoked, don't alert friends upon death"
+		5 : "Absolute" : "Never get provoked by player's hits"
+		6 : "Absolute, don't alert friends" : "Never get provoked by player's hits, don't alert friends upon death"
+	]
+	alert_friends(choices) : "Alert friends" : : "Alert friends when player kills this monster" =
+	[
+		0 : "Default" : "Depends on the monster and tolerance level"
+		1 : "Always" : "Always alert friends when player kills me"
+		2 : "If not in combat" : "Alert friends only if player kills me and I'm not in combat"
+		3 : "Never" : "Never alert friends"
+	]
+	alertable_by_friends(choices) : "Friends can alert me" : : "Can friends alert me when player kills them?" =
+	[
+		0 : "Default" : "Can be alerted if tolerance level is not absolute"
+		1 : "Yes"
+		2 : "No"
 	]
 	voicepitch(integer) : "Custom voice pitch [100 norm]"
 	suspicious(choices) : "Suspicious" =

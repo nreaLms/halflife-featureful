@@ -108,6 +108,21 @@ enum
 	TOLERANCE_ABSOLUTE_NO_ALERTS,
 };
 
+enum
+{
+	ALERT_FRIENDS_ON_DEATH_DEAFAULT,
+	ALERT_FRIENDS_ON_DEATH_ALWAYS,
+	ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT,
+	ALERT_FRIENDS_ON_DEATH_NEVER,
+};
+
+enum
+{
+	ALERTED_BY_FRIEND_DEATH_DEFAULT,
+	ALERTED_BY_FRIEND_DEATH_YES,
+	ALERTED_BY_FRIEND_DEATH_NO,
+};
+
 #define	SPEAK_NORMAL_CHECK 0
 #define	SPEAK_DISREGARD_ENEMY (1 << 0)
 #define	SPEAK_DISREGARD_OTHER_SPEAKING (1 << 1)
@@ -202,6 +217,14 @@ public:
 
 	virtual int DefaultToleranceLevel() { return TOLERANCE_LOW; }
 	int MyToleranceLevel() { return m_iTolerance ? m_iTolerance : DefaultToleranceLevel(); }
+
+	virtual short AlertFriendsDefaultPolicy();
+	short AlertFriendsPolicy() { return m_alertFriendsPolicy ? m_alertFriendsPolicy : AlertFriendsDefaultPolicy(); }
+	bool ShouldAlertFriendsOnDeath();
+
+	virtual bool AlertableByFriendDeathDefault();
+	bool AlertableByFriendDeath();
+
 	static const char* GetRedefinedSentence(string_t sentence);
 
 	void ReportAIState(ALERT_TYPE level);
@@ -238,6 +261,8 @@ public:
 	EHANDLE		m_hTalkTarget;	// who to look at while talking
 	BOOL m_fStartSuspicious;
 	short m_iTolerance;
+	short m_alertFriendsPolicy;
+	short m_alertableByFriends;
 	float m_flLastHitByPlayer;
 	int m_iPlayerHits;
 

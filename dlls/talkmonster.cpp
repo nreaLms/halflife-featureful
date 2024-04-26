@@ -55,6 +55,8 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_iszDecline, FIELD_STRING ),
 	DEFINE_FIELD( CTalkMonster, m_flMedicWaitTime, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_iTolerance, FIELD_SHORT ),
+	DEFINE_FIELD( CTalkMonster, m_alertFriendsPolicy, FIELD_SHORT ),
+	DEFINE_FIELD( CTalkMonster, m_alertableByFriends, FIELD_SHORT ),
 	DEFINE_FIELD( CTalkMonster, m_flLastHitByPlayer, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_iPlayerHits, FIELD_INTEGER ),
 	DEFINE_FIELD( CTalkMonster, m_flStopLookTime, FIELD_TIME ),
@@ -566,17 +568,14 @@ void CTalkMonster::RunTask( Task_t *pTask )
 
 void CTalkMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 {
-	const int toleranceLevel = MyToleranceLevel();
 	// If a client killed me (unless I was already Barnacle'd), make everyone else mad/afraid of him
-	if( toleranceLevel < TOLERANCE_ABSOLUTE_NO_ALERTS
-			&& ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE
+	if( ( pevAttacker->flags & FL_CLIENT) && m_MonsterState != MONSTERSTATE_PRONE
 			&& !HasMemory( bits_MEMORY_KILLED ) // corpses don't alert friends upon gibbing
+			&& ShouldAlertFriendsOnDeath()
 			&& IsFriendWithPlayerBeforeProvoked() ) // no point in alerting friends if player is already foe
 	{
-		if (toleranceLevel < TOLERANCE_HIGH || m_hEnemy == 0) {
-			AlertFriends();
-			LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
-		}
+		AlertFriends();
+		LimitFollowers( CBaseEntity::Instance( pevAttacker ), 0 );
 	}
 	CFollowingMonster::Killed( pevInflictor, pevAttacker, iGib );
 }
@@ -655,7 +654,9 @@ void CTalkMonster::AlertFriends( void )
 			if( pMonster && pMonster->IsFullyAlive() )
 			{
 				// don't provoke a friend that's playing a death animation. They're a goner
-				pMonster->m_afMemory |= bits_MEMORY_PROVOKED;
+				CTalkMonster* pTalkMonster = pMonster->MyTalkMonsterPointer();
+				if (pTalkMonster->AlertableByFriendDeath())
+					pMonster->m_afMemory |= bits_MEMORY_PROVOKED;
 			}
 		}
 	}
@@ -1654,6 +1655,16 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 		m_iTolerance = (short)atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "alert_friends" ) )
+	{
+		m_alertFriendsPolicy = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "alertable_by_friends" ) )
+	{
+		m_alertableByFriends = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "voicepitch" ) )
 	{
 		m_voicePitch = atoi( pkvd->szValue );
@@ -1671,6 +1682,39 @@ const char* CTalkMonster::GetRedefinedSentence(string_t sentence)
 		return STRING(sentence);
 }
 
+static const char* ToleranceLevelDisplayName(int tolerance)
+{
+	switch (tolerance) {
+	case TOLERANCE_ZERO:
+		return "Zero";
+	case TOLERANCE_LOW:
+		return "Low";
+	case TOLERANCE_AVERAGE:
+		return "Average";
+	case TOLERANCE_HIGH:
+		return "High";
+	case TOLERANCE_ABSOLUTE:
+	case TOLERANCE_ABSOLUTE_NO_ALERTS:
+		return "Absolute";
+	default:
+		return "Unknown";
+	}
+}
+
+static const char* AlertFriendsPolicyDisplayName(short alertFriendsPolicy)
+{
+	switch (alertFriendsPolicy) {
+	case ALERT_FRIENDS_ON_DEATH_ALWAYS:
+		return "Always";
+	case ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT:
+		return "If not in combat";
+	case ALERT_FRIENDS_ON_DEATH_NEVER:
+		return "Never";
+	default:
+		return "Unknown";
+	}
+}
+
 void CTalkMonster::ReportAIState(ALERT_TYPE level)
 {
 	CFollowingMonster::ReportAIState(level);
@@ -1679,6 +1723,9 @@ void CTalkMonster::ReportAIState(ALERT_TYPE level)
 	if (m_fStartSuspicious)
 		ALERT( level, "Start pre-provoked. " );
 	ALERT( level, "Voice pitch: %d. ", m_voicePitch );
+	ALERT( level, "Tolerance level: %s. ", ToleranceLevelDisplayName(MyToleranceLevel()) );
+	ALERT( level, "I will alert friends if player kills me: %s. ", AlertFriendsPolicyDisplayName(AlertFriendsPolicy()) );
+	ALERT( level, "Friends can alert me if player kills them: %s. ", AlertableByFriendDeath() ? "yes" : "no" );
 }
 
 bool CTalkMonster::SomeoneIsTalking()
@@ -1742,4 +1789,46 @@ void CTalkMonster::RegisterMedic(const char* className)
 void CTalkMonster::RegisterMedic()
 {
 	CTalkMonster::RegisterMedic(STRING(pev->classname));
+}
+
+short CTalkMonster::AlertFriendsDefaultPolicy()
+{
+	const int tolerance = MyToleranceLevel();
+	if (tolerance == TOLERANCE_ABSOLUTE_NO_ALERTS)
+		return ALERT_FRIENDS_ON_DEATH_NEVER;
+	if (TalkFriendCategory() == TALK_FRIEND_SOLDIER)
+		return ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT;
+	else
+		return ALERT_FRIENDS_ON_DEATH_ALWAYS;
+}
+
+bool CTalkMonster::ShouldAlertFriendsOnDeath()
+{
+	switch (AlertFriendsPolicy()) {
+	case ALERT_FRIENDS_ON_DEATH_ALWAYS:
+		return true;
+	case ALERT_FRIENDS_ON_DEATH_IF_NOT_IN_COMBAT:
+		return m_hEnemy == 0;
+	case ALERT_FRIENDS_ON_DEATH_NEVER:
+		return false;
+	default:
+		return false;
+	}
+}
+
+bool CTalkMonster::AlertableByFriendDeathDefault()
+{
+	return MyToleranceLevel() < TOLERANCE_ABSOLUTE;
+}
+
+bool CTalkMonster::AlertableByFriendDeath()
+{
+	switch (m_alertableByFriends) {
+	case ALERTED_BY_FRIEND_DEATH_YES:
+		return true;
+	case ALERTED_BY_FRIEND_DEATH_NO:
+		return false;
+	default:
+		return AlertableByFriendDeathDefault();
+	}
 }
