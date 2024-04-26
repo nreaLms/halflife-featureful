@@ -83,6 +83,7 @@ public:
 	float m_checkAttackTime;
 	BOOL m_lastAttackCheck;
 
+	virtual void SetGunState(int gunState);
 	int bodystate;
 	CUSTOM_SCHEDULES
 
@@ -338,13 +339,11 @@ void CBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 	case BARNEY_AE_DRAW:
 		// barney's bodygroup switches here so he can pull gun from holster
-		pev->body = BARNEY_BODY_GUNDRAWN;
-		m_fGunDrawn = TRUE;
+		SetGunState(BARNEY_BODY_GUNDRAWN);
 		break;
 	case BARNEY_AE_HOLSTER:
 		// change bodygroup to replace gun in holster
-		pev->body = BARNEY_BODY_GUNHOLSTERED;
-		m_fGunDrawn = FALSE;
+		SetGunState(BARNEY_BODY_GUNHOLSTERED);
 		break;
 	default:
 		CTalkMonster::HandleAnimEvent( pEvent );
@@ -378,13 +377,15 @@ void CBarney::Spawn()
 	Precache();
 	SpawnImpl("models/barney.mdl", gSkillData.barneyHealth);
 	if (bodystate == -1) {
-		bodystate = RANDOM_LONG(0,1);
+		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
 	}
-	SetBodygroup(1, bodystate);
-	m_fGunDrawn = FALSE;
-	if (bodystate == BARNEY_BODY_GUNDRAWN) {
-		m_fGunDrawn = TRUE;
-	}
+	SetGunState(bodystate);
+}
+
+void CBarney::SetGunState(int gunState)
+{
+	pev->body = gunState;
+	m_fGunDrawn = gunState == BARNEY_BODY_GUNDRAWN;
 }
 
 //=========================================================
@@ -689,6 +690,10 @@ void CDeadBarney :: Spawn( )
 }
 
 #if FEATURE_OTIS
+
+#define OTIS_GUN_GROUP 1
+#define OTIS_HEAD_GROUP 2
+
 #define	OTIS_BODY_GUNHOLSTERED	0
 #define	OTIS_BODY_GUNDRAWN		1
 #define OTIS_BODY_DONUT			2
@@ -712,6 +717,7 @@ public:
 	void SetHead(int head);
 	
 	int m_iHead;
+	void SetGunState(int gunState);
 };
 
 LINK_ENTITY_TO_CLASS( monster_otis, COtis )
@@ -721,17 +727,19 @@ void COtis::Spawn()
 	Precache();
 	SpawnImpl("models/otis.mdl", gSkillData.otisHealth);
 	if ( m_iHead == -1 )
-		SetBodygroup(2, RANDOM_LONG(0, 1));
+		SetBodygroup(OTIS_HEAD_GROUP, RANDOM_LONG(0, 1));
 	else
-		SetBodygroup(2, m_iHead);
+		SetBodygroup(OTIS_HEAD_GROUP, m_iHead);
 	if (bodystate == -1) {
-		bodystate = RANDOM_LONG(0,1);
+		bodystate = RANDOM_LONG(OTIS_BODY_GUNHOLSTERED, OTIS_BODY_GUNDRAWN);
 	}
-	SetBodygroup(1, bodystate);
-	m_fGunDrawn = FALSE;
-	if (bodystate == OTIS_BODY_GUNDRAWN) {
-		m_fGunDrawn = TRUE;
-	}
+	SetGunState(bodystate);
+}
+
+void COtis::SetGunState(int gunState)
+{
+	SetBodygroup(OTIS_GUN_GROUP, gunState);
+	m_fGunDrawn = gunState == OTIS_BODY_GUNDRAWN;
 }
 
 void COtis::Precache()
@@ -799,14 +807,12 @@ void COtis::HandleAnimEvent( MonsterEvent_t *pEvent )
 			
 		case BARNEY_AE_DRAW:
 			// barney's bodygroup switches here so he can pull gun from holster
-			SetBodygroup(1, OTIS_BODY_GUNDRAWN);
-			m_fGunDrawn = TRUE;
+			SetGunState(OTIS_BODY_GUNDRAWN);
 			break;
 			
 		case BARNEY_AE_HOLSTER:
 			// change bodygroup to replace gun in holster
-			SetBodygroup(1, OTIS_BODY_GUNHOLSTERED);
-			m_fGunDrawn = FALSE;
+			SetGunState(OTIS_BODY_GUNHOLSTERED);
 			break;
 			
 		default:
@@ -903,13 +909,9 @@ void CBarniel::Spawn()
 	SpawnImpl("models/barniel.mdl", gSkillData.barneyHealth);
 
 	if (bodystate == -1) {
-		bodystate = RANDOM_LONG(0,1);
+		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
 	}
-	SetBodygroup(1, bodystate);
-	m_fGunDrawn = FALSE;
-	if (bodystate == BARNEY_BODY_GUNDRAWN) {
-		m_fGunDrawn = TRUE;
-	}
+	SetGunState(bodystate);
 }
 
 void CBarniel::Precache()
@@ -1062,13 +1064,9 @@ void CKate::Spawn()
 	m_iCombatState = -1;
 
 	if (bodystate == -1) {
-		bodystate = RANDOM_LONG(0,1);
+		bodystate = RANDOM_LONG(BARNEY_BODY_GUNHOLSTERED, BARNEY_BODY_GUNDRAWN);
 	}
-	SetBodygroup(1, bodystate);
-	m_fGunDrawn = FALSE;
-	if (bodystate == BARNEY_BODY_GUNDRAWN) {
-		m_fGunDrawn = TRUE;
-	}
+	SetGunState(bodystate);
 }
 
 void CKate::Precache()
