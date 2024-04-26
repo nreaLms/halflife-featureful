@@ -510,7 +510,7 @@
 	]
 ]
 
-@BaseClass base(TalkMonster) = ScaredGuy
+@BaseClass base(TalkMonster) = Civilian
 [
 ]
 
@@ -5746,7 +5746,7 @@
 	]
 ]
 
-// @PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/gus.mdl") = monster_gus : "Construction Worker"
+// @PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/gus.mdl") = monster_gus : "Construction Worker"
 // [
 // 	body(Choices) : "Body" : -1 =
 // 	[
@@ -6049,7 +6049,13 @@
 	]
 ]
 
-@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist : "Cleansuit Scientist"
+@PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio() = monster_civilian : "Configurable civilian. Acts like scientist, but can't heal. Set model, body and skin to configure the look."
+[
+	body(integer) : "Body"
+	skin(integer) : "Skin"
+]
+
+@PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/cleansuit_scientist.mdl") = monster_cleansuit_scientist : "Cleansuit Scientist"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 13 =
 	[
@@ -6186,7 +6192,7 @@
 	]
 ]
 
-@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist : "Scared Scientist"
+@PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/scientist.mdl") = monster_scientist : "Scared Scientist"
 [
 	body(Choices) : "Body" : -1 =
 	[
@@ -6382,7 +6388,7 @@
 		32768 : "Don't drop to the floor" : 0
 	]
 ]
-@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/scientist_rosenberg.mdl") = monster_rosenberg : "Dr. Rosenberg" []
+@PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/scientist_rosenberg.mdl") = monster_rosenberg : "Dr. Rosenberg" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/sentry.mdl") = monster_sentry : "Sentry Turret Gun"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
@@ -6560,7 +6566,7 @@
 		1 : "Ceiling Mount"
 	]
 ]
-@PointClass base(Monster, ScaredGuy) size(-16 -16 0, 16 16 72) studio("models/wheelchair_sci.mdl") = monster_wheelchair : "Dr. Keller" []
+@PointClass base(Monster, Civilian) size(-16 -16 0, 16 16 72) studio("models/wheelchair_sci.mdl") = monster_wheelchair : "Dr. Keller" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 72) studio("models/zombie.mdl") = monster_zombie : "Scientist Zombie"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =

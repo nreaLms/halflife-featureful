@@ -113,7 +113,8 @@ public:
 	BOOL DisregardEnemy( CBaseEntity *pEnemy ) { return !pEnemy->IsAlive() || ( gpGlobals->time - m_fearTime ) > 15; }
 	bool CanTolerateWhileFollowing( CBaseEntity* pEnemy );
 
-	virtual BOOL	CanHeal( void );
+	virtual bool AbleToHeal() { return true; }
+	bool CanHeal( void );
 	void StartFollowingHealTarget(CBaseEntity* pTarget);
 	bool ReadyToHeal();
 	void Heal( void );
@@ -1152,14 +1153,16 @@ MONSTERSTATE CScientist::GetIdealState( void )
 	return CTalkMonster::GetIdealState();
 }
 
-BOOL CScientist::CanHeal( void )
-{ 
+bool CScientist::CanHeal( void )
+{
+	if (!AbleToHeal())
+		return false;
 	if( ( m_healTime > gpGlobals->time ) || ( m_hTargetEnt == 0 ) || ( !m_hTargetEnt->IsFullyAlive() ) ||
 			( m_hTargetEnt->IsPlayer() ? m_hTargetEnt->pev->health > ( m_hTargetEnt->pev->max_health * 0.5f ) :
 			  m_hTargetEnt->pev->health >= m_hTargetEnt->pev->max_health ) )
-		return FALSE;
+		return false;
 
-	return TRUE;
+	return true;
 }
 
 void CScientist::StartFollowingHealTarget(CBaseEntity *pTarget)
@@ -1174,7 +1177,7 @@ void CScientist::StartFollowingHealTarget(CBaseEntity *pTarget)
 
 bool CScientist::ReadyToHeal()
 {
-	return AbleToFollow() && ( m_healTime <= gpGlobals->time ) && m_pSchedule != slHeal;
+	return AbleToHeal() && AbleToFollow() && ( m_healTime <= gpGlobals->time ) && m_pSchedule != slHeal;
 }
 
 void CScientist::Heal( void )
@@ -1196,13 +1199,21 @@ void CScientist::Heal( void )
 void CScientist::ReportAIState(ALERT_TYPE level)
 {
 	CTalkMonster::ReportAIState(level);
-	if (m_healTime <= gpGlobals->time)
+	if (AbleToHeal())
 	{
-		ALERT(level, "Can heal now. ");
+		ALERT(level, "Is able to heal. ");
+		if (m_healTime <= gpGlobals->time)
+		{
+			ALERT(level, "Can heal now. ");
+		}
+		else
+		{
+			ALERT(level, "Can heal in %3.1f seconds. ", m_healTime - gpGlobals->time);
+		}
 	}
 	else
 	{
-		ALERT(level, "Can heal in %3.1f seconds. ", (double)(m_healTime - gpGlobals->time));
+		ALERT(level, "Is not able to heal. ");
 	}
 }
 
@@ -1549,8 +1560,7 @@ public:
 	void Precache();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 	const char* DefaultDisplayName() { return "Cleansuit Scientist"; }
-	BOOL CanHeal();
-	bool ReadyToHeal() {return false;}
+	bool AbleToHeal() { return false; }
 	void ReportAIState(ALERT_TYPE level);
 };
 
@@ -1569,11 +1579,6 @@ void CCleansuitScientist::Precache()
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
-}
-
-BOOL CCleansuitScientist::CanHeal()
-{
-	return FALSE;
 }
 
 void CCleansuitScientist::ReportAIState(ALERT_TYPE level)
@@ -1641,8 +1646,7 @@ public:
 	void PlayPainSound();
 
 #if FEATURE_ROSENBERG_DECAY
-	BOOL CanHeal() { return false; }
-	bool ReadyToHeal() {return false; }
+	bool AbleToHeal() { return false; }
 #endif
 
 	static const char* pPainSounds[];
@@ -1734,6 +1738,29 @@ void CRosenberg::PlayPainSound()
 
 #endif
 
+class CCivilian : public CScientist
+{
+public:
+	int GetDefaultVoicePitch() { return 100; }
+	void Spawn()
+	{
+		SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
+		TalkMonsterInit();
+	}
+	void Precache()
+	{
+		PrecacheMyModel("models/scientist.mdl");
+		PrecachePainSounds();
+		TalkInit();
+		CTalkMonster::Precache();
+		RegisterTalkMonster();
+	}
+	const char* DefaultDisplayName() { return "Civilian"; }
+	bool AbleToHeal() { return false; }
+};
+
+LINK_ENTITY_TO_CLASS( monster_civilian, CCivilian )
+
 #if FEATURE_GUS
 class CGus : public CScientist
 {
@@ -1747,8 +1774,7 @@ public:
 	void Spawn();
 	void Precache();
 	const char* DefaultDisplayName() { return "Construction Worker"; }
-	BOOL CanHeal();
-	bool ReadyToHeal() {return false;}
+	bool AbleToHeal() { return false; }
 	void ReportAIState(ALERT_TYPE level);
 	int RandomHeadCount() {
 		return 2;
@@ -1769,15 +1795,10 @@ void CGus::Spawn()
 void CGus::Precache()
 {
 	PrecacheMyModel("models/gus.mdl");
-	PrecacheSounds();
+	PrecachePainSounds();
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
-}
-
-BOOL CGus::CanHeal()
-{
-	return FALSE;
 }
 
 void CGus::ReportAIState(ALERT_TYPE level)
@@ -1844,8 +1865,7 @@ public:
 	void PlayPainSound();
 	void DeathSound();
 
-	BOOL CanHeal() { return false; }
-	bool ReadyToHeal() { return false; }
+	bool AbleToHeal() { return false; }
 
 protected:
 	static const char* pPainSounds[];
