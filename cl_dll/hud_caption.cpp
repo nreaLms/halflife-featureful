@@ -3,6 +3,7 @@
 #include "parsemsg.h"
 #include "parsetext.h"
 #include "arraysize.h"
+#include "text_utils.h"
 
 #include <algorithm>
 
@@ -151,11 +152,10 @@ void CHudCaption::CalculateLineOffsets(Subtitle_t &sub)
 
 	if (CHud::ShouldUseConsoleFont())
 	{
-		std::vector<WordBoundary> boundaries(sub.caption->message.size()/2 + 1);
-		unsigned int wordCount = CHud::SplitIntoWordBoundaries(boundaries, sub.caption->message);
+		WordBoundaries boundaries = SplitIntoWordBoundaries(sub.caption->message);
 
 		unsigned int startWordIndex = 0;
-		for (unsigned int j=0; j<wordCount;)
+		for (unsigned int j=0; j<boundaries.size();)
 		{
 			const int width = CHud::UtfText::LineWidth(str + boundaries[startWordIndex].wordStart, boundaries[j].wordEnd - boundaries[startWordIndex].wordStart);
 			if (width > xmax) {
@@ -173,7 +173,7 @@ void CHudCaption::CalculateLineOffsets(Subtitle_t &sub)
 					startWordIndex = j;
 				}
 			} else {
-				if (j == wordCount - 1) {
+				if (j == boundaries.size() - 1) {
 					sub.lineOffsets[sub.lineCount] = boundaries[startWordIndex].wordStart;
 					sub.lineEndOffsets[sub.lineCount] = boundaries[j].wordEnd;
 					sub.lineCount++;

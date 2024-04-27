@@ -289,12 +289,6 @@ struct Subtitle_t
 
 #define CAPTION_PROFILES_MAX 32
 
-struct WordBoundary
-{
-	unsigned int wordStart;
-	unsigned int wordEnd;
-};
-
 class CHudCaption : public CHudBase
 {
 public:
@@ -1038,7 +1032,6 @@ public:
 	bool hasHudScaleInEngine;
 
 	static bool ShouldUseConsoleFont();
-	static unsigned int SplitIntoWordBoundaries(std::vector<WordBoundary> &boundaries, const std::string &message);
 };
 
 extern CHud gHUD;
