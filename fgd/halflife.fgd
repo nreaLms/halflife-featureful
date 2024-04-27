@@ -7513,13 +7513,24 @@
 
 @PointClass base(Targetname) = trigger_compare : "Examine relationship between two numbers"
 [
-	initial_value(string) : "Base value [LR]" : 0
+	initial_value(string) : "Base Value [LR]" : 0
 	compare_value(string) : "Compare Value [LR]" : 0
-	target(target_destination) : "Trigger On Equal To"
-	trigger_on_not_equal(target_destination) : "Trigger On Not Equal To"
-	trigger_on_less(target_destination) : "Trigger On Less Than"
-	trigger_on_greater(target_destination) : "Trigger On Greater Than"
-	trigger_on_fail(target_destination) : "Trigger On Calc Fail"
+	testtype(choices) : "Comparison to pass" =
+	[
+		0 : "Equal"
+		1 : "Greater or equal"
+		2 : "Greater"
+		3 : "Less or equal"
+		4 : "Less"
+		5 : "Not equal"
+	]
+	pass_target(target_destination) : "Fire On Comparison Pass"
+	fail_target(target_destination) : "Fire On Comparison Fail"
+	trigger_on_equal(target_destination) : "Fire On Equal To"
+	trigger_on_not_equal(target_destination) : "Fire On Not Equal To"
+	trigger_on_less(target_destination) : "Fire On Less Than"
+	trigger_on_greater(target_destination) : "Fire On Greater Than"
+	trigger_on_fail(target_destination) : "Fire On Calc Fail"
 ]
 
 @BaseClass = TriggerConfigureMonsterBase
@@ -8109,13 +8120,14 @@
 
 @PointClass base(Targetname) color(85 255 255) = trigger_skill_test : "Compare skill level to the number"
 [
-	testtype(choices) : "Test type" : 0 =
+	testtype(choices) : "Comparison to pass" : 0 =
 	[
 		0 : "Equal"
 		1 : "Greater or equal"
 		2 : "Greater"
 		3 : "Less or equal"
 		4 : "Less"
+		5 : "Not equal"
 	]
 	comparand(choices) : "Compare skill to" : 3 =
 	[
@@ -8123,8 +8135,8 @@
 		2 : "Medium"
 		3 : "Hard"
 	]
-	target(target_destination) : "Fire on success"
-	target_on_fail(target_destination) : "Fire on fail"
+	target(target_destination) : "Fire on comparison pass"
+	target_on_fail(target_destination) : "Fire on comparison fail"
 ]
 
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []

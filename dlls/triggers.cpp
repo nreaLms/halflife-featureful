@@ -6013,29 +6013,72 @@ IMPLEMENT_SAVERESTORE( CTriggerCheckState, CPointEntity )
 
 LINK_ENTITY_TO_CLASS( trigger_check_state, CTriggerCheckState )
 
+enum
+{
+	COMPARISON_TEST_EQUAL = 0,
+	COMPARISON_TEST_GTE,
+	COMPARISON_TEST_GREATER,
+	COMPARISON_TEST_LTE,
+	COMPARISON_TEST_LESS,
+	COMPARISON_TEST_NOT_EQUAL,
+};
+
 class CTriggerCompare : public CPointEntity
 {
 public:
+	void Spawn()
+	{
+		CPointEntity::Spawn();
+		if (pev->target)
+		{
+			ALERT(at_warning, "%s: Setting 'Fire On Equal To' via 'target' entvar is deprecated. Use 'trigger_on_equal' parameter\n", STRING(pev->classname));
+			if (!m_onEqual) {
+				m_onEqual = pev->target;
+			}
+			pev->target = iStringNull;
+		}
+	}
+	int ObjectCaps( void ) { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
 	void KeyValue(KeyValueData *pkvd)
 	{
-		if( FStrEq( pkvd->szKeyName, "trigger_on_not_equal" ) )
+		if( FStrEq( pkvd->szKeyName, "testtype" ) )
 		{
-			pev->message = ALLOC_STRING( pkvd->szValue );
+			pev->impulse = atoi( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "pass_target"))
+		{
+			m_onComparisonPass = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "fail_target"))
+		{
+			m_onComparisonFail = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if( FStrEq( pkvd->szKeyName, "trigger_on_equal" ) )
+		{
+			m_onEqual = ALLOC_STRING( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else if( FStrEq( pkvd->szKeyName, "trigger_on_not_equal" ) )
+		{
+			m_onNotEqual = ALLOC_STRING( pkvd->szValue );
 			pkvd->fHandled = TRUE;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_less" ) )
 		{
-			m_triggerOnLessThan = ALLOC_STRING( pkvd->szValue );
+			m_onLessThan = ALLOC_STRING( pkvd->szValue );
 			pkvd->fHandled = TRUE;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_greater" ) )
 		{
-			m_triggerOnGreaterThan = ALLOC_STRING( pkvd->szValue );
+			m_onGreaterThan = ALLOC_STRING( pkvd->szValue );
 			pkvd->fHandled = TRUE;
 		}
 		else if( FStrEq( pkvd->szKeyName, "trigger_on_fail" ) )
 		{
-			m_triggerOnFail = ALLOC_STRING( pkvd->szValue );
+			m_onFail = ALLOC_STRING( pkvd->szValue );
 			pkvd->fHandled = TRUE;
 		}
 		else if( FStrEq( pkvd->szKeyName, "initial_value" ) )
@@ -6070,11 +6113,11 @@ public:
 			CPointEntity::KeyValue( pkvd );
 	}
 
-	float BaseValue(bool& success, CBaseEntity* pActivator)
+	float CalcBaseValue(bool& success, CBaseEntity* pActivator)
 	{
 		return CalcValue(m_value, m_valueSource, m_valueIsNumber, success, pActivator);
 	}
-	float CompareValue(bool& success, CBaseEntity* pActivator)
+	float CalcCompareValue(bool& success, CBaseEntity* pActivator)
 	{
 		return CalcValue(m_compareValue, m_compareValueSource, m_compareValueIsNumber, success, pActivator);
 	}
@@ -6082,38 +6125,72 @@ public:
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
 		bool valueSuccess;
-		const float baseValue = BaseValue(valueSuccess, pActivator);
+		const float baseValue = CalcBaseValue(valueSuccess, pActivator);
 		bool compareValueSuccess;
-		const float compareValue = CompareValue(compareValueSuccess, pActivator);
+		const float compareValue = CalcCompareValue(compareValueSuccess, pActivator);
 
 		if (!valueSuccess || !compareValueSuccess)
 		{
-			if (m_triggerOnFail)
-				FireTargets(STRING(m_triggerOnFail), pActivator, this);
+			if (m_onFail)
+				FireTargets(STRING(m_onFail), pActivator, this);
 			return;
 		}
 
-		if (baseValue == compareValue && pev->target)
+		const int compareResult = DoCompareValues(baseValue, compareValue);
+
+		if (m_onComparisonPass || m_onComparisonFail)
 		{
-			FireTargets(STRING(pev->target), pActivator, this);
+			bool passed = IsComparisonPassed(compareResult);
+			if (passed && m_onComparisonPass) {
+				FireTargets(STRING(m_onComparisonPass), pActivator, this);
+			}
+			if (!passed && m_onComparisonFail) {
+				FireTargets(STRING(m_onComparisonFail), pActivator, this);
+			}
 		}
-		if (baseValue != compareValue && pev->message)
+
+		if (compareResult == 0 && m_onEqual)
 		{
-			FireTargets(STRING(pev->message), pActivator, this);
+			FireTargets(STRING(m_onEqual), pActivator, this);
 		}
-		if (baseValue < compareValue && m_triggerOnLessThan)
+		if (compareResult != 0 && m_onNotEqual)
 		{
-			FireTargets(STRING(m_triggerOnLessThan), pActivator, this);
+			FireTargets(STRING(m_onNotEqual), pActivator, this);
 		}
-		if (baseValue > compareValue && m_triggerOnGreaterThan)
+		if (compareResult < 0 && m_onLessThan)
 		{
-			FireTargets(STRING(m_triggerOnGreaterThan), pActivator, this);
+			FireTargets(STRING(m_onLessThan), pActivator, this);
+		}
+		if (compareResult > 0 && m_onGreaterThan)
+		{
+			FireTargets(STRING(m_onGreaterThan), pActivator, this);
 		}
 	}
 
-	string_t m_triggerOnLessThan;
-	string_t m_triggerOnGreaterThan;
-	string_t m_triggerOnFail;
+	bool IsTriggered(CBaseEntity *pActivator)
+	{
+		bool valueSuccess;
+		const float baseValue = CalcBaseValue(valueSuccess, pActivator);
+		bool compareValueSuccess;
+		const float compareValue = CalcCompareValue(compareValueSuccess, pActivator);
+
+		if (!valueSuccess || !compareValueSuccess) {
+			return false;
+		}
+
+		const int compareResult = DoCompareValues(baseValue, compareValue);
+		return IsComparisonPassed(compareResult);
+	}
+
+	string_t m_onComparisonPass;
+	string_t m_onComparisonFail;
+
+	string_t m_onEqual;
+	string_t m_onNotEqual;
+	string_t m_onLessThan;
+	string_t m_onGreaterThan;
+
+	string_t m_onFail;
 	float m_value;
 	float m_compareValue;
 	string_t m_valueSource;
@@ -6140,15 +6217,57 @@ private:
 			return result;
 		}
 	}
+	int DoCompareValues(float a, float b)
+	{
+		if (a == b) {
+			return 0;
+		} else if (a < b){
+			return -1;
+		} else {
+			return 1;
+		}
+	}
+	bool IsComparisonPassed(int compareResult)
+	{
+		bool success = false;
+		switch (pev->impulse) {
+		case COMPARISON_TEST_EQUAL:
+			success = compareResult == 0;
+			break;
+		case COMPARISON_TEST_GREATER:
+			success = compareResult > 0;
+			break;
+		case COMPARISON_TEST_GTE:
+			success = compareResult >= 0;
+			break;
+		case COMPARISON_TEST_LESS:
+			success = compareResult < 0;
+			break;
+		case COMPARISON_TEST_LTE:
+			success = compareResult <= 0;
+			break;
+		case COMPARISON_TEST_NOT_EQUAL:
+			success = compareResult != 0;
+			break;
+		default:
+			ALERT(at_error, "Unknown test type in %s: %d\n", STRING(pev->classname), pev->impulse);
+			break;
+		}
+		return success;
+	}
 };
 
 LINK_ENTITY_TO_CLASS( trigger_compare, CTriggerCompare )
 
 TYPEDESCRIPTION	CTriggerCompare::m_SaveData[] =
 {
-	DEFINE_FIELD( CTriggerCompare, m_triggerOnLessThan, FIELD_STRING ),
-	DEFINE_FIELD( CTriggerCompare, m_triggerOnGreaterThan, FIELD_STRING ),
-	DEFINE_FIELD( CTriggerCompare, m_triggerOnFail, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_onComparisonPass, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_onComparisonFail, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_onEqual, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_onNotEqual, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_onLessThan, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_onGreaterThan, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerCompare, m_onFail, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerCompare, m_value, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCompare, m_compareValue, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCompare, m_valueSource, FIELD_STRING ),
@@ -6157,15 +6276,6 @@ TYPEDESCRIPTION	CTriggerCompare::m_SaveData[] =
 	DEFINE_FIELD( CTriggerCompare, m_compareValueIsNumber, FIELD_CHARACTER ),
 };
 IMPLEMENT_SAVERESTORE( CTriggerCompare, CPointEntity )
-
-enum
-{
-	SKILL_TEST_EQUAL = 0,
-	SKILL_TEST_GTE,
-	SKILL_TEST_GREATER,
-	SKILL_TEST_LTE,
-	SKILL_TEST_LESS,
-};
 
 class CTriggerSkillTest : public CPointEntity
 {
@@ -6213,20 +6323,23 @@ void CTriggerSkillTest::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	bool success = false;
 
 	switch (pev->impulse) {
-	case SKILL_TEST_EQUAL:
+	case COMPARISON_TEST_EQUAL:
 		success = testValue == comparand;
 		break;
-	case SKILL_TEST_GREATER:
+	case COMPARISON_TEST_GREATER:
 		success = testValue > comparand;
 		break;
-	case SKILL_TEST_GTE:
+	case COMPARISON_TEST_GTE:
 		success = testValue >= comparand;
 		break;
-	case SKILL_TEST_LESS:
+	case COMPARISON_TEST_LESS:
 		success = testValue < comparand;
 		break;
-	case SKILL_TEST_LTE:
+	case COMPARISON_TEST_LTE:
 		success = testValue <= comparand;
+		break;
+	case COMPARISON_TEST_NOT_EQUAL:
+		success = testValue != comparand;
 		break;
 	default:
 		ALERT(at_error, "Unknown test type in %s: %d\n", STRING(pev->classname), pev->impulse);
