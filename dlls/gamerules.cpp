@@ -307,7 +307,7 @@ void CGameRules::RefreshSkillData ( void )
 #if FEATURE_ROBOGRUNT
 	// Robogrunt
 	if (g_modFeatures.IsMonsterEnabled("robogrunt"))
-		gSkillData.rgruntExplode = GetSkillCvar( "sk_rgrunt_explode" );
+		gSkillData.rgruntExplode = GetSkillCvar( "sk_rgrunt_explode", "sk_plr_hand_grenade" );
 #endif
 	// Scientist
 	gSkillData.scientistHealth = GetSkillCvar( "sk_scientist_health" );
