@@ -5829,6 +5829,137 @@ void CStripWeapons::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 enum
 {
+	PLAYER_CALC_PARAM_HEALTH,
+	PLAYER_CALC_PARAM_ARMOR,
+	PLAYER_CALC_PARAM_AMMO,
+	PLAYER_CALC_PARAM_AMMO_INCLUDE_CLIP,
+};
+
+enum
+{
+	PLAYER_CALC_ABSOLUTE,
+	PLAYER_CALC_FRACTION,
+};
+
+class CPlayerCalcRatio : public CPointEntity
+{
+public:
+	void KeyValue(KeyValueData *pkvd)
+	{
+		if (FStrEq(pkvd->szKeyName, "calc_param"))
+		{
+			pev->impulse = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "value_notion"))
+		{
+			pev->button = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "ammo_name"))
+		{
+			pev->message = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+	bool CalcRatio(CBaseEntity *pLocus, float *outResult)
+	{
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pLocus);
+		if (!pPlayer) {
+			return false;
+		}
+		bool success = true;
+		*outResult = CalcParam(pev->impulse, pPlayer, pev->button == PLAYER_CALC_FRACTION, success);
+		return success;
+	}
+private:
+	float CalcParam(int paramType, CBasePlayer* pPlayer, bool isFraction, bool& success)
+	{
+		success = true;
+		switch (paramType) {
+		case PLAYER_CALC_PARAM_HEALTH:
+		{
+			if (pPlayer->pev->health <= 0.0f)
+				return 0.0f;
+			if (isFraction)
+			{
+				return pPlayer->pev->health / pPlayer->pev->max_health;
+			}
+			else
+			{
+				return pPlayer->pev->health;
+			}
+		}
+		case PLAYER_CALC_PARAM_ARMOR:
+		{
+			if (isFraction)
+			{
+				return pPlayer->pev->armorvalue / MAX_NORMAL_BATTERY;
+			}
+			else
+			{
+				return pPlayer->pev->armorvalue;
+			}
+		}
+		case PLAYER_CALC_PARAM_AMMO:
+		case PLAYER_CALC_PARAM_AMMO_INCLUDE_CLIP:
+		{
+			if (FStringNull(pev->message))
+			{
+				ALERT(at_warning, "Requesting player's ammo amount via %s, but the ammo name is not specified\n", STRING(pev->classname));
+				success = false;
+				return 0.0f;
+			}
+			const char* ammoName = STRING(pev->message);
+			const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(ammoName);
+			if (!ammoType)
+			{
+				success = false;
+				return 0.0f;
+			}
+			int ammoAmount = pPlayer->AmmoInventory(ammoType->id);
+			int ammoMax = ammoType->maxAmmo;
+
+			if (paramType == PLAYER_CALC_PARAM_AMMO_INCLUDE_CLIP)
+			{
+				for (int i=1; i<MAX_WEAPONS; ++i)
+				{
+					CBasePlayerWeapon* pWeapon = pPlayer->WeaponById(i);
+					if (!pWeapon)
+						continue;
+					if (pWeapon->iMaxClip() == WEAPON_NOCLIP)
+						continue;
+					const char* ammo1 = pWeapon->pszAmmo1();
+					if (ammo1 && strcmp(ammo1, ammoName) == 0)
+					{
+						ammoAmount += pWeapon->m_iClip;
+						ammoMax += pWeapon->iMaxClip();
+					}
+				}
+			}
+			if (isFraction)
+			{
+				return (float)ammoAmount / ammoMax;
+			}
+			else
+			{
+				return ammoAmount;
+			}
+		}
+		default:
+			ALERT(at_warning, "Unknown player calc parameter %d in %s!\n", paramType, STRING(pev->classname));
+			success = false;
+			return 0.0f;
+		}
+	}
+};
+
+LINK_ENTITY_TO_CLASS( player_calc_ratio, CPlayerCalcRatio )
+
+enum
+{
 	PLAYER_HAS_SUIT = 0,
 	PLAYER_HAS_FLASHLIGHT = 1,
 	PLAYER_HAS_NVG = 2,
