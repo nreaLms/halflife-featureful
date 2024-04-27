@@ -67,6 +67,7 @@ struct ModFeatures
 
 	bool blackops_classify;
 	bool opfor_grunts_dislike_civilians;
+	bool medic_drop_healthkit;
 
 	bool racex_dislike_alien_military;
 	bool racex_dislike_gargs;

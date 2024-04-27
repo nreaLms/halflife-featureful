@@ -65,6 +65,7 @@ ModFeatures::ModFeatures()
 
 	blackops_classify = false;
 	opfor_grunts_dislike_civilians = FEATURE_OPFOR_SPECIFIC ? true : false;
+	medic_drop_healthkit = false;
 
 	racex_dislike_alien_military = true;
 	racex_dislike_gargs = true;
@@ -126,6 +127,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(monsters_spawned_named_wait_trigger),
 		KEY_VALUE_DEF(blackops_classify),
 		KEY_VALUE_DEF(opfor_grunts_dislike_civilians),
+		KEY_VALUE_DEF(medic_drop_healthkit),
 		KEY_VALUE_DEF(racex_dislike_alien_military),
 		KEY_VALUE_DEF(racex_dislike_gargs),
 		KEY_VALUE_DEF(racex_dislike_alien_monsters),

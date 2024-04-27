@@ -31,8 +31,6 @@
 #include	"game.h"
 #include	"gamerules.h"
 
-#define FEATURE_MEDIC_DROP_HEALTHKIT 0
-
 #if FEATURE_OPFOR_GRUNT
 //=========================================================
 //
@@ -3886,10 +3884,8 @@ void CMedic::DropMyItems(BOOL isGibbed)
 		else if (FBitSet(pev->weapons, MEDIC_HANDGUN)) {
 			DropMyItem("weapon_9mmhandgun", vecGunPos, vecGunAngles, isGibbed);
 		}
-#if FEATURE_MEDIC_DROP_HEALTHKIT
-		if (m_flHealCharge >= gSkillData.healthkitCapacity)
+		if (g_modFeatures.medic_drop_healthkit && m_flHealCharge >= gSkillData.healthkitCapacity)
 			DropMyItem("item_healthkit", BodyTarget( pev->origin ), vecGunAngles, isGibbed);
-#endif
 	}
 }
 
