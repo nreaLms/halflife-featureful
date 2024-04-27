@@ -6286,9 +6286,26 @@ public:
 		*outResult = g_iSkillLevel;
 		return true;
 	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+private:
+	string_t m_triggerOnEasy;
+	string_t m_triggerOnMedium;
+	string_t m_triggerOnHard;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_skill_test, CTriggerSkillTest )
+
+TYPEDESCRIPTION	CTriggerSkillTest::m_SaveData[] =
+{
+	DEFINE_FIELD( CTriggerSkillTest, m_triggerOnEasy, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerSkillTest, m_triggerOnMedium, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerSkillTest, m_triggerOnHard, FIELD_STRING ),
+};
+IMPLEMENT_SAVERESTORE( CTriggerSkillTest, CPointEntity )
 
 void CTriggerSkillTest::KeyValue(KeyValueData *pkvd)
 {
@@ -6307,6 +6324,21 @@ void CTriggerSkillTest::KeyValue(KeyValueData *pkvd)
 		pev->message = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_on_easy" ) )
+	{
+		m_triggerOnEasy = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_on_medium" ) )
+	{
+		m_triggerOnMedium = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "trigger_on_hard" ) )
+	{
+		m_triggerOnHard = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue( pkvd );
 }
@@ -6317,29 +6349,29 @@ void CTriggerSkillTest::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	if (!pPlayer)
 		return;
 
-	const int testValue = g_iSkillLevel;
+	const int skillLevel = g_iSkillLevel;
 	const int comparand = pev->button;
 
 	bool success = false;
 
 	switch (pev->impulse) {
 	case COMPARISON_TEST_EQUAL:
-		success = testValue == comparand;
+		success = skillLevel == comparand;
 		break;
 	case COMPARISON_TEST_GREATER:
-		success = testValue > comparand;
+		success = skillLevel > comparand;
 		break;
 	case COMPARISON_TEST_GTE:
-		success = testValue >= comparand;
+		success = skillLevel >= comparand;
 		break;
 	case COMPARISON_TEST_LESS:
-		success = testValue < comparand;
+		success = skillLevel < comparand;
 		break;
 	case COMPARISON_TEST_LTE:
-		success = testValue <= comparand;
+		success = skillLevel <= comparand;
 		break;
 	case COMPARISON_TEST_NOT_EQUAL:
-		success = testValue != comparand;
+		success = skillLevel != comparand;
 		break;
 	default:
 		ALERT(at_error, "Unknown test type in %s: %d\n", STRING(pev->classname), pev->impulse);
@@ -6347,9 +6379,21 @@ void CTriggerSkillTest::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	}
 
 	if (success && pev->target) {
-		FireTargets(STRING(pev->target), pActivator, this, USE_TOGGLE, 0.0f);
+		FireTargets(STRING(pev->target), pActivator, this);
 	}
 	if (!success && pev->message) {
-		FireTargets(STRING(pev->message), pActivator, this, USE_TOGGLE, 0.0f);
+		FireTargets(STRING(pev->message), pActivator, this);
+	}
+
+	int skills[] = { SKILL_EASY, SKILL_MEDIUM, SKILL_HARD };
+	string_t skillTriggers[] = { m_triggerOnEasy, m_triggerOnMedium, m_triggerOnHard };
+
+	for (int i=0; i<ARRAYSIZE(skills); ++i)
+	{
+		if (skillTriggers[i] && skills[i] == skillLevel)
+		{
+			FireTargets(STRING(skillTriggers[i]), pActivator, this);
+			break;
+		}
 	}
 }

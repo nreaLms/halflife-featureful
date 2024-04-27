@@ -8147,6 +8147,9 @@
 	]
 	target(target_destination) : "Fire on comparison pass"
 	target_on_fail(target_destination) : "Fire on comparison fail"
+	trigger_on_easy(target_destination) : "Fire on Easy"
+	trigger_on_medium(target_destination) : "Fire on Medium"
+	trigger_on_hard(target_destination) : "Fire on Hard"
 ]
 
 @SolidClass base(Targetname) = trigger_transition : "Trigger: Select Transition Area" []
