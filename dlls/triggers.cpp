@@ -6070,21 +6070,21 @@ public:
 			CPointEntity::KeyValue( pkvd );
 	}
 
-	float BaseValue(bool& success)
+	float BaseValue(bool& success, CBaseEntity* pActivator)
 	{
-		return CalcValue(m_value, m_valueSource, m_valueIsNumber, success);
+		return CalcValue(m_value, m_valueSource, m_valueIsNumber, success, pActivator);
 	}
-	float CompareValue(bool& success)
+	float CompareValue(bool& success, CBaseEntity* pActivator)
 	{
-		return CalcValue(m_compareValue, m_compareValueSource, m_compareValueIsNumber, success);
+		return CalcValue(m_compareValue, m_compareValueSource, m_compareValueIsNumber, success, pActivator);
 	}
 
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
 		bool valueSuccess;
-		const float baseValue = BaseValue(valueSuccess);
+		const float baseValue = BaseValue(valueSuccess, pActivator);
 		bool compareValueSuccess;
-		const float compareValue = CompareValue(compareValueSuccess);
+		const float compareValue = CompareValue(compareValueSuccess, pActivator);
 
 		if (!valueSuccess || !compareValueSuccess)
 		{
@@ -6126,7 +6126,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 private:
-	float CalcValue(float numValue, string_t valueSource, byte valueIsNumber, bool& success)
+	float CalcValue(float numValue, string_t valueSource, byte valueIsNumber, bool& success, CBaseEntity* pActivator)
 	{
 		if (valueIsNumber)
 		{
@@ -6136,7 +6136,7 @@ private:
 		else
 		{
 			float result = 0;
-			success = TryCalcLocus_Ratio(NULL, STRING(valueSource), result);
+			success = TryCalcLocus_Ratio(pActivator, STRING(valueSource), result);
 			return result;
 		}
 	}
