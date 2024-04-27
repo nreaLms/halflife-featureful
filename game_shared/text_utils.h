@@ -46,11 +46,11 @@ WordBoundaries SplitIntoWordBoundaries(It begin, It end)
 	return boundaries;
 }
 
-WordBoundaries SplitIntoWordBoundaries(const std::string &message) {
+inline WordBoundaries SplitIntoWordBoundaries(const std::string &message) {
 	return SplitIntoWordBoundaries(message.begin(), message.end());
 }
 
-WordBoundaries SplitIntoWordBoundaries(const char* message) {
+inline WordBoundaries SplitIntoWordBoundaries(const char* message) {
 	return SplitIntoWordBoundaries(message, message + strlen(message));
 }
 
