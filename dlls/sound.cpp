@@ -1611,7 +1611,8 @@ void SENTENCEG_Init()
 		}
 	}
 
-	ALERT(at_aiconsole, "Number of sentence groups: %d/%d\nNumber of sentences: %d/%d\n", isentencegs, CSENTENCEG_MAX, gcallsentences, CVOXFILESENTENCEMAX);
+	ALERT(at_aiconsole, "Number of sentence groups: %d/%d\n", isentencegs, CSENTENCEG_MAX);
+	ALERT(at_aiconsole, "Number of sentences: %d out of max %d (on GoldSource) and %d (on Xash3D)\n", gcallsentences, CVOXFILESENTENCEMAX_GOLDSOURCE_ANNIVERSARY_25, CVOXFILESENTENCEMAX_XASH3D);
 
 	g_engfuncs.pfnFreeFile( pMemFile );
 
