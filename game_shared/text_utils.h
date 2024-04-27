@@ -1,6 +1,6 @@
 #pragma once
 #ifndef TEXT_UTILS_H
-#define TEXT_UTIL_H
+#define TEXT_UTILS_H
 
 #include <vector>
 #include <string>
