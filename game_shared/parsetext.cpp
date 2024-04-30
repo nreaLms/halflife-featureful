@@ -66,6 +66,15 @@ void ConsumeLineSignificantOnly(const char *text, int& i, const int length)
 	}
 }
 
+bool ConsumeLineUntil(const char *text, int &i, const int length, char c)
+{
+	while(i<length && text[i] != c && text[i] != '\n' && text[i] != '\r' && text[i] != '\0')
+	{
+		++i;
+	}
+	return text[i] == c;
+}
+
 bool ReadIdentifier(const char *text, int& i, char* identBuf, unsigned int identBufSize)
 {
 	if (identBufSize < 2)

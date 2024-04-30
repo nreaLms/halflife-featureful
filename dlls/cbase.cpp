@@ -640,6 +640,11 @@ bool CBaseEntity::EmitSoundDyn(int channel, const char *sample, float volume, fl
 	return EMIT_SOUND_DYN(edict(), channel, sample, volume, attenuation, flags, pitch);
 }
 
+bool CBaseEntity::EmitSound(int channel, const char *sample, float volume, float attenuation)
+{
+	return EmitSoundDyn(channel, sample, volume, attenuation, 0, PITCH_NORM);
+}
+
 int CBaseEntity::Save( CSave &save )
 {
 	if( save.WriteEntVars( "ENTVARS", pev ) )

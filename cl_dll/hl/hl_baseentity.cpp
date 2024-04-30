@@ -58,6 +58,7 @@ int CBaseEntity::DamageDecal( int bitsDamageType ) { return -1; }
 CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner ) { return NULL; }
 void CBaseEntity::UpdateOnRemove( void ) { }
 void CBaseEntity::SUB_Remove( void ) { }
+int CBaseEntity::PRECACHE_SOUND(const char *soundName) { return 0; }
 
 // CBaseDelay Stubs
 void CBaseDelay::KeyValue( struct KeyValueData_s * ) { }
@@ -73,7 +74,7 @@ edict_t *DBG_EntOfVars( const entvars_t *pev ) { return NULL; }
 void DBG_AssertFunction( BOOL fExpr, const char *szExpr, const char *szFile, int szLine, const char *szMessage) { }
 
 // UTIL_* Stubs
-void UTIL_PrecacheOther( const char *szClassname ) { }
+void UTIL_PrecacheOther( const char *szClassname, string_t soundList ) { }
 void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, int amount ) { }
 void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber ) { }
 void UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber ) { }

@@ -1675,7 +1675,7 @@ BOOL UTIL_IsValidEntity( edict_t *pent )
 	return TRUE;
 }
 
-void UTIL_PrecacheOther( const char *szClassname )
+void UTIL_PrecacheOther( const char *szClassname, string_t soundList )
 {
 	edict_t	*pent;
 
@@ -1688,7 +1688,10 @@ void UTIL_PrecacheOther( const char *szClassname )
 	
 	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
 	if( pEntity && pEntity->IsEnabledInMod() )
+	{
+		pEntity->m_soundList = soundList;
 		pEntity->Precache();
+	}
 	REMOVE_ENTITY( pent );
 }
 

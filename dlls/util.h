@@ -344,7 +344,7 @@ extern void			UTIL_Bubbles( Vector mins, Vector maxs, int count );
 extern void			UTIL_BubbleTrail( Vector from, Vector to, int count );
 
 // allows precacheing of other entities
-extern void			UTIL_PrecacheOther( const char *szClassname );
+extern void			UTIL_PrecacheOther(const char *szClassname, string_t soundList = iStringNull);
 extern void			UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship , Vector *vecMin = NULL, Vector *vecMax = NULL);
 
 // prints a message to each client

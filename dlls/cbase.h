@@ -285,6 +285,7 @@ public:
 	string_t m_soundList; // sound replacement list file name
 	int PRECACHE_SOUND(const char* soundName);
 	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
+	bool EmitSound( int channel, const char *sample, float volume, float attenuation );
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )
