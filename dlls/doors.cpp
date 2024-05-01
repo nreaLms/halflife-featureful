@@ -1266,6 +1266,13 @@ public:
 
 	BYTE m_bMoveSnd;			// sound a door makes while moving	
 	BYTE m_bStopSnd;			// sound a door makes when it stops
+
+	float m_fLastPos;
+
+	bool CalcRatio(CBaseEntity *pLocus, float *outResult) {
+		*outResult = m_fLastPos;
+		return true;
+	}
 };
 
 LINK_ENTITY_TO_CLASS( momentary_door, CMomentaryDoor )
@@ -1274,6 +1281,7 @@ TYPEDESCRIPTION	CMomentaryDoor::m_SaveData[] =
 {
 	DEFINE_FIELD( CMomentaryDoor, m_bMoveSnd, FIELD_CHARACTER ),
 	DEFINE_FIELD( CMomentaryDoor, m_bStopSnd, FIELD_CHARACTER ),
+	DEFINE_FIELD( CMomentaryDoor, m_fLastPos, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CMomentaryDoor, CBaseToggle )
@@ -1440,6 +1448,7 @@ void CMomentaryDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		else if( move == m_vecFinalDest )
 			return;
 
+		m_fLastPos = value;
 		LinearMove( move, speed );
 		SetMoveDone( &CMomentaryDoor::MomentaryMoveDone );
 	}
