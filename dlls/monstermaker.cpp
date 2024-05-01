@@ -371,7 +371,7 @@ void CMonsterMaker::Precache( void )
 		PRECACHE_MODEL(STRING(m_gibModel));
 
 	if (CheckMonsterClassname())
-		UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize );
+		UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize, m_soundList );
 
 	UTIL_PrecacheOther("monstermaker_hull");
 }
@@ -638,7 +638,12 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 	if (!FStringNull(m_customModel))
 		pevCreate->model = m_customModel;
 
-	CBaseMonster* createdMonster = GetMonsterPointer(pent);
+	CBaseEntity* pEntity = CBaseEntity::Instance(pent);
+	if (pEntity)
+	{
+		pEntity->m_soundList = m_soundList;
+	}
+	CBaseMonster* createdMonster = pEntity ? pEntity->MyMonsterPointer() : NULL;
 	if (createdMonster)
 	{
 		// Children hit monsterclip brushes

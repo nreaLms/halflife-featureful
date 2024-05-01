@@ -214,7 +214,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 		else if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
 		{
 			Sniperrifle();
-			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sniper_fire.wav", 1, 0.6);
+			EmitSound( CHAN_WEAPON, "weapons/sniper_fire.wav", 1, 0.6);
 			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 512, 0.3);
 
 			Vector vecGunPos;

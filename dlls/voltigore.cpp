@@ -569,7 +569,7 @@ void CVoltigore::IdleSound(void)
 //=========================================================
 void CVoltigore::PainSound(void)
 {
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, RANDOM_LONG(85, 120));
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, RANDOM_LONG(85, 120));
 }
 
 //=========================================================
@@ -577,7 +577,7 @@ void CVoltigore::PainSound(void)
 //=========================================================
 void CVoltigore::AlertSound(void)
 {
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, RANDOM_LONG(140, 160));
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, RANDOM_LONG(140, 160));
 }
 
 //=========================================================
@@ -966,7 +966,7 @@ void CVoltigore::StartTask(Task_t *pTask)
 			m_fShouldUpdateBeam = TRUE;
 
 			// Play the beam 'glow' sound.
-			EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, "debris/beamstart1.wav", 1, ATTN_NORM, 0, PITCH_HIGH);
+			EmitSoundDyn( CHAN_BODY, "debris/beamstart1.wav", 1, ATTN_NORM, 0, PITCH_HIGH);
 
 			CSquadMonster::StartTask(pTask);
 		}
@@ -1238,7 +1238,7 @@ void CBabyVoltigore::HandleAnimEvent(MonsterEvent_t* pEvent)
 	switch (pEvent->event)
 	{
 	case BABY_VOLTIGORE_AE_RUN:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pFootstepSounds), RANDOM_FLOAT(0.5, 0.6), ATTN_NORM, 0, RANDOM_LONG(85, 120));
+		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pFootstepSounds), RANDOM_FLOAT(0.5, 0.6), ATTN_NORM, 0, RANDOM_LONG(85, 120));
 		break;
 
 	case VOLTIGORE_AE_PUNCH_SINGLE:
@@ -1319,7 +1319,7 @@ void CBabyVoltigore::StartTask(Task_t *pTask)
 	{
 	case TASK_MELEE_ATTACK1:
 	{
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackMeleeSounds), RANDOM_FLOAT(0.5, 0.6), ATTN_NONE, 0, RANDOM_LONG(110, 120));
+		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackMeleeSounds), RANDOM_FLOAT(0.5, 0.6), ATTN_NONE, 0, RANDOM_LONG(110, 120));
 		CSquadMonster::StartTask(pTask);
 	}
 	break;

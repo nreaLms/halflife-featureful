@@ -416,7 +416,7 @@ int CPitWorm::DefaultClassify(void)
 //=========================================================
 void CPitWorm::IdleSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), VOL_NORM, PITWORM_ATTN);
+	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), VOL_NORM, PITWORM_ATTN);
 }
 
 //=========================================================
@@ -424,7 +424,7 @@ void CPitWorm::IdleSound(void)
 //=========================================================
 void CPitWorm::AlertSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), VOL_NORM, PITWORM_ATTN);
+	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), VOL_NORM, PITWORM_ATTN);
 }
 
 //=========================================================
@@ -432,7 +432,7 @@ void CPitWorm::AlertSound(void)
 //=========================================================
 void CPitWorm::DeathSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), VOL_NORM, PITWORM_ATTN);
+	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), VOL_NORM, PITWORM_ATTN);
 }
 
 void CPitWorm::PainSound(void)
@@ -440,7 +440,7 @@ void CPitWorm::PainSound(void)
 	if (m_flNextPainSound <= gpGlobals->time)
 	{
 		m_flNextPainSound = gpGlobals->time + RANDOM_LONG(2, 5);
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), VOL_NORM, PITWORM_ATTN);
+		EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), VOL_NORM, PITWORM_ATTN);
 	}
 }
 
@@ -449,7 +449,7 @@ void CPitWorm::PainSound(void)
 //=========================================================
 void CPitWorm::AngrySound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAngrySounds), VOL_NORM, PITWORM_ATTN);
+	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pAngrySounds), VOL_NORM, PITWORM_ATTN);
 }
 
 //=========================================================
@@ -457,7 +457,7 @@ void CPitWorm::AngrySound(void)
 //=========================================================
 void CPitWorm::SwipeSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pSwipeSounds), VOL_NORM, PITWORM_ATTN);
+	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pSwipeSounds), VOL_NORM, PITWORM_ATTN);
 }
 
 //=========================================================
@@ -465,7 +465,7 @@ void CPitWorm::SwipeSound(void)
 //=========================================================
 void CPitWorm::BeamSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, "pitworm/pit_worm_attack_eyeblast.wav", VOL_NORM, PITWORM_ATTN);
+	EmitSound(CHAN_VOICE, "pitworm/pit_worm_attack_eyeblast.wav", VOL_NORM, PITWORM_ATTN);
 }
 
 //=========================================================
@@ -477,7 +477,7 @@ void CPitWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 	case PITWORM_AE_SWIPE:	// bang
 	{
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pHitGroundSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_FLOAT(-5,5));
+		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pHitGroundSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_FLOAT(-5,5));
 
 		if (pev->sequence == 2)
 			UTIL_ScreenShake(pev->origin, 12.0, 100.0, 2.0, 100);
@@ -868,7 +868,7 @@ void CPitWorm::HitTouch(CBaseEntity* pOther)
 		pOther->TakeDamage(pev, pev, gSkillData.pwormDmgSwipe, DMG_CRUSH|DMG_SLASH);
 		pOther->pev->punchangle.z = 15;
 		pOther->pev->velocity.z += 200;
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_FLOAT(-5,5));
+		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_FLOAT(-5,5));
 		m_flHitTime = gpGlobals->time + 1.0;
 	}
 }
@@ -945,7 +945,7 @@ void CPitWorm::NextActivity()
 	}
 	if (m_hEnemy != 0 && !m_fFirstSighting)
 	{
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "pitworm/pit_worm_alert.wav", VOL_NORM, 0.1, 0, 100);
+		EmitSoundDyn( CHAN_VOICE, "pitworm/pit_worm_alert.wav", VOL_NORM, 0.1, 0, 100);
 		m_fFirstSighting = TRUE;
 		pev->sequence = LookupSequence("scream");
 	}
@@ -1187,7 +1187,7 @@ void CPitWorm::ShootBeam()
 				m_flIdealHeadYaw += m_flBeamDir * 50;
 			}
 
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pShootSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pShootSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
 
 			EyeLight(vecEyePos);
 

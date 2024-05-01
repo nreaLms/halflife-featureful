@@ -56,7 +56,7 @@ public:
 	void Precache(void);
 	void EXPORT SpikeTouch(CBaseEntity *pOther);
 	void EXPORT StartTrail();
-	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles);
+	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles, string_t soundList = iStringNull);
 };
 
 LINK_ENTITY_TO_CLASS(pitdronespike, CPitdroneSpike)
@@ -102,7 +102,7 @@ void CPitdroneSpike::SpikeTouch(CBaseEntity *pOther)
 
 	if (!pOther->pev->takedamage)
 	{
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/xbow_hit1.wav", 1, ATTN_NORM, 0, iPitch);
+		EmitSoundDyn( CHAN_WEAPON, "weapons/xbow_hit1.wav", 1, ATTN_NORM, 0, iPitch);
 		// make a horn in the wall
 
 		if (FClassnameIs(pOther->pev, "worldspawn"))
@@ -125,9 +125,9 @@ void CPitdroneSpike::SpikeTouch(CBaseEntity *pOther)
 		entvars_t	*pevOwner = VARS(pev->owner);
 		pOther->TakeDamage(pev, pevOwner, gSkillData.pitdroneDmgSpit, DMG_GENERIC | DMG_NEVERGIB);
 		if (RANDOM_LONG(0,1))
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/xbow_hitbod1.wav", 1, ATTN_NORM, 0, iPitch);
+			EmitSoundDyn( CHAN_WEAPON, "weapons/xbow_hitbod1.wav", 1, ATTN_NORM, 0, iPitch);
 		else
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/xbow_hitbod2.wav", 1, ATTN_NORM, 0, iPitch);
+			EmitSoundDyn( CHAN_WEAPON, "weapons/xbow_hitbod2.wav", 1, ATTN_NORM, 0, iPitch);
 	}
 }
 
@@ -149,9 +149,10 @@ void CPitdroneSpike::StartTrail()
 	SetTouch(&CPitdroneSpike::SpikeTouch);
 }
 
-void CPitdroneSpike::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles)
+void CPitdroneSpike::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles, string_t soundList)
 {
 	CPitdroneSpike *pSpit = GetClassPtr( (CPitdroneSpike *)NULL );
+	pSpit->m_soundList = soundList;
 	pSpit->Spawn();
 
 	UTIL_SetOrigin( pSpit->pev, vecStart );
@@ -469,10 +470,10 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 			switch( RANDOM_LONG( 0, 1 ) )
 			{
 			case 0:
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_bite2.wav", 0.7, ATTN_NORM, 0, iPitch );
+				EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite2.wav", 0.7, ATTN_NORM, 0, iPitch );
 				break;
 			case 1:
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_bite3.wav", 0.7, ATTN_NORM, 0, iPitch );
+				EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite3.wav", 0.7, ATTN_NORM, 0, iPitch );
 				break;
 			}
 
@@ -486,7 +487,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 			}
 		}
 		else
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, pAttackMissSounds[RANDOM_LONG(0, ARRAYSIZE(pAttackMissSounds) - 1)], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
+			EmitSoundDyn( CHAN_WEAPON, pAttackMissSounds[RANDOM_LONG(0, ARRAYSIZE(pAttackMissSounds) - 1)], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
 	}
 	break;
 
@@ -507,7 +508,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 			}
 		}
 		else // Play a random attack miss sound
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, pAttackMissSounds[RANDOM_LONG(0, ARRAYSIZE(pAttackMissSounds) - 1)], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
+			EmitSoundDyn( CHAN_WEAPON, pAttackMissSounds[RANDOM_LONG(0, ARRAYSIZE(pAttackMissSounds) - 1)], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
 		shouldAttackWithLeftClaw = !shouldAttackWithLeftClaw;
 	}
 	break;
@@ -554,7 +555,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 		// SOUND HERE! (in the pitdrone model)
 
-		CPitdroneSpike::Shoot(pev, vecSpitOrigin, vecSpitDir * 900, UTIL_VecToAngles(vecSpitDir));
+		CPitdroneSpike::Shoot(pev, vecSpitOrigin, vecSpitDir * 900, UTIL_VecToAngles(vecSpitDir), m_soundList);
 
 		// spew the spittle temporary ents.
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOrigin );
@@ -678,7 +679,7 @@ void CPitdrone::Precache()
 	PRECACHE_SOUND("pitdrone/pit_drone_hunt2.wav");
 	PRECACHE_SOUND("pitdrone/pit_drone_hunt3.wav");
 
-	UTIL_PrecacheOther("pitdronespike");
+	UTIL_PrecacheOther("pitdronespike", m_soundList);
 
 }
 
@@ -689,7 +690,7 @@ void CPitdrone::Precache()
 #define PITDRONE_ATTN_IDLE	(float)1.5
 void CPitdrone::IdleSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, PITDRONE_ATTN_IDLE);
+	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, PITDRONE_ATTN_IDLE);
 }
 
 //=========================================================
@@ -698,7 +699,7 @@ void CPitdrone::IdleSound(void)
 void CPitdrone::PainSound(void)
 {
 	int iPitch = RANDOM_LONG(85, 120);
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundDyn(CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
 }
 
 //=========================================================
@@ -707,14 +708,14 @@ void CPitdrone::PainSound(void)
 void CPitdrone::AlertSound(void)
 {
 	int iPitch = RANDOM_LONG(140, 160);
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundDyn(CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, iPitch);
 }
 //=========================================================
 // DeathSound
 //=========================================================
 void CPitdrone::DeathSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM);
+	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM);
 }
 
 void CPitdrone::RunAI(void)
@@ -1151,12 +1152,12 @@ void CPitdrone::RunTask(Task_t *pTask)
 
 void CPitdrone::PlayUseSentence()
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
 }
 
 void CPitdrone::PlayUnUseSentence()
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
 }
 
 class CDeadPitdrone : public CDeadMonster

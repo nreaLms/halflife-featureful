@@ -30,7 +30,7 @@ public:
 	void Spawn(void);
 	void Precache();
 
-	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
+	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList = iStringNull);
 	static float SpitSpeed() { return 900.0f; }
 	void Touch(CBaseEntity *pOther);
 	void EXPORT Animate(void);
@@ -51,7 +51,7 @@ public:
 	void Spawn( void );
 	void Precache();
 
-	static void Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
+	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity , string_t soundList = iStringNull);
 	static float SpitSpeed() { return 600.0f; }
 	void Touch( CBaseEntity *pOther );
 	void EXPORT Animate( void );

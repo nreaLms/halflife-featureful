@@ -302,7 +302,7 @@ void CController::HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_COORD( 32 ); // decay
 			MESSAGE_END();
 
-			CBaseMonster *pBall = (CBaseMonster*)Create( "controller_head_ball", vecStart, pev->angles, edict() );
+			CBaseMonster *pBall = (CBaseMonster*)Create( "controller_head_ball", vecStart, pev->angles, edict(), m_soundList );
 
 			pBall->pev->velocity = Vector( 0.0f, 0.0f, 32.0f );
 			if (m_pCine)
@@ -662,7 +662,7 @@ void CController::RunTask( Task_t *pTask )
 				vecDir = vecDir + Vector( RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ) ) * gSkillData.controllerSpeedBall;
 
 				vecSrc = vecSrc + vecDir * ( gpGlobals->time - m_flShootTime );
-				CBaseMonster *pBall = (CBaseMonster*)Create( "controller_energy_ball", vecSrc, pev->angles, edict() );
+				CBaseMonster *pBall = (CBaseMonster*)Create( "controller_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
 				pBall->pev->velocity = vecDir;
 			}
 			m_flShootTime += 0.2f;
@@ -1257,7 +1257,7 @@ void CControllerHeadBall::HuntThink( void )
 			WRITE_BYTE( 10 );		// speed
 		MESSAGE_END();
 
-		UTIL_EmitAmbientSound( ENT( pev ), tr.vecEndPos, "weapons/electro4.wav", 0.5f, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
+		EmitAmbientSound( tr.vecEndPos, "weapons/electro4.wav", 0.5f, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
 
 		m_flNextAttack = gpGlobals->time + 3.0f;
 
@@ -1406,7 +1406,7 @@ void CControllerZapBall::ExplodeTouch( CBaseEntity *pOther )
 
 		pOther->ApplyTraceAttack(pev, pevOwner, gSkillData.controllerDmgBall, pev->velocity.Normalize(), &tr, DMG_ENERGYBEAM);
 
-		UTIL_EmitAmbientSound( ENT( pev ), tr.vecEndPos, "weapons/electro4.wav", 0.3f, ATTN_NORM, 0, RANDOM_LONG( 90, 99 ) );
+		EmitAmbientSound( tr.vecEndPos, "weapons/electro4.wav", 0.3f, ATTN_NORM, 0, RANDOM_LONG( 90, 99 ) );
 	}
 
 	UTIL_Remove( this );

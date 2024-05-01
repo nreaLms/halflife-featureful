@@ -118,9 +118,10 @@ void CSquidSpit::Animate( void )
 	}
 }
 
-void CSquidSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity )
+void CSquidSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList )
 {
 	CSquidSpit *pSpit = GetClassPtr( (CSquidSpit *)NULL );
+	pSpit->m_soundList = soundList;
 	pSpit->Spawn();
 
 	UTIL_SetOrigin( pSpit->pev, vecStart );
@@ -139,15 +140,15 @@ void CSquidSpit::Touch( CBaseEntity *pOther )
 	// splat sound
 	iPitch = RANDOM_FLOAT( 90.0f, 110.0f );
 
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );
+	EmitSoundDyn( CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );
 
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );
+		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
+		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
 		break;
 	}
 
@@ -281,9 +282,10 @@ void CSquidToxicSpit::Animate( void )
 	}
 }
 
-void CSquidToxicSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity )
+void CSquidToxicSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList )
 {
 	CSquidToxicSpit *pSpit = GetClassPtr( (CSquidToxicSpit *)NULL );
+	pSpit->m_soundList = soundList;
 	pSpit->Spawn();
 
 	UTIL_SetOrigin( pSpit->pev, vecStart );
@@ -302,15 +304,15 @@ void CSquidToxicSpit::Touch( CBaseEntity *pOther )
 	// splat sound
 	iPitch = RANDOM_FLOAT( 90, 110 );
 
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "bullchicken/bc_acid2.wav", 1, ATTN_NORM, 0, iPitch );
+	EmitSoundDyn( CHAN_VOICE, "bullchicken/bc_acid2.wav", 1, ATTN_NORM, 0, iPitch );
 
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
+		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_spithit3.wav", 1, ATTN_NORM, 0, iPitch );
+		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit3.wav", 1, ATTN_NORM, 0, iPitch );
 		break;
 	}
 
@@ -672,7 +674,7 @@ int CBullsquid::DefaultClassify( void )
 #define SQUID_ATTN_IDLE	(float)1.5
 void CBullsquid::IdleSound( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, SQUID_ATTN_IDLE );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, SQUID_ATTN_IDLE );
 }
 
 //=========================================================
@@ -681,7 +683,7 @@ void CBullsquid::IdleSound( void )
 void CBullsquid::PainSound( void )
 {
 	int iPitch = RANDOM_LONG( 85, 120 );
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch );
 }
 
 //=========================================================
@@ -690,7 +692,7 @@ void CBullsquid::PainSound( void )
 void CBullsquid::AlertSound( void )
 {
 	int iPitch = RANDOM_LONG( 140, 160 );
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, iPitch );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, iPitch );
 }
 
 //=========================================================
@@ -778,9 +780,9 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				MESSAGE_END();
 
 				if (toxicSpit) {
-					CSquidToxicSpit::Shoot(pev, vecSpitOrigin, vecSpitDir * CSquidToxicSpit::SpitSpeed());
+					CSquidToxicSpit::Shoot(pev, vecSpitOrigin, vecSpitDir * CSquidToxicSpit::SpitSpeed(), m_soundList);
 				} else {
-					CSquidSpit::Shoot( pev, vecSpitOrigin, vecSpitDir * CSquidSpit::SpitSpeed() );
+					CSquidSpit::Shoot( pev, vecSpitOrigin, vecSpitDir * CSquidSpit::SpitSpeed(), m_soundList );
 				}
 			}
 			break;
@@ -852,10 +854,10 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 					switch( RANDOM_LONG( 0, 1 ) )
 					{
 					case 0:
-						EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_bite2.wav", 1.0f, ATTN_NORM, 0, iPitch );
+						EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite2.wav", 1.0f, ATTN_NORM, 0, iPitch );
 						break;
 					case 1:
-						EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_bite3.wav", 1.0f, ATTN_NORM, 0, iPitch );
+						EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite3.wav", 1.0f, ATTN_NORM, 0, iPitch );
 						break;
 					}
 
@@ -910,9 +912,9 @@ void CBullsquid::Precache()
 {
 	PrecacheMyModel( "models/bullsquid.mdl" );
 
-	UTIL_PrecacheOther("squidspit");
+	UTIL_PrecacheOther("squidspit", m_soundList);
 #if FEATURE_BULLSQUID_TOXICSPIT
-	UTIL_PrecacheOther("squidtoxicspit"); // toxic spit projectile
+	UTIL_PrecacheOther("squidtoxicspit", m_soundList); // toxic spit projectile
 #endif
 
 	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
@@ -936,7 +938,7 @@ void CBullsquid::Precache()
 //=========================================================
 void CBullsquid::DeathSound( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM );
 }
 
 //=========================================================
@@ -945,15 +947,15 @@ void CBullsquid::DeathSound( void )
 void CBullsquid::AttackSound( bool bigSpit )
 {
 	if (bigSpit) {
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_attack1.wav", 1, ATTN_NORM );
+		EmitSound( CHAN_WEAPON, "bullchicken/bc_attack1.wav", 1, ATTN_NORM );
 	} else {
 		switch( RANDOM_LONG( 0, 1 ) )
 		{
 		case 0:
-			EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_attack2.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_WEAPON, "bullchicken/bc_attack2.wav", 1, ATTN_NORM );
 			break;
 		case 1:
-			EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_attack3.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_WEAPON, "bullchicken/bc_attack3.wav", 1, ATTN_NORM );
 			break;
 		}
 	}
@@ -1407,7 +1409,7 @@ void CBullsquid::StartTask( Task_t *pTask )
 	{
 	case TASK_MELEE_ATTACK2:
 		{
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackGrowlSounds), 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackGrowlSounds), 1, ATTN_NORM );
 			CBaseMonster::StartTask( pTask );
 			break;
 		}

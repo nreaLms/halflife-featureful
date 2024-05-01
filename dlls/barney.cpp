@@ -305,7 +305,7 @@ void CBarney::BarneyFirePistol( const char* shotSound, Bullet bullet )
 		pitchShift = 0;
 	else
 		pitchShift -= 5;
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, shotSound, 1.0f, ATTN_NORM, 0, 100 + pitchShift );
+	EmitSoundDyn( CHAN_WEAPON, shotSound, 1.0f, ATTN_NORM, 0, 100 + pitchShift );
 
 	CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 384, 0.3f );
 
@@ -472,13 +472,13 @@ void CBarney::PainSound( void )
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 2:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_pain3.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain3.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	}
 }
@@ -491,13 +491,13 @@ void CBarney::DeathSound( void )
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "barney/ba_die1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "barney/ba_die2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 2:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	}
 }
@@ -972,7 +972,7 @@ void CBarniel::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 void CBarniel::DeathSound( void )
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barniel/bn_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, "barniel/bn_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 void CBarniel::PainSound()
@@ -981,7 +981,7 @@ void CBarniel::PainSound()
 		return;
 
 	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "barniel/bn_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, "barniel/bn_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 void CBarniel::OnDying()
@@ -1144,7 +1144,7 @@ void CKate::HandleAnimEvent( MonsterEvent_t *pEvent )
 				else
 					pszSound = "common/punch.wav";
 			}
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, pszSound, 1, ATTN_NORM, 0, PITCH_NORM );
+			EmitSoundDyn( CHAN_VOICE, pszSound, 1, ATTN_NORM, 0, PITCH_NORM );
 			UTIL_MakeVectors( pev->angles );
 
 			pHurt->pev->punchangle.x = 5;
@@ -1206,7 +1206,7 @@ BOOL CKate::CheckMeleeAttack1(float flDot, float flDist)
 
 void CKate::DeathSound( void )
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "kate/ka_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, "kate/ka_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 void CKate::PainSound()
@@ -1219,10 +1219,10 @@ void CKate::PainSound()
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "kate/ka_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "kate/ka_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "kate/ka_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, "kate/ka_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 		break;
 	}
 }

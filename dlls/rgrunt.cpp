@@ -149,13 +149,13 @@ void CRGrunt::Precache()
 
 void CRGrunt::PlayUseSentence()
 {
-	EMIT_SOUND( edict(), CHAN_VOICE, "buttons/button3.wav", SentenceVolume(), SentenceAttn() );
+	EmitSound( CHAN_VOICE, "buttons/button3.wav", SentenceVolume(), SentenceAttn() );
 	JustSpoke();
 }
 
 void CRGrunt::PlayUnUseSentence()
 {
-	EMIT_SOUND( edict(), CHAN_VOICE, "buttons/button2.wav", SentenceVolume(), SentenceAttn() );
+	EmitSound( CHAN_VOICE, "buttons/button2.wav", SentenceVolume(), SentenceAttn() );
 	JustSpoke();
 }
 
@@ -164,13 +164,13 @@ void CRGrunt::DeathSound()
 	switch (RANDOM_LONG(0,2))
 	{
 	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "turret/tu_die.wav", 1.0, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "turret/tu_die.wav", 1.0, ATTN_NORM );
 		break;
 	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "turret/tu_die2.wav", 1.0, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "turret/tu_die2.wav", 1.0, ATTN_NORM );
 		break;
 	case 2:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "turret/tu_die3.wav", 1.0, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "turret/tu_die3.wav", 1.0, ATTN_NORM );
 		break;
 	}
 }
@@ -349,22 +349,22 @@ void CRGrunt::DoSpark(const Vector &sparkLocation, float flVolume)
 	switch( RANDOM_LONG( 0, 5 ) )
 	{
 		case 0:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "buttons/spark1.wav", flVolume, ATTN_NORM );
+			EmitSound( CHAN_BODY, "buttons/spark1.wav", flVolume, ATTN_NORM );
 			break;
 		case 1:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "buttons/spark2.wav", flVolume, ATTN_NORM );
+			EmitSound( CHAN_BODY, "buttons/spark2.wav", flVolume, ATTN_NORM );
 			break;
 		case 2:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "buttons/spark3.wav", flVolume, ATTN_NORM );
+			EmitSound( CHAN_BODY, "buttons/spark3.wav", flVolume, ATTN_NORM );
 			break;
 		case 3:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "buttons/spark4.wav", flVolume, ATTN_NORM );
+			EmitSound( CHAN_BODY, "buttons/spark4.wav", flVolume, ATTN_NORM );
 			break;
 		case 4:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "buttons/spark5.wav", flVolume, ATTN_NORM );
+			EmitSound( CHAN_BODY, "buttons/spark5.wav", flVolume, ATTN_NORM );
 			break;
 		case 5:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "buttons/spark6.wav", flVolume, ATTN_NORM );
+			EmitSound( CHAN_BODY, "buttons/spark6.wav", flVolume, ATTN_NORM );
 			break;
 	}
 }

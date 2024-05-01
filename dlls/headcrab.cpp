@@ -292,7 +292,7 @@ void CHeadCrab::AttackSound()
 {
 	int iSound = RANDOM_LONG(0,2);
 	if( iSound != 0 )
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 //=========================================================
@@ -385,7 +385,7 @@ void CHeadCrab::LeapTouch( CBaseEntity *pOther )
 	// Don't hit if back on ground
 	if( !FBitSet( pev->flags, FL_ONGROUND ) )
 	{
-		EMIT_SOUND_DYN( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBiteSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBiteSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 
 		pOther->TakeDamage( pev, pev, GetDamageAmount(), DMG_SLASH );
 	}
@@ -411,7 +411,7 @@ void CHeadCrab::StartTask( Task_t *pTask )
 	{
 	case TASK_RANGE_ATTACK1:
 		{
-			EMIT_SOUND_DYN( edict(), CHAN_WEAPON, pAttackSounds[0], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+			EmitSoundDyn( CHAN_WEAPON, pAttackSounds[0], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 			m_IdealActivity = ACT_RANGE_ATTACK1;
 			SetTouch( &CHeadCrab::LeapTouch );
 			break;
@@ -467,7 +467,7 @@ int CHeadCrab::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 //=========================================================
 void CHeadCrab::IdleSound( void )
 {
-	EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pIdleSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pIdleSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 //=========================================================
@@ -475,7 +475,7 @@ void CHeadCrab::IdleSound( void )
 //=========================================================
 void CHeadCrab::AlertSound( void )
 {
-	EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pAlertSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAlertSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 //=========================================================
@@ -483,7 +483,7 @@ void CHeadCrab::AlertSound( void )
 //=========================================================
 void CHeadCrab::PainSound( void )
 {
-	EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 //=========================================================
@@ -491,7 +491,7 @@ void CHeadCrab::PainSound( void )
 //=========================================================
 void CHeadCrab::DeathSound( void )
 {
-	EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 Schedule_t *CHeadCrab::GetScheduleOfType( int Type )
@@ -766,7 +766,7 @@ void CShockRoach::LeapTouch(CBaseEntity *pOther)
 	{
 		if (!FBitSet(pev->flags, FL_ONGROUND))
 		{
-			EMIT_SOUND_DYN(edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 			pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
 		}
 	}
@@ -823,7 +823,7 @@ void CShockRoach::MonsterThink(void)
 //=========================================================
 void CShockRoach::IdleSound(void)
 {
-	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 }
 
 //=========================================================
@@ -831,7 +831,7 @@ void CShockRoach::IdleSound(void)
 //=========================================================
 void CShockRoach::AlertSound(void)
 {
-	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 }
 
 //=========================================================
@@ -839,7 +839,7 @@ void CShockRoach::AlertSound(void)
 //=========================================================
 void CShockRoach::PainSound(void)
 {
-	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 }
 
 //=========================================================
@@ -847,7 +847,7 @@ void CShockRoach::PainSound(void)
 //=========================================================
 void CShockRoach::DeathSound(void)
 {
-	EMIT_SOUND_DYN(edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
 }
 
 
@@ -875,7 +875,7 @@ BOOL CShockRoach::ShouldFadeOnDeath()
 
 void CShockRoach::AttackSound()
 {
-	EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
 }
 
 int CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )

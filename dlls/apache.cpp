@@ -754,7 +754,7 @@ void CApache::Flight( void )
 	// make rotor, engine sounds
 	if( m_iSoundState == 0 )
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3f, 0, 110 );
+		EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3f, 0, 110 );
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", 0.5, 0.2, 0, 110 );
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
@@ -782,7 +782,7 @@ void CApache::Flight( void )
 			if( flVol > 1.0f ) 
 				flVol = 1.0f;*/
 
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3f, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
+			EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3f, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 		}
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", flVol, 0.2f, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 	
@@ -886,7 +886,7 @@ BOOL CApache::FireGun()
 	{
 #if 1
 		FireBullets( 1, posGun, vecGun, VECTOR_CONE_4DEGREES, 8192, BULLET_MONSTER_12MM, 1 );
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.3f );
+		EmitSound( CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.3f );
 #else
 		static float flNext;
 		TraceResult tr;
@@ -1070,7 +1070,7 @@ void CApacheHVR::IgniteThink( void )
 	pev->effects |= EF_LIGHT;
 
 	// make rocket sound
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/rocket1.wav", 1, 0.5f );
+	EmitSound( CHAN_VOICE, "weapons/rocket1.wav", 1, 0.5f );
 
 	// rocket trail
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );

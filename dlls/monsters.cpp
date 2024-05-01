@@ -3218,7 +3218,7 @@ void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 	case MONSTER_EVENT_SWISHSOUND:
 		{
 			// NO MONSTER may use this anim event unless that monster's precache precaches this sound!!!
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "zombie/claw_miss2.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_BODY, "zombie/claw_miss2.wav", 1, ATTN_NORM );
 			break;
 		}
 	default:

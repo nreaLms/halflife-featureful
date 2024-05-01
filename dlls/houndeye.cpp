@@ -373,10 +373,10 @@ void CHoundeye::HandleAnimEvent( MonsterEvent_t *pEvent )
 			SonicAttack();
 			break;
 		case HOUND_AE_ANGERSOUND1:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain3.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, "houndeye/he_pain3.wav", 1, ATTN_NORM );
 			break;
 		case HOUND_AE_ANGERSOUND2:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "houndeye/he_pain1.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, "houndeye/he_pain1.wav", 1, ATTN_NORM );
 			break;
 		case HOUND_AE_CLOSE_EYE:
 			if( m_iBlink == HOUNDEYE_BLINK )
@@ -441,7 +441,7 @@ void CHoundeye::Precache()
 //=========================================================
 void CHoundeye::IdleSound( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM );
 }
 
 //=========================================================
@@ -449,7 +449,7 @@ void CHoundeye::IdleSound( void )
 //=========================================================
 void CHoundeye::WarmUpSound( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pWarmupSounds), 0.7, ATTN_NORM );
+	EmitSound( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pWarmupSounds), 0.7, ATTN_NORM );
 }
 
 //=========================================================
@@ -457,7 +457,7 @@ void CHoundeye::WarmUpSound( void )
 //=========================================================
 void CHoundeye::WarnSound( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pWarnSounds), 1, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pWarnSounds), 1, ATTN_NORM );
 }
 
 //=========================================================
@@ -470,7 +470,7 @@ void CHoundeye::AlertSound( void )
 		return; // only leader makes ALERT sound.
 	}
 
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM );
 }
 
 //=========================================================
@@ -478,7 +478,7 @@ void CHoundeye::AlertSound( void )
 //=========================================================
 void CHoundeye::DeathSound( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM );
 }
 
 //=========================================================
@@ -486,7 +486,7 @@ void CHoundeye::DeathSound( void )
 //=========================================================
 void CHoundeye::PainSound( void )
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM );
 }
 
 //=========================================================
@@ -541,7 +541,7 @@ void CHoundeye::SonicAttack( void )
 	float flAdjustedDamage;
 	float flDist;
 
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBlastSounds), 1, ATTN_NORM );
+	EmitSound( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBlastSounds), 1, ATTN_NORM );
 
 	// blast circles
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );

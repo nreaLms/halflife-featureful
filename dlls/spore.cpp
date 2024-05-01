@@ -117,7 +117,7 @@ void CSpore::IgniteThink()
 		m_hSprite = 0;
 	}
 
-	EMIT_SOUND(edict(), CHAN_WEAPON, "weapons/splauncher_impact.wav", VOL_NORM, ATTN_NORM);
+	EmitSound(CHAN_WEAPON, "weapons/splauncher_impact.wav", VOL_NORM, ATTN_NORM);
 
 	const Vector vecDir = pev->velocity.Normalize();
 
@@ -254,7 +254,7 @@ void CSpore::MyBounceTouch(CBaseEntity* pOther)
 			}
 			else
 			{
-				EMIT_SOUND_DYN(edict(), CHAN_VOICE, "weapons/splauncher_bounce.wav", 0.25, ATTN_NORM, 0, PITCH_NORM);
+				EmitSoundDyn(CHAN_VOICE, "weapons/splauncher_bounce.wav", 0.25, ATTN_NORM, 0, PITCH_NORM);
 			}
 		}
 	}
@@ -266,7 +266,7 @@ void CSpore::MyBounceTouch(CBaseEntity* pOther)
 	}
 }
 
-CSpore* CSpore::CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, const Vector& vecVelocity, CBaseEntity* pOwner, SporeType sporeType, bool bIsAI, bool bPuked)
+CSpore* CSpore::CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, const Vector& vecVelocity, CBaseEntity* pOwner, SporeType sporeType, bool bIsAI, bool bPuked, string_t soundList)
 {
 	CSpore* pSpore = GetClassPtr((CSpore *)NULL);
 	UTIL_SetOrigin(pSpore->pev, vecOrigin);
@@ -470,7 +470,7 @@ void CSporeAmmo :: AmmoTouch ( CBaseEntity *pOther )
 	int bResult = (pOther->GiveAmmo( AMMO_SPORE_GIVE, "spores" ) != -1);
 	if (bResult)
 	{
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "weapons/spore_ammo.wav", 1, ATTN_NORM);
+		EmitSound(CHAN_ITEM, "weapons/spore_ammo.wav", 1, ATTN_NORM);
 
 		pev->frame = 0;
 		pev->animtime		= gpGlobals->time;

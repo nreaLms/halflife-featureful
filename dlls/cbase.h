@@ -286,6 +286,7 @@ public:
 	int PRECACHE_SOUND(const char* soundName);
 	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
 	bool EmitSound( int channel, const char *sample, float volume, float attenuation );
+	void EmitAmbientSound( const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch );
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )
@@ -389,8 +390,8 @@ public:
 	// used by monsters that are created by the MonsterMaker
 	virtual	void UpdateOwner( void ) { return; };
 
-	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL );
-	static CBaseEntity *CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL );
+	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, string_t soundList = iStringNull );
+	static CBaseEntity *CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, string_t soundList = iStringNull );
 
 	virtual BOOL FBecomeProne( void ) {return FALSE;};
 	edict_t *edict() { return ENT( pev ); };

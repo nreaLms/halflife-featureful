@@ -62,7 +62,7 @@ void CShock::FlyThink()
 	if (pev->waterlevel == 3)
 	{
 		entvars_t *pevOwner = VARS(pev->owner);
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
+		EmitSound(CHAN_VOICE, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
 		RadiusDamage(pev->origin, pev, pevOwner ? pevOwner : pev, pev->dmg * 3, 144, CLASS_NONE, DMG_SHOCK | DMG_ALWAYSGIB );
 		ClearEffects();
 		SetThink( &CBaseEntity::SUB_Remove );
@@ -74,10 +74,11 @@ void CShock::FlyThink()
 	}
 }
 
-void CShock::Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity)
+void CShock::Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity, string_t soundList)
 {
 	CShock *pShock = GetClassPtr((CShock *)NULL);
 	UTIL_SetOrigin(pShock->pev, vecStart);
+	pShock->m_soundList = soundList;
 	pShock->Spawn();
 
 	pShock->pev->velocity = vecVelocity;
@@ -152,7 +153,7 @@ void CShock::Touch(CBaseEntity *pOther)
 	}
 
 	// splat sound
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
+	EmitSound(CHAN_WEAPON, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
 
 	pev->modelindex = 0;
 	pev->solid = SOLID_NOT;

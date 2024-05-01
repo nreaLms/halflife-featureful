@@ -899,7 +899,7 @@ void CScientist::PainSound( void )
 
 void CScientist::PlayPainSound()
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 //=========================================================
@@ -1190,7 +1190,7 @@ void CScientist::Heal( void )
 		return;
 
 	m_hTargetEnt->TakeHealth(this, gSkillData.scientistHeal, DMG_GENERIC );
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "items/medshot4.wav", 0.75, ATTN_NORM );
+	EmitSound( CHAN_WEAPON, "items/medshot4.wav", 0.75, ATTN_NORM );
 
 	// Don't heal again for 1 minute
 	m_healTime = gpGlobals->time + gSkillData.scientistHealTime;
@@ -1733,7 +1733,7 @@ const char* CRosenberg::DefaultSentenceGroup(int group)
 
 void CRosenberg::PlayPainSound()
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 #endif
@@ -1955,11 +1955,11 @@ const char* CKeller::DefaultSentenceGroup(int group)
 
 void CKeller::PlayPainSound()
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 
 void CKeller::DeathSound()
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
 }
 #endif

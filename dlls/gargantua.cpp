@@ -208,7 +208,7 @@ void CStomp::Spawn( void )
 	pev->framerate = 30;
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 0;
-	EMIT_SOUND_DYN( edict(), CHAN_BODY, GARG_STOMP_BUZZ_SOUND, 1, pev->armortype > 0 ? pev->armortype : ATTN_NORM, 0, PITCH_NORM * 0.55f );
+	EmitSoundDyn( CHAN_BODY, GARG_STOMP_BUZZ_SOUND, 1, pev->armortype > 0 ? pev->armortype : ATTN_NORM, 0, PITCH_NORM * 0.55f );
 }
 
 #define	STOMP_INTERVAL		0.025f
@@ -678,8 +678,8 @@ void CGargantua::FlameCreate( void )
 			CSoundEnt::InsertSound( bits_SOUND_COMBAT, posGun, 384, 0.3 );
 		}
 	}
-	EMIT_SOUND_DYN( edict(), CHAN_BODY, pBeamAttackSounds[1], 1.0, ATTN_NORM, 0, PITCH_NORM );
-	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, pBeamAttackSounds[2], 1.0, ATTN_NORM, 0, PITCH_NORM );
+	EmitSoundDyn( CHAN_BODY, pBeamAttackSounds[1], 1.0, ATTN_NORM, 0, PITCH_NORM );
+	EmitSoundDyn( CHAN_WEAPON, pBeamAttackSounds[2], 1.0, ATTN_NORM, 0, PITCH_NORM );
 }
 
 void CGargantua::FlameControls( float angleX, float angleY )
@@ -836,7 +836,7 @@ void CGargantua::FlameDestroy( void )
 
 void CGargantua::FlameOffSound( void )
 {
-	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, pBeamAttackSounds[0], 1.0, ATTN_NORM, 0, PITCH_NORM );
+	EmitSoundDyn( CHAN_WEAPON, pBeamAttackSounds[0], 1.0, ATTN_NORM, 0, PITCH_NORM );
 }
 
 void CGargantua::PrescheduleThink( void )
@@ -968,7 +968,7 @@ void CGargantua::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	{
 		if( m_painSoundTime < gpGlobals->time )
 		{
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0, ATTN_GARG, 0, PITCH_NORM );
+			EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0, ATTN_GARG, 0, PITCH_NORM );
 			m_painSoundTime = gpGlobals->time + RANDOM_FLOAT( 2.5, 4 );
 		}
 	}
@@ -1136,10 +1136,10 @@ void CGargantua::HandleSlashAnim(float damage, float punch, float velocity)
 			//UTIL_MakeVectors( pev->angles );	// called by CheckTraceHullAttack
 			pHurt->pev->velocity = pHurt->pev->velocity - gpGlobals->v_right * velocity;
 		}
-		EMIT_SOUND_DYN( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
+		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
 	}
 	else // Play a random attack miss sound
-		EMIT_SOUND_DYN( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
+		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
 
 	Vector forward;
 	UTIL_MakeVectorsPrivate( pev->angles, forward, NULL, NULL );
@@ -1481,13 +1481,13 @@ int CGargantua::MaxEyeBrightness()
 void CGargantua::FootEffect()
 {
 	UTIL_ScreenShake( pev->origin, 4.0, 3.0, 1.0, 750 );
-	EMIT_SOUND_DYN( edict(), CHAN_BODY, RANDOM_SOUND_ARRAY(pFootSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
+	EmitSoundDyn( CHAN_BODY, RANDOM_SOUND_ARRAY(pFootSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
 }
 
 void CGargantua::StompEffect()
 {
 	UTIL_ScreenShake( pev->origin, 12.0, 100.0, 2.0, 1000 );
-	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pStompSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
+	EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pStompSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
 }
 
 float CGargantua::FlameLength()
@@ -1523,12 +1523,12 @@ void CGargantua::PrecacheSounds()
 void CGargantua::BreatheSound()
 {
 	if (m_breatheTime <= gpGlobals->time)
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pBreatheSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
+		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pBreatheSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
 }
 
 void CGargantua::AttackSound()
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_GARG, 0, PITCH_NORM );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_GARG, 0, PITCH_NORM );
 }
 
 float CGargantua::FlameTimeDivider()
@@ -1544,13 +1544,13 @@ Vector CGargantua::StompAttackStartVec()
 void CGargantua::PlayUseSentence()
 {
 	m_breatheTime = gpGlobals->time + 1.5;
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
 }
 
 void CGargantua::PlayUnUseSentence()
 {
 	m_breatheTime = gpGlobals->time + 1.5;
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
 }
 
 #define SF_SMOKER_ACTIVE 1
@@ -2014,10 +2014,10 @@ void CBabyGargantua::HandleAnimEvent(MonsterEvent_t *pEvent)
 				pHurt->pev->punchangle.x = 20;
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_up * 100 + gpGlobals->v_forward * 200;
 			}
-			EMIT_SOUND_DYN( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
 		}
 		else // Play a random attack miss sound
-			EMIT_SOUND_DYN( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1.0, ATTN_NORM, 0, 50 + RANDOM_LONG( 0, 15 ) );
 	}
 		break;
 	default:
@@ -2028,7 +2028,7 @@ void CBabyGargantua::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 void CBabyGargantua::DeathSound()
 {
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1.0, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1.0, ATTN_NORM );
 }
 
 float CBabyGargantua::DefaultHealth()
@@ -2091,7 +2091,7 @@ void CBabyGargantua::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker
 
 	if( m_painSoundTime < gpGlobals->time )
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0, ATTN_GARG, 0, PITCH_NORM );
+		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0, ATTN_GARG, 0, PITCH_NORM );
 		m_painSoundTime = gpGlobals->time + RANDOM_FLOAT( 2.5, 4 );
 	}
 
@@ -2101,13 +2101,13 @@ void CBabyGargantua::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker
 void CBabyGargantua::FootEffect()
 {
 	UTIL_ScreenShake( pev->origin, 2.0, 3.0, 1.0, 400 );
-	EMIT_SOUND_DYN( edict(), CHAN_BODY, RANDOM_SOUND_ARRAY(pFootSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
+	EmitSoundDyn( CHAN_BODY, RANDOM_SOUND_ARRAY(pFootSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
 }
 
 void CBabyGargantua::StompEffect()
 {
 	UTIL_ScreenShake( pev->origin, 6.0, 100.0, 1.5, 600 );
-	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pStompSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
+	EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pStompSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
 }
 
 float CBabyGargantua::FlameLength()
@@ -2128,12 +2128,12 @@ int CBabyGargantua::SmallFlameScale()
 void CBabyGargantua::BreatheSound()
 {
 	if (m_breatheTime <= gpGlobals->time)
-		EMIT_SOUND_DYN( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY(pBreatheSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
+		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pBreatheSounds), 1.0, ATTN_GARG, 0, PITCH_NORM + RANDOM_LONG( -10, 10 ) );
 }
 
 void CBabyGargantua::AttackSound()
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_GARG, 0, PITCH_NORM );
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), 1.0, ATTN_GARG, 0, PITCH_NORM );
 }
 
 float CBabyGargantua::FlameTimeDivider()
@@ -2167,12 +2167,12 @@ void CBabyGargantua::SetYawSpeed( void )
 void CBabyGargantua::PlayUseSentence()
 {
 	m_breatheTime = gpGlobals->time + 1.5;
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
 }
 
 void CBabyGargantua::PlayUnUseSentence()
 {
 	m_breatheTime = gpGlobals->time + 1.5;
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
 }
 #endif

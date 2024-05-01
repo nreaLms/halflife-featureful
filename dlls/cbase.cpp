@@ -645,6 +645,18 @@ bool CBaseEntity::EmitSound(int channel, const char *sample, float volume, float
 	return EmitSoundDyn(channel, sample, volume, attenuation, 0, PITCH_NORM);
 }
 
+void CBaseEntity::EmitAmbientSound(const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch)
+{
+	if (!FStringNull(m_soundList)) {
+		auto replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
+		if (!replacement.empty()) {
+			UTIL_EmitAmbientSound(edict(), vecOrigin, replacement.c_str(), vol, attenuation, iFlags, pitch);
+			return;
+		}
+	}
+	UTIL_EmitAmbientSound(edict(), vecOrigin, sample, vol, attenuation, iFlags, pitch);
+}
+
 int CBaseEntity::Save( CSave &save )
 {
 	if( save.WriteEntVars( "ENTVARS", pev ) )
@@ -808,9 +820,9 @@ int CBaseEntity::DamageDecal( int bitsDamageType )
 
 // NOTE: szName must be a pointer to constant memory, e.g. "monster_class" because the entity
 // will keep a pointer to it after this call.
-CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner )
+CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner, string_t soundList )
 {
-	CBaseEntity *pEntity = CreateNoSpawn(szName, vecOrigin, vecAngles, pentOwner);
+	CBaseEntity *pEntity = CreateNoSpawn(szName, vecOrigin, vecAngles, pentOwner, soundList);
 	if (pEntity)
 	{
 		if (DispatchSpawn( pEntity->edict() ) == -1 )
@@ -825,7 +837,7 @@ CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, c
 /*
  * Same as Create, but does not call DispatchSpawn. This allows to change some parameters before call to Spawn()
  */
-CBaseEntity *CBaseEntity::CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner )
+CBaseEntity *CBaseEntity::CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner, string_t soundList )
 {
 	edict_t	*pent;
 	CBaseEntity *pEntity;
@@ -846,5 +858,6 @@ CBaseEntity *CBaseEntity::CreateNoSpawn( const char *szName, const Vector &vecOr
 	pEntity->pev->owner = pentOwner;
 	pEntity->pev->origin = vecOrigin;
 	pEntity->pev->angles = vecAngles;
+	pEntity->m_soundList = soundList;
 	return pEntity;
 }

@@ -345,7 +345,7 @@ extern void			UTIL_BubbleTrail( Vector from, Vector to, int count );
 
 // allows precacheing of other entities
 extern void			UTIL_PrecacheOther(const char *szClassname, string_t soundList = iStringNull);
-extern void			UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship , Vector *vecMin = NULL, Vector *vecMax = NULL);
+extern void			UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship , Vector *vecMin = NULL, Vector *vecMax = NULL, string_t soundList = iStringNull);
 
 // prints a message to each client
 extern void			UTIL_ClientPrintAll( int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL );
@@ -556,7 +556,7 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 	{ for (int i = 0; i < (int)ARRAYSIZE( a ); i++ ) PRECACHE_SOUND( a[i] ); }
 
 #define EMIT_SOUND_ARRAY_DYN( chan, array ) \
-	EMIT_SOUND_DYN ( ENT(pev), chan , array [ RANDOM_LONG(0,ARRAYSIZE( array )-1) ], 1.0, ATTN_NORM, 0, RANDOM_LONG(95,105) ); 
+	EmitSoundDyn ( chan , array [ RANDOM_LONG(0,ARRAYSIZE( array )-1) ], 1.0, ATTN_NORM, 0, RANDOM_LONG(95,105) );
 
 #define RANDOM_SOUND_ARRAY( array ) (array) [ RANDOM_LONG(0,ARRAYSIZE( (array) )-1) ]
 

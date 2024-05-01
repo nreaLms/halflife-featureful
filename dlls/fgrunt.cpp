@@ -1344,7 +1344,7 @@ void CHFGrunt :: PrescheduleThink ( void )
 
 void CHFGrunt::PlayCallForMedic()
 {
-	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
+	EmitSoundDyn( CHAN_VOICE, "fgrunt/medic.wav", 1, ATTN_NORM, 0, GetVoicePitch());
 }
 
 //=========================================================
@@ -1659,7 +1659,7 @@ void CHFGrunt :: M249 ( void )
 		case 2: sawFireSound = "weapons/saw_fire3.wav"; break;
 	}
 	if (sawFireSound)
-		EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, sawFireSound, 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0, 15) );
+		EmitSoundDyn( CHAN_WEAPON, sawFireSound, 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0, 15) );
 
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
@@ -1706,11 +1706,11 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		case HGRUNT_ALLY_AE_RELOAD:
 			if (FBitSet( pev->weapons, FGRUNT_9MMAR | FGRUNT_SHOTGUN ))
 			{
-				EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hgrunt/gr_reload1.wav", 1, ATTN_NORM );
+				EmitSound( CHAN_WEAPON, "hgrunt/gr_reload1.wav", 1, ATTN_NORM );
 			}
 			else if (FBitSet( pev->weapons, FGRUNT_M249 ))
 			{
-				EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/saw_reload2.wav", 1, ATTN_NORM );
+				EmitSound( CHAN_WEAPON, "weapons/saw_reload2.wav", 1, ATTN_NORM );
 			}
 			m_cAmmoLoaded = m_cClipSize;
 			ClearConditions(bits_COND_NO_AMMO_LOADED);
@@ -1745,7 +1745,7 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_ALLY_AE_GREN_LAUNCH:
 		{
-			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/glauncher.wav", 0.8, ATTN_NORM);
+			EmitSound( CHAN_WEAPON, "weapons/glauncher.wav", 0.8, ATTN_NORM);
 			//LRC: firing due to a script?
 			if (m_pCine)
 			{
@@ -1785,18 +1785,18 @@ void CHFGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				// the first round of the three round burst plays the sound and puts a sound in the world sound list.
 				if( RANDOM_LONG( 0, 1 ) )
 				{
-					EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun1.wav", 1, ATTN_NORM );
+					EmitSound( CHAN_WEAPON, "hgrunt/gr_mgun1.wav", 1, ATTN_NORM );
 				}
 				else
 				{
-					EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun2.wav", 1, ATTN_NORM );
+					EmitSound( CHAN_WEAPON, "hgrunt/gr_mgun2.wav", 1, ATTN_NORM );
 				}
 			}
 			else if ( FBitSet( pev->weapons, FGRUNT_SHOTGUN ))
 			{
 				Shotgun( );
 
-				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sbarrel1.wav", 1, ATTN_NORM );
+				EmitSound( CHAN_WEAPON, "weapons/sbarrel1.wav", 1, ATTN_NORM );
 			}
 			else
 			{
@@ -2066,7 +2066,7 @@ void CHFGrunt :: PainSound ( void )
 {
 	if ( gpGlobals->time > m_flNextPainTime )
 	{
-		EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, GetVoicePitch());
+		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, GetVoicePitch());
 		m_flNextPainTime = gpGlobals->time + 1;
 	}
 }
@@ -2084,7 +2084,7 @@ void CHFGrunt::AlertSound()
 //=========================================================
 void CHFGrunt :: DeathSound ( void )
 {
-	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM, 0, GetVoicePitch());
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM, 0, GetVoicePitch());
 }
 
 void CHFGrunt::IdleSound()
@@ -3031,7 +3031,7 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 		}
 		break;
 	case HGRUNT_ALLY_AE_RELOAD:
-		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/desert_eagle_reload.wav", 1, ATTN_NORM );
+		EmitSound( CHAN_WEAPON, "weapons/desert_eagle_reload.wav", 1, ATTN_NORM );
 		m_cAmmoLoaded = m_cClipSize;
 		ClearConditions(bits_COND_NO_AMMO_LOADED);
 		break;
@@ -3053,7 +3053,7 @@ void CTorch::HandleAnimEvent(MonsterEvent_t *pEvent)
 			pitchShift = 0;
 		else
 			pitchShift -= 5;
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "weapons/desert_eagle_fire.wav", 1, ATTN_NORM, 0, 100 + pitchShift );
+		EmitSoundDyn( CHAN_WEAPON, "weapons/desert_eagle_fire.wav", 1, ATTN_NORM, 0, 100 + pitchShift );
 		CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
 		m_cAmmoLoaded--;// take away a bullet!
 	}
@@ -3488,7 +3488,7 @@ void CMedic::StartTask(Task_t *pTask)
 	{
 	case TASK_MEDIC_HEAL:
 		if (Heal())
-			EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "fgrunt/medic_give_shot.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_WEAPON, "fgrunt/medic_give_shot.wav", 1, ATTN_NORM );
 		m_IdealActivity = ACT_MELEE_ATTACK2;
 		break;
 	case TASK_MEDIC_SAY_HEAL:
@@ -3813,9 +3813,9 @@ void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
 		break;
 	case HGRUNT_ALLY_AE_RELOAD:
 		if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
-			EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/desert_eagle_reload.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_WEAPON, "weapons/desert_eagle_reload.wav", 1, ATTN_NORM );
 		else
-			EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hgrunt/gr_reload1.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_WEAPON, "hgrunt/gr_reload1.wav", 1, ATTN_NORM );
 		m_cAmmoLoaded = m_cClipSize;
 		ClearConditions(bits_COND_NO_AMMO_LOADED);
 		break;
@@ -3907,7 +3907,7 @@ void CMedic::FirePistol(const char *shotSound , Bullet bullet)
 		pitchShift = 0;
 	else
 		pitchShift -= 5;
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, shotSound, 1, ATTN_NORM, 0, 100 + pitchShift );
+	EmitSoundDyn( CHAN_WEAPON, shotSound, 1, ATTN_NORM, 0, 100 + pitchShift );
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
 
 	m_cAmmoLoaded--;// take away a bullet!
@@ -3945,7 +3945,7 @@ void CMedic::RestoreTargetEnt()
 void CMedic::StopHealing(bool clearTargetEnt)
 {
 	m_fHealing = FALSE;
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM );
+	EmitSound( CHAN_WEAPON, "common/null.wav", 1, ATTN_NORM );
 	if (m_hTargetEnt != 0 && !m_hTargetEnt->IsPlayer()) {
 		if(m_movementGoal & MOVEGOAL_TARGETENT)
 			RouteClear(); // Stop him from walking toward the target

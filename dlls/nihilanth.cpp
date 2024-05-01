@@ -334,7 +334,7 @@ void CNihilanth::Precache( void )
 {
 	PRECACHE_MODEL( "models/nihilanth.mdl" );
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
-	UTIL_PrecacheOther( "nihilanth_energy_ball" );
+	UTIL_PrecacheOther( "nihilanth_energy_ball", m_soundList );
 	UTIL_PrecacheOther( "monster_alien_controller" );
 	UTIL_PrecacheOther( "monster_alien_slave" );
 
@@ -377,17 +377,17 @@ void CNihilanth::PainSound( void )
 
 	if( pev->health > gSkillData.nihilanthHealth / 2 )
 	{
-		EMIT_SOUND( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pLaughSounds ), 1.0, 0.2 ); 
+		EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pLaughSounds ), 1.0, 0.2 );
 	}
 	else if( m_irritation >= 2 )
 	{
-		EMIT_SOUND( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0, 0.2 ); 
+		EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0, 0.2 );
 	}
 }
 
 void CNihilanth::DeathSound( void )
 {
-	EMIT_SOUND( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1.0, 0.1 ); 
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1.0, 0.1 );
 }
 
 void CNihilanth::NullThink( void )
@@ -552,7 +552,7 @@ void CNihilanth::DyingThink( void )
 	MESSAGE_END();
 
 	GetAttachment( 0, vecSrc, vecAngles ); 
-	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict() );
+	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
 	pEntity->pev->velocity = Vector( RANDOM_FLOAT( -0.7f, 0.7f ), RANDOM_FLOAT( -0.7f, 0.7f ), 1.0f ) * 600.0f;
 	pEntity->GreenBallInit();
 
@@ -620,7 +620,7 @@ void CNihilanth::ShootBalls( void )
 				// vecDir = ( m_posTarget - vecSrc ).Normalize();
 				vecDir = ( m_posTarget - pev->origin ).Normalize();
 				vecSrc = vecSrc + vecDir * ( gpGlobals->time - m_flShootTime );
-				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict() );
+				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
 				pEntity->pev->velocity = vecDir * 200.0f; 
 				pEntity->ZapInit( m_hEnemy );
 
@@ -629,7 +629,7 @@ void CNihilanth::ShootBalls( void )
 				// vecDir = ( m_posTarget - vecSrc ).Normalize();
 				vecDir = ( m_posTarget - pev->origin ).Normalize();
 				vecSrc = vecSrc + vecDir * ( gpGlobals->time - m_flShootTime );
-				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict() );
+				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
 				pEntity->pev->velocity = vecDir * 200.0f; 
 				pEntity->ZapInit( m_hEnemy );
 			}
@@ -1015,7 +1015,7 @@ BOOL CNihilanth::EmitSphere( void )
 		return FALSE;
 
 	Vector vecSrc = m_hRecharger->pev->origin;
-	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict() );
+	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
 	pEntity->pev->velocity = pev->origin - vecSrc;
 	pEntity->CircleInit( this );
 
@@ -1062,9 +1062,9 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 		if( m_hEnemy != 0 )
 		{
 			if( RANDOM_LONG( 0, 4 ) == 0 )
-				EMIT_SOUND( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0, 0.2 ); 
+				EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0, 0.2 );
 
-			EMIT_SOUND( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBallSounds ), 1.0, 0.2 ); 
+			EmitSound( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBallSounds ), 1.0, 0.2 );
 
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_ELIGHT );
@@ -1112,11 +1112,11 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			if( pTrigger != NULL || pTouch != NULL )
 			{
-				EMIT_SOUND( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0, 0.2 ); 
+				EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0, 0.2 );
 
 				Vector vecSrc, vecAngles;
 				GetAttachment( 2, vecSrc, vecAngles ); 
-				CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict() );
+				CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
 				pEntity->pev->velocity = pev->origin - vecSrc;
 				pEntity->TeleportInit( this, m_hEnemy, pTrigger, pTouch );
 			}
@@ -1124,7 +1124,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 			{
 				m_iTeleport++; // unexpected failure
 
-				EMIT_SOUND( edict(), CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBallSounds ), 1.0, 0.2 ); 
+				EmitSound( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBallSounds ), 1.0, 0.2 );
 
 				ALERT( at_aiconsole, "nihilanth can't target %s\n", szText );
 
@@ -1176,7 +1176,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 	case 5:
 		// start up sphere machine
 		{
-			EMIT_SOUND( edict(), CHAN_VOICE, RANDOM_SOUND_ARRAY( pRechargeSounds ), 1.0, 0.2 ); 
+			EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pRechargeSounds ), 1.0, 0.2 );
 		}
 		break;
 	case 6:
@@ -1184,7 +1184,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			Vector vecSrc, vecAngles;
 			GetAttachment( 2, vecSrc, vecAngles ); 
-			CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict() );
+			CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
 			pEntity->pev->velocity = pev->origin - vecSrc;
 			pEntity->ZapInit( m_hEnemy );
 		}
@@ -1439,7 +1439,7 @@ void CNihilanthHVR::ZapInit( CBaseEntity *pEnemy )
 	SetTouch( &CNihilanthHVR::ZapTouch );
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100 );
+	EmitSoundDyn( CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100 );
 }
 
 void CNihilanthHVR::ZapThink( void )
@@ -1492,7 +1492,7 @@ void CNihilanthHVR::ZapThink( void )
 			WRITE_BYTE( 10 );		// speed
 		MESSAGE_END();
 
-		UTIL_EmitAmbientSound( edict(), tr.vecEndPos, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
+		EmitAmbientSound( tr.vecEndPos, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
 
 		SetTouch( NULL );
 		UTIL_Remove( this );
@@ -1521,7 +1521,7 @@ void CNihilanthHVR::ZapThink( void )
 
 void CNihilanthHVR::ZapTouch( CBaseEntity *pOther )
 {
-	UTIL_EmitAmbientSound( edict(), pev->origin, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, RANDOM_LONG( 90, 95 ) );
+	EmitAmbientSound( pev->origin, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, RANDOM_LONG( 90, 95 ) );
 
 	RadiusDamage( pev, pev, 50, CLASS_NONE, DMG_SHOCK );
 	pev->velocity = pev->velocity * 0;
@@ -1559,7 +1559,7 @@ void CNihilanthHVR::TeleportInit( CNihilanth *pOwner, CBaseEntity *pEnemy, CBase
 	SetTouch( &CNihilanthHVR::TeleportTouch );
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-	EMIT_SOUND_DYN( edict(), CHAN_WEAPON, "x/x_teleattack1.wav", 1, 0.2, 0, 100 );
+	EmitSoundDyn( CHAN_WEAPON, "x/x_teleattack1.wav", 1, 0.2, 0, 100 );
 }
 
 void CNihilanthHVR::GreenBallInit()

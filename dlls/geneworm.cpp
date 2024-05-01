@@ -333,7 +333,7 @@ void CGeneWormSpawn::SpawnThink()
 		{
 			if(!m_bTrooperDropped)
 			{
-				EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "debris/beamstart2.wav", 1, 0.4, 0, 100);
+				EmitSoundDyn( CHAN_ITEM, "debris/beamstart2.wav", 1, 0.4, 0, 100);
 				CBaseEntity *pEntity = CreateNoSpawn("monster_shocktrooper", pev->origin, pev->angles, ENT(pev));
 				if (pEntity)
 				{
@@ -722,7 +722,7 @@ void CGeneWorm::DyingThink(void)
 		pev->renderamt = 255;
 		pev->solid = SOLID_NOT;
 
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "geneworm/geneworm_death.wav", 1, 0.1, 0, 100);
+		EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_death.wav", 1, 0.1, 0, 100);
 
 		FireTargets("GeneWormDead", this, this);
 
@@ -810,7 +810,7 @@ void CGeneWorm::NextActivity(void)
 		if(gpGlobals->time <= m_flOrificeOpenTime  && !m_fOrificeHit)
 		{
 			pev->sequence = LookupSequence("bigpain2");
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "geneworm/geneworm_final_pain2.wav", VOL_NORM, 0.1, 0, 100);
+			EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_final_pain2.wav", VOL_NORM, 0.1, 0, 100);
 			return;
 		}
 
@@ -819,7 +819,7 @@ void CGeneWorm::NextActivity(void)
 		if(!m_fSpawningTrooper)
 		{
 			pev->sequence = LookupSequence("bigpain4");
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "geneworm/geneworm_final_pain4.wav", VOL_NORM, 0.1, 0, 100);
+			EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_final_pain4.wav", VOL_NORM, 0.1, 0, 100);
 			m_fSpawningTrooper = TRUE;
 			return;
 		}
@@ -874,7 +874,7 @@ BOOL CGeneWorm::ClawAttack()
 			else if(AngleDiff < 0)
 				pev->sequence = LookupSequence("dattack3");
 
-			EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, "geneworm/geneworm_beam_attack.wav", 1, 0.1, 0, 100);
+			EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_beam_attack.wav", 1, 0.1, 0, 100);
 
 			m_flNextRangeTime = gpGlobals->time + RANDOM_FLOAT(10,15);
 
@@ -904,7 +904,7 @@ BOOL CGeneWorm::ClawAttack()
 					sound = "geneworm/geneworm_attack_mounted_gun.wav";
 				}
 
-				EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, sound, 1, 0.1, 0, 100);
+				EmitSoundDyn( CHAN_VOICE, sound, 1, 0.1, 0, 100);
 
 				m_flNextMeleeTime = gpGlobals->time + RANDOM_FLOAT(3,5);
 
@@ -1105,7 +1105,7 @@ void CGeneWorm::HuntThink(void)
 			painAnimation = "eyepain2";
 		}
 
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, painSound, VOL_NORM, 0.1, 0, 100);
+		EmitSoundDyn( CHAN_VOICE, painSound, VOL_NORM, 0.1, 0, 100);
 
 		if (painAnimation)
 		{
@@ -1230,7 +1230,7 @@ void CGeneWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 			m_orificeGlow = NULL;
 
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "debris/beamstart7.wav", 1, 0.1, 0, RANDOM_LONG(-5, 5)+100);
+			EmitSoundDyn( CHAN_WEAPON, "debris/beamstart7.wav", 1, 0.1, 0, RANDOM_LONG(-5, 5)+100);
 		}
 		break;
 	}
@@ -1277,7 +1277,7 @@ void CGeneWorm::CommandUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		pev->solid = SOLID_BBOX;
 
 		UTIL_SetOrigin(pev, pev->origin);
-		EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, pEntrySounds[0], 1, 0.1, 0, 100);
+		EmitSoundDyn( CHAN_VOICE, pEntrySounds[0], 1, 0.1, 0, 100);
 	}
 }
 
@@ -1293,12 +1293,12 @@ void CGeneWorm::PainSound(void)
 
 void CGeneWorm::DeathSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 2, ATTN_NORM);
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 2, ATTN_NORM);
 }
 
 void CGeneWorm::IdleSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), VOL_NORM, ATTN_NORM);
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), VOL_NORM, ATTN_NORM);
 }
 
 #endif

@@ -82,15 +82,15 @@ void CGonomeGuts::Touch( CBaseEntity *pOther )
 	// splat sound
 	iPitch = RANDOM_FLOAT( 90, 110 );
 
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );
+	EmitSoundDyn( CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );
 
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
 	case 0:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );
+		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );
 		break;
 	case 1:
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
+		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
 		break;
 	}
 
@@ -256,6 +256,7 @@ CGonomeGuts* CGonome::GetGonomeGuts(const Vector &pos)
 	if (m_pGonomeGuts)
 		return m_pGonomeGuts;
 	CGonomeGuts *pGuts = GetClassPtr( (CGonomeGuts *)NULL );
+	pGuts->m_soundList = m_soundList;
 	pGuts->Spawn();
 
 	UTIL_SetOrigin( pGuts->pev, pos );
@@ -416,7 +417,7 @@ BOOL CGonome::CheckMeleeAttack2(float flDot, float flDist)
 void CGonome::IdleSound(void)
 {
 	const int iPitch = 95 + RANDOM_LONG( 0, 10 );
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
 }
 
 //=========================================================
@@ -425,7 +426,7 @@ void CGonome::IdleSound(void)
 void CGonome::PainSound(void)
 {
 	const int iPitch = RANDOM_LONG(0, 9) + 95;
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
 }
 
 //=========================================================
@@ -434,7 +435,7 @@ void CGonome::PainSound(void)
 void CGonome::AlertSound(void)
 {
 	const int iPitch = RANDOM_LONG(0, 9) + 95;
-	EMIT_SOUND_DYN(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
 }
 
 //=========================================================
@@ -455,7 +456,7 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 	case GONOME_SCRIPT_EVENT_SOUND:
 		if (m_Activity != ACT_MELEE_ATTACK1)
-			EMIT_SOUND(ENT(pev), CHAN_BODY, pEvent->options, 1, ATTN_NORM);
+			EmitSound( CHAN_BODY, pEvent->options, 1, ATTN_NORM);
 		break;
 	case GONOME_AE_SPIT:
 	{
@@ -509,11 +510,11 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 				pHurt->pev->punchangle.x = 5;
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 25;
 			}
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
 		}
 		else
 		{
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
 		}
 	}
 	break;
@@ -529,11 +530,11 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 				pHurt->pev->punchangle.x = 5;
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -25;
 			}
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
 		}
 		else
 		{
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
 		}
 	}
 	break;
@@ -553,10 +554,10 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 				switch (RANDOM_LONG(0, 1))
 				{
 				case 0:
-					EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "bullchicken/bc_bite2.wav", 1, ATTN_NORM, 0, iPitch);
+					EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite2.wav", 1, ATTN_NORM, 0, iPitch);
 					break;
 				case 1:
-					EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "bullchicken/bc_bite3.wav", 1, ATTN_NORM, 0, iPitch);
+					EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite3.wav", 1, ATTN_NORM, 0, iPitch);
 					break;
 				}
 
@@ -657,7 +658,7 @@ void CGonome::Precache()
 {
 	PrecacheMyModel("models/gonome.mdl");
 
-	UTIL_PrecacheOther("gonomeguts");
+	UTIL_PrecacheOther("gonomeguts", m_soundList);
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
@@ -687,7 +688,7 @@ void CGonome::Precache()
 //=========================================================
 void CGonome::DeathSound(void)
 {
-	EMIT_SOUND(ENT(pev), CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM);
+	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM);
 }
 
 //=========================================================
@@ -863,7 +864,7 @@ void CGonome::RunTask(Task_t *pTask)
 			{
 				sample = "gonome/gonome_melee1.wav";
 			}
-			EMIT_SOUND(ENT(pev), CHAN_BODY, sample, 1, ATTN_NORM);
+			EmitSound( CHAN_BODY, sample, 1, ATTN_NORM);
 			m_playedAttackSound = true;
 		}
 	}

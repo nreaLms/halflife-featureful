@@ -324,10 +324,10 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			{
 				vecToss = (gpGlobals->v_forward*0.5+gpGlobals->v_up*0.5).Normalize()*gSkillData.strooperGrenadeSpeed;
 			}
-			CSpore::CreateSpore(vecOrigin, pev->angles, vecToss, this, CSpore::GRENADE, true, false);
+			CSpore::CreateSpore(vecOrigin, pev->angles, vecToss, this, CSpore::GRENADE, true, false, m_soundList);
 		}
 		else
-			CSpore::CreateSpore(vecOrigin, pev->angles, m_vecTossVelocity, this, CSpore::GRENADE, true, false);
+			CSpore::CreateSpore(vecOrigin, pev->angles, m_vecTossVelocity, this, CSpore::GRENADE, true, false, m_soundList);
 
 		m_fThrowGrenade = FALSE;
 		m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
@@ -363,12 +363,12 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 			vecGunAngles = UTIL_VecToAngles(vecShootDir);
 
-			CShock::Shoot(pev, vecGunAngles, vecShootOrigin, vecShootDir * CShock::ShockSpeed());
+			CShock::Shoot(pev, vecGunAngles, vecShootOrigin, vecShootDir * CShock::ShockSpeed(), m_soundList);
 			m_cAmmoLoaded--;
 			SetBlending( 0, vecGunAngles.x );
 
 			// Play fire sound.
-			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/shock_fire.wav", 1, ATTN_NORM);
+			EmitSound(CHAN_WEAPON, "weapons/shock_fire.wav", 1, ATTN_NORM);
 			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
 		}
 		else if (m_pSchedule)
@@ -380,7 +380,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 	case STROOPER_AE_KICK:
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "zombie/claw_miss2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM + RANDOM_LONG( -5, 5 ) );
+		EmitSoundDyn( CHAN_WEAPON, "zombie/claw_miss2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM + RANDOM_LONG( -5, 5 ) );
 		PerformKick(gSkillData.strooperDmgKick, (m_bRightClaw) ? -10 : 10);
 
 		m_bRightClaw = !m_bRightClaw;
@@ -484,8 +484,8 @@ void CShockTrooper::Precache()
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");
 
-	UTIL_PrecacheOther("shock_beam");
-	UTIL_PrecacheOther("spore");
+	UTIL_PrecacheOther("shock_beam", m_soundList);
+	UTIL_PrecacheOther("spore", m_soundList);
 	UTIL_PrecacheOther("monster_shockroach");
 
 	// get voice pitch
@@ -508,19 +508,19 @@ void CShockTrooper::PainSound(void)
 		switch (RANDOM_LONG(0, 4))
 		{
 		case 0:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_pain1.wav", 1, ATTN_NORM);
+			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain1.wav", 1, ATTN_NORM);
 			break;
 		case 1:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_pain2.wav", 1, ATTN_NORM);
+			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain2.wav", 1, ATTN_NORM);
 			break;
 		case 2:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_pain3.wav", 1, ATTN_NORM);
+			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain3.wav", 1, ATTN_NORM);
 			break;
 		case 3:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_pain4.wav", 1, ATTN_NORM);
+			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain4.wav", 1, ATTN_NORM);
 			break;
 		case 4:
-			EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_pain5.wav", 1, ATTN_NORM);
+			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain5.wav", 1, ATTN_NORM);
 			break;
 		}
 
@@ -536,16 +536,16 @@ void CShockTrooper::DeathSound(void)
 	switch (RANDOM_LONG(0, 3))
 	{
 	case 0:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_die1.wav", 1, ATTN_IDLE);
+		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die1.wav", 1, ATTN_IDLE);
 		break;
 	case 1:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_die2.wav", 1, ATTN_IDLE);
+		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die2.wav", 1, ATTN_IDLE);
 		break;
 	case 2:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_die3.wav", 1, ATTN_IDLE);
+		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die3.wav", 1, ATTN_IDLE);
 		break;
 	case 3:
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "shocktrooper/shock_trooper_die4.wav", 1, ATTN_IDLE);
+		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die4.wav", 1, ATTN_IDLE);
 		break;
 	}
 }

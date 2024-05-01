@@ -1695,7 +1695,7 @@ void UTIL_PrecacheOther( const char *szClassname, string_t soundList )
 	REMOVE_ENTITY( pent );
 }
 
-void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax)
+void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax, string_t soundList)
 {
 	edict_t	*pent = CREATE_NAMED_ENTITY( MAKE_STRING( szClassname ) );
 	if( FNullEnt( pent ) )
@@ -1717,7 +1717,10 @@ void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vec
 				*vecMax = pMonster->DefaultMaxHullSize();
 		}
 		if (pEntity->IsEnabledInMod())
+		{
+			pEntity->m_soundList = soundList;
 			pEntity->Precache();
+		}
 	}
 	REMOVE_ENTITY( pent );
 }

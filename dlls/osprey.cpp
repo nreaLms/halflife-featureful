@@ -565,7 +565,7 @@ void COsprey::Flight()
 
 	if( m_iSoundState == 0 )
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), 0, 110 );
+		EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), 0, 110 );
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", 0.5, 0.2, 0, 110 );
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
@@ -593,7 +593,7 @@ void COsprey::Flight()
 			if( pitch != m_iPitch )
 			{
 				m_iPitch = pitch;
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
+				EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 				// ALERT( at_console, "%.0f\n", pitch );
 			}
 		}
@@ -793,7 +793,7 @@ void COsprey::DyingThink( void )
 			WRITE_BYTE( 0 );		// speed
 		MESSAGE_END();
 
-		EMIT_SOUND( ENT( pev ), CHAN_STATIC, "weapons/mortarhit.wav", 1.0, 0.3f );
+		EmitSound( CHAN_STATIC, "weapons/mortarhit.wav", 1.0, 0.3f );
 
 		RadiusDamage( pev->origin, pev, pev, 300, CLASS_NONE, DMG_BLAST );
 

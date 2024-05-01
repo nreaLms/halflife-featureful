@@ -195,7 +195,7 @@ void CHWGrunt::SetActivity( Activity NewActivity )
 {
 	if (NewActivity == ACT_THREAT_DISPLAY)
 	{
-		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hassault/hw_spinup.wav", 1, ATTN_NORM );
+		EmitSound( CHAN_WEAPON, "hassault/hw_spinup.wav", 1, ATTN_NORM );
 	}
 	CFollowingMonster::SetActivity(NewActivity);
 }
@@ -233,7 +233,7 @@ void CHWGrunt::StartTask( Task_t *pTask )
 		break;
 	case TASK_HWGRUNT_PLAY_SPINDOWN:
 	{
-		EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hassault/hw_spindown.wav", 1, ATTN_NORM );
+		EmitSound( CHAN_WEAPON, "hassault/hw_spindown.wav", 1, ATTN_NORM );
 		int iSequence = LookupSequence("spindown");
 		if( iSequence > ACTIVITY_NOT_AVAILABLE )
 		{
@@ -294,13 +294,13 @@ void CHWGrunt::PlayUseSentence()
 	switch(RANDOM_LONG(0,2))
 	{
 	case 0:
-		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER0", HWGRUNT_VOLUME, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "!HG_ANSWER0", HWGRUNT_VOLUME, ATTN_NORM );
 		break;
 	case 1:
-		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER1", HWGRUNT_VOLUME, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "!HG_ANSWER1", HWGRUNT_VOLUME, ATTN_NORM );
 		break;
 	case 2:
-		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER2", HWGRUNT_VOLUME, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "!HG_ANSWER2", HWGRUNT_VOLUME, ATTN_NORM );
 		break;
 	}
 }
@@ -310,10 +310,10 @@ void CHWGrunt::PlayUnUseSentence()
 	switch(RANDOM_LONG(0,1))
 	{
 	case 0:
-		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_ANSWER5", HWGRUNT_VOLUME, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "!HG_ANSWER5", HWGRUNT_VOLUME, ATTN_NORM );
 		break;
 	case 1:
-		EMIT_SOUND( edict(), CHAN_VOICE, "!HG_QUEST4", HWGRUNT_VOLUME, ATTN_NORM );
+		EmitSound( CHAN_VOICE, "!HG_QUEST4", HWGRUNT_VOLUME, ATTN_NORM );
 		break;
 	}
 }
@@ -323,13 +323,13 @@ void CHWGrunt::DeathSound()
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_die1.wav", 1, ATTN_IDLE );
+		EmitSound( CHAN_VOICE, "hgrunt/gr_die1.wav", 1, ATTN_IDLE );
 		break;
 	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_die2.wav", 1, ATTN_IDLE );
+		EmitSound( CHAN_VOICE, "hgrunt/gr_die2.wav", 1, ATTN_IDLE );
 		break;
 	case 2:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_die3.wav", 1, ATTN_IDLE );
+		EmitSound( CHAN_VOICE, "hgrunt/gr_die3.wav", 1, ATTN_IDLE );
 		break;
 	}
 }
@@ -341,19 +341,19 @@ void CHWGrunt::PainSound( void )
 		switch( RANDOM_LONG( 0, 6 ) )
 		{
 		case 0:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_pain3.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, "hgrunt/gr_pain3.wav", 1, ATTN_NORM );
 			break;
 		case 1:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_pain4.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, "hgrunt/gr_pain4.wav", 1, ATTN_NORM );
 			break;
 		case 2:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_pain5.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, "hgrunt/gr_pain5.wav", 1, ATTN_NORM );
 			break;
 		case 3:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_pain1.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, "hgrunt/gr_pain1.wav", 1, ATTN_NORM );
 			break;
 		case 4:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "hgrunt/gr_pain2.wav", 1, ATTN_NORM );
+			EmitSound( CHAN_VOICE, "hgrunt/gr_pain2.wav", 1, ATTN_NORM );
 			break;
 		}
 
@@ -370,8 +370,8 @@ void CHWGrunt::Shoot()
 
 	switch ( RANDOM_LONG(0,1) )
 	{
-		case 0: EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hassault/hw_shoot2.wav", 1, ATTN_NORM ); break;
-		case 1: EMIT_SOUND( ENT(pev), CHAN_WEAPON, "hassault/hw_shoot3.wav", 1, ATTN_NORM ); break;
+		case 0: EmitSound( CHAN_WEAPON, "hassault/hw_shoot2.wav", 1, ATTN_NORM ); break;
+		case 1: EmitSound( CHAN_WEAPON, "hassault/hw_shoot3.wav", 1, ATTN_NORM ); break;
 	}
 
 	Vector vecShootOrigin = GetGunPosition();
