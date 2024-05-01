@@ -620,7 +620,7 @@ int CBaseEntity::PRECACHE_SOUND(const char *soundName)
 {
 	if (!FStringNull(m_soundList)) {
 		if (g_soundReplacement.EnsureReplacementFile(STRING(m_soundList))) {
-			auto replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), soundName);
+			const auto& replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), soundName);
 			if (!replacement.empty()) {
 				return ::PRECACHE_SOUND(replacement.c_str());
 			}
@@ -632,7 +632,7 @@ int CBaseEntity::PRECACHE_SOUND(const char *soundName)
 bool CBaseEntity::EmitSoundDyn(int channel, const char *sample, float volume, float attenuation, int flags, int pitch)
 {
 	if (!FStringNull(m_soundList)) {
-		auto replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
+		const auto& replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
 		if (!replacement.empty()) {
 			return EMIT_SOUND_DYN(edict(), channel, replacement.c_str(), volume, attenuation, flags, pitch);
 		}
@@ -648,7 +648,7 @@ bool CBaseEntity::EmitSound(int channel, const char *sample, float volume, float
 void CBaseEntity::EmitAmbientSound(const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch)
 {
 	if (!FStringNull(m_soundList)) {
-		auto replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
+		const auto& replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
 		if (!replacement.empty()) {
 			UTIL_EmitAmbientSound(edict(), vecOrigin, replacement.c_str(), vol, attenuation, iFlags, pitch);
 			return;

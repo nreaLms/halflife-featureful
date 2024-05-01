@@ -14,7 +14,7 @@ bool SoundReplacementList::IsValid() const {
 	return _isValid;
 }
 
-std::string SoundReplacementList::ReplacementFor(const std::string &soundName)
+const std::string& SoundReplacementList::ReplacementFor(const std::string &soundName)
 {
 	auto it = _replacementMap.find(soundName);
 	if (it != _replacementMap.end()) {
@@ -129,7 +129,7 @@ bool SoundReplacementSystem::EnsureReplacementFile(const char *fileName)
 	return true;
 }
 
-std::string SoundReplacementSystem::FindReplacement(const char *fileName, const char *originalSoundName)
+const std::string& SoundReplacementSystem::FindReplacement(const char *fileName, const char *originalSoundName)
 {
 	auto fileIt = _fileMap.find(fileName);
 	if (fileIt != _fileMap.end()) {

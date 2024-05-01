@@ -8,11 +8,11 @@
 class SoundReplacementList
 {
 public:
-	typedef std::map<std::string, std::string> ReplacementMap;
+	typedef std::map<const std::string, const std::string> ReplacementMap;
 	SoundReplacementList();
 	SoundReplacementList(ReplacementMap&& replacementMap);
 	bool IsValid() const;
-	std::string ReplacementFor(const std::string& soundName);
+	const std::string& ReplacementFor(const std::string& soundName);
 private:
 	ReplacementMap _replacementMap;
 	bool _isValid;
@@ -22,7 +22,7 @@ class SoundReplacementSystem
 {
 public:
 	bool EnsureReplacementFile(const char* fileName);
-	std::string FindReplacement(const char* fileName, const char* originalSoundName);
+	const std::string& FindReplacement(const char* fileName, const char* originalSoundName);
 private:
 	std::map<std::string, SoundReplacementList> _fileMap;
 };
