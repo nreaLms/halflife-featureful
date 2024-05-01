@@ -497,12 +497,12 @@
 		2 : "No"
 	]
 	voicepitch(integer) : "Custom voice pitch [100 norm]"
-	suspicious(choices) : "Suspicious" =
+	suspicious(choices) : "Pre-provoked" =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-	SpeakAs(string) : "Speech Group"
+	SpeakAs(string) : "Speech Prefix" : : "Custom speech prefix for the monster. You can provide your own instead of SC for scientist or BA for security guards."
 	spawnflags(Flags) =
 	[
 		131072 : "Don't greet player" : 0 : "Don't say hello to player upon seeing him"
@@ -7908,7 +7908,7 @@
 	]
 ]
 
-@PointClass base(Targetname) = trigger_mp3audio : "Play mp3 audio"
+@PointClass base(Targetname) = trigger_mp3audio : "Play mp3 audio. The audio will be played at the music volume as configured by user"
 [
 	message(script) : "Track name"
 	spawnflags(flags) =
