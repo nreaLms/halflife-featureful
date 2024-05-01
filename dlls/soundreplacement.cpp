@@ -20,8 +20,10 @@ const std::string& SoundReplacementList::ReplacementFor(const std::string &sound
 	if (it != _replacementMap.end()) {
 		return it->second;
 	}
-	return std::string();
+	return SoundReplacementSystem::emptyString;
 }
+
+const std::string SoundReplacementSystem::emptyString;
 
 static void LogExpectedQuoteError(const char* fileName, int line, int pos)
 {
@@ -90,7 +92,7 @@ bool SoundReplacementSystem::EnsureReplacementFile(const char *fileName)
 					const std::string originalName(buffer + origNameStart, buffer + origNameEnd);
 					const std::string replacementName(buffer + replNameStart, buffer + replNameEnd);
 					replacementMap[originalName] = replacementName;
-					ALERT(at_console, "File '%s' is replaced with '%s'\n", originalName.c_str(), replacementName.c_str());
+					ALERT(at_console, "Sound replacement '%s': '%s' is replaced with '%s'\n", fileName, originalName.c_str(), replacementName.c_str());
 				}
 				else
 				{
@@ -138,5 +140,5 @@ const std::string& SoundReplacementSystem::FindReplacement(const char *fileName,
 			return soundReplacementFile.ReplacementFor(originalSoundName);
 		}
 	}
-	return std::string();
+	return SoundReplacementSystem::emptyString;
 }
