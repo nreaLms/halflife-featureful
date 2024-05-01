@@ -21,6 +21,7 @@
 #include "weapon_ids.h"
 #include "saverestore.h"
 #include "locus.h"
+#include "vcs_info.h"
 
 ModFeatures g_modFeatures;
 
@@ -603,6 +604,9 @@ void ReadMaxAmmos()
 
 	g_engfuncs.pfnFreeFile( pMemFile );
 }
+
+static cvar_t build_commit = { "sv_game_build_commit", g_VCSInfo_Commit };
+static cvar_t build_branch = { "sv_game_build_branch", g_VCSInfo_Commit };
 
 cvar_t displaysoundlist = {"displaysoundlist","0"};
 
@@ -1272,6 +1276,9 @@ void GameDLLInit( void )
 	violence_ablood = CVAR_GET_POINTER( "violence_ablood" );
 	violence_hgibs = CVAR_GET_POINTER( "violence_hgibs" );
 	violence_agibs = CVAR_GET_POINTER( "violence_agibs" );
+
+	CVAR_REGISTER( &build_commit );
+	CVAR_REGISTER( &build_branch );
 
 	CVAR_REGISTER( &displaysoundlist );
 	CVAR_REGISTER( &allow_spectators );

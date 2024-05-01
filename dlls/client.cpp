@@ -1383,7 +1383,7 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 		&& Entity->DefaultClassify() != CLASS_NONE
 		&& Entity->DefaultClassify() != CLASS_MACHINE )
 	{
-		SetBits( state->eflags, EFLAG_MONSTER );
+		SetBits( state->eflags, EFLAG_FLESH_SOUND );
 	}
 
 	return 1;

@@ -35,6 +35,8 @@
 
 #include "cl_msg.h"
 
+#include "vcs_info.h"
+
 #if USE_VGUI
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
@@ -275,6 +277,9 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 #if USE_PARTICLEMAN
 	CL_LoadParticleMan();
 #endif
+
+	gEngfuncs.pfnRegisterVariable( "cl_game_build_commit", g_VCSInfo_Commit, 0 );
+	gEngfuncs.pfnRegisterVariable( "cl_game_build_branch", g_VCSInfo_Branch, 0 );
 
 	return 1;
 }

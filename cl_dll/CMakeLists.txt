@@ -146,7 +146,9 @@ set (CLDLL_SOURCES
 	train.cpp
 	tri.cpp
 	util.cpp
-	view.cpp)
+	view.cpp
+	../game_shared/vcs_info.cpp
+)
 
 if (USE_VGUI)
 	list(APPEND CLDLL_SOURCES
@@ -188,6 +190,10 @@ if (USE_PARTICLEMAN)
 endif()
 
 include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public particleman/)
+
+if (WIN32)
+	include_directories (../external/)
+endif()
 
 if (USE_VGUI)
 	SET(CMAKE_SKIP_RPATH TRUE)
