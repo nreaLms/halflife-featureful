@@ -21,6 +21,7 @@
 #include "weapon_ids.h"
 #include "saverestore.h"
 #include "locus.h"
+#include "ammo_amounts.h"
 #include "vcs_info.h"
 
 ModFeatures g_modFeatures;
@@ -604,6 +605,48 @@ void ReadMaxAmmos()
 	}
 
 	g_engfuncs.pfnFreeFile( pMemFile );
+}
+
+void ReadAmmoAmounts()
+{
+	const char* fileName = "features/ammo_amounts.cfg";
+	int filePos = 0, fileSize;
+	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	if (!pMemFile)
+		return;
+
+	ALERT(at_console, "Parsing default ammo amounts for ammo and weapon entities from %s\n", fileName);
+
+	char buffer[512];
+	memset(buffer, 0, sizeof(buffer));
+
+	while( memfgets( pMemFile, fileSize, filePos, buffer, sizeof(buffer)-1 ) )
+	{
+		char* key = NULL;
+		char* value = NULL;
+		TryConsumeKeyAndValue(buffer, sizeof(buffer), key, value, CONSUME_VALUE_ONLY_FIRST_TOKEN);
+
+		if (key)
+		{
+			if (value)
+			{
+				const int amount = atoi(value);
+				if (amount < 0) {
+					ALERT(at_warning, "%s has a negative value for ammo amount in %s\n", fileName);
+					continue;
+				}
+				if (g_AmmoAmounts.RegisterAmountForAmmoEnt(key, amount)) {
+					ALERT(at_console, "Set default ammo amount for %s to %d\n", key, amount);
+				} else {
+					ALERT(at_warning, "Repeated definition of ammo amount for %s\n", key);
+				}
+			}
+			else
+			{
+				ALERT(at_warning, "Key '%s' without value!\n", key);
+			}
+		}
+	}
 }
 
 static cvar_t build_commit = { "sv_game_build_commit", g_VCSInfo_Commit };
@@ -1261,6 +1304,7 @@ void GameDLLInit( void )
 	ReadEnabledMonsters();
 	ReadEnabledWeapons();
 	ReadMaxAmmos();
+	ReadAmmoAmounts();
 
 	RegisterAmmoTypes();
 

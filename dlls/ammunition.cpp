@@ -7,6 +7,7 @@
 #include "weapons.h"
 #include "game.h"
 #include "gamerules.h"
+#include "ammo_amounts.h"
 
 void CBasePlayerAmmo::Spawn( void )
 {
@@ -143,7 +144,12 @@ bool CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
 
 int CBasePlayerAmmo::MyAmount()
 {
-	return pev->impulse > 0 ? pev->impulse : DefaultAmount();
+	if (pev->impulse > 0)
+		return pev->impulse;
+	const int amount = g_AmmoAmounts.AmountForAmmoEnt(STRING(pev->classname));
+	if (amount >= 0)
+		return amount;
+	return DefaultAmount();
 }
 
 void CBasePlayerAmmo::SetCustomAmount(int amount)

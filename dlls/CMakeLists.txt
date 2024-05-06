@@ -48,6 +48,7 @@ set (SVDLL_SOURCES
 	agrunt.cpp
 	airtank.cpp
 	aflock.cpp
+	ammo_amounts.cpp
 	ammoregistry.cpp
 	ammunition.cpp
 	animating.cpp

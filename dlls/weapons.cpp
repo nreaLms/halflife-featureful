@@ -32,6 +32,7 @@
 #include "game.h"
 #include "gamerules.h"
 #include "ammoregistry.h"
+#include "ammo_amounts.h"
 
 extern int gEvilImpulse101;
 
@@ -721,6 +722,26 @@ void CBasePlayerWeapon::AttachToPlayer( CBasePlayer *pPlayer )
 const AmmoType* CBasePlayerWeapon::GetAmmoType(const char *name)
 {
 	return g_AmmoRegistry.GetByName(name);
+}
+
+void CBasePlayerWeapon::InitDefaultAmmo(int defaultGive)
+{
+	if (m_iDefaultAmmo == 0)
+	{
+		const int amount = g_AmmoAmounts.AmountForAmmoEnt(STRING(pev->classname));
+		if (amount >= 0)
+			m_iDefaultAmmo = amount;
+		else
+			m_iDefaultAmmo = defaultGive;
+	}
+	else if (m_iDefaultAmmo < 0)
+	{
+		m_iDefaultAmmo = 0;
+	}
+	else
+	{
+		// pass, already initialized
+	}
 }
 
 // CALLED THROUGH the newly-touched weapon's instance. The existing player weapon is pOriginal
