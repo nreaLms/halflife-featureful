@@ -2,10 +2,9 @@
 #ifndef PARSETEXT_H
 #define PARSETEXT_H
 
+#include "string_utils.h"
 #include <cstddef>
 
-bool IsValidIdentifierCharacter(char c);
-bool IsSpaceCharacter(char c);
 void SkipSpaceCharacters(const char* text, int& i, const int length);
 bool SkipSpaces(const char* text, int& i, const int length);
 void ConsumeNonSpaceCharacters(const char* text, int& i, const int length);
@@ -17,7 +16,5 @@ bool ParseInteger(const char* valueText, int& result);
 bool ParseColor(const char* valueText, int& result);
 bool ParseBoolean(const char* valueText, bool& result);
 bool ParseFloat(const char* valueText, float& result);
-
-char *strncpyEnsureTermination(char *dest, const char *src, size_t n);
 
 #endif

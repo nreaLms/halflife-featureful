@@ -34,7 +34,7 @@
 #include "gamerules.h"
 #include "teamplay_gamerules.h"
 #include "game.h"
-#include "parsetext.h"
+#include "string_utils.h"
 
 extern CSoundEnt *pSoundEnt;
 

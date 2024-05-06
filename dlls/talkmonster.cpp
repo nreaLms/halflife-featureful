@@ -23,7 +23,7 @@
 #include	"scripted.h"
 #include	"soundent.h"
 #include	"animation.h"
-#include	"parsetext.h"
+#include	"string_utils.h"
 
 //=========================================================
 // Talking monster base class

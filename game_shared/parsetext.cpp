@@ -2,16 +2,6 @@
 #include <cstring>
 #include <cstdio>
 
-bool IsValidIdentifierCharacter(char c)
-{
-	return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
-}
-
-bool IsSpaceCharacter(char c)
-{
-	return c == ' ' || c == '\r' || c == '\n';
-}
-
 void SkipSpaceCharacters(const char* text, int& i, const int length)
 {
 	while (i<length && IsSpaceCharacter(text[i]))
@@ -150,11 +140,4 @@ bool ParseBoolean(const char* valueText, bool& result)
 bool ParseFloat(const char *valueText, float& result)
 {
 	return sscanf(valueText, "%f", &result) == 1;
-}
-
-char *strncpyEnsureTermination(char *dest, const char *src, size_t n)
-{
-	char* result = strncpy(dest, src, n);
-	dest[n-1] = '\0';
-	return result;
 }
