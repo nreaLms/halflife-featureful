@@ -301,6 +301,7 @@ USE_TYPE CTriggerRelay::MyTriggerType(USE_TYPE useType)
 #define SF_MULTIMAN_CLONE		0x80000000
 #define SF_MULTIMAN_THREAD		0x00000001
 #define SF_MULTIMAN_ONLYONCE	0x00000008
+#define SF_MULTIMAN_INSTANT		0x00000400
 
 enum
 {
@@ -537,7 +538,7 @@ CMultiManager *CMultiManager::Clone( void )
 	memcpy( pMulti->pev, pev, sizeof(*pev) );
 	pMulti->pev->pContainingEntity = pEdict;
 
-	pMulti->pev->spawnflags |= SF_MULTIMAN_CLONE;
+	pMulti->pev->spawnflags |= SF_MULTIMAN_CLONE | (pev->spawnflags & SF_MULTIMAN_INSTANT);
 	pMulti->m_cTargets = m_cTargets;
 	memcpy( pMulti->m_iTargetName, m_iTargetName, sizeof( m_iTargetName ) );
 	memcpy( pMulti->m_flTargetDelay, m_flTargetDelay, sizeof( m_flTargetDelay ) );
@@ -567,7 +568,14 @@ void CMultiManager::ManagerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	SetUse( NULL );// disable use until all targets have fired
 
 	SetThink( &CMultiManager::ManagerThink );
-	pev->nextthink = gpGlobals->time;
+	if (FBitSet(pev->spawnflags, SF_MULTIMAN_INSTANT) && m_cTargets > 0 && m_flTargetDelay[0] <= 0.0f)
+	{
+		ManagerThink();
+	}
+	else
+	{
+		pev->nextthink = gpGlobals->time;
+	}
 }
 
 #if _DEBUG

@@ -6950,6 +6950,7 @@
 		8 : "Once only" : 0
 		16 : "Reserved (don't use)" : 0 : "Reserved for Spirit 'Start on' flag"
 		32 : "Reserved (don't use)" : 0 : "Reserved for Spirit 'Debug mode' flag"
+		1024 : "Instant" : 0 : "When called, start instantly on the same frame (only if there're targets with 0 delay)"
 	]
 ]
 
