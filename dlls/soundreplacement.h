@@ -29,4 +29,6 @@ private:
 	std::map<std::string, SoundReplacementList> _fileMap;
 };
 
+extern SoundReplacementSystem g_soundReplacement;
+
 #endif

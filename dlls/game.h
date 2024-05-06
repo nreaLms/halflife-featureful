@@ -131,7 +131,6 @@ public:
 };
 
 extern ModFeatures g_modFeatures;
-extern SoundReplacementSystem g_soundReplacement;
 
 bool ItemsPickableByTouch();
 bool ItemsPickableByUse();

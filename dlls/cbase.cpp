@@ -618,15 +618,7 @@ void CBaseEntity::KeyValue(KeyValueData* pkvd)
 
 int CBaseEntity::PRECACHE_SOUND(const char *soundName)
 {
-	if (!FStringNull(m_soundList)) {
-		if (g_soundReplacement.EnsureReplacementFile(STRING(m_soundList))) {
-			const auto& replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), soundName);
-			if (!replacement.empty()) {
-				return ::PRECACHE_SOUND(replacement.c_str());
-			}
-		}
-	}
-	return ::PRECACHE_SOUND(soundName);
+	return ::PRECACHE_SOUND(soundName, m_soundList);
 }
 
 bool CBaseEntity::EmitSoundDyn(int channel, const char *sample, float volume, float attenuation, int flags, int pitch)

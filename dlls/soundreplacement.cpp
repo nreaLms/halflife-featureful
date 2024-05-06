@@ -142,3 +142,5 @@ const std::string& SoundReplacementSystem::FindReplacement(const char *fileName,
 	}
 	return SoundReplacementSystem::emptyString;
 }
+
+SoundReplacementSystem g_soundReplacement;

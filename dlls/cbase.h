@@ -284,6 +284,7 @@ public:
 
 	string_t m_soundList; // sound replacement list file name
 	int PRECACHE_SOUND(const char* soundName);
+
 	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
 	bool EmitSound( int channel, const char *sample, float volume, float attenuation );
 	void EmitAmbientSound( const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch );

@@ -25,7 +25,6 @@
 #include "vcs_info.h"
 
 ModFeatures g_modFeatures;
-SoundReplacementSystem g_soundReplacement;
 
 struct WeaponNameAndId
 {
