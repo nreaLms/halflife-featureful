@@ -753,16 +753,13 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
 		pCurrent->m_flTimeWeaponIdle = pfrom->m_flTimeWeaponIdle;
 		pCurrent->pev->fuser1 = pfrom->fuser1;
-		pCurrent->m_flStartThrow = pfrom->fuser2;
-		pCurrent->m_flReleaseThrow = pfrom->fuser3;
-		pCurrent->m_chargeReady = pfrom->iuser1;
-		pCurrent->m_fInAttack = pfrom->iuser2;
-		pCurrent->m_fireState = pfrom->iuser3;
 
 		pCurrent->m_iSecondaryAmmoType = (int)from->client.vuser3[2];
 		pCurrent->m_iPrimaryAmmoType = (int)from->client.vuser4[0];
 		player.m_rgAmmo[pCurrent->m_iPrimaryAmmoType] = (int)from->client.vuser4[1];
 		player.m_rgAmmo[pCurrent->m_iSecondaryAmmoType] = (int)from->client.vuser4[2];
+
+		pCurrent->SetWeaponData(*pfrom);
 	}
 
 	// For random weapon events, use this seed to seed random # generator
@@ -801,36 +798,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	{
 		player.m_pActiveItem = g_pWpns[from->client.m_iId];
 	}
-
-	if( player.m_pActiveItem->m_iId == WEAPON_RPG )
-	{
-		( (CRpg *)player.m_pActiveItem )->m_fSpotActive = (int)from->client.vuser2[1];
-		( (CRpg *)player.m_pActiveItem )->m_cActiveRockets = (int)from->client.vuser2[2];
-	}
-#if FEATURE_DESERT_EAGLE
-	if( player.m_pActiveItem->m_iId == WEAPON_EAGLE )
-	{
-		( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive = (int)from->client.vuser2[1];
-	}
-#endif
-#if FEATURE_PIPEWRENCH
-	if( player.m_pActiveItem->m_iId == WEAPON_PIPEWRENCH )
-	{
-		( (CPipeWrench *)player.m_pActiveItem )->m_iSwingMode = (int)from->client.vuser2[1];
-	}
-#endif
-#if FEATURE_KNIFE
-	if( player.m_pActiveItem->m_iId == WEAPON_KNIFE )
-	{
-		( (CKnife *)player.m_pActiveItem )->m_iSwingMode = (int)from->client.vuser2[1];
-	}
-#endif
-#if FEATURE_M249
-	if( player.m_pActiveItem->m_iId == WEAPON_M249 )
-	{
-		( (CM249 *)player.m_pActiveItem )->m_iVisibleClip = (int)from->client.vuser2[1];
-	}
-#endif
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
@@ -883,36 +850,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.fuser3 = player.m_flAmmoStartCharge;
 	to->client.maxspeed = player.pev->maxspeed;
 
-	if( player.m_pActiveItem->m_iId == WEAPON_RPG )
-	{
-		to->client.vuser2[1] = ( (CRpg *)player.m_pActiveItem)->m_fSpotActive;
-		to->client.vuser2[2] = ( (CRpg *)player.m_pActiveItem)->m_cActiveRockets;
-	}
-#if FEATURE_DESERT_EAGLE
-	else if( player.m_pActiveItem->m_iId == WEAPON_EAGLE )
-	{
-		to->client.vuser2[1] = ( (CEagle *)player.m_pActiveItem )->m_fEagleLaserActive;
-	}
-#endif
-#if FEATURE_PIPEWRENCH
-	else if( player.m_pActiveItem->m_iId == WEAPON_PIPEWRENCH )
-	{
-		to->client.vuser2[1] = ( (CPipeWrench *)player.m_pActiveItem )->m_iSwingMode;
-	}
-#endif
-#if FEATURE_KNIFE
-	else if( player.m_pActiveItem->m_iId == WEAPON_KNIFE )
-	{
-		to->client.vuser2[1] = ( (CKnife *)player.m_pActiveItem )->m_iSwingMode;
-	}
-#endif
-#if FEATURE_M249
-	else if( player.m_pActiveItem->m_iId == WEAPON_M249 )
-	{
-		to->client.vuser2[1] = ( (CM249 *)player.m_pActiveItem )->m_iVisibleClip;
-	}
-#endif
-
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
 	if( g_runfuncs && ( HUD_GetWeaponAnim() != to->client.weaponanim ) )
@@ -953,11 +890,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		pto->m_flNextSecondaryAttack = pCurrent->m_flNextSecondaryAttack;
 		pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
 		pto->fuser1 = pCurrent->pev->fuser1;
-		pto->fuser2 = pCurrent->m_flStartThrow;
-		pto->fuser3 = pCurrent->m_flReleaseThrow;
-		pto->iuser1 = pCurrent->m_chargeReady;
-		pto->iuser2 = pCurrent->m_fInAttack;
-		pto->iuser3 = pCurrent->m_fireState;
 
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
 		pto->m_flNextReload -= cmd->msec / 1000.0f;
@@ -971,6 +903,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		to->client.vuser4[0] = pCurrent->m_iPrimaryAmmoType;
 		to->client.vuser4[1] = player.m_rgAmmo[pCurrent->m_iPrimaryAmmoType];
 		to->client.vuser4[2] = player.m_rgAmmo[pCurrent->m_iSecondaryAmmoType];
+
+		pCurrent->GetWeaponData(*pto);
 
 /*		if( pto->m_flPumpTime != -9999.0f )
 		{

@@ -313,4 +313,15 @@ void CEagle::WeaponIdle( void )
 		SendWeaponAnim( iAnim );
 	}
 }
+
+void CEagle::GetWeaponData(weapon_data_t& data)
+{
+	data.iuser1 = m_fEagleLaserActive;
+}
+
+void CEagle::SetWeaponData(const weapon_data_t& data)
+{
+	m_fEagleLaserActive = data.iuser1;
+}
+
 #endif

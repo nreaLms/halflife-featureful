@@ -1738,11 +1738,7 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 					item->m_fInReload		= gun->m_fInReload;
 					item->m_fInSpecialReload	= gun->m_fInSpecialReload;
 					item->fuser1			= Q_max( gun->pev->fuser1, -0.001f );
-					item->fuser2			= gun->m_flStartThrow;
-					item->fuser3			= gun->m_flReleaseThrow;
-					item->iuser1			= gun->m_chargeReady;
-					item->iuser2			= gun->m_fInAttack;
-					item->iuser3			= gun->m_fireState;
+					gun->GetWeaponData(*item);
 
 					//item->m_flPumpTime		= max( gun->m_flPumpTime, -0.001 );
 				}
@@ -1841,36 +1837,6 @@ void UpdateClientData( const struct edict_s *ent, int sendweapons, struct client
 					cd->vuser4.x = gun->m_iPrimaryAmmoType;
 					cd->vuser4.y = pl->m_rgAmmo[gun->m_iPrimaryAmmoType];
 					cd->vuser4.z = pl->m_rgAmmo[gun->m_iSecondaryAmmoType];
-
-					if( pl->m_pActiveItem->m_iId == WEAPON_RPG )
-					{
-						cd->vuser2.y = ( (CRpg *)pl->m_pActiveItem )->m_fSpotActive;
-						cd->vuser2.z = ( (CRpg *)pl->m_pActiveItem )->m_cActiveRockets;
-					}
-#if FEATURE_DESERT_EAGLE
-					else if( pl->m_pActiveItem->m_iId == WEAPON_EAGLE )
-					{
-						cd->vuser2.y = ( (CEagle *)pl->m_pActiveItem )->m_fEagleLaserActive;
-					}
-#endif
-#if FEATURE_PIPEWRENCH
-					else if( pl->m_pActiveItem->m_iId == WEAPON_PIPEWRENCH )
-					{
-						cd->vuser2.y = ( (CPipeWrench *)pl->m_pActiveItem )->m_iSwingMode;
-					}
-#endif
-#if FEATURE_KNIFE
-					else if( pl->m_pActiveItem->m_iId == WEAPON_KNIFE )
-					{
-						cd->vuser2.y = ( (CKnife *)pl->m_pActiveItem )->m_iSwingMode;
-					}
-#endif
-#if FEATURE_M249
-					else if( pl->m_pActiveItem->m_iId == WEAPON_M249 )
-					{
-						cd->vuser2.y = ( (CM249 *)pl->m_pActiveItem )->m_iVisibleClip;
-					}
-#endif
 				}
 			}
 		}

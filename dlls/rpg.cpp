@@ -595,3 +595,15 @@ void CRpg::UpdateSpot( void )
 	}
 #endif
 }
+
+void CRpg::GetWeaponData(weapon_data_t& data)
+{
+	data.fuser2 = static_cast<float>(m_fSpotActive);
+	data.fuser3 = m_cActiveRockets;
+}
+
+void CRpg::SetWeaponData(const weapon_data_t& data)
+{
+	m_fSpotActive = data.fuser2 != 0;
+	m_cActiveRockets = data.fuser3;
+}

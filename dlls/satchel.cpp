@@ -615,6 +615,16 @@ void CSatchel::DrawRadio()
 		m_chargeReady = SATCHEL_READY;
 }
 
+void CSatchel::GetWeaponData(weapon_data_t& data)
+{
+	data.iuser1 = m_chargeReady;
+}
+
+void CSatchel::SetWeaponData(const weapon_data_t& data)
+{
+	m_chargeReady = data.iuser1;
+}
+
 //=========================================================
 // DeactivateSatchels - removes all satchels owned by
 // the provided player. Should only be used upon death.

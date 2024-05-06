@@ -502,3 +502,13 @@ void CEgon::EndAttack( void )
 
 	DestroyEffect();
 }
+
+void CEgon::GetWeaponData(weapon_data_t& data)
+{
+	data.iuser3 = m_fireState;
+}
+
+void CEgon::SetWeaponData(const weapon_data_t& data)
+{
+	m_fireState = data.iuser3;
+}

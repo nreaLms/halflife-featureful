@@ -584,3 +584,15 @@ void CGauss::WeaponIdle( void )
 #endif
 	}
 }
+
+void CGauss::GetWeaponData(weapon_data_t& data)
+{
+	data.iuser2 = m_fInAttack;
+	data.fuser1 = m_pPlayer->m_flStartCharge;
+}
+
+void CGauss::SetWeaponData(const weapon_data_t& data)
+{
+	m_fInAttack = data.iuser2;
+	m_pPlayer->m_flStartCharge = data.fuser1;
+}

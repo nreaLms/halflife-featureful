@@ -470,4 +470,15 @@ void CKnife::WeaponIdle( void )
 		SendWeaponAnim( iAnim );
 	}
 }
+
+void CKnife::GetWeaponData(weapon_data_t& data)
+{
+	data.m_fInSpecialReload = m_iSwingMode;
+}
+
+void CKnife::SetWeaponData(const weapon_data_t& data)
+{
+	m_iSwingMode = data.m_fInSpecialReload;
+}
+
 #endif

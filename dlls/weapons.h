@@ -21,6 +21,7 @@
 #include "mod_features.h"
 #include "bullet_types.h"
 #include "weapon_animations.h"
+#include "weaponinfo.h"
 #include "player_items.h"
 #include "ammoregistry.h"
 
@@ -332,6 +333,9 @@ public:
 	virtual void Reload( void ) { return; }						// do "+RELOAD"
 	virtual void WeaponIdle( void ) { return; }					// called when no buttons pressed
 	virtual int UpdateClientData( CBasePlayer *pPlayer );		// sends hud info to client dll, if things have changed
+	virtual void GetWeaponData(weapon_data_t& data) {}
+	virtual void SetWeaponData(const weapon_data_t& data) {}
+
 	virtual void RetireWeapon( void );
 	virtual BOOL ShouldWeaponIdle( void ) {return FALSE; }
 	virtual void Holster();
@@ -725,6 +729,9 @@ public:
 
 	const char* MyWModel() { return "models/w_rpg.mdl"; }
 
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
+
 private:
 	unsigned short m_usRpg;
 };
@@ -792,6 +799,9 @@ public:
 
 	const char* MyWModel() { return "models/w_gauss.mdl"; }
 
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
+
 private:
 	unsigned short m_usGaussFire;
 	unsigned short m_usGaussSpin;
@@ -850,6 +860,9 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_egon.mdl"; }
+
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
 
 	unsigned short m_usEgonStop;
 
@@ -928,6 +941,9 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_grenade.mdl"; }
+
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
 };
 
 class CSatchel : public CBasePlayerWeapon
@@ -968,6 +984,9 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_satchel.mdl"; }
+
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
 };
 
 class CTripmine : public CBasePlayerWeapon
@@ -1076,6 +1095,9 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_desert_eagle.mdl"; }
+
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
 private:
 	int m_iShell;
 
@@ -1125,6 +1147,9 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_pipe_wrench.mdl"; }
+
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
 private:
 
 	unsigned short m_usPWrench;
@@ -1274,6 +1299,9 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_saw.mdl"; }
+
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
 
 	void UpdateTape();
 	void UpdateTape(int clip);
@@ -1456,6 +1484,9 @@ public:
 	}
 
 	const char* MyWModel() { return "models/w_knife.mdl"; }
+
+	void GetWeaponData(weapon_data_t& data);
+	void SetWeaponData(const weapon_data_t& data);
 private:
 	unsigned short m_usKnife;
 };

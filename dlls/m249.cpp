@@ -314,4 +314,14 @@ int CM249::BodyFromClip(int clip)
 	}
 }
 
+void CM249::GetWeaponData(weapon_data_t &data)
+{
+	data.iuser1 = m_iVisibleClip;
+}
+
+void CM249::SetWeaponData(const weapon_data_t &data)
+{
+	UpdateTape(data.iuser1);
+}
+
 #endif
