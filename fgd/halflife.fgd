@@ -1872,6 +1872,7 @@
 	model(sprite) : "Sprite"
 	frags(integer) : "Z offset"
 	target(target_destination) : "Target to smoke at"
+    position(string) : "Smoke position [LP]"
 	scale_unit_type(choices) :"Scale unit type" : 1 =
 	[
 		0: "Decile (tenth)"

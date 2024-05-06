@@ -35,6 +35,7 @@
 #include	"game.h"
 #include	"mod_features.h"
 #include	"fx_flags.h"
+#include	"locus.h"
 
 //=========================================================
 // Gargantua Monster
@@ -1585,10 +1586,25 @@ public:
 			ClearBits(pev->spawnflags, SF_SMOKER_ACTIVE);
 	}
 
+	string_t m_iszPosition;
+	EHANDLE m_hActivator;
+
 	int smokeIndex;
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
 };
 
 LINK_ENTITY_TO_CLASS( env_smoker, CSmoker )
+
+TYPEDESCRIPTION	CSmoker::m_SaveData[] =
+{
+	DEFINE_FIELD( CSmoker, m_iszPosition, FIELD_STRING ),
+	DEFINE_FIELD( CSmoker, m_hActivator, FIELD_EHANDLE ),
+};
+
+IMPLEMENT_SAVERESTORE( CSmoker, CBaseEntity )
 
 void CSmoker::Precache()
 {
@@ -1638,6 +1654,11 @@ void CSmoker::KeyValue(KeyValueData *pkvd)
 		pev->impulse = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "position"))
+	{
+		m_iszPosition = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -1657,6 +1678,7 @@ void CSmoker::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 			pev->nextthink = gpGlobals->time;
 			SetActive(true);
 		}
+		m_hActivator = pActivator;
 	}
 }
 
@@ -1677,6 +1699,14 @@ void CSmoker::Think( void )
 	const int minFramerate = Q_max(pev->framerate - 1, 1);
 	const int maxFramerate = pev->framerate + 1;
 
+	bool isPosValid = true;
+	Vector position = pev->origin;
+
+	if (!FStringNull(m_iszPosition))
+	{
+		isPosValid = TryCalcLocus_Position(this, m_hActivator, STRING(m_iszPosition), position);
+	}
+
 	bool isDirValid = true;
 	bool directed = FBitSet(pev->spawnflags, SF_SMOKER_DIRECTIONAL);
 	Vector direction;
@@ -1686,7 +1716,7 @@ void CSmoker::Think( void )
 		directed = true;
 		CBaseEntity *pTarget = GetNextTarget();
 		if (pTarget)
-			direction = (pTarget->pev->origin - pev->origin).Normalize();
+			direction = (pTarget->pev->origin - position).Normalize();
 		else
 			isDirValid = false;
 	}
@@ -1695,7 +1725,7 @@ void CSmoker::Think( void )
 		direction = pev->movedir;
 	}
 
-	if (isDirValid)
+	if (isDirValid && isPosValid)
 	{
 		int flags = 0;
 		if (directed)
@@ -1707,9 +1737,9 @@ void CSmoker::Think( void )
 
 		MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
 			WRITE_BYTE( flags );
-			WRITE_COORD( pev->origin.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
-			WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
-			WRITE_COORD( pev->origin.z);
+			WRITE_COORD( position.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
+			WRITE_COORD( position.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
+			WRITE_COORD( position.z);
 			WRITE_SHORT( smokeIndex ? smokeIndex : g_sModelIndexSmoke );
 			WRITE_COORD( RANDOM_FLOAT(pev->scale, pev->scale * 1.1f ) );
 			WRITE_BYTE( RANDOM_LONG( minFramerate, maxFramerate ) ); // framerate
