@@ -225,6 +225,8 @@ void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *
 
 	const char* useTypeString = UseTypeToString(useType);
 	ALERT( at_aiconsole, "Firing: (%s)\n", targetName );
+	const char* callerClassname = pCaller ? STRING(pCaller->pev->classname) : "";
+	const char* activatorClassname = pActivator ? STRING(pActivator->pev->classname) : "";
 
 	for( ; ; )
 	{
@@ -234,7 +236,7 @@ void FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *
 
 		if( pTarget && !( pTarget->pev->flags & FL_KILLME ) )	// Don't use dying ents
 		{
-			ALERT( at_aiconsole, "Found: %s, firing (%s, %s)\n", STRING( pTarget->pev->classname ), targetName, useTypeString );
+			ALERT( at_aiconsole, "Found: %s, firing (%s, %s, called by '%s', activated by '%s')\n", STRING( pTarget->pev->classname ), targetName, useTypeString, callerClassname, activatorClassname );
 			pTarget->Use( pActivator, pCaller, useType, value );
 		}
 	}
