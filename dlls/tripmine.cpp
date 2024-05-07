@@ -467,9 +467,10 @@ void CTripmine::PrimaryAttack( void )
 		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
 		if( pEntity && !( pEntity->pev->flags & FL_CONVEYOR ) )
 		{
+#if !CLIENT_DLL
 			Vector angles = UTIL_VecToAngles( tr.vecPlaneNormal );
-
 			CBaseEntity::Create( "monster_tripmine", tr.vecEndPos + tr.vecPlaneNormal * 8.0f, angles, m_pPlayer->edict() );
+#endif
 
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
