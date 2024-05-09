@@ -989,11 +989,11 @@ void CHud::ParseClientFeatures()
 				}
 				else if (strcmp(keyName, "nvg_empty_sprite") == 0)
 				{
-					strncpyEnsureTermination(clientFeatures.nvg_empty_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
+					strncpyEnsureTermination(clientFeatures.nvg_empty_sprite, valueBuf);
 				}
 				else if (strcmp(keyName, "nvg_full_sprite") == 0)
 				{
-					strncpyEnsureTermination(clientFeatures.nvg_full_sprite, valueBuf, MAX_SPRITE_NAME_LENGTH);
+					strncpyEnsureTermination(clientFeatures.nvg_full_sprite, valueBuf);
 				}
 			}
 		}

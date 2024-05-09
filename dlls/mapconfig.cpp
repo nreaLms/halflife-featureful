@@ -79,7 +79,7 @@ bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize)
 				if (count > 0)
 				{
 					ammoName = FixedAmmoName(ammoName);
-					strncpyEnsureTermination(mapConfig.ammo[mapConfig.ammoCount].name, ammoName, MAPCONFIG_ENTRY_LENGTH);
+					strncpyEnsureTermination(mapConfig.ammo[mapConfig.ammoCount].name, ammoName);
 					mapConfig.ammo[mapConfig.ammoCount].count = count;
 					mapConfig.ammoCount++;
 				}
@@ -139,8 +139,8 @@ bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize)
 		{
 			if (mapConfig.cvarCount < 32)
 			{
-				strncpyEnsureTermination(mapConfig.overrideCvars[mapConfig.cvarCount].name, key, MAPCONFIG_ENTRY_LENGTH);
-				strncpyEnsureTermination(mapConfig.overrideCvars[mapConfig.cvarCount].value, value, MAPCONFIG_ENTRY_LENGTH);
+				strncpyEnsureTermination(mapConfig.overrideCvars[mapConfig.cvarCount].name, key);
+				strncpyEnsureTermination(mapConfig.overrideCvars[mapConfig.cvarCount].value, value);
 				mapConfig.cvarCount++;
 			}
 		}

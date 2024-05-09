@@ -26,7 +26,7 @@ bool AmmoAmounts::RegisterAmountForAmmoEnt(const char* entityName, int amount)
 		return false; // already registered
 	}
 	AmmoAmountInfo info;
-	strncpyEnsureTermination(info.entityName, entityName, sizeof(info.entityName));
+	strncpyEnsureTermination(info.entityName, entityName);
 	info.amount = amount;
 	amounts.push_back(info);
 	std::sort(amounts.begin(), amounts.end(), AmmoComparator());

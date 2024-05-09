@@ -329,8 +329,8 @@ void CGlobalState::EntityAdd(const char* globalname, string_t mapName, GLOBALEST
 	ASSERT( pNewEntity != NULL );
 	pNewEntity->pNext = m_pList;
 	m_pList = pNewEntity;
-	strncpyEnsureTermination( pNewEntity->name, globalname, sizeof(pNewEntity->name) );
-	strncpyEnsureTermination( pNewEntity->levelName, STRING( mapName ), sizeof(pNewEntity->levelName) );
+	strncpyEnsureTermination( pNewEntity->name, globalname );
+	strncpyEnsureTermination( pNewEntity->levelName, STRING( mapName ) );
 	pNewEntity->state = state;
 	pNewEntity->value = value;
 	m_listCount++;

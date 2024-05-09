@@ -16,7 +16,7 @@ Caption_t::Caption_t(): profile(NULL), delay(0.0f), duration(0.0f)
 
 Caption_t::Caption_t(const char *captionName): profile(NULL), delay(0.0f), duration(0.0f)
 {
-	strncpyEnsureTermination(name, captionName, sizeof(name));
+	strncpyEnsureTermination(name, captionName);
 }
 
 DECLARE_MESSAGE( m_Caption, Caption )

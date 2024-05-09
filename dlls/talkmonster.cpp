@@ -1740,7 +1740,7 @@ void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, sh
 	{
 		if (!m_szFriends[i].name[0])
 		{
-			strncpyEnsureTermination(m_szFriends[i].name, className, sizeof(m_szFriends[i].name));
+			strncpyEnsureTermination(m_szFriends[i].name, className);
 			m_szFriends[i].canFollow = canFollow;
 			m_szFriends[i].category = followerCategory;
 
@@ -1770,7 +1770,7 @@ void CTalkMonster::RegisterMedic(const char* className)
 	{
 		if (!m_szMedics[i][0])
 		{
-			strncpyEnsureTermination(m_szMedics[i], className, sizeof(m_szMedics[i]));
+			strncpyEnsureTermination(m_szMedics[i], className);
 
 			ALERT(at_aiconsole, "Registered %s as medic\n", className);
 			return;

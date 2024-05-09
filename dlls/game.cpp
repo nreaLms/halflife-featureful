@@ -207,7 +207,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		{
 			if (strcmp(key, strings[i].name) == 0)
 			{
-				strncpyEnsureTermination(strings[i].value, value, sizeof(StringBuf));
+				strncpyEnsureTermination(strings[i].value, value);
 				return true;
 			}
 		}
@@ -237,7 +237,7 @@ void ModFeatures::SetMaxAmmo(const char *name, int maxAmmo)
 		ALERT(at_console, "Can't add a new ammo type '%s', max count is reached\n", name);
 		return;
 	}
-	strncpyEnsureTermination(maxAmmos[maxAmmoCount].name, name, sizeof(maxAmmos[maxAmmoCount].name));
+	strncpyEnsureTermination(maxAmmos[maxAmmoCount].name, name);
 	maxAmmos[maxAmmoCount].maxAmmo = maxAmmo;
 	maxAmmoCount++;
 }
@@ -386,7 +386,7 @@ void ModFeatures::EnableMonster(const char *name)
 		return;
 	}
 
-	strncpyEnsureTermination(monsters[monstersCount], name, sizeof(monsters[0]));
+	strncpyEnsureTermination(monsters[monstersCount], name);
 	monstersCount++;
 }
 
