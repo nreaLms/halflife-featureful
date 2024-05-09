@@ -60,9 +60,6 @@
 
 extern DLL_GLOBAL BOOL		g_fGameOver;
 
-extern void SetMovedir(entvars_t* pev);
-extern Vector VecBModelOrigin( entvars_t* pevBModel );
-
 class CFrictionModifier : public CBaseEntity
 {
 public:

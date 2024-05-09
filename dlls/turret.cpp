@@ -26,8 +26,6 @@
 #include "effects.h"
 #include "game.h"
 
-extern Vector VecBModelOrigin( entvars_t* pevBModel );
-
 #define TURRET_SHOTS	2
 #define TURRET_RANGE	(100 * 12)
 #define TURRET_SPREAD	Vector( 0, 0, 0 )
