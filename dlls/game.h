@@ -95,6 +95,7 @@ struct ModFeatures
 
 	bool doors_open_in_move_direction;
 	bool doors_blocked_recheck;
+	bool door_rotating_starts_open_fix;
 
 	bool skill_opfor;
 	bool opfor_decals;
