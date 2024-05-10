@@ -7,24 +7,35 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-2019]
+        vgui_build: [non-vgui, vgui]
         include:
           - os: ubuntu-latest
             cc: gcc
             cxx: g++
-          - os: ubuntu-latest
-            cc: clang
-            cxx: clang++
           - os: windows-2019
             cc: cl
             cxx: cl
     env:
       CC: ${{ matrix.cc }}
       CXX: ${{ matrix.cxx }}
+      include_features: "false"
+      fgd_name: "halflife_featureful.fgd"
     steps:
     - name: Checkout
       uses: actions/checkout@v3
       with:
         submodules: recursive
+
+    - name: Setup VGUI-related environment variables
+      shell: bash
+      run: |
+        if [ ${{ matrix.vgui_build }} == 'vgui' ]
+        then
+        echo "USE_VGUI=ON" >> "$GITHUB_ENV"; echo "vgui_suffix=-vgui" >> "$GITHUB_ENV"
+        else
+        echo "USE_VGUI=OFF" >> "$GITHUB_ENV"; echo "vgui_suffix=" >> "$GITHUB_ENV"
+        fi
 
     - name: Checkout steam-runtime
       if: startsWith(matrix.os, 'ubuntu')
@@ -52,16 +63,10 @@ jobs:
     - name: Build on Linux
       if: startsWith(matrix.os, 'ubuntu')
       run: |
-        schroot --chroot steamrt_scout_i386 -- cmake -DCMAKE_BUILD_TYPE=Release -DPOLLY=ON -B build -S . -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DCMAKE_INSTALL_PREFIX="$PWD/dist"
+        schroot --chroot steamrt_scout_i386 -- cmake -DCMAKE_BUILD_TYPE=Release -DPOLLY=ON -B build -S . -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DUSE_VGUI=${{ env.USE_VGUI }} -DCMAKE_INSTALL_PREFIX="$PWD/dist"
+        if [ ${{ env.USE_VGUI == 'ON' }} ]; then cp vgui_support/vgui-dev/lib/vgui.so build/cl_dll ; fi
         schroot --chroot steamrt_scout_i386 -- cmake --build build --target all
         schroot --chroot steamrt_scout_i386 -- cmake --build build --target install
-    - name: Build on Linux with vgui
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.cc, 'gcc')
-      run: |
-        schroot --chroot steamrt_scout_i386 -- cmake -DCMAKE_BUILD_TYPE=Release -DPOLLY=ON -B build-vgui -S . -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined" -DUSE_VGUI=ON -DCMAKE_INSTALL_PREFIX="$PWD/dist-vgui"
-        cp vgui_support/vgui-dev/lib/vgui.so build-vgui/cl_dll
-        schroot --chroot steamrt_scout_i386 -- cmake --build build-vgui --target all
-        schroot --chroot steamrt_scout_i386 -- cmake --build build-vgui --target install
 
     - name: Add msbuild to PATH
       if: startsWith(matrix.os, 'windows')
@@ -69,12 +74,7 @@ jobs:
     - name: Build on Windows
       if: startsWith(matrix.os, 'windows')
       run: |
-        cmake -G "Visual Studio 16 2019" -A Win32 -B build -DCMAKE_INSTALL_PREFIX="dist"
-        msbuild -verbosity:normal /property:Configuration=Release build/INSTALL.vcxproj
-    - name: Build on Windows with vgui
-      if: startsWith(matrix.os, 'windows')
-      run: |
-        cmake -G "Visual Studio 16 2019" -A Win32 -B build -DUSE_VGUI=ON -DCMAKE_INSTALL_PREFIX="dist-vgui"
+        cmake -G "Visual Studio 16 2019" -A Win32 -B build -DUSE_VGUI=${{ env.USE_VGUI }} -DCMAKE_INSTALL_PREFIX="dist"
         msbuild -verbosity:normal /property:Configuration=Release build/INSTALL.vcxproj
 
     - name: Extract branch name
@@ -85,42 +85,31 @@ jobs:
       shell: bash
       run: echo "gamedir=$(grep build/CMakeCache.txt -Ee 'GAMEDIR:STRING=[a-z]+' | cut -d '=' -f 2)" >> $GITHUB_OUTPUT
       id: extract_gamedir
+
     - name: Copy fgd to dist dir
-      if: ${{ (startsWith(matrix.os, 'ubuntu') && startsWith(matrix.cc, 'gcc')) || startsWith(matrix.os, 'windows') }}
-      run: |
-        cp fgd/halflife.fgd dist/${{ steps.extract_gamedir.outputs.gamedir }}/halflife_featureful.fgd
-        cp fgd/halflife.fgd dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/halflife_featureful.fgd
-        cp -r features/ dist/${{ steps.extract_gamedir.outputs.gamedir }}/
-        cp -r features/ dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/
+      run: cp fgd/halflife.fgd dist/${{ steps.extract_gamedir.outputs.gamedir }}/${{ env.fgd_name }}
+
+    - name: Copy features to dist dir
+      if:  ${{ env.include_features == 'true' }}
+      run: cp -r features/ dist/${{ steps.extract_gamedir.outputs.gamedir }}/
+
     - name: Delete .lib files from dist
       if: startsWith(matrix.os, 'windows')
       run: |
         Remove-Item -Force -Path dist/${{ steps.extract_gamedir.outputs.gamedir }}/cl_dlls/client.lib
         Remove-Item -Force -Path dist/${{ steps.extract_gamedir.outputs.gamedir }}/dlls/hl.lib
-        Remove-Item -Force -Path dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/cl_dlls/client.lib
-        Remove-Item -Force -Path dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}/dlls/hl.lib
+
     - name: Upload linux artifact
-      if: startsWith(matrix.os, 'ubuntu') && matrix.cc == 'gcc'
+      if: startsWith(matrix.os, 'ubuntu')
       uses: actions/upload-artifact@v3
       with:
-        name: hlsdk-${{ steps.extract_branch.outputs.branch }}-linux
+        name: hlsdk-${{ steps.extract_branch.outputs.branch }}-linux${{ env.vgui_suffix }}
         path: dist/${{ steps.extract_gamedir.outputs.gamedir }}
-    - name: Upload linux artifact with vgui
-      if: startsWith(matrix.os, 'ubuntu') && matrix.cc == 'gcc'
-      uses: actions/upload-artifact@v3
-      with:
-        name: hlsdk-${{ steps.extract_branch.outputs.branch }}-linux-vgui
-        path: dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}
+
     - name: Upload windows artifact
       if: startsWith(matrix.os, 'windows')
       uses: actions/upload-artifact@v3
       with:
-        name: hlsdk-${{ steps.extract_branch.outputs.branch }}-windows
+        name: hlsdk-${{ steps.extract_branch.outputs.branch }}-windows${{ env.vgui_suffix }}
         path: dist/${{ steps.extract_gamedir.outputs.gamedir }}
-    - name: Upload windows artifact with vgui
-      if: startsWith(matrix.os, 'windows')
-      uses: actions/upload-artifact@v3
-      with:
-        name: hlsdk-${{ steps.extract_branch.outputs.branch }}-windows-vgui
-        path: dist-vgui/${{ steps.extract_gamedir.outputs.gamedir }}
 
