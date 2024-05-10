@@ -50,6 +50,10 @@ static inline int MAKE_STRING(const char *szValue)
 }
 #endif
 
+string_t ALLOC_STRING(const char* str);
+
+extern void ClearStringPool();
+
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
 {
 	return FIND_ENTITY_BY_STRING(entStart, "classname", pszName);

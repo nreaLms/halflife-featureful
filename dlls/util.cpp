@@ -30,6 +30,58 @@
 #include "weapons.h"
 #include "gamerules.h"
 
+#include <map>
+#include <string>
+
+class StringPool
+{
+public:
+	void AddString(const char* str, string_t s)
+	{
+		stringMap[str] = s;
+	}
+	string_t FindString(const char* str)
+	{
+		auto it = stringMap.find(str);
+		if (it != stringMap.end())
+		{
+			return it->second;
+		}
+		else
+		{
+			return iStringNull;
+		}
+	}
+	void Clear()
+	{
+		stringMap.clear();
+	}
+private:
+	std::map<std::string, string_t> stringMap;
+};
+
+StringPool g_StringPool;
+
+string_t ALLOC_STRING(const char* str)
+{
+	string_t s = g_StringPool.FindString(str);
+	if (!FStringNull(s))
+	{
+		return s;
+	}
+	else
+	{
+		s = g_engfuncs.pfnAllocString(str);
+		g_StringPool.AddString(str, s);
+		return s;
+	}
+}
+
+void ClearStringPool()
+{
+	g_StringPool.Clear();
+}
+
 void UTIL_DynamicLight( const Vector &vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay )
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
