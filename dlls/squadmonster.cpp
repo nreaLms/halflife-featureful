@@ -493,15 +493,14 @@ void CSquadMonster::StartMonster( void )
 		// try to form squads now.
 		int iSquadSize = SquadRecruit( 1024, 4 );
 
-		if( iSquadSize )
+		if( iSquadSize > 1 )
 		{
 			ALERT( at_aiconsole, "Squad of %d monsters formed. Leader is %s\n", iSquadSize, STRING( pev->classname ) );
 		}
 
-		if( IsLeader() && FClassnameIs( pev, "monster_human_grunt" ) )
+		if( IsLeader() )
 		{
-			SetBodygroup( 1, 1 ); // UNDONE: truly ugly hack
-			pev->skin = 0;
+			OnBecomingLeader();
 		}
 	}
 }

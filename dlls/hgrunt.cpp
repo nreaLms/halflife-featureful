@@ -2343,6 +2343,15 @@ void CHGrunt::ReportAIState(ALERT_TYPE level)
 	ALERT(level, "Ammo loaded: %d / %d. ", m_cAmmoLoaded, m_cClipSize);
 }
 
+void CHGrunt::OnBecomingLeader()
+{
+	if (FClassnameIs( pev, "monster_human_grunt" ))
+	{
+		SetBodygroup( HEAD_GROUP, HEAD_COMMANDER );
+		pev->skin = 0;
+	}
+}
+
 //=========================================================
 // CHGruntRepel - when triggered, spawns a monster_human_grunt
 // repelling down a line.

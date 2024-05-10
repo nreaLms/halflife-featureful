@@ -136,6 +136,8 @@ public:
 
 
 protected:
+	virtual void OnBecomingLeader();
+
 	static const char *pGruntSentences[HGRUNT_SENT_COUNT];
 
 	void SpawnHelper(const char* modelName, int health, int bloodColor = BLOOD_COLOR_RED);

@@ -127,5 +127,8 @@ public:
 	void StartTask( Task_t *pTask );
 
 	void ReportAIState(ALERT_TYPE level);
+
+protected:
+	virtual void OnBecomingLeader() {}
 };
 #endif // SQUADMONSTER_H
