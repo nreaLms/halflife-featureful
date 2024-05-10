@@ -1525,6 +1525,15 @@ void UTIL_StringToVector( float *pVector, const char *pString )
 	}
 }
 
+Vector UTIL_StringToVector(const char* str)
+{
+	float x, y, z;
+	if (sscanf( str, "%f %f %f", &x, &y, &z) == 3) {
+		return Vector(x, y, z);
+	}
+	return g_vecZero;
+}
+
 //LRC - randomized vectors of the form "0 0 0 .. 1 0 0"
 void UTIL_StringToRandomVector( float *pVector, const char *pString )
 {

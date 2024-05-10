@@ -3005,6 +3005,12 @@ public:
 	float m_soundVolume;
 	short m_soundRadius;
 
+	string_t model2;
+	Vector rendercolor2;
+	int renderamt2;
+	float scale2;
+	float framerate2;
+
 	int m_beamTexture;
 };
 
@@ -3018,6 +3024,11 @@ TYPEDESCRIPTION	CEnvWarpBall::m_SaveData[] =
 	DEFINE_FIELD(CEnvWarpBall, m_aiSoundDuration, FIELD_FLOAT),
 	DEFINE_FIELD(CEnvWarpBall, m_soundVolume, FIELD_FLOAT),
 	DEFINE_FIELD(CEnvWarpBall, m_soundRadius, FIELD_SHORT),
+	DEFINE_FIELD(CEnvWarpBall, model2, FIELD_STRING),
+	DEFINE_FIELD(CEnvWarpBall, rendercolor2, FIELD_VECTOR),
+	DEFINE_FIELD(CEnvWarpBall, renderamt2, FIELD_INTEGER),
+	DEFINE_FIELD(CEnvWarpBall, scale2, FIELD_FLOAT),
+	DEFINE_FIELD(CEnvWarpBall, framerate2, FIELD_FLOAT),
 };
 IMPLEMENT_SAVERESTORE( CEnvWarpBall, CBaseEntity )
 
@@ -3055,10 +3066,7 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 	}
 	else if ( FStrEq( pkvd->szKeyName, "beamcolor" ) ) 
 	{
-		float red, green, blue;
-		if (sscanf( pkvd->szValue, "%f %f %f", &red, &green, &blue) == 3) {
-			pev->punchangle = Vector(red, green, blue);
-		}
+		pev->punchangle = UTIL_StringToVector( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "beamcount" ) )
@@ -3086,6 +3094,31 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 		m_aiSoundDuration = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "model2" ) )
+	{
+		model2 = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "rendercolor2" ) )
+	{
+		rendercolor2 = UTIL_StringToVector( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "renderamt2" ) )
+	{
+		renderamt2 = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "scale2" ) )
+	{
+		scale2 = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "framerate2" ) )
+	{
+		framerate2 = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -3097,6 +3130,11 @@ void CEnvWarpBall::Precache( void )
 		PRECACHE_MODEL( STRING(pev->model) );
 	else
 		PRECACHE_MODEL( WARPBALL_SPRITE );
+
+	if (model2)
+	{
+		PRECACHE_MODEL( STRING(model2) );
+	}
 
 	PRECACHE_SOUND(WarpballSound1());
 
@@ -3188,6 +3226,29 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	pSpr->SetTransparency( RenderMode(),  red, green, blue, RenderAmount(), RenderFx() );
 	pSpr->SetScale(Scale());
+
+	if (!FStringNull(model2)) {
+		CSprite *pSpr2 = CSprite::SpriteCreate( STRING(model2), vecOrigin, TRUE );
+		pSpr2->AnimateAndDie( framerate2 > 0 ? framerate2 : SpriteFramerate() );
+
+		int red2, green2, blue2;
+		if (rendercolor2 == g_vecZero)
+		{
+			red2 = red;
+			green2 = green;
+			blue2 = blue;
+		}
+		else
+		{
+			red2 = rendercolor2.x;
+			green2 = rendercolor2.y;
+			blue2 = rendercolor2.z;
+		}
+
+		const int renderAlpha = renderamt2 > 0 ? renderamt2 : RenderAmount();
+		pSpr2->SetTransparency( RenderMode(), red2, green2, blue2, renderAlpha, RenderFx() );
+		pSpr2->SetScale(scale2 > 0 ? scale2 : Scale());
+	}
 
 	if (pev->spawnflags & SF_WARPBALL_DYNLIGHT)
 	{

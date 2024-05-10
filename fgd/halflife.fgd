@@ -2158,6 +2158,11 @@
 		32 : "Danger"
 	]
 	aisound_duration(string) : "AI Sound duration"
+	model2(sprite) : "Sprite 2 Name" : "sprites/xflare1.spr" : "Sprite to play along with a sprite defined in 'Sprite name', for more interesting visuals"
+	rendercolor2(color255) : "Sprite 2 color" : : "If left undefined, use the same color as for the first sprite"
+	renderamt2(integer) : "Sprite 2 brightness"
+	scale2(string) : "Sprite 2 scale"
+	framerate2(string) : "Sprite 2 framerate"
 ]
 
 @PointClass base(Target, Targetname) size(-24 -24 -24,24 24 24) = env_xenmaker :"Xen Portal. This entity is present just for compatibility with Sven Co-op"

@@ -327,6 +327,7 @@ extern void			UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber );
 extern void			UTIL_Sparks( const Vector &position );
 extern void			UTIL_Ricochet( const Vector &position, float scale );
 extern void			UTIL_StringToVector( float *pVector, const char *pString );
+extern Vector		UTIL_StringToVector( const char *str );
 extern void			UTIL_StringToRandomVector( float *pVector, const char *pString );
 extern void			UTIL_StringToIntArray( int *pVector, int count, const char *pString );
 extern Vector		UTIL_ClampVectorToBox( const Vector &input, const Vector &clampSize );
