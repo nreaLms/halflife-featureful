@@ -6814,15 +6814,11 @@
 	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
 	impulse(choices) : "Warp at monster's..." : : "If using warpball template, spawn warpball at this monster position" =
 	[
-		0 : "Origin (default)"
-		1 : "Eyes"
-		3 : "Center"
-		5 : "Attachment point 0"
-		6 : "Attachment point 1"
-		7 : "Attachment point 2"
-		8 : "Attachment point 3"
+		-1 : "Origin"
+		0 : "Default (Center)"
+		1 : "Center"
 	]
-	spawndelay(string) : "Delay before spawn" : : "If larger then zero, the monster spawn will be delayed by specified amount of time (in seconds). The hull is created in place of the future monster's spawn to make sure that monster will have enough place to spawn. Recommended to use with 'Auto size BBox' flag and 'Warpball template'. Does not work well with 'Warp at monster's...'"
+	spawndelay(string) : "Delay before spawn" : : "If larger then zero, the monster spawn will be delayed by specified amount of time (in seconds). The hull is created in place of the future monster's spawn to make sure that monster will have enough place to spawn. Recommended to use with 'Auto size BBox' flag and 'Warpball template'."
 	delay_after_blocked(string) : "Delay after blocked" : : "Delay before the next spawn attempt if previous was blocked by another monster. If not specified, the 'Delay between spawns' parameter is used as a delay"
 	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
 	[

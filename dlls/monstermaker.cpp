@@ -22,6 +22,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "saverestore.h"
+#include "game.h"
 #include "locus.h"
 #include "talkmonster.h"
 
@@ -846,36 +847,16 @@ int CMonsterMaker::MakeMonster( void )
 		if (!createdEntity)
 			return MONSTERMAKER_NULLENTITY;
 
-		CBaseMonster* createdMonster = createdEntity->MyMonsterPointer();
-
 		if (!FStringNull(warpballName))
 		{
-			Vector vecWarpPosition = createdEntity->pev->origin;
-			if (createdMonster)
+			Vector vecWarpPosition = g_modFeatures.warpball_at_monster_center ? createdEntity->Center() : createdEntity->pev->origin;
+			if (pev->impulse < 0)
 			{
-				Vector vecJunk;
-				switch (pev->impulse) {
-				case 1:
-					vecWarpPosition = createdMonster->EyePosition();
-					break;
-				case 3:
-					vecWarpPosition = createdMonster->Center();
-					break;
-				case 5:
-					createdMonster->GetAttachment(0, vecWarpPosition, vecJunk);
-					break;
-				case 6:
-					createdMonster->GetAttachment(1, vecWarpPosition, vecJunk);
-					break;
-				case 7:
-					createdMonster->GetAttachment(2, vecWarpPosition, vecJunk);
-					break;
-				case 8:
-					createdMonster->GetAttachment(3, vecWarpPosition, vecJunk);
-					break;
-				default:
-					break;
-				}
+				vecWarpPosition = createdEntity->pev->origin;
+			}
+			else if (pev->impulse > 0)
+			{
+				vecWarpPosition = createdEntity->Center();
 			}
 			StartWarpballEffect(vecWarpPosition, warpballSoundEnt);
 		}
@@ -890,7 +871,7 @@ int CMonsterMaker::MakeMonster( void )
 		if (!FStringNull(warpballName))
 		{
 			Vector vecWarpPosition = placePosition;
-			if (pev->impulse > 0)
+			if (pev->impulse > 0 || (pev->impulse == 0 && g_modFeatures.warpball_at_monster_center))
 			{
 				Vector realMinHullSize = g_vecZero;
 				Vector realMaxHullSize = g_vecZero;
