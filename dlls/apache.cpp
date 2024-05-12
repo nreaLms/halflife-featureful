@@ -236,7 +236,7 @@ void CApache::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib 
 	pev->movetype = MOVETYPE_TOSS;
 	pev->gravity = 0.3f;
 
-	STOP_SOUND( ENT( pev ), CHAN_STATIC, "apache/ap_rotor2.wav" );
+	StopSound( CHAN_STATIC, "apache/ap_rotor2.wav" );
 
 	UTIL_SetSize( pev, Vector( -32.0f, -32.0f, -64.0f ), Vector( 32.0f, 32.0f, 0.0f ) );
 	SetThink( &CApache::DyingThink );

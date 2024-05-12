@@ -1898,7 +1898,7 @@ void CISlave::ClearBeams()
 	HandsGlowOff();
 	RemoveSummonBeams();
 
-	STOP_SOUND( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav" );
+	StopSound( CHAN_WEAPON, "debris/zap4.wav" );
 }
 
 void CISlave::CoilBeam()

@@ -288,6 +288,7 @@ public:
 	bool EmitSoundDyn( int channel, const char *sample, float volume, float attenuation, int flags, int pitch );
 	bool EmitSound( int channel, const char *sample, float volume, float attenuation );
 	void EmitAmbientSound( const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch );
+	void StopSound( int channel, const char* sample );
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )

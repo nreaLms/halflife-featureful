@@ -648,6 +648,18 @@ void CBaseEntity::EmitAmbientSound(const Vector &vecOrigin, const char *sample, 
 	UTIL_EmitAmbientSound(edict(), vecOrigin, sample, vol, attenuation, iFlags, pitch);
 }
 
+void CBaseEntity::StopSound(int channel, const char *sample)
+{
+	if (!FStringNull(m_soundList)) {
+		const auto& replacement = g_soundReplacement.FindReplacement(STRING(m_soundList), sample);
+		if (!replacement.empty()) {
+			STOP_SOUND(edict(), channel, replacement.c_str());
+			return;
+		}
+	}
+	STOP_SOUND(edict(), channel, sample);
+}
+
 int CBaseEntity::Save( CSave &save )
 {
 	if( save.WriteEntVars( "ENTVARS", pev ) )

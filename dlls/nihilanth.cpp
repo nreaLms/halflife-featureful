@@ -1584,14 +1584,14 @@ void CNihilanthHVR::TeleportThink( void )
 	// check world boundaries
 	if( m_hEnemy == 0 || !m_hEnemy->IsAlive() || pev->origin.x < -4096 || pev->origin.x > 4096 || pev->origin.y < -4096 || pev->origin.y > 4096 || pev->origin.z < -4096 || pev->origin.z > 4096 )
 	{
-		STOP_SOUND( edict(), CHAN_WEAPON, "x/x_teleattack1.wav" );
+		StopSound( CHAN_WEAPON, "x/x_teleattack1.wav" );
 		UTIL_Remove( this );
 		return;
 	}
 
 	if( ( m_hEnemy->Center() - pev->origin).Length() < 128 )
 	{
-		STOP_SOUND( edict(), CHAN_WEAPON, "x/x_teleattack1.wav" );
+		StopSound( CHAN_WEAPON, "x/x_teleattack1.wav" );
 		UTIL_Remove( this );
 
 		if( m_hTargetEnt != 0 )
@@ -1663,7 +1663,7 @@ void CNihilanthHVR::TeleportTouch( CBaseEntity *pOther )
 	}
 
 	SetTouch( NULL );
-	STOP_SOUND(edict(), CHAN_WEAPON, "x/x_teleattack1.wav" );
+	StopSound( CHAN_WEAPON, "x/x_teleattack1.wav" );
 	UTIL_Remove( this );
 }
 
@@ -1799,7 +1799,7 @@ void CNihilanthHVR::Crawl( void )
 
 void CNihilanthHVR::RemoveTouch( CBaseEntity *pOther )
 {
-	STOP_SOUND( edict(), CHAN_WEAPON, "x/x_teleattack1.wav" );
+	StopSound( CHAN_WEAPON, "x/x_teleattack1.wav" );
 	UTIL_Remove( this );
 }
 

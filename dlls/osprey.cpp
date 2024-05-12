@@ -629,7 +629,7 @@ void COsprey::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib 
 	pev->gravity = 0.3f;
 	pev->velocity = m_velocity;
 	pev->avelocity = Vector( RANDOM_FLOAT( -20, 20 ), 0, RANDOM_FLOAT( -50, 50 ) );
-	STOP_SOUND( ENT( pev ), CHAN_STATIC, "apache/ap_rotor4.wav" );
+	StopSound( CHAN_STATIC, "apache/ap_rotor4.wav" );
 
 	UTIL_SetSize( pev, Vector( -32, -32, -64 ), Vector( 32, 32, 0 ) );
 	SetThink( &COsprey::DyingThink );
