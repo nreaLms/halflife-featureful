@@ -421,6 +421,8 @@ void COsprey::PrepareGruntBeforeSpawn(CBaseEntity *pGrunt)
 		if (pMonster)
 		{
 			pMonster->SetHead(-1);
+			// Set 9mmAR and hand grenades
+			pMonster->pev->weapons = 3;
 		}
 	}
 }
