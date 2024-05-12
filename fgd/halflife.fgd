@@ -526,7 +526,7 @@
 		8 : "NoWreckage"	: 0
 		64 : "Start Inactive" : 0
 	]
-	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
+	rotorvolume(string) : "Rotor sound volume (0.1 - 1.0)"
 ]
 
 @BaseClass base(Monster) = Osprey
@@ -537,8 +537,8 @@
 		32768 : "No deploy, just fly" : 0
 	]
 	num(integer) : "(Override) Number of Grunts"
-	rotorvolume(string) : "Rotor volume (0.0 - 1.0)"
-	attenuation(string) : "Rotor attenuation"
+	rotorvolume(string) : "Rotor sound volume (0.1 - 1.0)"
+	attenuation(string) : "Rotor sound attenuation" : : "The higher the value the stronger the volume fading with distance. The default attenuation for osprey is 0.15"
 ]
 
 @BaseClass base(Targetname, Angles) size(-8 -8 -8, 8 8 8) = gibshooterbase
@@ -2026,7 +2026,7 @@
 
 @PointClass base(Targetname) color(128 128 255) = env_state : "Local State. Can be used as Master entity"
 [
-	target(target_destination) : "Target (on & off)"
+	target(target_destination) : "Fire On State Change (on & off)" : : "Fire this target when the state of env_state changes. It sends On or Off use-type depending on the new state"
 	noise1(target_destination) : "Fire when turned on"
 	noise2(target_destination) : "Fire when turned off"
 	turnontime(string) : "Time taken to turn on"
@@ -6809,10 +6809,10 @@
 [
 	target(target_destination) : "Target On Release" : : "Targets which are fired whenever a monster is spawned."
 	monstertype(string) : "Monster Type" : "monster_headcrab" : "Spawned monster's classname"
-	netname(target_source) : "Childrens' Name" : : "The spawned monster will receive it as its targetname."
+	netname(target_source) : "Childrens' Name (Targetname)" : : "The spawned monster will receive it as its targetname."
 
 	monstercount(integer) : "Number of Monsters" : 1 : "How many monsters the monstermaker can create (-1 = unlimited)"
-	delay(string) : "Delay between spawns" : "5" : "How often (seconds) a new monster will be made"
+	delay(string) : "Delay between spawns (Frequency)" : "5" : "How often (seconds) a new monster will be made"
 	m_imaxlivechildren(integer) : "Max live children" : 5 : "Maximum number of live children allowed at one time. (New ones will not be made until one dies, -1 = no limit)"
 
     spawnorigin(string) : "Spawn position [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
