@@ -27,14 +27,6 @@
 
 #define SF_OSPREY_DONT_DEPLOY SF_MONSTER_SPECIAL_FLAG
 
-typedef struct 
-{
-	int isValid;
-	EHANDLE hGrunt;
-	Vector	vecOrigin;
-	Vector  vecAngles;
-} t_ospreygrunt;
-
 #define SF_WAITFORTRIGGER	0x40
 
 #define MAX_CARRY	24
