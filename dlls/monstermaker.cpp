@@ -64,6 +64,8 @@ typedef enum
 	MMA_FORWARD = 3,
 } MONSTERMAKER_TARGET_ACTIVATOR;
 
+#define MAX_CHILD_KEYS 16
+
 //=========================================================
 // MonsterMaker - this ent creates monsters during the game.
 //=========================================================
@@ -128,6 +130,10 @@ public:
 	int m_delayedCount;
 
 	float m_delayAfterBlocked;
+
+	string_t m_childKeys[MAX_CHILD_KEYS];
+	string_t m_childValues[MAX_CHILD_KEYS];
+	int m_childKeyCount;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -163,6 +169,9 @@ TYPEDESCRIPTION	CMonsterMaker::m_SaveData[] =
 	DEFINE_FIELD( CMonsterMaker, m_spawnDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CMonsterMaker, m_delayedCount, FIELD_INTEGER ),
 	DEFINE_FIELD( CMonsterMaker, m_delayAfterBlocked, FIELD_FLOAT ),
+	DEFINE_ARRAY( CMonsterMaker, m_childKeys, FIELD_STRING, MAX_CHILD_KEYS ),
+	DEFINE_ARRAY( CMonsterMaker, m_childValues, FIELD_STRING, MAX_CHILD_KEYS ),
+	DEFINE_FIELD( CMonsterMaker, m_childKeyCount, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CMonsterMaker, CBaseMonster )
@@ -283,6 +292,19 @@ void CMonsterMaker::KeyValue( KeyValueData *pkvd )
 	{
 		m_delayAfterBlocked = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
+	}
+	else if ( pkvd->szKeyName[0] == '#' )
+	{
+		if (m_childKeyCount < MAX_CHILD_KEYS)
+		{
+			m_childKeys[m_childKeyCount] = ALLOC_STRING(pkvd->szKeyName + 1);
+			m_childValues[m_childKeyCount] = ALLOC_STRING(pkvd->szValue);
+			++m_childKeyCount;
+		}
+		else
+		{
+			ALERT(at_warning, "%s: Too many child keys", STRING(pev->classname));
+		}
 	}
 	else
 		CBaseMonster::KeyValue( pkvd );
@@ -632,6 +654,28 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 	pevCreate->origin = placePosition;
 	pevCreate->angles = placeAngles;
 	SetBits( pevCreate->spawnflags, SF_MONSTER_FALL_TO_GROUND );
+
+	if (m_childKeyCount > 0)
+	{
+		const char* classname = STRING(pevCreate->classname);
+		KeyValueData kvd;
+		kvd.szClassName = classname;
+		for (int i=0; i<m_childKeyCount; ++i)
+		{
+			kvd.szKeyName = STRING(m_childKeys[i]);
+			kvd.szValue = STRING(m_childValues[i]);
+			kvd.fHandled = FALSE;
+
+			// don't change classname
+			if (FStrEq(kvd.szKeyName, "classname"))
+			{
+				continue;
+			}
+
+			DispatchKeyValue(pent, &kvd);
+		}
+	}
+
 	pevCreate->body = pev->body;
 	pevCreate->skin = pev->skin;
 	pevCreate->health = pev->health;
