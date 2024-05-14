@@ -64,7 +64,8 @@ StringPool g_StringPool;
 
 string_t ALLOC_STRING(const char* str)
 {
-	string_t s = g_StringPool.FindString(str);
+	return g_engfuncs.pfnAllocString(str);
+	/*string_t s = g_StringPool.FindString(str);
 	if (!FStringNull(s))
 	{
 		return s;
@@ -74,7 +75,7 @@ string_t ALLOC_STRING(const char* str)
 		s = g_engfuncs.pfnAllocString(str);
 		g_StringPool.AddString(str, s);
 		return s;
-	}
+	}*/
 }
 
 void ClearStringPool()
