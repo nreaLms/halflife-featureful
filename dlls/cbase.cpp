@@ -99,6 +99,11 @@ static DLL_FUNCTIONS gFunctionTable =
 
 void OnFreeEntPrivateData(edict_s* pEdict)
 {
+	entvars_t* pev = VARS(pEdict);
+	if (pev && !FStringNull(pev->classname) && FStrEq(STRING(pev->classname), "worldspawn"))
+	{
+		ClearStringPool();
+	}
 }
 
 void GameDLLShutdown()

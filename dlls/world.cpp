@@ -525,7 +525,6 @@ int CWorld::wallPuffsIndices[] = {0,0,0,0};
 
 void CWorld::Precache( void )
 {
-	ClearStringPool();
 	g_pLastSpawn = NULL;
 #if 1
 	CVAR_SET_STRING( "sv_gravity", "800" ); // 67ft/sec

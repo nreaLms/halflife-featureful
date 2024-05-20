@@ -60,12 +60,14 @@ private:
 	std::map<std::string, string_t> stringMap;
 };
 
+#define USE_STRINGPOOL 1
+
 StringPool g_StringPool;
 
 string_t ALLOC_STRING(const char* str)
 {
-	return g_engfuncs.pfnAllocString(str);
-	/*string_t s = g_StringPool.FindString(str);
+#if USE_STRINGPOOL
+	string_t s = g_StringPool.FindString(str);
 	if (!FStringNull(s))
 	{
 		return s;
@@ -75,7 +77,10 @@ string_t ALLOC_STRING(const char* str)
 		s = g_engfuncs.pfnAllocString(str);
 		g_StringPool.AddString(str, s);
 		return s;
-	}*/
+	}
+#else
+	return g_engfuncs.pfnAllocString(str);
+#endif
 }
 
 void ClearStringPool()
