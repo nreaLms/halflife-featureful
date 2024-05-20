@@ -598,7 +598,7 @@ void CHud::RecacheValues()
 	int hudR = m_pCvarHudRed->value;
 	int hudG = m_pCvarHudGreen->value;
 	int hudB = m_pCvarHudBlue->value;
-	m_cachedHudColor = ((hudR & 0xFF) << 16) | ((hudG & 0xFF) << 8) | (hudB & 0xFF);
+	m_cachedHudColor = PackRGB(hudR, hudG, hudB);
 }
 
 int CHud::GetCrosshairColor()

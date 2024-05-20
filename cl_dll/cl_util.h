@@ -19,6 +19,7 @@
 #define CL_UTIL_H
 #include "exportdef.h"
 #include "cvardef.h"
+#include "color_utils.h"
 
 #if !defined(TRUE)
 #define TRUE 1
@@ -176,13 +177,6 @@ extern float vec3_origin[3];
 #pragma warning( disable: 4244 )
 // disable 'truncation from 'const double' to 'float' warning message
 #pragma warning( disable: 4305 )
-
-inline void UnpackRGB( int &r, int &g, int &b, unsigned long ulRGB )\
-{\
-	r = ( ulRGB & 0xFF0000 ) >> 16;\
-	g = ( ulRGB & 0xFF00 ) >> 8;\
-	b = ulRGB & 0xFF;\
-}
 
 HSPRITE LoadSprite( const char *pszName );
 

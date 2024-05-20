@@ -1560,7 +1560,7 @@ void CHud::HUDColorCmd()
 		const int hudR = m_pCvarHudRed->value;
 		const int hudG = m_pCvarHudGreen->value;
 		const int hudB = m_pCvarHudBlue->value;
-		const int currentHudColor = ((hudR & 0xFF) << 16) | ((hudG & 0xFF) << 8) | (hudB & 0xFF);
+		const int currentHudColor = PackRGB(hudR, hudG, hudB);
 		gEngfuncs.Con_Printf( "Current HUD color: %d %d %d (%06X)\n"
 							  "usage:\n"
 							  "hud_color RRR GGG BBB\n"
