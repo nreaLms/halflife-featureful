@@ -37,20 +37,20 @@ extern globalvars_t				*gpGlobals;
 // Use this instead of ALLOC_STRING on constant strings
 #define STRING(offset)		(const char *)(gpGlobals->pStringBase + (int)offset)
 
+string_t ALLOC_STRING(const char* str);
+
 #if !XASH_64BIT || CLIENT_DLL
 #define MAKE_STRING(str)	((int)(long int)str - (int)(long int)STRING(0))
 #else
-static inline int MAKE_STRING(const char *szValue)
+static inline string_t MAKE_STRING(const char *szValue)
 {
 	long long ptrdiff = szValue - STRING(0);
 	if( ptrdiff > INT_MAX || ptrdiff < INT_MIN )
 		return ALLOC_STRING( szValue );
 	else
-		return (int)ptrdiff;
+		return (string_t)ptrdiff;
 }
 #endif
-
-string_t ALLOC_STRING(const char* str);
 
 extern void ClearStringPool();
 
@@ -172,7 +172,7 @@ inline BOOL FNullEnt(entvars_t* pev)				{ return pev == NULL || FNullEnt(OFFSET(
 
 // Testing strings for nullity
 #define iStringNull 0
-inline BOOL FStringNull(int iString)			{ return iString == iStringNull; }
+inline BOOL FStringNull(string_t iString)			{ return iString == iStringNull; }
 
 #define cchMapNameMost 32
 
