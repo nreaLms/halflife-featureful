@@ -3698,6 +3698,14 @@ void CBaseMonster::KeyValue( KeyValueData *pkvd )
 	}
 }
 
+void CBaseMonster::Activate()
+{
+	CBaseToggle::Activate();
+	if (!g_modFeatures.dying_monsters_block_player && pev->deadflag == DEAD_DYING && HasMemory(bits_MEMORY_KILLED)) {
+		pev->iuser3 = -1;
+	}
+}
+
 void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax)
 {
 	UTIL_SetSize(pev, m_minHullSize == g_vecZero ? vecMin : m_minHullSize, m_maxHullSize == g_vecZero ? vecMax : m_maxHullSize);

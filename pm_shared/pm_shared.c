@@ -863,10 +863,8 @@ void PM_FixupGravityVelocity( void )
 
 int PM_Ignore(physent_t *pe)
 {
-#if FEATURE_DYING_MONSTERS_DONT_COLLIDE_WITH_PLAYER
 	if (pe->iuser3 == -1)
 		return 1;
-#endif
 	return 0;
 }
 

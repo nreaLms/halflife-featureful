@@ -767,9 +767,8 @@ void CBaseMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int 
 
 void CBaseMonster::OnDying()
 {
-#if FEATURE_DYING_MONSTERS_DONT_COLLIDE_WITH_PLAYER
-	pev->iuser3 = -1;
-#endif
+	if (!g_modFeatures.dying_monsters_block_player)
+		pev->iuser3 = -1;
 	Remember( bits_MEMORY_KILLED );
 	// tell owner ( if any ) that we're dead.This is mostly for MonsterMaker functionality.
 	CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );

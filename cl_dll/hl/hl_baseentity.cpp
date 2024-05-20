@@ -141,6 +141,7 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 void CBaseEntity::TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType ) { }
 void CBaseMonster::ReportAIState( ALERT_TYPE ) { }
 void CBaseMonster::KeyValue( KeyValueData *pkvd ) { }
+void CBaseMonster::Activate() {}
 int CBaseMonster::CanPlaySequence( int interruptFlags ) { return FALSE; }
 BOOL CBaseMonster::FCanActiveIdle( void ) { return FALSE; }
 bool CBaseToggle::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle ) { return true; }

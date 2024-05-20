@@ -121,6 +121,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	void KeyValue( KeyValueData *pkvd );
+	void Activate();
 	void SetMySize(const Vector& vecMin, const Vector& vecMax);
 
 	// monster use function

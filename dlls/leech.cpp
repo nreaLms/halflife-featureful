@@ -206,6 +206,7 @@ void CLeech::Spawn( void )
 void CLeech::Activate( void )
 {
 	RecalculateWaterlevel();
+	CBaseMonster::Activate();
 }
 
 void CLeech::RecalculateWaterlevel( void )

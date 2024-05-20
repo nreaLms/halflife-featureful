@@ -728,6 +728,7 @@ void CBigMomma::Activate( void )
 {
 	if( m_hTargetEnt == 0 )
 		Remember( bits_MEMORY_ADVANCE_NODE );	// Start 'er up
+	CBaseMonster::Activate();
 }
 
 void CBigMomma::NodeStart( string_t iszNextNode )
