@@ -14,6 +14,7 @@
 #include "parsetext.h"
 #include "extdll.h"
 #include "util.h"
+#include "color_utils.h"
 #include "game.h"
 #include "effects.h"
 #include "soundent.h"
@@ -395,13 +396,6 @@ static bool UpdatePropertyFromJson(float& f, Value& jsonValue, const char* key)
 		return true;
 	}
 	return false;
-}
-
-inline void UnpackRGB( int &r, int &g, int &b, unsigned long ulRGB )
-{
-	r = ( ulRGB & 0xFF0000 ) >> 16;
-	g = ( ulRGB & 0xFF00 ) >> 8;
-	b = ulRGB & 0xFF;
 }
 
 static bool UpdatePropertyFromJson(Color& color, Value& jsonValue, const char* key)
