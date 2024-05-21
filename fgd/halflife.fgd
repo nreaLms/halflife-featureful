@@ -6816,14 +6816,14 @@
 	m_imaxlivechildren(integer) : "Max live children" : 5 : "Maximum number of live children allowed at one time. (New ones will not be made until one dies, -1 = no limit)"
 
     spawnorigin(string) : "Spawn position [LP]" : : "By default acts as a typical position variable. When it starts with '@' the monstermaker will choose a random spot among ones with the same name (the rest of the string after '@'). It also applies the chosen entity angles."
-	warpball(string) : "Warpball template" : : "env_warpball entity used as effect template for this monstermaker"
+	warpball(string) : "Warpball template" : : "The template name from templates/warpball.json or the name of the env_warpball entity used as effect template for this monstermaker"
 	impulse(choices) : "Warp at monster's..." : : "If using warpball template, spawn warpball at this monster position" =
 	[
 		-1 : "Origin"
 		0 : "Default (Center)"
 		1 : "Center"
 	]
-	spawndelay(string) : "Delay before spawn" : : "If larger then zero, the monster spawn will be delayed by specified amount of time (in seconds). The hull is created in place of the future monster's spawn to make sure that monster will have enough place to spawn. Recommended to use with 'Auto size BBox' flag and 'Warpball template'."
+	spawndelay(string) : "Delay before spawn" : : "If larger then zero or if the warpball template defines the 'spawn_delay' value, the monster spawn will be delayed by specified amount of time (in seconds). The hull is created in place of the future monster's spawn to make sure that monster will have enough place to spawn. Recommended to use with 'Auto size BBox' flag and 'Warpball template'. If less than zero, it forces no delay even if the warpball template defines the delay."
 	delay_after_blocked(string) : "Delay after blocked" : : "Delay before the next spawn attempt if previous was blocked by another monster. If not specified, the 'Delay between spawns' parameter is used as a delay"
 	target_activator(choices) : "Target's Activator" : : "Activator for 'Target On Release'" =
 	[
