@@ -1268,6 +1268,8 @@ void Cmd_CalcState()
 	}
 }
 
+extern void DumpWarpballTemplates();
+
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
 {
 	char valueStr[12];
@@ -1300,6 +1302,7 @@ cvar_t sv_pushable_fixed_tick_fudge = { "sv_pushable_fixed_tick_fudge", "15" };
 cvar_t sv_busters = { "sv_busters", "0" };
 
 extern void RegisterAmmoTypes();
+extern void LoadWarpballTemplates();
 
 // Register your console variables here
 // This gets called one time when the game is initialied
@@ -1314,6 +1317,7 @@ void GameDLLInit( void )
 	ReadAmmoAmounts();
 
 	RegisterAmmoTypes();
+	LoadWarpballTemplates();
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
 	g_psv_maxspeed = CVAR_GET_POINTER( "sv_maxspeed" );
@@ -1886,6 +1890,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("set_global_value", Cmd_SetGlobalValue);
 	g_engfuncs.pfnAddServerCommand("calc_ratio", Cmd_CalcRatio);
 	g_engfuncs.pfnAddServerCommand("calc_state", Cmd_CalcState);
+	g_engfuncs.pfnAddServerCommand("dump_warpballs", DumpWarpballTemplates);
 }
 
 bool ItemsPickableByTouch()

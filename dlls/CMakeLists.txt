@@ -177,6 +177,7 @@ set (SVDLL_SOURCES
 	util.cpp
 	vehicle.cpp
 	voltigore.cpp
+	warpball.cpp
 	weapons.cpp
 	weapons_shared.cpp
 	world.cpp

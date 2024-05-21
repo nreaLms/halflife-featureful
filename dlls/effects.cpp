@@ -34,11 +34,10 @@
 #include "particledef.h"
 #include "soundent.h"
 #include "fx_flags.h"
+#include "warpball.h"
 
 #define FEATURE_ENV_WARPBALL 1
 #define FEATURE_ENV_XENMAKER 1
-
-#define ALIEN_TELEPORT_SOUND "debris/alien_teleport.wav"
 
 #define	SF_GIBSHOOTER_REPEATABLE		1 // allows a gibshooter to be refired
 
@@ -2816,17 +2815,7 @@ void CItemSoda::CanTouch( CBaseEntity *pOther )
 	pev->nextthink = gpGlobals->time;
 }
 
-struct BeamParams
-{
-	int texture;
-	int lifeMin;
-	int lifeMax;
-	int width;
-	int noise;
-	int red, green, blue, alpha;
-};
-
-static void DrawChaoticBeam(Vector vecOrigin, Vector vecDest, const BeamParams& params)
+void DrawChaoticBeam(Vector vecOrigin, Vector vecDest, const BeamParams& params)
 {
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BEAMPOINTS );
@@ -2850,7 +2839,7 @@ static void DrawChaoticBeam(Vector vecOrigin, Vector vecDest, const BeamParams& 
 	MESSAGE_END();
 }
 
-static void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, const BeamParams& params, int iBeams)
+void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, const BeamParams& params, int iBeams)
 {
 	int iTimes = 0;
 	int iDrawn = 0;
@@ -2890,11 +2879,6 @@ static void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, 
 #define SF_WARPBALL_NOSHAKE	0x0004
 #define SF_WARPBALL_DYNLIGHT	0x0008
 #define SF_WARPBALL_NOSOUND	0x0010
-
-#define WARPBALL_SPRITE "sprites/fexplo1.spr"
-#define WARPBALL_BEAM "sprites/lgtning.spr"
-#define WARPBALL_SOUND1 "debris/beamstart2.wav"
-#define WARPBALL_SOUND2 "debris/beamstart7.wav"
 
 class CEnvWarpBall : public CBaseEntity
 {
@@ -2942,9 +2926,6 @@ public:
 	inline int RenderMode() {
 		return pev->rendermode ? pev->rendermode : kRenderGlow;
 	}
-	const char* SpriteModel() {
-		return pev->model ? STRING(pev->model) : WARPBALL_SPRITE;
-	}
 
 	inline void SetRadius( int radius ) {
 		m_baseRadius = radius;
@@ -2971,21 +2952,20 @@ public:
 		pev->message = warpTarget;
 	}
 
-
-	inline const char* WarpballSound1() {
-		if (pev->noise1)
-			return STRING(pev->noise1);
-		return g_modFeatures.alien_teleport_sound ? ALIEN_TELEPORT_SOUND : WARPBALL_SOUND1;
+	inline string_t WarpballSound1() {
+		if (!FStringNull(pev->noise1))
+			return pev->noise1;
+		return g_modFeatures.alien_teleport_sound ? MAKE_STRING(ALIEN_TELEPORT_SOUND) : MAKE_STRING(WARPBALL_SOUND1);
 	}
-	inline const char* WarpballSound2() {
+	inline string_t WarpballSound2() {
 		if (FStringNull(pev->noise2))
 		{
 			if (g_modFeatures.alien_teleport_sound)
-				return NULL;
-			return FStringNull(pev->noise1) ? WARPBALL_SOUND2 : NULL;
+				return iStringNull;
+			return FStringNull(pev->noise1) ? MAKE_STRING(WARPBALL_SOUND2) : iStringNull;
 		}
 		else
-			return STRING(pev->noise2);
+			return pev->noise2;
 	}
 	inline float SoundAttenuation() {
 		return ::SoundAttenuation(m_soundRadius);
@@ -3136,11 +3116,11 @@ void CEnvWarpBall::Precache( void )
 		PRECACHE_MODEL( STRING(model2) );
 	}
 
-	PRECACHE_SOUND(WarpballSound1());
+	PRECACHE_SOUND(STRING(WarpballSound1()));
 
-	const char* sound2 = WarpballSound2();
-	if (sound2)
-		PRECACHE_SOUND(sound2);
+	string_t sound2 = WarpballSound2();
+	if (!FStringNull(sound2))
+		PRECACHE_SOUND(STRING(sound2));
 
 	UTIL_PrecacheOther("warpball_hurt");
 }
@@ -3200,37 +3180,49 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		playSoundOnMyself = true;
 	}
 
+	WarpballTemplate w;
+
 	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
 	{
-		if (playSoundOnMyself)
-			EMIT_SOUND( edict(), CHAN_BODY, WarpballSound1(), SoundVolume(), SoundAttenuation() );
-		else
-			UTIL_EmitAmbientSound( playSoundEnt, vecOrigin, WarpballSound1(), SoundVolume(), SoundAttenuation(), 0, 100 );
+		w.sound1.soundName = WarpballSound1();
+		w.sound1.volume = SoundVolume();
+		w.sound1.attenuation = SoundAttenuation();
+
+		if (WarpballSound2())
+		{
+			w.sound2.soundName = WarpballSound2();
+			w.sound2.volume = SoundVolume();
+			w.sound2.attenuation = SoundAttenuation();
+		}
 	}
 	
 	if (!(pev->spawnflags & SF_WARPBALL_NOSHAKE)) {
-		UTIL_ScreenShake( vecOrigin, Amplitude(), Frequency(), Duration(), Radius() );
+		w.shake.amplitude = Amplitude();
+		w.shake.frequency = Frequency();
+		w.shake.duration = Duration();
+		w.shake.radius = Radius();
 	}
 
-	CSprite *pSpr = CSprite::SpriteCreate( SpriteModel(), vecOrigin, TRUE );
-	pSpr->AnimateAndDie( SpriteFramerate() );
+	w.sprite1.spriteName = pev->model ? pev->model : MAKE_STRING(WARPBALL_SPRITE);
+	w.sprite1.framerate = SpriteFramerate();
 
 	int red = pev->rendercolor.x;
 	int green = pev->rendercolor.y;
 	int blue = pev->rendercolor.z;
 	if (!red && !green && !blue) {
-		red = 77;
-		green = 210;
-		blue = 130;
+		red = WARPBALL_RED_DEFAULT;
+		green = WARPBALL_GREEN_DEFAULT;
+		blue = WARPBALL_BLUE_DEFAULT;
 	}
-
-	pSpr->SetTransparency( RenderMode(),  red, green, blue, RenderAmount(), RenderFx() );
-	pSpr->SetScale(Scale());
+	w.sprite1.color = Color(red, green, blue);
+	w.sprite1.rendermode = RenderMode();
+	w.sprite1.alpha = RenderAmount();
+	w.sprite1.renderfx = RenderFx();
+	w.sprite1.scale = Scale();
 
 	if (!FStringNull(model2)) {
-		CSprite *pSpr2 = CSprite::SpriteCreate( STRING(model2), vecOrigin, TRUE );
-		pSpr2->AnimateAndDie( framerate2 > 0 ? framerate2 : SpriteFramerate() );
-
+		w.sprite2.spriteName = model2;
+		w.sprite2.framerate = framerate2 > 0 ? framerate2 : SpriteFramerate();
 		int red2, green2, blue2;
 		if (rendercolor2 == g_vecZero)
 		{
@@ -3244,39 +3236,18 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 			green2 = rendercolor2.y;
 			blue2 = rendercolor2.z;
 		}
-
-		const int renderAlpha = renderamt2 > 0 ? renderamt2 : RenderAmount();
-		pSpr2->SetTransparency( RenderMode(), red2, green2, blue2, renderAlpha, RenderFx() );
-		pSpr2->SetScale(scale2 > 0 ? scale2 : Scale());
+		w.sprite2.color = Color(red2, green2, blue2);
+		w.sprite2.rendermode = RenderMode();
+		w.sprite2.alpha = renderamt2 > 0 ? renderamt2 : RenderAmount();
+		w.sprite2.renderfx = RenderFx();
+		w.sprite2.scale = scale2 > 0 ? scale2 : Scale();
 	}
 
 	if (pev->spawnflags & SF_WARPBALL_DYNLIGHT)
 	{
-		const int lifeTime = 15;
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
-			WRITE_BYTE( TE_DLIGHT );
-			WRITE_COORD( vecOrigin.x );	// X
-			WRITE_COORD( vecOrigin.y );	// Y
-			WRITE_COORD( vecOrigin.z );	// Z
-			WRITE_BYTE( 20 * Scale() );		// radius * 0.1
-			WRITE_BYTE( red );		// r
-			WRITE_BYTE( green );		// g
-			WRITE_BYTE( blue );		// b
-			WRITE_BYTE( lifeTime );		// time * 10
-			WRITE_BYTE( lifeTime/2 );		// decay * 0.1
-		MESSAGE_END();
-	}
-
-	if (!FBitSet(pev->spawnflags, SF_WARPBALL_NOSOUND))
-	{
-		const char* warpballSound2 = WarpballSound2();
-		if (warpballSound2)
-		{
-			if (playSoundOnMyself)
-				EMIT_SOUND( edict(), CHAN_ITEM, warpballSound2, SoundVolume(), SoundAttenuation() );
-			else
-				UTIL_EmitAmbientSound( playSoundEnt, vecOrigin, warpballSound2, SoundVolume(), SoundAttenuation(), 0, 100 );
-		}
+		w.light.radius = 200 * Scale();
+		w.light.color = Color(red, green, blue);
+		w.light.life = 1.5f;
 	}
 
 	int beamRed = pev->punchangle.x;
@@ -3284,29 +3255,27 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	int beamBlue = pev->punchangle.z;
 
 	if (!beamRed && !beamGreen && !beamBlue) {
-		beamRed = 20;
-		beamGreen = 243;
-		beamBlue = 20;
+		beamRed = WARPBALL_BEAM_RED_DEFAULT;
+		beamGreen = WARPBALL_BEAM_GREEN_DEFAULT;
+		beamBlue = WARPBALL_BEAM_BLUE_DEFAULT;
 	}
 
-	const int iBeams = RANDOM_LONG( MaxBeamCount()/2, MaxBeamCount() );
-	BeamParams beamParams;
-	beamParams.texture = m_beamTexture;
-	beamParams.lifeMin = 5;
-	beamParams.lifeMax = 16;
-	beamParams.width = 30;
-	beamParams.noise = 65;
-	beamParams.red = beamRed;
-	beamParams.green = beamGreen;
-	beamParams.blue = beamBlue;
-	beamParams.alpha = 220;
-	DrawChaoticBeams(vecOrigin, ENT(pev), Radius(), beamParams, iBeams);
+	w.beamCount = IntRange(MaxBeamCount()/2, MaxBeamCount());
+	w.beamRadius = Radius();
+
+	w.beam.texture = m_beamTexture;
+	w.beam.width = 30;
+	w.beam.noise = 65;
+	w.beam.color = Color(beamRed, beamGreen, beamBlue);
+	w.beam.alpha = 220;
 
 	if (m_aiSound)
 	{
-		const float soundDuration = m_aiSoundDuration > 0.0f ? m_aiSoundDuration : 0.3f;
-		CSoundEnt::InsertSound( m_aiSound, pev->origin, Radius(), soundDuration );
+		w.aiSound.type = m_aiSound;
+		w.aiSound.radius = Radius();
+		w.aiSound.duration = m_aiSoundDuration > 0.0f ? m_aiSoundDuration : 0.3f;
 	}
+	PlayWarpballEffect(w, vecOrigin, playSoundEnt);
 
 	SUB_UseTargets( this );
 
@@ -3596,55 +3565,41 @@ void CEnvXenMaker::TrySpawn()
 		}
 	}
 
-	CSprite *pSpr = CSprite::SpriteCreate( XENMAKER_SPRITE1, vecOrigin, TRUE );
-	pSpr->SetTransparency( kRenderGlow, m_vStartSpriteColor.x, m_vStartSpriteColor.y, m_vStartSpriteColor.z, m_iStartSpriteAlpha, kRenderFxNoDissipation );
-	pSpr->SetScale(m_flStartSpriteScale);
-	pSpr->AnimateAndDie( m_flStartSpriteFramerate );
+	WarpballTemplate w;
 
-	CSprite *pSpr2 = CSprite::SpriteCreate( XENMAKER_SPRITE2, vecOrigin, TRUE );
-	pSpr2->SetTransparency( kRenderGlow, m_vEndSpriteColor.x, m_vEndSpriteColor.y, m_vEndSpriteColor.z, m_iEndSpriteAlpha, kRenderFxNoDissipation );
-	pSpr2->SetScale(m_flEndSpriteScale);
-	pSpr2->AnimateAndDie( m_flEndSpriteFramerate );
+	w.sprite1.spriteName = MAKE_STRING(XENMAKER_SPRITE1);
+	w.sprite1.color = Color(m_vStartSpriteColor.x, m_vStartSpriteColor.y, m_vStartSpriteColor.z);
+	w.sprite1.alpha = m_iStartSpriteAlpha;
+	w.sprite1.scale = m_flStartSpriteScale;
+	w.sprite1.framerate = m_flStartSpriteFramerate;
 
-	BeamParams beamParams;
-	beamParams.texture = m_beamTexture;
-	beamParams.lifeMin = 5;
-	beamParams.lifeMax = 16;
-	beamParams.width = 25;
-	beamParams.noise = 50;
-	beamParams.red = m_vBeamColor.x;
-	beamParams.green = m_vBeamColor.y;
-	beamParams.blue = m_vBeamColor.z;
-	beamParams.alpha = m_iBeamAlpha;
+	w.sprite2.spriteName = MAKE_STRING(XENMAKER_SPRITE2);
+	w.sprite2.color = Color(m_vEndSpriteColor.x, m_vEndSpriteColor.y, m_vEndSpriteColor.z);
+	w.sprite2.alpha = m_iEndSpriteAlpha;
+	w.sprite2.scale = m_flEndSpriteScale;
+	w.sprite2.framerate = m_flEndSpriteFramerate;
 
-	DrawChaoticBeams(vecOrigin, ENT(pev), m_flBeamRadius, beamParams, m_iBeamCount);
+	w.beam.texture = m_beamTexture;
+	w.beam.width = 25;
+	w.beam.noise = 50;
+	w.beam.color = Color(m_vBeamColor.x, m_vBeamColor.y, m_vBeamColor.z);
+	w.beam.alpha = m_iBeamAlpha;
 
-	int red = m_vLightColor.x;
-	int green = m_vLightColor.y;
-	int blue = m_vLightColor.z;
+	w.beamCount = IntRange(m_iBeamCount);
 
-	const int lifeTime = 15;
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
-		WRITE_BYTE( TE_DLIGHT );
-		WRITE_COORD( vecOrigin.x );	// X
-		WRITE_COORD( vecOrigin.y );	// Y
-		WRITE_COORD( vecOrigin.z );	// Z
-		WRITE_BYTE( m_flLightRadius * 0.1 );		// radius * 0.1
-		WRITE_BYTE( red );		// r
-		WRITE_BYTE( green );		// g
-		WRITE_BYTE( blue );		// b
-		WRITE_BYTE( lifeTime );		// time * 10
-		WRITE_BYTE( lifeTime/2 );		// decay * 0.1
-	MESSAGE_END();
+	w.light.color = Color(m_vLightColor.x, m_vLightColor.y, m_vLightColor.z);
+	w.light.radius = m_flLightRadius;
 
-	const char* teleportSound = g_modFeatures.alien_teleport_sound ? ALIEN_TELEPORT_SOUND : XENMAKER_SOUND1;
-	EMIT_SOUND( posEnt, CHAN_ITEM, teleportSound, 1, ATTN_NORM );
+	if (g_modFeatures.alien_teleport_sound)
+		w.sound1.soundName = MAKE_STRING(ALIEN_TELEPORT_SOUND);
+	else
+		w.sound1.soundName = MAKE_STRING(XENMAKER_SOUND1);
 
 	if (!g_modFeatures.alien_teleport_sound)
 	{
 		if (asTemplate)
 		{
-			PlaySecondSound(posEnt);
+			w.sound2.soundName = MAKE_STRING(XENMAKER_SOUND2);
 		}
 		else
 		{
@@ -3652,6 +3607,8 @@ void CEnvXenMaker::TrySpawn()
 			pev->nextthink = gpGlobals->time + 0.8;
 		}
 	}
+
+	PlayWarpballEffect(w, vecOrigin, posEnt);
 }
 
 void CEnvXenMaker::PlaySecondSoundThink()

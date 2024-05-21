@@ -25,6 +25,7 @@
 #include "game.h"
 #include "locus.h"
 #include "talkmonster.h"
+#include "warpball.h"
 
 #define MONSTERMAKER_START_ON_FIX 1
 
@@ -84,7 +85,7 @@ public:
 	int MakeMonster( void );
 
 	void GetRealHullSizes(Vector& minHullSize, Vector& maxHullSize);
-	int CalculateSpot(const Vector& testMinHullSize, const Vector& testMaxHullSize, Vector& placePosition, Vector& placeAngles, edict_t*& warpballSoundEnt);
+	int CalculateSpot(const Vector& testMinHullSize, const Vector& testMaxHullSize, Vector& placePosition, Vector& placeAngles, edict_t*& warpballSoundEnt, float spawnDelay);
 	CBaseEntity* SpawnMonster(const Vector& placePosition, const Vector& placeAngles);
 	void StartWarpballEffect(const Vector& vecPosition, edict_t* warpballSoundEnt);
 	string_t WarpballName() {
@@ -396,6 +397,9 @@ void CMonsterMaker::Precache( void )
 	if (CheckMonsterClassname())
 		UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize, m_soundList );
 
+	if (!FStringNull(WarpballName()))
+		PrecacheWarpballTemplate(STRING(WarpballName()), STRING(m_iszMonsterClassname));
+
 	UTIL_PrecacheOther("monstermaker_hull");
 }
 
@@ -500,7 +504,7 @@ void CMonsterMaker::GetRealHullSizes(Vector &minHullSize, Vector &maxHullSize)
 	}
 }
 
-int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &testMaxHullSize, Vector &placePosition, Vector &placeAngles, edict_t *&warpballSoundEnt)
+int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &testMaxHullSize, Vector &placePosition, Vector &placeAngles, edict_t *&warpballSoundEnt, float spawnDelay)
 {
 	Vector mins, maxs;
 
@@ -573,7 +577,7 @@ int CMonsterMaker::CalculateSpot(const Vector &testMinHullSize, const Vector &te
 			if (tempPosEnt)
 			{
 				tempPosEnt->SetThink(&CBaseEntity::SUB_Remove);
-				tempPosEnt->pev->nextthink = gpGlobals->time + m_spawnDelay + 0.5f;
+				tempPosEnt->pev->nextthink = gpGlobals->time + spawnDelay + 0.5f;
 				warpballSoundEnt = tempPosEnt->edict();
 			}
 		}
@@ -841,7 +845,15 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 
 void CMonsterMaker::StartWarpballEffect(const Vector &vecPosition, edict_t* warpballSoundEnt)
 {
-	CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(0, STRING(WarpballName()));
+	const char* warpballName = STRING(WarpballName());
+	const WarpballTemplate* warpballTemplate = FindWarpballTemplate(warpballName, STRING(m_iszMonsterClassname));
+	if (warpballTemplate)
+	{
+		PlayWarpballEffect(*warpballTemplate, vecPosition, warpballSoundEnt);
+		return;
+	}
+
+	CBaseEntity* foundEntity = UTIL_FindEntityByTargetname(0, warpballName);
 	if ( foundEntity && (FClassnameIs(foundEntity->pev, "env_warpball") || FClassnameIs(foundEntity->pev, "env_xenmaker")))
 	{
 		edict_t* prevInflictor = foundEntity->pev->dmg_inflictor;
@@ -871,21 +883,44 @@ int CMonsterMaker::MakeMonster( void )
 	Vector minHullSize = Vector( -34, -34, 0 );
 	Vector maxHullSize = Vector( 34, 34, 0 );
 
+	Vector realMinHullSize;
+	Vector realMaxHullSize;
+	GetRealHullSizes(realMinHullSize, realMaxHullSize);
+
 	if (FBitSet(pev->spawnflags, SF_MONSTERMAKER_AUTOSIZEBBOX))
 	{
-		GetRealHullSizes(minHullSize, maxHullSize);
+		minHullSize = realMinHullSize;
+		maxHullSize = realMaxHullSize;
 	}
 
 	Vector placePosition, placeAngles;
 	edict_t *warpballSoundEnt = NULL;
 
-	const int spotResult = CalculateSpot(minHullSize, maxHullSize, placePosition, placeAngles, warpballSoundEnt);
+	string_t warpballName = WarpballName();
+	float spawnDelay = m_spawnDelay;
+	float verticalShift = 0.0f;
+	bool templateShiftDefined = false;
+
+	if (!FStringNull(warpballName))
+	{
+		const WarpballTemplate* w = FindWarpballTemplate(STRING(warpballName), STRING(m_iszMonsterClassname));
+		if (w)
+		{
+			if (spawnDelay == 0.0f)
+				spawnDelay = w->spawnDelay;
+			templateShiftDefined = w->position.IsDefined();
+			if (templateShiftDefined)
+			{
+				verticalShift = w->position.verticalShift;
+			}
+		}
+	}
+
+	const int spotResult = CalculateSpot(minHullSize, maxHullSize, placePosition, placeAngles, warpballSoundEnt, spawnDelay);
 	if (spotResult != 0)
 		return spotResult;
 
-	string_t warpballName = WarpballName();
-
-	if (m_spawnDelay <= 0.0f)
+	if (spawnDelay <= 0.0f)
 	{
 		CBaseEntity* createdEntity = SpawnMonster(placePosition, placeAngles);
 		if (!createdEntity)
@@ -893,12 +928,23 @@ int CMonsterMaker::MakeMonster( void )
 
 		if (!FStringNull(warpballName))
 		{
-			Vector vecWarpPosition = g_modFeatures.warpball_at_monster_center ? createdEntity->Center() : createdEntity->pev->origin;
-			if (pev->impulse < 0)
+			Vector vecWarpPosition;
+			if (pev->impulse == 0)
+			{
+				if (templateShiftDefined)
+				{
+					vecWarpPosition = placePosition + Vector(0.0f, 0.0f, verticalShift);
+				}
+				else
+				{
+					vecWarpPosition = g_modFeatures.warpball_at_monster_center ? createdEntity->Center() : createdEntity->pev->origin;
+				}
+			}
+			else if (pev->impulse < 0)
 			{
 				vecWarpPosition = createdEntity->pev->origin;
 			}
-			else if (pev->impulse > 0)
+			else
 			{
 				vecWarpPosition = createdEntity->Center();
 			}
@@ -907,20 +953,32 @@ int CMonsterMaker::MakeMonster( void )
 	}
 	else
 	{
-		CMonsterMakerHull* pHull = CMonsterMakerHull::SelfCreate(this, placePosition, placeAngles, minHullSize, maxHullSize, m_spawnDelay);
+		CMonsterMakerHull* pHull = CMonsterMakerHull::SelfCreate(this, placePosition, placeAngles, minHullSize, maxHullSize, spawnDelay);
 		if (!pHull)
 			return MONSTERMAKER_NULLENTITY;
 		m_delayedCount++;
 
 		if (!FStringNull(warpballName))
 		{
-			Vector vecWarpPosition = placePosition;
-			if (pev->impulse > 0 || (pev->impulse == 0 && g_modFeatures.warpball_at_monster_center))
+			Vector vecWarpPosition;
+			if (pev->impulse == 0)
 			{
-				Vector realMinHullSize = g_vecZero;
-				Vector realMaxHullSize = g_vecZero;
-				GetRealHullSizes(realMinHullSize, realMaxHullSize);
-				vecWarpPosition = placePosition + (realMinHullSize + realMaxHullSize) / 2.0f;
+				if (templateShiftDefined)
+				{
+					vecWarpPosition = placePosition + Vector(0.0f, 0.0f, verticalShift);
+				}
+				else
+				{
+					vecWarpPosition = g_modFeatures.warpball_at_monster_center ? placePosition + (realMinHullSize + realMaxHullSize) * 0.5f : placePosition;
+				}
+			}
+			else if (pev->impulse < 0)
+			{
+				vecWarpPosition = placePosition;
+			}
+			else
+			{
+				vecWarpPosition = placePosition + (realMinHullSize + realMaxHullSize) * 0.5f;
 			}
 			StartWarpballEffect(vecWarpPosition, warpballSoundEnt);
 		}

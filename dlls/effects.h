@@ -333,4 +333,18 @@ public:
 	string_t	m_iszSpriteName;
 	Vector	m_firePosition;
 };
+
+struct BeamParams
+{
+	int texture;
+	int lifeMin;
+	int lifeMax;
+	int width;
+	int noise;
+	int red, green, blue, alpha;
+};
+
+void DrawChaoticBeam(Vector vecOrigin, Vector vecDest, const BeamParams& params);
+void DrawChaoticBeams(Vector vecOrigin, edict_t* pentIgnore, int radius, const BeamParams& params, int iBeams);
+
 #endif		//EFFECTS_H
