@@ -4903,7 +4903,7 @@ void CBasePlayer::UpdateClientData( void )
 		gDisplayTitle = 0;
 	}
 
-	if( pev->health != m_iClientHealth || pev->health != m_iClientMaxHealth )
+	if( pev->health != m_iClientHealth || (int)pev->max_health != m_iClientMaxHealth )
 	{
 #define clamp( val, min, max ) ( ((val) > (max)) ? (max) : ( ((val) < (min)) ? (min) : (val) ) )
 		int iHealth = clamp( pev->health, 0, 9999 ); // make sure that no negative health values are sent
