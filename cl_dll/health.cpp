@@ -55,6 +55,7 @@ int CHudHealth::Init( void )
 	HOOK_MESSAGE( Health );
 	HOOK_MESSAGE( Damage );
 	m_iHealth = 100;
+	m_iMaxHealth = 100;
 	m_fFade = 0;
 	m_iFlags = 0;
 	m_bitsDamage = 0;
@@ -98,7 +99,8 @@ int CHudHealth::MsgFunc_Health( const char *pszName, int iSize, void *pbuf )
 {
 	// TODO: update local health data
 	BEGIN_READ( pbuf, iSize );
-	int x = READ_BYTE();
+	int x = READ_SHORT();
+	m_iMaxHealth = READ_SHORT();
 
 	m_iFlags |= HUD_ACTIVE;
 
@@ -108,7 +110,6 @@ int CHudHealth::MsgFunc_Health( const char *pszName, int iSize, void *pbuf )
 		m_fFade = FADE_TIME;
 		m_iHealth = x;
 	}
-
 	return 1;
 }
 
@@ -230,9 +231,10 @@ int CHudHealth::Draw( float flTime )
 
 		CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite( m_HUD_cross ), r, g, b, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
 
-		x = CrossWidth + HealthWidth / 2;
+		x += CrossWidth;
 
-		x = gHUD.DrawHudNumber( x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b );
+		const int digitFlag = m_iHealth >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
+		x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iHealth, r, g, b );
 
 		x += HealthWidth / 2;
 

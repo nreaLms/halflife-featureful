@@ -240,9 +240,9 @@ void LinkUserMessages( void )
 	gmsgGeigerRange = REG_USER_MSG( "Geiger", 1 );
 	gmsgFlashlight = REG_USER_MSG( "Flashlight", 2 );
 	gmsgFlashBattery = REG_USER_MSG( "FlashBat", 1 );
-	gmsgHealth = REG_USER_MSG( "Health", 1 );
+	gmsgHealth = REG_USER_MSG( "Health", 4 );
 	gmsgDamage = REG_USER_MSG( "Damage", 12 );
-	gmsgBattery = REG_USER_MSG( "Battery", 2);
+	gmsgBattery = REG_USER_MSG( "Battery", 4);
 	gmsgTrain = REG_USER_MSG( "Train", 1 );
 	//gmsgHudText = REG_USER_MSG( "HudTextPro", -1 );
 	gmsgHudText = REG_USER_MSG( "HudText", -1 ); // we don't use the message but 3rd party addons may!
@@ -459,15 +459,61 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 	return healed;
 }
 
+void CBasePlayer::SetHealth(int health, bool allowOverheal)
+{
+	pev->health = health;
+	if (pev->health > pev->max_health && !allowOverheal)
+	{
+		pev->health = pev->max_health;
+	}
+}
+
+void CBasePlayer::SetMaxHealth(int maxHealth, bool clampValue)
+{
+	pev->max_health = maxHealth;
+	if (clampValue && pev->health > pev->max_health)
+	{
+		pev->health = pev->max_health;
+	}
+}
+
 int CBasePlayer::TakeArmor(CBaseEntity *pCharger, float flArmor)
 {
-	if (pev->armorvalue >= MAX_NORMAL_BATTERY)
+	if (pev->armorvalue >= MaxArmor())
 		return false;
 	pev->armorvalue += flArmor;
-	pev->armorvalue = Q_min( pev->armorvalue, MAX_NORMAL_BATTERY );
+	pev->armorvalue = Q_min( pev->armorvalue, MaxArmor() );
 	if (pev->armorvalue < 0)
 		pev->armorvalue = 0;
 	return true;
+}
+
+int CBasePlayer::MaxArmor()
+{
+	if (pev->armortype > 0)
+	{
+		return pev->armortype;
+	}
+	return g_modFeatures.MaxPlayerArmor();
+}
+
+void CBasePlayer::SetMaxArmor(int maxArmor, bool clampValue)
+{
+	pev->armortype = maxArmor;
+	if (clampValue && pev->armorvalue > MaxArmor())
+	{
+		pev->armorvalue = MaxArmor();
+	}
+}
+
+void CBasePlayer::SetArmor(int armor, bool allowOvercharge)
+{
+	pev->armorvalue = armor;
+	const int maxArmor = MaxArmor();
+	if (pev->armorvalue > maxArmor && !allowOvercharge)
+	{
+		pev->armorvalue = maxArmor;
+	}
 }
 
 Vector CBasePlayer::GetGunPosition()
@@ -1097,8 +1143,10 @@ void CBasePlayer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int i
 
 	// send "health" update message to zero
 	m_iClientHealth = 0;
+	m_iClientMaxHealth = (int)pev->max_health;
 	MESSAGE_BEGIN( MSG_ONE, gmsgHealth, NULL, pev );
 		WRITE_BYTE( m_iClientHealth );
+		WRITE_BYTE( (int)pev->max_health );
 	MESSAGE_END();
 
 	// Tell Ammo Hud that the player is dead
@@ -3560,12 +3608,12 @@ void CBasePlayer::Spawn( void )
 {
 	m_flStartCharge = gpGlobals->time;
 	pev->classname = MAKE_STRING( "player" );
-	pev->health = 100;
 	pev->armorvalue = 0;
+	SetMaxArmor(g_modFeatures.MaxPlayerArmor());
 	pev->takedamage = DAMAGE_AIM;
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_WALK;
-	pev->max_health = pev->health;
+	pev->health = pev->max_health = g_modFeatures.MaxPlayerHealth();
 	pev->flags &= FL_PROXY;	// keep proxy flag sey by engine
 	pev->flags |= FL_CLIENT;
 	pev->air_finished = gpGlobals->time + 12;
@@ -3638,6 +3686,7 @@ void CBasePlayer::Spawn( void )
 	m_fWeapon = FALSE;
 	m_pClientActiveItem = NULL;
 	m_iClientBattery = -1;
+	m_iClientMaxBattery = -1;
 
 	// reset all ammo values to 0
 	for( int i = 0; i < MAX_AMMO_TYPES; i++ )
@@ -3671,6 +3720,7 @@ void CBasePlayer::Precache( void )
 	m_bitsHUDDamage = -1;
 
 	m_iClientBattery = -1;
+	m_iClientMaxBattery = -1;
 
 	m_flFlashLightTime = 1;
 
@@ -4168,7 +4218,9 @@ Reset stuff so that the state is transmitted.
 void CBasePlayer::ForceClientDllUpdate( void )
 {
 	m_iClientHealth = -1;
+	m_iClientMaxHealth = -1;
 	m_iClientBattery = -1;
+	m_iClientMaxBattery = -1;
 	m_iClientHideHUD = -1;	// Vit_amiN: forcing to update
 	m_iClientFOV = -1;	// Vit_amiN: force client weapons to be sent
 	m_ClientSndRoomtype = -1;
@@ -4851,30 +4903,35 @@ void CBasePlayer::UpdateClientData( void )
 		gDisplayTitle = 0;
 	}
 
-	if( pev->health != m_iClientHealth )
+	if( pev->health != m_iClientHealth || pev->health != m_iClientMaxHealth )
 	{
 #define clamp( val, min, max ) ( ((val) > (max)) ? (max) : ( ((val) < (min)) ? (min) : (val) ) )
-		int iHealth = clamp( pev->health, 0, 255 ); // make sure that no negative health values are sent
+		int iHealth = clamp( pev->health, 0, 9999 ); // make sure that no negative health values are sent
 		if( pev->health > 0.0f && pev->health <= 1.0f )
 			iHealth = 1;
 
 		// send "health" update message
 		MESSAGE_BEGIN( MSG_ONE, gmsgHealth, NULL, pev );
-			WRITE_BYTE( iHealth );
+			WRITE_SHORT( iHealth );
+			WRITE_SHORT( (int)pev->max_health );
 		MESSAGE_END();
 
 		m_iClientHealth = (int)pev->health;
+		m_iClientMaxHealth = (int)pev->max_health;
 	}
 
-	if( (int)pev->armorvalue != m_iClientBattery )
+	const int maxArmor = MaxArmor();
+	if( (int)pev->armorvalue != m_iClientBattery || maxArmor != m_iClientMaxBattery )
 	{
 		m_iClientBattery = (int)pev->armorvalue;
+		m_iClientMaxBattery = maxArmor;
 
 		ASSERT( gmsgBattery > 0 );
 
 		// send "health" update message
 		MESSAGE_BEGIN( MSG_ONE, gmsgBattery, NULL, pev );
 			WRITE_SHORT( (int)pev->armorvalue );
+			WRITE_SHORT( maxArmor );
 		MESSAGE_END();
 	}
 
@@ -5922,7 +5979,7 @@ private:
 		{
 			if (isFraction)
 			{
-				return pPlayer->pev->armorvalue / MAX_NORMAL_BATTERY;
+				return pPlayer->pev->armorvalue / pPlayer->MaxArmor();
 			}
 			else
 			{

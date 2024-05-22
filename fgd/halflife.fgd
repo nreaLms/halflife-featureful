@@ -2876,8 +2876,20 @@
 		1: "Flashlight"
 		2: "NVG"
 	]
-	health(integer) : "Starting health"
-	armorvalue(integer) : "Starting armor"
+	health(integer) : "Set health"
+	allow_overheal(choices) : "Allow OverHeal" : : "Allow overheal if new health is higher than the current max health. Don't clamp health value to the max health if the new max health is lower than the current health." =
+	[
+		0: "No"
+		1: "Yes"
+	]
+	max_health(integer): "Set max health"
+	armorvalue(integer) : "Set armor"
+	allow_overcharge(choices) : "Allow armor OverCharge" : : "Allow armor overcharge if new armor is higher than the current max armor. Don't clamp armor value to the max armor if the new max armor is lower than the current armor." =
+	[
+		0: "No"
+		1: "Yes"
+	]
+	max_armor(integer): "Set max armor"
 ]
 
 @PointClass base(Targetname, Targetx) = game_team_master : "Team based master/relay"

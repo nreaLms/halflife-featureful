@@ -220,10 +220,10 @@ void CChargeToken::Precache()
 
 void CChargeToken::ArmorPieceTouch(CBaseEntity *pOther)
 {
-	if (pOther->IsPlayer() && (static_cast<CBasePlayer*>(pOther))->HasSuit())
+	CBasePlayer* pPlayer = pOther->IsPlayer() ? static_cast<CBasePlayer*>(pOther) : nullptr;
+	if (pPlayer && pPlayer->HasSuit())
 	{
-		pOther->pev->armorvalue += pev->health;
-		pOther->pev->armorvalue = Q_min(pOther->pev->armorvalue, MAX_NORMAL_BATTERY);
+		pPlayer->TakeArmor(this, pev->health);
 		EMIT_SOUND_DYN( ENT( pOther->pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
 		SetTouch(NULL);
 		SetThink(&CBaseEntity::SUB_Remove);

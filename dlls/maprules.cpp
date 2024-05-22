@@ -965,6 +965,8 @@ private:
 	int m_ammoCounts[MAX_AMMO_TYPES];
 	short m_suitLogon;
 	short m_suitLight;
+	BOOL m_allowOverheal;
+	BOOL m_allowOvercharge;
 };
 
 LINK_ENTITY_TO_CLASS( game_player_settings, CGamePlayerSettings )
@@ -974,6 +976,8 @@ TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
 	DEFINE_ARRAY( CGamePlayerSettings, m_ammoCounts, FIELD_INTEGER, MAX_AMMO_TYPES ),
 	DEFINE_FIELD( CGamePlayerSettings, m_suitLogon, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_suitLight, FIELD_SHORT ),
+	DEFINE_FIELD( CGamePlayerSettings, m_allowOverheal, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CGamePlayerSettings, m_allowOvercharge, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE( CGamePlayerSettings, CRulePointEntity )
@@ -1002,6 +1006,21 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 		m_suitLight = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "max_armor"))
+	{
+		pev->armortype = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "allow_overheal"))
+	{
+		m_allowOverheal = atoi(pkvd->szValue) != 0;
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "allow_overcharge"))
+	{
+		m_allowOvercharge = atoi(pkvd->szValue) != 0;
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CRulePointEntity::KeyValue(pkvd);
 }
@@ -1013,13 +1032,21 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 
 	CBasePlayer* player = (CBasePlayer*)pPlayer;
 
-	if (pev->health > 0 && pev->health <= player->pev->max_health)
+	if (pev->max_health > 0)
 	{
-		player->pev->health = (int)pev->health;
+		player->SetMaxHealth(pev->max_health, !m_allowOverheal);
 	}
-	if (pev->armorvalue > 0 && pev->armorvalue <= MAX_NORMAL_BATTERY)
+	if (pev->armortype > 0)
 	{
-		player->pev->armorvalue = (int)pev->armorvalue;
+		player->SetMaxArmor(pev->armortype, !m_allowOvercharge);
+	}
+	if (pev->health > 0)
+	{
+		player->SetHealth((int)pev->health, m_allowOverheal);
+	}
+	if (pev->armorvalue > 0)
+	{
+		player->SetArmor((int)pev->armorvalue, m_allowOvercharge);
 	}
 
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_SUIT)

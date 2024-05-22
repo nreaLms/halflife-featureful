@@ -8,6 +8,7 @@ PickupEnt::PickupEnt(): entName(0), count(0) {}
 MapConfig::MapConfig() :
 	pickupEntCount(0), ammoCount(0), cvarCount(0),
 	starthealth(0), startarmor(0),
+	maxhealth(0), maxarmor(0),
 	nomedkit(false), nosuit(false),
 	suitLogon(SuitNoLogon), suit_light(SUIT_LIGHT_DEFAULT), longjump(false),
 	valid(false)
@@ -134,6 +135,14 @@ bool ReadMapConfigFromText(MapConfig& mapConfig, byte* pMemFile, int fileSize)
 		else if (strcmp(key, "starthealth") == 0)
 		{
 			mapConfig.starthealth = atoi(value);
+		}
+		else if (strcmp(key, "maxhealth") == 0)
+		{
+			mapConfig.maxhealth = atoi(value);
+		}
+		else if (strcmp(key, "maxarmor") == 0)
+		{
+			mapConfig.maxarmor = atoi(value);
 		}
 		else if (strncmp(key, "sv_", 3) == 0 || strncmp(key, "mp_", 3) == 0 || strncmp(key, "npc_", 4) == 0)
 		{

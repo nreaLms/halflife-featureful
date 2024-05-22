@@ -318,7 +318,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pCaller);
 
 	// if the player doesn't have the suit, or there is no juice left, make the deny noise
-	if( ( m_iJuice <= 0 ) || ( !pPlayer->HasSuit() ) || pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY )
+	if( ( m_iJuice <= 0 ) || ( !pPlayer->HasSuit() ) || pPlayer->pev->armorvalue >= pPlayer->MaxArmor() )
 	{
 		if( m_flSoundTime <= gpGlobals->time )
 		{
@@ -375,7 +375,7 @@ void CRechargeDecay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	// charge the player
-	if( pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY )
+	if( pPlayer->pev->armorvalue < pPlayer->MaxArmor() )
 	{
 		if (m_triggerOnFirstUse)
 		{

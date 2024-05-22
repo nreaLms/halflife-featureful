@@ -200,7 +200,9 @@ public:
 	float       m_tSneaking;
 	int			m_iUpdateTime;		// stores the number of frame ticks before sending HUD update messages
 	int			m_iClientHealth;	// the health currently known by the client.  If this changes, send a new
+	int			m_iClientMaxHealth;
 	int			m_iClientBattery;	// the Battery currently known by the client.  If this changes, send a new
+	int			m_iClientMaxBattery;
 	int			m_iHideHUD;		// the players hud weapon info is to be hidden
 	int			m_iClientHideHUD;
 	int			m_iFOV;			// field of view
@@ -238,7 +240,12 @@ public:
 	virtual void PostThink( void );
 	virtual Vector GetGunPosition( void );
 	virtual int TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamageType );
+	void SetHealth(int health, bool allowOverheal = false);
+	void SetMaxHealth(int maxHealth, bool clampValue = true);
 	virtual int TakeArmor(CBaseEntity *pCharger, float flArmor);
+	int MaxArmor();
+	void SetMaxArmor(int maxArmor, bool clampValue = true);
+	void SetArmor(int armor, bool allowOvercharge = false);
 	virtual void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual void	Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );

@@ -27,6 +27,7 @@ DECLARE_MESSAGE( m_Battery, Battery )
 int CHudBattery::Init( void )
 {
 	m_iBat = 0;
+	m_iMaxBat = 100;
 	m_fFade = 0;
 	m_iFlags = 0;
 
@@ -56,6 +57,7 @@ int CHudBattery::MsgFunc_Battery( const char *pszName,  int iSize, void *pbuf )
 
 	BEGIN_READ( pbuf, iSize );
 	int x = READ_SHORT();
+	m_iMaxBat = READ_SHORT();
 
 	if( x != m_iBat )
 	{
@@ -122,7 +124,9 @@ int CHudBattery::Draw( float flTime )
 	}
 
 	x += ( m_prc1->right - m_prc1->left );
-	x = gHUD.DrawHudNumber( x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b );
+
+	const int digitFlag = m_iBat >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
+	x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iBat, r, g, b );
 
 	return 1;
 }

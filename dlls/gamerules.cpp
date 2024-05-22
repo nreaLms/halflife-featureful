@@ -626,10 +626,19 @@ bool CGameRules::EquipPlayerFromMapConfig(CBasePlayer *pPlayer, const MapConfig 
 			pPlayer->GiveNamedItem("weapon_medkit");
 		}
 #endif
+		if (mapConfig.maxhealth > 0)
+		{
+			pPlayer->SetMaxHealth(mapConfig.maxhealth);
+			pPlayer->pev->health = pPlayer->pev->max_health;
+		}
+		if (mapConfig.maxarmor > 0)
+		{
+			pPlayer->SetMaxArmor(mapConfig.maxarmor);
+		}
 		if (mapConfig.startarmor > 0)
-			pPlayer->pev->armorvalue = Q_min(mapConfig.startarmor, MAX_NORMAL_BATTERY);
-		if (mapConfig.starthealth > 0 && mapConfig.starthealth < pPlayer->pev->max_health)
-			pPlayer->pev->health = mapConfig.starthealth;
+			pPlayer->SetArmor(mapConfig.startarmor);
+		if (mapConfig.starthealth > 0)
+			pPlayer->SetHealth(mapConfig.starthealth);
 
 		if (mapConfig.longjump)
 		{

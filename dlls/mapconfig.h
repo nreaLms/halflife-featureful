@@ -48,6 +48,8 @@ struct MapConfig
 
 	int starthealth;
 	int startarmor;
+	int maxhealth;
+	int maxarmor;
 
 	bool nomedkit; // for co-op
 

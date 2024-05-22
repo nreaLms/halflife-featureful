@@ -49,6 +49,9 @@ ModFeatures::ModFeatures()
 	memset(wall_puff3, 0, sizeof(StringBuf));
 	memset(wall_puff4, 0, sizeof(StringBuf));
 
+	player_maxhealth = MAX_NORMAL_HEALTH;
+	player_maxarmor = MAX_NORMAL_BATTERY;
+
 	suit_light = SUIT_LIGHT_FLASHLIGHT;
 	suit_light_allow_both = false;
 	suit_sentences = true;
@@ -170,6 +173,8 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 	}
 
 	KeyValueDefinition<int> integers[] = {
+		KEY_VALUE_DEF(player_maxhealth),
+		KEY_VALUE_DEF(player_maxarmor),
 		KEY_VALUE_DEF(scientist_random_heads),
 	};
 

@@ -2127,7 +2127,7 @@ void CMultiplayBusters::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerWeapon
 	UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "%s is busting!\n", STRING( pPlayer->pev->netname )));
 	SetPlayerModel( pPlayer, TRUE );
 	pPlayer->pev->health = pPlayer->pev->max_health;
-	pPlayer->pev->armorvalue = MAX_NORMAL_BATTERY;
+	pPlayer->pev->armorvalue = pPlayer->MaxArmor();
 	pPlayer->pev->renderfx = kRenderFxGlowShell;
 	pPlayer->pev->renderamt = 25;
 	pPlayer->pev->rendercolor = Vector( 0, 75, 250 );

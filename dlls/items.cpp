@@ -587,7 +587,7 @@ public:
 			return FALSE;
 		}
 
-		if( ( pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY ) && pPlayer->HasSuit() )
+		if( ( pPlayer->pev->armorvalue < pPlayer->MaxArmor() ) && pPlayer->HasSuit() )
 		{
 			pPlayer->TakeArmor(this, pev->health > 0 ? pev->health : DefaultCapacity());
 
@@ -603,7 +603,7 @@ public:
 				char szcharge[64];
 				// Suit reports new power level
 				// For some reason this wasn't working in release build -- round it.
-				pct = (int)( (float)( pPlayer->pev->armorvalue * 100.0f ) * ( 1.0f / MAX_NORMAL_BATTERY ) + 0.5f );
+				pct = (int)( (float)( pPlayer->pev->armorvalue * 100.0f ) * ( 1.0f / 100 ) + 0.5f );
 				pct = ( pct / 5 );
 				if( pct > 0 )
 					pct--;

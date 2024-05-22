@@ -22,6 +22,9 @@
 
 extern void GameDLLInit( void );
 
+#define MAX_NORMAL_HEALTH 100
+#define MAX_NORMAL_BATTERY 100
+
 struct ModFeatures
 {
 	enum {
@@ -50,6 +53,13 @@ struct ModFeatures
 	void EnableMonster(const char* name);
 	bool IsMonsterEnabled(const char* name) const;
 
+	int MaxPlayerHealth() {
+		return player_maxhealth > 0 ? player_maxhealth : MAX_NORMAL_HEALTH;
+	}
+	int MaxPlayerArmor() {
+		return player_maxarmor > 0 ? player_maxarmor : MAX_NORMAL_BATTERY;
+	}
+
 	int suit_light;
 	bool suit_light_allow_both;
 	bool suit_sentences;
@@ -58,6 +68,9 @@ struct ModFeatures
 	bool tripmines_solid;
 	bool satchels_pickable;
 	bool gauss_fidget;
+
+	int player_maxhealth;
+	int player_maxarmor;
 
 	bool alien_teleport_sound;
 	bool warpball_at_monster_center;

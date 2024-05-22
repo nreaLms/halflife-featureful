@@ -72,8 +72,6 @@ public:
 #define ITEM_SECURITY		3
 #define ITEM_BATTERY		4
 
-#define MAX_NORMAL_BATTERY	100
-
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
 #define GLOCK_WEIGHT		10
