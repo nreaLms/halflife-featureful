@@ -252,10 +252,7 @@ public:
 	virtual int DamageDecal( int bitsDamageType );
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState( int state ) {}
-	virtual void StartSneaking( void ) {}
-	virtual void StopSneaking( void ) {}
 	virtual BOOL OnControls( entvars_t *pev ) { return FALSE; }
-	virtual BOOL IsSneaking( void ) { return FALSE; }
 	virtual BOOL IsAlive( void ) { return IsFullyAlive(); }
 	virtual bool IsFullyAlive() { return (pev->deadflag == DEAD_NO) && pev->health > 0; } // IsAlive returns true for DEAD_DYING monsters. Use this when checking if monster is not dead and not dying
 	virtual BOOL IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }

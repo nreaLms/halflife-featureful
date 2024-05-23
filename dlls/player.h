@@ -197,7 +197,6 @@ public:
 	BOOL			m_fNoPlayerSound;	// a debugging feature. Player makes no sound if this is true. 
 	BOOL			m_fLongJump; // does this player have the longjump module?
 
-	float       m_tSneaking;
 	int			m_iUpdateTime;		// stores the number of frame ticks before sending HUD update messages
 	int			m_iClientHealth;	// the health currently known by the client.  If this changes, send a new
 	int			m_iClientMaxHealth;
@@ -250,9 +249,6 @@ public:
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual void	Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center( ) + pev->view_ofs * RANDOM_FLOAT( 0.5, 1.1 ); };		// position to shoot at
-	virtual void StartSneaking( void ) { m_tSneaking = gpGlobals->time - 1; }
-	virtual void StopSneaking( void ) { m_tSneaking = gpGlobals->time + 30; }
-	virtual BOOL IsSneaking( void ) { return m_tSneaking <= gpGlobals->time; }
 	virtual BOOL IsAlive( void ) { return IsFullyAlive(); }
 	virtual BOOL ShouldFadeOnDeath( void ) { return FALSE; }
 	virtual	BOOL IsPlayer( void ) { return TRUE; }			// Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
