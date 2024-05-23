@@ -88,21 +88,6 @@ bool ConsumePossiblyQuotedString(const char* text, int& i, const int length, int
 	return strEnd - strStart > 0;
 }
 
-bool ReadIdentifier(const char *text, int& i, char* identBuf, unsigned int identBufSize)
-{
-	if (identBufSize < 2)
-		return false;
-
-	unsigned int identLength = 0;
-	while(IsValidIdentifierCharacter(text[i]) && identLength < (identBufSize-1))
-	{
-		identBuf[identLength++] = text[i];
-		++i;
-	}
-	identBuf[identLength] = '\0';
-	return identLength > 0;
-}
-
 bool ParseInteger(const char *valueText, int& result)
 {
 	return sscanf(valueText, "%d", &result) == 1;

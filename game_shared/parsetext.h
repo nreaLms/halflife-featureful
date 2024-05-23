@@ -12,7 +12,6 @@ void ConsumeLine(const char* text, int& i, const int length);
 void ConsumeLineSignificantOnly(const char* text, int& i, const int length);
 bool ConsumeLineUntil(const char* text, int& i, const int length, char c);
 bool ConsumePossiblyQuotedString(const char* text, int& i, const int length, int& strStart, int& strEnd);
-bool ReadIdentifier(const char* text, int &i, char* identBuf, unsigned int identBufSize);
 bool ParseInteger(const char* valueText, int& result);
 bool ParseColor(const char* valueText, int& result);
 bool ParseBoolean(const char* valueText, bool& result);
