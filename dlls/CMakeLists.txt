@@ -147,6 +147,7 @@ set (SVDLL_SOURCES
 	ropes.cpp
 	rpg.cpp
 	satchel.cpp
+	savetitles.cpp
 	schedule.cpp
 	scientist.cpp
 	scripted.cpp

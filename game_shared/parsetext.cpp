@@ -65,6 +65,29 @@ bool ConsumeLineUntil(const char *text, int &i, const int length, char c)
 	return text[i] == c;
 }
 
+bool ConsumePossiblyQuotedString(const char* text, int& i, const int length, int& strStart, int& strEnd)
+{
+	const bool isQuoted = text[i] == '"';
+	if (isQuoted)
+	{
+		++i;
+		strStart = i;
+		if (ConsumeLineUntil(text, i, length, '"')) {
+			strEnd = i;
+			++i;
+		} else {
+			return false;
+		}
+	}
+	else
+	{
+		strStart = i;
+		ConsumeNonSpaceCharacters(text, i, length);
+		strEnd = i;
+	}
+	return strEnd - strStart > 0;
+}
+
 bool ReadIdentifier(const char *text, int& i, char* identBuf, unsigned int identBufSize)
 {
 	if (identBufSize < 2)

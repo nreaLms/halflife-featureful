@@ -22,6 +22,7 @@
 #include "saverestore.h"
 #include "locus.h"
 #include "ammo_amounts.h"
+#include "savetitles.h"
 #include "vcs_info.h"
 
 ModFeatures g_modFeatures;
@@ -1323,6 +1324,7 @@ void GameDLLInit( void )
 
 	RegisterAmmoTypes();
 	LoadWarpballTemplates();
+	ReadSaveTitles();
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
 	g_psv_maxspeed = CVAR_GET_POINTER( "sv_maxspeed" );
