@@ -1144,8 +1144,8 @@ void CBasePlayer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int i
 	m_iClientHealth = 0;
 	m_iClientMaxHealth = (int)pev->max_health;
 	MESSAGE_BEGIN( MSG_ONE, gmsgHealth, NULL, pev );
-		WRITE_BYTE( m_iClientHealth );
-		WRITE_BYTE( (int)pev->max_health );
+		WRITE_SHORT( m_iClientHealth );
+		WRITE_SHORT( (int)pev->max_health );
 	MESSAGE_END();
 
 	// Tell Ammo Hud that the player is dead
