@@ -211,12 +211,12 @@
 [
 	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
 	[
+		-1 : "Don't bleed"
 		0 : "Default"
-		1 : "Human (red)"
-		2 : "Alien (yellow)"
 		247 : "Human (red)"
 		195 : "Alien (yellow)"
-		-1 : "Don't bleed"
+		1 : "Human (red) [SC compatible]"
+		2 : "Alien (yellow) [SC compatible]"
 	]
 ]
 
@@ -7724,6 +7724,13 @@
 		37 : "Combat, Danger and Player"
 		127 : "Every sound and scent"
 		1028 : "Default, except Player"
+	]
+	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
+	[
+		-1 : "Don't bleed"
+		0 : "No change"
+		247 : "Human (red)"
+		195 : "Alien (yellow)"
 	]
 	prisonerto(choices) : "Act as Prisoner to" =
 	[

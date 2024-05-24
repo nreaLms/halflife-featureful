@@ -5547,6 +5547,7 @@ public:
 	short m_actOutOfPVS;
 	int m_iClass;
 	int m_soundMask;
+	short m_bloodColor;
 
 	short m_prisonerTo;
 	short m_freeRoam;
@@ -5580,6 +5581,7 @@ TYPEDESCRIPTION	CTriggerConfigureMonster::m_SaveData[] =
 	DEFINE_FIELD( CTriggerConfigureMonster, m_actOutOfPVS, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_iClass, FIELD_INTEGER ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_soundMask, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerConfigureMonster, m_bloodColor, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_prisonerTo, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_freeRoam, FIELD_SHORT ),
 	DEFINE_FIELD( CTriggerConfigureMonster, m_sizeForGrapple, FIELD_SHORT ),
@@ -5633,6 +5635,11 @@ void CTriggerConfigureMonster::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "soundmask"))
 	{
 		m_soundMask = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq( pkvd->szKeyName, "bloodcolor" ) )
+	{
+		m_bloodColor = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "classify"))
@@ -5775,6 +5782,9 @@ void CTriggerConfigureMonster::Affect(CBaseEntity *pEntity)
 
 	MaySetResettableValue2(pMonster->m_iClass, m_iClass);
 	MaySetResettableValue2(pMonster->m_customSoundMask, m_soundMask);
+
+	if (m_bloodColor)
+		pMonster->m_bloodColor = m_bloodColor;
 
 	MaySetResettableValue(pMonster->m_prisonerTo, m_prisonerTo);
 	MaySetResettableValue(pMonster->m_freeRoam, m_freeRoam);
