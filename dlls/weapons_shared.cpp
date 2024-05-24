@@ -110,7 +110,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 			m_fFireOnEmpty = TRUE;
 		}
 
-		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPRESS_ATTACK))
+		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
 			SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
@@ -121,10 +121,10 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 			m_fFireOnEmpty = TRUE;
 		}
 
-		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPRESS_ATTACK))
+		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
 			PrimaryAttack();
 	}
-	else if( m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload )
+	else if( m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload  && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN) )
 	{
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
