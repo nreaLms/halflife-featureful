@@ -1762,15 +1762,16 @@ void UTIL_PrecacheOther( const char *szClassname, string_t soundList )
 	REMOVE_ENTITY( pent );
 }
 
-void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax, string_t soundList)
+bool UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax, string_t soundList)
 {
 	edict_t	*pent = CREATE_NAMED_ENTITY( MAKE_STRING( szClassname ) );
 	if( FNullEnt( pent ) )
 	{
-		ALERT( at_console, "NULL Ent in UTIL_PrecacheMonster\n" );
-		return;
+		ALERT( at_console, "NULL Ent in UTIL_PrecacheMonster (%s)\n", szClassname );
+		return false;
 	}
 
+	bool enabled = true;
 	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
 	if( pEntity )
 	{
@@ -1783,13 +1784,15 @@ void UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vec
 			if (vecMax)
 				*vecMax = pMonster->DefaultMaxHullSize();
 		}
-		if (pEntity->IsEnabledInMod())
+		enabled = pEntity->IsEnabledInMod();
+		if (enabled)
 		{
 			pEntity->m_soundList = soundList;
 			pEntity->Precache();
 		}
 	}
 	REMOVE_ENTITY( pent );
+	return enabled;
 }
 
 //=========================================================

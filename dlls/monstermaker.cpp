@@ -81,6 +81,7 @@ public:
 	void EXPORT CyclicUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT MakerThink( void );
 	void EXPORT CyclicBacklogThink( void );
+	void ReportNullEntity();
 	void DeathNotice( entvars_t *pevChild );// monster maker children use this to tell the monster maker that they have died.
 	int MakeMonster( void );
 
@@ -135,6 +136,8 @@ public:
 	string_t m_childKeys[MAX_CHILD_KEYS];
 	string_t m_childValues[MAX_CHILD_KEYS];
 	int m_childKeyCount;
+
+	bool m_childIsValid;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker )
@@ -395,7 +398,7 @@ void CMonsterMaker::Precache( void )
 		PRECACHE_MODEL(STRING(m_gibModel));
 
 	if (CheckMonsterClassname())
-		UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize, m_soundList );
+		m_childIsValid = UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize, m_soundList );
 
 	if (!FStringNull(WarpballName()))
 		PrecacheWarpballTemplate(STRING(WarpballName()), STRING(m_iszMonsterClassname));
@@ -650,7 +653,6 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 	edict_t *pent = CREATE_NAMED_ENTITY( m_iszMonsterClassname );
 	if( FNullEnt( pent ) )
 	{
-		ALERT ( at_console, "NULL Ent in MonsterMaker!\n" );
 		return 0;
 	}
 
@@ -954,6 +956,8 @@ int CMonsterMaker::MakeMonster( void )
 	}
 	else
 	{
+		if (!m_childIsValid)
+			return MONSTERMAKER_NULLENTITY;
 		CMonsterMakerHull* pHull = CMonsterMakerHull::SelfCreate(this, placePosition, placeAngles, minHullSize, maxHullSize, spawnDelay);
 		if (!pHull)
 			return MONSTERMAKER_NULLENTITY;
@@ -1040,21 +1044,37 @@ void CMonsterMaker::MakerThink( void )
 {
 	pev->nextthink = gpGlobals->time + m_flDelay;
 
-	if (MakeMonster() == MONSTERMAKER_BLOCKED )
+	const int result = MakeMonster();
+	if (result == MONSTERMAKER_BLOCKED)
 	{
 		if (m_delayAfterBlocked > 0)
 			pev->nextthink = gpGlobals->time + m_delayAfterBlocked;
+	}
+	else if (result == MONSTERMAKER_NULLENTITY)
+	{
+		ReportNullEntity();
+		SetThink(NULL); // I can't spawn it anyway, so prevent further spamming to console
 	}
 }
 
 void CMonsterMaker::CyclicBacklogThink()
 {
-	if (MakeMonster() == MONSTERMAKER_SPAWNED)
+	const int result = MakeMonster();
+	if (result == MONSTERMAKER_SPAWNED)
 	{
 		m_cyclicBacklogSize--;
 	}
+	else if (result == MONSTERMAKER_NULLENTITY)
+	{
+		ReportNullEntity();
+	}
 	if (m_cyclicBacklogSize > 0)
 		pev->nextthink = gpGlobals->time + m_flDelay;
+}
+
+void CMonsterMaker::ReportNullEntity()
+{
+	ALERT ( at_console, "NULL Ent %s in %s!\n", STRING(m_iszMonsterClassname), STRING(pev->classname) );
 }
 
 //=========================================================
