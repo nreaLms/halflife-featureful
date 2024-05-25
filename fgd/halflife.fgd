@@ -1379,6 +1379,11 @@
 	model(sprite) : "Sprite"
 	scale(string) : "Scale"
 	framerate(integer) : "Frames per second" : 10
+	spawnflags(flags) =
+	[
+		1: "Do Save" : 1
+		2: "Player can't use" : 0
+	]
 ]
 
 @PointClass base(Monster, Sequence) flags(Angle) size(-16 -16 -16, 16 16 16) studio() = cycler_weapon : "Weapon Cycler"

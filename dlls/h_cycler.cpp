@@ -210,13 +210,23 @@ int CCycler::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 }
 #endif
 
+#define SF_CYCLER_SPRITE_DO_SAVE 1
+#define SF_CYCLER_SPRITE_PLAYER_CANT_USE 2
+
 class CCyclerSprite : public CBaseEntity
 {
 public:
 	void Spawn( void );
 	void Think( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	virtual int ObjectCaps( void ) { return ( CBaseEntity :: ObjectCaps() | FCAP_DONT_SAVE | FCAP_IMPULSE_USE ); }
+	virtual int ObjectCaps( void ) {
+		int caps = CBaseEntity :: ObjectCaps();
+		if (!FBitSet(pev->spawnflags, SF_CYCLER_SPRITE_DO_SAVE))
+			caps |= FCAP_DONT_SAVE;
+		if (!FBitSet(pev->spawnflags, SF_CYCLER_SPRITE_PLAYER_CANT_USE))
+			caps |= FCAP_IMPULSE_USE;
+		return caps;
+	}
 	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void Animate( float frames );
 
