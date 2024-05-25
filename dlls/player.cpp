@@ -6210,6 +6210,30 @@ IMPLEMENT_SAVERESTORE( CPlayerHasWeapon, CPointEntity )
 
 LINK_ENTITY_TO_CLASS( player_hasweapon, CPlayerHasWeapon )
 
+class CPlayerDeployWeapon : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "weapon_name"))
+		{
+			pev->netname = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+	{
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (pPlayer && !FStringNull(pev->netname))
+		{
+			pPlayer->SelectItem(STRING(pev->netname));
+		}
+	}
+};
+
+LINK_ENTITY_TO_CLASS( player_deployweapon, CPlayerDeployWeapon )
 
 enum
 {

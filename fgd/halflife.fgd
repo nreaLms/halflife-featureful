@@ -7229,6 +7229,11 @@
 	]
 ]
 
+@PointClass base(Targetname) = player_deployweapon : "Force deploying a weapon"
+[
+	weapon_name(string): "Weapon name" : : "Classname of the weapon, e.g. weapon_9mmAR"
+]
+
 @PointClass base(Targetname) color(72 96 128) = player_hasitem : "Check if player has a specific item"
 [
 	item_type(choices) : "Item Type" : 0 =
