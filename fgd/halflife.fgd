@@ -2918,6 +2918,7 @@
 		1: "Yes"
 	]
 	max_armor(integer): "Set max armor"
+	armor_strength(string): "Set armor strength" : : "Armor strength multiplier relative to health strength"
 ]
 
 @PointClass base(Targetname, Targetx) = game_team_master : "Team based master/relay"

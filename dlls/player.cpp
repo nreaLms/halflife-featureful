@@ -129,6 +129,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_buddha, FIELD_BOOLEAN),
 	DEFINE_FIELD(CBasePlayer, m_suppressedCapabilities, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_maxSpeedFraction, FIELD_FLOAT),
+	DEFINE_FIELD(CBasePlayer, m_armorStrength, FIELD_FLOAT),
 
 	DEFINE_FIELD(CBasePlayer, m_loopedMp3, FIELD_STRING),
 
@@ -515,6 +516,13 @@ void CBasePlayer::SetArmor(int armor, bool allowOvercharge)
 	}
 }
 
+float CBasePlayer::ArmorStrength()
+{
+	if (m_armorStrength > 0)
+		return m_armorStrength;
+	return gSkillData.plrArmorStrength;
+}
+
 Vector CBasePlayer::GetGunPosition()
 {
 	//UTIL_MakeVectors( pev->v_angle );
@@ -611,16 +619,16 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	int fTookDamage;
 	int ftrivial;
 	float flRatio;
-	float flBonus;
+	float flArmorStrength;
 	float flHealthPrev = pev->health;
 
-	flBonus = ARMOR_BONUS;
+	flArmorStrength = ArmorStrength();
 	flRatio = ARMOR_RATIO;
 
 	if( ( bitsDamageType & DMG_BLAST ) && g_pGameRules->IsMultiplayer() )
 	{
 		// blasts damage armor more.
-		flBonus *= 2;
+		flArmorStrength = Q_min(flArmorStrength, 1.0f);
 	}
 
 	// Already dead
@@ -644,15 +652,13 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	{
 		float flNew = flDamage * flRatio;
 
-		float flArmor;
-
-		flArmor = ( flDamage - flNew ) * flBonus;
+		float flArmor = ( flDamage - flNew ) / flArmorStrength;
 
 		// Does this use more armor than we have?
 		if( flArmor > pev->armorvalue )
 		{
 			flArmor = pev->armorvalue;
-			flArmor *= ( 1 / flBonus );
+			flArmor *= flArmorStrength;
 			flNew = flDamage - flArmor;
 			pev->armorvalue = 0;
 		}

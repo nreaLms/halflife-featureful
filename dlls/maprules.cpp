@@ -967,6 +967,7 @@ private:
 	short m_suitLight;
 	BOOL m_allowOverheal;
 	BOOL m_allowOvercharge;
+	float m_armorStrength;
 };
 
 LINK_ENTITY_TO_CLASS( game_player_settings, CGamePlayerSettings )
@@ -978,6 +979,7 @@ TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
 	DEFINE_FIELD( CGamePlayerSettings, m_suitLight, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_allowOverheal, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CGamePlayerSettings, m_allowOvercharge, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CGamePlayerSettings, m_armorStrength, FIELD_FLOAT ),
 };
 
 IMPLEMENT_SAVERESTORE( CGamePlayerSettings, CRulePointEntity )
@@ -1021,6 +1023,11 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 		m_allowOvercharge = atoi(pkvd->szValue) != 0;
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "armor_strength"))
+	{
+		m_armorStrength = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CRulePointEntity::KeyValue(pkvd);
 }
@@ -1047,6 +1054,10 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	if (pev->armorvalue > 0)
 	{
 		player->SetArmor((int)pev->armorvalue, m_allowOvercharge);
+	}
+	if (m_armorStrength > 0)
+	{
+		player->m_armorStrength = m_armorStrength;
 	}
 
 	if (pev->spawnflags & SF_PLAYER_SETTINGS_SUIT)

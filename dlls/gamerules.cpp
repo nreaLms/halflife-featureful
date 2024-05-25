@@ -547,6 +547,8 @@ void CGameRules::RefreshSkillData ( void )
 
 	gSkillData.flashlightDrainTime = GetSkillCvar( "sk_flashlight_drain_time" );
 	gSkillData.flashlightChargeTime = GetSkillCvar( "sk_flashlight_charge_time" );
+
+	gSkillData.plrArmorStrength = GetSkillCvar( "sk_plr_armor_strength" );
 }
 
 void CGameRules::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer )

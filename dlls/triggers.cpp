@@ -5338,7 +5338,8 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 		{
 			if (pTarget->IsPlayer())
 			{
-				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health + pTarget->pev->armorvalue / ARMOR_BONUS, DamageType());
+				CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pTarget);
+				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health + pTarget->pev->armorvalue * pPlayer->ArmorStrength(), DamageType());
 			}
 			else
 			{

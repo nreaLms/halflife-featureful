@@ -105,7 +105,6 @@ enum sbar_data
 #define CHAT_INTERVAL 1.0f
 
 #define ARMOR_RATIO	0.2	// Armor Takes 80% of the damage
-#define ARMOR_BONUS	0.5	// Each Point of Armor is work 1/x points of health
 
 #define PLAYER_SUPRESS_ATTACK (1<<0)
 #define PLAYER_SUPRESS_JUMP (1<<1)
@@ -245,6 +244,7 @@ public:
 	int MaxArmor();
 	void SetMaxArmor(int maxArmor, bool clampValue = true);
 	void SetArmor(int armor, bool allowOvercharge = false);
+	float ArmorStrength();
 	virtual void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual void	Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
@@ -485,6 +485,8 @@ public:
 
 	int m_suppressedCapabilities;
 	float m_maxSpeedFraction;
+
+	float m_armorStrength;
 
 	void SetLoopedMp3(string_t loopedMp3);
 	string_t m_loopedMp3;

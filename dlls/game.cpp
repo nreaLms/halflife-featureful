@@ -1144,6 +1144,8 @@ DECLARE_SKILL_VALUE(sk_player_leg, "1")
 DECLARE_SKILL_VALUE(sk_flashlight_drain_time, "120")
 DECLARE_SKILL_VALUE(sk_flashlight_charge_time, "20")
 
+DECLARE_SKILL_VALUE(sk_plr_armor_strength, "2")
+
 // END Cvars for Skill Level settings
 
 void Cmd_ReportAIState()
@@ -1867,6 +1869,9 @@ void GameDLLInit( void )
 	// Flashlight
 	REGISTER_SKILL_CVARS(sk_flashlight_drain_time);
 	REGISTER_SKILL_CVARS(sk_flashlight_charge_time);
+
+	// Player armor
+	REGISTER_SKILL_CVARS(sk_plr_armor_strength);
 // END REGISTER CVARS FOR SKILL LEVEL STUFF
 
 	CVAR_REGISTER( &sv_pushable_fixed_tick_fudge );
