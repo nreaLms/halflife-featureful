@@ -24,8 +24,6 @@
 
 #include "mobility_int.h"
 
-#include "hud_sprite.h"
-
 DECLARE_MESSAGE( m_Health, Health )
 DECLARE_MESSAGE( m_Health, Damage )
 

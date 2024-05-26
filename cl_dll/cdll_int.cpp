@@ -69,7 +69,7 @@ extern "C"
 
 extern engine_studio_api_t IEngineStudio;
 
-#include "hud_sprite.h"
+#include "hud_renderer.h"
 
 #ifdef CLDLL_FOG
 GLAPI_glEnable GL_glEnable = NULL;

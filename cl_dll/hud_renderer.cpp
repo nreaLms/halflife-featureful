@@ -5,7 +5,7 @@
 
 #include "triangleapi.h"
 
-#include "hud_sprite.h"
+#include "hud_renderer.h"
 
 // Note: TriAPI rendering won't work in software!
 

@@ -43,7 +43,7 @@
 #include "ammo.h"
 #include "dlight.h"
 
-#include "hud_sprite.h"
+#include "hud_renderer.h"
 
 #include <vector>
 #include <string>
