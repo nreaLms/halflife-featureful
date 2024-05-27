@@ -4760,7 +4760,7 @@ LINK_ENTITY_TO_CLASS( particle_shooter, CParticleShooter )
 TYPEDESCRIPTION	CParticleShooter::m_SaveData[] =
 {
 	DEFINE_FIELD( CParticleShooter, m_particleCount, FIELD_INTEGER ),
-	DEFINE_FIELD( CParticleShooter, m_particleCountLeft, FIELD_STRING ),
+	DEFINE_FIELD( CParticleShooter, m_particleCountLeft, FIELD_INTEGER ),
 	DEFINE_FIELD( CParticleShooter, m_fireDelay, FIELD_FLOAT ),
 	DEFINE_FIELD( CParticleShooter, m_particleLife, FIELD_FLOAT ),
 	DEFINE_FIELD( CParticleShooter, m_particleSpeed, FIELD_FLOAT ),
