@@ -1678,3 +1678,10 @@ bool CHud::ShouldUseConsoleFont()
 {
 	return true;
 }
+
+extern WEAPON *gpActiveSel;
+
+bool CHud::CanDrawStatusIcons()
+{
+	return !gpActiveSel;
+}

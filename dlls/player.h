@@ -490,6 +490,13 @@ public:
 
 	void SetLoopedMp3(string_t loopedMp3);
 	string_t m_loopedMp3;
+
+	string_t m_statusIcons[MAX_ICONSPRITES];
+	Vector m_statusIconColors[MAX_ICONSPRITES];
+	bool AddStatusIcon(string_t hudSprite, const Vector& color, bool allowDuplicate = false);
+	bool RemoveStatusIcon(string_t hudSprite);
+	bool HasStatusIcon(string_t hudSprite);
+	int HudStatusIcon(string_t hudSprite);
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

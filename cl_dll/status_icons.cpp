@@ -53,19 +53,24 @@ int CHudStatusIcons::Draw( float flTime )
 {
 	if( gEngfuncs.IsSpectateOnly() )
 		return 1;
+	if (!gHUD.CanDrawStatusIcons())
+		return 1;
 	// find starting position to draw from, along right-hand side of screen
 	int x = 5;
-	int y = ScreenHeight / 2;
+	int y = 5;
 	
 	// loop through icon list, and draw any valid icons drawing up from the middle of screen
 	for( int i = 0; i < MAX_ICONSPRITES; i++ )
 	{
 		if( m_IconList[i].spr )
 		{
-			y -= ( m_IconList[i].rc.bottom - m_IconList[i].rc.top ) + 5;
-
-			SPR_Set( m_IconList[i].spr, m_IconList[i].r, m_IconList[i].g, m_IconList[i].b );
-			SPR_DrawAdditive( 0, x, y, &m_IconList[i].rc );
+			int r = m_IconList[i].r;
+			int g = m_IconList[i].g;
+			int b = m_IconList[i].b;
+			if (r == 0 && g == 0 && b == 0)
+				UnpackRGB(r, g, b, gHUD.HUDColor());
+			CHud::Renderer().SPR_DrawAdditive(m_IconList[i].spr, r, g, b, x, y, &m_IconList[i].rc);
+			y += ( m_IconList[i].rc.bottom - m_IconList[i].rc.top ) + 5;
 		}
 	}
 
@@ -83,14 +88,16 @@ int CHudStatusIcons::MsgFunc_StatusIcon( const char *pszName, int iSize, void *p
 {
 	BEGIN_READ( pbuf, iSize );
 
-	int ShouldEnable = READ_BYTE();
-	char *pszIconName = READ_STRING();
-	if( ShouldEnable )
+	int flags = READ_BYTE();
+	bool shouldEnable = flags & PLAYER_STATUS_ICON_ENABLE;
+	bool allowDuplicate = flags & PLAYER_STATUS_ICON_ALLOW_DUPLICATE;
+	const char *pszIconName = READ_STRING();
+	if( shouldEnable )
 	{
 		int r = READ_BYTE();
 		int g = READ_BYTE();
 		int b = READ_BYTE();
-		EnableIcon( pszIconName, r, g, b );
+		EnableIcon( pszIconName, r, g, b, allowDuplicate );
 		m_iFlags |= HUD_ACTIVE;
 	}
 	else
@@ -102,18 +109,21 @@ int CHudStatusIcons::MsgFunc_StatusIcon( const char *pszName, int iSize, void *p
 }
 
 // add the icon to the icon list, and set it's drawing color
-void CHudStatusIcons::EnableIcon( const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue )
+void CHudStatusIcons::EnableIcon(const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue , bool allowDuplicate)
 {
-	int i;
+	int i = 0;
 
 	// check to see if the sprite is in the current list
-	for( i = 0; i < MAX_ICONSPRITES; i++ )
+	if (!allowDuplicate)
 	{
-		if( !stricmp( m_IconList[i].szSpriteName, pszIconName ) )
-			break;
+		for( i = 0; i < MAX_ICONSPRITES; i++ )
+		{
+			if( !stricmp( m_IconList[i].szSpriteName, pszIconName ) )
+				break;
+		}
 	}
 
-	if( i == MAX_ICONSPRITES )
+	if( allowDuplicate || i == MAX_ICONSPRITES )
 	{
 		// icon not in list, so find an empty slot to add to
 		for( i = 0; i < MAX_ICONSPRITES; i++ )
@@ -140,11 +150,14 @@ void CHudStatusIcons::EnableIcon( const char *pszIconName, unsigned char red, un
 	strcpy( m_IconList[i].szSpriteName, pszIconName );
 
 	// Hack: Play Timer sound when a grenade icon is played (in 0.8 seconds)
+	// This is for TFC
+#if 0
 	if( strstr(m_IconList[i].szSpriteName, "grenade") )
 	{
 		cl_entity_t *pthisplayer = gEngfuncs.GetLocalPlayer();
 		gEngfuncs.pEventAPI->EV_PlaySound( pthisplayer->index, pthisplayer->origin, CHAN_STATIC, "weapons/timer.wav", 1.0, ATTN_NORM, 0, PITCH_NORM );
 	}
+#endif
 }
 
 void CHudStatusIcons::DisableIcon( const char *pszIconName )

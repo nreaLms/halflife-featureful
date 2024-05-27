@@ -7261,6 +7261,23 @@
 	fail_target(target_destination) : "Fail Target"
 ]
 
+@PointClass base(Targetname) = player_statusicon : "Set player status icon (HUD sprite). The entity acts depending on the input: Toggle, On or Off."
+[
+	hud_sprite(string): "HUD sprite"
+	rendercolor(color255) : "Sprite Color (R G B)" : "0 0 0" : "All zeroes mean the client's HUD color"
+	spawnflags(Flags) =
+	[
+		2 : "Allow duplicate" : 0 : "Allow adding sprites with the same name. The player_statusicon must be triggered with 'On' use-type to set the duplicate"
+	]
+]
+
+@PointClass base(Targetname) color(72 96 128) = player_hasstatusicon : "Check if player has a specific status icon"
+[
+	hud_sprite(string) : "Status icon"
+	pass_target(target_destination) : "Pass Target"
+	fail_target(target_destination) : "Fail Target"
+]
+
 @PointClass base(Targetname) size(-16 -16 -16, 16 16 16) = player_loadsaved : "Load Auto-Saved game"
 [
 	duration(string) : "Fade Duration (seconds)" : "2"

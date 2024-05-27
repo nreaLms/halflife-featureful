@@ -652,13 +652,12 @@ public:
 
 	enum
 	{
-		MAX_ICONSPRITENAME_LENGTH = MAX_SPRITE_NAME_LENGTH,
-		MAX_ICONSPRITES = 4
+		MAX_ICONSPRITENAME_LENGTH = MAX_SPRITE_NAME_LENGTH
 	};
 	
 	//had to make these public so CHud could access them (to enable concussion icon)
 	//could use a friend declaration instead...
-	void EnableIcon( const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue );
+	void EnableIcon( const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue, bool allowDuplicate = false );
 	void DisableIcon( const char *pszIconName );
 
 private:
@@ -1033,6 +1032,8 @@ public:
 	bool hasHudScaleInEngine;
 
 	static bool ShouldUseConsoleFont();
+
+	bool CanDrawStatusIcons();
 };
 
 extern CHud gHUD;

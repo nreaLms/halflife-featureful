@@ -39,4 +39,9 @@
 #define HUD_PRINTTALK		3
 #define HUD_PRINTCENTER		4
 
+#define MAX_ICONSPRITES 6
+
+#define PLAYER_STATUS_ICON_ENABLE (1 << 0)
+#define PLAYER_STATUS_ICON_ALLOW_DUPLICATE (1 << 1)
+
 #endif

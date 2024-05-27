@@ -133,6 +133,9 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 
 	DEFINE_FIELD(CBasePlayer, m_loopedMp3, FIELD_STRING),
 
+	DEFINE_ARRAY(CBasePlayer, m_statusIcons, FIELD_STRING, MAX_ICONSPRITES),
+	DEFINE_ARRAY(CBasePlayer, m_statusIconColors, FIELD_VECTOR, MAX_ICONSPRITES),
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -206,6 +209,7 @@ int gmsgWallPuffs = 0;
 
 int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
+int gmsgStatusIcon = 0;
 
 int gmsgRandomGibs = 0;
 int gmsgMuzzleLight = 0;
@@ -280,6 +284,7 @@ void LinkUserMessages( void )
 
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
 	gmsgStatusValue = REG_USER_MSG( "StatusValue", 3 );
+	gmsgStatusIcon = REG_USER_MSG( "StatusIcon", -1 );
 
 	gmsgRandomGibs = REG_USER_MSG( "RandomGibs", 27 );
 	gmsgMuzzleLight = REG_USER_MSG( "MuzzleLight", 6 );
@@ -4845,6 +4850,21 @@ void CBasePlayer::UpdateClientData( void )
 			MESSAGE_END();
 
 			g_pGameRules->InitHUD( this );
+
+			for (int i=0; i<ARRAYSIZE(m_statusIcons); ++i)
+			{
+				if (!FStringNull(m_statusIcons[i]))
+				{
+					MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, NULL, pev);
+						WRITE_BYTE(PLAYER_STATUS_ICON_ENABLE|PLAYER_STATUS_ICON_ALLOW_DUPLICATE);
+						WRITE_STRING(STRING(m_statusIcons[i]));
+						WRITE_BYTE((int)m_statusIconColors[i].x);
+						WRITE_BYTE((int)m_statusIconColors[i].y);
+						WRITE_BYTE((int)m_statusIconColors[i].z);
+					MESSAGE_END();
+				}
+			}
+
 			m_fGameHUDInitialized = TRUE;
 
 			m_iObserverLastMode = OBS_ROAMING;
@@ -5852,6 +5872,77 @@ void CBasePlayer::SetLoopedMp3(string_t loopedMp3)
 	m_loopedMp3 = loopedMp3;
 }
 
+bool CBasePlayer::AddStatusIcon(string_t hudSprite, const Vector& color, bool allowDuplicate)
+{
+	if (!allowDuplicate)
+	{
+		int index = HudStatusIcon(hudSprite);
+		if (index != -1)
+			return false;
+	}
+	for (int i=0; i<ARRAYSIZE(m_statusIcons); ++i)
+	{
+		if (FStringNull(m_statusIcons[i]))
+		{
+			m_statusIcons[i] = hudSprite;
+			m_statusIconColors[i] = color;
+
+			int flags = PLAYER_STATUS_ICON_ENABLE;
+			if (allowDuplicate)
+				flags |= PLAYER_STATUS_ICON_ALLOW_DUPLICATE;
+
+			MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, NULL, pev);
+				WRITE_BYTE(flags);
+				WRITE_STRING(STRING(hudSprite));
+				WRITE_BYTE((int)color.x);
+				WRITE_BYTE((int)color.y);
+				WRITE_BYTE((int)color.z);
+			MESSAGE_END();
+
+			return true;
+		}
+	}
+	ALERT(at_warning, "Couldn't find a slot for HUD sprite %s\n", STRING(hudSprite));
+	return false;
+}
+
+bool CBasePlayer::RemoveStatusIcon(string_t hudSprite)
+{
+	int index = HudStatusIcon(hudSprite);
+	if (index == -1)
+		return false;
+
+	m_statusIcons[index] = iStringNull;
+	m_statusIconColors[index] = g_vecZero;
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, NULL, pev);
+		WRITE_BYTE(0);
+		WRITE_STRING(STRING(hudSprite));
+	MESSAGE_END();
+
+	return true;
+}
+
+bool CBasePlayer::HasStatusIcon(string_t hudSprite)
+{
+	return HudStatusIcon(hudSprite) != -1;
+}
+
+int CBasePlayer::HudStatusIcon(string_t hudSprite)
+{
+	if (FStringNull(hudSprite))
+		return -1;
+	for (int i=0; i<ARRAYSIZE(m_statusIcons); ++i)
+	{
+		if (!FStringNull(m_statusIcons[i]))
+		{
+			if (FStrEq(STRING(hudSprite), STRING(m_statusIcons[i])))
+				return i;
+		}
+	}
+	return -1;
+}
+
 //=========================================================
 // Dead HEV suit prop
 //=========================================================
@@ -6045,16 +6136,7 @@ private:
 
 LINK_ENTITY_TO_CLASS( player_calc_ratio, CPlayerCalcRatio )
 
-enum
-{
-	PLAYER_HAS_SUIT = 0,
-	PLAYER_HAS_FLASHLIGHT = 1,
-	PLAYER_HAS_NVG = 2,
-	PLAYER_HAS_ANYLIGHT = 3,
-	PLAYER_HAS_LONGJUMP = 4
-};
-
-class CPlayerHasItem : public CPointEntity
+class CPlayerHasThing : public CPointEntity
 {
 public:
 	void KeyValue( KeyValueData *pkvd )
@@ -6069,13 +6151,8 @@ public:
 			m_FailTarget = ALLOC_STRING(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "item_type"))
-		{
-			pev->impulse = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
-		}
 		else
-			CBaseEntity::KeyValue(pkvd);
+			CPointEntity::KeyValue(pkvd);
 	}
 
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -6084,7 +6161,7 @@ public:
 		if (!pPlayer) {
 			return;
 		}
-		const bool success = HasItem(pPlayer, ItemType());
+		const bool success = HasThing(pPlayer);
 		if (success && !FStringNull(m_PassTarget)) {
 			FireTargets(STRING(m_PassTarget), pActivator, this);
 		}
@@ -6100,12 +6177,54 @@ public:
 		if (!pPlayer) {
 			return false;
 		}
-		return HasItem(pPlayer, ItemType());
+		return HasThing(pPlayer);
 	}
+
+	virtual bool HasThing(CBasePlayer* pPlayer) = 0;
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
+protected:
+	string_t m_PassTarget;
+	string_t m_FailTarget;
+};
+
+TYPEDESCRIPTION	CPlayerHasThing::m_SaveData[] =
+{
+	DEFINE_FIELD( CPlayerHasThing, m_PassTarget, FIELD_STRING ),
+	DEFINE_FIELD( CPlayerHasThing, m_FailTarget, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CPlayerHasThing, CPointEntity )
+
+enum
+{
+	PLAYER_HAS_SUIT = 0,
+	PLAYER_HAS_FLASHLIGHT = 1,
+	PLAYER_HAS_NVG = 2,
+	PLAYER_HAS_ANYLIGHT = 3,
+	PLAYER_HAS_LONGJUMP = 4
+};
+
+class CPlayerHasItem : public CPlayerHasThing
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "item_type"))
+		{
+			pev->impulse = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPlayerHasThing::KeyValue(pkvd);
+	}
+
+	bool HasThing(CBasePlayer* pPlayer)
+	{
+		return HasItem(pPlayer, ItemType());
+	}
 private:
 	int ItemType() const { return pev->impulse; }
 	bool HasItem(CBasePlayer* pPlayer, int itemType) {
@@ -6124,67 +6243,25 @@ private:
 			return false;
 		}
 	}
-
-	string_t m_PassTarget;
-	string_t m_FailTarget;
 };
-
-TYPEDESCRIPTION	CPlayerHasItem::m_SaveData[] =
-{
-	DEFINE_FIELD( CPlayerHasItem, m_PassTarget, FIELD_STRING ),
-	DEFINE_FIELD( CPlayerHasItem, m_FailTarget, FIELD_STRING ),
-};
-
-IMPLEMENT_SAVERESTORE( CPlayerHasItem, CPointEntity )
 
 LINK_ENTITY_TO_CLASS( player_hasitem, CPlayerHasItem )
 
-class CPlayerHasWeapon : public CPointEntity
+class CPlayerHasWeapon : public CPlayerHasThing
 {
 public:
 	void KeyValue( KeyValueData *pkvd )
 	{
-		if (FStrEq(pkvd->szKeyName, "pass_target"))
-		{
-			m_PassTarget = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "fail_target"))
-		{
-			m_FailTarget = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "weapon_name"))
+		if (FStrEq(pkvd->szKeyName, "weapon_name"))
 		{
 			m_WeaponName = ALLOC_STRING(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
 		else
-			CBaseEntity::KeyValue(pkvd);
+			CPlayerHasThing::KeyValue(pkvd);
 	}
 
-	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
-	{
-		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
-		if (!pPlayer) {
-			return;
-		}
-		const bool success = HasWeapon(pPlayer, m_WeaponName);
-		if (success && !FStringNull(m_PassTarget)) {
-			FireTargets(STRING(m_PassTarget), pActivator, this);
-		}
-		if (!success && !FStringNull(m_FailTarget)) {
-			FireTargets(STRING(m_FailTarget), pActivator, this);
-		}
-	}
-
-	int	ObjectCaps() { return CPointEntity::ObjectCaps() | FCAP_MASTER; }
-
-	bool IsTriggered(CBaseEntity *pActivator) {
-		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
-		if (!pPlayer) {
-			return false;
-		}
+	bool HasThing(CBasePlayer* pPlayer) {
 		return HasWeapon(pPlayer, m_WeaponName);
 	}
 
@@ -6200,21 +6277,87 @@ private:
 		}
 	}
 
-	string_t m_PassTarget;
-	string_t m_FailTarget;
 	string_t m_WeaponName;
 };
 
 TYPEDESCRIPTION	CPlayerHasWeapon::m_SaveData[] =
 {
-	DEFINE_FIELD( CPlayerHasWeapon, m_PassTarget, FIELD_STRING ),
-	DEFINE_FIELD( CPlayerHasWeapon, m_FailTarget, FIELD_STRING ),
 	DEFINE_FIELD( CPlayerHasWeapon, m_WeaponName, FIELD_STRING ),
 };
 
-IMPLEMENT_SAVERESTORE( CPlayerHasWeapon, CPointEntity )
+IMPLEMENT_SAVERESTORE( CPlayerHasWeapon, CPlayerHasThing )
 
 LINK_ENTITY_TO_CLASS( player_hasweapon, CPlayerHasWeapon )
+
+#define SF_PLAYER_STATUS_ICON_ALLOW_DUPLICATE (1 << 1)
+
+class CPlayerStatusIcon : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "hud_sprite"))
+		{
+			pev->message = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+	{
+		string_t hudSprite = pev->message;
+		if (FStringNull(hudSprite))
+			return;
+
+		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (!pPlayer)
+			return;
+
+		switch (useType) {
+		case USE_OFF:
+			pPlayer->RemoveStatusIcon(hudSprite);
+			break;
+		case USE_ON:
+			pPlayer->AddStatusIcon(hudSprite, pev->rendercolor, FBitSet(pev->spawnflags, SF_PLAYER_STATUS_ICON_ALLOW_DUPLICATE));
+			break;
+		default:
+		{
+			if (pPlayer->HasStatusIcon(hudSprite)) {
+				pPlayer->RemoveStatusIcon(hudSprite);
+			} else {
+				pPlayer->AddStatusIcon(hudSprite, pev->rendercolor);
+			}
+		}
+			break;
+		}
+	}
+};
+
+LINK_ENTITY_TO_CLASS( player_statusicon, CPlayerStatusIcon )
+
+class CPlayerHasStatusIcon : public CPlayerHasThing
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "hud_sprite"))
+		{
+			pev->message = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPlayerHasThing::KeyValue(pkvd);
+	}
+	bool HasThing(CBasePlayer* pPlayer) {
+		string_t hudSprite = pev->message;
+		if (FStringNull(hudSprite))
+			return false;
+		return pPlayer->HasStatusIcon(hudSprite);
+	}
+};
+
+LINK_ENTITY_TO_CLASS( player_hasstatusicon, CPlayerHasStatusIcon )
 
 class CPlayerDeployWeapon : public CPointEntity
 {
