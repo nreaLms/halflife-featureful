@@ -517,8 +517,7 @@ private:
 	CSchemeManager m_SchemeManager;
 
 	// MOTD
-	int		m_iGotAllMOTD;
-	char	m_szMOTD[ MAX_MOTD_LENGTH ];
+	bool		m_iGotAllMOTD;
 
 	//  Command Menu Team buttons
 	CommandButton *m_pTeamButtons[6];
@@ -601,6 +600,7 @@ public:
 	int MsgFunc_Feign(const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_Detpack(const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_VGUIMenu(const char *pszName, int iSize, void *pbuf );
+	void ShowMOTD();
 	int MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_BuildSt( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_RandomPC( const char *pszName, int iSize, void *pbuf );
