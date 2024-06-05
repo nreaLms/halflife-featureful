@@ -160,6 +160,9 @@ public:
 		return m_pWeapon;
 	}
 
+	float DrawHistoryTime();
+	bool FastSwitchEnabled();
+
 private:
 	float m_fFade;
 	RGBA  m_rgba;
@@ -168,6 +171,9 @@ private:
 	int m_HUD_selection;
 	int m_HUD_buckets[WEAPON_SLOTS_HARDLIMIT];
 	int m_HUD_bucket_none;
+
+	cvar_t* m_pCvarDrawHistoryTime;
+	cvar_t* m_pCvarHudFastSwitch;
 };
 
 //

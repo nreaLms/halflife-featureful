@@ -441,8 +441,8 @@ int CHudAmmo::Init( void )
 
 	Reset();
 
-	CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
-	CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
+	m_pCvarDrawHistoryTime = CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
+	m_pCvarHudFastSwitch = CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 
@@ -600,7 +600,7 @@ void WeaponsResource::SelectSlot( int iSlot, int fAdvance, int iDirection )
 		return;
 
 	WEAPON *p = NULL;
-	bool fastSwitch = CVAR_GET_FLOAT( "hud_fastswitch" ) != 0;
+	bool fastSwitch = gHUD.m_Ammo.FastSwitchEnabled();
 
 	if ( ( gpActiveSel == NULL ) || ( gpActiveSel == (WEAPON *) 1 ) || ( iSlot != gpActiveSel->iSlot ) )
 	{
@@ -1376,6 +1376,16 @@ int CHudAmmo::DrawWList( float flTime )
 	}
 
 	return 1;
+}
+
+float CHudAmmo::DrawHistoryTime()
+{
+	return m_pCvarDrawHistoryTime && m_pCvarDrawHistoryTime->value > 0 ? m_pCvarDrawHistoryTime->value : 5;
+}
+
+bool CHudAmmo::FastSwitchEnabled()
+{
+	return m_pCvarHudFastSwitch && m_pCvarHudFastSwitch->value ? true : false;
 }
 
 /* =================================

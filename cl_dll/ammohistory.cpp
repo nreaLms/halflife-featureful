@@ -30,7 +30,6 @@ HistoryResource gHR;
 #define AMMO_PICKUP_HEIGHT_MAX		( ScreenHeight - 100 )
 
 #define MAX_ITEM_NAME	32
-int HISTORY_DRAW_TIME = 5;
 
 // keep a list of items
 struct ITEM_INFO
@@ -53,12 +52,11 @@ void HistoryResource::AddToHistory( int iType, int iId, int iCount )
 	}
 	
 	HIST_ITEM *freeslot = &rgAmmoHistory[iCurrentHistorySlot++];  // default to just writing to the first slot
-	HISTORY_DRAW_TIME = CVAR_GET_FLOAT( "hud_drawhistory_time" );
 
 	freeslot->type = iType;
 	freeslot->iId = iId;
 	freeslot->iCount = iCount;
-	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
+	freeslot->DisplayTime = gHUD.m_flTime + gHUD.m_Ammo.DrawHistoryTime();
 }
 
 void HistoryResource::AddToHistory( int iType, const char *szName, int iCount, int packedColor )
@@ -85,8 +83,7 @@ void HistoryResource::AddToHistory( int iType, const char *szName, int iCount, i
 	freeslot->iCount = iCount;
 	freeslot->packedColor = packedColor;
 
-	HISTORY_DRAW_TIME = CVAR_GET_FLOAT( "hud_drawhistory_time" );
-	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
+	freeslot->DisplayTime = gHUD.m_flTime + gHUD.m_Ammo.DrawHistoryTime();
 }
 
 void HistoryResource::CheckClearHistory( void )
@@ -115,7 +112,7 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 	{
 		if( rgAmmoHistory[i].type )
 		{
-			rgAmmoHistory[i].DisplayTime = Q_min( rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + HISTORY_DRAW_TIME );
+			rgAmmoHistory[i].DisplayTime = Q_min( rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + gHUD.m_Ammo.DrawHistoryTime() );
 
 			if( rgAmmoHistory[i].DisplayTime <= flTime )
 			{
