@@ -174,5 +174,11 @@ int CHudFlashlight::Draw( float flTime )
 		CHud::Renderer().SPR_DrawAdditive( fullSprite, r, g, b, x + iOffset, y, &rc );
 	}
 
+	bottomCoordinate = y + (emptyFlash->bottom - emptyFlash->top);
 	return 1;
+}
+
+int CHudFlashlight::RightmostCoordinate()
+{
+	return CHud::Renderer().PerceviedScreenWidth() - m_iWidth / 2;
 }

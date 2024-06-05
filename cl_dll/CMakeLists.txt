@@ -114,6 +114,7 @@ set (CLDLL_SOURCES
 	health.cpp
 	hud.cpp
 	hud_caption.cpp
+	hud_inventory.cpp
 	hud_msg.cpp
 	hud_redraw.cpp
 	hud_spectator.cpp
@@ -135,6 +136,7 @@ set (CLDLL_SOURCES
 	../pm_shared/pm_shared.c
 	../game_shared/tex_materials.c
 	../game_shared/parsetext.cpp
+	../game_shared/json_utils.cpp
 	saytext.cpp
 	status_icons.cpp
 	statusbar.cpp

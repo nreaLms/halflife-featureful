@@ -1311,13 +1311,12 @@ cvar_t sv_busters = { "sv_busters", "0" };
 
 extern void RegisterAmmoTypes();
 extern void LoadWarpballTemplates();
+extern void ReadInventorySpec();
 
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
 {
-	// Register cvars here:
-
 	ReadServerFeatures();
 	ReadEnabledMonsters();
 	ReadEnabledWeapons();
@@ -1326,7 +1325,10 @@ void GameDLLInit( void )
 
 	RegisterAmmoTypes();
 	LoadWarpballTemplates();
+	ReadInventorySpec();
 	ReadSaveTitles();
+
+	// Register cvars here:
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
 	g_psv_maxspeed = CVAR_GET_POINTER( "sv_maxspeed" );

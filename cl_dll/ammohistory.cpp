@@ -61,7 +61,7 @@ void HistoryResource::AddToHistory( int iType, int iId, int iCount )
 	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
 }
 
-void HistoryResource::AddToHistory( int iType, const char *szName, int iCount )
+void HistoryResource::AddToHistory( int iType, const char *szName, int iCount, int packedColor )
 {
 	if( iType != HISTSLOT_ITEM )
 		return;
@@ -83,6 +83,7 @@ void HistoryResource::AddToHistory( int iType, const char *szName, int iCount )
 	freeslot->iId = i;
 	freeslot->type = iType;
 	freeslot->iCount = iCount;
+	freeslot->packedColor = packedColor;
 
 	HISTORY_DRAW_TIME = CVAR_GET_FLOAT( "hud_drawhistory_time" );
 	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
@@ -102,6 +103,12 @@ void HistoryResource::CheckClearHistory( void )
 //
 // Draw Ammo pickup history
 //
+void HistoryResource::ScaleColorsAccordingToDisplayTime(float displayTime, float flTime, int& r, int& g, int& b)
+{
+	float scale = (displayTime - flTime) * 80;
+	ScaleColors( r, g, b, Q_min( scale, 255 ) );
+}
+
 int HistoryResource::DrawAmmoHistory( float flTime )
 {
 	for( int i = 0; i < MAX_HISTORY; i++ )
@@ -123,8 +130,7 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 
 				int r, g, b;
 				UnpackRGB( r, g, b, gHUD.HUDColor() );
-				float scale = ( rgAmmoHistory[i].DisplayTime - flTime ) * 80;
-				ScaleColors( r, g, b, Q_min( scale, 255 ) );
+				ScaleColorsAccordingToDisplayTime(rgAmmoHistory[i].DisplayTime, flTime, r, g, b);
 
 				// Draw the pic
 				int ypos = ScreenHeight - ( CHud::Renderer().ScaleScreen(AMMO_PICKUP_PICK_HEIGHT) + (AMMO_PICKUP_GAP * i) );
@@ -151,8 +157,7 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 				if( !gWR.HasAmmo( weap ) )
 					UnpackRGB( r, g, b, gHUD.HUDColorCritical() );	// if the weapon doesn't have ammo, display it as red
 
-				float scale = ( rgAmmoHistory[i].DisplayTime - flTime ) * 80;
-				ScaleColors( r, g, b, Q_min( scale, 255 ) );
+				ScaleColorsAccordingToDisplayTime(rgAmmoHistory[i].DisplayTime, flTime, r, g, b);
 
 				int ypos = ScreenHeight - ( CHud::Renderer().ScaleScreen(AMMO_PICKUP_PICK_HEIGHT) + ( AMMO_PICKUP_GAP * i ) );
 				int xpos = ScreenWidth - ( weap->rcInactive.right - weap->rcInactive.left );
@@ -168,15 +173,20 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 
 				wrect_t rect = gHUD.GetSpriteRect( rgAmmoHistory[i].iId );
 
-				UnpackRGB( r, g, b, gHUD.HUDColor() );
-				float scale = ( rgAmmoHistory[i].DisplayTime - flTime ) * 80;
-				ScaleColors( r, g, b, Q_min( scale, 255 ) );
+				int spriteColor = rgAmmoHistory[i].packedColor != 0 ? rgAmmoHistory[i].packedColor : gHUD.HUDColor();
+				UnpackRGB( r, g, b, spriteColor );
+				ScaleColorsAccordingToDisplayTime(rgAmmoHistory[i].DisplayTime, flTime, r, g, b);
 
 				int ypos = ScreenHeight - ( CHud::Renderer().ScaleScreen(AMMO_PICKUP_PICK_HEIGHT) + ( AMMO_PICKUP_GAP * i ) );
 				int xpos = ScreenWidth - ( rect.right - rect.left ) - 10;
 
 				SPR_Set( gHUD.GetSprite( rgAmmoHistory[i].iId ), r, g, b );
 				SPR_DrawAdditive( 0, xpos, ypos, &rect );
+
+				if (rgAmmoHistory[i].iCount > 1)
+				{
+					CHud::AdditiveText::DrawNumberString( xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b );
+				}
 			}
 		}
 	}

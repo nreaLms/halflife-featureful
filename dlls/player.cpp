@@ -1,4 +1,4 @@
-/***
+﻿/***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
@@ -37,6 +37,8 @@
 #include "pm_shared.h"
 #include "hltv.h"
 #include "talkmonster.h"
+#include "color_utils.h"
+#include "inventory.h"
 
 #if FEATURE_ROPE
 #include "ropes.h"
@@ -133,8 +135,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 
 	DEFINE_FIELD(CBasePlayer, m_loopedMp3, FIELD_STRING),
 
-	DEFINE_ARRAY(CBasePlayer, m_statusIcons, FIELD_STRING, MAX_ICONSPRITES),
-	DEFINE_ARRAY(CBasePlayer, m_statusIconColors, FIELD_VECTOR, MAX_ICONSPRITES),
+	DEFINE_ARRAY(CBasePlayer, m_inventoryItems, FIELD_STRING, MAX_INVENTORY_ITEMS),
+	DEFINE_ARRAY(CBasePlayer, m_inventoryItemCounts, FIELD_SHORT, MAX_INVENTORY_ITEMS),
 
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
@@ -231,6 +233,8 @@ int gmsgUseSound = 0;
 
 int gmsgCaption = 0;
 
+int gmsgInventory = 0;
+
 void LinkUserMessages( void )
 {
 	// Already taken care of?
@@ -303,6 +307,8 @@ void LinkUserMessages( void )
 	gmsgUseSound = REG_USER_MSG( "UseSound", 1 );
 
 	gmsgCaption = REG_USER_MSG("Caption", -1);
+
+	gmsgInventory = REG_USER_MSG("Inventory", -1);
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer )
@@ -4851,16 +4857,13 @@ void CBasePlayer::UpdateClientData( void )
 
 			g_pGameRules->InitHUD( this );
 
-			for (int i=0; i<ARRAYSIZE(m_statusIcons); ++i)
+			for (int i=0; i<ARRAYSIZE(m_inventoryItems); ++i)
 			{
-				if (!FStringNull(m_statusIcons[i]))
+				if (!FStringNull(m_inventoryItems[i]))
 				{
-					MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, NULL, pev);
-						WRITE_BYTE(PLAYER_STATUS_ICON_ENABLE|PLAYER_STATUS_ICON_ALLOW_DUPLICATE);
-						WRITE_STRING(STRING(m_statusIcons[i]));
-						WRITE_BYTE((int)m_statusIconColors[i].x);
-						WRITE_BYTE((int)m_statusIconColors[i].y);
-						WRITE_BYTE((int)m_statusIconColors[i].z);
+					MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
+						WRITE_SHORT(m_inventoryItemCounts[i]);
+						WRITE_STRING(STRING(m_inventoryItems[i]));
 					MESSAGE_END();
 				}
 			}
@@ -5872,71 +5875,160 @@ void CBasePlayer::SetLoopedMp3(string_t loopedMp3)
 	m_loopedMp3 = loopedMp3;
 }
 
-bool CBasePlayer::AddStatusIcon(string_t hudSprite, const Vector& color, bool allowDuplicate)
+int CBasePlayer::GiveInventoryItem(string_t item, int count, bool allowOverflow)
 {
-	if (!allowDuplicate)
+	int freeSlot = -1;
+	int i;
+	for (i=0; i<ARRAYSIZE(m_inventoryItems); ++i)
 	{
-		int index = HudStatusIcon(hudSprite);
-		if (index != -1)
-			return false;
-	}
-	for (int i=0; i<ARRAYSIZE(m_statusIcons); ++i)
-	{
-		if (FStringNull(m_statusIcons[i]))
+		if (freeSlot < 0 && FStringNull(m_inventoryItems[i]))
 		{
-			m_statusIcons[i] = hudSprite;
-			m_statusIconColors[i] = color;
-
-			int flags = PLAYER_STATUS_ICON_ENABLE;
-			if (allowDuplicate)
-				flags |= PLAYER_STATUS_ICON_ALLOW_DUPLICATE;
-
-			MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, NULL, pev);
-				WRITE_BYTE(flags);
-				WRITE_STRING(STRING(hudSprite));
-				WRITE_BYTE((int)color.x);
-				WRITE_BYTE((int)color.y);
-				WRITE_BYTE((int)color.z);
-			MESSAGE_END();
-
-			return true;
+			freeSlot = i;
+		}
+		if (!FStringNull(m_inventoryItems[i]) && FStrEq(STRING(item), STRING(m_inventoryItems[i])))
+		{
+			break;
 		}
 	}
-	ALERT(at_warning, "Couldn't find a slot for HUD sprite %s\n", STRING(hudSprite));
+
+	if (i == ARRAYSIZE(m_inventoryItems))
+	{
+		if (freeSlot >= 0)
+		{
+			i = freeSlot;
+		}
+		else
+		{
+			return INVENTORY_ITEM_NONE_GIVEN_MAXITEMS;
+		}
+	}
+
+	const InventoryItemSpec* spec = GetInventoryItemSpec(STRING(item));
+	if (!allowOverflow && spec && spec->maxCount > 0)
+	{
+		if (m_inventoryItemCounts[i] >= spec->maxCount)
+			return INVENTORY_ITEM_NONE_GIVEN_MAXCOUNT;
+	}
+
+	int oldCount = m_inventoryItemCounts[i];
+	m_inventoryItems[i] = item;
+	m_inventoryItemCounts[i] += count;
+
+	int result = INVENTORY_ITEM_GIVEN;
+
+	if (spec && spec->maxCount > 0)
+	{
+		if (oldCount <= spec->maxCount && m_inventoryItemCounts[i] > spec->maxCount)
+		{
+			if (!allowOverflow)
+				m_inventoryItemCounts[i] = spec->maxCount;
+			result = INVENTORY_ITEM_GIVEN_OVERFLOW;
+		}
+	}
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
+		WRITE_SHORT(m_inventoryItemCounts[i]);
+		WRITE_STRING(STRING(item));
+	MESSAGE_END();
+
+	return result;
+}
+
+int CBasePlayer::SetInventoryItem(string_t item, int count, bool allowOverflow)
+{
+	int i = InventoryItemIndex(item);
+	if (i != -1)
+	{
+		int oldCount = m_inventoryItemCounts[i];
+		if (count <= 0)
+		{
+			m_inventoryItems[i] = iStringNull;
+			m_inventoryItemCounts[i] = 0;
+		}
+		else
+		{
+			m_inventoryItemCounts[i] = count;
+		}
+		if (oldCount != count)
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
+				WRITE_SHORT(m_inventoryItemCounts[i]);
+				WRITE_STRING(STRING(item));
+			MESSAGE_END();
+
+			int result = INVENTORY_ITEM_COUNT_CHANGED;
+			const InventoryItemSpec* spec = GetInventoryItemSpec(STRING(item));
+			if (spec && spec->maxCount > 0)
+			{
+				if (oldCount <= spec->maxCount && count > spec->maxCount)
+				{
+					if (!allowOverflow)
+						m_inventoryItemCounts[i] = spec->maxCount;
+					result = INVENTORY_ITEM_GIVEN_OVERFLOW;
+				}
+			}
+			return result;
+		}
+		return INVENTORY_ITEM_NO_CHANGE;
+	}
+	else
+	{
+		return GiveInventoryItem(item, count, allowOverflow);
+	}
+}
+
+bool CBasePlayer::RemoveInventoryItem(string_t item, int count)
+{
+	int i = InventoryItemIndex(item);
+	if (i != -1)
+	{
+		m_inventoryItemCounts[i] -= count;
+		if (m_inventoryItemCounts[i] <= 0)
+		{
+			m_inventoryItemCounts[i] = 0;
+			m_inventoryItems[i] = iStringNull;
+		}
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
+			WRITE_SHORT(m_inventoryItemCounts[i]);
+			WRITE_STRING(STRING(item));
+		MESSAGE_END();
+		return true;
+	}
 	return false;
 }
 
-bool CBasePlayer::RemoveStatusIcon(string_t hudSprite)
+void CBasePlayer::RemoveAllInventoryItems()
 {
-	int index = HudStatusIcon(hudSprite);
-	if (index == -1)
-		return false;
-
-	m_statusIcons[index] = iStringNull;
-	m_statusIconColors[index] = g_vecZero;
-
-	MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, NULL, pev);
-		WRITE_BYTE(0);
-		WRITE_STRING(STRING(hudSprite));
-	MESSAGE_END();
-
-	return true;
-}
-
-bool CBasePlayer::HasStatusIcon(string_t hudSprite)
-{
-	return HudStatusIcon(hudSprite) != -1;
-}
-
-int CBasePlayer::HudStatusIcon(string_t hudSprite)
-{
-	if (FStringNull(hudSprite))
-		return -1;
-	for (int i=0; i<ARRAYSIZE(m_statusIcons); ++i)
+	for (int i=0; i<ARRAYSIZE(m_inventoryItems); ++i)
 	{
-		if (!FStringNull(m_statusIcons[i]))
+		if (!FStringNull(m_inventoryItems[i]))
 		{
-			if (FStrEq(STRING(hudSprite), STRING(m_statusIcons[i])))
+			MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
+				WRITE_SHORT(0);
+				WRITE_STRING(STRING(m_inventoryItems[i]));
+			MESSAGE_END();
+
+			m_inventoryItems[i] = iStringNull;
+			m_inventoryItemCounts[i] = 0;
+		}
+	}
+}
+
+bool CBasePlayer::HasInventoryItem(string_t item)
+{
+	return InventoryItemIndex(item) != -1;
+}
+
+int CBasePlayer::InventoryItemIndex(string_t item)
+{
+	if (FStringNull(item))
+		return -1;
+	for (int i=0; i<ARRAYSIZE(m_inventoryItems); ++i)
+	{
+		if (!FStringNull(m_inventoryItems[i]))
+		{
+			if (FStrEq(STRING(item), STRING(m_inventoryItems[i])))
 				return i;
 		}
 	}
@@ -6011,6 +6103,7 @@ enum
 	PLAYER_CALC_PARAM_ARMOR,
 	PLAYER_CALC_PARAM_AMMO,
 	PLAYER_CALC_PARAM_AMMO_INCLUDE_CLIP,
+	PLAYER_CALC_INVENTORY_ITEM,
 };
 
 enum
@@ -6037,6 +6130,11 @@ public:
 		else if (FStrEq(pkvd->szKeyName, "ammo_name"))
 		{
 			pev->message = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "item_name"))
+		{
+			pev->netname = ALLOC_STRING(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
 		else
@@ -6124,6 +6222,34 @@ private:
 			else
 			{
 				return ammoAmount;
+			}
+		}
+		case PLAYER_CALC_INVENTORY_ITEM:
+		{
+			if (FStringNull(pev->netname))
+			{
+				ALERT(at_warning, "Requesting player's inventory item via %s, but the item name is not specified\n", STRING(pev->classname));
+				success = false;
+				return 0.0f;
+			}
+			int index = pPlayer->InventoryItemIndex(pev->netname);
+			if (index == -1)
+			{
+				return 0.0f;
+			}
+			else
+			{
+				if (isFraction)
+				{
+					const InventoryItemSpec* spec = GetInventoryItemSpec(STRING(pPlayer->m_inventoryItems[index]));
+					if (spec && spec->maxCount > 0)
+					{
+						return pPlayer->m_inventoryItemCounts[index] / (float)spec->maxCount;
+					}
+					return pPlayer->m_inventoryItemCounts[index] > 0 ? 1.0f : 0.0f;
+				}
+				else
+					return pPlayer->m_inventoryItemCounts[index];
 			}
 		}
 		default:
@@ -6289,16 +6415,52 @@ IMPLEMENT_SAVERESTORE( CPlayerHasWeapon, CPlayerHasThing )
 
 LINK_ENTITY_TO_CLASS( player_hasweapon, CPlayerHasWeapon )
 
-#define SF_PLAYER_STATUS_ICON_ALLOW_DUPLICATE (1 << 1)
+#define SF_PLAYER_INVENTORY_REMOVE_ON_FIRE (1 << 0)
+#define SF_PLAYER_INVENTORY_ALLOW_MAXCOUNT_OVERFLOW (1 << 1)
 
-class CPlayerStatusIcon : public CPointEntity
+#define PLAYER_INVENTORY_OP_REMOVE -1
+#define PLAYER_INVENTORY_OP_INPUT 0
+#define PLAYER_INVENTORY_OP_GIVE 1
+#define PLAYER_INVENTORY_OP_SET 2
+
+class CPlayerInventory : public CPointEntity
 {
 public:
 	void KeyValue( KeyValueData *pkvd )
 	{
-		if (FStrEq(pkvd->szKeyName, "hud_sprite"))
+		if (FStrEq(pkvd->szKeyName, "item_name"))
 		{
 			pev->message = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "operation"))
+		{
+			pev->weapons = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "count"))
+		{
+			pev->impulse = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "on_count_change"))
+		{
+			m_fireOnCountChange = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "on_item_limit"))
+		{
+			m_fireOnItemLimit = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "on_max_count_limit"))
+		{
+			m_fireOnMaxCountLimit = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "on_count_overflow"))
+		{
+			m_fireOnCountOverflow = ALLOC_STRING(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
 		else
@@ -6306,42 +6468,137 @@ public:
 	}
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
-		string_t hudSprite = pev->message;
-		if (FStringNull(hudSprite))
-			return;
-
 		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if (!pPlayer)
 			return;
 
-		switch (useType) {
-		case USE_OFF:
-			pPlayer->RemoveStatusIcon(hudSprite);
-			break;
-		case USE_ON:
-			pPlayer->AddStatusIcon(hudSprite, pev->rendercolor, FBitSet(pev->spawnflags, SF_PLAYER_STATUS_ICON_ALLOW_DUPLICATE));
-			break;
-		default:
+		string_t item = pev->message;
+		int operation = pev->weapons;
+		int count = pev->impulse;
+
+		if (operation == PLAYER_INVENTORY_OP_INPUT)
 		{
-			if (pPlayer->HasStatusIcon(hudSprite)) {
-				pPlayer->RemoveStatusIcon(hudSprite);
-			} else {
-				pPlayer->AddStatusIcon(hudSprite, pev->rendercolor);
+			if (useType == USE_OFF)
+			{
+				operation = PLAYER_INVENTORY_OP_REMOVE;
+			}
+			else if (useType == USE_SET)
+			{
+				operation = PLAYER_INVENTORY_OP_SET;
+				count = (int)value;
+			}
+			else
+			{
+				operation = PLAYER_INVENTORY_OP_GIVE;
 			}
 		}
+
+		if (FStringNull(item))
+		{
+			if (count <= 0 && (operation == PLAYER_INVENTORY_OP_SET || operation == PLAYER_INVENTORY_OP_REMOVE))
+				pPlayer->RemoveAllInventoryItems();
+			return;
+		}
+
+		int oldCount = 0;
+		if (!FStringNull(m_fireOnCountChange))
+		{
+			int itemIndex = pPlayer->InventoryItemIndex(item);
+			if (itemIndex != -1)
+			{
+				oldCount = pPlayer->m_inventoryItemCounts[itemIndex];
+			}
+		}
+
+		int result = INVENTORY_ITEM_NO_CHANGE;
+		switch (operation) {
+		case PLAYER_INVENTORY_OP_REMOVE:
+			result = pPlayer->RemoveInventoryItem(item, count) ? INVENTORY_ITEM_COUNT_CHANGED : INVENTORY_ITEM_NO_CHANGE;
+			break;
+		case PLAYER_INVENTORY_OP_SET:
+			result = pPlayer->SetInventoryItem(item, count, AllowOverflow());
+			break;
+		case PLAYER_INVENTORY_OP_GIVE:
+			result = pPlayer->GiveInventoryItem(item, count, AllowOverflow());
+			break;
+		default:
 			break;
 		}
+
+		if (!FStringNull(m_fireOnCountChange))
+		{
+			int newCount = 0;
+			int itemIndex = pPlayer->InventoryItemIndex(item);
+			if (itemIndex != -1)
+			{
+				newCount = pPlayer->m_inventoryItemCounts[itemIndex];
+			}
+			if (oldCount != newCount)
+			{
+				FireTargets(STRING(m_fireOnCountChange), pActivator, this);
+			}
+		}
+
+		switch (result) {
+		case INVENTORY_ITEM_NONE_GIVEN_MAXITEMS:
+			if (!FStringNull(m_fireOnItemLimit))
+			{
+				FireTargets(STRING(m_fireOnItemLimit), pActivator, this);
+			}
+			break;
+		case INVENTORY_ITEM_NONE_GIVEN_MAXCOUNT:
+			if (!FStringNull(m_fireOnMaxCountLimit))
+			{
+				FireTargets(STRING(m_fireOnMaxCountLimit), pActivator, this);
+			}
+			break;
+		case INVENTORY_ITEM_GIVEN_OVERFLOW:
+			if (!FStringNull(m_fireOnCountOverflow))
+			{
+				FireTargets(STRING(m_fireOnCountOverflow), pActivator, this);
+			}
+			break;
+		default:
+			break;
+		}
+
+		if (FBitSet(pev->spawnflags, SF_PLAYER_INVENTORY_REMOVE_ON_FIRE))
+			UTIL_Remove(this);
 	}
+
+	bool AllowOverflow()
+	{
+		return FBitSet(pev->spawnflags, SF_PLAYER_INVENTORY_ALLOW_MAXCOUNT_OVERFLOW);
+	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_fireOnCountChange;
+	string_t m_fireOnItemLimit;
+	string_t m_fireOnMaxCountLimit;
+	string_t m_fireOnCountOverflow;
 };
 
-LINK_ENTITY_TO_CLASS( player_statusicon, CPlayerStatusIcon )
+LINK_ENTITY_TO_CLASS( player_inventory, CPlayerInventory )
 
-class CPlayerHasStatusIcon : public CPlayerHasThing
+TYPEDESCRIPTION	CPlayerInventory::m_SaveData[] =
+{
+	DEFINE_FIELD( CPlayerInventory, m_fireOnCountChange, FIELD_STRING ),
+	DEFINE_FIELD( CPlayerInventory, m_fireOnItemLimit, FIELD_STRING ),
+	DEFINE_FIELD( CPlayerInventory, m_fireOnMaxCountLimit, FIELD_STRING ),
+	DEFINE_FIELD( CPlayerInventory, m_fireOnCountOverflow, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CPlayerInventory, CPointEntity )
+
+class CPlayerHasInventory : public CPlayerHasThing
 {
 public:
 	void KeyValue( KeyValueData *pkvd )
 	{
-		if (FStrEq(pkvd->szKeyName, "hud_sprite"))
+		if (FStrEq(pkvd->szKeyName, "item_name"))
 		{
 			pev->message = ALLOC_STRING(pkvd->szValue);
 			pkvd->fHandled = TRUE;
@@ -6350,14 +6607,14 @@ public:
 			CPlayerHasThing::KeyValue(pkvd);
 	}
 	bool HasThing(CBasePlayer* pPlayer) {
-		string_t hudSprite = pev->message;
-		if (FStringNull(hudSprite))
+		string_t item = pev->message;
+		if (FStringNull(item))
 			return false;
-		return pPlayer->HasStatusIcon(hudSprite);
+		return pPlayer->HasInventoryItem(item);
 	}
 };
 
-LINK_ENTITY_TO_CLASS( player_hasstatusicon, CPlayerHasStatusIcon )
+LINK_ENTITY_TO_CLASS( player_hasinventory, CPlayerHasInventory )
 
 class CPlayerDeployWeapon : public CPointEntity
 {

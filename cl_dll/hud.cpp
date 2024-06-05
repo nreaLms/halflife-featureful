@@ -724,6 +724,8 @@ void CHud::Init( void )
 
 	m_Caption.Init();
 
+	inventorySpec.ReadFromFile("sprites/hud_inventory.json");
+
 	hudRenderer.Init();
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
@@ -1663,10 +1665,12 @@ int CHudMoveMode::Draw(float flTime)
 
 	const wrect_t rc = *prc;
 	int width = rc.right - rc.left;
-	y = ( rc.bottom - rc.top ) * 2;
+	y = gHUD.m_Flash.bottomCoordinate + 4;
 	x = CHud::Renderer().PerceviedScreenWidth() - width - width / 2;
 
 	CHud::Renderer().SPR_DrawAdditive( sprite, r, g, b,  x, y, &rc );
+
+	bottomCoordinate = y + (rc.bottom - rc.top);
 	return 1;
 }
 
@@ -1688,6 +1692,18 @@ extern WEAPON *gpActiveSel;
 bool CHud::CanDrawStatusIcons()
 {
 	return !gpActiveSel;
+}
+
+int CHud::TopRightInventoryCoordinate()
+{
+	if (MoveModeEnabled())
+	{
+		return m_MoveMode.bottomCoordinate;
+	}
+	else
+	{
+		return m_Flash.bottomCoordinate;
+	}
 }
 
 bool CHud::UseVguiMOTD()

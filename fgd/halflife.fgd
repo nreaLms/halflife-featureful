@@ -7169,6 +7169,7 @@
 		1 : "Armor"
 		2 : "Ammo"
 		3 : "Ammo, with clip"
+		4 : "Inventory item count"
 	]
 	value_notion(choices) : "Calc value notion" : 0 =
 	[
@@ -7197,6 +7198,7 @@
 		"Shocks" : "Shocks"
 		"Penguins" : "Penguins"
 	]
+	"item_name"(string) : "Inventory item name"
 ]
 
 @PointClass base(Targetname) = player_capabilities : "Enable/disable certain player's capabilities"
@@ -7261,19 +7263,31 @@
 	fail_target(target_destination) : "Fail Target"
 ]
 
-@PointClass base(Targetname) = player_statusicon : "Set player status icon (HUD sprite). The entity acts depending on the input: Toggle, On or Off."
+@PointClass base(Targetname) = player_inventory : "Control player inventory. Max count per item is defined in templates/inventory.json"
 [
-	hud_sprite(string): "HUD sprite"
-	rendercolor(color255) : "Sprite Color (R G B)" : "0 0 0" : "All zeroes mean the client's HUD color"
+	item_name(string): "Item name" : : "The inventory item name. Also used in player_hasinventory and player_calc_ratio. Special case: empty item name in combination with Decrease or Set operation and count = 0 means removing all items. 'Fire on' triggers don't fire in this case"
+	operation(choices) : "Inventory operation" : 1 =
+	[
+		-1 : "Decrease by count"
+		0 : "Depends on input"
+		1 : "Increase by count"
+		2 : "Set count"
+	]
+	count(integer): "Item Count" : 1 : "The number to decrease/increase by or set (depending on the operation)"
+	on_count_change(target_destination): "Fire on count change" : : "Fire if the operation changed the count of item"
+	on_max_count_limit(target_destination) : "Fire on max count limit" : : "Fire when can't give an item duplicate due to the max count limit for this item. This never fires when 'Allow overflow' spawnflag is ticked"
+	on_count_overflow(target_destination) : "Fire on count overflow" : : "Fire when the new number of item duplicates would overflow the maximum allowed count. This won't fire if the max count is already overflown before the operation"
+	on_item_limit(target_destination) : "Fire on item limit" : : "Fire when can't give a new item due to the max inventory item limit"
 	spawnflags(Flags) =
 	[
-		2 : "Allow duplicate" : 0 : "Allow adding sprites with the same name. The player_statusicon must be triggered with 'On' use-type to set the duplicate"
+		1 : "Remove on fire" : 0
+		2 : "Allow overflow" : 0 : "Allow max count overflow when increasing or setting the item count"
 	]
 ]
 
-@PointClass base(Targetname) color(72 96 128) = player_hasstatusicon : "Check if player has a specific status icon"
+@PointClass base(Targetname) color(72 96 128) = player_hasinventory : "Check if player has a specific inventory item"
 [
-	hud_sprite(string) : "Status icon"
+	item_name(string) : "Item name"
 	pass_target(target_destination) : "Pass Target"
 	fail_target(target_destination) : "Fail Target"
 ]

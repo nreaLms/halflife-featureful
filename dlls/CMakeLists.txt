@@ -108,6 +108,7 @@ set (SVDLL_SOURCES
 	hornetgun.cpp
 	houndeye.cpp
 	ichthyosaur.cpp
+	inventory.cpp
 	islave.cpp
 	items.cpp
 	knife.cpp
@@ -189,6 +190,7 @@ set (SVDLL_SOURCES
 	../pm_shared/pm_shared.c
 	../game_shared/tex_materials.c
 	../game_shared/parsetext.cpp
+	../game_shared/json_utils.cpp
 	../game_shared/vcs_info.cpp
 )
 

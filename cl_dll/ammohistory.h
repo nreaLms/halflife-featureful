@@ -113,9 +113,12 @@ private:
 		float DisplayTime;  // the time at which this item should be removed from the history
 		int iCount;
 		int iId;
+		int packedColor;
 	};
 
 	HIST_ITEM rgAmmoHistory[MAX_HISTORY];
+
+	void ScaleColorsAccordingToDisplayTime(float displayTime, float flTime, int& r, int& g, int& b);
 
 public:
 
@@ -133,7 +136,7 @@ public:
 	int iCurrentHistorySlot;
 
 	void AddToHistory( int iType, int iId, int iCount = 0 );
-	void AddToHistory( int iType, const char *szName, int iCount = 0 );
+	void AddToHistory(int iType, const char *szName, int iCount = 0, int packedColor = 0);
 
 	void CheckClearHistory( void );
 	int DrawAmmoHistory( float flTime );

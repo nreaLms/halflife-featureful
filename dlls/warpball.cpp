@@ -15,6 +15,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "color_utils.h"
+#include "json_utils.h"
 #include "game.h"
 #include "effects.h"
 #include "soundent.h"
@@ -365,146 +366,6 @@ private:
 	}
 };
 
-static bool UpdatePropertyFromJson(std::string& str, Value& jsonValue, const char* key)
-{
-	auto it = jsonValue.FindMember(key);
-	if (it != jsonValue.MemberEnd())
-	{
-		str = it->value.GetString();
-		return true;
-	}
-	return false;
-}
-
-static bool UpdatePropertyFromJson(int& i, Value& jsonValue, const char* key)
-{
-	auto it = jsonValue.FindMember(key);
-	if (it != jsonValue.MemberEnd())
-	{
-		i = it->value.GetInt();
-		return true;
-	}
-	return false;
-}
-
-static bool UpdatePropertyFromJson(float& f, Value& jsonValue, const char* key)
-{
-	auto it = jsonValue.FindMember(key);
-	if (it != jsonValue.MemberEnd())
-	{
-		f = it->value.GetFloat();
-		return true;
-	}
-	return false;
-}
-
-static bool UpdatePropertyFromJson(Color& color, Value& jsonValue, const char* key)
-{
-	auto it = jsonValue.FindMember(key);
-	if (it != jsonValue.MemberEnd())
-	{
-		const char* colorStr = it->value.GetString();
-		int packedColor;
-		if (ParseColor(colorStr, packedColor)) {
-			UnpackRGB(color.r, color.g, color.b, packedColor);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool UpdatePropertyFromJson(FloatRange& floatRange, Value& jsonValue, const char* key)
-{
-	auto it = jsonValue.FindMember(key);
-	if (it != jsonValue.MemberEnd())
-	{
-		Value& value = it->value;
-		if (value.IsNumber())
-		{
-			floatRange.min = value.GetFloat();
-			floatRange.max = floatRange.min;
-		}
-		else if (value.IsObject())
-		{
-			auto minIt = value.FindMember("min");
-			auto maxIt = value.FindMember("max");
-			if (minIt != value.MemberEnd())
-			{
-				if (minIt->value.IsFloat())
-					floatRange.min = minIt->value.GetFloat();
-			}
-			if (maxIt != value.MemberEnd())
-			{
-				if (maxIt->value.IsFloat())
-					floatRange.max = maxIt->value.GetFloat();
-			}
-		}
-		else if (value.IsString())
-		{
-			const char* str = value.GetString();
-			const char* found = strchr(str, ',');
-			floatRange.min = atof(str);
-			if (found) {
-				found++;
-				floatRange.max = atof(found);
-			} else {
-				floatRange.max = floatRange.min;
-			}
-		}
-
-		if (floatRange.min > floatRange.max) {
-			floatRange.min = floatRange.max;
-		}
-	}
-	return false;
-}
-
-bool UpdatePropertyFromJson(IntRange& floatRange, Value& jsonValue, const char* key)
-{
-	auto it = jsonValue.FindMember(key);
-	if (it != jsonValue.MemberEnd())
-	{
-		Value& value = it->value;
-		if (value.IsInt())
-		{
-			floatRange.min = value.GetInt();
-			floatRange.max = floatRange.min;
-		}
-		else if (value.IsObject())
-		{
-			auto minIt = value.FindMember("min");
-			auto maxIt = value.FindMember("max");
-			if (minIt != value.MemberEnd())
-			{
-				if (minIt->value.IsFloat())
-					floatRange.min = minIt->value.GetFloat();
-			}
-			if (maxIt != value.MemberEnd())
-			{
-				if (maxIt->value.IsFloat())
-					floatRange.max = maxIt->value.GetFloat();
-			}
-		}
-		else if (value.IsString())
-		{
-			const char* str = value.GetString();
-			const char* found = strchr(str, ',');
-			floatRange.min = atoi(str);
-			if (found) {
-				found++;
-				floatRange.max = atoi(found);
-			} else {
-				floatRange.max = floatRange.min;
-			}
-		}
-
-		if (floatRange.min > floatRange.max) {
-			floatRange.min = floatRange.max;
-		}
-	}
-	return false;
-}
-
 static void AssignWarpballSound(WarpballSound& sound, Value& soundJson)
 {
 	if (soundJson.IsNull())
@@ -733,76 +594,22 @@ static bool AddWarpballTemplate(WarpballTemplateCatalog& catalog, Value& allTemp
 
 WarpballTemplateCatalog g_WarpballCatalog;
 
-static void ReportParseErrors(ParseResult& parseResult)
-{
-	ALERT(at_error, "JSON parse error: %s (%lu)\n", GetParseError_En(parseResult.Code()), parseResult.Offset());
-}
-
 void LoadWarpballTemplates()
 {
-	Document schemaDocument;
-	schemaDocument.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>(warpballCatalogSchema);
-	ParseResult parseResult = schemaDocument;
-	if (!parseResult) {
-		ReportParseErrors(parseResult);
-		return;
-	}
-	SchemaDocument schema(schemaDocument);
-
 	const char* fileName = "templates/warpball.json";
 	int fileSize;
-	byte *pMemFile = g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
+	char *pMemFile = (char*)g_engfuncs.pfnLoadFileForMe( fileName, &fileSize );
 	if (!pMemFile)
 		return;
 
 	ALERT(at_console, "Parsing %s\n", fileName);
+
 	Document document;
-	document.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>((const char*)pMemFile, fileSize);
+	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, warpballCatalogSchema);
 	g_engfuncs.pfnFreeFile(pMemFile);
 
-	parseResult = document;
-	if (!parseResult) {
-		ReportParseErrors(parseResult);
+	if (!success)
 		return;
-	}
-
-	SchemaValidator validator(schema);
-	if (!document.Accept(validator))
-	{
-		Pointer schemaPointer = validator.GetInvalidSchemaPointer();
-		StringBuffer schemaPathBuffer;
-		schemaPointer.Stringify(schemaPathBuffer);
-
-		Pointer docPointer = validator.GetInvalidDocumentPointer();
-		StringBuffer docPathBuffer;
-		docPointer.Stringify(docPathBuffer);
-
-		StringBuffer badValueBuffer;
-		Value *badVal = GetValueByPointer(document, docPointer);
-		if (badVal)
-		{
-			Writer<StringBuffer> writer(badValueBuffer);
-			badVal->Accept(writer);
-		}
-
-		StringBuffer schemaPartBuffer;
-		Pointer schemaKeywordPointer = schemaPointer.Append(validator.GetInvalidSchemaKeyword());
-		Value* schemaPartValue = GetValueByPointer(schemaDocument, schemaKeywordPointer);
-		if (schemaPartValue)
-		{
-			Writer<StringBuffer> writer(schemaPartBuffer);
-			schemaPartValue->Accept(writer);
-		}
-
-		ALERT(at_error, "Value %s of property '%s' doesn't match the constraint '%s' in '%s': %s\n",
-			badValueBuffer.GetString(),
-			docPathBuffer.GetString(),
-			validator.GetInvalidSchemaKeyword(),
-			schemaPathBuffer.GetString(),
-			schemaPartBuffer.GetString());
-
-		return;
-	}
 
 	auto templatesIt = document.FindMember("templates");
 	if (templatesIt != document.MemberEnd())

@@ -30,6 +30,16 @@ class CRope;
 #define PLAYER_MIN_BOUNCE_SPEED		200
 #define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
 
+enum
+{
+	INVENTORY_ITEM_NO_CHANGE = -2,
+	INVENTORY_ITEM_NONE_GIVEN_MAXITEMS = -1,
+	INVENTORY_ITEM_NONE_GIVEN_MAXCOUNT = 0,
+	INVENTORY_ITEM_GIVEN = 1,
+	INVENTORY_ITEM_GIVEN_OVERFLOW = 2,
+	INVENTORY_ITEM_COUNT_CHANGED = 3
+};
+
 #define STRIP_WEAPONS_ONLY 0
 #define STRIP_SUIT 1
 #define STRIP_SUITLIGHT 2
@@ -491,12 +501,14 @@ public:
 	void SetLoopedMp3(string_t loopedMp3);
 	string_t m_loopedMp3;
 
-	string_t m_statusIcons[MAX_ICONSPRITES];
-	Vector m_statusIconColors[MAX_ICONSPRITES];
-	bool AddStatusIcon(string_t hudSprite, const Vector& color, bool allowDuplicate = false);
-	bool RemoveStatusIcon(string_t hudSprite);
-	bool HasStatusIcon(string_t hudSprite);
-	int HudStatusIcon(string_t hudSprite);
+	string_t m_inventoryItems[MAX_INVENTORY_ITEMS];
+	short m_inventoryItemCounts[MAX_INVENTORY_ITEMS];
+	int GiveInventoryItem(string_t item, int count, bool allowOverflow = false);
+	int SetInventoryItem(string_t item, int count, bool allowOverflow = false);
+	bool RemoveInventoryItem(string_t item, int count);
+	void RemoveAllInventoryItems();
+	bool HasInventoryItem(string_t item);
+	int InventoryItemIndex(string_t item);
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

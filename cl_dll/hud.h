@@ -44,6 +44,7 @@
 #include "dlight.h"
 
 #include "hud_renderer.h"
+#include "hud_inventory.h"
 
 #include <vector>
 #include <string>
@@ -506,7 +507,9 @@ public:
 	void Reset( void );
 	int MsgFunc_Flashlight( const char *pszName,  int iSize, void *pbuf );
 	int MsgFunc_FlashBat( const char *pszName,  int iSize, void *pbuf );
+	int RightmostCoordinate();
 
+	int bottomCoordinate;
 private:
 	HSPRITE m_hSprite1;
 	HSPRITE m_hSprite2;
@@ -639,6 +642,16 @@ private:
 //
 #define MAX_SPRITE_NAME_LENGTH	24
 
+struct inventory_t
+{
+	char itemName[MAX_SPRITE_NAME_LENGTH];
+	HSPRITE spr;
+	wrect_t rc;
+	unsigned char r, g, b, a;
+	int position;
+	int count;
+};
+
 class CHudStatusIcons : public CHudBase
 {
 public:
@@ -647,27 +660,21 @@ public:
 	void Reset( void );
 	int Draw( float flTime );
 	int MsgFunc_StatusIcon( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_Inventory( const char *pszName, int iSize, void *pbuf );
 
-	enum
-	{
-		MAX_ICONSPRITENAME_LENGTH = MAX_SPRITE_NAME_LENGTH
-	};
-	
-	//had to make these public so CHud could access them (to enable concussion icon)
-	//could use a friend declaration instead...
-	void EnableIcon( const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue, bool allowDuplicate = false );
-	void DisableIcon( const char *pszIconName );
-
+	void EnableIcon(const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue, bool allowDuplicate = false);
+	void DisableIcon(const char *pszIconName);
 private:
 	typedef struct
 	{
-		char szSpriteName[MAX_ICONSPRITENAME_LENGTH];
+		char szSpriteName[MAX_SPRITE_NAME_LENGTH];
 		HSPRITE spr;
 		wrect_t rc;
 		unsigned char r, g, b;
 	} icon_sprite_t;
 
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];
+	inventory_t m_InventoryList[MAX_INVENTORY_ITEMS];
 };
 
 //
@@ -690,6 +697,7 @@ public:
 	void Reset( void );
 	int MsgFunc_MoveMode( const char *pszName,  int iSize, void *pbuf );
 
+	int bottomCoordinate;
 private:
 	HSPRITE m_hSpriteStand;
 	HSPRITE m_hSpriteRun;
@@ -1026,12 +1034,15 @@ public:
 
 	bool m_bFlashlight;
 
+	InventoryHudSpec inventorySpec;
+
 	HudSpriteRenderer hudRenderer;
 	bool hasHudScaleInEngine;
 
 	static bool ShouldUseConsoleFont();
 
 	bool CanDrawStatusIcons();
+	int TopRightInventoryCoordinate();
 	bool UseVguiMOTD();
 };
 

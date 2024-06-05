@@ -4,6 +4,7 @@
 
 #include <string>
 #include "extdll.h"
+#include "template_property_types.h"
 
 #define WARPBALL_RED_DEFAULT 77
 #define WARPBALL_GREEN_DEFAULT 210
@@ -20,28 +21,6 @@
 #define WARPBALL_BEAM "sprites/lgtning.spr"
 #define WARPBALL_SOUND1 "debris/beamstart2.wav"
 #define WARPBALL_SOUND2 "debris/beamstart7.wav"
-
-struct Color
-{
-	Color(): r(0), g(0), b(0) {}
-	Color(int red, int green, int blue): r(red), g(green), b(blue) {}
-	int r;
-	int g;
-	int b;
-};
-
-template <typename N>
-struct NumberRange
-{
-	NumberRange(): min(), max() {}
-	NumberRange(N mini, N maxi): min(mini), max(maxi) {}
-	NumberRange(N val): min(val), max(val) {}
-	N min;
-	N max;
-};
-
-typedef NumberRange<float> FloatRange;
-typedef NumberRange<int> IntRange;
 
 struct WarpballSound
 {
