@@ -1,6 +1,6 @@
 #pragma once
 #ifndef SAVETITLES_H
-#define SAVETITLE_H
+#define SAVETITLES_H
 
 const char* GetSaveTitleForMap(const char* mapname);
 
