@@ -450,9 +450,7 @@ private:
 	void DropPlayerItemImpl(CBasePlayerWeapon* pWeapon, int dropType = DropAmmoFair, float speed = 400);
 
 public:
-#if FEATURE_MOVE_MODE
 	short m_movementState; // no need to save
-#endif
 
 	bool m_bSentMessages;
 	bool m_bSentSpriteIndices;

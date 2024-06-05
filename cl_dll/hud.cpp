@@ -701,9 +701,7 @@ void CHud::Init( void )
 	m_Train.Init();
 	m_Battery.Init();
 	m_Flash.Init();
-#if FEATURE_MOVE_MODE
 	m_MoveMode.Init();
-#endif
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();
@@ -1175,9 +1173,7 @@ void CHud::VidInit( void )
 	m_Train.VidInit();
 	m_Battery.VidInit();
 	m_Flash.VidInit();
-#if FEATURE_MOVE_MODE
 	m_MoveMode.VidInit();
-#endif
 	m_Message.VidInit();
 	m_StatusBar.VidInit();
 	m_DeathNotice.VidInit();
@@ -1590,7 +1586,6 @@ HudSpriteRenderer& CHud::Renderer()
 	return gHUD.hudRenderer.DefaultScale();
 }
 
-#if FEATURE_MOVE_MODE
 DECLARE_MESSAGE( m_MoveMode, MoveMode )
 
 int CHudMoveMode::Init()
@@ -1680,7 +1675,6 @@ int CHudMoveMode::MsgFunc_MoveMode(const char *pszName, int iSize, void *pbuf)
 	m_movementState = READ_SHORT();
 	return 1;
 }
-#endif
 
 bool CHud::ShouldUseConsoleFont()
 {

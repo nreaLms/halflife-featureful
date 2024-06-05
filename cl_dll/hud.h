@@ -680,7 +680,6 @@ private:
 //
 //-----------------------------------------------------
 //
-#if FEATURE_MOVE_MODE
 class CHudMoveMode: public CHudBase
 {
 	enum
@@ -709,7 +708,6 @@ private:
 	wrect_t *m_prcJump;
 	short m_movementState;
 };
-#endif
 
 struct FogProperties
 {
@@ -963,9 +961,7 @@ public:
 	CHudBattery		m_Battery;
 	CHudTrain		m_Train;
 	CHudFlashlight	m_Flash;
-#if FEATURE_MOVE_MODE
 	CHudMoveMode	m_MoveMode;
-#endif
 	CHudMessage		m_Message;
 	CHudStatusBar   m_StatusBar;
 	CHudDeathNotice m_DeathNotice;

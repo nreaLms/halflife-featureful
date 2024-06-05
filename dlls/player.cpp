@@ -225,9 +225,7 @@ int gmsgParticleShooter = 0;
 int gmsgNightvision = 0;
 #endif
 
-#if FEATURE_MOVE_MODE
 int gmsgMovementState = 0;
-#endif
 
 int gmsgUseSound = 0;
 
@@ -301,9 +299,7 @@ void LinkUserMessages( void )
 #if FEATURE_NIGHTVISION
 	gmsgNightvision = REG_USER_MSG( "Nightvision", 1 );
 #endif
-#if FEATURE_MOVE_MODE
 	gmsgMovementState = REG_USER_MSG( "MoveMode", 2 );
-#endif
 	gmsgUseSound = REG_USER_MSG( "UseSound", 1 );
 
 	gmsgCaption = REG_USER_MSG("Caption", -1);
@@ -2355,7 +2351,6 @@ enum
 
 void CBasePlayer::SetMovementMode()
 {
-#if FEATURE_MOVE_MODE
 	if (m_fInitHUD)
 		return;
 	short currentMovementState;
@@ -2395,7 +2390,6 @@ void CBasePlayer::SetMovementMode()
 			MESSAGE_END();
 		}
 	}
-#endif
 }
 
 void CBasePlayer::PreThink( void )
@@ -3750,9 +3744,7 @@ void CBasePlayer::Precache( void )
 		m_fInitHUD = TRUE;
 
 	pev->fov = m_iFOV;	// Vit_amiN: restore the FOV on level change or map/saved game load
-#if FEATURE_MOVE_MODE
 	m_movementState = MovementStand;
-#endif
 }
 
 int CBasePlayer::Save( CSave &save )
