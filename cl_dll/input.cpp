@@ -651,27 +651,26 @@ void IN_Impulse( void )
 void IN_ScoreDown( void )
 {
 	KeyDown( &in_score );
-#if USE_VGUI && !USE_NOVGUI_SCOREBOARD
-	if ( gViewPort )
+#if USE_VGUI
+	if ( gHUD.UseVguiScoreBoard() && gViewPort )
 	{
 		gViewPort->ShowScoreBoard();
+		return;
 	}
-#else
-	gHUD.m_Scoreboard.UserCmd_ShowScores();
 #endif
+	gHUD.m_Scoreboard.UserCmd_ShowScores();
 }
 
 void IN_ScoreUp( void )
 {
 	KeyUp( &in_score );
-#if USE_VGUI && !USE_NOVGUI_SCOREBOARD
+#if USE_VGUI
 	if ( gViewPort )
 	{
 		gViewPort->HideScoreBoard();
 	}
-#else
-	gHUD.m_Scoreboard.UserCmd_HideScores();
 #endif
+	gHUD.m_Scoreboard.UserCmd_HideScores();
 }
 
 void IN_MLookUp( void )

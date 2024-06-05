@@ -494,28 +494,25 @@ int __MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf )
 	return 0;
 }
 
-#if USE_VGUI && !USE_NOVGUI_SCOREBOARD
 int __MsgFunc_ScoreInfo(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_ScoreInfo( pszName, iSize, pbuf );
-	return 0;
+	return gHUD.m_Scoreboard.MsgFunc_ScoreInfo( pszName, iSize, pbuf );
 }
 
 int __MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf)
 {
-	if (gViewPort)
-		return gViewPort->MsgFunc_TeamScore( pszName, iSize, pbuf );
-	return 0;
+	return gHUD.m_Scoreboard.MsgFunc_TeamScore( pszName, iSize, pbuf );
 }
 
 int __MsgFunc_TeamInfo(const char *pszName, int iSize, void *pbuf)
 {
+	int result = gHUD.m_Scoreboard.MsgFunc_TeamInfo( pszName, iSize, pbuf );
+#if USE_VGUI
 	if (gViewPort)
-		return gViewPort->MsgFunc_TeamInfo( pszName, iSize, pbuf );
-	return 0;
-}
+		gViewPort->m_pScoreBoard->Update();
 #endif
+	return result;
+}
 
 int __MsgFunc_Spectator( const char *pszName, int iSize, void *pbuf )
 {
@@ -587,11 +584,9 @@ void CHud::Init( void )
 	HOOK_MESSAGE( ServerName );
 	HOOK_MESSAGE( MOTD );
 
-#if USE_VGUI && !USE_NOVGUI_SCOREBOARD
 	HOOK_MESSAGE( ScoreInfo );
 	HOOK_MESSAGE( TeamScore );
 	HOOK_MESSAGE( TeamInfo );
-#endif
 
 	HOOK_MESSAGE( Spectator );
 	HOOK_MESSAGE( AllowSpec );
@@ -674,6 +669,7 @@ void CHud::Init( void )
 	CreateBooleanCvarConditionally(m_pCvarCrosshairColorable, "crosshair_colorable", clientFeatures.crosshair_colorable);
 
 	m_pCvarMOTDVGUI = CVAR_CREATE("cl_motd_vgui", "1", FCVAR_ARCHIVE);
+	m_pCvarScoreboardVGUI = CVAR_CREATE("cl_scoreboard_vgui", "1", FCVAR_ARCHIVE);
 
 	m_pSpriteList = NULL;
 
@@ -714,9 +710,7 @@ void CHud::Init( void )
 #endif
 
 	m_MOTD.Init();
-#if !USE_VGUI || USE_NOVGUI_SCOREBOARD
 	m_Scoreboard.Init();
-#endif
 
 	m_Menu.Init();
 
@@ -1186,9 +1180,7 @@ void CHud::VidInit( void )
 	GetClientVoiceMgr()->VidInit();
 #endif
 	m_MOTD.VidInit();
-#if !USE_VGUI || USE_NOVGUI_SCOREBOARD
 	m_Scoreboard.VidInit();
-#endif
 	m_Nightvision.VidInit();
 
 	m_Caption.VidInit();
@@ -1390,13 +1382,7 @@ void CHud::GetAllPlayersInfo()
 
 		if( g_PlayerInfoList[i].thisplayer )
 		{
-#if USE_VGUI
-			if(gViewPort)
-				gViewPort->m_pScoreBoard->m_iPlayerNum = i;
-#endif
-#if !USE_VGUI || USE_NOVGUI_SCOREBOARD
 			m_Scoreboard.m_iPlayerNum = i;  // !!!HACK: this should be initialized elsewhere... maybe gotten from the engine
-#endif
 		}
 	}
 }
@@ -1703,6 +1689,15 @@ bool CHud::UseVguiMOTD()
 {
 #if USE_VGUI
 	return m_pCvarMOTDVGUI && m_pCvarMOTDVGUI->value;
+#else
+	return false;
+#endif
+}
+
+bool CHud::UseVguiScoreBoard()
+{
+#if USE_VGUI
+	return m_pCvarScoreboardVGUI && m_pCvarScoreboardVGUI->value;
 #else
 	return false;
 #endif

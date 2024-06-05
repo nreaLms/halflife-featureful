@@ -172,10 +172,7 @@ int CHudDeathNotice::MsgFunc_DeathMsg( const char *pszName, int iSize, void *pbu
 	strncat( killedwith, READ_STRING(), sizeof(killedwith) - strlen(killedwith) - 1 );
 	killedwith[sizeof(killedwith) - 1] = '\0';
 
-#if USE_VGUI
-	if (gViewPort)
-		gViewPort->DeathMsg( killer, victim );
-#endif
+	gHUD.m_Scoreboard.DeathMsg( killer, victim );
 
 	gHUD.m_Spectator.DeathMessage( victim );
 

@@ -332,7 +332,6 @@ protected:
 	int voiceIconHeight;
 };
 
-#if !USE_VGUI || USE_NOVGUI_SCOREBOARD
 class CHudScoreboard : public CHudBase
 {
 public:
@@ -349,6 +348,9 @@ public:
 	int MsgFunc_TeamScores( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_TeamNames( const char *pszName, int iSize, void *pbuf );
 	void DeathMsg( int killer, int victim );
+	void RebuildTeams();
+	void UpdateTeams();
+	int BestTeam();
 
 	int m_iNumTeams;
 
@@ -356,10 +358,7 @@ public:
 	int m_fLastKillTime;
 	int m_iPlayerNum;
 	int m_iShowscoresHeld;
-
-	void GetAllPlayersInfo( void );
 };
-#endif
 
 //
 //-----------------------------------------------------
@@ -863,6 +862,7 @@ public:
 	cvar_t	*m_pCvarHudBlue;
 
 	cvar_t	*m_pCvarMOTDVGUI;
+	cvar_t	*m_pCvarScoreboardVGUI;
 
 	int m_iFontHeight;
 	int DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -976,9 +976,7 @@ public:
 	CHudAmmoSecondary	m_AmmoSecondary;
 	CHudTextMessage m_TextMessage;
 	CHudStatusIcons m_StatusIcons;
-#if !USE_VGUI || USE_NOVGUI_SCOREBOARD
 	CHudScoreboard	m_Scoreboard;
-#endif
 	CHudMOTD	m_MOTD;
 	CHudNightvision m_Nightvision;
 	CHudCaption		m_Caption;
@@ -1046,6 +1044,7 @@ public:
 	bool CanDrawStatusIcons();
 	int TopRightInventoryCoordinate();
 	bool UseVguiMOTD();
+	bool UseVguiScoreBoard();
 };
 
 extern CHud gHUD;
