@@ -43,6 +43,9 @@ const char hudInventorySchema[] = R"(
           "position": {
             "type": "string",
             "pattern": "^topleft|status|bottom|topright|hide$"
+          },
+          "show_in_history": {
+            "type": "boolean"
           }
         }
       }
@@ -51,7 +54,7 @@ const char hudInventorySchema[] = R"(
 }
 )";
 
-InventoryItemHudSpec::InventoryItemHudSpec(): packedColor(0), alpha(0), position(INVENTORY_PLACE_DEFAULT), colorDefined(false)
+InventoryItemHudSpec::InventoryItemHudSpec(): packedColor(0), alpha(0), position(INVENTORY_PLACE_DEFAULT), colorDefined(false), showInHistory(true)
 {
 	itemName[0] = '\0';
 	spriteName[0] = '\0';
@@ -104,6 +107,7 @@ bool InventoryHudSpec::ReadFromFile(const char *fileName)
 					item.colorDefined = ParseColor(colorIt->value.GetString(), item.packedColor);
 			}
 			UpdatePropertyFromJson(item.alpha, value, "alpha");
+			UpdatePropertyFromJson(item.showInHistory, value, "show_in_history");
 			auto positionIt = value.FindMember("position");
 			if (positionIt != value.MemberEnd())
 			{

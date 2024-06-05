@@ -22,6 +22,7 @@ struct InventoryItemHudSpec
 	int alpha;
 	int position;
 	bool colorDefined;
+	bool showInHistory;
 };
 
 class InventoryHudSpec

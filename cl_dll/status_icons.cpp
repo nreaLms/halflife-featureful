@@ -333,7 +333,7 @@ int CHudStatusIcons::MsgFunc_Inventory(const char *pszName, int iSize, void *pbu
 	item.rc = gHUD.GetSpriteRect( spr_index );
 	m_iFlags |= HUD_ACTIVE;
 
-	if (countDiff >= 1)
+	if (countDiff >= 1 && (!itemSpec || itemSpec->showInHistory))
 		gHR.AddToHistory(HISTSLOT_ITEM, spriteName, countDiff, itemSpec ? itemSpec->packedColor : 0);
 
 	return 1;

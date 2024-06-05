@@ -12,6 +12,7 @@ bool ReadJsonDocumentWithSchema(rapidjson::Document& document, const char* pMemF
 bool UpdatePropertyFromJson(std::string& str, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(int& i, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(float& f, rapidjson::Value& jsonValue, const char* key);
+bool UpdatePropertyFromJson(bool& b, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(Color& color, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(FloatRange& floatRange, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(IntRange& intRange, rapidjson::Value& jsonValue, const char* key);
