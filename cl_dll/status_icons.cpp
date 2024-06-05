@@ -100,6 +100,10 @@ int CHudStatusIcons::Draw( float flTime )
 	}
 
 	int yTopRight = gHUD.TopRightInventoryCoordinate();
+	if (yTopRight == 0)
+	{
+		yTopRight = yIcons;
+	}
 	int xCenterBottom = (renderer.PerceviedScreenWidth() - bottomWidth - ((bottomItemCount-1)*bottomIconGap)) / 2;
 
 	int itemsDrawnAsStatusIcons = 0;

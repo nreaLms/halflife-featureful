@@ -110,6 +110,7 @@ int CHudFlashlight::Draw( float flTime )
 			gMobileEngfuncs->pfnTouchHideButtons( "flashlight", !show );
 		}
 	}
+	bottomCoordinate = 0;
 	if( !show )
 		return 1;
 

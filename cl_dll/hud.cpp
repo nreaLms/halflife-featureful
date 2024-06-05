@@ -1624,6 +1624,7 @@ int CHudMoveMode::VidInit()
 
 int CHudMoveMode::Draw(float flTime)
 {
+	bottomCoordinate = 0;
 	if (!gHUD.MoveModeEnabled())
 		return 1;
 
@@ -1690,14 +1691,12 @@ bool CHud::CanDrawStatusIcons()
 
 int CHud::TopRightInventoryCoordinate()
 {
+	int y = m_Flash.bottomCoordinate;
 	if (MoveModeEnabled())
 	{
-		return m_MoveMode.bottomCoordinate;
+		y = Q_max(y, m_MoveMode.bottomCoordinate);
 	}
-	else
-	{
-		return m_Flash.bottomCoordinate;
-	}
+	return y;
 }
 
 bool CHud::UseVguiMOTD()
