@@ -250,7 +250,7 @@ public:
 	virtual int TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamageType );
 	void SetHealth(int health, bool allowOverheal = false);
 	void SetMaxHealth(int maxHealth, bool clampValue = true);
-	virtual int TakeArmor(CBaseEntity *pCharger, float flArmor);
+	virtual int TakeArmor(CBaseEntity *pCharger, float flArmor, int flags = 0);
 	int MaxArmor();
 	void SetMaxArmor(int maxArmor, bool clampValue = true);
 	void SetArmor(int armor, bool allowOvercharge = false);

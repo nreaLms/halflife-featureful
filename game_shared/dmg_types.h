@@ -48,4 +48,7 @@
 #define HEAL_GENERIC 0
 #define HEAL_CHARGE (1<<0) // Charge my portable medkit
 
+#define GIVEARMOR_GENERIC 0
+#define GIVEARMOR_ALLOW_OVERFLOW (1<<1)
+
 #endif

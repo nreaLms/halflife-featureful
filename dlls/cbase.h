@@ -211,6 +211,7 @@ public:
 	virtual void Spawn( void ) { return; }
 	virtual void Precache( void ) { return; }
 	virtual bool IsEnabledInMod() { return true; }
+	virtual void PreEntvarsKeyvalue( KeyValueData* pkvd ) { pkvd->fHandled = FALSE; }
 	virtual void KeyValue( KeyValueData* pkvd );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -232,7 +233,7 @@ public:
 	void ApplyTraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	virtual int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	virtual int TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType );
-	virtual int TakeArmor( CBaseEntity* pCharger, float flArmor ) { return 0; }
+	virtual int TakeArmor( CBaseEntity* pCharger, float flArmor, int flags = 0 ) { return 0; }
 	virtual void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	virtual int BloodColor( void ) { return DONT_BLEED; }
 	virtual void TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );

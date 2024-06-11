@@ -238,15 +238,19 @@ void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd )
 	if( !pkvd || !pentKeyvalue )
 		return;
 
+	// Get the actualy entity object
+	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE( pentKeyvalue );
+	if (pEntity && pkvd->szClassName)
+		pEntity->PreEntvarsKeyvalue(pkvd);
+	if (pkvd->fHandled)
+		return;
+
 	EntvarsKeyvalue( VARS( pentKeyvalue ), pkvd );
 
 	// If the key was an entity variable, or there's no class set yet, don't look for the object, it may
 	// not exist yet.
 	if ( pkvd->fHandled || pkvd->szClassName == NULL )
 		return;
-
-	// Get the actualy entity object
-	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE( pentKeyvalue );
 
 	if( !pEntity )
 		return;

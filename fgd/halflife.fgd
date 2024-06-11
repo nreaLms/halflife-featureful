@@ -2911,7 +2911,7 @@
 		1: "Yes"
 	]
 	max_health(integer): "Set max health"
-	armorvalue(integer) : "Set armor"
+	armorvalue(integer) : "Set armor" : : "Prefix the value with = to set the armor amount (this allows to reset the armor to 0). The '+' prefix means to add armor. The '-' prefix means to substruct armor. If no prefix is given, the specified amount if it's not 0."
 	allow_overcharge(choices) : "Allow armor OverCharge" : : "Allow armor overcharge if new armor is higher than the current max armor. Don't clamp armor value to the max armor if the new max armor is lower than the current armor." =
 	[
 		0: "No"

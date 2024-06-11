@@ -484,12 +484,20 @@ void CBasePlayer::SetMaxHealth(int maxHealth, bool clampValue)
 	}
 }
 
-int CBasePlayer::TakeArmor(CBaseEntity *pCharger, float flArmor)
+int CBasePlayer::TakeArmor(CBaseEntity *pCharger, float flArmor, int flags)
 {
-	if (pev->armorvalue >= MaxArmor())
+	if (!flArmor)
+		return false;
+	const int maxArmor = MaxArmor();
+	const bool allowOvercharge = FBitSet(flags, GIVEARMOR_ALLOW_OVERFLOW);
+
+	if (flArmor > 0 && pev->armorvalue >= maxArmor && !allowOvercharge)
 		return false;
 	pev->armorvalue += flArmor;
-	pev->armorvalue = Q_min( pev->armorvalue, MaxArmor() );
+	if (flArmor > 0 && !allowOvercharge)
+	{
+		pev->armorvalue = Q_min( pev->armorvalue, maxArmor );
+	}
 	if (pev->armorvalue < 0)
 		pev->armorvalue = 0;
 	return true;
@@ -521,6 +529,8 @@ void CBasePlayer::SetArmor(int armor, bool allowOvercharge)
 	{
 		pev->armorvalue = maxArmor;
 	}
+	if (pev->armorvalue < 0)
+		pev->armorvalue = 0;
 }
 
 float CBasePlayer::ArmorStrength()
