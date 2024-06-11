@@ -5163,6 +5163,7 @@ void CTriggerChangeClass::Affect(CBaseEntity *pEntity, USE_TYPE useType)
 #define SF_TRIGGER_HURT_REMOTE_INSTANT_KILL 1
 #define SF_TRIGGER_HURT_REMOTE_CONSTANT 2
 #define SF_TRIGGER_HURT_REMOTE_STARTON 4
+#define SF_TRIGGER_HURT_REMOTE_DO_ARMOR_DAMAGE 8
 
 #define SF_TRIGGER_HURT_REMOTE_IGNORE_ARMOR 256
 #define SF_TRIGGER_HURT_REMOTE_NO_PUNCH 512
@@ -5244,6 +5245,11 @@ void CTriggerHurtRemote::KeyValue(KeyValueData *pkvd)
 		pev->dmg_save = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "armordmg"))
+	{
+		pev->armorvalue = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue( pkvd );
 }
@@ -5322,6 +5328,13 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 		return;
 
 	CBaseEntity* pActivator = m_hActivator;
+
+	if (pev->armorvalue != 0 && FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_DO_ARMOR_DAMAGE))
+	{
+		CBaseEntity* charger = pActivator != 0 ? pActivator : this;
+		pTarget->TakeArmor(charger, -pev->armorvalue);
+	}
+
 	if (pev->dmg >= 0)
 	{
 		float fldmg = pev->dmg;

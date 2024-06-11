@@ -8008,6 +8008,7 @@
 		1 : "Instant Kill" : 0
 		2 : "Constant" : 0
 		4 : "Start On" : 0
+		8 : "Do Armor Damage" : 0
 		256:"Ignore Armor" : 0
 		512:"No Camera Punch" : 0
 	]
@@ -8016,6 +8017,7 @@
 	dmg(integer) : "Damage" : 10 : "Damage to deal. If 'Constant' flag is selected, this is a damage to deal every 'Delay' seconds. Can be negative to provide healing instead of dealing damage."
 	delay(string) : "Delay (Only when Constant)" : "1"
 	min_health(string) : "Minimum health threshold" : : "Don't decrease the toucher health beyond this value"
+	armordmg(string) : "Armor damage" : : "Deal damage to armor. Works only if 'Do Armor' flag is selected. When target is out of armor, the damage is not dealt. Can be negative to give an armor instead of draining it."
 ]
 
 @PointClass base(Targetname) = trigger_killmonster : "Trigger Kill Monster"
