@@ -1,4 +1,4 @@
-﻿/***
+/***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
@@ -50,7 +50,10 @@ int CHudStatusIcons::VidInit( void )
 void CHudStatusIcons::Reset( void )
 {
 	memset( m_IconList, 0, sizeof m_IconList );
-	memset( m_InventoryList, 0, sizeof m_InventoryList );
+	for (auto& item : m_InventoryList)
+	{
+		item = inventory_t();
+	}
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
@@ -250,16 +253,18 @@ int CHudStatusIcons::MsgFunc_Inventory(const char *pszName, int iSize, void *pbu
 
 	int count = READ_SHORT();
 	const char* itemName = READ_STRING();
+	if (!*itemName)
+		return 1; // don't allow empty names
 
 	int freeSlot = -1;
 	int i;
 	for (i=0; i<ARRAYSIZE(m_InventoryList); ++i)
 	{
-		if (freeSlot < 0 && !*m_InventoryList[i].itemName)
+		if (freeSlot < 0 && m_InventoryList[i].itemName.empty())
 		{
 			freeSlot = i;
 		}
-		if (strcmp(itemName, m_InventoryList[i].itemName) == 0)
+		if (m_InventoryList[i].itemName == itemName)
 		{
 			break;
 		}
@@ -280,17 +285,11 @@ int CHudStatusIcons::MsgFunc_Inventory(const char *pszName, int iSize, void *pbu
 
 	const InventoryItemHudSpec* itemSpec = gHUD.inventorySpec.GetInventoryItemSpec(itemName);
 
-	const char* spriteName = NULL;
+	const char* spriteName = itemName;
 	if (itemSpec)
 	{
 		if (*itemSpec->spriteName)
 			spriteName = itemSpec->spriteName;
-		else
-			spriteName = itemSpec->itemName;
-	}
-	else
-	{
-		spriteName = itemName;
 	}
 
 	int spr_index = gHUD.GetSpriteIndex(spriteName);
@@ -303,12 +302,12 @@ int CHudStatusIcons::MsgFunc_Inventory(const char *pszName, int iSize, void *pbu
 	inventory_t& item = m_InventoryList[i];
 	const int countDiff = count - item.count;
 
-	strncpyEnsureTermination(item.itemName, itemName);
+	item.itemName = itemName;
 	item.count = count;
 
 	if (item.count == 0)
 	{
-		memset(&item, 0, sizeof(item));
+		item = inventory_t();
 		return 1;
 	}
 

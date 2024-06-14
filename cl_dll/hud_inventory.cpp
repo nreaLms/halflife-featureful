@@ -56,7 +56,6 @@ const char hudInventorySchema[] = R"(
 
 InventoryItemHudSpec::InventoryItemHudSpec(): packedColor(0), alpha(0), position(INVENTORY_PLACE_DEFAULT), colorDefined(false), showInHistory(true)
 {
-	itemName[0] = '\0';
 	spriteName[0] = '\0';
 }
 
@@ -70,6 +69,8 @@ bool InventoryHudSpec::ReadFromFile(const char *fileName)
 	char *pMemFile = (char*)gEngfuncs.COM_LoadFile( fileName, 5, &fileSize );
 	if (!pMemFile)
 		return false;
+
+	gEngfuncs.Con_DPrintf("Parsing %s\n", fileName);
 
 	Document document;
 	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, hudInventorySchema);
@@ -86,14 +87,14 @@ bool InventoryHudSpec::ReadFromFile(const char *fileName)
 		for (auto itemIt = items.MemberBegin(); itemIt != items.MemberEnd(); ++itemIt)
 		{
 			InventoryItemHudSpec item;
-			strncpyEnsureTermination(item.itemName, itemIt->name.GetString());
+			item.itemName = itemIt->name.GetString();
 			Value& value = itemIt->value;
 			auto spriteIt = value.FindMember("sprite");
 			if (spriteIt != value.MemberEnd())
 			{
 				if (spriteIt->value.IsNull())
 				{
-					strncpyEnsureTermination(item.spriteName, item.itemName);
+					strncpyEnsureTermination(item.spriteName, item.itemName.c_str());
 				}
 				else
 				{
@@ -134,7 +135,7 @@ bool InventoryHudSpec::ReadFromFile(const char *fileName)
 		}
 
 		std::sort(inventory.begin(), inventory.end(), [](const InventoryItemHudSpec& a, const InventoryItemHudSpec& b) {
-			return strcmp(a.itemName, b.itemName) < 0;
+			return strcmp(a.itemName.c_str(), b.itemName.c_str()) < 0;
 		});
 	}
 
@@ -148,11 +149,11 @@ struct InventoryItemCompare
 {
 	bool operator ()(const InventoryItemHudSpec& lhs, const char* rhs)
 	{
-		return strcmp(lhs.itemName, rhs) < 0;
+		return strcmp(lhs.itemName.c_str(), rhs) < 0;
 	}
 	bool operator ()(const char* lhs, const InventoryItemHudSpec& rhs)
 	{
-		return strcmp(lhs, rhs.itemName) < 0;
+		return strcmp(lhs, rhs.itemName.c_str()) < 0;
 	}
 };
 

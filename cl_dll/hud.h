@@ -649,7 +649,8 @@ private:
 
 struct inventory_t
 {
-	char itemName[MAX_SPRITE_NAME_LENGTH];
+	inventory_t(): itemName(), spr(0), count(0) {}
+	std::string itemName;
 	HSPRITE spr;
 	wrect_t rc;
 	unsigned char r, g, b, a;

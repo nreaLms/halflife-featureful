@@ -5,6 +5,7 @@
 #include "cl_dll.h"
 #include "cdll_int.h"
 
+#include <string>
 #include <vector>
 
 #define INVENTORY_PLACE_HIDE -1
@@ -16,7 +17,7 @@
 struct InventoryItemHudSpec
 {
 	InventoryItemHudSpec();
-	char itemName[24];
+	std::string itemName;
 	char spriteName[24];
 	int packedColor;
 	int alpha;
