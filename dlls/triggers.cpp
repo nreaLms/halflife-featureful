@@ -3048,6 +3048,12 @@ void CTriggerChangeTarget::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	}
 }
 
+enum
+{
+	CHANGEVALUE_LITERAL = 0,
+	CHANGEVALUE_CALCRATIO = 1
+};
+
 class CTriggerChangeValue : public CBaseDelay
 {
 public:
@@ -3061,7 +3067,7 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 private:
-	int		m_iszNewValue;
+	string_t	m_iszNewValue;
 };
 LINK_ENTITY_TO_CLASS( trigger_changevalue, CTriggerChangeValue )
 
@@ -3084,6 +3090,11 @@ void CTriggerChangeValue::KeyValue( KeyValueData *pkvd )
 		pev->netname = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "value_type"))
+	{
+		pev->impulse = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseDelay::KeyValue( pkvd );
 }
@@ -3091,12 +3102,29 @@ void CTriggerChangeValue::KeyValue( KeyValueData *pkvd )
 void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	CBaseEntity *pTarget = NULL;
+	char buf[64];
+	const char* newValue = STRING(m_iszNewValue);
+
+	if (pev->impulse == CHANGEVALUE_CALCRATIO)
+	{
+		float result;
+		if (TryCalcLocus_Ratio(pActivator, STRING(m_iszNewValue), result))
+		{
+			snprintf(buf, sizeof(buf), "%g", result);
+			newValue = buf;
+		}
+		else
+		{
+			return;
+		}
+	}
 
 	while ((pTarget = UTIL_FindEntityByTargetname( pTarget, STRING( pev->target ), pActivator )) != NULL)
 	{
 		KeyValueData mypkvd;
+		mypkvd.szClassName = STRING(pTarget->pev->classname);
 		mypkvd.szKeyName = STRING(pev->netname);
-		mypkvd.szValue = STRING(m_iszNewValue);
+		mypkvd.szValue = newValue;
 		mypkvd.fHandled = FALSE;
 
 		DispatchKeyValue(pTarget->edict(), &mypkvd);

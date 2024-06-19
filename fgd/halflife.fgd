@@ -7629,8 +7629,13 @@
 [
 	target(target_destination) : "Entity to affect [LE]"
 	m_iszValueName(string) : "Keyname to change"
-	m_iszNewValue(string) : "New value to set"
+	m_iszNewValue(string) : "New value to set" : : "Depending on the Value type it's either a literal value to set or the name of the entity to Calc Ratio from and use it as a new value"
 	message(target_destination) : "Trigger after operation" : : "Trigger entities after the value was set. This can call another trigger_changevalue without any delay so it's useful for chained operations."
+	value_type(choices) : "Value type" =
+	[
+		0 : "Literal"
+		1 : "Name for Calc Ratio"
+	]
 ]
 
 @PointClass base(Targetname) = trigger_check_state : "Check entity's state"
