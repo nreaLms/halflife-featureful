@@ -8013,7 +8013,7 @@
 		512:"No Camera Punch" : 0
 	]
 	target(string) : "Target [LE]"
-	targetclass(string) : "Target Class" : : "If specified, all entities with the given class will be affected. This is independent from Target, which means the entity might cause damage twice to the same entity if Target is class of Target Class."
+	targetclass(string) : "Target Classname" : : "If specified, all entities with the given classname will be affected. This is independent from Target, which means the entity might cause damage twice to the same entity if Target is class of Target Class."
 	dmg(integer) : "Damage" : 10 : "Damage to deal. If 'Constant' flag is selected, this is a damage to deal every 'Delay' seconds. Can be negative to provide healing instead of dealing damage."
 	delay(string) : "Delay (Only when Constant)" : "1"
 	min_health(string) : "Minimum health threshold" : : "Don't decrease the toucher health beyond this value"

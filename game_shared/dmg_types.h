@@ -35,11 +35,12 @@
 
 // additional flags
 // TODO: make into another set of flags?
-#define DMG_NONLETHAL		(1 << 24) // this damage shouldn't kill player
+#define DMG_NONLETHAL		(1 << 24) // this damage shouldn't kill player or monster
 #define DMG_TIMEDNONLETHAL	(1 << 25) // timed damage, e.g. poison, shouldn't kill player completely
 #define DMG_DONTBLEED		(1 << 26) // used in TraceAttack. Force not to bleed.
-#define DMG_IGNORE_ARMOR	(1 << 27)
-#define DMG_NO_PUNCH	(1 << 28)
+#define DMG_IGNORE_ARMOR	(1 << 27) // ignore player's armor, deal damage to health only
+#define DMG_NO_PUNCH	(1 << 28) // don't make a smalle punch on player's camera
+#define DMG_NO_PLAYER_PUSH (1 << 29) // don't push player
 
 // Modifiers to time-based damage, up to 8
 #define DMG_TIMED_MOD_NONLETHAL ( 1 << 0 )

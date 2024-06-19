@@ -35,7 +35,7 @@ typedef enum
 	FB_TA_NO = 0,
 	FB_TA_BREAKABLE = 1,
 	FB_TA_ACTIVATOR_OR_ATTACKER = 2,
-} SCRIPT_TARGET_ACTIVATOR;
+} BREAKABLE_TARGET_ACTIVATOR;
 
 // =================== FUNC_Breakable ==============================================
 
@@ -643,9 +643,16 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	pev->health -= flDamage;
 	if( pev->health <= 0 )
 	{
-		Killed( pevInflictor, pevAttacker, GIB_NORMAL );
-		DieToActivator(CBaseEntity::Instance(pevAttacker));
-		return 0;
+		if (FBitSet(bitsDamageType, DMG_NONLETHAL))
+		{
+			pev->health = 1;
+		}
+		else
+		{
+			Killed( pevInflictor, pevAttacker, GIB_NORMAL );
+			DieToActivator(CBaseEntity::Instance(pevAttacker));
+			return 0;
+		}
 	}
 
 	// Make a shard noise each time func breakable is hit.

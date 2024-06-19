@@ -1096,17 +1096,17 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		{
 			return 0;
 		}
-	}
 
-	// if this is a player, move him around!
-	if( ( !FNullEnt( pevInflictor ) ) && ( pev->movetype == MOVETYPE_WALK ) && ( !pevAttacker || pevAttacker->solid != SOLID_TRIGGER ) )
-	{
-		Vector velocityAdd = vecDir * -DamageForce( flDamage );
-		if (!AllowGrenadeJump())
+		// if this is a player, move him around!
+		if( ( !FNullEnt( pevInflictor ) ) && ( pev->movetype == MOVETYPE_WALK ) && ( !pevAttacker || pevAttacker->solid != SOLID_TRIGGER ) && !FBitSet(bitsDamageType, DMG_NO_PLAYER_PUSH) )
 		{
-			velocityAdd.z = 0;
+			Vector velocityAdd = vecDir * -DamageForce( flDamage );
+			if (!AllowGrenadeJump())
+			{
+				velocityAdd.z = 0;
+			}
+			pev->velocity = pev->velocity + velocityAdd;
 		}
-		pev->velocity = pev->velocity + velocityAdd;
 	}
 
 	AddScoreForDamage(pevAttacker, this, flTake);
@@ -1130,27 +1130,26 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		return 0;
 	}
 
-	if ( pev->health <= 1 && FBitSet(bitsDamageType, DMG_NONLETHAL) && IsPlayer() ) {
-		pev->health = 1;
-		return 1;
-	}
-
 	if( pev->health <= 0 )
 	{
-		if( bitsDamageType & DMG_ALWAYSGIB )
+		if (FBitSet(bitsDamageType, DMG_NONLETHAL))
 		{
-			Killed( pevInflictor, pevAttacker, GIB_ALWAYS );
-		}
-		else if( bitsDamageType & DMG_NEVERGIB )
-		{
-			Killed( pevInflictor, pevAttacker, GIB_NEVER );
+			pev->health = 1;
 		}
 		else
 		{
-			Killed( pevInflictor, pevAttacker, GIB_NORMAL );
+			int gibType = GIB_NORMAL;
+			if( bitsDamageType & DMG_ALWAYSGIB )
+			{
+				gibType = GIB_ALWAYS;
+			}
+			else if( bitsDamageType & DMG_NEVERGIB )
+			{
+				gibType = GIB_NEVER;
+			}
+			Killed( pevInflictor, pevAttacker, gibType );
+			return 0;
 		}
-
-		return 0;
 	}
 
 	// react to the damage (get mad)

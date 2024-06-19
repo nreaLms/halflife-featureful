@@ -1030,6 +1030,7 @@ public:
 	void HurtNonMovingMonsters( void );
 	void EXPORT HurtNonMovingMonstersThink( void );
 	bool CanHurt( CBaseEntity* pOther );
+	void DoDamage( CBaseEntity* pTarget, float fldmg );
 
 	int DamageType() const {
 		int damageType = m_bitsDamageInflict;
@@ -1472,10 +1473,7 @@ void CTriggerHurt::HurtNonMovingMonsters()
 		CBaseMonster* pMonster = pList[i]->MyMonsterPointer();
 		if (pMonster && CanHurt(pMonster) && !pMonster->IsMoving()) {
 			const float flDmg = FBitSet(pev->spawnflags, SF_TRIGGER_HURT_FULL_DAMAGE_EVERY_HALF_SECOND) ? pev->dmg : pev->dmg * 0.5f;
-			if (flDmg < 0)
-				pMonster->TakeHealth( this, -flDmg, m_bitsDamageInflict );
-			else
-				pMonster->TakeDamage( pev, pev, flDmg, DamageType() );
+			DoDamage(pMonster, flDmg);
 		}
 	}
 }
@@ -1540,6 +1538,33 @@ bool CTriggerHurt::CanHurt(CBaseEntity *pOther)
 		return false;
 	}
 	return true;
+}
+
+void CTriggerHurt::DoDamage(CBaseEntity *pTarget, float fldmg)
+{
+	if( fldmg < 0 )
+	{
+		if( !( g_pGameRules->IsMultiplayer() && pTarget->IsPlayer() && pTarget->pev->deadflag ))
+			pTarget->TakeHealth( this, -fldmg, m_bitsDamageInflict );
+	}
+	else
+	{
+		int damageType = DamageType();
+
+		const float healthBeforeDmg = pTarget->pev->health;
+		const float minHealthThreshold = pev->dmg_save;
+
+		if (minHealthThreshold > 0) {
+			damageType |= DMG_NONLETHAL;
+		}
+
+		pTarget->TakeDamage( pev, pev, fldmg, damageType );
+
+		if (minHealthThreshold > 0 && pTarget->pev->health < minHealthThreshold)
+		{
+			pTarget->pev->health = Q_min(minHealthThreshold, healthBeforeDmg);
+		}
+	}
 }
 
 // When touched, a hurt trigger does DMG points of damage each half-second
@@ -1640,20 +1665,7 @@ void CTriggerHurt::HurtTouch( CBaseEntity *pOther )
 		break;
 	}
 #endif
-	if( fldmg < 0 )
-	{
-		if( !( g_pGameRules->IsMultiplayer()
-		    && pOther->IsPlayer()
-		    && pOther->pev->deadflag ))
-			pOther->TakeHealth( this, -fldmg, m_bitsDamageInflict );
-	}
-	else
-	{
-		if (pev->dmg_save > 0) {
-			fldmg = Q_max(Q_min(pOther->pev->health - pev->dmg_save, fldmg), 0.0f);
-		}
-		pOther->TakeDamage( pev, pev, fldmg, DamageType() );
-	}
+	DoDamage(pOther, fldmg);
 
 	// Store pain time so we can get all of the other entities on this frame
 	pev->pain_finished = gpGlobals->time;
@@ -5203,7 +5215,7 @@ protected:
 			damageType |= DMG_IGNORE_ARMOR;
 		if (pev->spawnflags & SF_TRIGGER_HURT_REMOTE_NO_PUNCH)
 			damageType |= DMG_NO_PUNCH;
-		return damageType;
+		return damageType | DMG_NO_PLAYER_PUSH;
 	}
 	float Delay() const { return pev->frags ? pev->frags : 0.1; }
 	bool IsActive() const { return FBitSet(pev->spawnflags, SF_TRIGGER_HURT_REMOTE_STARTON); }
@@ -5338,8 +5350,13 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 	if (pev->dmg >= 0)
 	{
 		float fldmg = pev->dmg;
-		if (pev->dmg_save > 0) {
-			fldmg = Q_max(Q_min(pTarget->pev->health - pev->dmg_save, fldmg), 0.0f);
+		int damageType = DamageType();
+
+		const float healthBeforeDmg = pTarget->pev->health;
+		const float minHealthThreshold = pev->dmg_save;
+
+		if (minHealthThreshold > 0) {
+			damageType |= DMG_NONLETHAL;
 		}
 
 		entvars_t* pevAttacker = pActivator != 0 ? pActivator->pev : pev;
@@ -5348,16 +5365,21 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 			if (pTarget->IsPlayer())
 			{
 				CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pTarget);
-				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health + pTarget->pev->armorvalue * pPlayer->ArmorStrength(), DamageType());
+				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health + pTarget->pev->armorvalue * pPlayer->ArmorStrength(), damageType);
 			}
 			else
 			{
-				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health, DamageType() | DMG_ALWAYSGIB);
+				pTarget->TakeDamage(pTarget->pev, pevAttacker, pTarget->pev->health, damageType | DMG_ALWAYSGIB);
 			}
 		}
 		else
 		{
-			pTarget->TakeDamage(pTarget->pev, pevAttacker, fldmg, DamageType());
+			pTarget->TakeDamage(pTarget->pev, pevAttacker, fldmg, damageType);
+		}
+
+		if (minHealthThreshold > 0 && pTarget->pev->health < minHealthThreshold)
+		{
+			pTarget->pev->health = Q_min(minHealthThreshold, healthBeforeDmg);
 		}
 	}
 	else
