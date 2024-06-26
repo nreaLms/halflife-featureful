@@ -932,10 +932,12 @@ void CGamePlayerTeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 
 enum
 {
-	ARMOR_SETTING_DEFAULT = 0,
-	ARMOR_SETTING_SET,
-	ARMOR_SETTING_ADD,
-	ARMOR_SETTING_SUBSTRUCT,
+	VALUE_SETTING_DEFAULT = 0,
+	VALUE_SETTING_SET,
+	VALUE_SETTING_ADD,
+	VALUE_SETTING_SUBSTRUCT,
+	VALUE_SETTING_ATMAX,
+	VALUE_SETTING_ATLEAST
 };
 
 class CGamePlayerSettings : public CRulePointEntity
@@ -977,6 +979,8 @@ private:
 	BOOL m_allowOverheal;
 	BOOL m_allowOvercharge;
 	float m_armorStrength;
+
+	short m_healthSetting;
 	short m_armorSetting;
 };
 
@@ -990,32 +994,56 @@ TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
 	DEFINE_FIELD( CGamePlayerSettings, m_allowOverheal, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CGamePlayerSettings, m_allowOvercharge, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CGamePlayerSettings, m_armorStrength, FIELD_FLOAT ),
+	DEFINE_FIELD( CGamePlayerSettings, m_healthSetting, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_armorSetting, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CGamePlayerSettings, CRulePointEntity )
 
+static float ParseValueAndSetting(const char* value, short& setting)
+{
+	if (*value == '=')
+	{
+		setting = VALUE_SETTING_SET;
+		++value;
+	}
+	else if (*value == '+')
+	{
+		setting = VALUE_SETTING_ADD;
+		++value;
+	}
+	else if (*value == '-')
+	{
+		setting = VALUE_SETTING_SUBSTRUCT;
+		++value;
+	}
+	else if (*value == '<')
+	{
+		setting = VALUE_SETTING_ATMAX;
+		++value;
+	}
+	else if (*value == '>')
+	{
+		setting = VALUE_SETTING_ATLEAST;
+		++value;
+	}
+	else
+	{
+		setting = VALUE_SETTING_DEFAULT;
+	}
+	return atof(value);
+}
+
 void CGamePlayerSettings::PreEntvarsKeyvalue( KeyValueData* pkvd )
 {
-	if (FStrEq(pkvd->szKeyName, "armorvalue"))
+	if (FStrEq(pkvd->szKeyName, "health"))
 	{
-		const char* value = pkvd->szValue;
-		if (*value == '=')
-		{
-			m_armorSetting = ARMOR_SETTING_SET;
-			++value;
-		}
-		else if (*value == '+')
-		{
-			m_armorSetting = ARMOR_SETTING_ADD;
-			++value;
-		}
-		else if (*value == '-')
-		{
-			m_armorSetting = ARMOR_SETTING_SUBSTRUCT;
-			++value;
-		}
-		pev->armorvalue = atof(value);
+		pev->health = ParseValueAndSetting(pkvd->szValue, m_healthSetting);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "armorvalue"))
+	{
+		pev->armorvalue = ParseValueAndSetting(pkvd->szValue, m_armorSetting);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1085,29 +1113,65 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	{
 		player->SetMaxArmor(pev->armortype, !m_allowOvercharge);
 	}
-	if (pev->health > 0)
-	{
-		player->SetHealth((int)pev->health, m_allowOverheal);
+
+	switch (m_healthSetting) {
+	case VALUE_SETTING_SET:
+		player->SetHealth(pev->health, m_allowOverheal);
+		break;
+	case VALUE_SETTING_ADD:
+		player->TakeHealth(this, (int)pev->health, m_allowOverheal ? HEAL_ALLOW_OVERFLOW : HEAL_GENERIC);
+		break;
+	case VALUE_SETTING_SUBSTRUCT:
+		player->TakeDamage(pev, pev, pev->health, DMG_IGNORE_ARMOR|DMG_NO_PUNCH|DMG_NO_PLAYER_PUSH);
+		break;
+	case VALUE_SETTING_ATMAX:
+		if (player->pev->health > pev->health)
+		{
+			player->SetHealth((int)pev->health, m_allowOverheal);
+		}
+		break;
+	case VALUE_SETTING_ATLEAST:
+		if (player->pev->health < pev->health)
+		{
+			player->SetHealth((int)pev->health, m_allowOverheal);
+		}
+		break;
+	default:
+		if (pev->health > 0)
+		{
+			player->SetHealth((int)pev->health, m_allowOverheal);
+		}
+		break;
 	}
 
-	if (m_armorSetting == ARMOR_SETTING_SET)
-	{
+	switch (m_armorSetting) {
+	case VALUE_SETTING_SET:
 		player->SetArmor(pev->armorvalue, m_allowOvercharge);
-	}
-	else if (m_armorSetting == ARMOR_SETTING_ADD)
-	{
+		break;
+	case VALUE_SETTING_ADD:
 		player->TakeArmor(this, pev->armorvalue, m_allowOvercharge ? GIVEARMOR_ALLOW_OVERFLOW : GIVEARMOR_GENERIC);
-	}
-	else if (m_armorSetting == ARMOR_SETTING_SUBSTRUCT)
-	{
+		break;
+	case VALUE_SETTING_SUBSTRUCT:
 		player->TakeArmor(this, -pev->armorvalue, m_allowOvercharge ? GIVEARMOR_ALLOW_OVERFLOW : GIVEARMOR_GENERIC);
-	}
-	else
-	{
+		break;
+	case VALUE_SETTING_ATMAX:
+		if (player->pev->armorvalue > pev->armorvalue)
+		{
+			player->SetArmor(pev->armorvalue, m_allowOvercharge);
+		}
+		break;
+	case VALUE_SETTING_ATLEAST:
+		if (player->pev->armorvalue < pev->armorvalue)
+		{
+			player->SetArmor(pev->armorvalue, m_allowOvercharge);
+		}
+		break;
+	default:
 		if (pev->armorvalue > 0)
 		{
 			player->SetArmor(pev->armorvalue, m_allowOvercharge);
 		}
+		break;
 	}
 
 	if (m_armorStrength > 0)

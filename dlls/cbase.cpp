@@ -553,8 +553,10 @@ int CBaseEntity::TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamage
 	if( !pev->takedamage )
 		return 0;
 
+	const bool overhealAllowed = FBitSet(bitsDamageType, HEAL_ALLOW_OVERFLOW);
+
 	// heal
-	if( pev->health >= pev->max_health )
+	if( pev->health >= pev->max_health && !overhealAllowed )
 		return 0;
 
 	if (flHealth <= 0)
@@ -562,7 +564,7 @@ int CBaseEntity::TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamage
 
 	pev->health += flHealth;
 
-	if( pev->health > pev->max_health ) {
+	if( pev->health > pev->max_health && !overhealAllowed ) {
 		flHealth -= (pev->health - pev->max_health);
 		pev->health = pev->max_health;
 	}
