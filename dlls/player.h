@@ -410,6 +410,8 @@ public:
 	int GetCustomDecalFrames( void );
 
 	void SetMovementMode();
+	void RecruitFollowers();
+	void DisbandFollowers();
 
 	float m_flStartCharge;
 	float m_flAmmoStartCharge;

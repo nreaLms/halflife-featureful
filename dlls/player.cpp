@@ -235,6 +235,26 @@ int gmsgCaption = 0;
 
 int gmsgInventory = 0;
 
+static CFollowingMonster* CanRecruit(CBaseEntity* pFriend, CBasePlayer* player)
+{
+	if (!pFriend->IsFullyAlive())
+		return NULL;
+	CBaseMonster *pMonster = pFriend->MyMonsterPointer();
+	if( !pMonster || pMonster->m_MonsterState == MONSTERSTATE_SCRIPT || pMonster->m_MonsterState == MONSTERSTATE_PRONE )
+		return NULL;
+	const int rel = pMonster->IRelationship(player);
+	if ( rel >= R_DL || rel == R_FR ) {
+		return NULL;
+	}
+	CFollowingMonster* pFollowingMonster = pMonster->MyFollowingMonsterPointer();
+	if (pFollowingMonster)
+	{
+		if (pFollowingMonster->ShouldDeclineFollowing())
+			return NULL;
+	}
+	return pFollowingMonster;
+}
+
 void LinkUserMessages( void )
 {
 	// Already taken care of?
@@ -6079,6 +6099,86 @@ int CBasePlayer::InventoryItemIndex(string_t item)
 		}
 	}
 	return -1;
+}
+
+void CBasePlayer::RecruitFollowers()
+{
+	const float maxRange = 500;
+	Vector vecStart = pev->origin;
+	vecStart.z = pev->absmax.z;
+
+	bool saySentence = true;
+	for (int i=0; i<ARRAYSIZE(CTalkMonster::m_szFriends); ++i)
+	{
+		if (!CTalkMonster::m_szFriends[i].name[0])
+			break;
+		if (CTalkMonster::m_szFriends[i].category != TALK_FRIEND_SOLDIER)
+			continue;
+		CBaseEntity *pFriend = NULL;
+		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, CTalkMonster::m_szFriends[i].name ) ) )
+		{
+			CFollowingMonster *pMonster = CanRecruit(pFriend, this); pFriend->MyMonsterPointer();
+			if (!pMonster)
+				continue;
+			Vector vecCheck = pFriend->pev->origin;
+			vecCheck.z = pFriend->pev->absmax.z;
+			if ((vecCheck - vecStart).Length() <= maxRange)
+			{
+				TraceResult tr;
+				UTIL_TraceLine( vecStart, vecCheck, ignore_monsters, ENT( pev ), &tr );
+				if( tr.flFraction == 1.0 )
+				{
+					CFollowingMonster* talkMonster = pMonster->MyFollowingMonsterPointer();
+					if (talkMonster && talkMonster->CanFollow())
+					{
+						int result = talkMonster->DoFollowerUse(this, saySentence, USE_ON);
+						if (result == FOLLOWING_STARTED)
+						{
+							saySentence = false;
+						}
+						else if (result == FOLLOWING_NOTREADY)
+						{
+							talkMonster->DoFollowerUse(this, false, USE_ON, true);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void CBasePlayer::DisbandFollowers()
+{
+	bool saySentence = true;
+	for (int i=0; i<ARRAYSIZE(CTalkMonster::m_szFriends); ++i)
+	{
+		if (!CTalkMonster::m_szFriends[i].name[0])
+			break;
+		if (CTalkMonster::m_szFriends[i].category != TALK_FRIEND_SOLDIER)
+			continue;
+		CBaseEntity *pFriend = NULL;
+		const char* pszFriend = CTalkMonster::m_szFriends[i].name;
+		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
+		{
+			CBaseMonster *pMonster = pFriend->MyMonsterPointer();
+			if (pMonster)
+			{
+				CFollowingMonster* talkMonster = pMonster->MyFollowingMonsterPointer();
+				if (talkMonster && !talkMonster->ShouldDeclineFollowing())
+				{
+					int result = talkMonster->DoFollowerUse(this, saySentence, USE_OFF);
+					if (result == FOLLOWING_STOPPED)
+					{
+						saySentence = false;
+					}
+					else if (result == FOLLOWING_NOTREADY)
+					{
+						talkMonster->DoFollowerUse(this, false, USE_OFF, true);
+					}
+				}
+			}
+		}
+	}
 }
 
 //=========================================================

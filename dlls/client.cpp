@@ -622,6 +622,16 @@ void ClientCommand( edict_t *pEntity )
 		if( pPlayer->IsObserver() )
 			pPlayer->Observer_FindNextPlayer( atoi( CMD_ARGV( 1 ) ) ? true : false );
 	}
+	else if ( FStrEq( pcmd, "recruit_followers" ) )
+	{
+		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
+		pPlayer->RecruitFollowers();
+	}
+	else if ( FStrEq( pcmd, "disband_followers" ) )
+	{
+		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
+		pPlayer->DisbandFollowers();
+	}
 	else if( g_pGameRules->ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ) )
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
