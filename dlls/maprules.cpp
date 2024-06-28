@@ -950,6 +950,14 @@ public:
 		SUIT_LIGHT_NVG = 2,
 	};
 
+	enum
+	{
+		WEAPON_SETTING_REMOVE = -1,
+		WEAPON_SETTING_NOCHANGE = 0,
+		WEAPON_SETTING_GIVE = 1,
+		WEAPON_SETTING_GIVE_ALLOW_DUP = 2,
+	};
+
 	void PreEntvarsKeyvalue( KeyValueData* pkvd );
 	void KeyValue( KeyValueData *pkvd );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -974,8 +982,13 @@ private:
 		SuitNoLogon
 	};
 	int m_ammoCounts[MAX_AMMO_TYPES];
+	string_t m_weapons[MAX_WEAPONS];
+	short m_weaponSettings[MAX_WEAPONS];
+	short m_suit;
 	short m_suitLogon;
 	short m_suitLight;
+	short m_longjump;
+
 	BOOL m_allowOverheal;
 	BOOL m_allowOvercharge;
 	float m_armorStrength;
@@ -989,8 +1002,12 @@ LINK_ENTITY_TO_CLASS( game_player_settings, CGamePlayerSettings )
 TYPEDESCRIPTION	CGamePlayerSettings::m_SaveData[] =
 {
 	DEFINE_ARRAY( CGamePlayerSettings, m_ammoCounts, FIELD_INTEGER, MAX_AMMO_TYPES ),
+	DEFINE_ARRAY( CGamePlayerSettings, m_weapons, FIELD_STRING, MAX_WEAPONS ),
+	DEFINE_ARRAY( CGamePlayerSettings, m_weaponSettings, FIELD_SHORT, MAX_WEAPONS ),
+	DEFINE_FIELD( CGamePlayerSettings, m_suit, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_suitLogon, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_suitLight, FIELD_SHORT ),
+	DEFINE_FIELD( CGamePlayerSettings, m_longjump, FIELD_SHORT ),
 	DEFINE_FIELD( CGamePlayerSettings, m_allowOverheal, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CGamePlayerSettings, m_allowOvercharge, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CGamePlayerSettings, m_armorStrength, FIELD_FLOAT ),
@@ -1064,6 +1081,11 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 		m_ammoCounts[ammoType->id] = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "suit"))
+	{
+		m_suit = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else if (FStrEq(pkvd->szKeyName, "suitlogon"))
 	{
 		m_suitLogon = atoi(pkvd->szValue);
@@ -1072,6 +1094,11 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "suitlight"))
 	{
 		m_suitLight = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "longjump"))
+	{
+		m_longjump = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "max_armor"))
@@ -1092,6 +1119,25 @@ void CGamePlayerSettings::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "armor_strength"))
 	{
 		m_armorStrength = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (strncmp(pkvd->szKeyName, "weapon_", 7) == 0)
+	{
+		int i;
+		for (i=0; i<ARRAYSIZE(m_weapons); ++i)
+		{
+			if (FStringNull(m_weapons[i]))
+			{
+				m_weapons[i] = ALLOC_STRING(pkvd->szKeyName);
+				m_weaponSettings[i] = atoi(pkvd->szValue);
+				break;
+			}
+			if (FStrEq(pkvd->szKeyName, STRING(m_weapons[i])))
+			{
+				m_weaponSettings[i] = atoi(pkvd->szValue);
+				break;
+			}
+		}
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1179,7 +1225,12 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 		player->m_armorStrength = m_armorStrength;
 	}
 
-	if (pev->spawnflags & SF_PLAYER_SETTINGS_SUIT)
+	short giveSuit = m_suit;
+	if (!giveSuit && FBitSet(pev->spawnflags, SF_PLAYER_SETTINGS_SUIT))
+	{
+		giveSuit = 1;
+	}
+	if (giveSuit > 0)
 	{
 		if (!player->HasSuit())
 		{
@@ -1197,10 +1248,26 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 			player->GiveNamedItem("item_suit", suitSpawnFlags);
 		}
 	}
-
-	if ((pev->spawnflags & SF_PLAYER_SETTINGS_LONGJUMP) && player->HasSuit() && !player->m_fLongJump)
+	else if (giveSuit < 0)
 	{
-		player->GiveNamedItem("item_longjump", SF_ITEM_NOFALL);
+		player->m_iItemsBits &= ~(PLAYER_ITEM_SUIT);
+	}
+
+	short giveLongjump = m_longjump;
+	if (!giveLongjump && FBitSet(pev->spawnflags, SF_PLAYER_SETTINGS_LONGJUMP))
+	{
+		giveLongjump = 1;
+	}
+	if (giveLongjump > 0)
+	{
+		if (player->HasSuit() && !player->m_fLongJump)
+		{
+			player->GiveNamedItem("item_longjump", SF_ITEM_NOFALL);
+		}
+	}
+	else if (giveLongjump < 0)
+	{
+		player->SetLongjump(false);
 	}
 
 	switch (m_suitLight) {
@@ -1307,12 +1374,16 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 	for (i=1; i<MAX_AMMO_TYPES; ++i)
 	{
 		const AmmoType* ammoInfo = g_AmmoRegistry.GetByIndex(i);
-		if (ammoInfo && m_ammoCounts[i])
+		if (ammoInfo)
 		{
-			player->GiveAmmo(m_ammoCounts[i], ammoInfo->name);
+			if (m_ammoCounts[i] > 0)
+				player->GiveAmmo(m_ammoCounts[i], ammoInfo->name);
+			else if (m_ammoCounts[i] < 0)
+				player->RemoveAmmo(-m_ammoCounts[i], ammoInfo->name);
 		}
 	}
 
+	// This way of setting weapons is deprecated
 	for (i=0; i<ARRAYSIZE(weaponFlags); ++i)
 	{
 		if (pev->spawnflags & weaponFlags[i])
@@ -1325,8 +1396,40 @@ void CGamePlayerSettings::EquipPlayer(CBaseEntity *pPlayer)
 		}
 	}
 
-	if (!hadWeapons)
+	for (i=0; i<ARRAYSIZE(m_weapons); ++i)
+	{
+		if (FStringNull(m_weapons[i]))
+			break;
+		string_t weaponName = m_weapons[i];
+		const int weaponSetting = m_weaponSettings[i];
+		if (weaponSetting == WEAPON_SETTING_REMOVE)
+		{
+			CBasePlayerWeapon* pWeapon = player->GetWeaponByName(STRING(weaponName));
+			if (pWeapon)
+			{
+				pWeapon->DestroyItem();
+			}
+		}
+		else if (weaponSetting == WEAPON_SETTING_GIVE)
+		{
+			if (!player->HasNamedPlayerItem(STRING(weaponName)))
+			{
+				player->GiveNamedItem(STRING(weaponName));
+			}
+		}
+		else if (weaponSetting == WEAPON_SETTING_GIVE_ALLOW_DUP)
+		{
+			player->GiveNamedItem(STRING(weaponName));
+		}
+	}
+
+	if (!hadWeapons || player->m_pActiveItem == NULL)
 		player->SwitchToBestWeapon();
+
+	if (player->m_pActiveItem == NULL)
+	{
+		player->SendCurWeaponClear();
+	}
 
 	SUB_UseTargets(pPlayer);
 }

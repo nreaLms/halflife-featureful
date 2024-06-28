@@ -2853,28 +2853,28 @@
 	target(target_destination) : "Fire on equip" : : "Fire after (and if) player got equipped."
 	spawnflags(flags) =
 	[
-		1: "Give Medkit" : 0
-		2: "Give Suit" : 0
-		4: "Give Crowbar" : 0
-		8: "Give Glock": 0
-		16: "Give Python": 0
-		32: "Give MP5": 0
-		64: "Give Shotgun": 0
-		128: "Give Crossbow": 0
-		256: "Give RPG": 0
-		512: "Give Gauss": 0
-		1024: "Give Egon": 0
-		2048: "Give Hornetgun": 0
-		4096: "Give Pipe Wrench": 0
-		8192: "Give Knife": 0
-		16384: "Give Grapple": 0
-		32768: "Give Desert Eagle": 0
-		65536: "Give Sniper rifle": 0
-		131072: "Give M249": 0
-		262144: "Give Displacer": 0
-		524288: "Give Shock rifle": 0
-		1048576: "Give Spore launcher": 0
-		8388608: "Give Long Jump": 0
+		1: "[Deprecated] Give Medkit" : 0
+		2: "[Deprecated] Give Suit" : 0
+		4: "[Deprecated] Give Crowbar" : 0
+		8: "[Deprecated] Give Glock": 0
+		16: "[Deprecated] Give Python": 0
+		32: "[Deprecated] Give MP5": 0
+		64: "[Deprecated] Give Shotgun": 0
+		128: "[Deprecated] Give Crossbow": 0
+		256: "[Deprecated] Give RPG": 0
+		512: "[Deprecated] Give Gauss": 0
+		1024: "[Deprecated] Give Egon": 0
+		2048: "[Deprecated] Give Hornetgun": 0
+		4096: "[Deprecated] Give Pipe Wrench": 0
+		8192: "[Deprecated] Give Knife": 0
+		16384: "[Deprecated] Give Grapple": 0
+		32768: "[Deprecated] Give Desert Eagle": 0
+		65536: "[Deprecated] Give Sniper rifle": 0
+		131072: "[Deprecated] Give M249": 0
+		262144: "[Deprecated] Give Displacer": 0
+		524288: "[Deprecated] Give Shock rifle": 0
+		1048576: "[Deprecated] Give Spore launcher": 0
+		8388608: "[Deprecated] Give Long Jump": 0
 	]
 	_9mm(integer) : "9mm bullets"
 	_357(integer) : "357 bullets"
@@ -2891,6 +2891,12 @@
 	_762(integer) : "762 bullets"
 	Spores(integer) : "Spores"
 	Penguins(integer) : "Penguins"
+	suit(choices): "Suit" =
+	[
+		-1: "Remove suit"
+		0: "No change"
+		1: "Give suit"
+	]
 	suitlogon(choices) : "Suit logon" : 2 =
 	[
 		0: "Long logon"
@@ -2903,6 +2909,12 @@
 		0: "Default"
 		1: "Flashlight"
 		2: "NVG"
+	]
+	longjump(choices): "Longjump" =
+	[
+		-1: "Remove longjump"
+		0: "No change"
+		1: "Give longjump"
 	]
 	health(integer) : "Set health" : : "Prefix the value with '=' to set the health amount. The '+' prefix means to add health. The '-' prefix means to substruct health. The '<' prefix means to set health to the specified value or do nothing if it's already lower. The '>' prefix means to set the health to the specified value or do nothing if it's already higher. If no prefix is given, set the specified amount if it's a positive value."
 	allow_overheal(choices) : "Allow OverHeal" : : "Allow overheal if new health is higher than the current max health. Don't clamp health value to the max health if the new max health is lower than the current health." =
@@ -2919,6 +2931,121 @@
 	]
 	max_armor(integer): "Set max armor"
 	armor_strength(string): "Customize armor strength" : : "Armor strength multiplier relative to health strength"
+	weapon_crowbar(choices) : "Crowbar" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+	]
+	weapon_9mmhandgun(choices) : "Glock" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_357(choices) : "Python" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_9mmAR(choices) : "MP5" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_shotgun(choices) : "Shotgun" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_crossbow(choices) : "Crossbow" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_rpg(choices) : "RPG" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_hornetgun(choices) : "Hornetgun" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_pipewrench(choices) : "Pipewrench" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+	]
+	weapon_knife(choices) : "Knife" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+	]
+	weapon_grapple(choices) : "Grapple" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+	]
+	weapon_medkit(choices) : "Portable Medkit" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_eagle(choices) : "Desert Eagle" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_m249(choices) : "M249" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_sniperrifle(choices) : "Sniperrifle" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_shockrifle(choices) : "Shock Roach" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
+	weapon_sporelauncher(choices) : "Spore Launcher" =
+	[
+		-1: "Remove"
+		0: "No change"
+		1: "Give"
+		2: "Give (allow duplicate)"
+	]
 ]
 
 @PointClass base(Targetname, Targetx) = game_team_master : "Team based master/relay"
@@ -3034,11 +3161,13 @@
 	weapon_pipewrench(string) : "Pipewrench chance"
 	weapon_knife(string) : "Knife chance"
 	weapon_grapple(string) : "Grapple chance"
-	weapon_medkit(string) : "Medkit chance"
+	weapon_medkit(string) : "Portable Medkit chance"
 	weapon_eagle(string) : "Desert Eagle chance"
 	weapon_penguin(string) : "Penguins chance"
 	weapon_m249(string) : "M249 chance"
 	weapon_sniperrifle(string) : "Sniperrifle chance"
+	weapon_shockrifle(string) : "Shock Roach chance"
+	weapon_sporelauncher(string) : "Spore Launcher chance"
 	spawnflags(Flags) =
 	[
 		64 : "Predetermined" : 0
@@ -8391,7 +8520,7 @@
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_m40a1.mdl") = weapon_sniperrifle : "Sniper Rifle" []
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_displacer.mdl") = weapon_displacer : "Displacer" []
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_spore_launcher.mdl") = weapon_sporelauncher : "Spore Launcher" []
-@PointClass base(Weapon, WeaponInitAmmo) studio("models/w_medkit.mdl") = weapon_medkit : "Medkit" []
+@PointClass base(Weapon, WeaponInitAmmo) studio("models/w_medkit.mdl") = weapon_medkit : "Portable Medkit" []
 @PointClass base(Weapon, WeaponInitAmmo) studio("models/w_uzi.mdl") = weapon_uzi : "Single UZI" []
 
 @PointClass base(Pickup) = world_items : "World Items"

@@ -1107,12 +1107,7 @@ void CBasePlayer::RemoveAllItems( int stripFlags )
 
 	UpdateClientData();
 
-	// send Selected Weapon Message to our client
-	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
-		WRITE_BYTE( 0 );
-		WRITE_BYTE( 0 );
-		WRITE_SHORT( 0 );
-	MESSAGE_END();
+	SendCurWeaponClear();
 }
 
 /*
@@ -1172,11 +1167,7 @@ void CBasePlayer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int i
 	MESSAGE_END();
 
 	// Tell Ammo Hud that the player is dead
-	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
-		WRITE_BYTE( 0 );
-		WRITE_BYTE( 0XFF );
-		WRITE_SHORT( -1 );
-	MESSAGE_END();
+	SendCurWeaponDead();
 
 	// reset FOV
 	pev->fov = m_iFOV = m_iClientFOV = 0;
@@ -1734,11 +1725,7 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	SetSuitUpdate( NULL, FALSE, 0 );
 
 	// Tell Ammo Hud that the player is dead
-	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
-		WRITE_BYTE( 0 );
-		WRITE_BYTE( 0XFF );
-		WRITE_SHORT( -1 );
-	MESSAGE_END();
+	SendCurWeaponDead();
 
 	// reset FOV
 	m_iFOV = m_iClientFOV = 0;
@@ -3948,6 +3935,24 @@ BOOL CBasePlayer::HasWeapons( void )
 	return FALSE;
 }
 
+void CBasePlayer::SendCurWeaponClear()
+{
+	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
+		WRITE_BYTE( 0 );
+		WRITE_BYTE( 0 );
+		WRITE_SHORT( 0 );
+	MESSAGE_END();
+}
+
+void CBasePlayer::SendCurWeaponDead()
+{
+	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
+		WRITE_BYTE( 0 );
+		WRITE_BYTE( 0XFF );
+		WRITE_SHORT( -1 );
+	MESSAGE_END();
+}
+
 void CBasePlayer::SelectPrevItem( int iItem )
 {
 }
@@ -4658,12 +4663,6 @@ BOOL CBasePlayer::RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHolster 
 //
 int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 {
-	if( !szName )
-	{
-		// no ammo.
-		return -1;
-	}
-
 	const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(szName);
 	if (!ammoType)
 		return -1;
@@ -4734,6 +4733,32 @@ int CBasePlayer::GiveAmmo(int iCount, const char *szName)
 	}
 
 	return i;
+}
+
+void CBasePlayer::RemoveAmmo(int iAmount, const char *szName)
+{
+	const AmmoType* ammoType = CBasePlayerWeapon::GetAmmoType(szName);
+	if (!ammoType)
+		return;
+
+	int i = ammoType->id;
+	m_rgAmmo[i] -= iAmount;
+	if (m_rgAmmo[i] < 0)
+		m_rgAmmo[i] = 0;
+
+	if (m_rgAmmo[i] <= 0 && ammoType->exhaustible)
+	{
+		for (int j=0; j<MAX_WEAPONS; ++j)
+		{
+			const ItemInfo& II = CBasePlayerWeapon::ItemInfoArray[j];
+			if ((II.iFlags & ITEM_FLAG_EXHAUSTIBLE) && II.pszAmmo1 && FStrEq(szName, II.pszAmmo1)) {
+				// we found a weapon that uses this ammo type
+				CBasePlayerWeapon* pWeapon = WeaponById(j);
+				if (pWeapon)
+					pWeapon->RetireWeapon();
+			}
+		}
+	}
 }
 
 /*
@@ -5721,23 +5746,24 @@ BOOL CBasePlayer::HasPlayerItem( CBasePlayerWeapon *pCheckItem )
 //=========================================================
 BOOL CBasePlayer::HasNamedPlayerItem( const char *pszItemName )
 {
-	CBasePlayerWeapon *pItem;
-	int i;
+	return GetWeaponByName(pszItemName) != NULL;
+}
 
-	for( i = 0; i < MAX_WEAPONS; i++ )
+CBasePlayerWeapon* CBasePlayer::GetWeaponByName(const char *pszItemName)
+{
+	for( int i = 0; i < MAX_WEAPONS; i++ )
 	{
-		pItem = m_rgpPlayerWeapons[i];
+		CBasePlayerWeapon* pWeapon = m_rgpPlayerWeapons[i];
 
-		if( pItem )
+		if( pWeapon )
 		{
-			if( !strcmp( pszItemName, STRING( pItem->pev->classname ) ) )
+			if( strcmp( pszItemName, STRING( pWeapon->pev->classname ) ) == 0 )
 			{
-				return TRUE;
+				return pWeapon;
 			}
 		}
 	}
-
-	return FALSE;
+	return NULL;
 }
 
 //=========================================================
@@ -5769,18 +5795,15 @@ BOOL CBasePlayer::SwitchWeapon(CBasePlayerWeapon *pWeapon )
 BOOL CBasePlayer::SwitchToBestWeapon()
 {
 	CBasePlayerWeapon *pBest = m_pActiveItem;
-	int i;
 
-	if (!pBest)
-		return FALSE;
-
-	for( i = 0; i < MAX_WEAPONS; i++ )
+	for( int i = 0; i < MAX_WEAPONS; i++ )
 	{
 		CBasePlayerWeapon *pCheck = m_rgpPlayerWeapons[i];
 
 		if ( pCheck )
 		{
-			if( pCheck->iWeight() > pBest->iWeight() && pCheck != pBest )
+			const int bestWeight = pBest ? pBest->iWeight() : -1;
+			if( pCheck->iWeight() > bestWeight && pCheck != pBest )
 			{
 				if( pCheck->CanDeploy() )
 				{

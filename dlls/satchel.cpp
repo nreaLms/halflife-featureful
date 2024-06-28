@@ -432,7 +432,6 @@ void CSatchel::Holster()
 
 	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] && m_chargeReady != SATCHEL_READY )
 	{
-		m_pPlayer->pev->weapons &= ~( 1 << WEAPON_SATCHEL );
 		DestroyItem();
 	}
 }

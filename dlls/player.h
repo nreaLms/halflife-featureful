@@ -360,7 +360,10 @@ public:
 	void DropAmmo();
 	BOOL HasPlayerItem( CBasePlayerWeapon *pCheckItem );
 	BOOL HasNamedPlayerItem( const char *pszItemName );
+	CBasePlayerWeapon* GetWeaponByName( const char *pszItemName );
 	BOOL HasWeapons( void );// do I have ANY weapons?
+	void SendCurWeaponClear();
+	void SendCurWeaponDead();
 	void SelectPrevItem( int iItem );
 	void SelectLastItem(void);
 	void SelectItem(const char *pstr);
@@ -370,6 +373,7 @@ public:
 	void EnableControl(BOOL fControl);
 
 	int  GiveAmmo( int iAmount, const char *szName );
+	void RemoveAmmo( int iAmount, const char *szName );
 	void SendAmmoUpdate(void);
 
 	void WaterMove( void );

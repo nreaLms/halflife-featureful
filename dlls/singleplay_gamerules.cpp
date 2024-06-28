@@ -105,18 +105,17 @@ BOOL CHalfLifeRules::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerWeapo
 //=========================================================
 BOOL HLGetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon )
 {
-	CBasePlayerWeapon *pBest;// this will be used in the event that we don't find a weapon in the same category.
-	int iBestWeight;
+	CBasePlayerWeapon *pBest = NULL;// this will be used in the event that we don't find a weapon in the same category.
+	int iBestWeight = -1;// no weapon lower than -1 can be autoswitched to
 	int i;
 
-	iBestWeight = -1;// no weapon lower than -1 can be autoswitched to
-	pBest = NULL;
-
-	if( !pCurrentWeapon->CanHolster() )
+	if( pCurrentWeapon && !pCurrentWeapon->CanHolster() )
 	{
 		// can't put this gun away right now, so can't switch.
 		return FALSE;
 	}
+
+	const int currentWeight = pCurrentWeapon ? pCurrentWeapon->iWeight() : 0;
 
 	for( i = 0; i < MAX_WEAPONS; i++ )
 	{
@@ -126,7 +125,7 @@ BOOL HLGetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerWeapon *pCurrentWeapon
 		{
 			if( !FBitSet( pCheck->iFlags(), ITEM_FLAG_NOCHOICE ))
 			{
-				if( pCheck->iWeight() > -1 && pCheck->iWeight() == pCurrentWeapon->iWeight() && pCheck != pCurrentWeapon )
+				if( pCheck->iWeight() > -1 && pCheck->iWeight() == currentWeight && pCheck != pCurrentWeapon )
 				{
 					// this weapon is from the same category.
 					if ( pCheck->CanDeploy() )

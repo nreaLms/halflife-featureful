@@ -683,7 +683,9 @@ void CBasePlayerWeapon::DestroyItem( void )
 	if( m_pPlayer )
 	{
 		// if attached to a player, remove.
+		m_pPlayer->pev->weapons &= ~( 1 << m_iId );
 		m_pPlayer->RemovePlayerItem( this, false );
+		//m_pPlayer = NULL;
 	}
 
 	Kill();
@@ -692,6 +694,7 @@ void CBasePlayerWeapon::DestroyItem( void )
 void CBasePlayerWeapon::Drop( void )
 {
 	SetTouch( NULL );
+	SetUse( NULL );
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1f;
 }
@@ -699,6 +702,7 @@ void CBasePlayerWeapon::Drop( void )
 void CBasePlayerWeapon::Kill( void )
 {
 	SetTouch( NULL );
+	SetUse( NULL );
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1f;
 }
@@ -1049,11 +1053,18 @@ int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon )
 void CBasePlayerWeapon::RetireWeapon( void )
 {
 	// first, no viewmodel at all.
-	m_pPlayer->pev->viewmodel = iStringNull;
-	m_pPlayer->pev->weaponmodel = iStringNull;
-	//m_pPlayer->pev->viewmodelindex = NULL;
+	if (m_pPlayer->m_pActiveItem == this)
+	{
+		m_pPlayer->pev->viewmodel = iStringNull;
+		m_pPlayer->pev->weaponmodel = iStringNull;
+		//m_pPlayer->pev->viewmodelindex = NULL;
+	}
 
-	if( !g_pGameRules->GetNextBestWeapon( m_pPlayer, this ) )
+	if (m_pPlayer->m_pActiveItem != this)
+	{
+		DestroyItem();
+	}
+	else if( !g_pGameRules->GetNextBestWeapon( m_pPlayer, this ) )
 	{
 		// Another weapon wasn't selected. Get rid of current one
 		if( m_pPlayer->m_pActiveItem == this )

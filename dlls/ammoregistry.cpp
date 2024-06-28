@@ -28,9 +28,7 @@ bool AmmoType::IsValid() const
 {
 	if (!name || *name == '\0')
 		return false;
-	if (id <= 0)
-		return false;
-	return true;
+	return id > 0;
 }
 
 int AmmoRegistry::Register(const char *name, int maxAmmo, bool exhaustible)

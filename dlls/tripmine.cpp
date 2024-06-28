@@ -433,7 +433,6 @@ void CTripmine::Holster()
 	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 	{
 		// out of mines
-		m_pPlayer->pev->weapons &= ~( 1 << WEAPON_TRIPMINE );
 		DestroyItem();
 	}
 

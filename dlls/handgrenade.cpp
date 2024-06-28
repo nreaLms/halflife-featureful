@@ -98,7 +98,6 @@ void CHandGrenade::Holster()
 	else
 	{
 		// no more grenades!
-		m_pPlayer->pev->weapons &= ~( 1 << WEAPON_HANDGRENADE );
 		DestroyItem();
 	}
 
