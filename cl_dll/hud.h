@@ -786,6 +786,7 @@ struct ClientFeatures
 	ClientFeatures();
 
 	int hud_color;
+	bool hud_color_configurable;
 	ConfigurableBoundedValue hud_min_alpha;
 	int hud_color_critical;
 

@@ -594,10 +594,17 @@ int CHud::MinHUDAlpha() const
 void CHud::RecacheValues()
 {
 	m_cachedMinAlpha = CalcMinHUDAlpha();
-	int hudR = m_pCvarHudRed->value;
-	int hudG = m_pCvarHudGreen->value;
-	int hudB = m_pCvarHudBlue->value;
-	m_cachedHudColor = PackRGB(hudR, hudG, hudB);
+	if (clientFeatures.hud_color_configurable)
+	{
+		int hudR = m_pCvarHudRed->value;
+		int hudG = m_pCvarHudGreen->value;
+		int hudB = m_pCvarHudBlue->value;
+		m_cachedHudColor = PackRGB(hudR, hudG, hudB);
+	}
+	else
+	{
+		m_cachedHudColor = clientFeatures.hud_color;
+	}
 }
 
 int CHud::GetCrosshairColor()

@@ -76,6 +76,7 @@ FlashlightFeatures::FlashlightFeatures() : color(0xFFFFFF), distance(2048)
 ClientFeatures::ClientFeatures()
 {
 	hud_color = RGB_HUD_DEFAULT;
+	hud_color_configurable = false;
 	hud_color_critical = RGB_REDISH;
 	hud_min_alpha.defaultValue = MIN_ALPHA;
 	hud_min_alpha.minValue = 100;
@@ -601,8 +602,6 @@ void CHud::Init( void )
 
 	HOOK_MESSAGE( PlayMP3 );
 
-	HOOK_COMMAND( "hud_color", HUDColor );
-
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
 
@@ -630,9 +629,15 @@ void CHud::Init( void )
 	CreateIntegerCvarConditionally(m_pCvarMinAlpha, "hud_min_alpha", clientFeatures.hud_min_alpha);
 	int hudR, hudG, hudB;
 	UnpackRGB(hudR, hudG, hudB, clientFeatures.hud_color);
-	m_pCvarHudRed = CVAR_CREATE_INTVALUE("hud_color_r", hudR, FCVAR_ARCHIVE);
-	m_pCvarHudGreen = CVAR_CREATE_INTVALUE("hud_color_g", hudG, FCVAR_ARCHIVE);
-	m_pCvarHudBlue = CVAR_CREATE_INTVALUE("hud_color_b", hudB, FCVAR_ARCHIVE);
+
+	if (clientFeatures.hud_color_configurable)
+	{
+		m_pCvarHudRed = CVAR_CREATE_INTVALUE("hud_color_r", hudR, FCVAR_ARCHIVE);
+		m_pCvarHudGreen = CVAR_CREATE_INTVALUE("hud_color_g", hudG, FCVAR_ARCHIVE);
+		m_pCvarHudBlue = CVAR_CREATE_INTVALUE("hud_color_b", hudB, FCVAR_ARCHIVE);
+
+		HOOK_COMMAND( "hud_color", HUDColor );
+	}
 
 	CreateBooleanCvarConditionally(cl_weapon_sparks, "cl_weapon_sparks", clientFeatures.weapon_sparks);
 	CreateBooleanCvarConditionally(cl_weapon_wallpuff, "cl_weapon_wallpuff", clientFeatures.weapon_wallpuff);
@@ -872,6 +877,7 @@ void CHud::ParseClientFeatures()
 		{ "rollangle.", clientFeatures.rollangle },
 	};
 	KeyValueDefinition<bool> booleans[] = {
+		{ "hud_color.configurable", clientFeatures.hud_color_configurable },
 		{ "hud_autoscale_by_default", clientFeatures.hud_autoscale_by_default },
 		{ "hud_draw_nosuit", clientFeatures.hud_draw_nosuit },
 		{ "opfor_title", clientFeatures.opfor_title },
