@@ -1551,19 +1551,12 @@ void CTriggerHurt::DoDamage(CBaseEntity *pTarget, float fldmg)
 	{
 		int damageType = DamageType();
 
-		const float healthBeforeDmg = pTarget->pev->health;
 		const float minHealthThreshold = pev->dmg_save;
-
 		if (minHealthThreshold > 0) {
-			damageType |= DMG_NONLETHAL;
+			pTarget->m_healthMinThreshold = minHealthThreshold;
 		}
 
 		pTarget->TakeDamage( pev, pev, fldmg, damageType );
-
-		if (minHealthThreshold > 0 && pTarget->pev->health < minHealthThreshold)
-		{
-			pTarget->pev->health = Q_min(minHealthThreshold, healthBeforeDmg);
-		}
 	}
 }
 
@@ -5390,11 +5383,9 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 		float fldmg = pev->dmg;
 		int damageType = DamageType();
 
-		const float healthBeforeDmg = pTarget->pev->health;
 		const float minHealthThreshold = pev->dmg_save;
-
 		if (minHealthThreshold > 0) {
-			damageType |= DMG_NONLETHAL;
+			pTarget->m_healthMinThreshold = minHealthThreshold;
 		}
 
 		entvars_t* pevAttacker = pActivator != 0 ? pActivator->pev : pev;
@@ -5413,11 +5404,6 @@ void CTriggerHurtRemote::DoDamage(CBaseEntity* pTarget)
 		else
 		{
 			pTarget->TakeDamage(pTarget->pev, pevAttacker, fldmg, damageType);
-		}
-
-		if (minHealthThreshold > 0 && pTarget->pev->health < minHealthThreshold)
-		{
-			pTarget->pev->health = Q_min(minHealthThreshold, healthBeforeDmg);
 		}
 	}
 	else

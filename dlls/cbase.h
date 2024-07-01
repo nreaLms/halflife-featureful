@@ -424,6 +424,9 @@ public:
 
 	virtual void SendMessages(CBaseEntity* pClient) {}
 	virtual bool HandleDoorBlockage(CBaseEntity* pDoor) { return false; }
+
+	void ApplyDamageToHealth(float flDamage);
+	float m_healthMinThreshold;
 };
 
 // Ugly technique to override base member functions

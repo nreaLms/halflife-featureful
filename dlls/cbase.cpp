@@ -574,6 +574,28 @@ int CBaseEntity::TakeHealth(CBaseEntity *pHealer, float flHealth, int bitsDamage
 
 // inflict damage on this entity.  bitsDamageType indicates type of damage inflicted, ie: DMG_CRUSH
 
+void CBaseEntity::ApplyDamageToHealth(float flDamage)
+{
+	const float healthBeforeDamage = pev->health;
+
+	// do the damage
+	pev->health -= flDamage;
+
+	if (m_healthMinThreshold > 0 && pev->health < m_healthMinThreshold)
+	{
+		if (IsPlayer())
+		{
+			pev->health = Q_max((int)m_healthMinThreshold, 1);
+		}
+		else
+		{
+			pev->health = Q_max(m_healthMinThreshold, 1.0f);
+			pev->health = Q_min(healthBeforeDamage, pev->health);
+		}
+		m_healthMinThreshold = 0.0f;
+	}
+}
+
 int CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	Vector vecTemp;
@@ -612,8 +634,8 @@ int CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 		pev->velocity = pev->velocity + vecDir * flForce;
 	}
 
-	// do the damage
-	pev->health -= flDamage;
+	ApplyDamageToHealth(flDamage);
+
 	if( pev->health <= 0 )
 	{
 		Killed( pevInflictor, pevAttacker, GIB_NORMAL );
