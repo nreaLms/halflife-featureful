@@ -116,10 +116,14 @@ enum sbar_data
 
 #define ARMOR_RATIO	0.2	// Armor Takes 80% of the damage
 
+// suppress capabilities flags
 #define PLAYER_SUPRESS_ATTACK (1<<0)
 #define PLAYER_SUPRESS_JUMP (1<<1)
 #define PLAYER_SUPRESS_DUCK (1<<2)
 #define PLAYER_SUPRESS_USE (1<<5)
+
+// trigger_camera related player flags
+#define PLAYER_CAMERA_INVULNERABLE (1 << 0)
 
 class CBasePlayer : public CBaseMonster
 {
@@ -255,6 +259,7 @@ public:
 	void SetMaxArmor(int maxArmor, bool clampValue = true);
 	void SetArmor(int armor, bool allowOvercharge = false);
 	float ArmorStrength();
+	bool IsInvulnerable();
 	virtual void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual void	Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
@@ -511,6 +516,8 @@ public:
 	void RemoveAllInventoryItems();
 	bool HasInventoryItem(string_t item);
 	int InventoryItemIndex(string_t item);
+
+	int m_cameraFlags;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

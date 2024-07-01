@@ -7684,7 +7684,7 @@
 		32: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'No Instant Turn' flag"
 		64: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Instant Move' flag"
 		128: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Mouse Cursor' flag"
-		256: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Player Invulnerable' flag"
+		256: "Player Invulnerable" : 0 : "Player cannot be hurt when camera is active"
 		512: "Reserved (don't use)" : 0 : "Reserved for Sven Co-op 'Ignore Hold Time' flag"
 		1024: "Alive player only" : 0
 		4096: "Don't fire look target" : 0 : "By default trigger_camera triggers the Target it uses to look at when it releases the player's view. Tick this flag to prevent this weird behavior."

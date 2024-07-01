@@ -138,6 +138,8 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_ARRAY(CBasePlayer, m_inventoryItems, FIELD_STRING, MAX_INVENTORY_ITEMS),
 	DEFINE_ARRAY(CBasePlayer, m_inventoryItemCounts, FIELD_SHORT, MAX_INVENTORY_ITEMS),
 
+	DEFINE_FIELD(CBasePlayer, m_cameraFlags, FIELD_INTEGER),
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -551,11 +553,22 @@ Vector CBasePlayer::GetGunPosition()
 	return origin;
 }
 
+bool CBasePlayer::IsInvulnerable()
+{
+	if (m_hViewEntity != 0 && FBitSet(m_cameraFlags, PLAYER_CAMERA_INVULNERABLE))
+		return true;
+
+	return false;
+}
+
 //=========================================================
 // TraceAttack
 //=========================================================
 void CBasePlayer::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
+	if (IsInvulnerable())
+		return;
+
 	if( pev->takedamage )
 	{
 		m_LastHitGroup = ptr->iHitgroup;
@@ -650,6 +663,9 @@ int CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 
 	// Already dead
 	if( !IsAlive() )
+		return 0;
+
+	if (IsInvulnerable())
 		return 0;
 
 	// go take the damage first

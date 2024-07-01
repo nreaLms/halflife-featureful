@@ -3139,6 +3139,7 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 #define SF_CAMERA_PLAYER_POSITION	1
 #define SF_CAMERA_PLAYER_TARGET		2
 #define SF_CAMERA_PLAYER_TAKECONTROL 4
+#define SF_CAMERA_PLAYER_INVULRENABLE 256
 #define SF_CAMERA_PLAYER_ALIVE_ONLY 1024
 #define SF_CAMERA_DONT_FIRE_LOOK_TARGET 4096
 
@@ -3253,6 +3254,15 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_ALIVE_ONLY) && !pPlayer->IsAlive())
 		return;
+
+	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_INVULRENABLE))
+	{
+		SetBits(pPlayer->m_cameraFlags, PLAYER_CAMERA_INVULNERABLE);
+	}
+	else
+	{
+		ClearBits(pPlayer->m_cameraFlags, PLAYER_CAMERA_INVULNERABLE);
+	}
 
 	pActivator = pPlayer;
 	m_hPlayer = pPlayer;
