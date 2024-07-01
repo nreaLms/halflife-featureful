@@ -2641,7 +2641,9 @@ public:
 	void EXPORT TeleportUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	virtual edict_t* GetTeleportTarget();
+	virtual CBaseEntity* GetLandmark();
 	bool TeleportToDestination( CBaseEntity *pOther );
+	void LetGoRope(CBaseEntity* pOther);
 
 	virtual int		Save( CSave &save );
 	virtual int		Restore( CRestore &restore );
@@ -2729,51 +2731,104 @@ bool CTriggerTeleport::TeleportToDestination( CBaseEntity *pOther )
 	if( FNullEnt( pentTarget ) )
 		return false;
 
-	Vector tmp = VARS( pentTarget )->origin;
-
-	if (FBitSet(pev->spawnflags, SF_TELEPORT_RELATIVE_TELEPORT))
+	//LRC - landmark based teleports
+	CBaseEntity* pLandmark = GetLandmark();
+	if (pLandmark)
 	{
-		Vector subjectPos = pOther->pev->origin;
-		if (pOther->IsPlayer())
-			subjectPos.z += pOther->pev->mins.z;
-		Vector offset = subjectPos - pev->origin;
-		tmp = tmp + offset;
+		CBaseEntity* pTarget = CBaseEntity::Instance(pentTarget);
+		Vector vecOriginOffs = pTarget->pev->origin - pLandmark->pev->origin;
+
+		// do we need to rotate the entity?
+		if (pLandmark->pev->angles != pTarget->pev->angles)
+		{
+			float ydiff = pTarget->pev->angles.y - pLandmark->pev->angles.y;
+
+			// set new angle to face
+			pOther->pev->angles.y = UTIL_AngleMod(pOther->pev->angles.y + ydiff);
+			if (pOther->IsPlayer())
+			{
+				pOther->pev->angles.x = pOther->pev->v_angle.x;
+				pOther->pev->angles.z = pOther->pev->v_angle.z = 0;
+				pOther->pev->fixangle = TRUE;
+			}
+
+			// set new velocity
+			Vector vecVA = UTIL_VecToAngles(pOther->pev->velocity);
+			vecVA.y += ydiff;
+			UTIL_MakeVectors(vecVA);
+			pOther->pev->velocity = gpGlobals->v_forward * pOther->pev->velocity.Length();
+			// fix the ugly "angle to vector" behaviour - a legacy from Quake
+			pOther->pev->velocity.z = -pOther->pev->velocity.z;
+
+			// set new origin
+			Vector vecPlayerOffs = pOther->pev->origin - pLandmark->pev->origin;
+			vecVA = UTIL_VecToAngles(vecPlayerOffs);
+			vecVA.y += ydiff;
+			UTIL_MakeVectors(vecVA);
+			Vector vecPlayerOffsNew = gpGlobals->v_forward * vecPlayerOffs.Length();
+			vecPlayerOffsNew.z = -vecPlayerOffsNew.z;
+
+			vecOriginOffs = vecOriginOffs + vecPlayerOffsNew - vecPlayerOffs;
+		}
+
+		LetGoRope(pOther);
+		UTIL_SetOrigin(pOther->pev, pOther->pev->origin + vecOriginOffs);
+	}
+	else
+	{
+		Vector tmp = VARS( pentTarget )->origin;
+
+		if (FBitSet(pev->spawnflags, SF_TELEPORT_RELATIVE_TELEPORT))
+		{
+			Vector subjectPos = pOther->pev->origin;
+			if (pOther->IsPlayer())
+				subjectPos.z += pOther->pev->mins.z;
+			Vector offset = subjectPos - pev->origin;
+			tmp = tmp + offset;
+		}
+
+		if( pOther->IsPlayer() )
+		{
+			tmp.z -= pOther->pev->mins.z;// make origin adjustments in case the teleportee is a player. (origin in center, not at feet)
+		}
+		tmp.z++;
+
+		LetGoRope(pOther);
+		UTIL_SetOrigin( pevToucher, tmp );
+
+		if (!FBitSet(pev->spawnflags, SF_TELEPORT_KEEPANGLES))
+		{
+			pevToucher->angles = pentTarget->v.angles;
+
+			if( pOther->IsPlayer() )
+			{
+				pevToucher->v_angle = pentTarget->v.angles;
+			}
+
+			pevToucher->fixangle = TRUE;
+		}
+
+		if (!FBitSet(pev->spawnflags, SF_TELEPORT_KEEPVELOCITY))
+		{
+			pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
+		}
 	}
 
+	pevToucher->flags &= ~FL_ONGROUND;
+
+	return true;
+}
+
+void CTriggerTeleport::LetGoRope(CBaseEntity *pOther)
+{
 	if( pOther->IsPlayer() )
 	{
-		tmp.z -= pOther->pev->mins.z;// make origin adjustments in case the teleportee is a player. (origin in center, not at feet)
 #if FEATURE_ROPE
 		CBasePlayer* pPlayer = (CBasePlayer*)pOther;
 		if( (pPlayer->m_afPhysicsFlags & PFLAG_ONROPE) )
 			pPlayer->LetGoRope();
 #endif
 	}
-
-	tmp.z++;
-
-	pevToucher->flags &= ~FL_ONGROUND;
-
-	UTIL_SetOrigin( pevToucher, tmp );
-
-	if (!FBitSet(pev->spawnflags, SF_TELEPORT_KEEPANGLES))
-	{
-		pevToucher->angles = pentTarget->v.angles;
-
-		if( pOther->IsPlayer() )
-		{
-			pevToucher->v_angle = pentTarget->v.angles;
-		}
-
-		pevToucher->fixangle = TRUE;
-	}
-
-	if (!FBitSet(pev->spawnflags, SF_TELEPORT_KEEPVELOCITY))
-	{
-		pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
-	}
-
-	return true;
 }
 
 void CTriggerTeleport::TeleportTouch( CBaseEntity *pOther )
@@ -2798,6 +2853,11 @@ edict_t* CTriggerTeleport::GetTeleportTarget()
 		return pEntity->edict();
 	}
 	return FIND_ENTITY_BY_TARGETNAME( NULL, szName );
+}
+
+CBaseEntity* CTriggerTeleport::GetLandmark()
+{
+	return FStringNull(pev->message) ? NULL : UTIL_FindEntityByTargetname(NULL, STRING(pev->message));
 }
 
 class CTriggerTeleportPlayer : public CTriggerTeleport

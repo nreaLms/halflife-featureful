@@ -8588,6 +8588,7 @@
 @SolidClass base(TriggerTeleport, TriggerCond, TeleportRandomDest) = trigger_teleport : "Trigger teleport"
 [
 	target(target_destination) : "Destination point" : : "Name of the entity which the player is teleported to. Ideally an info_teleport_destination entity."
+	message(target_destination) : "Landmark entity" : : "Point entity (e.g. info_target or info_teleport_destination) that is usually put inside the trigger_teleport brush. The player will be teleported to the destination using the relative distance. If landmark and destination entities have different yaw angles, the player will be rotated appropriately as well. This allows for making 'seemless' teleports. This is alternative to 'Relative Teleport' spawnflag. If landmark is defined the velocity is always kept."
 	spawnflags(flags) =
 	[
 		128 : "Relative Teleport" : 0 : "The player's destination will be the location of the destination plus his offset from the trigger_teleport's origin in the moment of the player entering the trigger. trigger_teleport is expected to have an origin brush."
