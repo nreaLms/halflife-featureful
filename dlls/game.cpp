@@ -1256,6 +1256,32 @@ void Cmd_CalcRatio()
 		ALERT(at_console, "%s calc_ratio is %g\n", target, r);
 }
 
+void Cmd_CalcPosition()
+{
+	if (CMD_ARGC() < 2)
+	{
+		ALERT(at_console, "Usage: %s <targetname>\n", CMD_ARGV(0));
+		return;
+	}
+	const char* target = CMD_ARGV(1);
+	Vector r;
+	if (TryCalcLocus_Position(NULL, NULL, target, r))
+		ALERT(at_console, "%s calc_position is (%g %g %g)\n", target, r.x, r.y, r.z);
+}
+
+void Cmd_CalcVelocity()
+{
+	if (CMD_ARGC() < 2)
+	{
+		ALERT(at_console, "Usage: %s <targetname>\n", CMD_ARGV(0));
+		return;
+	}
+	const char* target = CMD_ARGV(1);
+	Vector r;
+	if (TryCalcLocus_Velocity(NULL, NULL, target, r))
+		ALERT(at_console, "%s calc_velocity is (%g %g %g)\n", target, r.x, r.y, r.z);
+}
+
 void Cmd_CalcState()
 {
 	if (CMD_ARGC() < 2)
@@ -1903,6 +1929,8 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("set_global_state", Cmd_SetGlobalState);
 	g_engfuncs.pfnAddServerCommand("set_global_value", Cmd_SetGlobalValue);
 	g_engfuncs.pfnAddServerCommand("calc_ratio", Cmd_CalcRatio);
+	g_engfuncs.pfnAddServerCommand("calc_position", Cmd_CalcPosition);
+	g_engfuncs.pfnAddServerCommand("calc_velocity", Cmd_CalcVelocity);
 	g_engfuncs.pfnAddServerCommand("calc_state", Cmd_CalcState);
 	g_engfuncs.pfnAddServerCommand("dump_warpballs", DumpWarpballTemplates);
 }

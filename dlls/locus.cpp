@@ -35,7 +35,9 @@ bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const cha
 		return pCalc->CalcPosition( pLocus, &result );
 	}
 
-	ALERT(at_error, "%s \"%s\" has bad or missing calc_position value \"%s\"\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname), szText);
+	const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
+	const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
+	ALERT(at_error, "%s \"%s\" has bad or missing calc_position value \"%s\"\n", requesterClassname, requesterTargetname, szText);
 	return false;
 }
 
@@ -55,8 +57,10 @@ bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char
 	{
 		return pCalc->CalcVelocity( pLocus, &result );
 	}
-		
-	ALERT(at_error, "%s \"%s\" has bad or missing calc_velocity value \"%s\"\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->targetname), szText);
+
+	const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
+	const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
+	ALERT(at_error, "%s \"%s\" has bad or missing calc_velocity value \"%s\"\n", requesterClassname, requesterTargetname, szText);
 	return false;
 }
 
