@@ -3044,7 +3044,9 @@ void CTriggerChangeTarget::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, U
 enum
 {
 	CHANGEVALUE_LITERAL = 0,
-	CHANGEVALUE_CALCRATIO = 1
+	CHANGEVALUE_CALCRATIO = 1,
+	CHANGEVALUE_CALCPOSITION = 2,
+	CHANGEVALUE_CALCVELOCITY = 3,
 };
 
 class CTriggerChangeValue : public CBaseDelay
@@ -3095,7 +3097,7 @@ void CTriggerChangeValue::KeyValue( KeyValueData *pkvd )
 void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	CBaseEntity *pTarget = NULL;
-	char buf[64];
+	char buf[256];
 	const char* newValue = STRING(m_iszNewValue);
 
 	if (pev->impulse == CHANGEVALUE_CALCRATIO)
@@ -3104,6 +3106,32 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		if (TryCalcLocus_Ratio(pActivator, STRING(m_iszNewValue), result))
 		{
 			snprintf(buf, sizeof(buf), "%g", result);
+			newValue = buf;
+		}
+		else
+		{
+			return;
+		}
+	}
+	else if (pev->impulse == CHANGEVALUE_CALCPOSITION)
+	{
+		Vector result;
+		if (TryCalcLocus_Position(this, pActivator, STRING(m_iszNewValue), result))
+		{
+			snprintf(buf, sizeof(buf), "%g %g %g", result.x, result.y, result.z);
+			newValue = buf;
+		}
+		else
+		{
+			return;
+		}
+	}
+	else if (pev->impulse == CHANGEVALUE_CALCVELOCITY)
+	{
+		Vector result;
+		if (TryCalcLocus_Velocity(this, pActivator, STRING(m_iszNewValue), result))
+		{
+			snprintf(buf, sizeof(buf), "%g %g %g", result.x, result.y, result.z);
 			newValue = buf;
 		}
 		else
