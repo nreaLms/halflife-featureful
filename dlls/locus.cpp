@@ -29,7 +29,6 @@ bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const cha
 	}
 
 	CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, szText, pLocus);
-
 	if (pCalc != NULL)
 	{
 		return pCalc->CalcPosition( pLocus, &result );
@@ -52,7 +51,6 @@ bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char
 	}
 
 	CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, szText, pLocus);
-		
 	if (pCalc != NULL)
 	{
 		return pCalc->CalcVelocity( pLocus, &result );
@@ -80,6 +78,29 @@ bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText , float& result)
 	}
 
 	ALERT(at_error, "Bad or missing calc_ratio entity \"%s\"\n", szText);
+	return false;
+}
+
+bool TryCalcLocus_Color(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText , Vector& result)
+{
+	if (IsLikelyNumber(szText))
+	{ // it's a vector
+		Vector tmp;
+		UTIL_StringToRandomVector( (float *)tmp, szText );
+		result = tmp;
+		return true;
+	}
+
+	CBaseEntity *pCalc = UTIL_FindEntityByTargetname(NULL, szText, pLocus);
+	if (pCalc != NULL)
+	{
+		result = pCalc->pev->rendercolor;
+		return true;
+	}
+
+	const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
+	const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
+	ALERT(at_error, "%s \"%s\" has bad or missing color value \"%s\"\n", requesterClassname, requesterTargetname, szText);
 	return false;
 }
 
@@ -614,6 +635,90 @@ bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 	else
 		*outResult = fBasis;
 	return true;
+}
+
+enum
+{
+	CALCNUMFROM_VELOCITY = 0,
+	CALCNUMFROM_POSITION = 1,
+	CALCNUMFROM_COLOR = 2,
+};
+
+class CCalcNumFromVec : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "vector_type"))
+		{
+			pev->weapons = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+	bool CalcRatio( CBaseEntity *pLocus, float* outResult );
+};
+
+LINK_ENTITY_TO_CLASS( calc_numfromvec, CCalcNumFromVec )
+
+bool CCalcNumFromVec::CalcRatio( CBaseEntity *pLocus, float* outResult )
+{
+	if ( FStringNull(pev->target) )
+	{
+		ALERT(at_error, "No base vector given for %s \"%s\"\n", STRING(pev->classname), STRING(pev->targetname));
+		return false;
+	}
+
+	Vector vecA;
+	switch (pev->weapons) {
+	case CALCNUMFROM_POSITION:
+		if (!TryCalcLocus_Position( this, pLocus, STRING(pev->target), vecA ))
+		{
+			return false;
+		}
+		break;
+	case CALCNUMFROM_COLOR:
+		if (!TryCalcLocus_Color( this, pLocus, STRING(pev->target), vecA ))
+		{
+			return false;
+		}
+		break;
+	case CALCNUMFROM_VELOCITY:
+	default:
+		if (!TryCalcLocus_Velocity( this, pLocus, STRING(pev->target), vecA ))
+		{
+			return false;
+		}
+		break;
+	}
+
+	switch(pev->impulse)
+	{
+	case 0: // X
+		*outResult = vecA.x; return true;
+	case 1: // Y
+		*outResult = vecA.y; return true;
+	case 2: // Z
+		*outResult = vecA.z; return true;
+	case 3: // Length
+		*outResult = vecA.Length(); return true;
+	case 4: // Pitch
+		{
+			Vector ang = UTIL_VecToAngles(vecA);
+			*outResult = ang.x;
+			return true;
+		}
+	case 5: // Yaw
+		{
+			Vector ang = UTIL_VecToAngles(vecA);
+			*outResult = ang.y;
+			return true;
+		}
+	}
+
+	ALERT(at_console, "%s \"%s\" doesn't understand mode %d\n", STRING(pev->classname), STRING(pev->targetname), pev->impulse);
+	return false;
 }
 
 
