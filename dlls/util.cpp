@@ -1501,7 +1501,7 @@ BOOL UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 )
 	return FALSE;
 }
 
-void UTIL_StringToVector( float *pVector, const char *pString )
+void UTIL_StringToVector( float *pVector, const char *pString, int* componentsRead )
 {
 	char *pstr, *pfront, tempString[128];
 	int j;
@@ -1509,9 +1509,12 @@ void UTIL_StringToVector( float *pVector, const char *pString )
 	strcpy( tempString, pString );
 	pstr = pfront = tempString;
 
+	int componentsParsed;
+
 	for( j = 0; j < 3; j++ )			// lifted from pr_edict.c
 	{
 		pVector[j] = atof( pfront );
+		componentsParsed++;
 
 		while( *pstr && *pstr != ' ' )
 			pstr++;
@@ -1520,6 +1523,8 @@ void UTIL_StringToVector( float *pVector, const char *pString )
 		pstr++;
 		pfront = pstr;
 	}
+	if (componentsRead)
+		*componentsRead = componentsParsed;
 	if( j < 2 )
 	{
 		/*
@@ -2214,6 +2219,44 @@ void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd )
 			return;
 		}
 	}
+}
+
+int ReadEntvarKeyvalue(entvars_t* pev, const char* keyName, int* offset, float* outFloat, int* outInteger, Vector* outVector, string_t* outString)
+{
+	for( int i = 0; i < (int)ENTVARS_COUNT; i++ )
+	{
+		TYPEDESCRIPTION *pField = &gEntvarsDescription[i];
+		if( stricmp( pField->fieldName, keyName ) == 0 )
+		{
+			switch( pField->fieldType )
+			{
+			case FIELD_MODELNAME:
+			case FIELD_SOUNDNAME:
+			case FIELD_STRING:
+				if (outString)
+					*outString = ( *(string_t *)( (char *)pev + pField->fieldOffset ) );
+				break;
+			case FIELD_TIME:
+			case FIELD_FLOAT:
+				if (outFloat)
+					*outFloat = ( *(float *)( (char *)pev + pField->fieldOffset ) );
+				break;
+			case FIELD_INTEGER:
+				if (outInteger)
+					*outInteger = ( *(int *)( (char *)pev + pField->fieldOffset ) );
+				break;
+			case FIELD_POSITION_VECTOR:
+			case FIELD_VECTOR:
+				if (outVector)
+					*outVector = Vector((float *)( (char *)pev + pField->fieldOffset ));
+				break;
+			}
+			if (offset)
+				*offset = pField->fieldOffset;
+			return pField->fieldType;
+		}
+	}
+	return -1;
 }
 
 int CSave::WriteEntVars( const char *pname, entvars_t *pev )

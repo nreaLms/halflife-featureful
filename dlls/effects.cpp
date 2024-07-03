@@ -3046,7 +3046,7 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 	}
 	else if ( FStrEq( pkvd->szKeyName, "beamcolor" ) ) 
 	{
-		pev->punchangle = UTIL_StringToVector( pkvd->szValue );
+		UTIL_StringToVector( pev->punchangle, pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "beamcount" ) )
@@ -3081,7 +3081,7 @@ void CEnvWarpBall::KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "rendercolor2" ) )
 	{
-		rendercolor2 = UTIL_StringToVector( pkvd->szValue );
+		UTIL_StringToVector( rendercolor2, pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "renderamt2" ) )

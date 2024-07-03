@@ -3049,6 +3049,19 @@ enum
 	CHANGEVALUE_CALCVELOCITY = 3,
 };
 
+#define SF_TRIGGER_CHANGEVALUE_NO_X (1<<0)
+#define SF_TRIGGER_CHANGEVALUE_NO_Y (1<<1)
+#define SF_TRIGGER_CHANGEVALUE_NO_Z (1<<2)
+
+enum
+{
+	CHANGEVALUE_ACTION_REPLACE = 0,
+	CHANGEVALUE_ACTION_ADD = 1,
+	CHANGEVALUE_ACTION_MUL = 2,
+	CHANGEVALUE_ACTION_SUB = 3,
+	CHANGEVALUE_ACTION_DIV = 4,
+};
+
 class CTriggerChangeValue : public CBaseDelay
 {
 public:
@@ -3062,13 +3075,15 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 private:
-	string_t	m_iszNewValue;
+	string_t m_iszNewValue;
+	int m_iszValueType;
 };
 LINK_ENTITY_TO_CLASS( trigger_changevalue, CTriggerChangeValue )
 
 TYPEDESCRIPTION	CTriggerChangeValue::m_SaveData[] =
 {
 	DEFINE_FIELD( CTriggerChangeValue, m_iszNewValue, FIELD_STRING ),
+	DEFINE_FIELD( CTriggerChangeValue, m_iszValueType, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE(CTriggerChangeValue, CBaseDelay)
@@ -3083,6 +3098,11 @@ void CTriggerChangeValue::KeyValue( KeyValueData *pkvd )
 	else if (FStrEq(pkvd->szKeyName, "m_iszValueName"))
 	{
 		pev->netname = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "m_iszValueType"))
+	{
+		m_iszValueType = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "value_type"))
@@ -3100,12 +3120,18 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 	char buf[256];
 	const char* newValue = STRING(m_iszNewValue);
 
-	if (pev->impulse == CHANGEVALUE_CALCRATIO)
+	Vector newVector = g_vecZero;
+	float newFloat = 0.0f;
+	int newInteger = 0;
+	bool treatNewValueAsVector = false;
+
+	const int treatValueAs = pev->impulse;
+	if (treatValueAs == CHANGEVALUE_CALCRATIO)
 	{
-		float result;
-		if (TryCalcLocus_Ratio(pActivator, STRING(m_iszNewValue), result))
+		if (TryCalcLocus_Ratio(pActivator, STRING(m_iszNewValue), newFloat))
 		{
-			snprintf(buf, sizeof(buf), "%g", result);
+			newInteger = (int)newFloat;
+			snprintf(buf, sizeof(buf), "%g", newFloat);
 			newValue = buf;
 		}
 		else
@@ -3113,38 +3139,170 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 			return;
 		}
 	}
-	else if (pev->impulse == CHANGEVALUE_CALCPOSITION)
+	else if (treatValueAs == CHANGEVALUE_CALCPOSITION)
 	{
-		Vector result;
-		if (TryCalcLocus_Position(this, pActivator, STRING(m_iszNewValue), result))
+		if (TryCalcLocus_Position(this, pActivator, STRING(m_iszNewValue), newVector))
 		{
-			snprintf(buf, sizeof(buf), "%g %g %g", result.x, result.y, result.z);
+			snprintf(buf, sizeof(buf), "%g %g %g", newVector.x, newVector.y, newVector.z);
 			newValue = buf;
+			treatNewValueAsVector= true;
 		}
 		else
 		{
 			return;
 		}
 	}
-	else if (pev->impulse == CHANGEVALUE_CALCVELOCITY)
+	else if (treatValueAs == CHANGEVALUE_CALCVELOCITY)
 	{
-		Vector result;
-		if (TryCalcLocus_Velocity(this, pActivator, STRING(m_iszNewValue), result))
+		if (TryCalcLocus_Velocity(this, pActivator, STRING(m_iszNewValue), newVector))
 		{
-			snprintf(buf, sizeof(buf), "%g %g %g", result.x, result.y, result.z);
+			snprintf(buf, sizeof(buf), "%g %g %g", newVector.x, newVector.y, newVector.z);
 			newValue = buf;
+			treatNewValueAsVector= true;
 		}
 		else
 		{
 			return;
 		}
+	}
+	else
+	{
+		// Try reading as vector in case we want to treat it as vector later
+		int componentsRead = 0;
+		UTIL_StringToVector((float*)newVector, newValue, &componentsRead);
+		newFloat = atof(newValue);
+		newInteger = atoi(newValue);
+		treatNewValueAsVector = componentsRead >= 2;
 	}
 
 	while ((pTarget = UTIL_FindEntityByTargetname( pTarget, STRING( pev->target ), pActivator )) != NULL)
 	{
+		const char* keyName = STRING(pev->netname);
+
+		int fieldOffset = 0;
+		float oldFloat = 0.0f;
+		int oldInteger = 0;
+		Vector oldVector = g_vecZero;
+		string_t oldString = iStringNull;
+		int fieldType = ReadEntvarKeyvalue(pTarget->pev, keyName, &fieldOffset, &oldFloat, &oldInteger, &oldVector, &oldString);
+
+		switch (fieldType) {
+		case FIELD_POSITION_VECTOR:
+		case FIELD_VECTOR:
+		{
+			switch(m_iszValueType)
+			{
+			case CHANGEVALUE_ACTION_ADD:
+				if (treatNewValueAsVector)
+					newVector = oldVector + newVector;
+				else
+					newVector = oldVector + Vector(newFloat, newFloat, newFloat);
+				break;
+			case CHANGEVALUE_ACTION_MUL:
+				if (treatNewValueAsVector)
+					newVector = Vector(oldVector.x * newVector.x, oldVector.y * newVector.y, oldVector.z * newVector.z);
+				else
+					newVector = oldVector * newFloat;
+				break;
+			case CHANGEVALUE_ACTION_SUB:
+				if (treatNewValueAsVector)
+					newVector = oldVector - newVector;
+				else
+					newVector = oldVector - Vector(newFloat, newFloat, newFloat);
+				break;
+			case CHANGEVALUE_ACTION_DIV:
+				if (treatNewValueAsVector)
+				{
+					if (newVector.x == 0.0f || newVector.y == 0.0f || newVector.z == 0.0f)
+						return;
+					newVector = Vector(oldVector.x / newVector.x, oldVector.y / newVector.y, oldVector.z / newVector.z);
+				}
+				else
+				{
+					if (newFloat == 0.0f)
+						return;
+					newVector = oldVector / newFloat;
+				}
+				break;
+			default:
+				break;
+			}
+
+			if (FBitSet(pev->spawnflags, SF_TRIGGER_CHANGEVALUE_NO_X))
+			{
+				newVector.x = oldVector.x;
+			}
+			if (FBitSet(pev->spawnflags, SF_TRIGGER_CHANGEVALUE_NO_Y))
+			{
+				newVector.y = oldVector.y;
+			}
+			if (FBitSet(pev->spawnflags, SF_TRIGGER_CHANGEVALUE_NO_Z))
+			{
+				newVector.z = oldVector.z;
+			}
+			snprintf(buf, sizeof(buf), "%g %g %g", newVector.x, newVector.y, newVector.z);
+			newValue = buf;
+		}
+			break;
+		case FIELD_INTEGER:
+		{
+			switch(m_iszValueType)
+			{
+			case CHANGEVALUE_ACTION_ADD:
+				newInteger = oldInteger + newInteger;
+				break;
+			case CHANGEVALUE_ACTION_MUL:
+				newInteger = oldInteger * newInteger;
+				break;
+			case CHANGEVALUE_ACTION_SUB:
+				newInteger = oldInteger - newInteger;
+				break;
+			case CHANGEVALUE_ACTION_DIV:
+				if (newInteger != 0)
+					newInteger = oldInteger / newInteger;
+				else
+					return;
+				break;
+			default:
+				break;
+			}
+			snprintf(buf, sizeof(buf), "%d", newInteger);
+			newValue = buf;
+		}
+			break;
+		case FIELD_FLOAT:
+		case FIELD_TIME:
+		{
+			switch(m_iszValueType)
+			{
+			case CHANGEVALUE_ACTION_ADD:
+				newFloat = oldFloat + newFloat;
+				break;
+			case CHANGEVALUE_ACTION_MUL:
+				newFloat = oldFloat * newFloat;
+				break;
+			case CHANGEVALUE_ACTION_SUB:
+				newFloat = oldFloat - newFloat;
+				break;
+			case CHANGEVALUE_ACTION_DIV:
+				if (newFloat != 0)
+					newFloat = oldFloat / newFloat;
+				else
+					return;
+				break;
+			default:
+				break;
+			}
+			snprintf(buf, sizeof(buf), "%g", newFloat);
+			newValue = buf;
+		}
+		default:
+			break;
+		}
+
 		KeyValueData mypkvd;
 		mypkvd.szClassName = STRING(pTarget->pev->classname);
-		mypkvd.szKeyName = STRING(pev->netname);
+		mypkvd.szKeyName = keyName;
 		mypkvd.szValue = newValue;
 		mypkvd.fHandled = FALSE;
 
