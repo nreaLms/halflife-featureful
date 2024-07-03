@@ -1284,16 +1284,26 @@
 @PointClass base(Targetname) color(170 221 85) size(-12 -12 -12, 12 12 12) = calc_ratio : "Ratio adjustment"
 [
 	target(string) : "Based on ratio [LR]" : "*locus"
-	impulse(choices) : "Transformation" : 0 =
+	impulse(choices) : "Transformation" : 0 : "Cosine, sine and tangent operations expect degrees as a base value. Inverse operations return the result in degrees as well." =
 	[
 		0 : "None"
 		1 : "Reversed (1-X)"
 		2 : "Negative (-X)"
 		3 : "Reciprocal (1/X)"
+		4 : "Square (X*X)"
+		5 : "Inverse Square (1/X*X)"
+		6 : "Square root"
+		7 : "Cosine"
+		8 : "Sine"
+		9 : "Tangent"
+		10 : "Inverse Cosine"
+		11 : "Inverse Sine"
+		12 : "Inverse Tangent"
 	]
-	netname(string) : "Offset by [LR]" : "0"
-	noise(string) : "Min (blank = none) [LR]"
-	noise1(string) : "Max (blank = none) [LR]"
+	netname(string) : "Offset by [LR]" : : "Offset by value after transformation"
+	message(string) : "Scale factor [LR]" : : "Scale by value after transformation and after applying the offset"
+	noise(string) : "Min (blank = none) [LR]" : : "Min boundary for the resulting value"
+	noise1(string) : "Max (blank = none) [LR]" : : "Max boundary for the resulting value"
 	frags(choices) : "If outside range" : 0 =
 	[
 		0 : "Pick nearest value"

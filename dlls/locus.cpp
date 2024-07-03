@@ -466,6 +466,23 @@ bool CCalcPosition::CalcPosition( CBaseEntity *pLocus, Vector* outVector )
 
 //=======================================================
 
+enum
+{
+	CALCRATIO_TRANSFORM_NONE = 0,
+	CALCRATIO_TRANSFORM_REVERSED,
+	CALCRATIO_TRANSFORM_NEGATIVE,
+	CALCRATIO_TRANSFORM_RECIPROCAL,
+	CALCRATIO_TRANSFORM_SQUARE,
+	CALCRATIO_TRANSFORM_INVERSESQUARE,
+	CALCRATIO_TRANSFORM_SQUAREROOT,
+	CALCRATIO_TRANSFORM_COSINE,
+	CALCRATIO_TRANSFORM_SINE,
+	CALCRATIO_TRANSFORM_TANGENT,
+	CALCRATIO_TRANSFORM_ACOSINE,
+	CALCRATIO_TRANSFORM_ASINE,
+	CALCRATIO_TRANSFORM_ATANGENT,
+};
+
 class CCalcRatio : public CPointEntity
 {
 public:
@@ -507,9 +524,18 @@ bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 
 	switch (pev->impulse)
 	{
-	case 1:		fBasis = 1-fBasis; break; //reversed
-	case 2:		fBasis = -fBasis; break; //negative
-	case 3:		fBasis = 1/fBasis; break; //reciprocal
+	case CALCRATIO_TRANSFORM_REVERSED:	fBasis = 1-fBasis; break;
+	case CALCRATIO_TRANSFORM_NEGATIVE:	fBasis = -fBasis; break;
+	case CALCRATIO_TRANSFORM_RECIPROCAL: fBasis = 1/fBasis; break;
+	case CALCRATIO_TRANSFORM_SQUARE: fBasis = fBasis * fBasis; break;
+	case CALCRATIO_TRANSFORM_INVERSESQUARE: fBasis = 1 / (fBasis * fBasis); break;
+	case CALCRATIO_TRANSFORM_SQUAREROOT: fBasis = sqrt(fBasis); break;
+	case CALCRATIO_TRANSFORM_COSINE: fBasis = cos(fBasis * (M_PI / 180.0f)); break;
+	case CALCRATIO_TRANSFORM_SINE: fBasis = sin(fBasis * (M_PI / 180.0f)); break;
+	case CALCRATIO_TRANSFORM_TANGENT: fBasis = tan(fBasis * (M_PI / 180.0f)); break;
+	case CALCRATIO_TRANSFORM_ACOSINE: fBasis = acos(fBasis) * (180.0f / M_PI); break;
+	case CALCRATIO_TRANSFORM_ASINE: fBasis = asin(fBasis) * (180.0f / M_PI); break;
+	case CALCRATIO_TRANSFORM_ATANGENT: fBasis = atan(fBasis) * (180.0f / M_PI); break;
 	}
 
 	if (!FStringNull(pev->netname)) {
@@ -518,7 +544,12 @@ bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 			return false;
 		fBasis += fTmp;
 	}
-	//fBasis = fBasis * CalcLocus_Ratio( pLocus, STRING(pev->message));
+	if (!FStringNull(pev->message)) {
+		float fTmp = 1;
+		if (!TryCalcLocus_Ratio( pLocus, STRING(pev->message), fTmp))
+			return false;
+		fBasis = fBasis * fTmp;
+	}
 
 	if (!FStringNull(m_iszMin))
 	{
