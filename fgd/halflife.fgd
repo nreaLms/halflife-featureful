@@ -1282,7 +1282,6 @@
 		2: "Color [LE]"
 	]
 ]
-
 @PointClass color(128 200 64) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_position : "Calculate position"
 [
 	netname(target_destination) : "Entity to use [LE]" : "*locus"
@@ -1330,6 +1329,19 @@
 		1 : "Wrap around"
 		2 : "Bounce back"
 	]
+]
+@PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_vecfromnums : "Calculate vector based on three numbers. This entity will report the resulting vector as both its Position and Velocity"
+[
+	base_vector(string): "Base Vector [LV], [LP], [LE]" : : "The vector to use as a base. If omitted the base vector is 0,0,0"
+	vector_type(choices) : "Base Vector is..." =
+	[
+		0: "Velocity [LV]"
+		1: "Position [LP]"
+		2: "Color [LE]"
+	]
+	x_value(string): "X value [LR]" : : "Use as X component. If omitted the one from Base Vector will be used"
+	y_value(string): "Y value [LR]" : : "Use as Y component. If omitted the one from Base Vector will be used"
+	z_value(string): "Z value [LR]" : : "Use as Z component. If omitted the one from Base Vector will be used"
 ]
 @PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_subvelocity : "Calculate velocity based on entity properties"
 [

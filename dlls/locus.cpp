@@ -40,7 +40,7 @@ bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const cha
 	return false;
 }
 
-bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText , Vector& result)
+bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result)
 {
 	if (IsLikelyNumber(szText))
 	{ // it's a vector
@@ -62,7 +62,7 @@ bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char
 	return false;
 }
 
-bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText , float& result)
+bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText, float& result)
 {
 	if (IsLikelyNumber(szText))
 	{ // assume it's a float
@@ -81,7 +81,7 @@ bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText , float& result)
 	return false;
 }
 
-bool TryCalcLocus_Color(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText , Vector& result)
+bool TryCalcLocus_Color(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result)
 {
 	if (IsLikelyNumber(szText))
 	{ // it's a vector
@@ -639,9 +639,9 @@ bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 
 enum
 {
-	CALCNUMFROM_VELOCITY = 0,
-	CALCNUMFROM_POSITION = 1,
-	CALCNUMFROM_COLOR = 2,
+	CALCVECTOR_VELOCITY = 0,
+	CALCVECTOR_POSITION = 1,
+	CALCVECTOR_COLOR = 2,
 };
 
 class CCalcNumFromVec : public CPointEntity
@@ -672,19 +672,19 @@ bool CCalcNumFromVec::CalcRatio( CBaseEntity *pLocus, float* outResult )
 
 	Vector vecA;
 	switch (pev->weapons) {
-	case CALCNUMFROM_POSITION:
+	case CALCVECTOR_POSITION:
 		if (!TryCalcLocus_Position( this, pLocus, STRING(pev->target), vecA ))
 		{
 			return false;
 		}
 		break;
-	case CALCNUMFROM_COLOR:
+	case CALCVECTOR_COLOR:
 		if (!TryCalcLocus_Color( this, pLocus, STRING(pev->target), vecA ))
 		{
 			return false;
 		}
 		break;
-	case CALCNUMFROM_VELOCITY:
+	case CALCVECTOR_VELOCITY:
 	default:
 		if (!TryCalcLocus_Velocity( this, pLocus, STRING(pev->target), vecA ))
 		{
@@ -721,6 +721,105 @@ bool CCalcNumFromVec::CalcRatio( CBaseEntity *pLocus, float* outResult )
 	return false;
 }
 
+class CCalcVectorFromNums : public CPointEntity
+{
+public:
+	void KeyValue( KeyValueData *pkvd )
+	{
+		if (FStrEq(pkvd->szKeyName, "x_value"))
+		{
+			m_xValue = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "y_value"))
+		{
+			m_yValue = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "z_value"))
+		{
+			m_zValue = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "base_vector"))
+		{
+			pev->netname = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "vector_type"))
+		{
+			pev->weapons = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CPointEntity::KeyValue(pkvd);
+	}
+
+	bool CalcPosition(CBaseEntity *pLocus, Vector *outResult)
+	{
+		return CalcVector(pLocus, outResult);
+	}
+	bool CalcVelocity(CBaseEntity *pLocus, Vector *outResult)
+	{
+		return CalcVector(pLocus, outResult);
+	}
+
+	bool CalcVector(CBaseEntity* pLocus, Vector *outResult)
+	{
+		Vector baseVector = g_vecZero;
+
+		if (!FStringNull(pev->netname))
+		{
+			switch (pev->weapons) {
+			case CALCVECTOR_POSITION:
+				if (!TryCalcLocus_Position(this, pLocus, STRING(pev->netname), baseVector))
+					return false;
+				break;
+			case CALCVECTOR_COLOR:
+				if (!TryCalcLocus_Color(this, pLocus, STRING(pev->netname), baseVector))
+					return false;
+				break;
+			case CALCVECTOR_VELOCITY:
+			default:
+				if (!TryCalcLocus_Velocity(this, pLocus, STRING(pev->netname), baseVector))
+					return false;
+				break;
+			}
+		}
+
+		string_t components[3] = {m_xValue, m_yValue, m_zValue};
+		for (int i=0; i<3; ++i)
+		{
+			if (!FStringNull(components[i]))
+			{
+				float value;
+				if (!TryCalcLocus_Ratio(pLocus, STRING(components[i]), value))
+					return false;
+				baseVector[i] = value;
+			}
+		}
+		*outResult = baseVector;
+		return true;
+	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	string_t m_xValue;
+	string_t m_yValue;
+	string_t m_zValue;
+};
+
+TYPEDESCRIPTION CCalcVectorFromNums::m_SaveData[] =
+{
+	DEFINE_FIELD(CCalcVectorFromNums, m_xValue, FIELD_STRING),
+	DEFINE_FIELD(CCalcVectorFromNums, m_yValue, FIELD_STRING),
+	DEFINE_FIELD(CCalcVectorFromNums, m_zValue, FIELD_STRING),
+};
+
+LINK_ENTITY_TO_CLASS( calc_vecfromnums, CCalcVectorFromNums )
+IMPLEMENT_SAVERESTORE( CCalcVectorFromNums, CPointEntity )
 
 //=======================================================
 #define SF_CALCVELOCITY_NORMALIZE 1
