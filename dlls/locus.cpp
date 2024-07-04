@@ -1238,6 +1238,7 @@ protected:
 	string_t m_right;
 	int m_operation;
 	string_t m_storeIn;
+	string_t m_triggerOnFail;
 	string_t m_iszMin;
 	string_t m_iszMax;
 	int m_clampPolicy;
@@ -1249,6 +1250,7 @@ TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
 	DEFINE_FIELD( CCalcEvalNumber, m_right, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_operation, FIELD_INTEGER ),
 	DEFINE_FIELD( CCalcEvalNumber, m_storeIn, FIELD_STRING ),
+	DEFINE_FIELD( CCalcEvalNumber, m_triggerOnFail, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_iszMin, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_iszMax, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_clampPolicy, FIELD_INTEGER ),
@@ -1295,6 +1297,11 @@ void CCalcEvalNumber::KeyValue(KeyValueData *pkvd)
 		m_clampPolicy = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if(FStrEq(pkvd->szKeyName, "trigger_on_fail"))
+	{
+		m_triggerOnFail = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue(pkvd);
 }
@@ -1338,10 +1345,18 @@ float CCalcEvalNumber::CalcEvalNumber(CBaseEntity *pActivator, bool isUse, bool 
 
 	if (isUse)
 	{
-		if (m_storeIn)
-			FireTargets(STRING(m_storeIn), pActivator, this, USE_SET, result);
-		if (pev->target)
-			FireTargets(STRING(pev->target), pActivator, this);
+		if (success)
+		{
+			if (m_storeIn)
+				FireTargets(STRING(m_storeIn), pActivator, this, USE_SET, result);
+			if (pev->target)
+				FireTargets(STRING(pev->target), pActivator, this);
+		}
+		else
+		{
+			if (m_triggerOnFail)
+				FireTargets(STRING(m_triggerOnFail), pActivator, this);
+		}
 	}
 
 	return result;

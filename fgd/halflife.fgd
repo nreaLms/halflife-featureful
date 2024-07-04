@@ -1259,8 +1259,9 @@
 		2 : "Multiply"
 		3 : "Divide"
 	]
-	store_result(target_destination) : "Store result in"
-	target(target_destination) : "Trigger after operation"
+	store_result(target_destination) : "Store result in" : : "When calc_eval_number is triggered and the operation succeeded, store the numeric result in other entity like game_number or game_counter"
+	target(target_destination) : "Trigger after operation" : : "When calc_eval_number is triggered and the operation succeeded, trigger this target"
+	trigger_on_fail(target_destination) : "Trigger on calculation fail" : : "When calc_eval_number is triggered and the operation failed, trigger this target. The operation may fail if one of the operands couldn't be calculated due to the source entity being missing or invalid operation like dividing by zero."
 	min_value(string) : "Min (blank = none) [LR]" : : "Min boundary for the resulting value"
 	max_value(string) : "Max (blank = none) [LR]" : : "Max boundary for the resulting value"
 	clamp_policy(choices) : "If outside range" =
