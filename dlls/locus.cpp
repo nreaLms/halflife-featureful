@@ -644,6 +644,19 @@ enum
 	CALCVECTOR_COLOR = 2,
 };
 
+static bool TryCalcLocus_Vector(CBaseEntity* pEntity, CBaseEntity* pLocus, const char* szText, Vector& result, int requestedVectorType)
+{
+	switch (requestedVectorType) {
+	case CALCVECTOR_POSITION:
+		return TryCalcLocus_Position(pEntity, pLocus, szText, result);
+	case CALCVECTOR_COLOR:
+		return TryCalcLocus_Color(pEntity, pLocus, szText, result);
+	case CALCVECTOR_VELOCITY:
+	default:
+		return TryCalcLocus_Velocity(pEntity, pLocus, szText, result);
+	}
+}
+
 class CCalcNumFromVec : public CPointEntity
 {
 public:
@@ -671,26 +684,10 @@ bool CCalcNumFromVec::CalcRatio( CBaseEntity *pLocus, float* outResult )
 	}
 
 	Vector vecA;
-	switch (pev->weapons) {
-	case CALCVECTOR_POSITION:
-		if (!TryCalcLocus_Position( this, pLocus, STRING(pev->target), vecA ))
-		{
-			return false;
-		}
-		break;
-	case CALCVECTOR_COLOR:
-		if (!TryCalcLocus_Color( this, pLocus, STRING(pev->target), vecA ))
-		{
-			return false;
-		}
-		break;
-	case CALCVECTOR_VELOCITY:
-	default:
-		if (!TryCalcLocus_Velocity( this, pLocus, STRING(pev->target), vecA ))
-		{
-			return false;
-		}
-		break;
+	if (!TryCalcLocus_Vector(this, pLocus, STRING(pev->target), vecA, pev->weapons))
+	{
+		ALERT(at_error, "%s: Couldn't get the vector value from %s\n", STRING(pev->classname), STRING(pev->target));
+		return false;
 	}
 
 	switch(pev->impulse)
@@ -770,21 +767,8 @@ public:
 
 		if (!FStringNull(pev->netname))
 		{
-			switch (pev->weapons) {
-			case CALCVECTOR_POSITION:
-				if (!TryCalcLocus_Position(this, pLocus, STRING(pev->netname), baseVector))
-					return false;
-				break;
-			case CALCVECTOR_COLOR:
-				if (!TryCalcLocus_Color(this, pLocus, STRING(pev->netname), baseVector))
-					return false;
-				break;
-			case CALCVECTOR_VELOCITY:
-			default:
-				if (!TryCalcLocus_Velocity(this, pLocus, STRING(pev->netname), baseVector))
-					return false;
-				break;
-			}
+			if (!TryCalcLocus_Vector(this, pLocus, STRING(pev->netname), baseVector, pev->weapons))
+				return false;
 		}
 
 		string_t components[3] = {m_xValue, m_yValue, m_zValue};
