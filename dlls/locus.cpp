@@ -487,6 +487,64 @@ bool CCalcPosition::CalcPosition( CBaseEntity *pLocus, Vector* outVector )
 
 //=======================================================
 
+static bool ClampToMinMax(CBaseEntity* pLocus, float& fBasis, string_t iszMin, string_t iszMax, int clampPolicy)
+{
+	if (!FStringNull(iszMin))
+	{
+		float fMin = 0;
+		if (!TryCalcLocus_Ratio( pLocus, STRING(iszMin), fMin))
+			return false;
+
+		if (!FStringNull(iszMax))
+		{
+			float fMax = 0;
+			if (!TryCalcLocus_Ratio( pLocus, STRING(iszMax), fMax))
+				return false;
+
+			if (fBasis >= fMin && fBasis <= fMax) {
+				return true;
+			}
+			switch (clampPolicy)
+			{
+			case 0:
+				if (fBasis < fMin)
+					fBasis = fMin;
+				else
+					fBasis = fMax;
+				return true;
+			case 1:
+				while (fBasis < fMin)
+					fBasis += fMax - fMin;
+				while (fBasis > fMax)
+					fBasis -= fMax - fMin;
+				return true;
+			case 2:
+				while (fBasis < fMin || fBasis > fMax)
+				{
+					if (fBasis < fMin)
+						fBasis = fMin + fMax - fBasis;
+					else
+						fBasis = fMax + fMax - fBasis;
+				}
+				return true;
+			}
+		}
+
+		if (fBasis < fMin)
+			fBasis = fMin; // crop to nearest value
+	}
+	else if (!FStringNull(iszMax))
+	{
+		float fMax = 0;
+		if (!TryCalcLocus_Ratio( pLocus, STRING(iszMax), fMax))
+			return false;
+
+		if (fBasis > fMax)
+			fBasis = fMax; // crop to nearest value
+	}
+	return true;
+}
+
 enum
 {
 	CALCRATIO_TRANSFORM_NONE = 0,
@@ -572,68 +630,10 @@ bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 		fBasis = fBasis * fTmp;
 	}
 
-	if (!FStringNull(m_iszMin))
-	{
-		float fMin = 0;
-		if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszMin), fMin))
-			return false;
+	if (!ClampToMinMax(pLocus, fBasis, m_iszMin, m_iszMax, (int)pev->frags))
+		return false;
 
-		if (!FStringNull(m_iszMax))
-		{
-			float fMax = 0;
-			if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszMax), fMax))
-				return false;
-			
-			if (fBasis >= fMin && fBasis <= fMax) {
-				*outResult = fBasis;
-				return true;
-			}
-			switch ((int)pev->frags)
-			{
-			case 0:
-				if (fBasis < fMin)
-					*outResult = fMin;
-				else
-					*outResult = fMax;
-				return true;
-			case 1:
-				while (fBasis < fMin)
-					fBasis += fMax - fMin;
-				while (fBasis > fMax)
-					fBasis -= fMax - fMin;
-				*outResult = fBasis;
-				return true;
-			case 2:
-				while (fBasis < fMin || fBasis > fMax)
-				{
-					if (fBasis < fMin)
-						fBasis = fMin + fMax - fBasis;
-					else
-						fBasis = fMax + fMax - fBasis;
-				}
-				*outResult = fBasis;
-				return true;
-			}
-		}
-		
-		if (fBasis > fMin)
-			*outResult = fBasis;
-		else
-			*outResult = fMin; // crop to nearest value
-	}
-	else if (!FStringNull(m_iszMax))
-	{
-		float fMax = 0;
-		if (!TryCalcLocus_Ratio( pLocus, STRING(m_iszMax), fMax))
-			return false;
-
-		if (fBasis < fMax)
-			*outResult = fBasis;
-		else
-			*outResult = fMax; // crop to nearest value
-	}
-	else
-		*outResult = fBasis;
+	*outResult = fBasis;
 	return true;
 }
 
@@ -1238,6 +1238,9 @@ protected:
 	string_t m_right;
 	int m_operation;
 	string_t m_storeIn;
+	string_t m_iszMin;
+	string_t m_iszMax;
+	int m_clampPolicy;
 };
 
 TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
@@ -1246,6 +1249,9 @@ TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
 	DEFINE_FIELD( CCalcEvalNumber, m_right, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_operation, FIELD_INTEGER ),
 	DEFINE_FIELD( CCalcEvalNumber, m_storeIn, FIELD_STRING ),
+	DEFINE_FIELD( CCalcEvalNumber, m_iszMin, FIELD_STRING ),
+	DEFINE_FIELD( CCalcEvalNumber, m_iszMax, FIELD_STRING ),
+	DEFINE_FIELD( CCalcEvalNumber, m_clampPolicy, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CCalcEvalNumber, CPointEntity )
@@ -1254,24 +1260,39 @@ LINK_ENTITY_TO_CLASS( calc_eval_number, CCalcEvalNumber )
 
 void CCalcEvalNumber::KeyValue(KeyValueData *pkvd)
 {
-	if(strcmp(pkvd->szKeyName, "operation") == 0)
+	if(FStrEq(pkvd->szKeyName, "operation"))
 	{
 		m_operation = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
-	else if(strcmp(pkvd->szKeyName, "left_operand") == 0)
+	else if(FStrEq(pkvd->szKeyName, "left_operand"))
 	{
 		m_left = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
-	else if(strcmp(pkvd->szKeyName, "right_operand") == 0)
+	else if(FStrEq(pkvd->szKeyName, "right_operand"))
 	{
 		m_right = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
-	else if(strcmp(pkvd->szKeyName, "store_result") == 0)
+	else if(FStrEq(pkvd->szKeyName, "store_result"))
 	{
 		m_storeIn = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "min_value"))
+	{
+		m_iszMin = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "max_value"))
+	{
+		m_iszMax = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "clamp_policy"))
+	{
+		m_clampPolicy = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1304,7 +1325,16 @@ float CCalcEvalNumber::CalcEvalNumber(CBaseEntity *pActivator, bool isUse, bool 
 		return 0.0f;
 	}
 
-	const float result = DoOperation(leftValue, rightValue, m_operation, success);
+	float result = DoOperation(leftValue, rightValue, m_operation, success);
+
+	if (success)
+	{
+		if (!ClampToMinMax(pActivator, result, m_iszMin, m_iszMax, m_clampPolicy))
+		{
+			success = false;
+			return 0.0f;
+		}
+	}
 
 	if (isUse)
 	{
