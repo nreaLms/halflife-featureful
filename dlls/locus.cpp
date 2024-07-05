@@ -354,6 +354,9 @@ void CLocusBeam::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		pBeam = CBeam::BeamCreate( STRING(m_iszSprite), m_iWidth );
 		pBeam->PointsInit( vecStartPos, vecStartPos + vecEndPos );
 		break;
+	default:
+		ALERT(at_error, "%s: unknown 'Start and End' type. Refusing to spawn a beam\n", STRING(pev->classname));
+		return;
 	}
 	pBeam->SetColor( pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z );
 	pBeam->SetBrightness( pev->renderamt );
