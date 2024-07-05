@@ -1217,6 +1217,13 @@ public:
 		EVAL_DIVIDE,
 	};
 
+	enum {
+		REPORTED_VECTOR_NONE = 0,
+		REPORTED_VECTOR_X00 = 1,
+		REPORTED_VECTOR_0Y0 = 2,
+		REPORTED_VECTOR_00Z = 3,
+	};
+
 	void KeyValue( KeyValueData *pkvd );
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	bool CalcRatio(CBaseEntity *pLocus, float *outResult)
@@ -1224,6 +1231,14 @@ public:
 		bool success;
 		*outResult = CalcEvalNumber(pLocus, false, success);
 		return success;
+	}
+	bool CalcVelocity(CBaseEntity *pLocus, Vector *outResult)
+	{
+		return ReportVector(pLocus, *outResult);
+	}
+	bool CalcPosition(CBaseEntity *pLocus, Vector *outResult)
+	{
+		return ReportVector(pLocus, *outResult);
 	}
 
 	virtual int		Save( CSave &save );
@@ -1233,6 +1248,7 @@ public:
 protected:
 	float CalcEvalNumber(CBaseEntity* pActivator, bool isUse, bool& success);
 	float DoOperation(float leftValue, float rightValue, int operationId, bool& success);
+	bool ReportVector(CBaseEntity* pLocus, Vector& result);
 
 	string_t m_left;
 	string_t m_right;
@@ -1242,6 +1258,7 @@ protected:
 	string_t m_iszMin;
 	string_t m_iszMax;
 	int m_clampPolicy;
+	int m_vectorMode;
 };
 
 TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
@@ -1254,6 +1271,7 @@ TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
 	DEFINE_FIELD( CCalcEvalNumber, m_iszMin, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_iszMax, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_clampPolicy, FIELD_INTEGER ),
+	DEFINE_FIELD( CCalcEvalNumber, m_vectorMode, FIELD_INTEGER ),
 };
 
 IMPLEMENT_SAVERESTORE( CCalcEvalNumber, CPointEntity )
@@ -1300,6 +1318,11 @@ void CCalcEvalNumber::KeyValue(KeyValueData *pkvd)
 	else if(FStrEq(pkvd->szKeyName, "trigger_on_fail"))
 	{
 		m_triggerOnFail = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "vector_mode"))
+	{
+		m_vectorMode = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1383,5 +1406,28 @@ float CCalcEvalNumber::DoOperation(float leftValue, float rightValue, int operat
 		ALERT(at_error, "%s: unknown operation id %d\n", STRING(pev->classname), operationId);
 		success = false;
 		return 0.0f;
+	}
+}
+
+bool CCalcEvalNumber::ReportVector(CBaseEntity *pLocus, Vector &result)
+{
+	bool success;
+	float f = CalcEvalNumber(pLocus, false, success);
+	if (!success)
+		return false;
+
+	switch (m_vectorMode) {
+	case REPORTED_VECTOR_X00:
+		result = Vector(f, 0.0f, 0.0f);
+		return true;
+	case REPORTED_VECTOR_0Y0:
+		result =  Vector(0.0f, f, 0.0f);
+		return true;
+	case REPORTED_VECTOR_00Z:
+		result = Vector(0.0f, 0.0f, f);
+		return true;
+	case REPORTED_VECTOR_NONE:
+	default:
+		return false;
 	}
 }

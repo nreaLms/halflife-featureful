@@ -1270,6 +1270,13 @@
 		1 : "Wrap around"
 		2 : "Bounce back"
 	]
+	vector_mode(choices) : "Report as vector" : : "When the Position or Velocity is requested from this entity, form the vector based on the number depending on the chosen pattern. E.g. for 'X 0 0' pattern and number computed to 10 the resulting vector will be '10 0 0'. Sometimes it's more handy than having a dedicated calc_vecfromnums." =
+	[
+		0 : "No"
+		1 : "X 0 0"
+		2 : "0 Y 0"
+		3 : "0 0 Z"
+	]
 ]
 
 @PointClass base(Targetname) color(170 221 85) size(-12 -12 -12, 12 12 12) = calc_numfromvec : "Calculate number based on vector"
