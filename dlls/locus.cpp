@@ -1212,9 +1212,10 @@ class CCalcEvalNumber : public CPointEntity
 public:
 	enum {
 		EVAL_ADD = 0,
-		EVAL_SUBSTRUCT,
-		EVAL_MULTIPLY,
-		EVAL_DIVIDE,
+		EVAL_SUBSTRUCT = 1,
+		EVAL_MULTIPLY = 2,
+		EVAL_DIVIDE = 3,
+		EVAL_MOD = 4,
 	};
 
 	enum {
@@ -1228,9 +1229,7 @@ public:
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	bool CalcRatio(CBaseEntity *pLocus, float *outResult)
 	{
-		bool success;
-		*outResult = CalcEvalNumber(pLocus, false, success);
-		return success;
+		return CalcEvalNumber(pLocus, *outResult);
 	}
 	bool CalcVelocity(CBaseEntity *pLocus, Vector *outResult)
 	{
@@ -1246,12 +1245,13 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 protected:
-	float CalcEvalNumber(CBaseEntity* pActivator, bool isUse, bool& success);
-	float DoOperation(float leftValue, float rightValue, int operationId, bool& success);
+	bool CalcEvalNumber(CBaseEntity* pActivator, float& result);
+	bool DoOperation(float& result, float* operands, int operandCount, int operationId);
 	bool ReportVector(CBaseEntity* pLocus, Vector& result);
 
 	string_t m_left;
 	string_t m_right;
+	string_t m_third;
 	int m_operation;
 	string_t m_storeIn;
 	string_t m_triggerOnFail;
@@ -1265,6 +1265,7 @@ TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
 {
 	DEFINE_FIELD( CCalcEvalNumber, m_left, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_right, FIELD_STRING ),
+	DEFINE_FIELD( CCalcEvalNumber, m_third, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_operation, FIELD_INTEGER ),
 	DEFINE_FIELD( CCalcEvalNumber, m_storeIn, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_triggerOnFail, FIELD_STRING ),
@@ -1293,6 +1294,11 @@ void CCalcEvalNumber::KeyValue(KeyValueData *pkvd)
 	else if(FStrEq(pkvd->szKeyName, "right_operand"))
 	{
 		m_right = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "third_operand"))
+	{
+		m_third = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if(FStrEq(pkvd->szKeyName, "store_result"))
@@ -1331,89 +1337,99 @@ void CCalcEvalNumber::KeyValue(KeyValueData *pkvd)
 
 void CCalcEvalNumber::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	bool success;
-	CalcEvalNumber(pActivator, true, success);
+	float result;
+	if (CalcEvalNumber(pActivator, result))
+	{
+		if (m_storeIn)
+			FireTargets(STRING(m_storeIn), pActivator, this, USE_SET, result);
+		if (pev->target)
+			FireTargets(STRING(pev->target), pActivator, this);
+	}
+	else
+	{
+		if (m_triggerOnFail)
+			FireTargets(STRING(m_triggerOnFail), pActivator, this);
+	}
 }
 
-float CCalcEvalNumber::CalcEvalNumber(CBaseEntity *pActivator, bool isUse, bool &success)
+bool CCalcEvalNumber::CalcEvalNumber(CBaseEntity* pActivator, float& result)
 {
 	if (FStringNull(m_left) || FStringNull(m_right))
 	{
-		ALERT(at_error, "%s needs both left and right operands defined\n", STRING(pev->classname));
-		success = false;
-		return 0.0f;
+		ALERT(at_error, "%s needs at least left and right operands defined\n", STRING(pev->classname));
+		return false;
 	}
 
-	float leftValue = 0;
-	float rightValue = 0;
+	float leftValue;
+	float rightValue;
 
-	const bool leftSuccess = TryCalcLocus_Ratio(pActivator, STRING(m_left), leftValue);
-	const bool rightSuccess = TryCalcLocus_Ratio(pActivator, STRING(m_right), rightValue);
+	if (!TryCalcLocus_Ratio(pActivator, STRING(m_left), leftValue))
+		return false;
+	if (!TryCalcLocus_Ratio(pActivator, STRING(m_right), rightValue))
+		return false;
 
-	if (!leftSuccess || !rightSuccess) {
-		success = false;
-		return 0.0f;
-	}
+	int operandCount = 2;
 
-	float result = DoOperation(leftValue, rightValue, m_operation, success);
-
-	if (success)
+	float thirdValue;
+	if (!FStringNull(m_third))
 	{
-		if (!ClampToMinMax(pActivator, result, m_iszMin, m_iszMax, m_clampPolicy))
-		{
-			success = false;
-			return 0.0f;
-		}
+		if (!TryCalcLocus_Ratio(pActivator, STRING(m_third), thirdValue))
+			return false;
+		operandCount++;
 	}
 
-	if (isUse)
-	{
-		if (success)
-		{
-			if (m_storeIn)
-				FireTargets(STRING(m_storeIn), pActivator, this, USE_SET, result);
-			if (pev->target)
-				FireTargets(STRING(pev->target), pActivator, this);
-		}
-		else
-		{
-			if (m_triggerOnFail)
-				FireTargets(STRING(m_triggerOnFail), pActivator, this);
-		}
-	}
+	float operands[3] = {leftValue, rightValue, thirdValue};
 
-	return result;
+	if (!DoOperation(result, operands, operandCount, m_operation))
+		return false;
+
+	if (!ClampToMinMax(pActivator, result, m_iszMin, m_iszMax, m_clampPolicy))
+		return false;
+
+	return true;
 }
 
-float CCalcEvalNumber::DoOperation(float leftValue, float rightValue, int operationId, bool &success)
+bool CCalcEvalNumber::DoOperation(float& result, float* operands, int operandCount, int operationId)
 {
-	success = true;
-	switch (operationId) {
-	case EVAL_ADD:
-		return leftValue + rightValue;
-	case EVAL_SUBSTRUCT:
-		return leftValue - rightValue;
-	case EVAL_MULTIPLY:
-		return leftValue * rightValue;
-	case EVAL_DIVIDE:
-		if (rightValue == 0)
-		{
-			success = false;
-			return 0.0f;
+	if (operandCount <= 0)
+		return false;
+	float value = operands[0];
+	for (int i=1; i<operandCount; ++i)
+	{
+		float operand = operands[i];
+		switch (operationId) {
+		case EVAL_ADD:
+			value += operand;
+			break;
+		case EVAL_SUBSTRUCT:
+			value -= operand;
+			break;
+		case EVAL_MULTIPLY:
+			value *= operand;
+			break;
+		case EVAL_DIVIDE:
+			if (operand == 0.0f)
+				return false;
+			value /= operand;
+			break;
+		case EVAL_MOD:
+			if (operand == 0.0f)
+				return false;
+			value = fmod(value, operand);
+			break;
+		default:
+			ALERT(at_error, "%s: unknown operation id %d\n", STRING(pev->classname), operationId);
+			return false;
 		}
-		return leftValue / rightValue;
-	default:
-		ALERT(at_error, "%s: unknown operation id %d\n", STRING(pev->classname), operationId);
-		success = false;
-		return 0.0f;
 	}
+	result = value;
+	return true;
 }
 
 bool CCalcEvalNumber::ReportVector(CBaseEntity *pLocus, Vector &result)
 {
-	bool success;
-	float f = CalcEvalNumber(pLocus, false, success);
-	if (!success)
+	float f;
+	if (!CalcEvalNumber(pLocus, f))
 		return false;
 
 	switch (m_vectorMode) {

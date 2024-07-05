@@ -1250,14 +1250,16 @@
 
 @PointClass base(Targetname) color(170 221 85) size(-12 -12 -12, 12 12 12) = calc_eval_number : "Calculate number"
 [
-	left_operand(string) : "Left Operand [LR]"
-	right_operand(string) : "Right Operand [LR]"
+	left_operand(string) : "First Operand [LR]"
+	right_operand(string) : "Second Operand [LR]"
+	third_operand(string) : "Third Operand [LR] (optional)" : : "After calculating the result of operation on the first 2 operands, make the same operation with the result and the third operand. This allows, for example, to add 3 values without resorting to the use of another calc_eval_number."
 	operation(choices) : "Operation" : 0 =
 	[
 		0 : "Add"
 		1 : "Substruct"
 		2 : "Multiply"
 		3 : "Divide"
+		4 : "Mod"
 	]
 	store_result(target_destination) : "Store result in" : : "When calc_eval_number is triggered and the operation succeeded, store the numeric result in other entity like game_number or game_counter"
 	target(target_destination) : "Trigger after operation" : : "When calc_eval_number is triggered and the operation succeeded, trigger this target"
