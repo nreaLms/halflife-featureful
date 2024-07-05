@@ -1216,6 +1216,8 @@ public:
 		EVAL_MULTIPLY = 2,
 		EVAL_DIVIDE = 3,
 		EVAL_MOD = 4,
+		EVAL_MIN = 5,
+		EVAL_MAX = 6
 	};
 
 	enum {
@@ -1416,6 +1418,12 @@ bool CCalcEvalNumber::DoOperation(float& result, float* operands, int operandCou
 			if (operand == 0.0f)
 				return false;
 			value = fmod(value, operand);
+			break;
+		case EVAL_MIN:
+			value = Q_min(value, operand);
+			break;
+		case EVAL_MAX:
+			value = Q_max(value, operand);
 			break;
 		default:
 			ALERT(at_error, "%s: unknown operation id %d\n", STRING(pev->classname), operationId);
