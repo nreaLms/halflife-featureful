@@ -127,6 +127,7 @@ public:
 	void KeyValue( KeyValueData* pkvd );
 	void Spawn( void );
 	void Precache( void );
+	void Activate();
 	void EXPORT ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT StartPlayFrom( void );
 	void EXPORT RampThink( void );
@@ -144,8 +145,12 @@ public:
 	BOOL m_fActive;	// only TRUE when the entity is playing a looping sound
 	BOOL m_fLooping;	// TRUE when the sound played will loop
 
-	edict_t *m_pPlayFrom; //LRC - the entity to play from
+	EHANDLE m_hPlayFrom; //LRC - the entity to play from
 	int		m_iChannel; //LRC - the channel to play from, for "play from X" sounds
+	EHANDLE m_hActivator; // this is for m_hPlayFrom, in case the entity is !activator
+
+	bool EntityToPlayFromIsDefined();
+	CBaseEntity* GetEntityToPlayFrom(CBaseEntity* pActivator);
 };
 
 LINK_ENTITY_TO_CLASS( ambient_generic, CAmbientGeneric )
@@ -156,7 +161,7 @@ TYPEDESCRIPTION	CAmbientGeneric::m_SaveData[] =
 	DEFINE_FIELD( CAmbientGeneric, m_fActive, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CAmbientGeneric, m_fLooping, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CAmbientGeneric, m_iChannel, FIELD_INTEGER ), //LRC
-	DEFINE_FIELD( CAmbientGeneric, m_pPlayFrom, FIELD_EDICT ), //LRC
+	DEFINE_FIELD( CAmbientGeneric, m_hPlayFrom, FIELD_EHANDLE ), //LRC
 
 	// HACKHACK - This is not really in the spirit of the save/restore design, but save this
 	// out as a binary data block.  If the dynpitchvol_t is changed, old saved games will NOT
@@ -164,6 +169,8 @@ TYPEDESCRIPTION	CAmbientGeneric::m_SaveData[] =
 	// The right way to do this is to split the input parms (read in keyvalue) into members and re-init this
 	// struct in Precache(), but it's unlikely that the struct will change, so it's not worth the time right now.
 	DEFINE_ARRAY( CAmbientGeneric, m_dpv, FIELD_CHARACTER, sizeof(dynpitchvol_t) ),
+
+	DEFINE_FIELD( CAmbientGeneric, m_hActivator, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CAmbientGeneric, CBaseEntity )
@@ -282,9 +289,32 @@ void CAmbientGeneric::Precache( void )
 			m_fActive = TRUE;
 	}
 
-	if (pev->target)
+	if( m_fActive )
 	{
-		CBaseEntity *pTarget = UTIL_FindEntityByTargetname( NULL, STRING(pev->target));
+		if (!EntityToPlayFromIsDefined())
+		{
+			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
+					( m_dpv.vol * 0.01f ), m_flAttenuation, SND_SPAWNING, m_dpv.pitch );
+			pev->nextthink = gpGlobals->time + 0.1f;
+		}
+	}
+}
+
+bool CAmbientGeneric::EntityToPlayFromIsDefined()
+{
+	return !FStringNull(pev->target);
+}
+
+CBaseEntity* CAmbientGeneric::GetEntityToPlayFrom(CBaseEntity *pActivator)
+{
+	return UTIL_FindEntityByTargetname(NULL, STRING(pev->target), pActivator);
+}
+
+void CAmbientGeneric::Activate()
+{
+	if (m_fActive && EntityToPlayFromIsDefined())
+	{
+		CBaseEntity *pTarget = GetEntityToPlayFrom(m_hActivator);
 		if (!pTarget)
 		{
 			ALERT(at_console, "WARNING: ambient_generic \"%s\" can't find \"%s\", its entity to play from.\n",
@@ -292,35 +322,25 @@ void CAmbientGeneric::Precache( void )
 		}
 		else
 		{
-			m_pPlayFrom = ENT(pTarget->pev);
-		}
-	}
-
-	if( m_fActive )
-	{
-		if (m_pPlayFrom)
-		{
+			m_hPlayFrom = pTarget;
 			SetThink(&CAmbientGeneric::StartPlayFrom); //LRC
+			pev->nextthink = gpGlobals->time + 0.1f;
 		}
-		else
-		{
-			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
-					( m_dpv.vol * 0.01f ), m_flAttenuation, SND_SPAWNING, m_dpv.pitch );
-		}
-
-		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 }
 
-void CAmbientGeneric :: StartPlayFrom( void )
+void CAmbientGeneric::StartPlayFrom( void )
 {
 	const char* szSoundFile = STRING(pev->message);
 
-	EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, //LRC
-			(m_dpv.vol * 0.01), m_flAttenuation, SND_SPAWNING, m_dpv.pitch);
+	if (m_hPlayFrom != 0)
+	{
+		EMIT_SOUND_DYN( m_hPlayFrom->edict(), m_iChannel, szSoundFile, //LRC
+				(m_dpv.vol * 0.01f), m_flAttenuation, SND_SPAWNING, m_dpv.pitch);
 
-	SetThink(&CAmbientGeneric::RampThink);
-	pev->nextthink = gpGlobals->time + 0.1;
+		SetThink(&CAmbientGeneric::RampThink);
+		pev->nextthink = gpGlobals->time + 0.1f;
+	}
 }
 
 // RampThink - Think at 5hz if we are dynamically modifying 
@@ -365,9 +385,9 @@ void CAmbientGeneric::RampThink( void )
 			m_dpv.spindown = 0;				// done with ramp down
 
 			// shut sound off
-			if (m_pPlayFrom)
+			if (m_hPlayFrom != 0)
 			{
-				STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile); //LRC
+				STOP_SOUND( m_hPlayFrom->edict(), m_iChannel, szSoundFile); //LRC
 			}
 			else
 			{
@@ -416,9 +436,9 @@ void CAmbientGeneric::RampThink( void )
 			m_dpv.fadeout = 0;				// done with ramp down
 
 			// shut sound off
-			if (m_pPlayFrom)
+			if (m_hPlayFrom != 0)
 			{
-				STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile); //LRC
+				STOP_SOUND( m_hPlayFrom->edict(), m_iChannel, szSoundFile); //LRC
 			}
 			else
 			{
@@ -527,9 +547,9 @@ void CAmbientGeneric::RampThink( void )
 		if( pitch == PITCH_NORM )
 			pitch = PITCH_NORM + 1; // don't send 'no pitch' !
 
-		if (m_pPlayFrom)
+		if (m_hPlayFrom != 0)
 		{
-			EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, (vol * 0.01f), //LRC
+			EMIT_SOUND_DYN( m_hPlayFrom->edict(), m_iChannel, szSoundFile, (vol * 0.01f), //LRC
 					m_flAttenuation, flags, pitch);
 		}
 		else
@@ -661,9 +681,9 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 
 		m_dpv.pitch = (int)( fraction * 255.0f );
 
-		if (m_pPlayFrom)
+		if (m_hPlayFrom != 0)
 		{
-			EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, 0, 0, SND_CHANGE_PITCH, m_dpv.pitch);
+			EMIT_SOUND_DYN( m_hPlayFrom->edict(), m_iChannel, szSoundFile, 0, 0, SND_CHANGE_PITCH, m_dpv.pitch);
 		}
 		else
 		{
@@ -717,9 +737,9 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 				m_dpv.fadein = 0;
 				pev->nextthink = gpGlobals->time + 0.1f;
 			}
-			else if (m_pPlayFrom)
+			else if (m_hPlayFrom != 0)
 			{
-				STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile);
+				STOP_SOUND( m_hPlayFrom->edict(), m_iChannel, szSoundFile);
 			}
 			else
 			{
@@ -737,9 +757,9 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		// and then restarted.
 		if( m_fLooping )
 			m_fActive = TRUE;
-		else if (m_pPlayFrom)
+		else if (m_hPlayFrom != 0)
 		{
-			STOP_SOUND( m_pPlayFrom, m_iChannel, szSoundFile); //LRC
+			STOP_SOUND( m_hPlayFrom->edict(), m_iChannel, szSoundFile); //LRC
 		}
 		else
 			// shut sound off now - may be interrupting a long non-looping sound
@@ -750,10 +770,15 @@ void CAmbientGeneric::ToggleUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 
 		szSoundFile = GetNextSound();
 
-		if (m_pPlayFrom)
+		if (EntityToPlayFromIsDefined())
 		{
-			EMIT_SOUND_DYN( m_pPlayFrom, m_iChannel, szSoundFile, //LRC
-					(m_dpv.vol * 0.01f), m_flAttenuation, 0, m_dpv.pitch);
+			m_hActivator = pActivator;
+			m_hPlayFrom = GetEntityToPlayFrom(pActivator);
+			if (m_hPlayFrom != 0)
+			{
+				EMIT_SOUND_DYN( m_hPlayFrom->edict(), m_iChannel, szSoundFile, //LRC
+						(m_dpv.vol * 0.01f), m_flAttenuation, 0, m_dpv.pitch);
+			}
 		}
 		else
 		{
