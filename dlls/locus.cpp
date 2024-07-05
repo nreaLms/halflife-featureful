@@ -562,18 +562,48 @@ enum
 	CALCRATIO_TRANSFORM_ATANGENT,
 };
 
+enum
+{
+	CALC_CASTTOINT_NO = 0,
+	CALC_CASTTOINT_ROUND = 1,
+	CALC_CASTTOINT_FLOOR = 2,
+	CALC_CASTTOINT_CEIL = 3,
+	CALC_CASTTOINT_TRUNC = 4,
+};
+
+static float ApplyCastMode(float f, byte castMode)
+{
+	switch(castMode)
+	{
+	case CALC_CASTTOINT_ROUND:
+		return round(f);
+	case CALC_CASTTOINT_FLOOR:
+		return floor(f);
+	case CALC_CASTTOINT_CEIL:
+		return ceil(f);
+	case CALC_CASTTOINT_TRUNC:
+		return trunc(f);
+	case CALC_CASTTOINT_NO:
+	default:
+		return f;
+	}
+}
+
 class CCalcRatio : public CPointEntity
 {
 public:
 	bool CalcRatio( CBaseEntity *pLocus, float* outResult );
 
 	void Spawn();
+	void KeyValue( KeyValueData *pkvd );
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
 	string_t m_iszMin;
 	string_t m_iszMax;
+	byte m_baseCastMode;
+	byte m_resultCastMode;
 };
 
 LINK_ENTITY_TO_CLASS( calc_ratio, CCalcRatio )
@@ -582,6 +612,8 @@ TYPEDESCRIPTION	CCalcRatio::m_SaveData[] =
 {
 	DEFINE_FIELD( CCalcRatio, m_iszMin, FIELD_STRING ),
 	DEFINE_FIELD( CCalcRatio, m_iszMax, FIELD_STRING ),
+	DEFINE_FIELD( CCalcRatio, m_baseCastMode, FIELD_CHARACTER ),
+	DEFINE_FIELD( CCalcRatio, m_resultCastMode, FIELD_CHARACTER ),
 };
 
 IMPLEMENT_SAVERESTORE( CCalcRatio, CPointEntity )
@@ -594,12 +626,30 @@ void CCalcRatio::Spawn()
 	pev->noise1 = iStringNull;
 }
 
+void CCalcRatio::KeyValue(KeyValueData *pkvd)
+{
+	if(FStrEq(pkvd->szKeyName, "base_cast_mode"))
+	{
+		m_baseCastMode = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "result_cast_mode"))
+	{
+		m_resultCastMode = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue(pkvd);
+}
+
 bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 {
 	float fBasis = 0;
 	if (!TryCalcLocus_Ratio( pLocus, STRING(pev->target), fBasis)) {
 		return false;
 	}
+
+	fBasis = ApplyCastMode(fBasis, m_baseCastMode);
 
 	switch (pev->impulse)
 	{
@@ -633,6 +683,7 @@ bool CCalcRatio::CalcRatio( CBaseEntity *pLocus, float* outResult )
 	if (!ClampToMinMax(pLocus, fBasis, m_iszMin, m_iszMax, (int)pev->frags))
 		return false;
 
+	fBasis = ApplyCastMode(fBasis, m_resultCastMode);
 	*outResult = fBasis;
 	return true;
 }
@@ -1261,6 +1312,10 @@ protected:
 	string_t m_iszMax;
 	int m_clampPolicy;
 	int m_vectorMode;
+	byte m_firstCastMode;
+	byte m_secondCastMode;
+	byte m_thirdCastMode;
+	byte m_resultCastMode;
 };
 
 TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
@@ -1275,6 +1330,10 @@ TYPEDESCRIPTION CCalcEvalNumber::m_SaveData[] =
 	DEFINE_FIELD( CCalcEvalNumber, m_iszMax, FIELD_STRING ),
 	DEFINE_FIELD( CCalcEvalNumber, m_clampPolicy, FIELD_INTEGER ),
 	DEFINE_FIELD( CCalcEvalNumber, m_vectorMode, FIELD_INTEGER ),
+	DEFINE_FIELD( CCalcEvalNumber, m_firstCastMode, FIELD_CHARACTER ),
+	DEFINE_FIELD( CCalcEvalNumber, m_secondCastMode, FIELD_CHARACTER ),
+	DEFINE_FIELD( CCalcEvalNumber, m_thirdCastMode, FIELD_CHARACTER ),
+	DEFINE_FIELD( CCalcEvalNumber, m_resultCastMode, FIELD_CHARACTER ),
 };
 
 IMPLEMENT_SAVERESTORE( CCalcEvalNumber, CPointEntity )
@@ -1333,6 +1392,26 @@ void CCalcEvalNumber::KeyValue(KeyValueData *pkvd)
 		m_vectorMode = atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if(FStrEq(pkvd->szKeyName, "first_cast_mode"))
+	{
+		m_firstCastMode = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "second_cast_mode"))
+	{
+		m_secondCastMode = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "third_cast_mode"))
+	{
+		m_thirdCastMode = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if(FStrEq(pkvd->szKeyName, "result_cast_mode"))
+	{
+		m_resultCastMode = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue(pkvd);
 }
@@ -1370,6 +1449,9 @@ bool CCalcEvalNumber::CalcEvalNumber(CBaseEntity* pActivator, float& result)
 	if (!TryCalcLocus_Ratio(pActivator, STRING(m_right), rightValue))
 		return false;
 
+	leftValue = ApplyCastMode(leftValue, m_firstCastMode);
+	rightValue = ApplyCastMode(rightValue, m_secondCastMode);
+
 	int operandCount = 2;
 
 	float thirdValue;
@@ -1378,6 +1460,7 @@ bool CCalcEvalNumber::CalcEvalNumber(CBaseEntity* pActivator, float& result)
 		if (!TryCalcLocus_Ratio(pActivator, STRING(m_third), thirdValue))
 			return false;
 		operandCount++;
+		thirdValue = ApplyCastMode(thirdValue, m_thirdCastMode);
 	}
 
 	float operands[3] = {leftValue, rightValue, thirdValue};
@@ -1388,6 +1471,7 @@ bool CCalcEvalNumber::CalcEvalNumber(CBaseEntity* pActivator, float& result)
 	if (!ClampToMinMax(pActivator, result, m_iszMin, m_iszMax, m_clampPolicy))
 		return false;
 
+	result = ApplyCastMode(result, m_resultCastMode);
 	return true;
 }
 

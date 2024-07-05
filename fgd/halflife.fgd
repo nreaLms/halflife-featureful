@@ -1281,6 +1281,38 @@
 		2 : "0 Y 0"
 		3 : "0 0 Z"
 	]
+	first_cast_mode(choices) : "Cast first operand" =
+	[
+		0 : "No cast"
+		1 : "Round"
+		2 : "Floor"
+		3 : "Ceil"
+		4 : "Trunc"
+	]
+	second_cast_mode(choices) : "Cast second operand" =
+	[
+		0 : "No cast"
+		1 : "Round"
+		2 : "Floor"
+		3 : "Ceil"
+		4 : "Trunc"
+	]
+	third_cast_mode(choices) : "Cast third operand" =
+	[
+		0 : "No cast"
+		1 : "Round"
+		2 : "Floor"
+		3 : "Ceil"
+		4 : "Trunc"
+	]
+	result_cast_mode(choices) : "Cast result" =
+	[
+		0 : "No cast"
+		1 : "Round"
+		2 : "Floor"
+		3 : "Ceil"
+		4 : "Trunc"
+	]
 ]
 
 @PointClass base(Targetname) color(170 221 85) size(-12 -12 -12, 12 12 12) = calc_numfromvec : "Calculate number based on vector"
@@ -1348,6 +1380,22 @@
 		0 : "Pick nearest value"
 		1 : "Wrap around"
 		2 : "Bounce back"
+	]
+	base_cast_mode(choices) : "Cast base" =
+	[
+		0 : "No cast"
+		1 : "Round"
+		2 : "Floor"
+		3 : "Ceil"
+		4 : "Trunc"
+	]
+	result_cast_mode(choices) : "Cast result" =
+	[
+		0 : "No cast"
+		1 : "Round"
+		2 : "Floor"
+		3 : "Ceil"
+		4 : "Trunc"
 	]
 ]
 @PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_vecfromnums : "Calculate vector based on three numbers. This entity will report the resulting vector as both its Position and Velocity"
