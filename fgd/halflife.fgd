@@ -60,7 +60,30 @@
 	sequence(integer) : "Animation Sequence (editor)" : : "Sequence to display in Jackhammer. This does not affect gameplay."
 ]
 
-@BaseClass = ZHLT
+@BaseClass = ZHLTbmodel
+[
+	zhlt_usemodel(string) : "ZHLT Template Model Target"
+	zhlt_copylight(string) : "ZHLT Copy Lighting From Target"
+	zhlt_noclip(choices) : "ZHLT Disable Clipping" =
+	[
+		0 : "Default"
+		1 : "Always non-solid"
+	]
+	zhlt_invisible(choices) : "ZHLT Invisible" =
+	[
+		0 : "Visible (default)"
+		1 : "Invisible"
+	]
+	zhlt_customshadow(string) : "ZHLT Custom Shadow (when opaque)"
+	zhlt_embedlightmap(choices) : "ZHLT Embed Light Map (when translucent)" =
+	[
+		0 : "No (default)"
+		1 : "Yes"
+	]
+	zhlt_embedlightmapresolution(integer) : "ZHLT Embed Light Map Resolution"
+]
+
+@BaseClass base(ZHLTbmodel) = ZHLT
 [
 	zhlt_lightflags(choices) : "ZHLT Lightflags" : 0 =
 	[
