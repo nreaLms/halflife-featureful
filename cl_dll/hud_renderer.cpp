@@ -174,8 +174,6 @@ int HudSpriteRenderer::VidInit() {
 	if (gHUD.hasHudScaleInEngine)
 		return 1;
 
-	assert(hud_scale != NULL);
-
 	float average_scale = 1.0f;
 
 	float x_scale;
@@ -321,13 +319,8 @@ void HudSpriteRenderer::RecalcHUDScale()
 		return;
 	}
 
-	assert(hud_scale != NULL);
-
-	float scale = 1.0f;
-
-	if (hud_scale->value > 0.0f)
-		scale = hud_scale->value;
-	else
+	float scale = hud_scale ? hud_scale->value : gHUD.clientFeatures.hud_scale.defaultValue;
+	if (scale <= 0.0f)
 		scale = hud_auto_scale_value;
 
 	cachedHudScale = scale;

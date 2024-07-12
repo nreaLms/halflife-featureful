@@ -790,7 +790,7 @@ struct ClientFeatures
 	ConfigurableBoundedValue hud_min_alpha;
 	int hud_color_critical;
 
-	bool hud_autoscale_by_default;
+	ConfigurableFloatValue hud_scale;
 	bool hud_draw_nosuit;
 	int hud_color_nosuit;
 
