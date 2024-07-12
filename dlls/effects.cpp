@@ -4752,6 +4752,10 @@ public:
 	float m_fadeSpeed;
 	float m_scaleSpeed;
 
+	string_t m_iszPosition;
+	string_t m_iszDirection;
+	EHANDLE m_hActivator;
+
 	int m_iSprite;
 };
 
@@ -4767,6 +4771,9 @@ TYPEDESCRIPTION	CParticleShooter::m_SaveData[] =
 	DEFINE_FIELD( CParticleShooter, m_velVariance, FIELD_FLOAT ),
 	DEFINE_FIELD( CParticleShooter, m_fadeSpeed, FIELD_FLOAT ),
 	DEFINE_FIELD( CParticleShooter, m_scaleSpeed, FIELD_FLOAT ),
+	DEFINE_FIELD( CParticleShooter, m_iszPosition, FIELD_STRING ),
+	DEFINE_FIELD( CParticleShooter, m_iszDirection, FIELD_STRING ),
+	DEFINE_FIELD( CParticleShooter, m_hActivator, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CParticleShooter, CPointEntity )
@@ -4855,6 +4862,16 @@ void CParticleShooter::KeyValue(KeyValueData *pkvd)
 		m_scaleSpeed = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "position"))
+	{
+		m_iszPosition = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "direction"))
+	{
+		m_iszDirection = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue(pkvd);
 }
@@ -4875,6 +4892,7 @@ void CParticleShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 			SetThink(&CParticleShooter::ShootParticle);
 			pev->nextthink = gpGlobals->time;
 		}
+		m_hActivator = pActivator;
 	}
 }
 
@@ -4882,16 +4900,45 @@ void CParticleShooter::ShootParticle()
 {
 	extern int gmsgParticleShooter;
 
-	if (FStringNull(pev->target))
+	if (FStringNull(pev->target) && FStringNull(m_iszDirection))
+	{
+		ALERT(at_error, "%s have neither a target nor a direction!\n", STRING(pev->classname));
 		return;
+	}
 
 	pev->nextthink = gpGlobals->time + m_fireDelay;
 
-	CBaseEntity* pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target));
-	if (!pTarget)
-		return;
+	Vector position = pev->origin;
 
-	Vector vecShootDir = (pTarget->pev->origin - pev->origin).Normalize();
+	if (!FStringNull(m_iszPosition))
+	{
+		if (!TryCalcLocus_Position(this, m_hActivator, STRING(m_iszPosition), position))
+		{
+			ALERT(at_error, "%s can't calc its position from '%s'!\n", STRING(pev->classname), STRING(m_iszPosition));
+			return;
+		}
+	}
+
+	Vector vecShootDir;
+	if (!FStringNull(m_iszDirection))
+	{
+		if (!TryCalcLocus_Velocity(this, m_hActivator, STRING(m_iszDirection), vecShootDir))
+		{
+			ALERT(at_error, "%s can't calc its direction from '%s'!\n", STRING(pev->classname), STRING(m_iszDirection));
+			return;
+		}
+		vecShootDir = vecShootDir.Normalize();
+	}
+	else
+	{
+		Vector vecShootAtPos;
+		if (!TryCalcLocus_Position(this, m_hActivator, STRING(pev->target), vecShootAtPos))
+		{
+			ALERT(at_error, "%s can't calc position to shoot at from '%s'!\n", STRING(pev->classname), STRING(pev->target));
+			return;
+		}
+		vecShootDir = (vecShootAtPos - position).Normalize();
+	}
 
 	float teta = acos(vecShootDir.z);
 	float fi = (vecShootDir.x == 0 && vecShootDir.y == 0) ? RANDOM_FLOAT(0, M_PI_F * 2) : atan2(vecShootDir.y, vecShootDir.x);
@@ -4912,10 +4959,10 @@ void CParticleShooter::ShootParticle()
 
 	if (gmsgParticleShooter)
 	{
-		MESSAGE_BEGIN( MSG_PVS, gmsgParticleShooter, pev->origin );
-			WRITE_COORD(pev->origin.x);
-			WRITE_COORD(pev->origin.y);
-			WRITE_COORD(pev->origin.z);
+		MESSAGE_BEGIN( MSG_PVS, gmsgParticleShooter, position );
+			WRITE_COORD(position.x);
+			WRITE_COORD(position.y);
+			WRITE_COORD(position.z);
 			WRITE_COORD(velocity.x);
 			WRITE_COORD(velocity.y);
 			WRITE_COORD(velocity.z);

@@ -1587,6 +1587,7 @@ public:
 	}
 
 	string_t m_iszPosition;
+	string_t m_iszDirection;
 	EHANDLE m_hActivator;
 
 	int smokeIndex;
@@ -1601,6 +1602,7 @@ LINK_ENTITY_TO_CLASS( env_smoker, CSmoker )
 TYPEDESCRIPTION	CSmoker::m_SaveData[] =
 {
 	DEFINE_FIELD( CSmoker, m_iszPosition, FIELD_STRING ),
+	DEFINE_FIELD( CSmoker, m_iszDirection, FIELD_EHANDLE ),
 	DEFINE_FIELD( CSmoker, m_hActivator, FIELD_EHANDLE ),
 };
 
@@ -1659,6 +1661,11 @@ void CSmoker::KeyValue(KeyValueData *pkvd)
 		m_iszPosition = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if (FStrEq(pkvd->szKeyName, "direction"))
+	{
+		m_iszDirection = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseEntity::KeyValue( pkvd );
 }
@@ -1690,7 +1697,7 @@ void CSmoker::Think( void )
 	if (!FBitSet(pev->spawnflags, SF_SMOKER_MAXHEALTH_SET))
 	{
 		pev->max_health = pev->health;
-		FBitSet(pev->spawnflags, SF_SMOKER_MAXHEALTH_SET);
+		SetBits(pev->spawnflags, SF_SMOKER_MAXHEALTH_SET);
 	}
 
 	if (!IsActive())
@@ -1711,14 +1718,20 @@ void CSmoker::Think( void )
 	bool directed = FBitSet(pev->spawnflags, SF_SMOKER_DIRECTIONAL);
 	Vector direction;
 
-	if (!FStringNull(pev->target))
+	if (!FStringNull(m_iszDirection))
 	{
 		directed = true;
-		CBaseEntity *pTarget = GetNextTarget();
-		if (pTarget)
-			direction = (pTarget->pev->origin - position).Normalize();
-		else
-			isDirValid = false;
+		isDirValid = TryCalcLocus_Velocity(this, m_hActivator, STRING(m_iszDirection), direction);
+		if (isDirValid)
+			direction = direction.Normalize();
+	}
+	else if (!FStringNull(pev->target))
+	{
+		directed = true;
+		Vector targetPos;
+		isDirValid = TryCalcLocus_Position(this, m_hActivator, STRING(pev->target), targetPos);
+		if (isDirValid)
+			direction = (targetPos - position).Normalize();
 	}
 	else if (directed)
 	{
@@ -1735,7 +1748,7 @@ void CSmoker::Think( void )
 		if (pev->impulse == SMOKER_SPRITE_SCALE_NORMAL)
 			flags |= SMOKER_FLAG_SCALE_VALUE_IS_NORMAL;
 
-		MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, pev->origin );
+		MESSAGE_BEGIN( MSG_PVS, gmsgSmoke, position );
 			WRITE_BYTE( flags );
 			WRITE_COORD( position.x + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );
 			WRITE_COORD( position.y + RANDOM_FLOAT( -pev->dmg, pev->dmg ) );

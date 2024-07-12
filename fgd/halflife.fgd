@@ -2022,7 +2022,7 @@
 
 @PointClass base(Targetname, RenderFields) size(-16 -16 -16, 16 16 16) = env_smoker : "Smoker"
 [
-	health(integer) : "Times to smoke" : 1
+	health(integer) : "Times to smoke [0 = infinite]" : 1
 	scale(string) : "Smoke Scale" : 1
 	dmg(string) : "Dispersion of smoke particles" : "0"
 	dmg_take(string) : "Min delay between smokes" : "0.4"
@@ -2032,8 +2032,9 @@
 	scale_speed(string) : "Scale Speed"
 	model(sprite) : "Sprite"
 	frags(integer) : "Z offset"
-	target(target_destination) : "Target to smoke at"
-    position(string) : "Smoke position [LP]"
+	target(string) : "Position to smoke at [LP]"
+	direction(string) : "Smoke direction [LV]" : : "When deciding on the direction this option has higher preference than 'Position to smoke at'."
+	position(string) : "Smoke from [LP]"
 	scale_unit_type(choices) :"Scale unit type" : 1 =
 	[
 		0: "Decile (tenth)"
@@ -7337,15 +7338,19 @@
 	globalstate(string) : "Global State Master"
 ]
 
-@PointClass base(Target, Targetname) color(255 255 128) = particle_shooter : "Particle Shooter" 
+@PointClass base(Targetname) color(255 255 128) = particle_shooter : "Particle Shooter" 
 [
+	target(string) : "Shoot particles at [LP]" : : "This or 'Shooter direction' must be defined for the entity to work"
+	direction(string) : "Shooter direction [LV]" : : "This or 'Shoot particles at' must be defined for the entity to work. This option has higher preference."
+	position(string) : "Position to shoot from (blank = here) [LP]"
+
 	//group_id(integer) : "Group Id" : 1
 	num_particles(integer) : "Number of Particles ( -1 = infinite )" : 10
 	fire_delay(string) : "Delay between shots" : "0.2"
 
 	particle_life(string) : "particle life" : "4.0"
 
-	particle_speed(string) : "Particle Velocity" : "200"
+	particle_speed(string) : "Particle Speed" : "200"
 	vel_variance(string) : "Velocity Variance" : "12"
 	//spin_speed(integer) : "spin ( degrees per sec )" : 0
 	gravity(string) : "Gravity" : "0.0"
