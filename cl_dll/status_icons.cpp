@@ -253,6 +253,7 @@ int CHudStatusIcons::MsgFunc_Inventory(const char *pszName, int iSize, void *pbu
 
 	int count = READ_SHORT();
 	const char* itemName = READ_STRING();
+	int flags = READ_BYTE();
 	if (!*itemName)
 		return 1; // don't allow empty names
 
@@ -332,7 +333,7 @@ int CHudStatusIcons::MsgFunc_Inventory(const char *pszName, int iSize, void *pbu
 	item.rc = gHUD.GetSpriteRect( spr_index );
 	m_iFlags |= HUD_ACTIVE;
 
-	if (countDiff >= 1 && (!itemSpec || itemSpec->showInHistory))
+	if (!(flags & INVENTORY_DONT_SHOW_IN_HISTORY) && countDiff >= 1 && (!itemSpec || itemSpec->showInHistory))
 		gHR.AddToHistory(HISTSLOT_ITEM, spriteName, countDiff, itemSpec ? itemSpec->packedColor : 0);
 
 	return 1;

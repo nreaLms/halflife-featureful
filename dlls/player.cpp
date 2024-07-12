@@ -4907,6 +4907,7 @@ void CBasePlayer::UpdateClientData( void )
 					MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
 						WRITE_SHORT(m_inventoryItemCounts[i]);
 						WRITE_STRING(STRING(m_inventoryItems[i]));
+						WRITE_BYTE(INVENTORY_DONT_SHOW_IN_HISTORY);
 					MESSAGE_END();
 				}
 			}
@@ -5970,6 +5971,7 @@ int CBasePlayer::GiveInventoryItem(string_t item, int count, bool allowOverflow)
 	MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
 		WRITE_SHORT(m_inventoryItemCounts[i]);
 		WRITE_STRING(STRING(item));
+		WRITE_BYTE(0);
 	MESSAGE_END();
 
 	return result;
@@ -5995,6 +5997,7 @@ int CBasePlayer::SetInventoryItem(string_t item, int count, bool allowOverflow)
 			MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
 				WRITE_SHORT(m_inventoryItemCounts[i]);
 				WRITE_STRING(STRING(item));
+				WRITE_BYTE(0);
 			MESSAGE_END();
 
 			int result = INVENTORY_ITEM_COUNT_CHANGED;
@@ -6033,6 +6036,7 @@ bool CBasePlayer::RemoveInventoryItem(string_t item, int count)
 		MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
 			WRITE_SHORT(m_inventoryItemCounts[i]);
 			WRITE_STRING(STRING(item));
+			WRITE_BYTE(0);
 		MESSAGE_END();
 		return true;
 	}
@@ -6048,6 +6052,7 @@ void CBasePlayer::RemoveAllInventoryItems()
 			MESSAGE_BEGIN(MSG_ONE, gmsgInventory, NULL, pev);
 				WRITE_SHORT(0);
 				WRITE_STRING(STRING(m_inventoryItems[i]));
+				WRITE_BYTE(0);
 			MESSAGE_END();
 
 			m_inventoryItems[i] = iStringNull;
