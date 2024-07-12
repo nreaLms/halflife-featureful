@@ -3408,7 +3408,7 @@
 [
 	message(string) : "Message" : : "Message from titles.txt to show on pickup"
 	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
-	hudname(string) : "Hud name" : : "Custom name from hud.txt to show on pickup. The default is item_security"
+	hudname(string) : "HUD name" : : "Sprite from hud.txt to show on pickup. By default it won't show anything"
 ]
 @PointClass size(-8 -8 0, 8 8 8) color(0 0 200) base(Targetname) studio("models/can.mdl") = item_sodacan : "Soda can"
 [

@@ -717,9 +717,12 @@ class CItemSecurity : public CItem
 
 		if (!FStringNull(pev->noise))
 			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
-		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-			WRITE_STRING( FStringNull(pev->netname) ? STRING( pev->classname ) : STRING(pev->netname) );
-		MESSAGE_END();
+		if (!FStringNull(pev->netname))
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
+				WRITE_STRING( STRING(pev->netname) );
+			MESSAGE_END();
+		}
 		if (!FStringNull(pev->message))
 			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
 
