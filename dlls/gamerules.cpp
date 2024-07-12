@@ -530,6 +530,7 @@ void CGameRules::RefreshSkillData ( void )
 	gSkillData.scientistHeal = GetSkillCvar ( "sk_scientist_heal" );
 	gSkillData.scientistHealTime = GetSkillCvar ( "sk_scientist_heal_time" );
 	gSkillData.sodaHeal = GetSkillCvar( "sk_soda" );
+	gSkillData.vortigauntArmorCharge = GetSkillCvar( "sk_vortigaunt_armor_charge", "sk_battery" );
 
 	// monster damage adj
 	gSkillData.monHead = GetSkillCvar( "sk_monster_head" );

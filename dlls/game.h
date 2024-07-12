@@ -99,6 +99,7 @@ struct ModFeatures
 	bool vortigaunt_heal;
 	bool vortigaunt_revive;
 	bool vortigaunt_squad;
+	bool vortigaunt_armor_charge;
 
 	bool sentry_retract;
 

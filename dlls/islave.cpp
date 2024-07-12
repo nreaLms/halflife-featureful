@@ -43,9 +43,6 @@
 // whether vortigaunt marked as squadleader has a different beam color
 #define FEATURE_ISLAVE_LEADER_COLOR 1
 
-// wheter vortigaunt can charge ally player's suit
-#define FEATURE_ISLAVE_CHARGE_TOKEN (0 && FEATURE_ISLAVE_ENERGY)
-
 //=========================================================
 // monster-specific schedule types
 //=========================================================
@@ -205,7 +202,7 @@ void CChargeToken::Spawn()
 
 	UTIL_SetOrigin( pev, pev->origin );
 
-	pev->health = gSkillData.batteryCapacity;
+	pev->health = gSkillData.vortigauntArmorCharge;
 
 	pev->frags = MODEL_FRAMES( pev->modelindex ) - 1;
 
@@ -556,9 +553,7 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 #endif
 	DEFINE_FIELD( CISlave, m_minHullSize, FIELD_VECTOR ),
 	DEFINE_FIELD( CISlave, m_maxHullSize, FIELD_VECTOR ),
-#if FEATURE_ISLAVE_CHARGE_TOKEN
 	DEFINE_FIELD( CISlave, m_chargeToken, FIELD_CLASSPTR ),
-#endif
 };
 
 IMPLEMENT_SAVERESTORE( CISlave, CFollowingMonster )
@@ -1109,22 +1104,27 @@ void CISlave::StartTask( Task_t *pTask )
 
 	case TASK_ISLAVE_MAKE_CHARGE_TOKEN:
 	{
-		m_chargeToken = GetClassPtr( (CChargeToken *)NULL );
-		if (m_chargeToken)
+		if (g_modFeatures.vortigaunt_armor_charge)
 		{
-			m_chargeToken->Spawn();
-			m_chargeToken->SetAttachment(edict(), 1);
-			UTIL_SetOrigin(m_chargeToken->pev, pev->origin);
-			m_chargeToken->MakeEntLight(6);
-			TaskComplete();
+			m_chargeToken = GetClassPtr( (CChargeToken *)NULL );
+			if (m_chargeToken)
+			{
+				m_chargeToken->Spawn();
+				m_chargeToken->SetAttachment(edict(), 1);
+				UTIL_SetOrigin(m_chargeToken->pev, pev->origin);
+				m_chargeToken->MakeEntLight(6);
+				TaskComplete();
+			}
+			else
+				TaskFail("failed to create charge token entity");
 		}
 		else
-			TaskFail("failed to create charge token entity");
+			TaskFail("charge tokens are disabled");
 		break;
 	}
 	case TASK_ISLAVE_SEND_CHARGE_TOKEN:
 	{
-		if (m_chargeToken)
+		if (g_modFeatures.vortigaunt_armor_charge && m_chargeToken)
 		{
 			CBaseEntity* pTarget = FollowedPlayer();
 			if (pTarget)
@@ -1331,9 +1331,8 @@ void CISlave::Precache()
 	UTIL_PrecacheOther( "monster_snark" );
 	UTIL_PrecacheOther( "monster_headcrab" );
 #endif
-#if FEATURE_ISLAVE_CHARGE_TOKEN
-	UTIL_PrecacheOther( "charge_token" );
-#endif
+	if (g_modFeatures.vortigaunt_armor_charge)
+		UTIL_PrecacheOther( "charge_token" );
 }
 
 void CISlave::KeyValue(KeyValueData *pkvd)
@@ -1589,17 +1588,15 @@ Schedule_t *CISlave::GetSchedule( void )
 				}
 			}
 		}
-#if FEATURE_ISLAVE_CHARGE_TOKEN
-		if (HasFreeEnergy())
+		if (HasFreeEnergy() && g_modFeatures.vortigaunt_armor_charge)
 		{
 			CBasePlayer* pPlayer = static_cast<CBasePlayer*>(FollowedPlayer());
-			if (pPlayer && pPlayer->HasSuit() && pPlayer->IsAlive() && pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY/4 &&
+			if (pPlayer && pPlayer->HasSuit() && pPlayer->IsAlive() && pPlayer->pev->armorvalue < pPlayer->MaxArmor()/4 &&
 					FVisible(pPlayer) && (pPlayer->pev->origin - pev->origin).Length() < 128)
 			{
 				return GetScheduleOfType(SCHED_ISLAVE_GIVE_CHARGE);
 			}
 		}
-#endif
 		Schedule_t* followingSchedule = GetFollowingSchedule();
 		if (followingSchedule)
 			return followingSchedule;

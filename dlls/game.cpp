@@ -89,6 +89,7 @@ ModFeatures::ModFeatures()
 	vortigaunt_heal = true;
 	vortigaunt_revive = true;
 	vortigaunt_squad = false;
+	vortigaunt_armor_charge = false;
 
 	sentry_retract = true;
 
@@ -150,6 +151,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(vortigaunt_heal),
 		KEY_VALUE_DEF(vortigaunt_revive),
 		KEY_VALUE_DEF(vortigaunt_squad),
+		KEY_VALUE_DEF(vortigaunt_armor_charge),
 		KEY_VALUE_DEF(sentry_retract),
 		KEY_VALUE_DEF(bigmomma_wait_fix),
 		KEY_VALUE_DEF(gargantua_larger_size),
@@ -1125,6 +1127,7 @@ DECLARE_SKILL_VALUE(sk_healthkit, "0")
 DECLARE_SKILL_VALUE(sk_scientist_heal, "0")
 DECLARE_SKILL_VALUE(sk_scientist_heal_time, "60")
 DECLARE_SKILL_VALUE(sk_soda, "1")
+DECLARE_SKILL_VALUE(sk_vortigaunt_armor_charge, "0")
 
 // monster damage adjusters
 DECLARE_SKILL_VALUE(sk_monster_head, "2")
@@ -1879,6 +1882,7 @@ void GameDLLInit( void )
 	REGISTER_SKILL_CVARS(sk_scientist_heal);
 	REGISTER_SKILL_CVARS(sk_scientist_heal_time);
 	REGISTER_SKILL_CVARS(sk_soda);
+	REGISTER_SKILL_CVARS(sk_vortigaunt_armor_charge);
 
 	// monster damage adjusters
 	REGISTER_SKILL_CVARS(sk_monster_head);
