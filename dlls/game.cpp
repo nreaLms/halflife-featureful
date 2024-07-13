@@ -22,6 +22,7 @@
 #include "saverestore.h"
 #include "locus.h"
 #include "ammo_amounts.h"
+#include "followers.h"
 #include "savetitles.h"
 #include "vcs_info.h"
 
@@ -1355,6 +1356,7 @@ void GameDLLInit( void )
 	RegisterAmmoTypes();
 	LoadWarpballTemplates();
 	ReadInventorySpec();
+	ReadFollowersDescription();
 	ReadSaveTitles();
 
 	// Register cvars here:

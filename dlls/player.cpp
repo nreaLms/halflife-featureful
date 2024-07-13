@@ -39,6 +39,7 @@
 #include "talkmonster.h"
 #include "color_utils.h"
 #include "inventory.h"
+#include "followers.h"
 
 #if FEATURE_ROPE
 #include "ropes.h"
@@ -6103,19 +6104,15 @@ int CBasePlayer::InventoryItemIndex(string_t item)
 
 void CBasePlayer::RecruitFollowers()
 {
-	const float maxRange = 500;
+	const float maxRange = g_FollowersDescription.FastRecruitRange();
 	Vector vecStart = pev->origin;
 	vecStart.z = pev->absmax.z;
 
 	bool saySentence = true;
-	for (int i=0; i<ARRAYSIZE(CTalkMonster::m_szFriends); ++i)
+	for (auto it = g_FollowersDescription.RecruitsBegin(); it != g_FollowersDescription.RecruitsEnd(); ++it)
 	{
-		if (!CTalkMonster::m_szFriends[i].name[0])
-			break;
-		if (CTalkMonster::m_szFriends[i].category != TALK_FRIEND_SOLDIER)
-			continue;
 		CBaseEntity *pFriend = NULL;
-		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, CTalkMonster::m_szFriends[i].name ) ) )
+		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, it->c_str()) ) != NULL )
 		{
 			CFollowingMonster *pMonster = CanRecruit(pFriend, this); pFriend->MyMonsterPointer();
 			if (!pMonster)
@@ -6128,17 +6125,17 @@ void CBasePlayer::RecruitFollowers()
 				UTIL_TraceLine( vecStart, vecCheck, ignore_monsters, ENT( pev ), &tr );
 				if( tr.flFraction == 1.0 )
 				{
-					CFollowingMonster* talkMonster = pMonster->MyFollowingMonsterPointer();
-					if (talkMonster && talkMonster->CanFollow())
+					CFollowingMonster* followingMonster = pMonster->MyFollowingMonsterPointer();
+					if (followingMonster && followingMonster->CanFollow())
 					{
-						int result = talkMonster->DoFollowerUse(this, saySentence, USE_ON);
+						int result = followingMonster->DoFollowerUse(this, saySentence, USE_ON);
 						if (result == FOLLOWING_STARTED)
 						{
 							saySentence = false;
 						}
 						else if (result == FOLLOWING_NOTREADY)
 						{
-							talkMonster->DoFollowerUse(this, false, USE_ON, true);
+							followingMonster->DoFollowerUse(this, false, USE_ON, true);
 						}
 					}
 				}
@@ -6150,15 +6147,10 @@ void CBasePlayer::RecruitFollowers()
 void CBasePlayer::DisbandFollowers()
 {
 	bool saySentence = true;
-	for (int i=0; i<ARRAYSIZE(CTalkMonster::m_szFriends); ++i)
+	for (auto it = g_FollowersDescription.RecruitsBegin(); it != g_FollowersDescription.RecruitsEnd(); ++it)
 	{
-		if (!CTalkMonster::m_szFriends[i].name[0])
-			break;
-		if (CTalkMonster::m_szFriends[i].category != TALK_FRIEND_SOLDIER)
-			continue;
 		CBaseEntity *pFriend = NULL;
-		const char* pszFriend = CTalkMonster::m_szFriends[i].name;
-		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, pszFriend ) ) )
+		while( ( pFriend = UTIL_FindEntityByClassname( pFriend, it->c_str() ) ) )
 		{
 			CBaseMonster *pMonster = pFriend->MyMonsterPointer();
 			if (pMonster)
