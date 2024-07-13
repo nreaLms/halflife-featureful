@@ -732,6 +732,66 @@ class CItemSecurity : public CItem
 
 LINK_ENTITY_TO_CLASS( item_security, CItemSecurity )
 
+class CItemPickup : public CItem
+{
+	void Spawn( void )
+	{
+		if (FStringNull(pev->model))
+		{
+			ALERT(at_error, "%s with no model!", STRING(pev->classname));
+			REMOVE_ENTITY(edict());
+			return;
+		}
+		Precache();
+		SET_MODEL( ENT( pev ), STRING(pev->model) );
+		CItem::Spawn();
+	}
+	void Precache( void )
+	{
+		PRECACHE_MODEL( STRING(pev->model) );
+		if (!FStringNull(pev->noise))
+			PRECACHE_SOUND( STRING(pev->noise) );
+	}
+	void KeyValue(KeyValueData* pkvd)
+	{
+		if (FStrEq(pkvd->szKeyName, "item_name"))
+		{
+			pev->netname = ALLOC_STRING(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else if (FStrEq(pkvd->szKeyName, "count"))
+		{
+			pev->impulse = atoi(pkvd->szValue);
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CItem::KeyValue(pkvd);
+	}
+
+	BOOL MyTouch( CBasePlayer *pPlayer )
+	{
+		if( pPlayer->pev->deadflag != DEAD_NO )
+		{
+			return FALSE;
+		}
+
+		if (!FStringNull(pev->noise))
+			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
+
+		if (!FStringNull(pev->netname))
+		{
+			pPlayer->GiveInventoryItem(pev->netname, pev->impulse > 0 ? pev->impulse : 1);
+		}
+
+		if (!FStringNull(pev->message))
+			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
+
+		return TRUE;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( item_pickup, CItemPickup )
+
 class CItemLongJump : public CItem
 {
 	void Spawn( void )

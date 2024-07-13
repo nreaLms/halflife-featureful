@@ -3404,6 +3404,14 @@
 	health(integer) : "Health Supplied"
 ]
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_longjump.mdl") = item_longjump : "Longjump Module" []
+@PointClass size(-16 -16 0, 16 16 36) base(Pickup) studio() = item_pickup : "Generic item that can be picked up by the player. Gives the inventory item upon pick up if the 'Inventory item' is set."
+[
+	model(studio) : "Model" : "models/w_security.mdl"
+	item_name(string) : "Inventory item" : : "Inventory item to give to player"
+	count(integer) : "Inventory item count" : 1 : "Count of inventory items to give (if item is defined)"
+	message(string) : "Message" : : "Message from titles.txt to show on pickup"
+	noise(sound) : "Pickup sound" : "items/gunpickup4.wav"
+]
 @PointClass size(-16 -16 0, 16 16 36) base(Item) studio("models/w_security.mdl") = item_security : "Security card"
 [
 	message(string) : "Message" : : "Message from titles.txt to show on pickup"
