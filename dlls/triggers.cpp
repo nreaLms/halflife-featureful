@@ -4357,6 +4357,7 @@ void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 
 #define SF_TRIGGER_TIMER_START_ON 1
 #define SF_TRIGGER_TIMER_NO_FIRST_DELAY 32
+#define SF_TRIGGER_TIMER_FORWARD_ACTIVATOR 64
 #define SF_TRIGGER_TIMER_PREDETERMINED_TIMED 128
 
 class CTriggerTimer : public CPointEntity
@@ -4372,7 +4373,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	float GetRandomDelay();
-	void SetActive(BOOL active);
+	void SetActive(BOOL active, CBaseEntity* pActivator = NULL);
 
 	bool HasPredeterminedDelays() const {
 		return FBitSet(pev->spawnflags, SF_TRIGGER_TIMER_PREDETERMINED_TIMED);
@@ -4385,6 +4386,7 @@ public:
 	BOOL m_active;
 	string_t m_triggerOnLimit;
 	unsigned int m_delayRandomSeed;
+	EHANDLE m_hActivator;
 };
 
 LINK_ENTITY_TO_CLASS( trigger_timer, CTriggerTimer )
@@ -4398,6 +4400,7 @@ TYPEDESCRIPTION	CTriggerTimer::m_SaveData[] =
 	DEFINE_FIELD( CTriggerTimer, m_active, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CTriggerTimer, m_triggerOnLimit, FIELD_STRING ),
 	DEFINE_FIELD( CTriggerTimer, m_delayRandomSeed, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerTimer, m_hActivator, FIELD_EHANDLE ),
 };
 
 IMPLEMENT_SAVERESTORE( CTriggerTimer, CPointEntity )
@@ -4453,10 +4456,10 @@ void CTriggerTimer::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 		SetActive(FALSE);
 		break;
 	case USE_ON:
-		SetActive(TRUE);
+		SetActive(TRUE, pActivator);
 		break;
 	default:
-		SetActive(!m_active);
+		SetActive(!m_active, pActivator);
 		break;
 	}
 }
@@ -4464,8 +4467,12 @@ void CTriggerTimer::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 void CTriggerTimer::TimerThink()
 {
 	if (m_active) {
+		CBaseEntity* pActivator = this;
+		if (FBitSet(pev->spawnflags, SF_TRIGGER_TIMER_FORWARD_ACTIVATOR))
+			pActivator = m_hActivator;
+
 		if (!FStringNull(pev->target)) {
-			FireTargets(STRING(pev->target), this, this);
+			FireTargets(STRING(pev->target), pActivator, this);
 		}
 
 		if (m_triggerNumberLimit) {
@@ -4473,7 +4480,9 @@ void CTriggerTimer::TimerThink()
 			if (m_triggerCounter >= m_triggerNumberLimit) {
 				SetActive(FALSE);
 				if (!FStringNull(m_triggerOnLimit))
-					FireTargets(STRING(m_triggerOnLimit), this, this);
+				{
+					FireTargets(STRING(m_triggerOnLimit), pActivator, this);
+				}
 				return;
 			}
 		}
@@ -4495,13 +4504,14 @@ float CTriggerTimer::GetRandomDelay()
 	return RANDOM_FLOAT(minDelay, maxDelay);
 }
 
-void CTriggerTimer::SetActive(BOOL active)
+void CTriggerTimer::SetActive(BOOL active, CBaseEntity* pActivator)
 {
 	if (m_active == active)
 		return;
 	m_active = active;
 	if (m_active)
 	{
+		m_hActivator = pActivator;
 		if (FBitSet(pev->spawnflags, SF_TRIGGER_TIMER_NO_FIRST_DELAY))
 			pev->nextthink = gpGlobals->time;
 		else
@@ -4509,6 +4519,7 @@ void CTriggerTimer::SetActive(BOOL active)
 	}
 	else
 	{
+		m_hActivator = 0;
 		m_triggerCounter = 0;
 	}
 }

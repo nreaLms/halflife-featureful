@@ -8561,10 +8561,11 @@
 	[
 		1 : "Start on" : 0 : "Automatically activate trigger_timer on the first map load"
 		32 : "Don't delay first fire" : 0 : "Don't use random delay on the first target fire upon the activation"
+		64 : "Forward activator" : 0 : "Forward my activator when triggering my target. Without this flag trigger_timer passes itself as an activator."
 		128 : "Predetermined delays" : 0
 	]
-	min_delay(string) : "Minimum delay"
-	max_delay(string) : "Maximum delay"
+	min_delay(string) : "Minimum delay" : "0.5"
+	max_delay(string) : "Maximum delay" : "1.0"
 	trigger_number(integer) : "Trigger number limit" : : "Automatically stop after triggering the target this number of times. After that trigger_timer can be reactivated again. 0 means no limit."
 	trigger_on_limit(target_destination) : "Trigger on limit" : : "Trigger when the trigger limit is reached"
 ]
