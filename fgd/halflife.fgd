@@ -199,6 +199,7 @@
 		14: "Constant Glow"
 		15: "Distort"
 		16: "Hologram (Distort + fade)"
+		19: "Glow Shell"
 	]
 ]
 
@@ -1436,7 +1437,7 @@
 ]
 @PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_subvelocity : "Calculate velocity based on entity properties"
 [
-	netname(target_destination) : "Entity to use [LE]" : "*locus"
+	netname(string) : "Entity to use [LE]" : "*locus"
 	impulse(choices) : "Value to calculate from" : 0 =
 	[
 		0 : "Movement Velocity"
@@ -1447,8 +1448,8 @@
 		7 : "Attachment point 2"
 		8 : "Attachment point 3"
 	]
-	noise(string) : "Scale factor [LR]" : "1.0"
-	message(string) : "Add offset [LV]" : "0 0 0"
+	noise(string) : "Scale factor [LR]" : "1.0" : "Scale by this factor after getting the base vector and after possible normalization"
+	message(string) : "Add offset [LV]" : "0 0 0" : "Add offset after (possible) normalization and scale factor have been applied"
 	spawnflags(flags) =
 	[
 		1 : "Normalize" : 0
@@ -1461,7 +1462,7 @@
 @PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_velocity_path : "Calculate velocity for travelling"
 [
 	target(string) : "Start position [LP]" : "*locus"
-	netname(string) : "Destination"
+	netname(string) : "Destination [LP], [LV]"
 	armorvalue(choices) : "Destination is" : 0 =
 	[
 		0 : "Position [LP]"
@@ -1475,7 +1476,7 @@
 		2 : "Reciprocal (X = 1/X)"
 		3 : "Inverse Square (X = 1/X*X)"
 	]
-	noise(string) : "Length factor [LR]" : "1.0"
+	noise(string) : "Length factor [LR]" : "1.0" : "Scale the vector by this factor. A negative number here will make the line go in the opposite direction."
 	frags(choices) : "Line is blocked by" : 0 =
 	[
 		0 : "Nothing"
@@ -1489,11 +1490,11 @@
 [
 	netname(string) : "Based on velocity [LV]"
 	angles(string) : "Rotated by angle (Y Z X)" : "0 0 0"
-	noise(string) : "Length factor [LR]" : "1.0"
-	message(string) : "Add offset [LV]" : "0 0 0"
+	noise(string) : "Length factor [LR]" : "1.0" : "Scale the vector by this factor."
+	message(string) : "Add offset [LV]" : "0 0 0" : "After rotation and scaling, add this offset to the vector."
 	spawnflags(flags) =
 	[
-		1 : "Normalize" : 0
+		1 : "Normalize" : 0 : "The 'Length factor' field will set the exact length of the velocity, instead of scaling it by a factor."
 	]
 ]
 
