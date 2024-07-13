@@ -29,10 +29,7 @@ const char inventorySpecSchema[] = R"(
 }
 )";
 
-InventoryItemSpec::InventoryItemSpec(): maxCount(0)
-{
-	itemName[0] = '\0';
-}
+InventoryItemSpec::InventoryItemSpec(): maxCount(0) {}
 
 class InventorySpec
 {
@@ -66,14 +63,14 @@ bool InventorySpec::ReadFromFile(const char *fileName)
 		for (auto itemIt = items.MemberBegin(); itemIt != items.MemberEnd(); ++itemIt)
 		{
 			InventoryItemSpec item;
-			strncpyEnsureTermination(item.itemName, itemIt->name.GetString());
+			item.itemName = itemIt->name.GetString();
 			Value& value = itemIt->value;
 			UpdatePropertyFromJson(item.maxCount, value, "max_count");
 			inventory.push_back(item);
 		}
 	}
 	std::sort(inventory.begin(), inventory.end(), [](const InventoryItemSpec& a, const InventoryItemSpec& b) {
-		return strcmp(a.itemName, b.itemName) < 0;
+		return strcmp(a.itemName.c_str(), b.itemName.c_str()) < 0;
 	});
 
 	return true;
@@ -83,11 +80,11 @@ struct InventoryItemCompare
 {
 	bool operator ()(const InventoryItemSpec& lhs, const char* rhs)
 	{
-		return strcmp(lhs.itemName, rhs) < 0;
+		return strcmp(lhs.itemName.c_str(), rhs) < 0;
 	}
 	bool operator ()(const char* lhs, const InventoryItemSpec& rhs)
 	{
-		return strcmp(lhs, rhs.itemName) < 0;
+		return strcmp(lhs, rhs.itemName.c_str()) < 0;
 	}
 };
 

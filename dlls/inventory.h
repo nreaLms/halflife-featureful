@@ -2,10 +2,12 @@
 #ifndef INVENTORY_H
 #define INVENTORY_H
 
+#include <string>
+
 struct InventoryItemSpec
 {
 	InventoryItemSpec();
-	char itemName[24];
+	std::string itemName;
 	int maxCount;
 };
 
