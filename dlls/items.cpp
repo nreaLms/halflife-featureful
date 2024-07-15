@@ -775,13 +775,15 @@ class CItemPickup : public CItem
 			return FALSE;
 		}
 
-		if (!FStringNull(pev->noise))
-			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
-
 		if (!FStringNull(pev->netname))
 		{
-			pPlayer->GiveInventoryItem(pev->netname, pev->impulse > 0 ? pev->impulse : 1);
+			const int result = pPlayer->GiveInventoryItem(pev->netname, pev->impulse > 0 ? pev->impulse : 1);
+			if (result < INVENTORY_ITEM_GIVEN)
+				return FALSE;
 		}
+
+		if (!FStringNull(pev->noise))
+			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM );
 
 		if (!FStringNull(pev->message))
 			UTIL_ShowMessage( STRING( pev->message ), pPlayer );
