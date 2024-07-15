@@ -2632,6 +2632,9 @@ void CTriggerPush::Touch( CBaseEntity *pOther )
 #define SF_TELEPORT_KEEPANGLES 256
 #define SF_TELEPORT_KEEPVELOCITY 512
 
+// info_teleport_destination flags
+#define SF_TELEPORT_DESTINATION_TRIGGER_ON_ARRIVAL 32
+
 class CTriggerTeleport : public CBaseTrigger
 {
 public:
@@ -2815,6 +2818,13 @@ bool CTriggerTeleport::TeleportToDestination( CBaseEntity *pOther )
 	}
 
 	pevToucher->flags &= ~FL_ONGROUND;
+
+	if (FBitSet(pentTarget->v.spawnflags, SF_TELEPORT_DESTINATION_TRIGGER_ON_ARRIVAL) &&
+			!FStringNull(pentTarget->v.target) &&
+			FClassnameIs(pentTarget, "info_teleport_destination"))
+	{
+		FireTargets(STRING(pentTarget->v.target), pOther, this);
+	}
 
 	return true;
 }
