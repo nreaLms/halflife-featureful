@@ -103,6 +103,7 @@ set (CLDLL_SOURCES
 	death.cpp
 	demo.cpp
 	entity.cpp
+	environment.cpp
 	ev_common.cpp
 	events.cpp
 	flashlight.cpp

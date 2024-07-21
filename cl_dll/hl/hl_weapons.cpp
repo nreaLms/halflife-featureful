@@ -50,6 +50,8 @@ static CBasePlayerWeapon *g_pWpns[MAX_WEAPONS];
 float g_flApplyVel = 0.0;
 int g_irunninggausspred = 0;
 
+Vector g_vPlayerVelocity;
+
 vec3_t previousorigin;
 
 // HLDM Weapon placeholder entities.
@@ -792,6 +794,8 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.m_flNextAttack = from->client.m_flNextAttack;
 	player.m_flNextAmmoBurn = from->client.fuser2;
 	player.m_flAmmoStartCharge = from->client.fuser3;
+
+	g_vPlayerVelocity = player.pev->velocity;
 
 	// Point to current weapon object
 	if( from->client.m_iId )

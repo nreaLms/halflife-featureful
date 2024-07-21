@@ -22,6 +22,8 @@
 #include "r_efx.h"
 #include "arraysize.h"
 
+#include "environment.h"
+
 #define MAX_CLIENTS 32
 
 extern BEAM *pBeam;
@@ -84,6 +86,8 @@ void CHud::MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;
 	pFlare = NULL;	// Vit_amiN: clear egon's beam flare
+
+	g_Environment.Initialize();
 }
 
 int CHud::MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf )

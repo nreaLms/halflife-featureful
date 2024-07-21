@@ -4628,6 +4628,582 @@ void CEnvFog::SendDataToOne(CBaseEntity *pClient, Vector col, int iFadeTime, int
 
 LINK_ENTITY_TO_CLASS( env_fog, CEnvFog )
 
+extern int gmsgRain;
+
+class CBaseWeather : public CBaseEntity
+{
+public:
+	void Spawn();
+	int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	void KeyValue(KeyValueData *pkvd);
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void SendMessages(CBaseEntity* pClient);
+
+	bool IsActive() const {
+		if (FBitSet(pev->spawnflags, SF_WEATHER_ACTIVE))
+			return true;
+		return false;
+	}
+	void SetActive(bool active) {
+		if (active)
+			SetBits(pev->spawnflags, SF_WEATHER_ACTIVE);
+		else
+			ClearBits(pev->spawnflags, SF_WEATHER_ACTIVE);
+	}
+
+	virtual void SendWeather(CBaseEntity* pClient = nullptr) = 0;
+	virtual void SendClearWeather() = 0;
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+protected:
+	void WriteBaseWeaterData(int flags);
+
+	short m_intensity;
+	float m_updatePeriod;
+	short m_distance;
+
+	short m_minHeight;
+	short m_maxHeight;
+};
+
+TYPEDESCRIPTION CBaseWeather::m_SaveData[] =
+{
+	DEFINE_FIELD( CBaseWeather, m_intensity, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseWeather, m_updatePeriod, FIELD_FLOAT ),
+	DEFINE_FIELD( CBaseWeather, m_distance, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseWeather, m_minHeight, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseWeather, m_maxHeight, FIELD_SHORT ),
+};
+
+IMPLEMENT_SAVERESTORE( CBaseWeather, CBaseEntity )
+
+void CBaseWeather::Spawn()
+{
+	pev->effects |= EF_NODRAW;
+	if (FStringNull(pev->targetname))
+		pev->spawnflags |= SF_WEATHER_ACTIVE;
+}
+
+void CBaseWeather::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "intensity"))
+	{
+		m_intensity = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "update_period"))
+	{
+		m_updatePeriod = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "distance"))
+	{
+		m_distance = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "min_height"))
+	{
+		m_minHeight = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "max_height"))
+	{
+		m_maxHeight = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseEntity::KeyValue(pkvd);
+}
+
+void CBaseWeather::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	bool active = IsActive();
+	if (ShouldToggle(useType, active))
+	{
+		if (active)
+		{
+			SetActive(false);
+			SendClearWeather();
+		}
+		else
+		{
+			SetActive(true);
+			SendWeather();
+		}
+	}
+}
+
+void CBaseWeather::SendMessages(CBaseEntity *pClient)
+{
+	if (!IsActive())
+		return;
+	SendWeather(pClient);
+}
+
+void CBaseWeather::WriteBaseWeaterData(int flags)
+{
+	WRITE_LONG(entindex());
+	WRITE_SHORT(flags);
+	WRITE_SHORT(m_intensity);
+	WRITE_SHORT((short)(m_updatePeriod * 100.0f));
+
+	if (FBitSet(flags, WEATHER_BRUSH_ENTITY))
+	{
+		WRITE_COORD(pev->absmin.x);
+		WRITE_COORD(pev->absmin.y);
+		WRITE_COORD(pev->absmin.z);
+		WRITE_COORD(pev->absmax.x);
+		WRITE_COORD(pev->absmax.y);
+		WRITE_COORD(pev->absmax.z);
+	}
+	else
+	{
+		WRITE_SHORT(m_distance);
+		WRITE_SHORT(m_minHeight);
+		WRITE_SHORT(m_maxHeight);
+
+		if (FBitSet(flags, SF_WEATHER_LOCALIZED))
+		{
+			WRITE_COORD(pev->origin.x);
+			WRITE_COORD(pev->origin.y);
+			WRITE_COORD(pev->origin.z);
+		}
+	}
+}
+
+class CEnvRain : public CBaseWeather
+{
+public:
+	void KeyValue(KeyValueData *pkvd);
+	void SendWeather(CBaseEntity* pClient = NULL);
+	void SendClearWeather();
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+private:
+	short m_raindropWidth;
+	short m_raindropHeight;
+
+	byte m_raindropLightMode;
+	short m_raindropMinSpeed;
+	short m_raindropMaxSpeed;
+	float m_raindropLife;
+
+	short m_windPuffMinSize;
+	short m_windPuffMaxSize;
+	short m_windPuffRenderMode;
+	short m_windPuffBrightness;
+	Vector m_windPuffColor;
+	byte m_windPuffLightMode;
+	float m_windPuffLife;
+
+	short m_splashMinSize;
+	short m_splashMaxSize;
+	short m_splashRenderMode;
+	short m_splashBrightness;
+	Vector m_splashColor;
+	byte m_splashLightMode;
+
+	short m_rippleSize;
+	short m_rippleRenderMode;
+	short m_rippleBrightness;
+	Vector m_rippleColor;
+	byte m_rippleLightMode;
+
+	string_t m_raindropSprite;
+	string_t m_windpuffSprite;
+	string_t m_splashSprite;
+	string_t m_rippleSprite;
+};
+
+LINK_ENTITY_TO_CLASS( env_rain, CEnvRain )
+
+TYPEDESCRIPTION CEnvRain::m_SaveData[] =
+{
+	DEFINE_FIELD( CEnvRain, m_raindropWidth, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_raindropHeight, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_raindropLightMode, FIELD_CHARACTER ),
+	DEFINE_FIELD( CEnvRain, m_raindropMinSpeed, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_raindropMaxSpeed, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_raindropLife, FIELD_FLOAT ),
+
+	DEFINE_FIELD( CEnvRain, m_windPuffMinSize, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_windPuffMaxSize, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_windPuffRenderMode, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_windPuffBrightness, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_windPuffColor, FIELD_VECTOR ),
+	DEFINE_FIELD( CEnvRain, m_windPuffLightMode, FIELD_CHARACTER ),
+	DEFINE_FIELD( CEnvRain, m_windPuffLife, FIELD_FLOAT ),
+
+	DEFINE_FIELD( CEnvRain, m_splashMinSize, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_splashMaxSize, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_splashRenderMode, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_splashBrightness, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_splashColor, FIELD_VECTOR ),
+	DEFINE_FIELD( CEnvRain, m_splashLightMode, FIELD_CHARACTER ),
+
+	DEFINE_FIELD( CEnvRain, m_rippleSize, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_rippleRenderMode, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_rippleBrightness, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvRain, m_rippleColor, FIELD_VECTOR ),
+	DEFINE_FIELD( CEnvRain, m_rippleLightMode, FIELD_CHARACTER ),
+
+	DEFINE_FIELD( CEnvRain, m_raindropSprite, FIELD_STRING ),
+	DEFINE_FIELD( CEnvRain, m_windpuffSprite, FIELD_STRING ),
+	DEFINE_FIELD( CEnvRain, m_splashSprite, FIELD_STRING ),
+	DEFINE_FIELD( CEnvRain, m_rippleSprite, FIELD_STRING ),
+};
+IMPLEMENT_SAVERESTORE( CEnvRain, CBaseWeather )
+
+void CEnvRain::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "raindrop_width"))
+	{
+		m_raindropWidth = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "raindrop_height"))
+	{
+		m_raindropHeight = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "raindrop_light_mode"))
+	{
+		m_raindropLightMode = (byte)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "raindrop_min_speed"))
+	{
+		m_raindropMinSpeed = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "raindrop_max_speed"))
+	{
+		m_raindropMaxSpeed = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "raindrop_life"))
+	{
+		m_raindropLife = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_min_size"))
+	{
+		m_windPuffMinSize = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_max_size"))
+	{
+		m_windPuffMaxSize = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_rendermode"))
+	{
+		m_windPuffRenderMode = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_renderamt"))
+	{
+		m_windPuffBrightness = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_rendercolor"))
+	{
+		UTIL_StringToVector(m_windPuffColor, pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_light_mode"))
+	{
+		m_windPuffLightMode = (byte)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_life"))
+	{
+		m_windPuffLife = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "splash_min_size"))
+	{
+		m_splashMinSize = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "splash_max_size"))
+	{
+		m_splashMaxSize = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "splash_rendermode"))
+	{
+		m_splashRenderMode = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "splash_renderamt"))
+	{
+		m_splashBrightness = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "splash_rendercolor"))
+	{
+		UTIL_StringToVector(m_splashColor, pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "splash_light_mode"))
+	{
+		m_splashLightMode = (byte)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "ripple_size"))
+	{
+		m_rippleSize = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "ripple_rendermode"))
+	{
+		m_rippleRenderMode = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "ripple_renderamt"))
+	{
+		m_rippleBrightness = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "ripple_rendercolor"))
+	{
+		UTIL_StringToVector(m_rippleColor, pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "ripple_light_mode"))
+	{
+		m_rippleLightMode = (byte)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "raindrop_sprite"))
+	{
+		m_raindropSprite = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "windpuff_sprite"))
+	{
+		m_windpuffSprite = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "splash_sprite"))
+	{
+		m_splashSprite = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "ripple_sprite"))
+	{
+		m_rippleSprite = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseWeather::KeyValue(pkvd);
+}
+
+void CEnvRain::SendWeather(CBaseEntity *pClient)
+{
+	const int msgType = pClient ? MSG_ONE : MSG_ALL;
+	edict_t* pClientEdict = pClient ? pClient->edict() : NULL;
+
+	MESSAGE_BEGIN(msgType, gmsgRain, NULL, pClientEdict);
+		WriteBaseWeaterData(pev->spawnflags);
+
+		WRITE_SHORT(m_raindropWidth);
+		WRITE_SHORT(m_raindropHeight);
+		WRITE_BYTE(pev->rendermode);
+		WRITE_BYTE(pev->renderamt);
+		WRITE_BYTE((int)pev->rendercolor.x);
+		WRITE_BYTE((int)pev->rendercolor.y);
+		WRITE_BYTE((int)pev->rendercolor.z);
+		WRITE_BYTE(m_raindropLightMode);
+		WRITE_SHORT(m_raindropMinSpeed);
+		WRITE_SHORT(m_raindropMaxSpeed);
+		WRITE_SHORT((short)(m_raindropLife * 100));
+
+		WRITE_SHORT(m_windPuffMinSize);
+		WRITE_SHORT(m_windPuffMaxSize);
+		WRITE_BYTE(m_windPuffRenderMode);
+		WRITE_BYTE(m_windPuffBrightness);
+		WRITE_BYTE((int)m_windPuffColor.x);
+		WRITE_BYTE((int)m_windPuffColor.y);
+		WRITE_BYTE((int)m_windPuffColor.z);
+		WRITE_BYTE(m_windPuffLightMode);
+		WRITE_SHORT((short)(m_windPuffLife * 100));
+
+		WRITE_SHORT(m_splashMinSize);
+		WRITE_SHORT(m_splashMaxSize);
+		WRITE_BYTE(m_splashRenderMode);
+		WRITE_BYTE(m_splashBrightness);
+		WRITE_BYTE((int)m_splashColor.x);
+		WRITE_BYTE((int)m_splashColor.y);
+		WRITE_BYTE((int)m_splashColor.z);
+		WRITE_BYTE(m_splashLightMode);
+
+		WRITE_SHORT(m_rippleSize);
+		WRITE_BYTE(m_rippleRenderMode);
+		WRITE_BYTE(m_rippleBrightness);
+		WRITE_BYTE((int)m_rippleColor.x);
+		WRITE_BYTE((int)m_rippleColor.y);
+		WRITE_BYTE((int)m_rippleColor.z);
+		WRITE_BYTE(m_rippleLightMode);
+
+		WRITE_STRING(m_raindropSprite ? STRING(m_raindropSprite) : "");
+		WRITE_STRING(m_windpuffSprite ? STRING(m_windpuffSprite) : "");
+		WRITE_STRING(m_splashSprite ? STRING(m_splashSprite) : "");
+		WRITE_STRING(m_rippleSprite ? STRING(m_rippleSprite) : "");
+	MESSAGE_END();
+}
+
+void CEnvRain::SendClearWeather()
+{
+	MESSAGE_BEGIN(MSG_ALL, gmsgRain);
+		WRITE_LONG(entindex());
+		WRITE_SHORT(0);
+	MESSAGE_END();
+}
+
+class CFuncRainVolume : public CEnvRain
+{
+public:
+	void Spawn() {
+		CEnvRain::Spawn();
+		SET_MODEL( ENT( pev ), STRING( pev->model ) );
+		pev->spawnflags |= RAIN_BRUSH_ENTITY;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( func_rainvolume, CFuncRainVolume )
+
+extern int gmsgSnow;
+
+class CEnvSnow : public CBaseWeather
+{
+public:
+	void KeyValue(KeyValueData *pkvd);
+	void SendWeather(CBaseEntity* pClient = NULL);
+	void SendClearWeather();
+
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
+	static	TYPEDESCRIPTION m_SaveData[];
+
+private:
+	short m_snowflakeMinSize;
+	short m_snowflakeMaxSize;
+	byte m_snowflakeLightMode;
+	short m_snowflakeMinSpeed;
+	short m_snowflakeMaxSpeed;
+	float m_snowflakeLife;
+
+	string_t m_snowflakeSprite;
+};
+
+LINK_ENTITY_TO_CLASS( env_snow, CEnvSnow )
+
+TYPEDESCRIPTION CEnvSnow::m_SaveData[] =
+{
+	DEFINE_FIELD( CEnvSnow, m_snowflakeMinSize, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvSnow, m_snowflakeMaxSize, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvSnow, m_snowflakeLightMode, FIELD_CHARACTER ),
+	DEFINE_FIELD( CEnvSnow, m_snowflakeMinSpeed, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvSnow, m_snowflakeMaxSpeed, FIELD_SHORT ),
+	DEFINE_FIELD( CEnvSnow, m_snowflakeLife, FIELD_FLOAT ),
+
+	DEFINE_FIELD( CEnvSnow, m_snowflakeSprite, FIELD_STRING ),
+};
+IMPLEMENT_SAVERESTORE( CEnvSnow, CBaseWeather )
+
+void CEnvSnow::KeyValue(KeyValueData *pkvd)
+{
+	if (FStrEq(pkvd->szKeyName, "snowflake_min_size"))
+	{
+		m_snowflakeMinSize = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "snowflake_max_size"))
+	{
+		m_snowflakeMaxSize = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "snowflake_light_mode"))
+	{
+		m_snowflakeLightMode = (byte)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "snowflake_min_speed"))
+	{
+		m_snowflakeMinSpeed = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "snowflake_max_speed"))
+	{
+		m_snowflakeMaxSpeed = (short)atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "snowflake_life"))
+	{
+		m_snowflakeLife = atof(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if (FStrEq(pkvd->szKeyName, "snowflake_sprite"))
+	{
+		m_snowflakeSprite = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CBaseWeather::KeyValue(pkvd);
+}
+
+void CEnvSnow::SendWeather(CBaseEntity *pClient)
+{
+	const int msgType = pClient ? MSG_ONE : MSG_ALL;
+	edict_t* pClientEdict = pClient ? pClient->edict() : NULL;
+
+	MESSAGE_BEGIN(msgType, gmsgSnow, NULL, pClientEdict);
+		WriteBaseWeaterData(pev->spawnflags);
+
+		WRITE_SHORT(m_snowflakeMinSize);
+		WRITE_SHORT(m_snowflakeMaxSize);
+		WRITE_BYTE(pev->rendermode);
+		WRITE_BYTE(pev->renderamt);
+		WRITE_BYTE((int)pev->rendercolor.x);
+		WRITE_BYTE((int)pev->rendercolor.y);
+		WRITE_BYTE((int)pev->rendercolor.z);
+		WRITE_BYTE(m_snowflakeLightMode);
+		WRITE_SHORT(m_snowflakeMinSpeed);
+		WRITE_SHORT(m_snowflakeMaxSpeed);
+		WRITE_SHORT((short)(m_snowflakeLife * 100));
+
+		WRITE_STRING(m_snowflakeSprite ? STRING(m_snowflakeSprite) : "");
+	MESSAGE_END();
+}
+
+void CEnvSnow::SendClearWeather()
+{
+	MESSAGE_BEGIN(MSG_ALL, gmsgSnow);
+		WRITE_LONG(entindex());
+		WRITE_SHORT(0);
+	MESSAGE_END();
+}
+
+class CFuncSnowVolume : public CEnvSnow
+{
+public:
+	void Spawn() {
+		CEnvSnow::Spawn();
+		SET_MODEL( ENT( pev ), STRING( pev->model ) );
+		pev->spawnflags |= SNOW_BRUSH_ENTITY;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( func_snowvolume, CFuncSnowVolume )
+
 #define SF_BEAMTRAIL_OFF 1
 class CEnvBeamTrail : public CPointEntity
 {

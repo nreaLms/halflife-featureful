@@ -46,6 +46,8 @@
 #include "IParticleMan_Active.h"
 #include "CBaseParticle.h"
 
+#include "environment.h"
+
 IParticleMan *g_pParticleMan = NULL;
 
 void CL_LoadParticleMan( void );
@@ -418,6 +420,7 @@ int DLLEXPORT HUD_VidInit( void )
 	if (g_pParticleMan)
 	{
 		g_pParticleMan->ResetParticles();
+		g_Environment.Reset();
 	}
 #endif
 

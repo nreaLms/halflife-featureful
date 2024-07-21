@@ -170,6 +170,8 @@ void VectorScale( const float *in, float scale, float *out );
 float VectorNormalize( float *v );
 void VectorInverse( float *v );
 
+float UTIL_ApproachAngle( float target, float value, float speed );
+
 // extern vec3_t vec3_origin;
 extern float vec3_origin[3];
 

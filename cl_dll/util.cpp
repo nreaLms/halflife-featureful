@@ -24,6 +24,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "pi_constant.h"
+#include "util_shared.h"
 
 // extern vec3_t vec3_origin;
 

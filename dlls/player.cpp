@@ -236,6 +236,9 @@ int gmsgCaption = 0;
 
 int gmsgInventory = 0;
 
+int gmsgRain = 0;
+int gmsgSnow = 0;
+
 static CFollowingMonster* CanRecruit(CBaseEntity* pFriend, CBasePlayer* player)
 {
 	if (!pFriend->IsFullyAlive())
@@ -328,6 +331,9 @@ void LinkUserMessages( void )
 	gmsgCaption = REG_USER_MSG("Caption", -1);
 
 	gmsgInventory = REG_USER_MSG("Inventory", -1);
+
+	gmsgRain = REG_USER_MSG("Rain", -1);
+	gmsgSnow = REG_USER_MSG("Snow", -1);
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer )

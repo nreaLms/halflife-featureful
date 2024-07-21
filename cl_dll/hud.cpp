@@ -31,6 +31,8 @@
 #include "demo.h"
 #include "demo_api.h"
 
+#include "environment.h"
+
 hud_player_info_t	 g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
 extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
 team_info_t		g_TeamInfo[MAX_TEAMS + 1];
@@ -237,6 +239,8 @@ cvar_t *cl_grenadephysics = NULL;
 cvar_t* cl_weapon_sparks = NULL;
 cvar_t* cl_weapon_wallpuff = NULL;
 
+cvar_t* cl_weather = NULL;
+
 cvar_t* cl_muzzlelight = NULL;
 cvar_t* cl_muzzlelight_monsters = NULL;
 
@@ -278,6 +282,16 @@ int __MsgFunc_Items(const char* pszName, int iSize, void* pbuf)
 int __MsgFunc_SetFog(const char *pszName, int iSize, void *pbuf)
 {
 	return gHUD.MsgFunc_SetFog( pszName, iSize, pbuf );
+}
+
+int __MsgFunc_Rain(const char *pszName, int iSize, void *pbuf)
+{
+	return g_Environment.MsgFunc_Rain( pszName, iSize, pbuf );
+}
+
+int __MsgFunc_Snow(const char *pszName, int iSize, void *pbuf)
+{
+	return g_Environment.MsgFunc_Snow( pszName, iSize, pbuf );
 }
 
 //LRC
@@ -567,6 +581,8 @@ void CHud::Init( void )
 	HOOK_MESSAGE( Concuss );
 	HOOK_MESSAGE( Items );
 	HOOK_MESSAGE( SetFog );
+	HOOK_MESSAGE( Rain );
+	HOOK_MESSAGE( Snow );
 	HOOK_MESSAGE( KeyedDLight );
 	HOOK_MESSAGE( WallPuffs );
 
@@ -641,6 +657,8 @@ void CHud::Init( void )
 
 	CreateBooleanCvarConditionally(cl_weapon_sparks, "cl_weapon_sparks", clientFeatures.weapon_sparks);
 	CreateBooleanCvarConditionally(cl_weapon_wallpuff, "cl_weapon_wallpuff", clientFeatures.weapon_wallpuff);
+
+	cl_weather = CVAR_CREATE( "cl_weather", "1", FCVAR_ARCHIVE );
 
 	CreateBooleanCvarConditionally(cl_muzzlelight, "cl_muzzlelight", clientFeatures.muzzlelight);
 	cl_muzzlelight_monsters = CVAR_CREATE( "cl_muzzlelight_monsters", "0", FCVAR_ARCHIVE );

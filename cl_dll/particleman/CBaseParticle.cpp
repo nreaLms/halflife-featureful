@@ -16,8 +16,6 @@
 #include "hud.h"
 #include "cl_util.h"
 
-#include <algorithm>
-
 #include "event_api.h"
 #include "triangleapi.h"
 
@@ -28,7 +26,7 @@
 #include "pm_defs.h"
 #include "pmtrace.h"
 
-const Vector g_vecZero = Vector(0,0,0);
+extern const Vector g_vecZero;
 
 void CBaseParticle::InitializeSprite(Vector org, Vector normal, model_s* sprite, float size, float brightness)
 {
@@ -186,15 +184,15 @@ void CBaseParticle::Draw()
 	}
 	else if ((m_iRenderFlags & LIGHT_COLOR) != 0)
 	{
-		resultColor.x = vColor.x / (m_vColor.x * 255);
-		resultColor.y = vColor.y / (m_vColor.y * 255);
-		resultColor.z = vColor.z / (m_vColor.z * 255);
+		resultColor.x = (vColor.x * m_vColor.x / 255.0f);
+		resultColor.y = (vColor.y * m_vColor.y / 255.0f);
+		resultColor.z = (vColor.z * m_vColor.z / 255.0f);
 	}
 	else if ((m_iRenderFlags & LIGHT_INTENSITY) != 0)
 	{
-		resultColor.x = intensity / (m_vColor.x * 255);
-		resultColor.y = intensity / (m_vColor.y * 255);
-		resultColor.z = intensity / (m_vColor.z * 255);
+		resultColor.x = (intensity * m_vColor.x / 255.0f);
+		resultColor.y = (intensity * m_vColor.y / 255.0f);
+		resultColor.z = (intensity * m_vColor.z / 255.0f);
 	}
 
 	resultColor.x = clampValue(resultColor.x, 0.f, 255.f);
