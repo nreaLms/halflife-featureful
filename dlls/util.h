@@ -98,10 +98,6 @@ typedef int EOFFSET;
 // In case it's not alread defined
 typedef int BOOL;
 
-// In case this ever changes
-#if !defined(M_PI)
-#define M_PI			3.14159265358979323846
-#endif
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
 #define DECLARE_GLOBAL_METHOD(MethodName)  extern void DLLEXPORT MethodName( void )
 #define GLOBAL_METHOD(funcname)					void DLLEXPORT funcname(void)

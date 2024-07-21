@@ -68,10 +68,7 @@ typedef int BOOL;
 #include <cstdlib>
 #include <cstddef>
 #include <cmath>
-
-#if !defined(M_PI_F)
-#define M_PI_F          (float)M_PI
-#endif
+#include "pi_constant.h"
 
 // Header file containing definition of globalvars_t and entvars_t
 typedef unsigned int func_t;
