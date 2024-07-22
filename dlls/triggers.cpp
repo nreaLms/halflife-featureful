@@ -4369,6 +4369,7 @@ void CTriggerKillMonster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 #define SF_TRIGGER_TIMER_NO_FIRST_DELAY 32
 #define SF_TRIGGER_TIMER_FORWARD_ACTIVATOR 64
 #define SF_TRIGGER_TIMER_PREDETERMINED_TIMED 128
+#define SF_TRIGGER_TIMER_DONT_RESET_TRIGGER_COUNTER 256
 
 class CTriggerTimer : public CPointEntity
 {
@@ -4489,6 +4490,7 @@ void CTriggerTimer::TimerThink()
 			m_triggerCounter++;
 			if (m_triggerCounter >= m_triggerNumberLimit) {
 				SetActive(FALSE);
+				m_triggerCounter = 0;
 				if (!FStringNull(m_triggerOnLimit))
 				{
 					FireTargets(STRING(m_triggerOnLimit), pActivator, this);
@@ -4530,7 +4532,8 @@ void CTriggerTimer::SetActive(BOOL active, CBaseEntity* pActivator)
 	else
 	{
 		m_hActivator = 0;
-		m_triggerCounter = 0;
+		if (!FBitSet(pev->spawnflags, SF_TRIGGER_TIMER_DONT_RESET_TRIGGER_COUNTER))
+			m_triggerCounter = 0;
 	}
 }
 #endif

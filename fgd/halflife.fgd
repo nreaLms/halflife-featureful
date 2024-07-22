@@ -8491,8 +8491,8 @@
 		8 : "Timed" : 0
 		16 : "Unique" : 0
 		32 : "Not repetitive" : 0 : "Don't repeat the same target twice in a row. Targets still can be repeated if there're several with the same name."
-		64 : "Predetermined" : 0
-		128 : "Predetermined delays (Timed only)" : 0
+		64 : "Scheduled order" : 0 : "Makes trigger_random infinitely schedule the order in which it fires its targets beforehand. If player loads the saved game the trigger_random will fire its targets in the same scheduled order. This prevents player from getting 'the best outcome' just by loading the save again and again until they're satisfied with the result. The schedule is getting defined at the map load, so technically player still can circumvent the restriction by loading the save from a previous map and going through the changelevel to the new map again which will yield a different schedule for trigger_random. This should be fixed in future."
+		128 : "Scheduled delays (Timed only)" : 0 : "Makes trigger_random infinitely schedule the values of timed delays beforehand. If player loads the saved game the trigger_random will use the same delays as it scheduled originally."
 	]
 	min_delay(string) : "Minimum delay (Timed only)"
 	max_delay(string) : "Maximum delay (Timed only)"
@@ -8568,7 +8568,8 @@
 		1 : "Start on" : 0 : "Automatically activate trigger_timer on the first map load"
 		32 : "Don't delay first fire" : 0 : "Don't use random delay on the first target fire upon the activation"
 		64 : "Forward activator" : 0 : "Forward my activator when triggering my target. Without this flag trigger_timer passes itself as an activator."
-		128 : "Predetermined delays" : 0
+		128 : "Scheduled delays" : 0 : "Makes trigger_timer infinitely schedule the values of timed delays beforehand. If player loads the saved game the trigger_timer will use the same delays as it scheduled originally."
+		256 : "Don't reset trigger counter on deactivation" : 0 : "If 'Trigger number limit' is defined, when trigger_timer is turned off due to the external trigger, don't reset the trigger counter to 0. This allows to activate trigger_timer later with the preserved trigger counter. If trigger counter reaches the trigger number limit it will still naturally reset to 0 and deactivate."
 	]
 	min_delay(string) : "Minimum delay" : "0.5"
 	max_delay(string) : "Maximum delay" : "1.0"
