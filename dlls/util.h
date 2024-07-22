@@ -28,6 +28,8 @@
 #include "enginecallback.h"
 #endif
 
+#include "util_shared.h"
+
 #include <cstring>
 #include <cctype>
 inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent );  // implementation later in this file
@@ -585,9 +587,6 @@ private:
 
 void UTIL_SetGroupTrace( int groupmask, int op );
 void UTIL_UnsetGroupTrace( void );
-
-int UTIL_SharedRandomLong( unsigned int seed, int low, int high );
-float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 float UTIL_WeaponTimeBase( void );
 void UTIL_CleanSpawnPoint( Vector origin, float dist );

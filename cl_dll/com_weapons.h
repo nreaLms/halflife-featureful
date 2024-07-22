@@ -12,6 +12,7 @@
 #define COM_WEAPONSH
 
 #include "hud_iface.h"
+#include "util_shared.h"
 
 extern "C"
 {
@@ -20,9 +21,6 @@ extern "C"
 
 void			COM_Log( const char *pszFile, const char *fmt, ... );
 int				CL_IsDead( void );
-
-float			UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
-int				UTIL_SharedRandomLong( unsigned int seed, int low, int high );
 
 int				HUD_GetWeaponAnim( void );
 void			HUD_SendWeaponAnim( int iAnim, int body, int force );

@@ -134,6 +134,7 @@ set (CLDLL_SOURCES
 	../game_shared/tex_materials.c
 	../game_shared/parsetext.cpp
 	../game_shared/json_utils.cpp
+	../game_shared/util_shared.cpp
 	saytext.cpp
 	scoreboard.cpp
 	status_icons.cpp

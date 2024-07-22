@@ -192,6 +192,7 @@ set (SVDLL_SOURCES
 	../game_shared/tex_materials.c
 	../game_shared/parsetext.cpp
 	../game_shared/json_utils.cpp
+	../game_shared/util_shared.cpp
 	../game_shared/vcs_info.cpp
 )
 
