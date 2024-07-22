@@ -515,11 +515,27 @@ void ClientCommand( edict_t *pEntity )
 		if( g_enable_cheats->value != 0 )
 		{
 			CBaseEntity *pPlayer = CBaseEntity::Instance( pEntity );
-			if( CMD_ARGC() > 1 )
+			const bool entityUnderCrosshair = CMD_ARGC() <= 1 || FStrEq( CMD_ARGV(1), "!cross" );
+			USE_TYPE useType = USE_TOGGLE;
+			float value = 0.0f;
+			if (CMD_ARGC() >= 3)
 			{
-				FireTargets( CMD_ARGV( 1 ), pPlayer, pPlayer );
+				const char* useTypeName = CMD_ARGV(2);
+				if (stricmp(useTypeName, "on") == 0)
+					useType = USE_ON;
+				else if (stricmp(useTypeName, "off") == 0)
+					useType = USE_OFF;
+				else if (stricmp(useTypeName, "set") == 0)
+				{
+					useType = USE_SET;
+					if (CMD_ARGC() >= 4)
+					{
+						value = atof(CMD_ARGV(3));
+					}
+				}
 			}
-			else
+
+			if ( entityUnderCrosshair )
 			{
 				TraceResult tr;
 				UTIL_MakeVectors( pev->v_angle );
@@ -534,10 +550,14 @@ void ClientCommand( edict_t *pEntity )
 					CBaseEntity *pHitEnt = CBaseEntity::Instance( tr.pHit );
 					if( pHitEnt )
 					{
-						pHitEnt->Use( pPlayer, pPlayer, USE_TOGGLE, 0 );
+						pHitEnt->Use( pPlayer, pPlayer, useType, value );
 						ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs( "Fired %s \"%s\"\n", STRING( pHitEnt->pev->classname ), STRING( pHitEnt->pev->targetname ) ) );
 					}
 				}
+			}
+			else
+			{
+				FireTargets( CMD_ARGV( 1 ), pPlayer, pPlayer, useType, value );
 			}
 		}
 	}
