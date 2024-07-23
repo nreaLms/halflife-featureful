@@ -198,6 +198,7 @@ void CAutoTrigger::Think( void )
 
 #define SF_RELAY_FIREONCE		0x0001
 #define SF_RELAY_FORWARDACTIVATOR		0x0040
+#define SF_RELAY_PASS_CALLER_AS_ACTIVATOR		0x0080
 
 class CTriggerRelay : public CBaseDelay
 {
@@ -258,7 +259,16 @@ void CTriggerRelay::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	{
 		return;
 	}
-	SUB_UseTargets( FBitSet(pev->spawnflags, SF_RELAY_FORWARDACTIVATOR) ? pActivator : this, MyTriggerType(useType) );
+	CBaseEntity* targetActivator = this;
+	if (FBitSet(pev->spawnflags, SF_RELAY_PASS_CALLER_AS_ACTIVATOR))
+	{
+		targetActivator = pCaller;
+	}
+	else if (FBitSet(pev->spawnflags, SF_RELAY_FORWARDACTIVATOR))
+	{
+		targetActivator = pActivator;
+	}
+	SUB_UseTargets( targetActivator, MyTriggerType(useType) );
 	if (m_flDelayBeforeReset > 0) {
 		m_flResetTime = gpGlobals->time + m_flDelayBeforeReset;
 	}

@@ -8706,6 +8706,7 @@
 	[
 		1: "Remove On fire" : 0
 		64: "Forward activator" : 0 : "Forward my activator when triggering my target. Without this flag trigger_relay passes itself as an activator."
+		128: "Pass caller as activator" : 0 : "Pass my caller as activator when triggering my target. This has higher priority than 'Forward activator'."
 	]
 	triggerstate(choices) : "Trigger State" : 2 =
 	[
