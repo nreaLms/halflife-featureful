@@ -1159,7 +1159,24 @@ void Cmd_ReportAIState()
 
 void Cmd_NumberOfEntities()
 {
-	ALERT(at_console, "%d / %d\n", NUMBER_OF_ENTITIES(), gpGlobals->maxEntities);
+	if (CMD_ARGC() > 1)
+	{
+		const char* className = CMD_ARGV(1);
+		if (className && *className)
+		{
+			int count = 0;
+			CBaseEntity* pEntity = nullptr;
+			while ((pEntity = UTIL_FindEntityByClassname(pEntity, className)) != nullptr)
+			{
+				count++;
+			}
+			ALERT(at_console, "%d\n", count);
+		}
+	}
+	else
+	{
+		ALERT(at_console, "%d / %d\n", NUMBER_OF_ENTITIES(), gpGlobals->maxEntities);
+	}
 }
 
 static bool CanRunCheatCommand()
