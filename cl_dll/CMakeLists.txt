@@ -56,10 +56,6 @@ if (USE_VGUI)
 	add_definitions(-DUSE_VGUI)
 endif()
 
-if (USE_PARTICLEMAN)
-	add_definitions(-DUSE_PARTICLEMAN)
-endif()
-
 set (CLDLL_SOURCES
 	../dlls/ammoregistry.cpp
 	../dlls/weapons_shared.cpp
@@ -148,6 +144,10 @@ set (CLDLL_SOURCES
 	util.cpp
 	view.cpp
 	../game_shared/vcs_info.cpp
+	particleman/CBaseParticle.cpp
+	particleman/CFrustum.cpp
+	particleman/CMiniMem.cpp
+	particleman/IParticleMan_Active.cpp
 )
 
 if (USE_VGUI)
@@ -173,10 +173,6 @@ if (USE_VGUI)
 		../game_shared/vgui_slider2.cpp
 		../game_shared/voice_banmgr.cpp
 		)
-endif()
-
-if (USE_PARTICLEMAN)
-	list(APPEND CLDLL_SOURCES particleman/CBaseParticle.cpp particleman/CFrustum.cpp particleman/CMiniMem.cpp particleman/IParticleMan_Active.cpp)
 endif()
 
 include_directories (. hl/ ../dlls ../dlls/wpn_shared ../common ../engine ../pm_shared ../game_shared ../public particleman/)

@@ -42,7 +42,6 @@
 #include "vgui_TeamFortressViewport.h"
 #endif
 
-#if USE_PARTICLEMAN
 #include "IParticleMan_Active.h"
 #include "CBaseParticle.h"
 
@@ -52,7 +51,6 @@ IParticleMan *g_pParticleMan = NULL;
 
 void CL_LoadParticleMan( void );
 void CL_UnloadParticleMan( void );
-#endif
 
 #if GOLDSOURCE_SUPPORT && (XASH_WIN32 || XASH_LINUX || XASH_APPLE) && XASH_X86
 #define USE_FAKE_VGUI	!USE_VGUI
@@ -276,9 +274,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	EV_HookEvents();
 
-#if USE_PARTICLEMAN
 	CL_LoadParticleMan();
-#endif
 
 	gEngfuncs.pfnRegisterVariable( "cl_game_build_commit", g_VCSInfo_Commit, 0 );
 	gEngfuncs.pfnRegisterVariable( "cl_game_build_branch", g_VCSInfo_Branch, 0 );
@@ -416,13 +412,11 @@ int DLLEXPORT HUD_VidInit( void )
 	}
 #endif
 
-#if USE_PARTICLEMAN
 	if (g_pParticleMan)
 	{
 		g_pParticleMan->ResetParticles();
 		g_Environment.Reset();
 	}
-#endif
 
 	return 1;
 }
@@ -553,7 +547,6 @@ void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
 
-#if USE_PARTICLEMAN
 void TestParticlesCmd()
 {
 	static model_t* texture = 0;
@@ -618,7 +611,6 @@ void CL_LoadParticleMan( void )
 		gEngfuncs.pfnAddCommand("test_particles", &TestParticlesCmd);
 	}
 }
-#endif
 
 void DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
 {
@@ -648,7 +640,7 @@ void DLLEXPORT HUD_Shutdown( void )
 #ifdef CLDLL_FOG
 	UnloadOpenGL();
 #endif
-#if USE_PARTICLEMAN
+	g_Environment.Clear();
 	auto miniMem = CMiniMem::Instance();
 	if (miniMem)
 	{
@@ -656,7 +648,6 @@ void DLLEXPORT HUD_Shutdown( void )
 		miniMem->Shutdown();
 	}
 	CL_UnloadParticleMan();
-#endif
 }
 
 bool IsXashFWGS()

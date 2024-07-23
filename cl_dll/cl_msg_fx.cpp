@@ -14,10 +14,7 @@
 #include "r_studioint.h"
 
 #include "fx_flags.h"
-
-#if USE_PARTICLEMAN
 #include "particleman.h"
-#endif
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -544,7 +541,6 @@ int __MsgFunc_Particle( const char *pszName, int iSize, void *pbuf )
 	const int flags = READ_BYTE();
 	const int modelIndex = READ_SHORT();
 
-#if USE_PARTICLEMAN
 	if (g_pParticleMan)
 	{
 		const float clTime = gEngfuncs.GetClientTime();
@@ -585,7 +581,6 @@ int __MsgFunc_Particle( const char *pszName, int iSize, void *pbuf )
 			}
 		}
 	}
-#endif
 
 	return 1;
 }

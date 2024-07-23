@@ -44,7 +44,6 @@ project (HLSDK-FEATUREFUL)
 ################\
 option(USE_VGUI "Enable VGUI1." OFF)
 option(USE_VOICEMGR "Enable VOICE MANAGER." OFF)
-option(USE_PARTICLEMAN "Enable ParticleMan." ON)
 option(BUILD_CLIENT "Build client dll" ON)
 option(BUILD_SERVER "Build server dll" ON)
 option(LTO "Enable interprocedural optimization" OFF)
