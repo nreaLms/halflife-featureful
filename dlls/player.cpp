@@ -139,6 +139,7 @@ TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 	DEFINE_ARRAY(CBasePlayer, m_inventoryItems, FIELD_STRING, MAX_INVENTORY_ITEMS),
 	DEFINE_ARRAY(CBasePlayer, m_inventoryItemCounts, FIELD_SHORT, MAX_INVENTORY_ITEMS),
 
+	DEFINE_FIELD(CBasePlayer, m_camera, FIELD_EHANDLE),
 	DEFINE_FIELD(CBasePlayer, m_cameraFlags, FIELD_INTEGER),
 
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
@@ -582,7 +583,7 @@ Vector CBasePlayer::GetGunPosition()
 
 bool CBasePlayer::IsInvulnerable()
 {
-	if (m_hViewEntity != 0 && FBitSet(m_cameraFlags, PLAYER_CAMERA_INVULNERABLE))
+	if (m_camera != 0 && FBitSet(m_cameraFlags, PLAYER_CAMERA_INVULNERABLE))
 		return true;
 
 	return false;
@@ -1834,7 +1835,13 @@ void CBasePlayer::PlayerUse( void )
 	// Hit Use on a train?
 	if( m_afButtonPressed & IN_USE )
 	{
-		if( m_pTank != 0 )
+		if( m_camera != 0 && FBitSet(m_camera->pev->spawnflags, SF_CAMERA_STOP_BY_PLAYER_INPUT_USE) )
+		{
+			m_camera->Use(this, this, USE_OFF, 0.0f);
+			m_camera = 0;
+			return;
+		}
+		else if( m_pTank != 0 )
 		{
 			// Stop controlling the tank
 			// TODO: Send HUD Update

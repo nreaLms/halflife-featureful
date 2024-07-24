@@ -125,6 +125,9 @@ enum sbar_data
 // trigger_camera related player flags
 #define PLAYER_CAMERA_INVULNERABLE (1 << 0)
 
+// this is trigger_camera flag, need to have it here
+#define SF_CAMERA_STOP_BY_PLAYER_INPUT_USE (1 << 25)
+
 class CBasePlayer : public CBaseMonster
 {
 public:
@@ -519,6 +522,7 @@ public:
 	bool HasInventoryItem(string_t item);
 	int InventoryItemIndex(string_t item);
 
+	EHANDLE m_camera;
 	int m_cameraFlags;
 };
 

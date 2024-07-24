@@ -3399,6 +3399,7 @@ void CTriggerChangeValue::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 #define SF_CAMERA_PLAYER_TARGET		2
 #define SF_CAMERA_PLAYER_TAKECONTROL 4
 #define SF_CAMERA_PLAYER_INVULRENABLE 256
+#define SF_CAMERA_IGNORE_HOLD_TIME 512
 #define SF_CAMERA_PLAYER_ALIVE_ONLY 1024
 #define SF_CAMERA_DONT_FIRE_LOOK_TARGET 4096
 
@@ -3431,6 +3432,8 @@ public:
 	float m_acceleration;
 	float m_deceleration;
 	int m_state;
+	string_t m_iszTurnedOffTarget;
+	int m_stopByPlayerInput; // don't save, this is going to spawnflags
 };
 
 LINK_ENTITY_TO_CLASS( trigger_camera, CTriggerCamera )
@@ -3451,6 +3454,7 @@ TYPEDESCRIPTION	CTriggerCamera::m_SaveData[] =
 	DEFINE_FIELD( CTriggerCamera, m_acceleration, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_deceleration, FIELD_FLOAT ),
 	DEFINE_FIELD( CTriggerCamera, m_state, FIELD_INTEGER ),
+	DEFINE_FIELD( CTriggerCamera, m_iszTurnedOffTarget, FIELD_STRING ),
 };
 
 IMPLEMENT_SAVERESTORE( CTriggerCamera, CBaseDelay )
@@ -3467,6 +3471,11 @@ void CTriggerCamera::Spawn( void )
 		m_acceleration = 500;
 	if( m_deceleration == 0 )
 		m_deceleration = 500;
+
+	if (m_stopByPlayerInput != 0)
+	{
+		pev->spawnflags |= SF_CAMERA_STOP_BY_PLAYER_INPUT_USE;
+	}
 }
 
 void CTriggerCamera::KeyValue( KeyValueData *pkvd )
@@ -3489,6 +3498,16 @@ void CTriggerCamera::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq(pkvd->szKeyName, "deceleration" ) )
 	{
 		m_deceleration = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "stop_by_player_input" ) )
+	{
+		m_stopByPlayerInput = atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if ( FStrEq(pkvd->szKeyName, "m_iszTurnedOffTarget" ) )
+	{
+		m_iszTurnedOffTarget = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -3514,17 +3533,15 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_ALIVE_ONLY) && !pPlayer->IsAlive())
 		return;
 
+	pPlayer->m_cameraFlags = 0;
 	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_INVULRENABLE))
 	{
 		SetBits(pPlayer->m_cameraFlags, PLAYER_CAMERA_INVULNERABLE);
 	}
-	else
-	{
-		ClearBits(pPlayer->m_cameraFlags, PLAYER_CAMERA_INVULNERABLE);
-	}
 
 	pActivator = pPlayer;
 	m_hPlayer = pPlayer;
+	pPlayer->m_camera = this;
 
 	m_flReturnTime = gpGlobals->time + m_flWait;
 	pev->speed = m_initialSpeed;
@@ -3604,8 +3621,9 @@ void CTriggerCamera::FollowTarget()
 	CBasePlayer* player = static_cast<CBasePlayer*>(static_cast<CBaseEntity*>(m_hPlayer));
 	const bool playerIsAlive = player->IsAlive();
 	const bool shouldTurnOff = !playerIsAlive && FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_ALIVE_ONLY);
+	const bool shouldGoOff = FBitSet(pev->spawnflags, SF_CAMERA_IGNORE_HOLD_TIME) ? m_state == 0 : m_flReturnTime < gpGlobals->time;
 
-	if( m_hTarget == 0 || m_flReturnTime < gpGlobals->time || shouldTurnOff )
+	if( m_hTarget == 0 || shouldGoOff || shouldTurnOff )
 	{
 		const bool shouldReset = !playerIsAlive && FBitSet( pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL );
 
@@ -3614,11 +3632,15 @@ void CTriggerCamera::FollowTarget()
 			ReleasePlayer();
 		}
 
+		player->m_camera = 0;
+		player->m_cameraFlags = 0;
 		player->m_hViewEntity = 0;
 		player->m_bResetViewEntity = false;
 
 		if (!FBitSet(pev->spawnflags, SF_CAMERA_DONT_FIRE_LOOK_TARGET))
 			SUB_UseTargets( this );
+		if (!FStringNull(m_iszTurnedOffTarget))
+			FireTargets(STRING(m_iszTurnedOffTarget), player, this);
 		pev->avelocity = Vector( 0, 0, 0 );
 		m_state = 0;
 		return;
