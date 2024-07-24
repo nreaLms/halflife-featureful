@@ -1373,6 +1373,7 @@
 		7 : "Attachment point 2"
 		8 : "Attachment point 3"
 		9 : "Random"
+		10 : "Calc Position [LP]" : "Get Calc Position of another entity. This allows to use the result of another calc_position as a base. You must ensure that the evaluation chain won't lead to recursion!"
 	]
 	message(string) : "Add offset [LV]" : "0 0 0"
 ]
@@ -1441,18 +1442,19 @@
 	impulse(choices) : "Value to calculate from" : 0 =
 	[
 		0 : "Movement Velocity"
-		1 : "Angle"
-		2 : "View Angle"
+		1 : "Angle" : "Get entity direction"
+		2 : "View Angle" : "Get player view direction"
 		5 : "Attachment point 0"
 		6 : "Attachment point 1"
 		7 : "Attachment point 2"
 		8 : "Attachment point 3"
+		10: "Calc Velocity [LV]" : "Get Calc Velocity of another entity. This allows to use the result of another calc_subvelocity as a base. You must ensure that the evaluation chain won't lead to recursion!"
 	]
 	noise(string) : "Scale factor [LR]" : "1.0" : "Scale by this factor after getting the base vector and after possible normalization"
 	message(string) : "Add offset [LV]" : "0 0 0" : "Add offset after (possible) normalization and scale factor have been applied"
 	spawnflags(flags) =
 	[
-		1 : "Normalize" : 0
+		1 : "Normalize before scaling" : 0
 		2 : "Flip Vertical" : 0
 		4 : "Discard X" : 0
 		8 : "Discard Y" : 0
@@ -1489,7 +1491,7 @@
 @PointClass color(170 179 43) size(-12 -12 -12, 12 12 12) base(Targetname) = calc_velocity_polar : "Calculate velocity"
 [
 	netname(string) : "Based on velocity [LV]"
-	angles(string) : "Rotated by angle (Y Z X)" : "0 0 0"
+	angles(string) : "Rotated by angle (Y Z X) (degrees)" : "0 0 0"
 	noise(string) : "Length factor [LR]" : "1.0" : "Scale the vector by this factor."
 	message(string) : "Add offset [LV]" : "0 0 0" : "After rotation and scaling, add this offset to the vector."
 	spawnflags(flags) =

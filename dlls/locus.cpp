@@ -481,6 +481,15 @@ bool CCalcPosition::CalcPosition( CBaseEntity *pLocus, Vector* outVector )
 			RANDOM_FLOAT(pSubject->pev->mins.z, pSubject->pev->maxs.z)
 		);
 		break;
+	case 10:
+		if (pSubject == this)
+		{
+			ALERT(at_warning, "Recursion: %s refers to its own CalcPosition\n", STRING(pev->targetname));
+			return false;
+		}
+		if (!pSubject->CalcPosition(pLocus, outVector))
+			return false;
+		break;
 	default:
 		*outVector = vecOffset + pSubject->pev->origin;
 		break;
@@ -897,6 +906,7 @@ void CCalcSubVelocity::Spawn()
 
 bool CCalcSubVelocity::CalcVelocity( CBaseEntity *pLocus, Vector* outResult )
 {
+	// Note: this loses the original pLocus. This is how it's coded in all versions of SoHL
 	pLocus = UTIL_FindEntityByTargetname( NULL, STRING(pev->netname), pLocus );
 	if ( !pLocus )
 	{
@@ -927,6 +937,18 @@ bool CCalcSubVelocity::CalcVelocity( CBaseEntity *pLocus, Vector* outResult )
 	case 8:
 		((CBaseAnimating*)pLocus)->GetAttachment( 3, vecJunk, vecAngles );
 		return ConvertAngles( pLocus, vecAngles, outResult );
+	case 10:
+	{
+		if (pLocus == this)
+		{
+			ALERT(at_warning, "Recursion: %s refers to its own CalcVelocity\n", STRING(pev->targetname));
+			return false;
+		}
+		Vector calcedVelocity;
+		if (!pLocus->CalcVelocity(pLocus, &calcedVelocity))
+			return false;
+		return Convert( pLocus, calcedVelocity, outResult );
+	}
 	default:
 		return Convert( pLocus, pLocus->pev->velocity, outResult );
 	}
