@@ -497,6 +497,14 @@ CBaseEntity *UTIL_FindEntityByTargetname( CBaseEntity *pStartEntity, const char 
 		else
 			return NULL;
 	}
+	else if (UTIL_IsPlayerReference(szName))
+	{
+		CBaseEntity* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
+		if (pPlayer && (pStartEntity == NULL || pPlayer->eoffset() > pStartEntity->eoffset()))
+			return pPlayer;
+		else
+			return NULL;
+	}
 	else
 		return UTIL_FindEntityByTargetname( pStartEntity, szName );
 }
@@ -1053,6 +1061,11 @@ int UTIL_IsMasterTriggered( string_t sMaster, CBaseEntity *pActivator )
 
 	// if this isn't a master entity, just say yes.
 	return 1;
+}
+
+bool UTIL_IsPlayerReference(const char *name)
+{
+	return name != 0 && FStrEq(name, "*player");
 }
 
 bool UTIL_TargetnameIsActivator(const char *targetName)
