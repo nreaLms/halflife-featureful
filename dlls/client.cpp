@@ -489,6 +489,7 @@ void ClientCommand( edict_t *pEntity )
 		return;
 
 	entvars_t *pev = &pEntity->v;
+	CBasePlayer* pPlayer = GetClassPtr( (CBasePlayer *)pev );
 
 	if( FStrEq( pcmd, "say" ) )
 	{
@@ -500,14 +501,70 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if( FStrEq( pcmd, "fullupdate" ) )
 	{
-		GetClassPtr( (CBasePlayer *)pev )->ForceClientDllUpdate();
+		pPlayer->ForceClientDllUpdate();
 	}
 	else if( FStrEq(pcmd, "give" ) )
 	{
 		if( g_enable_cheats->value != 0 )
 		{
 			string_t iszItem = ALLOC_STRING( CMD_ARGV( 1 ) );	// Make a copy of the classname
-			GetClassPtr( (CBasePlayer *)pev )->GiveNamedItem( STRING( iszItem ) );
+			pPlayer->GiveNamedItem( STRING( iszItem ) );
+		}
+	}
+	else if( FStrEq(pcmd, "give_inventory" ) )
+	{
+		if( g_enable_cheats->value != 0 )
+		{
+			const char* inventoryItemName = CMD_ARGV( 1 );
+			if (*inventoryItemName)
+			{
+				string_t iszItem = ALLOC_STRING(inventoryItemName);
+				int count = 1;
+				if (CMD_ARGC() > 2)
+				{
+					count = atoi(CMD_ARGV(2));
+				}
+				if (count > 0)
+				{
+					pPlayer->GiveInventoryItem(iszItem, count > 0 ? count : 1);
+				}
+				else
+				{
+					ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, "Invalid number of inventory items to give!\n" );
+				}
+			}
+			else
+			{
+				ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, "Need an inventory item name!\n" );
+			}
+		}
+	}
+	else if( FStrEq(pcmd, "remove_inventory" ) )
+	{
+		if( g_enable_cheats->value != 0 )
+		{
+			const char* inventoryItemName = CMD_ARGV( 1 );
+			if (*inventoryItemName)
+			{
+				string_t iszItem = ALLOC_STRING(inventoryItemName);
+				int count = 1;
+				if (CMD_ARGC() > 2)
+				{
+					count = atoi(CMD_ARGV(2));
+				}
+				if (count > 0)
+				{
+					pPlayer->RemoveInventoryItem(iszItem, count > 0 ? count : 1);
+				}
+				else
+				{
+					ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, "Invalid number of inventory items to remove!\n" );
+				}
+			}
+			else
+			{
+				ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, "Need an inventory item name!\n" );
+			}
 		}
 	}
 	else if( FStrEq( pcmd, "fire" ) )
@@ -564,17 +621,17 @@ void ClientCommand( edict_t *pEntity )
 	else if( FStrEq( pcmd, "drop" ) )
 	{
 		// player is dropping an item.
-		GetClassPtr( (CBasePlayer *)pev )->DropPlayerItem( (char *)CMD_ARGV( 1 ) );
+		pPlayer->DropPlayerItem( (char *)CMD_ARGV( 1 ) );
 	}
 	else if (FStrEq( pcmd, "dropammo") )
 	{
-		GetClassPtr( (CBasePlayer *)pev )->DropAmmo();
+		pPlayer->DropAmmo();
 	}
 	else if( FStrEq( pcmd, "fov" ) )
 	{
 		if( g_enable_cheats->value != 0 && CMD_ARGC() > 1 )
 		{
-			GetClassPtr( (CBasePlayer *)pev )->m_iFOV = atoi( CMD_ARGV( 1 ) );
+			pPlayer->m_iFOV = atoi( CMD_ARGV( 1 ) );
 		}
 		else
 		{
@@ -583,19 +640,19 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if( FStrEq( pcmd, "use" ) )
 	{
-		GetClassPtr( (CBasePlayer *)pev )->SelectItem( (char *)CMD_ARGV( 1 ) );
+		pPlayer->SelectItem( CMD_ARGV( 1 ) );
 	}
 	else if( ( ( pstr = strstr( pcmd, "weapon_" ) ) != NULL ) && ( pstr == pcmd ) )
 	{
-		GetClassPtr( (CBasePlayer *)pev )->SelectItem( pcmd );
+		pPlayer->SelectItem( pcmd );
 	}
 	else if( FStrEq( pcmd, "lastinv" ) )
 	{
-		GetClassPtr( (CBasePlayer *)pev )->SelectLastItem();
+		pPlayer->SelectLastItem();
 	}
 	else if( FStrEq( pcmd, "nightvision" ) )
 	{
-		GetClassPtr( (CBasePlayer *)pev )->NVGToggle();
+		pPlayer->NVGToggle();
 	}
 	else if( FStrEq( pcmd, "spectate" ) ) // clients wants to become a spectator
 	{
@@ -626,8 +683,6 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if( FStrEq( pcmd, "specmode" ) ) // new spectator mode
 	{
-		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
-
 		if( pPlayer->IsObserver() )
 			pPlayer->Observer_SetMode( atoi( CMD_ARGV( 1 ) ) );
 	}
@@ -637,19 +692,15 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if( FStrEq( pcmd, "follownext" ) )	// follow next player
 	{
-		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
-
 		if( pPlayer->IsObserver() )
 			pPlayer->Observer_FindNextPlayer( atoi( CMD_ARGV( 1 ) ) ? true : false );
 	}
 	else if ( FStrEq( pcmd, "recruit_followers" ) )
 	{
-		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 		pPlayer->RecruitFollowers();
 	}
 	else if ( FStrEq( pcmd, "disband_followers" ) )
 	{
-		CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 		pPlayer->DisbandFollowers();
 	}
 	else if( g_pGameRules->ClientCommand( GetClassPtr( (CBasePlayer *)pev ), pcmd ) )
@@ -665,7 +716,6 @@ void ClientCommand( edict_t *pEntity )
 	{
 		if (g_enable_cheats->value != 0)
 		{
-			CBasePlayer *pPlayer = GetClassPtr( (CBasePlayer *)pev );
 			if (pPlayer->m_buddha) {
 				pPlayer->m_buddha = FALSE;
 				ClientPrint(&pEntity->v, HUD_PRINTCONSOLE, "Buddha Mode off\n");
