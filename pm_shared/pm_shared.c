@@ -63,7 +63,7 @@ playermove_t *pmove = NULL;
 #define VEC_VIEW		28
 #define	STOP_EPSILON		0.1f
 
-#define CTEXTURESMAX		512			// max number of textures loaded
+#define CTEXTURESMAX		1024			// max number of textures loaded
 #include "pm_materials.h"
 
 #define STEP_CONCRETE		0		// default step sound
