@@ -370,6 +370,8 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 	if( tr.pHit && Instance( tr.pHit )->pev->solid != SOLID_BSP )
 		return NULL;
 
+	Vector spawnAngles = pev->angles;
+	spawnAngles.x = spawnAngles.z = 0;
 	for( int i = 0; i < m_iUnits; i++ )
 	{
 		if( m_hGrunt[i] == 0 || !m_hGrunt[i]->IsAlive() )
@@ -378,7 +380,7 @@ CBaseMonster *COsprey::MakeGrunt( Vector vecSrc )
 			{
 				m_hGrunt[i]->SUB_StartFadeOut();
 			}
-			pEntity = CreateNoSpawn( TrooperName(), vecSrc, pev->angles );
+			pEntity = CreateNoSpawn( TrooperName(), vecSrc, spawnAngles );
 			pGrunt = pEntity->MyMonsterPointer();
 			// If player is my enemy and default relationship of my grunts with player is ally, reverse their relationship
 			if (IDefaultRelationship(CLASS_PLAYER) >= R_DL && IDefaultRelationship(pGrunt->DefaultClassify(), CLASS_PLAYER) < R_DL)
