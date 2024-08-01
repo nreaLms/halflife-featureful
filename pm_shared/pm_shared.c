@@ -307,6 +307,9 @@ void PM_PlayStepSound( int step, float fvol )
 	if( pmove->multiplayer && ( !g_onladder && Length( hvel ) <= 220 ) )
 		return;
 
+	if (atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "nos" ) ) == 1)
+		return;
+
 	// irand - 0,1 for right foot, 2,3 for left foot
 	// used to alternate left and right foot
 	// FIXME, move to player state

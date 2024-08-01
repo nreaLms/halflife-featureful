@@ -7698,6 +7698,14 @@
 		2 : "Toggle"
 		3 : "Copy use input"
 	]
+	stepsound_capability(choices) : "Step sounds" =
+	[
+		-1 : "Off"
+		0 : "No change"
+		1 : "On"
+		2 : "Toggle"
+		3 : "Copy use input"
+	]
 ]
 
 @PointClass base(Targetname) = player_deployweapon : "Force deploying a weapon"

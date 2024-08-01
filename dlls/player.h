@@ -117,10 +117,11 @@ enum sbar_data
 #define ARMOR_RATIO	0.2	// Armor Takes 80% of the damage
 
 // suppress capabilities flags
-#define PLAYER_SUPRESS_ATTACK (1<<0)
-#define PLAYER_SUPRESS_JUMP (1<<1)
-#define PLAYER_SUPRESS_DUCK (1<<2)
-#define PLAYER_SUPRESS_USE (1<<5)
+#define PLAYER_SUPPRESS_ATTACK (1<<0)
+#define PLAYER_SUPPRESS_JUMP (1<<1)
+#define PLAYER_SUPPRESS_DUCK (1<<2)
+#define PLAYER_SUPPRESS_STEP_SOUND (1<<3)
+#define PLAYER_SUPPRESS_USE (1<<5)
 
 // trigger_camera related player flags
 #define PLAYER_CAMERA_INVULNERABLE (1 << 0)

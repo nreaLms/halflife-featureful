@@ -110,7 +110,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 			m_fFireOnEmpty = TRUE;
 		}
 
-		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
+		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
 			SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
@@ -121,7 +121,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 			m_fFireOnEmpty = TRUE;
 		}
 
-		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
+		if (!FBitSet(m_pPlayer->m_suppressedCapabilities, PLAYER_SUPPRESS_ATTACK) && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN))
 			PrimaryAttack();
 	}
 	else if( m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload  && !FBitSet(m_pPlayer->pev->flags, FL_FROZEN) )

@@ -1829,7 +1829,7 @@ void CBasePlayer::PlayerUse( void )
 	if( !( ( pev->button | m_afButtonPressed | m_afButtonReleased) & IN_USE ) )
 		return;
 
-	if (FBitSet(m_suppressedCapabilities, PLAYER_SUPRESS_USE))
+	if (FBitSet(m_suppressedCapabilities, PLAYER_SUPPRESS_USE))
 		return;
 
 	// Hit Use on a train?
@@ -3884,7 +3884,7 @@ int CBasePlayer::Restore( CRestore &restore )
 
 void CBasePlayer::SetPhysicsKeyValues()
 {
-	if( FBitSet(m_suppressedCapabilities, PLAYER_SUPRESS_JUMP) )
+	if( FBitSet(m_suppressedCapabilities, PLAYER_SUPPRESS_JUMP) )
 	{
 		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "noj", "1" );
 	}
@@ -3892,13 +3892,21 @@ void CBasePlayer::SetPhysicsKeyValues()
 	{
 		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "noj", "0" );
 	}
-	if( FBitSet(m_suppressedCapabilities, PLAYER_SUPRESS_DUCK) )
+	if( FBitSet(m_suppressedCapabilities, PLAYER_SUPPRESS_DUCK) )
 	{
 		pev->iuser3 = 1;
 	}
 	else
 	{
 		pev->iuser3 = 0;
+	}
+	if( FBitSet(m_suppressedCapabilities, PLAYER_SUPPRESS_STEP_SOUND) )
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "nos", "1" );
+	}
+	else
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "nos", "0" );
 	}
 }
 
@@ -6811,10 +6819,11 @@ public:
 		CBasePlayer* pPlayer = g_pGameRules->EffectivePlayer(pActivator);
 		if (!pPlayer)
 			return;
-		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_ATTACK, m_attackCapability, useType);
-		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_JUMP, m_jumpCapability, useType);
-		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_DUCK, m_duckCapability, useType);
-		ConfigurePlayerCapability(pPlayer, PLAYER_SUPRESS_USE, m_useCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPPRESS_ATTACK, m_attackCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPPRESS_JUMP, m_jumpCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPPRESS_DUCK, m_duckCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPPRESS_USE, m_useCapability, useType);
+		ConfigurePlayerCapability(pPlayer, PLAYER_SUPPRESS_STEP_SOUND, m_stepSoundCapability, useType);
 
 		pPlayer->SetPhysicsKeyValues();
 	}
@@ -6839,6 +6848,11 @@ public:
 		else if( FStrEq( pkvd->szKeyName, "use_capability" ) )
 		{
 			m_useCapability = atoi( pkvd->szValue );
+			pkvd->fHandled = TRUE;
+		}
+		else if( FStrEq( pkvd->szKeyName, "stepsound_capability" ) )
+		{
+			m_stepSoundCapability = atoi( pkvd->szValue );
 			pkvd->fHandled = TRUE;
 		}
 		else
@@ -6883,6 +6897,7 @@ private:
 	short m_jumpCapability;
 	short m_duckCapability;
 	short m_useCapability;
+	short m_stepSoundCapability;
 };
 
 LINK_ENTITY_TO_CLASS( player_capabilities, CPlayerCapabilities )
@@ -6893,6 +6908,7 @@ TYPEDESCRIPTION	CPlayerCapabilities::m_SaveData[] =
 	DEFINE_FIELD( CPlayerCapabilities, m_jumpCapability, FIELD_SHORT ),
 	DEFINE_FIELD( CPlayerCapabilities, m_duckCapability, FIELD_SHORT ),
 	DEFINE_FIELD( CPlayerCapabilities, m_useCapability, FIELD_SHORT ),
+	DEFINE_FIELD( CPlayerCapabilities, m_stepSoundCapability, FIELD_SHORT ),
 };
 
 IMPLEMENT_SAVERESTORE( CPlayerCapabilities, CPointEntity )
