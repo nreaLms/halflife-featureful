@@ -124,6 +124,7 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 			{
 				wrect_t rcPic;
 				HSPRITE *spr = gWR.GetAmmoPicFromWeapon( rgAmmoHistory[i].iId, rcPic );
+				bool hasSprite = spr && *spr;
 
 				int r, g, b;
 				UnpackRGB( r, g, b, gHUD.HUDColor() );
@@ -131,8 +132,13 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 
 				// Draw the pic
 				int ypos = ScreenHeight - ( CHud::Renderer().ScaleScreen(AMMO_PICKUP_PICK_HEIGHT) + (AMMO_PICKUP_GAP * i) );
-				int xpos = ScreenWidth - 24;
-				if( spr && *spr )    // weapon isn't loaded yet so just don't draw the pic
+				int width = 24;
+				if (hasSprite)
+				{
+					width = Q_max((rcPic.right - rcPic.left), width);
+				}
+				int xpos = ScreenWidth - width;
+				if( hasSprite )    // weapon isn't loaded yet so just don't draw the pic
 				{
 					// the dll has to make sure it has sent info the weapons you need
 					SPR_Set( *spr, r, g, b );
