@@ -113,6 +113,8 @@ struct ModFeatures
 	bool doors_blocked_recheck;
 	bool door_rotating_starts_open_fix;
 
+	bool env_spark_transit;
+
 	bool skill_opfor;
 	bool opfor_decals;
 	bool opfor_deadhaz;

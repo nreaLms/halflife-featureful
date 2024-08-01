@@ -26,6 +26,7 @@
 #include "saverestore.h"
 #include "doors.h"
 #include "soundradius.h"
+#include "game.h"
 
 #define SF_BUTTON_DONTMOVE		1
 #define SF_ROTBUTTON_NOTSOLID		1
@@ -1920,6 +1921,13 @@ class CEnvSpark : public CBaseEntity
 public:
 	void Spawn( void );
 	void Precache( void );
+	int ObjectCaps( void )
+	{
+		int caps = CBaseEntity::ObjectCaps();
+		if (g_modFeatures.env_spark_transit)
+			return caps;
+		return caps & ~FCAP_ACROSS_TRANSITION;
+	}
 	void EXPORT SparkThink( void );
 	void EXPORT SparkWait( void );
 	void EXPORT SparkCyclic(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
