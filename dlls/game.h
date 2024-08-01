@@ -193,7 +193,7 @@ extern cvar_t dmgperscore;
 extern cvar_t allydmgpenalty;
 extern cvar_t npckill;
 
-extern cvar_t bhopcap;
+extern cvar_t sv_bunnyhop;
 extern cvar_t sv_pushable_fixed_tick_fudge;
 extern cvar_t sv_busters;
 
