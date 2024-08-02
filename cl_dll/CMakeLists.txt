@@ -92,7 +92,6 @@ set (CLDLL_SOURCES
 	ammo.cpp
 	ammo_secondary.cpp
 	ammohistory.cpp
-	battery.cpp
 	cdll_int.cpp
 	cl_msg_fx.cpp
 	com_weapons.cpp

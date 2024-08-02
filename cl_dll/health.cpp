@@ -26,6 +26,7 @@
 
 DECLARE_MESSAGE( m_Health, Health )
 DECLARE_MESSAGE( m_Health, Damage )
+DECLARE_MESSAGE( m_Health, Battery )
 
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
@@ -52,6 +53,8 @@ int CHudHealth::Init( void )
 {
 	HOOK_MESSAGE( Health );
 	HOOK_MESSAGE( Damage );
+	HOOK_MESSAGE( Battery );
+
 	m_iHealth = 100;
 	m_iMaxHealth = 100;
 	m_fFade = 0;
@@ -62,6 +65,10 @@ int CHudHealth::Init( void )
 	giDmgWidth = 0;
 
 	memset( m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES );
+
+	m_iBat = 0;
+	m_iMaxBat = 100;
+	m_fArmorFade = 0;
 
 	gHUD.AddHudElem( this );
 	return 1;
@@ -89,6 +96,15 @@ int CHudHealth::VidInit( void )
 
 	giDmgHeight = gHUD.GetSpriteRect( m_HUD_dmg_bio ).right - gHUD.GetSpriteRect( m_HUD_dmg_bio ).left;
 	giDmgWidth = gHUD.GetSpriteRect( m_HUD_dmg_bio ).bottom - gHUD.GetSpriteRect( m_HUD_dmg_bio ).top;
+
+	int HUD_suit_empty = gHUD.GetSpriteIndex( "suit_empty" );
+	int HUD_suit_full = gHUD.GetSpriteIndex( "suit_full" );
+
+	m_ArmorSprite1 = m_ArmorSprite2 = 0;  // delaying get sprite handles until we know the sprites are loaded
+	m_prc1 = &gHUD.GetSpriteRect( HUD_suit_empty );
+	m_prc2 = &gHUD.GetSpriteRect( HUD_suit_full );
+	m_iHeight = m_prc2->bottom - m_prc1->top;
+	m_fArmorFade = 0;
 
 	return 1;
 }
@@ -144,6 +160,23 @@ int CHudHealth::MsgFunc_Damage( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int CHudHealth::MsgFunc_Battery( const char *pszName,  int iSize, void *pbuf )
+{
+	m_iFlags |= HUD_ACTIVE;
+
+	BEGIN_READ( pbuf, iSize );
+	int x = READ_SHORT();
+	m_iMaxBat = READ_SHORT();
+
+	if( x != m_iBat )
+	{
+		m_fArmorFade = FADE_TIME;
+		m_iBat = x;
+	}
+
+	return 1;
+}
+
 // Returns back a color from the
 // Green <-> Yellow <-> Red ramp
 void CHudHealth::GetHealthColor( int &r, int &g, int &b )
@@ -185,15 +218,29 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 
 int CHudHealth::Draw( float flTime )
 {
-	int r, g, b;
-	int a = 0, x, y;
-	int HealthWidth;
-
 	if( ( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH ) || gEngfuncs.IsSpectateOnly() )
 		return 1;
 
 	if( !m_hSprite )
 		m_hSprite = LoadSprite( PAIN_NAME );
+
+	bool hasSuit = gHUD.HasSuit();
+
+	// Only draw health if we have the suit.
+	if( hasSuit || gHUD.clientFeatures.hud_draw_nosuit )
+	{
+		const int armorStartX = DrawHealth();
+		if (hasSuit)
+			DrawArmor(armorStartX);
+	}
+
+	DrawDamage( flTime );
+	return DrawPain( flTime );
+}
+
+int CHudHealth::DrawHealth()
+{
+	int a = gHUD.MinHUDAlpha();
 
 	// Has health changed? Flash the health #
 	if( m_fFade )
@@ -201,49 +248,93 @@ int CHudHealth::Draw( float flTime )
 		m_fFade -= ( (float)gHUD.m_flTimeDelta * 20.0f );
 		if( m_fFade <= 0 )
 		{
-			a = gHUD.MinHUDAlpha();
 			m_fFade = 0;
 		}
 
 		// Fade the health number back to dim
-		a = gHUD.MinHUDAlpha() + ( m_fFade / FADE_TIME ) * 128;
+		a += ( m_fFade / FADE_TIME ) * 128;
 	}
-	else
-		a = gHUD.MinHUDAlpha();
 
 	// If health is getting low, make it bright red
 	if( m_iHealth <= 15 )
 		a = 255;
 
+	int r, g, b;
 	GetHealthColor( r, g, b );
 	ScaleColors( r, g, b, a );
 
-	// Only draw health if we have the suit.
-	if( gHUD.HasSuit() || gHUD.clientFeatures.hud_draw_nosuit )
+	const int HealthWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
+	int CrossWidth = gHUD.GetSpriteRect( m_HUD_cross ).right - gHUD.GetSpriteRect( m_HUD_cross ).left;
+
+	int y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+	int x = CrossWidth / 2;
+
+	CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite( m_HUD_cross ), r, g, b, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
+
+	x += CrossWidth;
+
+	const int digitFlag = m_iHealth >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
+	x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iHealth, r, g, b );
+
+	x += HealthWidth / 2;
+
+	int iHeight = gHUD.m_iFontHeight;
+	int iWidth = HealthWidth / 10;
+	UnpackRGB( r, g, b, gHUD.HUDColor() );
+	CHud::Renderer().FillRGBA( x, y, iWidth, iHeight, r, g, b, a );
+
+	return x + HealthWidth / 2;
+}
+
+void CHudHealth::DrawArmor(int startX)
+{
+	wrect_t rc = *m_prc2;
+	rc.top  += m_iHeight * ( (float)( 100 - ( Q_min( 100, m_iBat ) ) ) * 0.01f );	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
+
+	int a = gHUD.MinHUDAlpha();
+
+	// Has health changed? Flash the health #
+	if( m_fArmorFade )
 	{
-		HealthWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
-		int CrossWidth = gHUD.GetSpriteRect( m_HUD_cross ).right - gHUD.GetSpriteRect( m_HUD_cross ).left;
+		if( m_fArmorFade > FADE_TIME )
+			m_fArmorFade = FADE_TIME;
 
-		y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-		x = CrossWidth / 2;
+		m_fArmorFade -= ( (float)gHUD.m_flTimeDelta * 20.0f );
+		if( m_fArmorFade <= 0 )
+		{
+			m_fArmorFade = 0;
+		}
 
-		CHud::Renderer().SPR_DrawAdditive( gHUD.GetSprite( m_HUD_cross ), r, g, b, x, y, &gHUD.GetSpriteRect( m_HUD_cross ) );
-
-		x += CrossWidth;
-
-		const int digitFlag = m_iHealth >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
-		x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iHealth, r, g, b );
-
-		x += HealthWidth / 2;
-
-		int iHeight = gHUD.m_iFontHeight;
-		int iWidth = HealthWidth / 10;
-		UnpackRGB( r, g, b, gHUD.HUDColor() );
-		CHud::Renderer().FillRGBA( x, y, iWidth, iHeight, r, g, b, a );
+		// Fade the health number back to dim
+		a += ( m_fArmorFade / FADE_TIME ) * 128;
 	}
 
-	DrawDamage( flTime );
-	return DrawPain( flTime );
+	int r, g, b;
+	UnpackRGB( r, g, b, gHUD.HUDColor() );
+	ScaleColors( r, g, b, a );
+
+	int iOffset = ( m_prc1->bottom - m_prc1->top ) / 6;
+
+	int y = CHud::Renderer().PerceviedScreenHeight() - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+	int x = gHUD.DrawArmorNearHealth() ? startX : CHud::Renderer().PerceviedScreenWidth() / 5;
+
+	// make sure we have the right sprite handles
+	if( !m_ArmorSprite1 )
+		m_ArmorSprite1 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_empty" ) );
+	if( !m_ArmorSprite2 )
+		m_ArmorSprite2 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_full" ) );
+
+	CHud::Renderer().SPR_DrawAdditive( m_ArmorSprite1, r, g, b,  x, y - iOffset, m_prc1 );
+
+	if( rc.bottom > rc.top )
+	{
+		CHud::Renderer().SPR_DrawAdditive( m_ArmorSprite2, r, g, b, x, y - iOffset + ( rc.top - m_prc2->top ), &rc );
+	}
+
+	x += ( m_prc1->right - m_prc1->left );
+
+	const int digitFlag = m_iBat >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
+	x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iBat, r, g, b );
 }
 
 void CHudHealth::CalcDamageDirection( vec3_t vecFrom )

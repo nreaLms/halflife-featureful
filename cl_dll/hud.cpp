@@ -643,6 +643,7 @@ void CHud::Init( void )
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "200", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
 	CreateIntegerCvarConditionally(m_pCvarMinAlpha, "hud_min_alpha", clientFeatures.hud_min_alpha);
+	CreateBooleanCvarConditionally(m_pCvarArmorNearHealth, "hud_armor_near_health", clientFeatures.hud_armor_near_health);
 	int hudR, hudG, hudB;
 	UnpackRGB(hudR, hudG, hudB, clientFeatures.hud_color);
 
@@ -718,7 +719,6 @@ void CHud::Init( void )
 	m_Spectator.Init();
 	m_Geiger.Init();
 	m_Train.Init();
-	m_Battery.Init();
 	m_Flash.Init();
 	m_MoveMode.Init();
 	m_Message.Init();
@@ -1189,7 +1189,6 @@ void CHud::VidInit( void )
 	m_Spectator.VidInit();
 	m_Geiger.VidInit();
 	m_Train.VidInit();
-	m_Battery.VidInit();
 	m_Flash.VidInit();
 	m_MoveMode.VidInit();
 	m_Message.VidInit();
@@ -1434,6 +1433,11 @@ int CHud::CalcMinHUDAlpha()
 	const ConfigurableBoundedValue& min_alpha = clientFeatures.hud_min_alpha;
 	const int value = m_pCvarMinAlpha ? m_pCvarMinAlpha->value : min_alpha.defaultValue;
 	return boundValue(min_alpha.minValue, value, min_alpha.maxValue);
+}
+
+bool CHud::DrawArmorNearHealth()
+{
+	return ClientFeatureEnabled(m_pCvarArmorNearHealth, clientFeatures.hud_armor_near_health.enabled_by_default);
 }
 
 bool CHud::WeaponWallpuffEnabled()

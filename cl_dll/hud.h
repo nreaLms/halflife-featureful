@@ -481,23 +481,47 @@ private:
 //
 //-----------------------------------------------------
 //
-class CHudBattery : public CHudBase
+class CHudHealth : public CHudBase
 {
 public:
-	int Init( void );
-	int VidInit( void );
-	int Draw( float flTime );
+	virtual int Init( void );
+	virtual int VidInit( void );
+	virtual int Draw( float fTime );
+	virtual void Reset( void );
+	int MsgFunc_Health( const char *pszName,  int iSize, void *pbuf );
+	int MsgFunc_Damage( const char *pszName,  int iSize, void *pbuf );
 	int MsgFunc_Battery( const char *pszName,  int iSize, void *pbuf );
-	
+	int m_iHealth;
+	int m_iMaxHealth;
+	int m_HUD_dmg_bio;
+	int m_HUD_cross;
+	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
+	void GetHealthColor( int &r, int &g, int &b );
+	void GetPainColor( int &r, int &g, int &b );
+	float m_fFade;
+
 private:
-	HSPRITE m_hSprite1;
-	HSPRITE m_hSprite2;
-	wrect_t *m_prc1;
-	wrect_t *m_prc2;
+	HSPRITE m_hSprite;
+	HSPRITE m_hDamage;
+
+	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
+	int m_bitsDamage;
+
+	HSPRITE m_ArmorSprite1;
+	HSPRITE m_ArmorSprite2;
+	const wrect_t *m_prc1;
+	const wrect_t *m_prc2;
 	int m_iBat;
 	int m_iMaxBat;
-	float m_fFade;
+	float m_fArmorFade;
 	int m_iHeight;		// width of the battery innards
+
+	int DrawHealth();
+	void DrawArmor(int startX);
+	int DrawPain( float fTime );
+	int DrawDamage( float fTime );
+	void CalcDamageDirection( vec3_t vecFrom );
+	void UpdateTiles( float fTime, long bits );
 };
 
 //
@@ -794,6 +818,8 @@ struct ClientFeatures
 	bool hud_draw_nosuit;
 	int hud_color_nosuit;
 
+	ConfigurableBooleanValue hud_armor_near_health;
+
 	int hud_color_nvg;
 	int hud_min_alpha_nvg;
 	bool opfor_title;
@@ -862,6 +888,7 @@ public:
 	cvar_t	*m_pCvarHudRed;
 	cvar_t	*m_pCvarHudGreen;
 	cvar_t	*m_pCvarHudBlue;
+	cvar_t	*m_pCvarArmorNearHealth;
 
 	cvar_t	*m_pCvarMOTDVGUI;
 	cvar_t	*m_pCvarScoreboardVGUI;
@@ -919,6 +946,7 @@ public:
 	}
 	bool ViewBobEnabled();
 	int CalcMinHUDAlpha();
+	bool DrawArmorNearHealth();
 	bool WeaponWallpuffEnabled();
 	bool WeaponSparksEnabled();
 	bool MuzzleLightEnabled();
@@ -966,7 +994,6 @@ public:
 	CHudHealth		m_Health;
 	CHudSpectator		m_Spectator;
 	CHudGeiger		m_Geiger;
-	CHudBattery		m_Battery;
 	CHudTrain		m_Train;
 	CHudFlashlight	m_Flash;
 	CHudMoveMode	m_MoveMode;
