@@ -21,27 +21,14 @@ public:
 	int DefaultISoundMask(void);
 	int DefaultClassify(void);
 	void DeathSound( void );
-	void PainSound( void );
+	void PlayPainSound( void );
 
 	Schedule_t *GetSchedule( void );
 
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
-	static TYPEDESCRIPTION m_SaveData[];
-
 	const char* DefaultSentenceGroup(int group);
-
-	float m_painTime;
 };
 
 LINK_ENTITY_TO_CLASS( monster_recruit, CRecruit )
-
-TYPEDESCRIPTION	CRecruit::m_SaveData[] =
-{
-	DEFINE_FIELD( CRecruit, m_painTime, FIELD_TIME ),
-};
-
-IMPLEMENT_SAVERESTORE( CRecruit, CTalkMonster )
 
 void CRecruit::Precache()
 {
@@ -114,13 +101,8 @@ int CRecruit::DefaultClassify(void)
 	return CLASS_PLAYER_ALLY_MILITARY;
 }
 
-void CRecruit::PainSound( void )
+void CRecruit::PlayPainSound( void )
 {
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
-
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:

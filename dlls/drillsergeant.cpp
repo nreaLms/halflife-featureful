@@ -22,27 +22,14 @@ public:
 	int DefaultISoundMask(void);
 	int DefaultClassify(void);
 	void DeathSound( void );
-	void PainSound( void );
+	void PlayPainSound( void );
 
 	Schedule_t *GetSchedule( void );
 
-	virtual int Save( CSave &save );
-	virtual int Restore( CRestore &restore );
-	static TYPEDESCRIPTION m_SaveData[];
-
 	const char* DefaultSentenceGroup(int group);
-
-	float m_painTime;
 };
 
 LINK_ENTITY_TO_CLASS( monster_drillsergeant, CDrillSergeant )
-
-TYPEDESCRIPTION	CDrillSergeant::m_SaveData[] =
-{
-	DEFINE_FIELD( CDrillSergeant, m_painTime, FIELD_TIME ),
-};
-
-IMPLEMENT_SAVERESTORE( CDrillSergeant, CTalkMonster )
 
 void CDrillSergeant::Precache()
 {
@@ -115,13 +102,8 @@ int CDrillSergeant::DefaultClassify(void)
 	return CLASS_PLAYER_ALLY_MILITARY;
 }
 
-void CDrillSergeant::PainSound( void )
+void CDrillSergeant::PlayPainSound( void )
 {
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5, 0.75 );
-
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:

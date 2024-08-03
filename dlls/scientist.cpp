@@ -130,8 +130,7 @@ public:
 	}
 
 	void DeathSound( void );
-	void PainSound( void );
-	virtual void PlayPainSound();
+	void PlayPainSound();
 
 	const char* DefaultSentenceGroup(int group);
 
@@ -156,7 +155,6 @@ protected:
 	void SciSpawnHelper(const char* modelName, float health);
 	void PrecachePainSounds();
 
-	float m_painTime;
 	float m_healTime;
 	float m_fearTime;
 
@@ -170,7 +168,6 @@ LINK_ENTITY_TO_CLASS( monster_scientist, CScientist )
 
 TYPEDESCRIPTION	CScientist::m_SaveData[] =
 {
-	DEFINE_FIELD( CScientist, m_painTime, FIELD_TIME ),
 	DEFINE_FIELD( CScientist, m_healTime, FIELD_TIME ),
 	DEFINE_FIELD( CScientist, m_fearTime, FIELD_TIME ),
 };
@@ -887,16 +884,6 @@ int CScientist::DefaultISoundMask( void )
 //=========================================================
 // PainSound
 //=========================================================
-void CScientist::PainSound( void )
-{
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
-
-	PlayPainSound();
-}
-
 void CScientist::PlayPainSound()
 {
 	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );

@@ -67,7 +67,7 @@ public:
 	Schedule_t *GetSchedule( void );
 
 	void DeathSound( void );
-	void PainSound( void );
+	void PlayPainSound( void );
 
 	const char* DefaultSentenceGroup(int group);
 
@@ -79,7 +79,6 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	BOOL m_fGunDrawn;
-	float m_painTime;
 	float m_checkAttackTime;
 	BOOL m_lastAttackCheck;
 
@@ -99,7 +98,6 @@ LINK_ENTITY_TO_CLASS( monster_barney, CBarney )
 TYPEDESCRIPTION	CBarney::m_SaveData[] =
 {
 	DEFINE_FIELD( CBarney, m_fGunDrawn, FIELD_BOOLEAN ),
-	DEFINE_FIELD( CBarney, m_painTime, FIELD_TIME ),
 	DEFINE_FIELD( CBarney, m_checkAttackTime, FIELD_TIME ),
 	DEFINE_FIELD( CBarney, m_lastAttackCheck, FIELD_BOOLEAN ),
 };
@@ -462,13 +460,8 @@ void CBarney::KeyValue(KeyValueData *pkvd)
 //=========================================================
 // PainSound
 //=========================================================
-void CBarney::PainSound( void )
+void CBarney::PlayPainSound( void )
 {
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
-
 	switch( RANDOM_LONG( 0, 2 ) )
 	{
 	case 0:
@@ -896,7 +889,7 @@ public:
 	const char* ReverseRelationshipModel() { return NULL; }
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void DeathSound( void );
-	void PainSound( void );
+	void PlayPainSound( void );
 
 	void OnDying();
 };
@@ -975,12 +968,8 @@ void CBarniel::DeathSound( void )
 	EmitSoundDyn( CHAN_VOICE, "barniel/bn_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 }
 
-void CBarniel::PainSound()
+void CBarniel::PlayPainSound()
 {
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
 	EmitSoundDyn( CHAN_VOICE, "barniel/bn_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 }
 
@@ -1042,7 +1031,7 @@ public:
 	int DefaultToleranceLevel() { return TOLERANCE_AVERAGE; }
 	BOOL CheckMeleeAttack1( float flDot, float flDist );
 	void DeathSound( void );
-	void PainSound( void );
+	void PlayPainSound( void );
 
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
@@ -1209,13 +1198,8 @@ void CKate::DeathSound( void )
 	EmitSoundDyn( CHAN_VOICE, "kate/ka_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
 }
 
-void CKate::PainSound()
+void CKate::PlayPainSound()
 {
-	if( gpGlobals->time < m_painTime )
-		return;
-
-	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
-
 	switch( RANDOM_LONG( 0, 1 ) )
 	{
 	case 0:

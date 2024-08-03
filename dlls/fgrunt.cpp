@@ -178,7 +178,7 @@ public:
 
 	void AlertSound( void );
 	void DeathSound( void );
-	void PainSound( void );
+	void PlayPainSound( void );
 	void IdleSound( void );
 
 	static const char *pPainSounds[];
@@ -210,7 +210,6 @@ public:
 	// checking the feasibility of a grenade toss is kind of costly, so we do it every couple of seconds,
 	// not every server frame.
 	float m_flNextGrenadeCheck;
-	float m_flNextPainTime;
 
 	bool	m_flLinkToggle;
 
@@ -328,7 +327,6 @@ protected:
 TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
 {
 	DEFINE_FIELD( CHFGrunt, m_flNextGrenadeCheck, FIELD_TIME ),
-	DEFINE_FIELD( CHFGrunt, m_flNextPainTime, FIELD_TIME ),
 	DEFINE_FIELD( CHFGrunt, m_vecTossVelocity, FIELD_VECTOR ),
 	DEFINE_FIELD( CHFGrunt, m_fThrowGrenade, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CHFGrunt, m_fStanding, FIELD_BOOLEAN ),
@@ -1936,7 +1934,6 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 	SetMyFieldOfView(VIEW_FIELD_WIDE); // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck = gpGlobals->time + 1;
-	m_flNextPainTime	= gpGlobals->time;
 
 	m_afCapability		= bits_CAP_HEAR | bits_CAP_SQUAD | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
@@ -2062,13 +2059,9 @@ void CHFGrunt::SpeakCaughtEnemy()
 //=========================================================
 // PainSound
 //=========================================================
-void CHFGrunt :: PainSound ( void )
+void CHFGrunt::PlayPainSound( void )
 {
-	if ( gpGlobals->time > m_flNextPainTime )
-	{
-		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, GetVoicePitch());
-		m_flNextPainTime = gpGlobals->time + 1;
-	}
+	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, GetVoicePitch());
 }
 
 void CHFGrunt::AlertSound()

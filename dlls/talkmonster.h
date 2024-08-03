@@ -147,6 +147,7 @@ public:
 	virtual int		CanPlaySentence( BOOL fDisregardState );
 	virtual bool PlaySentence( const char *pszSentence, float duration, float volume, float attenuation, bool subtitle = false );
 	void			PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
+	void			PainSound();
 	void			KeyValue( KeyValueData *pkvd );
 
 	// AI functions
@@ -182,6 +183,7 @@ public:
 	void			Talk( float flDuration );
 	virtual const char* DefaultSentenceGroup(int group) { return NULL; }
 	virtual const char* SentenceGroup(int group);
+	virtual void PlayPainSound() {}
 
 	// Following related
 	virtual void	StartFollowing( CBaseEntity *pLeader, bool saySentence = true );
@@ -268,6 +270,7 @@ public:
 
 	float m_flStopLookTime;
 	float m_flNextFlinch;
+	float m_painTime;
 
 	CUSTOM_SCHEDULES
 };

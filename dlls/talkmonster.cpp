@@ -61,6 +61,7 @@ TYPEDESCRIPTION	CTalkMonster::m_SaveData[] =
 	DEFINE_FIELD( CTalkMonster, m_iPlayerHits, FIELD_INTEGER ),
 	DEFINE_FIELD( CTalkMonster, m_flStopLookTime, FIELD_TIME ),
 	DEFINE_FIELD( CTalkMonster, m_flNextFlinch, FIELD_TIME ),
+	DEFINE_FIELD( CTalkMonster, m_painTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CTalkMonster, CFollowingMonster )
@@ -978,6 +979,16 @@ int CTalkMonster::CanPlaySentence( BOOL fDisregardState )
 	if( fDisregardState )
 		return CFollowingMonster::CanPlaySentence( fDisregardState );
 	return FOkToSpeak(); 
+}
+
+void CTalkMonster::PainSound()
+{
+	if( gpGlobals->time < m_painTime )
+		return;
+
+	m_painTime = gpGlobals->time + RANDOM_FLOAT( 0.5f, 0.75f );
+
+	PlayPainSound();
 }
 
 //=========================================================
