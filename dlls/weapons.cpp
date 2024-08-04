@@ -281,7 +281,6 @@ void RegisterAmmoTypes()
 	{
 		g_AmmoRegistry.SetMaxAmmo(g_modFeatures.maxAmmos[i].name, g_modFeatures.maxAmmos[i].maxAmmo);
 	}
-	g_AmmoRegistry.ReportRegisteredTypes();
 }
 
 // called by worldspawn

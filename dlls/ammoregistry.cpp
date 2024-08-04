@@ -83,7 +83,8 @@ void AmmoRegistry::RegisterOnClient(const char *name, int maxAmmo, int index, bo
 	type.id = index;
 	type.exhaustible = exhaustible;
 
-	ReportRegisteredType(type);
+	if (type.id > lastAmmoIndex)
+		lastAmmoIndex = type.id;
 }
 
 const AmmoType* AmmoRegistry::GetByName(const char *name) const
@@ -157,7 +158,12 @@ void AmmoRegistry::ReportRegisteredTypes()
 
 void AmmoRegistry::ReportRegisteredType(const AmmoType& ammoType)
 {
-	AMMO_LOG("Registered ammo type: '%s' (max: %d, index: %d)\n", ammoType.name, ammoType.maxAmmo, ammoType.id);
+	AMMO_LOG("%s. Max ammo: %d. Index: %d. %s\n", ammoType.name, ammoType.maxAmmo, ammoType.id, ammoType.exhaustible ? "Exhaustible" : "");
 }
 
 AmmoRegistry g_AmmoRegistry;
+
+void ReportRegisteredAmmoTypes()
+{
+	g_AmmoRegistry.ReportRegisteredTypes();
+}

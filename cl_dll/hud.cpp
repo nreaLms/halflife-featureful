@@ -568,6 +568,8 @@ void __CmdFunc_HUDColor()
 {
 	gHUD.HUDColorCmd();
 }
+
+extern void ReportRegisteredAmmoTypes();
  
 // This is called every time the DLL is loaded
 void CHud::Init( void )
@@ -742,6 +744,8 @@ void CHud::Init( void )
 	inventorySpec.ReadFromFile("sprites/hud_inventory.json");
 
 	hudRenderer.Init();
+
+	gEngfuncs.pfnAddCommand("dump_ammo_types_client", ReportRegisteredAmmoTypes);
 
 	MsgFunc_ResetHUD( 0, 0, NULL );
 	ClientCmd( "richpresence_gamemode\n" );

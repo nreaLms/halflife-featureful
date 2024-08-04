@@ -1363,6 +1363,7 @@ cvar_t sv_pushable_fixed_tick_fudge = { "sv_pushable_fixed_tick_fudge", "15" };
 cvar_t sv_busters = { "sv_busters", "0" };
 
 extern void RegisterAmmoTypes();
+extern void ReportRegisteredAmmoTypes();
 extern void LoadWarpballTemplates();
 extern void ReadInventorySpec();
 
@@ -1964,6 +1965,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("calc_position", Cmd_CalcPosition);
 	g_engfuncs.pfnAddServerCommand("calc_velocity", Cmd_CalcVelocity);
 	g_engfuncs.pfnAddServerCommand("calc_state", Cmd_CalcState);
+	g_engfuncs.pfnAddServerCommand("dump_ammo_types", ReportRegisteredAmmoTypes);
 	g_engfuncs.pfnAddServerCommand("dump_warpballs", DumpWarpballTemplates);
 }
 
