@@ -255,7 +255,7 @@ static float RandomizeNumberFromRange(const FloatRange& r)
 	return RANDOM_FLOAT(r.min, r.max);
 }
 
-static float RandomizeNumberFromRange(const IntRange& r)
+static int RandomizeNumberFromRange(const IntRange& r)
 {
 	if (r.min >= r.max) {
 		return r.min;
