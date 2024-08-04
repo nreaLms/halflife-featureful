@@ -184,6 +184,7 @@ bool UpdatePropertyFromJson(FloatRange& floatRange, Value& jsonValue, const char
 		if (floatRange.min > floatRange.max) {
 			floatRange.min = floatRange.max;
 		}
+		return true;
 	}
 	return false;
 }
@@ -230,6 +231,7 @@ bool UpdatePropertyFromJson(IntRange& intRange, Value& jsonValue, const char* ke
 		if (intRange.min > intRange.max) {
 			intRange.min = intRange.max;
 		}
+		return true;
 	}
 	return false;
 }
