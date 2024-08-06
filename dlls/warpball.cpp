@@ -247,22 +247,6 @@ const char warpballCatalogSchema[] = R"(
 }
 )";
 
-static float RandomizeNumberFromRange(const FloatRange& r)
-{
-	if (r.min >= r.max) {
-		return r.min;
-	}
-	return RANDOM_FLOAT(r.min, r.max);
-}
-
-static int RandomizeNumberFromRange(const IntRange& r)
-{
-	if (r.min >= r.max) {
-		return r.min;
-	}
-	return RANDOM_LONG(r.min, r.max);
-}
-
 static Color DefaultWarpballColor()
 {
 	return Color(WARPBALL_RED_DEFAULT, WARPBALL_GREEN_DEFAULT, WARPBALL_BLUE_DEFAULT);

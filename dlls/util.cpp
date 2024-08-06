@@ -2672,6 +2672,32 @@ char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int b
 	return NULL;
 }
 
+float RandomizeNumberFromRange(const FloatRange& r)
+{
+	return RandomizeNumberFromRange(r.min, r.max);
+}
+
+float RandomizeNumberFromRange(float minF, float maxF)
+{
+	if (minF >= maxF) {
+		return minF;
+	}
+	return RANDOM_FLOAT(minF, maxF);
+}
+
+int RandomizeNumberFromRange(const IntRange& r)
+{
+	return RandomizeNumberFromRange(r.min, r.max);
+}
+
+int RandomizeNumberFromRange(int minI, int maxI)
+{
+	if (minI >= maxI) {
+		return minI;
+	}
+	return RANDOM_LONG(minI, maxI);
+}
+
 void ReportAIStateByClassname(const char* name)
 {
 	if (!name || !*name) {

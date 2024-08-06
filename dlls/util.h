@@ -30,6 +30,7 @@
 #endif
 
 #include "util_shared.h"
+#include "template_property_types.h"
 
 #include <cstring>
 #include <cctype>
@@ -583,6 +584,11 @@ void UTIL_DynamicLight( const Vector& vecSrc, float flRadius, byte r, byte g, by
 void UTIL_MuzzleLight( const Vector& vecSrc );
 
 char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize );
+
+float RandomizeNumberFromRange(const FloatRange& r);
+float RandomizeNumberFromRange(float minF, float maxF);
+int RandomizeNumberFromRange(const IntRange& r);
+int RandomizeNumberFromRange(int minI, int maxI);
 
 void ReportAIStateByClassname(const char* name);
 
