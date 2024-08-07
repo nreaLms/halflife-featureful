@@ -84,13 +84,9 @@ extern void UTIL_MoveToOrigin( edict_t* pent, const Vector &vecGoal, float flDis
 Vector VecCheckToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, float flGravityAdj = 1.0 );
 Vector VecCheckThrow( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, float flSpeed, float flGravityAdj = 1.0 );
 extern DLL_GLOBAL Vector g_vecAttackDir;
-extern DLL_GLOBAL CONSTANT float g_flMeleeRange;
-extern DLL_GLOBAL CONSTANT float g_flMediumRange;
-extern DLL_GLOBAL CONSTANT float g_flLongRange;
 extern void EjectBrass(const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype );
 extern void ExplodeModel( const Vector &vecOrigin, float speed, int model, int count );
 
-BOOL FBoxVisible( entvars_t *pevLooker, entvars_t *pevTarget );
 BOOL FBoxVisible( entvars_t *pevLooker, entvars_t *pevTarget, Vector &vecTargetOrigin, float flSize = 0.0 );
 
 // monster to monster relationship types

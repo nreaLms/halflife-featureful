@@ -43,12 +43,8 @@ float VectorNormalize (float* v);		// returns vector length
 void VectorInverse (float* v);
 void VectorScale (const float* in, float scale, float* out);
 
-void R_ConcatRotations (float in1[3][3], float in2[3][3], float out[3][3]);
-void R_ConcatTransforms (float in1[3][4], float in2[3][4], float out[3][4]);
-
 void AngleVectors (const Vector& angles, Vector* forward, Vector* right, Vector* up);
 void AngleVectorsTranspose (const Vector& angles, Vector* forward, Vector* right, Vector* up);
-#define AngleIVectors	AngleVectorsTranspose
 
 void AngleMatrix (const float* angles, float (*matrix)[4] );
 void AngleIMatrix (const Vector& angles, float (*matrix)[4] );
@@ -61,24 +57,6 @@ float AngleBetweenVectors(const Vector& v1, const Vector& v2 );
 void VectorMatrix(const Vector& forward, Vector& right, Vector& up);
 void VectorAngles( const float* forward, float* angles );
 
-int InvertMatrix( const float * m, float *out );
-
-int BoxOnPlaneSide (const Vector& emins, const Vector& emaxs, struct mplane_s *plane);
 float	anglemod(float a);
 
-#define BOX_ON_PLANE_SIDE(emins, emaxs, p)	\
-	(((p)->type < 3)?						\
-	(										\
-		((p)->dist <= (emins)[(p)->type])?	\
-			1								\
-		:									\
-		(									\
-			((p)->dist >= (emaxs)[(p)->type])?\
-				2							\
-			:								\
-				3							\
-		)									\
-	)										\
-	:										\
-		BoxOnPlaneSide( (emins), (emaxs), (p)))
 #endif // MATHLIB_H
