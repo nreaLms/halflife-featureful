@@ -117,7 +117,6 @@ def configure(conf):
 			'-Werror=cast-align=strict',
 			'-Werror=duplicated-cond',
 			# '-Werror=format=2',
-			'-Werror=implicit-fallthrough=2',
 			# '-Werror=logical-op',
 			'-Werror=packed',
 			'-Werror=packed-not-aligned',

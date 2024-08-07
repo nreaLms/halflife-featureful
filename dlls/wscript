@@ -23,8 +23,15 @@ def build(bld):
 	excluded_files = ['mpstubb.cpp', 'stats.cpp', 'Wxdebug.cpp']
 
 	source = bld.path.ant_glob('**/*.cpp', excl=excluded_files)
-	source += bld.path.parent.ant_glob('pm_shared/*.c')
-	source += ['../game_shared/vcs_info.cpp']
+	source += bld.path.parent.ant_glob([
+		'pm_shared/*.cpp',
+		'game_shared/fx_types.cpp',
+		'game_shared/json_utils.cpp',
+		'game_shared/parsetext.cpp',
+		'game_shared/tex_materials.cpp',
+		'game_shared/util_shared.cpp',
+		'game_shared/vcs_info.cpp'
+	])
 
 	defines = []
 	if bld.env.USE_VOICEMGR:
