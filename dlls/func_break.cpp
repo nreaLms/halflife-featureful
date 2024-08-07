@@ -639,7 +639,8 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	// this global is still used for glass and other non-monster killables, along with decals.
 	g_vecAttackDir = vecTemp.Normalize();
 
-	ApplyDamageToHealth(flDamage);
+	if (pev->takedamage != DAMAGE_NO)
+		ApplyDamageToHealth(flDamage);
 
 	if( pev->health <= 0 )
 	{
