@@ -234,7 +234,7 @@ int __MsgFunc_CustomBeam( const char* pszName, int iSize, void *pbuf )
 		flags = READ_BYTE();
 		if ( beamType == TE_BEAMRING )
 			beam = gEngfuncs.pEfxAPI->R_BeamRing( startEnt, endEnt, modelIndex, life, width, noise, a, speed, startFrame, frameRate, r, g, b );
-		if( beamType == TE_BEAMENTS )
+		else if( beamType == TE_BEAMENTS )
 			beam = gEngfuncs.pEfxAPI->R_BeamEnts( startEnt, endEnt, modelIndex, life, width, noise, a, speed, startFrame, frameRate, r, g, b );
 		else if( beamType == TE_BEAMENTPOINT )
 			beam = gEngfuncs.pEfxAPI->R_BeamEntPoint( startEnt, end, modelIndex, life, width, noise, a, speed, startFrame, frameRate, r, g, b );
