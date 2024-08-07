@@ -2458,7 +2458,7 @@ void CLadder::Precache( void )
 	// Do all of this in here because we need to 'convert' old saved games
 	pev->solid = SOLID_NOT;
 	if (FBitSet(pev->spawnflags, SF_LADDER_OFF))
-		pev->skin = CONTENTS_CLIP;
+		pev->skin = CONTENTS_SOLID;
 	else
 		pev->skin = CONTENTS_LADDER;
 	if( CVAR_GET_FLOAT( "showtriggers" ) == 0 )
@@ -2495,7 +2495,7 @@ void CLadder::SetEnabled(bool enabled)
 	}
 	else
 	{
-		pev->skin = CONTENTS_CLIP;
+		pev->skin = CONTENTS_SOLID;
 		SetBits(pev->spawnflags, SF_LADDER_OFF);
 	}
 }
