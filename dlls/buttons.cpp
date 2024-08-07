@@ -1250,13 +1250,24 @@ const char *ButtonSound( int sound )
 //
 // Makes flagged buttons spark when turned off
 //
+void PlaySparkSound( entvars_t *pev, float attenuation = ATTN_NORM )
+{
+	const float flVolume = RANDOM_FLOAT( 0.25f, 0.75f ) * 0.4f;//random volume range
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( g_sparkSounds ), flVolume, attenuation );
+}
+
 void DoSpark( entvars_t *pev, const Vector &location, float attenuation = ATTN_NORM )
 {
 	Vector tmp = location + pev->size * 0.5f;
 	UTIL_Sparks( tmp );
+	PlaySparkSound(pev, attenuation);
+}
 
-	const float flVolume = RANDOM_FLOAT( 0.25f, 0.75f ) * 0.4f;//random volume range
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( g_sparkSounds ), flVolume, attenuation );
+void DoSparkShower( entvars_t *pev, const Vector &location, const SparkEffectParams& params, float attenuation = ATTN_NORM )
+{
+	Vector tmp = location + pev->size * 0.5f;
+	UTIL_SparkShower( tmp, params );
+	PlaySparkSound(pev, attenuation);
 }
 
 void CBaseButton::ButtonSpark( void )
@@ -1915,6 +1926,7 @@ void CMomentaryRotButton::UpdateSelfReturn( float value )
 #define SF_SPARK_CYCLIC 16
 #define SF_SPARK_TOGGLE 32
 #define SF_SPARK_START_ON 64
+#define SF_SPARK_NO_STREAK 128
 
 class CEnvSpark : public CBaseEntity
 {
@@ -1934,19 +1946,32 @@ public:
 	void EXPORT SparkStart( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void EXPORT SparkStop( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void KeyValue( KeyValueData *pkvd );
-	
+	void MakeSpark();
+
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
 	float m_flDelay;
 	short m_soundRadius;
+	int m_streakCount;
+	int m_streakVelocity;
+	float m_sparkDuration;
+	float m_sparkScaleMin;
+	float m_sparkScaleMax;
+
+	int m_modelIndex;
 };
 
 TYPEDESCRIPTION CEnvSpark::m_SaveData[] =
 {
 	DEFINE_FIELD( CEnvSpark, m_flDelay, FIELD_FLOAT),
 	DEFINE_FIELD( CEnvSpark, m_soundRadius, FIELD_SHORT),
+	DEFINE_FIELD( CEnvSpark, m_streakCount, FIELD_INTEGER),
+	DEFINE_FIELD( CEnvSpark, m_streakVelocity, FIELD_INTEGER),
+	DEFINE_FIELD( CEnvSpark, m_sparkDuration, FIELD_FLOAT),
+	DEFINE_FIELD( CEnvSpark, m_sparkScaleMin, FIELD_FLOAT),
+	DEFINE_FIELD( CEnvSpark, m_sparkScaleMax, FIELD_FLOAT),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvSpark, CBaseEntity )
@@ -1990,6 +2015,10 @@ void CEnvSpark::Spawn( void )
 void CEnvSpark::Precache( void )
 {
 	PRECACHE_SOUND_ARRAY(g_sparkSounds);
+	if (!FStringNull(pev->model))
+	{
+		m_modelIndex = PRECACHE_MODEL(STRING(pev->model));
+	}
 }
 
 void CEnvSpark::KeyValue( KeyValueData *pkvd )
@@ -2002,6 +2031,31 @@ void CEnvSpark::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "soundradius" ) )
 	{
 		m_soundRadius = (short)atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "streak_count" ) )
+	{
+		m_streakCount = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "streak_velocity" ) )
+	{
+		m_streakVelocity = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "spark_duration" ) )
+	{
+		m_sparkDuration = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "spark_scale_min" ) )
+	{
+		m_sparkScaleMin = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "spark_scale_max" ) )
+	{
+		m_sparkScaleMax = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "style" ) ||
@@ -2019,7 +2073,7 @@ void CEnvSpark::SparkCyclic(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 {
 	if (m_pfnThink == NULL)
 	{
-		DoSpark( pev, pev->origin, ::SoundAttenuation(m_soundRadius) );
+		MakeSpark();
 		SetThink(&CEnvSpark::SparkWait );
 		pev->nextthink = gpGlobals->time + m_flDelay;
 	}
@@ -2036,7 +2090,7 @@ void CEnvSpark::SparkWait(void)
 
 void CEnvSpark::SparkThink( void )
 {
-	DoSpark( pev, pev->origin, ::SoundAttenuation(m_soundRadius) );
+	MakeSpark();
 	if (pev->spawnflags & SF_SPARK_CYCLIC)
 	{
 		SetThink( NULL );
@@ -2058,6 +2112,22 @@ void CEnvSpark::SparkStop( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 {
 	SetUse( &CEnvSpark::SparkStart);
 	SetThink( NULL );
+}
+
+void CEnvSpark::MakeSpark()
+{
+	SparkEffectParams params;
+	params.sparkModelIndex = m_modelIndex;
+	params.streakCount = m_streakCount;
+	params.streakVelocity = m_streakVelocity;
+	params.sparkDuration = m_sparkDuration;
+	params.sparkScaleMin = m_sparkScaleMin;
+	params.sparkScaleMax = m_sparkScaleMax;
+	if (FBitSet(pev->spawnflags, SF_SPARK_NO_STREAK))
+	{
+		params.flags |= SPARK_EFFECT_NO_STREAK;
+	}
+	DoSparkShower(pev, pev->origin, params, ::SoundAttenuation(m_soundRadius) );
 }
 
 #define SF_BTARGET_USE		0x0001

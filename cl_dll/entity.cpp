@@ -19,6 +19,7 @@
 #include "pm_defs.h"
 #include "pmtrace.h"	
 #include "pm_shared.h"
+#include "cl_fx.h"
 
 #include "particleman.h"
 
@@ -828,8 +829,16 @@ void DLLEXPORT HUD_TempEntUpdate (
 				// Scale is next think time
 				if( client_time > pTemp->entity.baseline.scale )
 				{
+					SparkEffectParams sparkParams;
+					sparkParams.streakCount = pTemp->entity.curstate.iuser2 > 0 ? pTemp->entity.curstate.iuser2 : 8;
+					sparkParams.streakVelocity = pTemp->entity.curstate.iuser3 > 0 ? pTemp->entity.curstate.iuser3 : 200;
+					sparkParams.sparkModelIndex = pTemp->entity.curstate.iuser1;
+					sparkParams.sparkDuration = pTemp->entity.curstate.fuser1;
+					sparkParams.sparkScaleMin = pTemp->entity.curstate.fuser2;
+					sparkParams.sparkScaleMax = pTemp->entity.curstate.fuser3;
+					sparkParams.flags = pTemp->entity.curstate.iuser4;
 					// Show Sparks
-					gEngfuncs.pEfxAPI->R_SparkEffect( pTemp->entity.origin, 8, -200, 200 );
+					FX_SparkEffect( pTemp->entity.origin, sparkParams );
 
 					// Reduce life
 					pTemp->entity.baseline.framerate -= 0.1f;

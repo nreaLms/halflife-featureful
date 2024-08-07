@@ -10,6 +10,7 @@
 #include "studio.h"
 #include "pmtrace.h"
 #include "cl_msg.h"
+#include "cl_fx.h"
 
 #include "r_studioint.h"
 
@@ -347,37 +348,12 @@ int __MsgFunc_SpriteTrail( const char* pszName, int iSize, void *pbuf )
 	return 1;
 }
 
-void FX_Streaks( Vector pos, Vector dir, int color, int count, float speed, int velocityMin, int velocityMax, float minLife = 0.1f, float maxLife = 0.5f, ptype_t particleType = pt_grav, float length = 1.0f )
-{
-	if (maxLife < minLife)
-		maxLife = minLife;
-
-	Vector vel;
-	VectorScale( dir, speed, vel );
-
-	for( int i = 0; i < count; i++ )
-	{
-		vel.x += Com_RandomFloat( velocityMin, velocityMax );
-		vel.y += Com_RandomFloat( velocityMin, velocityMax );
-		vel.z += Com_RandomFloat( velocityMin, velocityMax );
-
-		particle_t *p = gEngfuncs.pEfxAPI->R_TracerParticles( pos, vel, Com_RandomFloat( minLife, maxLife ));
-		if( !p ) return;
-
-		p->type = particleType;
-		p->color = color;
-		p->ramp = length;
-	}
-}
-
 int __MsgFunc_Streaks( const char* pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
 	Vector pos, dir;
-	int color, count;
-	ptype_t particleType;
-	float minLife, maxLife, speed, velRandomness, length;
+	StreakParams streakParams;
 
 	pos[0] = READ_COORD();
 	pos[1] = READ_COORD();
@@ -385,16 +361,17 @@ int __MsgFunc_Streaks( const char* pszName, int iSize, void *pbuf )
 	dir[0] = READ_COORD();
 	dir[1] = READ_COORD();
 	dir[2] = READ_COORD();
-	color = READ_BYTE();
-	count = READ_SHORT();
-	speed = READ_SHORT();
-	velRandomness = READ_SHORT();
-	minLife = READ_BYTE() * 0.1f;
-	maxLife = READ_BYTE() * 0.1f;
-	particleType = (ptype_t)READ_BYTE();
-	length = READ_BYTE() * 0.1f;
+	streakParams.color = READ_BYTE();
+	streakParams.count = READ_SHORT();
+	streakParams.speed = READ_SHORT();
+	streakParams.velocityMax = READ_SHORT();
+	streakParams.velocityMin = -streakParams.velocityMax;
+	streakParams.minLife = READ_BYTE() * 0.1f;
+	streakParams.maxLife = READ_BYTE() * 0.1f;
+	streakParams.particleType = (ptype_t)READ_BYTE();
+	streakParams.length = READ_BYTE() * 0.1f;
 
-	FX_Streaks(pos, dir, color, count, speed, -velRandomness, velRandomness, minLife, maxLife, particleType, length);
+	FX_Streaks(pos, dir, streakParams);
 
 	return 1;
 }
@@ -515,6 +492,29 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int __MsgFunc_SparkShower( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	Vector pos;
+	pos[0] = READ_COORD();
+	pos[1] = READ_COORD();
+	pos[2] = READ_COORD();
+
+	SparkEffectParams params;
+	params.sparkModelIndex = READ_SHORT();
+	params.streakCount = READ_SHORT();
+	params.streakVelocity = READ_SHORT();
+	params.sparkDuration = READ_SHORT() * 0.01f;
+	params.sparkScaleMin = READ_SHORT() * 0.01f;
+	params.sparkScaleMax = READ_SHORT() * 0.01f;
+	params.flags = READ_SHORT();
+
+	FX_SparkShower(pos, params);
+
+	return 1;
+}
+
 int __MsgFunc_Particle( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
@@ -593,5 +593,6 @@ void HookFXMessages()
 	HOOK_MESSAGE( SpriteTrail );
 	HOOK_MESSAGE( Streaks );
 	HOOK_MESSAGE( Smoke );
+	HOOK_MESSAGE( SparkShower );
 	HOOK_MESSAGE( Particle );
 }

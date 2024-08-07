@@ -29,6 +29,7 @@
 #include "enginecallback.h"
 #endif
 
+#include "fx_types.h"
 #include "util_shared.h"
 #include "template_property_types.h"
 
@@ -312,6 +313,7 @@ extern void			UTIL_DecalTrace( TraceResult *pTrace, int decalNumber );
 extern void			UTIL_PlayerDecalTrace( TraceResult *pTrace, int playernum, int decalNumber, BOOL bIsCustom );
 extern void			UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber );
 extern void			UTIL_Sparks( const Vector &position );
+extern void			UTIL_SparkShower( const Vector &position, const SparkEffectParams& params );
 extern void			UTIL_Ricochet( const Vector &position, float scale );
 extern void			UTIL_StringToVector( float *pVector, const char *pString, int* componentsRead = NULL );
 extern Vector		UTIL_StringToVector( const char *str );

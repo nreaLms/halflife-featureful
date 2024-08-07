@@ -42,6 +42,8 @@
 #include "vgui_TeamFortressViewport.h"
 #endif
 
+#include "cl_fx.h"
+
 #include "IParticleMan_Active.h"
 #include "CBaseParticle.h"
 
@@ -354,6 +356,7 @@ int DLLEXPORT HUD_VidInit( void )
 {
 	gHUD.m_iHardwareMode = IEngineStudio.IsHardware();
 	gHUD.VidInit();
+	LoadDefaultSprites();
 #if USE_FAKE_VGUI
 	vgui::Panel* root=(vgui::Panel*)gEngfuncs.VGui_GetPanel();
 	if (root) {

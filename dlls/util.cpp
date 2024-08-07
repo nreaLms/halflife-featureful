@@ -1303,6 +1303,23 @@ void UTIL_Sparks( const Vector &position )
 	MESSAGE_END();
 }
 
+void UTIL_SparkShower(const Vector &position, const SparkEffectParams& params)
+{
+	extern int gmsgSparkShower;
+	MESSAGE_BEGIN( MSG_PVS, gmsgSparkShower, position );
+		WRITE_COORD( position.x );
+		WRITE_COORD( position.y );
+		WRITE_COORD( position.z );
+		WRITE_SHORT( params.sparkModelIndex );
+		WRITE_SHORT( params.streakCount );
+		WRITE_SHORT( params.streakVelocity );
+		WRITE_SHORT( short(params.sparkDuration * 100) );
+		WRITE_SHORT( short(params.sparkScaleMin * 100) );
+		WRITE_SHORT( short(params.sparkScaleMax * 100) );
+		WRITE_SHORT( params.flags );
+	MESSAGE_END();
+}
+
 void UTIL_Ricochet( const Vector &position, float scale )
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, position );
