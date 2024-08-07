@@ -153,17 +153,12 @@ inline void CenterPrint( const char *string )
 inline void PlaySound( const char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
-#define Q_max(a, b)  (((a) > (b)) ? (a) : (b))
-#define Q_min(a, b)  (((a) < (b)) ? (a) : (b))
+#include "min_and_max.h"
+
 #define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
 
 void ScaleColors( int &r, int &g, int &b, int a );
 
-#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
-#define VectorSubtract(a, b, c) { (c)[0] = (a)[0] - (b)[0]; (c)[1] = (a)[1] - (b)[1]; (c)[2] = (a)[2] - (b)[2]; }
-#define VectorAdd(a, b, c) { (c)[0] = (a)[0] + (b)[0]; (c)[1] = (a)[1] + (b)[1]; (c)[2] = (a)[2] + (b)[2]; }
-#define VectorCopy(a, b) { (b)[0] = (a)[0]; (b)[1] = (a)[1]; (b)[2] = (a)[2]; }
-inline void VectorClear( float *a ) { a[0] = 0.0; a[1] = 0.0; a[2] = 0.0; }
 float Length( const float *v );
 void VectorMA( const float *veca, float scale, const float *vecb, float *vecc );
 void VectorScale( const float *in, float scale, float *out );
@@ -171,9 +166,6 @@ float VectorNormalize( float *v );
 void VectorInverse( float *v );
 
 float UTIL_ApproachAngle( float target, float value, float speed );
-
-// extern vec3_t vec3_origin;
-extern float vec3_origin[3];
 
 // disable 'possible loss of data converting float to int' warning message
 #pragma warning( disable: 4244 )

@@ -9,16 +9,7 @@
 #define STUDIO_UTIL_H
 
 #include "pi_constant.h"
-
-#if !defined(PITCH)
-// MOVEMENT INFO
-// up / down
-#define	PITCH	0
-// left / right
-#define	YAW		1
-// fall over
-#define	ROLL	2
-#endif
+#include "in_defs.h"
 
 #define FDotProduct( a, b ) ( fabs( ( a[0] ) * ( b[0] ) ) + fabs( ( a[1] ) * ( b[1] ) ) + fabs( ( a[2] ) * ( b[2] ) ) )
 

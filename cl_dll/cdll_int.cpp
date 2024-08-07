@@ -60,10 +60,7 @@ void CL_UnloadParticleMan( void );
 #endif
 #endif
 
-extern "C"
-{
 #include "pm_shared.h"
-}
 
 #include "r_studioint.h"
 

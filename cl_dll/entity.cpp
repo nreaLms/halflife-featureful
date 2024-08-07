@@ -24,7 +24,7 @@
 
 void Game_AddObjects( void );
 
-extern vec3_t v_origin;
+extern Vector v_origin;
 
 int g_iAlive = 1;
 int g_iLaserDot = 0;
@@ -922,7 +922,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 
 			if( pTemp->flags & ( FTENT_COLLIDEALL | FTENT_COLLIDEWORLD ) )
 			{
-				vec3_t	traceNormal( 0.0f, 0.0f, 0.0f );
+				Vector	traceNormal( 0.0f, 0.0f, 0.0f );
 				float	traceFraction = 1;
 
 				if( pTemp->flags & FTENT_COLLIDEALL )

@@ -25,6 +25,7 @@
 #include "gamerules.h"
 #include "tex_materials.h"
 #include "soundent.h"
+#include "pm_shared.h"
 #include "locus.h"
 #include "soundreplacement.h"
 
@@ -1793,8 +1794,6 @@ int PRECACHE_SOUND(const char *soundName, string_t soundList)
 
 // NOTE: this routine should ONLY be called if the 
 // current texture under the player changes!
-
-extern "C" char PM_FindTextureType( char *name );
 
 char TEXTURETYPE_Find( char *name )
 {

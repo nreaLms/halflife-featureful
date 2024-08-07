@@ -520,7 +520,7 @@ private:
 	void DrawArmor(int startX);
 	int DrawPain( float fTime );
 	int DrawDamage( float fTime );
-	void CalcDamageDirection( vec3_t vecFrom );
+	void CalcDamageDirection( Vector vecFrom );
 	void UpdateTiles( float fTime, long bits );
 };
 

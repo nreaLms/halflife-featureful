@@ -44,7 +44,7 @@ extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
 
 // Defined in pm_math.c
-extern "C" float anglemod( float a );
+float anglemod( float a );
 
 void IN_Init( void );
 void IN_Move( float frametime, usercmd_t *cmd );
@@ -797,8 +797,8 @@ if active == 1 then we are 1) not playing back demos ( where our commands are ig
 void DLLEXPORT CL_CreateMove( float frametime, struct usercmd_s *cmd, int active )
 {
 	float spd;
-	vec3_t viewangles;
-	static vec3_t oldangles;
+	Vector viewangles;
+	static Vector oldangles;
 
 	if( active )
 	{

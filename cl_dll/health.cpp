@@ -135,7 +135,7 @@ int CHudHealth::MsgFunc_Damage( const char *pszName, int iSize, void *pbuf )
 	int damageTaken = READ_BYTE();	// health
 	long bitsDamage = READ_LONG(); // damage bits
 
-	vec3_t vecFrom;
+	Vector vecFrom;
 
 	for( int i = 0; i < 3; i++ )
 		vecFrom[i] = READ_COORD();
@@ -337,11 +337,11 @@ void CHudHealth::DrawArmor(int startX)
 	x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iBat, r, g, b );
 }
 
-void CHudHealth::CalcDamageDirection( vec3_t vecFrom )
+void CHudHealth::CalcDamageDirection( Vector vecFrom )
 {
-	vec3_t forward, right, up;
+	Vector forward, right, up;
 	float side, front;
-	vec3_t vecOrigin, vecAngles;
+	Vector vecOrigin, vecAngles;
 
 	if( !vecFrom[0] && !vecFrom[1] && !vecFrom[2] )
 	{
@@ -349,8 +349,8 @@ void CHudHealth::CalcDamageDirection( vec3_t vecFrom )
 		return;
 	}
 
-	memcpy( vecOrigin, gHUD.m_vecOrigin, sizeof(vec3_t) );
-	memcpy( vecAngles, gHUD.m_vecAngles, sizeof(vec3_t) );
+	memcpy( vecOrigin, gHUD.m_vecOrigin, sizeof(Vector) );
+	memcpy( vecAngles, gHUD.m_vecAngles, sizeof(Vector) );
 
 	VectorSubtract( vecFrom, vecOrigin, vecFrom );
 

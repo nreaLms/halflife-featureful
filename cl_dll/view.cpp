@@ -43,18 +43,18 @@ extern "C"
 	void CL_CameraOffset( float *ofs );
 
 	void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
-
-	void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert );
-	int PM_GetVisEntInfo( int ent );
-	int PM_GetPhysEntInfo( int ent );
-	void InterpolateAngles( float * start, float * end, float * output, float frac );
-	void NormalizeAngles( float * angles );
-	float Distance( const float * v1, const float * v2 );
-	float AngleBetweenVectors(  const float * v1,  const float * v2 );
-
-	float vJumpOrigin[3];
-	float vJumpAngles[3];
 }
+
+void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert );
+int PM_GetVisEntInfo( int ent );
+int PM_GetPhysEntInfo( int ent );
+void InterpolateAngles( float * start, float * end, float * output, float frac );
+void NormalizeAngles( float * angles );
+float Distance( const float * v1, const float * v2 );
+float AngleBetweenVectors(  const float * v1,  const float * v2 );
+
+extern float vJumpOrigin[3];
+extern float vJumpAngles[3];
 
 void V_DropPunchAngle( float frametime, float *ev_punchangle );
 void VectorAngles( const float *forward, float *angles );
@@ -80,15 +80,15 @@ extern Vector   dead_viewangles;
 #define	CAM_MODE_RELAX		1
 #define CAM_MODE_FOCUS		2
 
-vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
+Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 float v_frametime, v_lastDistance;	
 float v_cameraRelaxAngle = 5.0f;
 float v_cameraFocusAngle = 35.0f;
 int v_cameraMode = CAM_MODE_FOCUS;
 qboolean v_resetCamera = 1;
 
-vec3_t v_client_aimangles;
-vec3_t g_ev_punchangle;
+Vector v_client_aimangles;
+Vector g_ev_punchangle;
 
 cvar_t	*scr_ofsx;
 cvar_t	*scr_ofsy;
@@ -179,7 +179,7 @@ float V_CalcBob( struct ref_params_s *pparams )
 	static float bob;
 	float cycle;
 	static float lasttime;
-	vec3_t	vel;
+	Vector	vel;
 
 	if( pparams->onground == -1 ||
 		 pparams->time == lasttime )
@@ -221,12 +221,12 @@ V_CalcRoll
 Used by view and sv_user
 ===============
 */
-float V_CalcRoll( vec3_t angles, vec3_t velocity, float rollangle, float rollspeed )
+float V_CalcRoll( Vector angles, Vector velocity, float rollangle, float rollspeed )
 {
 	float sign;
 	float side;
 	float value;
-	vec3_t forward, right, up;
+	Vector forward, right, up;
 
 	AngleVectors( angles, forward, right, up );
 
@@ -428,14 +428,14 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 {
 	cl_entity_t *ent, *view;
 	int i;
-	vec3_t angles;
+	Vector angles;
 	float bob, waterOffset;
 	static viewinterp_t ViewInterp;
 
 	static float oldz = 0;
 	static float lasttime;
 
-	vec3_t camAngles, camForward, camRight, camUp;
+	Vector camAngles, camForward, camRight, camUp;
 	cl_entity_t *pwater;
 
 	if( gEngfuncs.IsSpectateOnly() )
@@ -487,7 +487,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	if( pparams->waterlevel >= 2 )
 	{
 		int contents, waterDist, waterEntity;
-		vec3_t point;
+		Vector point;
 		waterDist = cl_waterdist->value;
 
 		if( pparams->hardware )
@@ -568,7 +568,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	// Treating cam_ofs[2] as the distance
 	if( CL_IsThirdPerson() )
 	{
-		vec3_t ofs;
+		Vector ofs;
 
 		ofs[0] = ofs[1] = ofs[2] = 0.0f;
 
@@ -676,7 +676,7 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 #endif
 	{
 		static float lastorg[3];
-		vec3_t delta;
+		Vector delta;
 
 		VectorSubtract( pparams->simorg, lastorg, delta );
 
@@ -714,10 +714,10 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 		if( i < ORIGIN_MASK && ViewInterp.OriginTime[foundidx & ORIGIN_MASK] != 0.0f )
 		{
 			// Interpolate
-			vec3_t delta;
+			Vector delta;
 			double frac;
 			double dt;
-			vec3_t neworg;
+			Vector neworg;
 
 			dt = ViewInterp.OriginTime[( foundidx + 1 ) & ORIGIN_MASK] - ViewInterp.OriginTime[foundidx & ORIGIN_MASK];
 			if( dt > 0.0 )
@@ -857,9 +857,9 @@ void V_SmoothInterpolateAngles( float * startAngle, float * endAngle, float * fi
 // Get the origin of the Observer based around the target's position and angles
 void V_GetChaseOrigin( float * angles, float * origin, float distance, float * returnvec )
 {
-	vec3_t vecEnd;
-	vec3_t forward;
-	vec3_t vecStart;
+	Vector vecEnd;
+	Vector forward;
+	Vector vecStart;
 	pmtrace_t *trace;
 	int maxLoops = 8;
 
@@ -1275,8 +1275,8 @@ void V_GetInEyePos( int target, float *origin, float *angles )
 
 void V_GetMapFreePosition( float *cl_angles, float *origin, float *angles )
 {
-	vec3_t forward;
-	vec3_t zScaledTarget;
+	Vector forward;
+	Vector zScaledTarget;
 
 	VectorCopy( cl_angles, angles );
 
@@ -1296,7 +1296,7 @@ void V_GetMapFreePosition( float *cl_angles, float *origin, float *angles )
 
 void V_GetMapChasePosition( int target, float *cl_angles, float *origin, float *angles )
 {
-	vec3_t forward;
+	Vector forward;
 
 	if( target )
 	{
@@ -1399,7 +1399,7 @@ V_CalcSpectatorRefdef
 */
 void V_CalcSpectatorRefdef( struct ref_params_s * pparams )
 {
-	static vec3_t velocity( 0.0f, 0.0f, 0.0f );
+	static Vector velocity( 0.0f, 0.0f, 0.0f );
 
 	static int lastWeaponModelIndex = 0;
 	static int lastViewModelIndex = 0;
@@ -1423,7 +1423,7 @@ void V_CalcSpectatorRefdef( struct ref_params_s * pparams )
 
 		if( timeDiff > 0 )
 		{
-			vec3_t distance;
+			Vector distance;
 			VectorSubtract( ent->prevstate.origin, ent->curstate.origin, distance );
 			VectorScale( distance, 1 / timeDiff, distance );
 

@@ -943,7 +943,7 @@ void StartFrame( void )
 	g_ulFrameCount++;
 }
 
-extern "C" int PM_IsThereSnowTexture();
+int PM_IsThereSnowTexture();
 
 void ClientPrecache( void )
 {
@@ -1479,7 +1479,7 @@ CreateBaseline
 Creates baselines used for network encoding, especially for player data since players are not spawned until connect time.
 ===================
 */
-void CreateBaseline( int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs )
+void CreateBaseline( int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, Vector* player_mins, Vector* player_maxs )
 {
 	baseline->origin		= entity->v.origin;
 	baseline->angles		= entity->v.angles;
@@ -1496,8 +1496,8 @@ void CreateBaseline( int player, int eindex, struct entity_state_s *baseline, st
 
 	if( player )
 	{
-		baseline->mins		= player_mins;
-		baseline->maxs		= player_maxs;
+		baseline->mins		= *player_mins;
+		baseline->maxs		= *player_maxs;
 
 		baseline->colormap	= eindex;
 		baseline->modelindex	= playermodelindex;

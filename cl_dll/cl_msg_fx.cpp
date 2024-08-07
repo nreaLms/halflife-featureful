@@ -183,7 +183,7 @@ int __MsgFunc_CustomBeam( const char* pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 	int beamType = READ_BYTE();
 
-	vec3_t	start, end;
+	Vector	start, end;
 	int	modelIndex, startFrame;
 	float	frameRate, life, width;
 	int	startEnt, endEnt;

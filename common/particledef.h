@@ -34,11 +34,11 @@ typedef enum
 
 typedef struct particle_s
 {
-	vec3_t		org;
+	Vector		org;
 	short		color;
 	short		packedColor;
 	struct particle_s	*next;
-	vec3_t		vel;
+	Vector		vel;
 	float		ramp;
 	float		die;
 	ptype_t		type;

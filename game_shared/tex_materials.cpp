@@ -1,7 +1,7 @@
 #include "tex_materials.h"
 #include "pm_materials.h"
 #include "bullet_types.h"
-#include <string.h>
+#include <cstring>
 
 int GetTextureMaterialProperties(char chTextureType, float* fvol, float* fvolbar,
 								  const char *rgsz[], int* cnt, float* fattn, int iBulletType)

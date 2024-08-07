@@ -21,14 +21,11 @@
 #include	"decals.h"
 #include	"gamerules.h"
 #include	"game.h"
+#include	"pm_shared.h"
 
 bool g_fIsXash3D = false;
 
 void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd );
-
-extern "C" void PM_Move ( struct playermove_s *ppmove, int server );
-extern "C" void PM_Init ( struct playermove_s *ppmove  );
-extern "C" char PM_FindTextureType( const char *name );
 
 extern DLL_GLOBAL Vector g_vecAttackDir;
 extern DLL_GLOBAL int g_iSkillLevel;

@@ -177,7 +177,7 @@ int CHudGeiger::Draw( float flTime )
 			sprintf( sz, "player/geiger%d.wav", j + 1 );
 
 #if FEATURE_GEIGER_SOUNDS_FIX
-			vec3_t view_ofs;
+			Vector view_ofs;
 			cl_entity_t *pthisplayer = gEngfuncs.GetLocalPlayer();
 			gEngfuncs.pEventAPI->EV_LocalPlayerViewheight( view_ofs );
 			gEngfuncs.pEventAPI->EV_PlaySound( pthisplayer->index, pthisplayer->origin + view_ofs, CHAN_STATIC, sz, flvol, ATTN_NORM, 0, PITCH_NORM );

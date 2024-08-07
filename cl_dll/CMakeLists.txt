@@ -124,10 +124,10 @@ set (CLDLL_SOURCES
 	MOTD.cpp
 	nightvision.cpp
 	parsemsg.cpp
-	../pm_shared/pm_debug.c
-	../pm_shared/pm_math.c
-	../pm_shared/pm_shared.c
-	../game_shared/tex_materials.c
+	../pm_shared/pm_debug.cpp
+	../pm_shared/pm_math.cpp
+	../pm_shared/pm_shared.cpp
+	../game_shared/tex_materials.cpp
 	../game_shared/parsetext.cpp
 	../game_shared/json_utils.cpp
 	../game_shared/util_shared.cpp
