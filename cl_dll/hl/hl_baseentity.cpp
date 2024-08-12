@@ -40,6 +40,9 @@ globalvars_t *gpGlobals;
 ItemInfo CBasePlayerWeapon::ItemInfoArray[MAX_WEAPONS];
 
 bool EMIT_SOUND_DYN( edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch ) { return true; }
+int PRECACHE_MODEL(const char* name) {return 0;}
+int PRECACHE_SOUND(const char* name) {return 0;}
+void SET_MODEL(edict_t *e, const char *m) {}
 
 // CBaseEntity Stubs
 int CBaseEntity::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamageType ) { return 1; }

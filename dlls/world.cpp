@@ -520,6 +520,7 @@ void CWorld::Spawn( void )
 {
 	g_fGameOver = FALSE;
 	Precache();
+	AddMapBSPAsPrecachedModel();
 }
 
 int CWorld::wallPuffsIndices[] = {0,0,0,0};

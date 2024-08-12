@@ -100,6 +100,8 @@ void OnFreeEntPrivateData(edict_s* pEdict)
 	if (pev && !FStringNull(pev->classname) && FStrEq(STRING(pev->classname), "worldspawn"))
 	{
 		ClearStringPool();
+		ClearPrecachedModels();
+		ClearPrecachedSounds();
 	}
 }
 

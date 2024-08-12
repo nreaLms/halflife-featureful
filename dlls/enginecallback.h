@@ -27,12 +27,10 @@ extern enginefuncs_t g_engfuncs;
 
 // The actual engine callbacks
 #define GETPLAYERUSERID (*g_engfuncs.pfnGetPlayerUserId)
-#define PRECACHE_MODEL	(*g_engfuncs.pfnPrecacheModel)
-inline int PRECACHE_SOUND(const char* name) {
-	return g_engfuncs.pfnPrecacheSound(name);
-}
+extern int PRECACHE_MODEL(const char* name);
+extern int PRECACHE_SOUND(const char* name);
 #define PRECACHE_GENERIC	(*g_engfuncs.pfnPrecacheGeneric)
-#define SET_MODEL		(*g_engfuncs.pfnSetModel)
+extern void SET_MODEL(edict_t *e, const char *m);
 #define MODEL_INDEX		(*g_engfuncs.pfnModelIndex)
 #define MODEL_FRAMES	(*g_engfuncs.pfnModelFrames)
 #define SET_SIZE		(*g_engfuncs.pfnSetSize)

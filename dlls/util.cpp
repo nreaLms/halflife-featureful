@@ -31,6 +31,7 @@
 #include "gamerules.h"
 
 #include <map>
+#include <set>
 #include <string>
 
 class StringPool
@@ -86,6 +87,81 @@ string_t ALLOC_STRING(const char* str)
 void ClearStringPool()
 {
 	g_StringPool.Clear();
+}
+
+extern cvar_t *g_psv_developer;
+
+std::set<std::string> g_precachedModels;
+std::set<std::string> g_precachedSounds;
+
+int PRECACHE_MODEL(const char* name)
+{
+	if (g_psv_developer && g_psv_developer->value > 0)
+		g_precachedModels.insert(name);
+	return g_engfuncs.pfnPrecacheModel(name);
+}
+
+int PRECACHE_SOUND(const char* name)
+{
+	if (g_psv_developer && g_psv_developer->value > 0)
+		g_precachedSounds.insert(name);
+	return g_engfuncs.pfnPrecacheSound(name);
+}
+
+void SET_MODEL(edict_t *e, const char *m)
+{
+	if (g_psv_developer && g_psv_developer->value > 0)
+		g_precachedModels.insert(m);
+	g_engfuncs.pfnSetModel(e, m);
+}
+
+void ClearPrecachedModels()
+{
+	g_precachedModels.clear();
+}
+
+void ClearPrecachedSounds()
+{
+	g_precachedSounds.clear();
+}
+
+void ReportPrecachedModels()
+{
+	ALERT(at_console, "Number of precached models: %d\nList of precached models:\n", g_precachedModels.size());
+	int i = 0;
+	for (auto it = g_precachedModels.cbegin(); it != g_precachedModels.cend(); ++it)
+	{
+		ALERT(at_console, "%s; ", it->c_str());
+		i++;
+		if (i == 4)
+		{
+			ALERT(at_console, "\n");
+			i = 0;
+		}
+	}
+}
+
+void ReportPrecachedSounds()
+{
+	ALERT(at_console, "Number of precached sounds: %d\nList of precached sounds:\n", g_precachedSounds.size());
+	int i = 0;
+	for (auto it = g_precachedSounds.cbegin(); it != g_precachedSounds.cend(); ++it)
+	{
+		ALERT(at_console, "%s; ", it->c_str());
+		i++;
+		if (i == 4)
+		{
+			ALERT(at_console, "\n");
+			i = 0;
+		}
+	}
+}
+
+void AddMapBSPAsPrecachedModel()
+{
+	char buf[1024];
+	snprintf(buf, sizeof(buf), "maps/%s.bsp", STRING(gpGlobals->mapname));
+	g_precachedModels.insert(buf);
 }
 
 void UTIL_DynamicLight( const Vector &vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay )

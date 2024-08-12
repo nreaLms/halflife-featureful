@@ -58,6 +58,11 @@ static inline string_t MAKE_STRING(const char *szValue)
 #endif
 
 extern void ClearStringPool();
+extern void ClearPrecachedModels();
+extern void ClearPrecachedSounds();
+extern void ReportPrecachedModels();
+extern void ReportPrecachedSounds();
+extern void AddMapBSPAsPrecachedModel();
 
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
 {

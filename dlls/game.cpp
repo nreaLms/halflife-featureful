@@ -1967,6 +1967,8 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("calc_state", Cmd_CalcState);
 	g_engfuncs.pfnAddServerCommand("dump_ammo_types", ReportRegisteredAmmoTypes);
 	g_engfuncs.pfnAddServerCommand("dump_warpballs", DumpWarpballTemplates);
+	g_engfuncs.pfnAddServerCommand("dump_precached_models", ReportPrecachedModels);
+	g_engfuncs.pfnAddServerCommand("dump_precached_sounds", ReportPrecachedSounds);
 }
 
 bool ItemsPickableByTouch()
