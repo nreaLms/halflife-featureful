@@ -30,6 +30,7 @@
 #include	"mod_features.h"
 #include	"game.h"
 #include	"gamerules.h"
+#include	"studio.h"
 
 #if FEATURE_OPFOR_GRUNT
 //=========================================================
@@ -322,6 +323,10 @@ public:
 
 protected:
 	bool HasWeaponEquiped();
+
+	void SetBodyGroupNumbers();
+	int headGroup;
+	int gunGroup;
 };
 
 TYPEDESCRIPTION	CHFGrunt::m_SaveData[] =
@@ -3505,7 +3510,7 @@ void CMedic::StartTask(Task_t *pTask)
 		RestoreTargetEnt();
 		break;
 	case TASK_MEDIC_DRAW_NEEDLE:
-		if (GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE)
+		if (GetBodygroup(gunGroup) == MEDIC_GUN_NEEDLE)
 		{
 			TaskComplete();
 		}
@@ -3715,9 +3720,10 @@ int CMedic::GetDefaultVoicePitch()
 
 void CMedic::Spawn()
 {
-	Precache( );
+	Precache();
 
 	SpawnHelper("models/hgrunt_medic.mdl", gSkillData.medicHealth);
+	SetBodyGroupNumbers();
 
 	if (!pev->weapons)
 	{
@@ -3726,16 +3732,16 @@ void CMedic::Spawn()
 	m_cClipSize = MEDIC_CLIP_SIZE_EAGLE;
 	if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
 	{
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_EAGLE );
+		SetBodygroup( gunGroup, MEDIC_GUN_EAGLE );
 	}
 	else if ( FBitSet( pev->weapons, MEDIC_HANDGUN ) )
 	{
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_PISTOL );
+		SetBodygroup( gunGroup, MEDIC_GUN_PISTOL );
 		m_cClipSize = MEDIC_CLIP_SIZE;
 	}
 	else if ( FBitSet( pev->weapons, MEDIC_NEEDLE ) )
 	{
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NEEDLE );
+		SetBodygroup( gunGroup, MEDIC_GUN_NEEDLE );
 	}
 	m_cAmmoLoaded		= m_cClipSize;
 
@@ -3743,7 +3749,7 @@ void CMedic::Spawn()
 		m_iHead = RANDOM_LONG(MEDIC_HEAD_WHITE, MEDIC_HEAD_BLACK);
 	}
 
-	SetBodygroup(MEDIC_HEAD_GROUP, m_iHead);
+	SetBodygroup(headGroup, m_iHead);
 
 	m_flHealCharge = gSkillData.medicHeal;
 	TalkMonsterInit();
@@ -3763,6 +3769,9 @@ void CMedic::Precache()
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
 	RegisterMedic();
+
+	if (pev->modelindex)
+		SetBodyGroupNumbers();
 }
 
 const char* CMedic::DefaultSentenceGroup(int group)
@@ -3779,27 +3788,27 @@ void CMedic::HandleAnimEvent(MonsterEvent_t *pEvent)
 	switch ( pEvent->event )
 	{
 	case MEDIC_AE_SHOWNEEDLE:
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NEEDLE );
+		SetBodygroup( gunGroup, MEDIC_GUN_NEEDLE );
 		break;
 
 	case MEDIC_AE_SHOWGUN:
 		if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
-			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_EAGLE );
+			SetBodygroup( gunGroup, MEDIC_GUN_EAGLE );
 		else if ( FBitSet( pev->weapons, MEDIC_HANDGUN ) )
-			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_PISTOL );
+			SetBodygroup( gunGroup, MEDIC_GUN_PISTOL );
 		else
-			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NEEDLE );
+			SetBodygroup( gunGroup, MEDIC_GUN_NEEDLE );
 		break;
 
 	case MEDIC_AE_HIDENEEDLE:
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
+		SetBodygroup( gunGroup, MEDIC_GUN_NONE );
 		break;
 	case MEDIC_AE_HIDEGUN:
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
+		SetBodygroup( gunGroup, MEDIC_GUN_NONE );
 		break;
 
 	case HGRUNT_ALLY_AE_DROP_GUN:
-		if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && GetBodygroup(MEDIC_GUN_GROUP) != MEDIC_GUN_NONE )
+		if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && GetBodygroup(gunGroup) != MEDIC_GUN_NONE )
 		{
 			DropMyItems(FALSE);
 		}
@@ -3855,7 +3864,7 @@ BOOL CMedic::CheckRangeAttack2(float flDot, float flDist)
 
 void CMedic::GibMonster()
 {
-	if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && GetBodygroup(MEDIC_GUN_GROUP) != MEDIC_GUN_NONE )
+	if ( FBitSet( pev->weapons, MEDIC_EAGLE | MEDIC_HANDGUN ) && GetBodygroup(gunGroup) != MEDIC_GUN_NONE )
 	{// throw a gun if the grunt has one
 		DropMyItems(TRUE);
 	}
@@ -3867,7 +3876,7 @@ void CMedic::DropMyItems(BOOL isGibbed)
 	if (g_pGameRules->FMonsterCanDropWeapons(this) && !FBitSet(pev->spawnflags, SF_MONSTER_DONT_DROP_GUN))
 	{
 		if (!isGibbed) {
-			SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NONE );
+			SetBodygroup( gunGroup, MEDIC_GUN_NONE );
 		}
 		Vector	vecGunPos;
 		Vector	vecGunAngles;
@@ -3979,7 +3988,7 @@ bool CMedic::CheckHealCharge()
 bool CMedic::ShouldDrawGun()
 {
 	return FBitSet( pev->weapons, MEDIC_EAGLE|MEDIC_HANDGUN ) &&
-		 (GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NEEDLE || GetBodygroup(MEDIC_GUN_GROUP) == MEDIC_GUN_NONE);
+		 (GetBodygroup(gunGroup) == MEDIC_GUN_NEEDLE || GetBodygroup(gunGroup) == MEDIC_GUN_NONE);
 }
 
 bool CMedic::ReadyToHeal()
@@ -3995,7 +4004,36 @@ bool CMedic::InHealSchedule()
 void CMedic::ReportAIState(ALERT_TYPE level)
 {
 	CHFGrunt::ReportAIState(level);
-	ALERT(level, "Heal charge: %3.1f. ", (double)m_flHealCharge);
+	ALERT(level, "Heal charge: %3.1f. ", m_flHealCharge);
+}
+
+static void SetMedicBodyGroupNumbers(entvars_t *pev, int& headGroup, int& gunGroup)
+{
+	void *pmodel = GET_MODEL_PTR(ENT(pev));
+	if (pmodel)
+	{
+		studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
+		if (pstudiohdr->numbodyparts == 3)
+		{
+			headGroup = 1;
+			gunGroup = 2;
+		}
+		else if (pstudiohdr->numbodyparts == 2)
+		{
+			headGroup = 0;
+			gunGroup = 1;
+		}
+		else
+		{
+			headGroup = MEDIC_HEAD_GROUP;
+			gunGroup = MEDIC_GUN_GROUP;
+		}
+	}
+}
+
+void CMedic::SetBodyGroupNumbers()
+{
+	SetMedicBodyGroupNumbers(pev, headGroup, gunGroup);
 }
 
 //=========================================================
@@ -4005,10 +4043,17 @@ void CMedic::ReportAIState(ALERT_TYPE level)
 class CDeadMedic : public CDeadFGrunt
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	void Precache();
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
+
+	void SetBodyGroupNumbers() {
+		SetMedicBodyGroupNumbers(pev, headGroup, gunGroup);
+	}
+	int gunGroup;
+	int headGroup;
 };
 
 const char *CDeadMedic::m_szPoses[] = { "deadstomach", "deadside", "deadsitting" };
@@ -4023,6 +4068,7 @@ LINK_ENTITY_TO_CLASS( monster_human_medic_ally_dead, CDeadMedic )
 void CDeadMedic::Spawn( )
 {
 	SpawnHelper("models/hgrunt_medic.mdl");
+	SetBodyGroupNumbers();
 
 	if ( pev->weapons <= 0 )
 	{
@@ -4030,24 +4076,30 @@ void CDeadMedic::Spawn( )
 	}
 	if ( FBitSet( pev->weapons, MEDIC_EAGLE ) )
 	{
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_EAGLE );
+		SetBodygroup( gunGroup, MEDIC_GUN_EAGLE );
 	}
 	else if ( FBitSet( pev->weapons, MEDIC_HANDGUN ) )
 	{
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_PISTOL );
+		SetBodygroup( gunGroup, MEDIC_GUN_PISTOL );
 	}
 	else if ( FBitSet( pev->weapons, MEDIC_NEEDLE ) )
 	{
-		SetBodygroup( MEDIC_GUN_GROUP, MEDIC_GUN_NEEDLE );
+		SetBodygroup( gunGroup, MEDIC_GUN_NEEDLE );
 	}
 
 	if (m_iHead < 0 || m_iHead >= MEDIC_HEAD_COUNT) {
 		m_iHead = RANDOM_LONG(MEDIC_HEAD_WHITE, MEDIC_HEAD_BLACK);
 	}
 
-	SetBodygroup(MEDIC_HEAD_GROUP, m_iHead);
+	SetBodygroup(headGroup, m_iHead);
 
 	MonsterInitDead();
+}
+
+void CDeadMedic::Precache()
+{
+	CDeadFGrunt::Precache();
+	SetBodyGroupNumbers();
 }
 
 #endif
