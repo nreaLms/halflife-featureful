@@ -92,7 +92,6 @@ bool SoundReplacementSystem::EnsureReplacementFile(const char *fileName)
 					const std::string originalName(buffer + origNameStart, buffer + origNameEnd);
 					const std::string replacementName(buffer + replNameStart, buffer + replNameEnd);
 					replacementMap[originalName] = replacementName;
-					ALERT(at_console, "Sound replacement '%s': '%s' is replaced with '%s'\n", fileName, originalName.c_str(), replacementName.c_str());
 				}
 				else
 				{
@@ -141,6 +140,23 @@ const std::string& SoundReplacementSystem::FindReplacement(const char *fileName,
 		}
 	}
 	return SoundReplacementSystem::emptyString;
+}
+
+void SoundReplacementList::ReportReplacements()
+{
+	for (auto& p : _replacementMap)
+	{
+		ALERT(at_console, "'%s' is replaced with '%s'\n", p.first.c_str(), p.second.c_str());
+	}
+}
+
+void SoundReplacementSystem::ReportSoundReplacements()
+{
+	for (auto& p : _fileMap)
+	{
+		ALERT(at_console, "Sound replacement file: %s\n", p.first.c_str());
+		p.second.ReportReplacements();
+	}
 }
 
 SoundReplacementSystem g_soundReplacement;

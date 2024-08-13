@@ -1329,6 +1329,11 @@ void Cmd_CalcState()
 	}
 }
 
+void ReportSoundReplacements()
+{
+	g_soundReplacement.ReportSoundReplacements();
+}
+
 extern void DumpWarpballTemplates();
 
 static void CVAR_REGISTER_INTEGER( cvar_t* cvar, int value )
@@ -1969,6 +1974,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("dump_warpballs", DumpWarpballTemplates);
 	g_engfuncs.pfnAddServerCommand("dump_precached_models", ReportPrecachedModels);
 	g_engfuncs.pfnAddServerCommand("dump_precached_sounds", ReportPrecachedSounds);
+	g_engfuncs.pfnAddServerCommand("dump_sound_replacements", ReportSoundReplacements);
 }
 
 bool ItemsPickableByTouch()

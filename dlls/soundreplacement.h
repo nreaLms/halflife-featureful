@@ -13,6 +13,7 @@ public:
 	SoundReplacementList(ReplacementMap&& replacementMap);
 	bool IsValid() const;
 	const std::string& ReplacementFor(const std::string& soundName);
+	void ReportReplacements();
 private:
 	ReplacementMap _replacementMap;
 	bool _isValid;
@@ -23,6 +24,8 @@ class SoundReplacementSystem
 public:
 	bool EnsureReplacementFile(const char* fileName);
 	const std::string& FindReplacement(const char* fileName, const char* originalSoundName);
+
+	void ReportSoundReplacements();
 
 	static const std::string emptyString;
 private:
