@@ -1247,27 +1247,34 @@ const char *ButtonSound( int sound )
 	return pszSound;
 }
 
-//
-// Makes flagged buttons spark when turned off
-//
-void PlaySparkSound( entvars_t *pev, float attenuation = ATTN_NORM, float volume = VOL_NORM )
+
+struct SparkSoundParams
 {
-	const float flVolume = (RANDOM_FLOAT( 0.25f, 0.75f ) * 0.4f) * volume ;//random volume range
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( g_sparkSounds ), flVolume, attenuation );
+	float volumeFactor = 1.0f;
+	float attenuation = 1.0f;
+	bool silent = false;
+};
+
+void PlaySparkSound( entvars_t *pev, SparkSoundParams soundParams = SparkSoundParams() )
+{
+	if (soundParams.silent)
+		return;
+	const float flVolume = (RANDOM_FLOAT( 0.25f, 0.75f ) * 0.4f) * soundParams.volumeFactor;//random volume range
+	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( g_sparkSounds ), flVolume, soundParams.attenuation );
 }
 
-void DoSpark( entvars_t *pev, const Vector &location, float attenuation = ATTN_NORM, float volume = VOL_NORM )
+void DoSpark( entvars_t *pev, const Vector &location, SparkSoundParams soundParams = SparkSoundParams() )
 {
 	Vector tmp = location + pev->size * 0.5f;
 	UTIL_Sparks( tmp );
-	PlaySparkSound(pev, attenuation);
+	PlaySparkSound(pev, soundParams);
 }
 
-void DoSparkShower( entvars_t *pev, const Vector &location, const SparkEffectParams& params, float attenuation = ATTN_NORM, float volume = VOL_NORM )
+void DoSparkShower( entvars_t *pev, const Vector &location, const SparkEffectParams& params, SparkSoundParams soundParams = SparkSoundParams() )
 {
 	Vector tmp = location + pev->size * 0.5f;
 	UTIL_SparkShower( tmp, params );
-	PlaySparkSound(pev, attenuation, volume);
+	PlaySparkSound(pev, soundParams);
 }
 
 void CBaseButton::ButtonSpark( void )
@@ -1927,6 +1934,7 @@ void CMomentaryRotButton::UpdateSelfReturn( float value )
 #define SF_SPARK_TOGGLE 32
 #define SF_SPARK_START_ON 64
 #define SF_SPARK_NO_STREAK 128
+#define SF_SPARK_NO_SOUND 4096
 
 class CEnvSpark : public CBaseEntity
 {
@@ -1947,6 +1955,17 @@ public:
 	void EXPORT SparkStop( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void KeyValue( KeyValueData *pkvd );
 	void MakeSpark();
+	void SetSilent(bool silent)
+	{
+		if (silent)
+			SetBits(pev->spawnflags, SF_SPARK_NO_SOUND);
+		else
+			ClearBits(pev->spawnflags, SF_SPARK_NO_SOUND);
+	}
+	bool IsSilent() const
+	{
+		return FBitSet(pev->spawnflags, SF_SPARK_NO_SOUND);
+	}
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -1960,7 +1979,7 @@ public:
 	float m_sparkScaleMin;
 	float m_sparkScaleMax;
 	float m_volume;
-	bool m_silent;
+	bool m_silent; // don't save, goes to spawnflags
 
 	int m_modelIndex;
 };
@@ -1975,7 +1994,6 @@ TYPEDESCRIPTION CEnvSpark::m_SaveData[] =
 	DEFINE_FIELD( CEnvSpark, m_sparkScaleMin, FIELD_FLOAT),
 	DEFINE_FIELD( CEnvSpark, m_sparkScaleMax, FIELD_FLOAT),
 	DEFINE_FIELD( CEnvSpark, m_volume, FIELD_FLOAT),
-	DEFINE_FIELD( CEnvSpark, m_silent, FIELD_BOOLEAN),
 };
 
 IMPLEMENT_SAVERESTORE( CEnvSpark, CBaseEntity )
@@ -2013,12 +2031,7 @@ void CEnvSpark::Spawn( void )
 			m_flDelay = 1.5f;
 	}
 
-	if (m_silent) {
-		m_volume = 0.0;
-	}
-	else if (m_volume == 0.0) {
-		m_volume = VOL_NORM;
-	}
+	SetSilent(m_silent);
 
 	Precache();
 }
@@ -2076,7 +2089,8 @@ void CEnvSpark::KeyValue( KeyValueData *pkvd )
 	}
 	else if ( FStrEq( pkvd->szKeyName, "spark_silent" ) )
 	{
-		m_silent = (bool)atoi( pkvd->szValue);
+		m_silent = atoi( pkvd->szValue) != 0;
+		SetSilent(m_silent);
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "style" ) ||
@@ -2148,7 +2162,11 @@ void CEnvSpark::MakeSpark()
 	{
 		params.flags |= SPARK_EFFECT_NO_STREAK;
 	}
-	DoSparkShower(pev, pev->origin, params, ::SoundAttenuation(m_soundRadius), m_volume );
+	SparkSoundParams soundParams;
+	soundParams.silent = IsSilent();
+	soundParams.volumeFactor = m_volume > 0.0f ? m_volume : 1.0f;
+	soundParams.attenuation = ::SoundAttenuation(m_soundRadius);
+	DoSparkShower(pev, pev->origin, params, soundParams);
 }
 
 #define SF_BTARGET_USE		0x0001
