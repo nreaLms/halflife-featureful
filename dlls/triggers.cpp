@@ -899,8 +899,8 @@ void CRenderFxManager::Affect( CBaseEntity *pTarget, bool bIsFirst, CBaseEntity 
 	{
 		if ( !FBitSet( pev->spawnflags, SF_RENDER_MASKAMT ) )
 			pevTarget->renderamt = pev->renderamt * fAmtFactor;
-			if( !FBitSet( pev->spawnflags, SF_RENDER_MASKCOLOR ) )
-				pevTarget->rendercolor = pev->rendercolor;
+		if( !FBitSet( pev->spawnflags, SF_RENDER_MASKCOLOR ) )
+			pevTarget->rendercolor = pev->rendercolor;
 		if ( pev->scale )
 			pevTarget->scale = pev->scale;
 
