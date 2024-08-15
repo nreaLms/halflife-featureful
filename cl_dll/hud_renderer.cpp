@@ -171,7 +171,7 @@ void HudSpriteRenderer::SPR_DrawInternal(int frame, float x, float y, float widt
 }
 
 int HudSpriteRenderer::VidInit() {
-	if (gHUD.hasHudScaleInEngine)
+	if (gHUD.hasHudScaleInEngine || gHUD.UsingHighResSprites())
 		return 1;
 
 	float average_scale = 1.0f;
@@ -313,7 +313,7 @@ void HudSpriteRenderer::DrawCrosshair()
 
 void HudSpriteRenderer::RecalcHUDScale()
 {
-	if (gHUD.hasHudScaleInEngine || gHUD.m_iHardwareMode == 0)
+	if (gHUD.hasHudScaleInEngine || gHUD.m_iHardwareMode == 0 || gHUD.UsingHighResSprites())
 	{
 		cachedHudScale = 1.0f;
 		return;

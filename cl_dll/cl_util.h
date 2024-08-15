@@ -157,6 +157,8 @@ inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( 
 
 #define fabs(x)	   ((x) > 0 ? (x) : 0 - (x))
 
+int GetSpriteRes( int width, int height );
+
 void ScaleColors( int &r, int &g, int &b, int a );
 
 float Length( const float *v );

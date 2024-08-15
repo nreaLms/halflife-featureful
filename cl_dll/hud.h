@@ -49,6 +49,8 @@
 #include <vector>
 #include <string>
 
+#include "cvardef.h"
+
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
 #define DHN_3DIGITS  4
@@ -878,8 +880,11 @@ public:
 	int		m_iFOV;
 	int		m_Teamplay;
 	int		m_iRes;
+	int		m_iMaxRes;
+	int		m_iHudNumbersYOffset;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
+	cvar_t  *m_pAllowHD;
 	cvar_t	*m_pCvarDrawMoveMode;
 	cvar_t	*m_pCvarCrosshair;
 	cvar_t	*m_pCvarCrosshairColorable;
@@ -986,6 +991,13 @@ public:
 		if (index < 0 || index >= m_iSpriteCount)
 			return NULL;
 		return &m_rgrcRects[index];
+	}
+
+	inline bool UsingHighResSprites( void )
+	{
+		// a1ba: only HL25 have higher resolution HUD spritesheets
+		// and only accept HUD style changes if user has allowed HD sprites
+		return m_iMaxRes > 640 && m_pAllowHD->value;
 	}
 	
 	int GetSpriteIndex( const char *SpriteName );	// gets a sprite index, for use in the m_rghSprites[] array

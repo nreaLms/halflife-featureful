@@ -179,7 +179,7 @@ int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
 void	DLLEXPORT HUD_Frame( double time );
 void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
 void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
-void DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
+int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs );
 }
 
 /*
@@ -612,11 +612,12 @@ void CL_LoadParticleMan( void )
 	}
 }
 
-void DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
+int DLLEXPORT HUD_MobilityInterface( mobile_engfuncs_t *gpMobileEngfuncs )
 {
 	if( gpMobileEngfuncs->version != MOBILITY_API_VERSION )
-		return;
+		return 1;
 	gMobileEngfuncs = gpMobileEngfuncs;
+	return 0;
 }
 
 bool HUD_MessageBox( const char *msg )

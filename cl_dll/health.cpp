@@ -274,14 +274,14 @@ int CHudHealth::DrawHealth()
 	x += CrossWidth;
 
 	const int digitFlag = m_iHealth >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
-	x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iHealth, r, g, b );
+	x = gHUD.DrawHudNumber( x, y + gHUD.m_iHudNumbersYOffset, digitFlag | DHN_DRAWZERO, m_iHealth, r, g, b );
 
 	x += HealthWidth / 2;
 
 	int iHeight = gHUD.m_iFontHeight;
 	int iWidth = HealthWidth / 10;
 	UnpackRGB( r, g, b, gHUD.HUDColor() );
-	CHud::Renderer().FillRGBA( x, y, iWidth, iHeight, r, g, b, a );
+	CHud::Renderer().FillRGBA( x, y + gHUD.m_iHudNumbersYOffset, iWidth, iHeight, r, g, b, a );
 
 	return x + HealthWidth / 2;
 }
@@ -334,7 +334,7 @@ void CHudHealth::DrawArmor(int startX)
 	x += ( m_prc1->right - m_prc1->left );
 
 	const int digitFlag = m_iBat >= 1000 ? DHN_4DIGITS : DHN_3DIGITS;
-	x = gHUD.DrawHudNumber( x, y, digitFlag | DHN_DRAWZERO, m_iBat, r, g, b );
+	x = gHUD.DrawHudNumber( x, y + gHUD.m_iHudNumbersYOffset, digitFlag | DHN_DRAWZERO, m_iBat, r, g, b );
 }
 
 void CHudHealth::CalcDamageDirection( Vector vecFrom )

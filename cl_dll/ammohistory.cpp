@@ -145,7 +145,14 @@ int HistoryResource::DrawAmmoHistory( float flTime )
 					SPR_DrawAdditive( 0, xpos, ypos, &rcPic );
 				}
 
-				CHud::AdditiveText::DrawNumberString( xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b );
+				int numberXPos = xpos - 10;
+				int numberXMin = xpos - 100;
+				if (gHUD.UsingHighResSprites())
+				{
+					numberXPos -= 4;
+					numberXMin -= 4;
+				}
+				CHud::AdditiveText::DrawNumberString( numberXPos, ypos, numberXMin, rgAmmoHistory[i].iCount, r, g, b );
 			}
 			else if( rgAmmoHistory[i].type == HISTSLOT_WEAP )
 			{
