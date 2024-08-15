@@ -43,7 +43,7 @@ void CShotgun::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_shotgun.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_shotgun.mdl" );
+	PrecachePModel( "models/p_shotgun.mdl" );
 
 	m_iShell = PRECACHE_MODEL( "models/shotgunshell.mdl" );// shotgun shell
 

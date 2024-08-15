@@ -47,7 +47,7 @@ void CUzi::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_uzi.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_uzi.mdl" );
+	PrecachePModel( "models/p_uzi.mdl" );
 
 	m_iShell = PRECACHE_MODEL( "models/shell.mdl" );// brass shellTE_MODEL
 

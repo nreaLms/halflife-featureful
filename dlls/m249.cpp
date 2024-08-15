@@ -51,7 +51,7 @@ void CM249::Precache(void)
 {
 	PRECACHE_MODEL("models/v_saw.mdl");
 	PRECACHE_MODEL(MyWModel());
-	PRECACHE_MODEL("models/p_saw.mdl");
+	PrecachePModel("models/p_saw.mdl");
 
 	m_iShell = PRECACHE_MODEL("models/saw_shell.mdl");// brass shellTE_MODEL
 	m_iLink = PRECACHE_MODEL("models/saw_link.mdl");

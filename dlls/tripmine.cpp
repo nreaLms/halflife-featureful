@@ -397,7 +397,7 @@ void CTripmine::Spawn()
 void CTripmine::Precache( void )
 {
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_tripmine.mdl" );
+	PrecachePModel( "models/p_tripmine.mdl" );
 	UTIL_PrecacheOther( "monster_tripmine" );
 
 	m_usTripFire = PRECACHE_EVENT( 1, "events/tripfire.sc" );

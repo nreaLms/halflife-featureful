@@ -49,7 +49,7 @@ void CPipeWrench::Precache(void)
 {
 	PRECACHE_MODEL("models/v_pipe_wrench.mdl");
 	PRECACHE_MODEL(MyWModel());
-	PRECACHE_MODEL("models/p_pipe_wrench.mdl");
+	PrecachePModel("models/p_pipe_wrench.mdl");
 
 	PRECACHE_SOUND("weapons/pwrench_hit1.wav");
 	PRECACHE_SOUND("weapons/pwrench_hit2.wav");

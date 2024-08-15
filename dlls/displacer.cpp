@@ -91,7 +91,7 @@ void CDisplacer::Precache(void)
 {
 	PRECACHE_MODEL("models/v_displacer.mdl");
 	PRECACHE_MODEL(MyWModel());
-	PRECACHE_MODEL("models/p_displacer.mdl");
+	PrecachePModel("models/p_displacer.mdl");
 
 	PRECACHE_SOUND("items/9mmclip1.wav");
 

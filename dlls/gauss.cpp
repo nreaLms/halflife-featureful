@@ -63,7 +63,7 @@ void CGauss::Precache( void )
 {
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/v_gauss.mdl" );
-	PRECACHE_MODEL( "models/p_gauss.mdl" );
+	PrecachePModel( "models/p_gauss.mdl" );
 
 	PRECACHE_SOUND( "items/9mmclip1.wav" );
 

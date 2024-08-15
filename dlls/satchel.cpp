@@ -343,8 +343,8 @@ void CSatchel::Precache( void )
 	PRECACHE_MODEL( "models/v_satchel.mdl" );
 	PRECACHE_MODEL( "models/v_satchel_radio.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_satchel.mdl" );
-	PRECACHE_MODEL( "models/p_satchel_radio.mdl" );
+	PrecachePModel( "models/p_satchel.mdl" );
+	PrecachePModel( "models/p_satchel_radio.mdl" );
 
 	UTIL_PrecacheOther( "monster_satchel" );
 }
@@ -473,7 +473,8 @@ void CSatchel::Throw( void )
 		pSatchel->pev->avelocity.y = 400;
 
 		m_pPlayer->pev->viewmodel = MAKE_STRING( "models/v_satchel_radio.mdl" );
-		m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel_radio.mdl" );
+		if (g_modFeatures.weapon_p_models)
+			m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel_radio.mdl" );
 #else
 		LoadVModel( "models/v_satchel_radio.mdl", m_pPlayer );
 #endif
@@ -582,7 +583,8 @@ void CSatchel::DrawSatchel()
 {
 #if !CLIENT_DLL
 		m_pPlayer->pev->viewmodel = MAKE_STRING( "models/v_satchel.mdl" );
-		m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel.mdl" );
+		if (g_modFeatures.weapon_p_models)
+			m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel.mdl" );
 #else
 		LoadVModel( "models/v_satchel.mdl", m_pPlayer );
 #endif
@@ -600,7 +602,8 @@ void CSatchel::DrawRadio()
 {
 #if !CLIENT_DLL
 		m_pPlayer->pev->viewmodel = MAKE_STRING( "models/v_satchel_radio.mdl" );
-		m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel_radio.mdl" );
+		if (g_modFeatures.weapon_p_models)
+			m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_satchel_radio.mdl" );
 #else
 		LoadVModel( "models/v_satchel_radio.mdl", m_pPlayer );
 #endif

@@ -199,6 +199,8 @@ BOOL CBasePlayerWeapon::DefaultDeploy( const char *szViewModel, const char *szWe
 	return TRUE;
 }
 
+void CBasePlayerWeapon::PrecachePModel(const char *name) {}
+
 /*
 =====================
 CBasePlayerWeapon::PlayEmptySound

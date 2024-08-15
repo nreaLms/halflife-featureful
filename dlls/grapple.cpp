@@ -246,7 +246,7 @@ void CBarnacleGrapple::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_bgrap.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_bgrap.mdl" );
+	PrecachePModel( "models/p_bgrap.mdl" );
 
 	PRECACHE_SOUND( "weapons/bgrapple_release.wav" );
 	PRECACHE_SOUND( "weapons/bgrapple_impact.wav" );

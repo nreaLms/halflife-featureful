@@ -40,7 +40,7 @@ void CGlock::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_9mmhandgun.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_9mmhandgun.mdl" );
+	PrecachePModel( "models/p_9mmhandgun.mdl" );
 
 	m_iShell = PRECACHE_MODEL( "models/shell.mdl" );// brass shell
 

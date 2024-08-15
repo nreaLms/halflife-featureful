@@ -48,7 +48,7 @@ void CSporelauncher::Precache(void)
 {
 	PRECACHE_MODEL("models/v_spore_launcher.mdl");
 	PRECACHE_MODEL(MyWModel());
-	PRECACHE_MODEL("models/p_spore_launcher.mdl");
+	PrecachePModel("models/p_spore_launcher.mdl");
 
 	PRECACHE_SOUND("weapons/splauncher_altfire.wav");
 	PRECACHE_SOUND("weapons/splauncher_bounce.wav");

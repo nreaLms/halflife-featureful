@@ -3386,7 +3386,7 @@ void CBasePlayer::PostThink()
 	if( m_pTank != 0 )
 	{
 		// if they've moved too far from the gun,  or selected a weapon, unuse the gun
-		if( m_pTank->OnControls( pev ) && !pev->weaponmodel )
+		if( m_pTank->OnControls( pev ) && !pev->viewmodel )
 		{  
 			m_pTank->Use( this, this, USE_SET, 2 );	// try fire the gun
 		}

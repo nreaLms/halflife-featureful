@@ -55,7 +55,7 @@ void CHandGrenade::Precache( void )
 {
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/v_grenade.mdl" );
-	PRECACHE_MODEL( "models/p_grenade.mdl" );
+	PrecachePModel( "models/p_grenade.mdl" );
 }
 
 int CHandGrenade::GetItemInfo( ItemInfo *p )

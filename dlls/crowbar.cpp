@@ -41,7 +41,7 @@ void CCrowbar::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_crowbar.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_crowbar.mdl" );
+	PrecachePModel( "models/p_crowbar.mdl" );
 	PRECACHE_SOUND( "weapons/cbar_hit1.wav" );
 	PRECACHE_SOUND( "weapons/cbar_hit2.wav" );
 	PRECACHE_SOUND( "weapons/cbar_hitbod1.wav" );

@@ -57,6 +57,7 @@ ModFeatures::ModFeatures()
 	tripmines_solid = FEATURE_OPFOR_SPECIFIC ? false : true;
 	satchels_pickable = true;
 	gauss_fidget = false;
+	weapon_p_models = true;
 
 	alien_teleport_sound = false;
 	warpball_at_monster_center = true;
@@ -128,6 +129,7 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KEY_VALUE_DEF(tripmines_solid),
 		KEY_VALUE_DEF(satchels_pickable),
 		KEY_VALUE_DEF(gauss_fidget),
+		KEY_VALUE_DEF(weapon_p_models),
 		KEY_VALUE_DEF(alien_teleport_sound),
 		KEY_VALUE_DEF(warpball_at_monster_center),
 		KEY_VALUE_DEF(monsters_stop_attacking_dying_monsters),

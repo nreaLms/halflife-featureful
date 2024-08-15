@@ -54,7 +54,7 @@ void CShockrifle::Precache(void)
 {
 	PRECACHE_MODEL("models/v_shock.mdl");
 	PRECACHE_MODEL(MyWModel());
-	PRECACHE_MODEL("models/p_shock.mdl");
+	PrecachePModel("models/p_shock.mdl");
 
 	PRECACHE_SOUND("weapons/shock_discharge.wav");
 	PRECACHE_SOUND("weapons/shock_draw.wav");

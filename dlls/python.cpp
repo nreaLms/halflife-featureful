@@ -62,7 +62,7 @@ void CPython::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_357.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_357.mdl" );
+	PrecachePModel( "models/p_357.mdl" );
 
 	PRECACHE_MODEL( "models/w_357ammobox.mdl" );
 	PRECACHE_SOUND( "items/9mmclip1.wav" );

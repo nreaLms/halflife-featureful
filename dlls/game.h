@@ -68,6 +68,7 @@ struct ModFeatures
 	bool tripmines_solid;
 	bool satchels_pickable;
 	bool gauss_fidget;
+	bool weapon_p_models;
 
 	int player_maxhealth;
 	int player_maxarmor;

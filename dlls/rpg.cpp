@@ -386,7 +386,7 @@ void CRpg::Precache( void )
 {
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/v_rpg.mdl" );
-	PRECACHE_MODEL( "models/p_rpg.mdl" );
+	PrecachePModel( "models/p_rpg.mdl" );
 
 	PRECACHE_SOUND( "items/9mmclip1.wav" );
 

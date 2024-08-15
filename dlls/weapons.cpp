@@ -956,7 +956,8 @@ BOOL CBasePlayerWeapon::DefaultDeploy( const char *szViewModel, const char *szWe
 		return FALSE;
 
 	m_pPlayer->pev->viewmodel = MAKE_STRING( szViewModel );
-	m_pPlayer->pev->weaponmodel = MAKE_STRING( szWeaponModel );
+	if (g_modFeatures.weapon_p_models)
+		m_pPlayer->pev->weaponmodel = MAKE_STRING( szWeaponModel );
 	strcpy( m_pPlayer->m_szAnimExtention, szAnimExt );
 	SendWeaponAnim( iAnim, body );
 
@@ -965,6 +966,12 @@ BOOL CBasePlayerWeapon::DefaultDeploy( const char *szViewModel, const char *szWe
 	m_flLastFireTime = 0.0f;
 
 	return TRUE;
+}
+
+void CBasePlayerWeapon::PrecachePModel(const char *name)
+{
+	if (g_modFeatures.weapon_p_models)
+		PRECACHE_MODEL(name);
 }
 
 BOOL CBasePlayerWeapon::PlayEmptySound( void )

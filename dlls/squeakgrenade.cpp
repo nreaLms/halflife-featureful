@@ -488,7 +488,7 @@ void CSqueak::Precache( void )
 {
 	PRECACHE_MODEL( NestModel() );
 	PRECACHE_MODEL( VModel() );
-	PRECACHE_MODEL( PModel() );
+	PrecachePModel( PModel() );
 	PRECACHE_SOUND( "squeek/sqk_hunt2.wav" );
 	PRECACHE_SOUND( "squeek/sqk_hunt3.wav" );
 	UTIL_PrecacheOther( GrenadeName() );

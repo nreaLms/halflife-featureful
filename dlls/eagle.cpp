@@ -51,7 +51,7 @@ void CEagle::Precache( void )
 	UTIL_PrecacheOther( "eagle_laser" );
 	PRECACHE_MODEL("models/v_desert_eagle.mdl");
 	PRECACHE_MODEL(MyWModel());
-	PRECACHE_MODEL("models/p_desert_eagle.mdl");
+	PrecachePModel("models/p_desert_eagle.mdl");
 	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 
 	PRECACHE_SOUND ("weapons/desert_eagle_reload.wav");

@@ -52,7 +52,7 @@ void CMP5::Precache( void )
 {
 	PRECACHE_MODEL( "models/v_9mmAR.mdl" );
 	PRECACHE_MODEL( MyWModel() );
-	PRECACHE_MODEL( "models/p_9mmAR.mdl" );
+	PrecachePModel( "models/p_9mmAR.mdl" );
 
 	m_iShell = PRECACHE_MODEL( "models/shell.mdl" );// brass shellTE_MODEL
 

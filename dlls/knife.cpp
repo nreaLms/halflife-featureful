@@ -49,7 +49,7 @@ void CKnife::Precache(void)
 {
 	PRECACHE_MODEL("models/v_knife.mdl");
 	PRECACHE_MODEL(MyWModel());
-	PRECACHE_MODEL("models/p_knife.mdl");
+	PrecachePModel("models/p_knife.mdl");
 	PRECACHE_SOUND("weapons/knife_hit_flesh1.wav");
 	PRECACHE_SOUND("weapons/knife_hit_flesh2.wav");
 	PRECACHE_SOUND("weapons/knife_hit_wall1.wav");
