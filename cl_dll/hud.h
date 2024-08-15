@@ -795,6 +795,8 @@ struct NVGFeatures
 	int layer_alpha;
 };
 
+#define MAX_WALLPUFF_COUNT 4
+
 struct ClientFeatures
 {
 	ClientFeatures();
@@ -832,6 +834,8 @@ struct ClientFeatures
 
 	char nvg_empty_sprite[MAX_SPRITE_NAME_LENGTH];
 	char nvg_full_sprite[MAX_SPRITE_NAME_LENGTH];
+
+	char wall_puffs[MAX_WALLPUFF_COUNT][64];
 };
 
 //
@@ -1034,7 +1038,6 @@ public:
 	int _cdecl MsgFunc_Items(const char* pszName, int iSize, void* pbuf);
 	int _cdecl MsgFunc_SetFog( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_KeyedDLight( const char *pszName, int iSize, void *pbuf );
-	int _cdecl MsgFunc_WallPuffs( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information
 	SCREENINFO	m_scrinfo;
@@ -1058,8 +1061,9 @@ public:
 	bool m_iHardwareMode;
 	FogProperties fog;
 
-	int wallPuffs[4];
+	void LoadWallPuffSprites();
 	int wallPuffCount;
+	model_t* wallPuffs[MAX_WALLPUFF_COUNT];
 
 	bool m_bFlashlight;
 

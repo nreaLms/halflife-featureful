@@ -123,11 +123,6 @@ struct ModFeatures
 	// Strings for nvg sounds
 	StringBuf nvg_sound_on;
 	StringBuf nvg_sound_off;
-
-	StringBuf wall_puff1;
-	StringBuf wall_puff2;
-	StringBuf wall_puff3;
-	StringBuf wall_puff4;
 private:
 	bool UpdateBoolean(const char* value, bool& result, const char* key);
 	bool UpdateInteger(const char* value, int& result, const char* key);

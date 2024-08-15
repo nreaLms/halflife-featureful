@@ -591,18 +591,6 @@ void CWorld::Precache( void )
 	PRECACHE_SOUND( "weapons/ric4.wav" );
 	PRECACHE_SOUND( "weapons/ric5.wav" );
 
-	const char* wallPuffs[ARRAYSIZE(wallPuffsIndices)] = {
-		g_modFeatures.wall_puff1,
-		g_modFeatures.wall_puff2,
-		g_modFeatures.wall_puff3,
-		g_modFeatures.wall_puff4,
-	};
-	for (int wi = 0; wi < ARRAYSIZE(wallPuffsIndices); ++wi)
-	{
-		if (*wallPuffs[wi])
-			wallPuffsIndices[wi] = PRECACHE_MODEL(wallPuffs[wi]);
-	}
-
 	//
 	// Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
 	//

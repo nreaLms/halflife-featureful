@@ -317,14 +317,14 @@ void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float sc
 {
 	TEMPENTITY *te = NULL;
 	void ( *callback )( struct tempent_s *ent, float frametime, float currenttime ) = NULL;
-	int wallPuffSpriteIndex = 0;
+	model_t* wallPuffSprite = nullptr;
 
 	switch( type )
 	{
 	case SMOKE_WALLPUFF:
 		if (gHUD.wallPuffCount <= 0)
 			return;
-		wallPuffSpriteIndex = gHUD.wallPuffs[Com_RandomLong(0, gHUD.wallPuffCount-1)];
+		wallPuffSprite = gHUD.wallPuffs[Com_RandomLong(0, gHUD.wallPuffCount-1)];
 		break;
 	default:
 		gEngfuncs.Con_DPrintf("Unknown smoketype %d\n", type);
@@ -337,13 +337,13 @@ void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float sc
 		callback = EV_SmokeRise;
 
 
-	te = gEngfuncs.pEfxAPI->R_DefaultSprite( origin, wallPuffSpriteIndex, framerate );
+	te = gEngfuncs.pEfxAPI->CL_TempEntAlloc( origin, wallPuffSprite );
 
 	if( te )
 	{
 		te->callback = callback;
 		te->hitcallback = EV_HugWalls;
-		te->flags |= FTENT_COLLIDEALL | FTENT_CLIENTCUSTOM;
+		te->flags |= FTENT_SPRANIMATE | FTENT_COLLIDEALL | FTENT_CLIENTCUSTOM;
 		te->entity.curstate.rendermode = kRenderTransAdd;
 		te->entity.curstate.rendercolor.r = r;
 		te->entity.curstate.rendercolor.g = g;
@@ -351,6 +351,10 @@ void EV_CreateShotSmoke(int type, Vector origin, Vector dir, int speed, float sc
 		te->entity.curstate.renderamt = gEngfuncs.pfnRandomLong( 120, 180 );
 		te->entity.curstate.scale = scale;
 		te->entity.baseline.origin = speed * dir;
+		te->entity.curstate.framerate = framerate;
+		te->frameMax = wallPuffSprite->numframes;
+		te->die = gEngfuncs.GetClientTime() + (float)te->frameMax / framerate;
+		te->entity.curstate.frame = 0;
 
 		if( velocity != Vector(0,0,0) )
 		{

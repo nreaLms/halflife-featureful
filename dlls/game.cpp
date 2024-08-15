@@ -46,11 +46,6 @@ ModFeatures::ModFeatures()
 	memset(nvg_sound_on, 0, sizeof(StringBuf));
 	memset(nvg_sound_off, 0, sizeof(StringBuf));
 
-	strcpy(wall_puff1, "sprites/stmbal1.spr");
-	memset(wall_puff2, 0, sizeof(StringBuf));
-	memset(wall_puff3, 0, sizeof(StringBuf));
-	memset(wall_puff4, 0, sizeof(StringBuf));
-
 	player_maxhealth = MAX_NORMAL_HEALTH;
 	player_maxarmor = MAX_NORMAL_BATTERY;
 
@@ -213,10 +208,6 @@ bool ModFeatures::SetValue(const char *key, const char *value)
 		KeyValueDefinition<StringBuf> strings[] = {
 			KEY_VALUE_DEF(nvg_sound_on),
 			KEY_VALUE_DEF(nvg_sound_off),
-			KEY_VALUE_DEF(wall_puff1),
-			KEY_VALUE_DEF(wall_puff2),
-			KEY_VALUE_DEF(wall_puff3),
-			KEY_VALUE_DEF(wall_puff4),
 		};
 
 		for (i = 0; i<ARRAYSIZE(strings); ++i)

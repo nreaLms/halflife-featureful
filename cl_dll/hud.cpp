@@ -117,6 +117,9 @@ ClientFeatures::ClientFeatures()
 
 	memset(nvg_empty_sprite, 0, sizeof (nvg_empty_sprite));
 	memset(nvg_full_sprite, 0, sizeof (nvg_full_sprite));
+
+	memset(wall_puffs, 0, sizeof(wall_puffs));
+	strcpy(wall_puffs[0], "sprites/stmbal1.spr");
 }
 
 static cvar_t* CVAR_CREATE_INTVALUE(const char* name, int value, int flags)
@@ -298,11 +301,6 @@ int __MsgFunc_Snow(const char *pszName, int iSize, void *pbuf)
 int __MsgFunc_KeyedDLight(const char *pszName, int iSize, void *pbuf)
 {
 	return gHUD.MsgFunc_KeyedDLight( pszName, iSize, pbuf );
-}
-
-int __MsgFunc_WallPuffs(const char *pszName, int iSize, void *pbuf)
-{
-	return gHUD.MsgFunc_WallPuffs( pszName, iSize, pbuf );
 }
 
 //DECLARE_MESSAGE( m_Logo, Logo )
@@ -586,7 +584,6 @@ void CHud::Init( void )
 	HOOK_MESSAGE( Rain );
 	HOOK_MESSAGE( Snow );
 	HOOK_MESSAGE( KeyedDLight );
-	HOOK_MESSAGE( WallPuffs );
 
 	// TFFree CommandMenu
 	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );
@@ -1024,6 +1021,22 @@ void CHud::ParseClientFeatures()
 				{
 					strncpyEnsureTermination(clientFeatures.nvg_full_sprite, valueBuf);
 				}
+				else if (strcmp(keyName, "wall_puff1") == 0)
+				{
+					strncpyEnsureTermination(clientFeatures.wall_puffs[0], valueBuf);
+				}
+				else if (strcmp(keyName, "wall_puff2") == 0)
+				{
+					strncpyEnsureTermination(clientFeatures.wall_puffs[1], valueBuf);
+				}
+				else if (strcmp(keyName, "wall_puff3") == 0)
+				{
+					strncpyEnsureTermination(clientFeatures.wall_puffs[2], valueBuf);
+				}
+				else if (strcmp(keyName, "wall_puff4") == 0)
+				{
+					strncpyEnsureTermination(clientFeatures.wall_puffs[3], valueBuf);
+				}
 			}
 		}
 	}
@@ -1066,6 +1079,21 @@ int CHud::GetSpriteIndex( const char *SpriteName )
 	}
 
 	return -1; // invalid sprite
+}
+
+void CHud::LoadWallPuffSprites()
+{
+	int i = 0;
+	for (i=0; i<ARRAYSIZE(wallPuffs); ++i)
+	{
+		if (*clientFeatures.wall_puffs[i])
+		{
+			wallPuffs[i] = const_cast<model_t*>(gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load(clientFeatures.wall_puffs[i])));
+		}
+		else
+			break;
+	}
+	wallPuffCount = i;
 }
 
 void CHud::VidInit( void )
@@ -1198,6 +1226,8 @@ void CHud::VidInit( void )
 
 		return;
 	}
+
+	LoadWallPuffSprites();
 
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
 
