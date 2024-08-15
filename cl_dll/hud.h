@@ -59,22 +59,12 @@
 
 #define		HUDELEM_ACTIVE	1
 
-typedef struct
-{
-	int x, y;
-} POSITION;
-
 enum 
 { 
 	MAX_PLAYERS = 64,
 	MAX_TEAMS = 64,
 	MAX_TEAM_NAME = 16
 };
-
-typedef struct
-{
-	unsigned char r, g, b, a;
-} RGBA;
 
 typedef struct cvar_s cvar_t;
 
@@ -96,7 +86,6 @@ extern cvar_t* cl_muzzlelight_monsters;
 class CHudBase
 {
 public:
-	POSITION  m_pos;
 	int   m_type;
 	int	  m_iFlags; // active, moving, 
 	virtual		~CHudBase() {}
@@ -167,7 +156,6 @@ public:
 
 private:
 	float m_fFade;
-	RGBA  m_rgba;
 	WEAPON *m_pWeapon;
 	int m_HUD_bucket0;
 	int m_HUD_selection;
