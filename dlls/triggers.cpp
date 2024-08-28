@@ -5273,6 +5273,8 @@ void CMotionThread::MotionThink( void )
 	}
 }
 
+#define SF_MOTION_MANAGER_OBEY_TRIGGER_MODE 16
+#define SF_MOTION_MANAGER_START_ON 32
 
 class CMotionManager : public CPointEntity
 {
@@ -5280,6 +5282,7 @@ public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void KeyValue( KeyValueData *pkvd );
 	void Affect(CBaseEntity *pTarget, CBaseEntity *pActivator );
+	void AffectTargets(CBaseEntity* pActivator);
 	void Activate( void ); // TODO: change to PostSpawn
 	void UpdateOnRemove();
 	void RemoveThreads();
@@ -5293,6 +5296,7 @@ public:
 	string_t m_iszFacing;
 	int m_iFaceMode;
 	BOOL m_activated;
+	BOOL m_active;
 };
 LINK_ENTITY_TO_CLASS( motion_manager, CMotionManager )
 
@@ -5303,6 +5307,7 @@ TYPEDESCRIPTION	CMotionManager::m_SaveData[] =
 	DEFINE_FIELD( CMotionManager, m_iszFacing, FIELD_STRING ),
 	DEFINE_FIELD( CMotionManager, m_iFaceMode, FIELD_INTEGER ),
 	DEFINE_FIELD( CMotionManager, m_activated, FIELD_BOOLEAN ),
+	DEFINE_FIELD( CMotionManager, m_active, FIELD_BOOLEAN ),
 };
 
 IMPLEMENT_SAVERESTORE(CMotionManager,CPointEntity)
@@ -5337,33 +5342,57 @@ void CMotionManager::Activate( void )
 {
 	if (m_activated)
 		return;
-	if (FStringNull(pev->targetname))
+	if (FStringNull(pev->targetname) || FBitSet(pev->spawnflags, SF_MOTION_MANAGER_START_ON))
+	{
 		Use( this, this, USE_ON, 0 );
+	}
 	m_activated = TRUE;
 }
 
 void CMotionManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	CBaseEntity *pTarget = NULL;
+	if (FBitSet(pev->spawnflags, SF_MOTION_MANAGER_OBEY_TRIGGER_MODE))
+	{
+		if (ShouldToggle(useType, m_active))
+		{
+			if (m_active)
+			{
+				m_active = FALSE;
+				RemoveThreads();
+			}
+			else
+			{
+				m_active = TRUE;
+				AffectTargets(pActivator);
+			}
+		}
+		return;
+	}
+
 	if (useType == USE_OFF || useType == USE_TOGGLE)
 	{
 		RemoveThreads();
 	}
 	if (useType == USE_ON || useType == USE_TOGGLE)
 	{
-		if (pev->target)
+		AffectTargets(pActivator);
+	}
+}
+
+void CMotionManager::AffectTargets(CBaseEntity* pActivator)
+{
+	if (pev->target)
+	{
+		CBaseEntity *pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target), pActivator);
+		if (pTarget == NULL)
+			ALERT(at_error, "motion_manager \"%s\" can't find entity \"%s\" to affect\n", STRING(pev->targetname), STRING(pev->target));
+		else
 		{
-			pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target), pActivator);
-			if (pTarget == NULL)
-				ALERT(at_error, "motion_manager \"%s\" can't find entity \"%s\" to affect\n", STRING(pev->targetname), STRING(pev->target));
-			else
+			do
 			{
-				do
-				{
-					Affect( pTarget, pActivator );
-					pTarget = UTIL_FindEntityByTargetname(pTarget, STRING(pev->target), pActivator);
-				} while ( pTarget );
-			}
+				Affect( pTarget, pActivator );
+				pTarget = UTIL_FindEntityByTargetname(pTarget, STRING(pev->target), pActivator);
+			} while ( pTarget );
 		}
 	}
 }

@@ -7464,6 +7464,8 @@
 	spawnflags(flags) =
 	[
 		1: "Debug" : 0
+		16: "Obey Trigger Mode" : 1
+		32: "Start On" : 0
 	]
 ]
 
