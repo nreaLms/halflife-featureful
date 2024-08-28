@@ -132,11 +132,21 @@ bool UpdatePropertyFromJson(Color& color, Value& jsonValue, const char* key)
 	auto it = jsonValue.FindMember(key);
 	if (it != jsonValue.MemberEnd())
 	{
-		const char* colorStr = it->value.GetString();
-		int packedColor;
-		if (ParseColor(colorStr, packedColor)) {
-			UnpackRGB(color.r, color.g, color.b, packedColor);
-			return true;
+		if (it->value.IsString())
+		{
+			const char* colorStr = it->value.GetString();
+			int packedColor;
+			if (ParseColor(colorStr, packedColor)) {
+				UnpackRGB(color.r, color.g, color.b, packedColor);
+				return true;
+			}
+		}
+		else if (it->value.IsArray())
+		{
+			Value::Array arr = it->value.GetArray();
+			color.r = arr[0].GetInt();
+			color.g = arr[1].GetInt();
+			color.b = arr[2].GetInt();
 		}
 	}
 	return false;
@@ -180,6 +190,12 @@ bool UpdatePropertyFromJson(FloatRange& floatRange, Value& jsonValue, const char
 				floatRange.max = floatRange.min;
 			}
 		}
+		else if (value.IsArray())
+		{
+			Value::Array arr = value.GetArray();
+			floatRange.min = arr[0].GetFloat();
+			floatRange.max = arr[1].GetFloat();
+		}
 
 		if (floatRange.min > floatRange.max) {
 			floatRange.min = floatRange.max;
@@ -206,13 +222,13 @@ bool UpdatePropertyFromJson(IntRange& intRange, Value& jsonValue, const char* ke
 			auto maxIt = value.FindMember("max");
 			if (minIt != value.MemberEnd())
 			{
-				if (minIt->value.IsFloat())
-					intRange.min = minIt->value.GetFloat();
+				if (minIt->value.IsInt())
+					intRange.min = minIt->value.GetInt();
 			}
 			if (maxIt != value.MemberEnd())
 			{
-				if (maxIt->value.IsFloat())
-					intRange.max = maxIt->value.GetFloat();
+				if (maxIt->value.IsInt())
+					intRange.max = maxIt->value.GetInt();
 			}
 		}
 		else if (value.IsString())
@@ -226,6 +242,12 @@ bool UpdatePropertyFromJson(IntRange& intRange, Value& jsonValue, const char* ke
 			} else {
 				intRange.max = intRange.min;
 			}
+		}
+		else if (value.IsArray())
+		{
+			Value::Array arr = value.GetArray();
+			intRange.min = arr[0].GetInt();
+			intRange.max = arr[1].GetInt();
 		}
 
 		if (intRange.min > intRange.max) {

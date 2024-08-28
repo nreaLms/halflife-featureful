@@ -82,11 +82,18 @@ const char warpballCatalogSchema[] = R"(
       "maximum": 255
     },
     "color": {
-      "type": "string",
-      "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$"
+      "type": ["string", "array"],
+      "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 255
+      },
+      "minItems": 3,
+      "maxItems": 3
     },
     "range": {
-      "type": ["string", "object", "number"],
+      "type": ["string", "object", "number", "array"],
       "pattern": "[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?",
       "properties": {
         "min": {
@@ -95,19 +102,29 @@ const char warpballCatalogSchema[] = R"(
         "max": {
           "type": "number"
         }
-      }
+      },
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
     },
     "range_int": {
-      "type": ["string", "object", "number"],
+      "type": ["string", "object", "integer", "array"],
       "pattern": "[0-9]+(,[0-9]+)?",
       "properties": {
         "min": {
-          "type": "number"
+          "type": "integer"
         },
         "max": {
-          "type": "number"
+          "type": "integer"
         }
-      }
+      },
+      "items": {
+        "type": "integer",
+      },
+      "minItems": 2,
+      "maxItems": 2
     }
   },
   "properties": {
