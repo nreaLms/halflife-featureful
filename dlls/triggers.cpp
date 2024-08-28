@@ -5137,9 +5137,9 @@ void CMotionThread::MotionThink( void )
 	if( (m_hLocus == 0 && FBitSet(pev->spawnflags, SF_MOTION_REQUIRES_ACTIVATOR)) || m_hTarget == 0 )
 	{
 		if (debug)
-			ALERT(at_console, "motion_thread expires\n");
-		SetThink(&CMotionThread:: SUB_Remove );
-		pev->nextthink = gpGlobals->time + 0.1;
+			ALERT(at_console, "motion_thread \"%s\" expires\n", STRING(pev->targetname));
+		SetThink(&CMotionThread::SUB_Remove);
+		pev->nextthink = gpGlobals->time;
 		return;
 	}
 	else
@@ -5148,7 +5148,7 @@ void CMotionThread::MotionThink( void )
 	}
 
 	if (debug)
-		ALERT(at_console, "motion_thread affects %s \"%s\":\n", STRING(m_hTarget->pev->classname), STRING(m_hTarget->pev->targetname));
+		ALERT(at_console, "motion_thread \"%s\" affects %s \"%s\" (time: %g):\n", STRING(pev->targetname), STRING(m_hTarget->pev->classname), STRING(m_hTarget->pev->targetname), gpGlobals->time);
 
 	Vector vecTemp = g_vecZero;
 	Vector vecOld = g_vecZero;
@@ -5371,10 +5371,11 @@ void CMotionManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 void CMotionManager::Affect( CBaseEntity *pTarget, CBaseEntity *pActivator )
 {
 	if (pev->spawnflags & SF_MOTION_DEBUG)
-		ALERT(at_console, "DEBUG: Creating MotionThread for %s \"%s\"\n", STRING(pTarget->pev->classname), STRING(pTarget->pev->targetname));
+		ALERT(at_console, "DEBUG: Creating MotionThread \"%s\" for %s \"%s\". Time: %g\n", STRING(pev->targetname), STRING(pTarget->pev->classname), STRING(pTarget->pev->targetname), gpGlobals->time);
 
 	CMotionThread *pThread = GetClassPtr( (CMotionThread*)NULL );
 	if (pThread == NULL) return; //error?
+	pThread->pev->owner = edict();
 	pThread->Spawn();
 	pThread->pev->targetname = pev->targetname;
 	pThread->m_hLocus = pActivator;
@@ -5401,16 +5402,18 @@ void CMotionManager::UpdateOnRemove()
 void CMotionManager::RemoveThreads()
 {
 	CBaseEntity* pEntity = NULL;
-	if (!FStringNull(pev->targetname))
+	while ((pEntity = UTIL_FindEntityByClassname(pEntity, "motion_thread")) != NULL)
 	{
-		while ((pEntity = UTIL_FindEntityByTargetname(pEntity, STRING(pev->targetname))) != NULL)
+		if (pEntity->pev->owner == edict())
 		{
-			if (FClassnameIs(pEntity->pev, "motion_thread"))
-			{
-				CMotionThread* motionThread = (CMotionThread*)pEntity;
-				motionThread->m_hTarget = 0;
-				motionThread->m_hLocus = 0;
-			}
+			CMotionThread* motionThread = (CMotionThread*)pEntity;
+			CBaseEntity* pTarget = motionThread->m_hTarget;
+
+			motionThread->m_hTarget = 0;
+			motionThread->m_hLocus = 0;
+
+			if (pTarget && (pev->spawnflags & SF_MOTION_DEBUG))
+				ALERT(at_console, "DEBUG: Removing MotionThread \"%s\" for %s \"%s\"\n", STRING(pev->targetname), STRING(pTarget->pev->classname), STRING(pTarget->pev->targetname));
 		}
 	}
 }
