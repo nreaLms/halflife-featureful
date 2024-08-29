@@ -66,7 +66,7 @@ public:
 	void Touch(CBaseEntity *pOther);
 };
 
-LINK_ENTITY_TO_CLASS( gonomeguts, CSquidSpit )
+LINK_ENTITY_TO_CLASS( gonomeguts, CGonomeGuts )
 
 void CGonomeGuts::Spawn()
 {
