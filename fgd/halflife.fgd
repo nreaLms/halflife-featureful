@@ -1153,11 +1153,15 @@
 
 @PointClass base(ScriptedSequence) = aiscripted_sequence:"AI Scripted Sequence" []
 
-@BaseClass iconsprite("sprites/ambient_generic.spr") base(Targetname) = Ambient
+@BaseClass base(Targetname) = AmbientBase
 [
 	message(sound) : "WAV Name"
 	health(integer) : "Volume (10 = loudest)" : 10
-	target(target_destination) : "Entity to play from"
+]
+
+@BaseClass = AmbientPlayFrom
+[
+	target(target_generic) : "Entity to play from"
 	channel(choices) : "Channel to use for that entity" =
 	[
 		0: "Default (Static)"
@@ -1168,6 +1172,10 @@
 		5: "Stream"
 		6: "Static"
 	]
+]
+
+@BaseClass = AmbientDetails
+[
 	preset(choices) :"Dynamic Presets" =
 	[
 		0: "None"
@@ -1232,15 +1240,41 @@
 	]
 ]
 
-@PointClass base(Ambient) = ambient_generic : "Universal Ambient" []
+@BaseClass = AmbientExtraSpeaker
+[
+	target(string) : "Attach to entity" : "*player"
+	channel(choices) : "Channel to use" =
+	[
+		0: "Default (Static)"
+		1: "Weapon"
+		2: "Voice"
+		3: "Item"
+		4: "Body"
+		5: "Stream"
+		6: "Static"
+	]
+]
 
-@PointClass base(Ambient) = ambient_random : "Universal Ambient playing a random sound"
+@PointClass iconsprite("sprites/ambient_generic.spr") base(AmbientBase, AmbientExtraSpeaker, AmbientDetails) = ambient_extraspeaker : "Ambient played on the automatically created entity that is attached to another entity. This allows to play sounds like if they were playing from the main entity without interfering with its own audio channels. Use this for radio or narrator messages that should follow the player around."
+[
+	spawnflags(flags) =
+	[
+		16 : "Start Silent": 1
+		32 : "Not Toggled": 1
+	]
+]
+
+@PointClass iconsprite("sprites/ambient_generic.spr") base(AmbientBase, AmbientPlayFrom, AmbientDetails) = ambient_generic : "Universal Ambient" []
+
+@BaseClass = AmbientRandomWavs
 [
 	noise(sound) : "WAV Name 1"
 	noise1(sound) : "WAV Name 2"
 	noise2(sound) : "WAV Name 3"
 	noise3(sound) : "WAV Name 4"
 ]
+
+@PointClass iconsprite("sprites/ambient_generic.spr") base(AmbientBase, AmbientRandomWavs, AmbientPlayFrom, AmbientDetails) = ambient_random : "Universal Ambient playing a random sound" []
 
 //
 // ammo

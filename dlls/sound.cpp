@@ -150,8 +150,8 @@ public:
 	int		m_iChannel; //LRC - the channel to play from, for "play from X" sounds
 	EHANDLE m_hActivator; // this is for m_hPlayFrom, in case the entity is !activator
 
-	bool EntityToPlayFromIsDefined();
-	CBaseEntity* GetEntityToPlayFrom(CBaseEntity* pActivator);
+	virtual bool EntityToPlayFromIsDefined();
+	virtual CBaseEntity* GetEntityToPlayFrom(CBaseEntity* pActivator);
 };
 
 LINK_ENTITY_TO_CLASS( ambient_generic, CAmbientGeneric )
@@ -290,14 +290,11 @@ void CAmbientGeneric::Precache( void )
 			m_fActive = TRUE;
 	}
 
-	if( m_fActive )
+	if (m_fActive && !EntityToPlayFromIsDefined())
 	{
-		if (!EntityToPlayFromIsDefined())
-		{
-			UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
-					( m_dpv.vol * 0.01f ), m_flAttenuation, SND_SPAWNING, m_dpv.pitch );
-			pev->nextthink = gpGlobals->time + 0.1f;
-		}
+		UTIL_EmitAmbientSound( ENT( pev ), pev->origin, szSoundFile,
+				( m_dpv.vol * 0.01f ), m_flAttenuation, SND_SPAWNING, m_dpv.pitch );
+		pev->nextthink = gpGlobals->time + 0.1f;
 	}
 }
 
@@ -318,8 +315,8 @@ void CAmbientGeneric::Activate()
 		CBaseEntity *pTarget = GetEntityToPlayFrom(m_hActivator);
 		if (!pTarget)
 		{
-			ALERT(at_console, "WARNING: ambient_generic \"%s\" can't find \"%s\", its entity to play from.\n",
-					STRING(pev->targetname), STRING(pev->target));
+			ALERT(at_console, "WARNING: %s \"%s\" can't find \"%s\", its entity to play from.\n",
+					STRING(pev->classname), STRING(pev->targetname), STRING(pev->target));
 		}
 		else
 		{
@@ -2170,4 +2167,100 @@ void CEnvSoundMark::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	{
 		UTIL_Remove(this);
 	}
+}
+
+class CExtraSpeaker : public CPointEntity
+{
+public:
+	void Think()
+	{
+		// Gargbage collection
+		CBaseEntity* pOwner = nullptr;
+		if (!FNullEnt(pev->owner))
+		{
+			pOwner = CBaseEntity::Instance(pev->owner);
+		}
+		if (!pOwner)
+		{
+			ALERT(at_console, "Removing %s because the owner has expired\n", STRING(pev->classname));
+			UTIL_Remove(this);
+			return;
+		}
+		pev->nextthink = gpGlobals->time + 1.0f;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( extra_speaker, CExtraSpeaker )
+
+class CAmbientExtraSpeaker : public CAmbientGeneric
+{
+public:
+	CBaseEntity* GetEntityToPlayFrom(CBaseEntity *pActivator);
+	bool EntityToPlayFromIsDefined() { return true; }
+
+protected:
+	CBaseEntity* GetTargetEntity(CBaseEntity* pActivator);
+	CBaseEntity* GetSpeakerEntity(CBaseEntity* pTargetEntity);
+};
+
+LINK_ENTITY_TO_CLASS( ambient_extraspeaker, CAmbientExtraSpeaker )
+
+CBaseEntity* CAmbientExtraSpeaker::GetEntityToPlayFrom(CBaseEntity *pActivator)
+{
+	CBaseEntity* pTargetEntity = GetTargetEntity(pActivator);
+	if (!pTargetEntity)
+		return nullptr;
+
+	CBaseEntity* pSpeakerEntity = GetSpeakerEntity(pTargetEntity);
+	if (pSpeakerEntity)
+	{
+		pSpeakerEntity->pev->movetype = MOVETYPE_FOLLOW;
+		pSpeakerEntity->pev->aiment = pTargetEntity->edict();
+	}
+	return pSpeakerEntity;
+}
+
+CBaseEntity* CAmbientExtraSpeaker::GetTargetEntity(CBaseEntity *pActivator)
+{
+	CBaseEntity* pTargetEntity = nullptr;
+	if (FStringNull(pev->target))
+	{
+		pTargetEntity = g_pGameRules->EffectivePlayer(pActivator);
+	}
+	else
+	{
+		pTargetEntity = UTIL_FindEntityByTargetname(nullptr, STRING(pev->target), pActivator);
+	}
+	return pTargetEntity;
+}
+
+CBaseEntity* CAmbientExtraSpeaker::GetSpeakerEntity(CBaseEntity *pTargetEntity)
+{
+	CBaseEntity* pEntity = nullptr;
+	while((pEntity = UTIL_FindEntityByClassname(pEntity, "extra_speaker")) != nullptr)
+	{
+		if (pTargetEntity->edict() == pEntity->pev->owner)
+		{
+			return pEntity;
+		}
+	}
+
+	if (!pEntity) {
+		pEntity = CBaseEntity::CreateNoSpawn("extra_speaker", pTargetEntity->pev->origin, pTargetEntity->pev->angles);
+
+		if (pEntity) {
+			ALERT(at_console, "Created %s for %s\n", STRING(pEntity->pev->classname), STRING(pTargetEntity->pev->classname));
+			pEntity->pev->movetype = MOVETYPE_FOLLOW;
+			pEntity->pev->aiment = pTargetEntity->edict();
+			pEntity->pev->owner = pTargetEntity->edict();
+			pEntity->m_EFlags |= EFLAG_PREVENT_ORIGIN_UNSETTING;
+			DispatchSpawn(pEntity->edict());
+			SET_MODEL(pEntity->edict(), "sprites/iunknown.spr");
+			pEntity->pev->rendermode = kRenderTransAlpha;
+			pEntity->pev->renderamt = 0;
+			pEntity->pev->nextthink = gpGlobals->time + 1.0f;
+		}
+	}
+
+	return pEntity;
 }

@@ -1605,9 +1605,12 @@ void Entity_Encode( struct delta_s *pFields, const unsigned char *from, const un
 	if( ( t->movetype == MOVETYPE_FOLLOW ) &&
 		( t->aiment != 0 ) )
 	{
-		DELTA_UNSETBYINDEX( pFields, entity_field_alias[FIELD_ORIGIN0].field );
-		DELTA_UNSETBYINDEX( pFields, entity_field_alias[FIELD_ORIGIN1].field );
-		DELTA_UNSETBYINDEX( pFields, entity_field_alias[FIELD_ORIGIN2].field );
+		if ((t->eflags & EFLAG_PREVENT_ORIGIN_UNSETTING) == 0)
+		{
+			DELTA_UNSETBYINDEX( pFields, entity_field_alias[FIELD_ORIGIN0].field );
+			DELTA_UNSETBYINDEX( pFields, entity_field_alias[FIELD_ORIGIN1].field );
+			DELTA_UNSETBYINDEX( pFields, entity_field_alias[FIELD_ORIGIN2].field );
+		}
 	}
 	else if( t->aiment != f->aiment )
 	{
