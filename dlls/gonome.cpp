@@ -30,6 +30,7 @@
 #include	"studio.h"
 #include	"mod_features.h"
 #include	"game.h"
+#include	"common_soundscripts.h"
 
 #if FEATURE_GONOME
 
@@ -63,7 +64,11 @@ class CGonomeGuts : public CSquidSpit
 {
 public:
 	void Spawn(void);
+	void PrecacheSounds();
 	void Touch(CBaseEntity *pOther);
+
+	static constexpr const char* spitTouchSoundScript = "Gonome.SpitTouch";
+	static constexpr const char* spitHitSoundScript = "Gonome.SpitHit";
 };
 
 LINK_ENTITY_TO_CLASS( gonomeguts, CGonomeGuts )
@@ -74,25 +79,18 @@ void CGonomeGuts::Spawn()
 	pev->rendercolor.x = 255;
 }
 
+void CGonomeGuts::PrecacheSounds()
+{
+	RegisterAndPrecacheSoundScript(spitTouchSoundScript, NPC::spitTouchSoundScript);
+	RegisterAndPrecacheSoundScript(spitHitSoundScript, NPC::spitHitSoundScript);
+}
+
 void CGonomeGuts::Touch( CBaseEntity *pOther )
 {
 	TraceResult tr;
-	int iPitch;
 
-	// splat sound
-	iPitch = RANDOM_FLOAT( 90, 110 );
-
-	EmitSoundDyn( CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );
-
-	switch( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	}
+	EmitSoundScript(spitTouchSoundScript);
+	EmitSoundScript(spitHitSoundScript);
 
 	if( !pOther->pev->takedamage )
 	{
@@ -153,11 +151,15 @@ public:
 	CUSTOM_SCHEDULES
 	static TYPEDESCRIPTION m_SaveData[];
 
-	static const char* pPainSounds[];
-	static const char* pIdleSounds[];
-	static const char* pDeathSounds[];
-	static const char *pAttackHitSounds[];
-	static const char *pAttackMissSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static constexpr const char* attackHitSoundScript = "Gonome.AttackHit";
+	static constexpr const char* attackMissSoundScript = "Gonome.AttackMiss";
+	static const NamedSoundScript biteSoundScript;
+	static const NamedSoundScript melee1SoundScript;
+	static const NamedSoundScript melee2SoundScript;
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_LARGE; }
 	bool IsDisplaceable() { return true; }
@@ -175,36 +177,50 @@ protected:
 
 LINK_ENTITY_TO_CLASS(monster_gonome, CGonome)
 
-const char* CGonome::pPainSounds[] = {
-	"gonome/gonome_pain1.wav",
-	"gonome/gonome_pain2.wav",
-	"gonome/gonome_pain3.wav",
-	"gonome/gonome_pain4.wav"
+const NamedSoundScript CGonome::idleSoundScript = {
+	CHAN_VOICE,
+	{"gonome/gonome_idle1.wav", "gonome/gonome_idle2.wav", "gonome/gonome_idle3.wav"},
+	IntRange(95, 105),
+	"Gonome.Idle"
 };
 
-const char* CGonome::pIdleSounds[] = {
-	"gonome/gonome_idle1.wav",
-	"gonome/gonome_idle2.wav",
-	"gonome/gonome_idle3.wav"
+const NamedSoundScript CGonome::alertSoundScript = {
+	CHAN_VOICE,
+	{"zombie/zo_alert10.wav", "zombie/zo_alert20.wav", "zombie/zo_alert30.wav"},
+	IntRange(95, 104),
+	"Gonome.Alert"
 };
 
-const char* CGonome::pDeathSounds[] = {
-	"gonome/gonome_death2.wav",
-	"gonome/gonome_death3.wav",
-	"gonome/gonome_death4.wav"
+const NamedSoundScript CGonome::painSoundScript = {
+	CHAN_VOICE,
+	{"gonome/gonome_pain1.wav", "gonome/gonome_pain2.wav", "gonome/gonome_pain3.wav", "gonome/gonome_pain4.wav"},
+	IntRange(95, 104),
+	"Gonome.Pain"
 };
 
-const char* CGonome::pAttackHitSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav",
+const NamedSoundScript CGonome::dieSoundScript = {
+	CHAN_VOICE,
+	{"gonome/gonome_death2.wav", "gonome/gonome_death3.wav", "gonome/gonome_death4.wav"},
+	"Gonome.Die"
 };
 
-const char* CGonome::pAttackMissSounds[] =
-{
-	"zombie/claw_miss1.wav",
-	"zombie/claw_miss2.wav",
+const NamedSoundScript CGonome::biteSoundScript = {
+	CHAN_WEAPON,
+	{"bullchicken/bc_bite2.wav", "bullchicken/bc_bite3.wav"},
+	IntRange(90, 110),
+	"Gonome.Bite"
+};
+
+const NamedSoundScript CGonome::melee1SoundScript = {
+	CHAN_WEAPON,
+	{"gonome/gonome_melee1.wav"},
+	"Gonome.Melee1"
+};
+
+const NamedSoundScript CGonome::melee2SoundScript = {
+	CHAN_WEAPON,
+	{"gonome/gonome_melee2.wav"},
+	"Gonome.Melee2"
 };
 
 TYPEDESCRIPTION	CGonome::m_SaveData[] =
@@ -416,8 +432,7 @@ BOOL CGonome::CheckMeleeAttack2(float flDot, float flDist)
 //=========================================================
 void CGonome::IdleSound(void)
 {
-	const int iPitch = 95 + RANDOM_LONG( 0, 10 );
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundScript(idleSoundScript);
 }
 
 //=========================================================
@@ -425,8 +440,8 @@ void CGonome::IdleSound(void)
 //=========================================================
 void CGonome::PainSound(void)
 {
-	const int iPitch = RANDOM_LONG(0, 9) + 95;
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
+	if (RANDOM_LONG(0, 5) < 2)
+		EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -434,8 +449,7 @@ void CGonome::PainSound(void)
 //=========================================================
 void CGonome::AlertSound(void)
 {
-	const int iPitch = RANDOM_LONG(0, 9) + 95;
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundScript(alertSoundScript);
 }
 
 //=========================================================
@@ -510,11 +524,11 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 				pHurt->pev->punchangle.x = 5;
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 25;
 			}
-			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundScript(attackHitSoundScript);
 		}
 		else
 		{
-			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundScript(attackMissSoundScript);
 		}
 	}
 	break;
@@ -530,11 +544,11 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 				pHurt->pev->punchangle.x = 5;
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -25;
 			}
-			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundScript(attackHitSoundScript);
 		}
 		else
 		{
-			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundScript(attackMissSoundScript);
 		}
 	}
 	break;
@@ -544,22 +558,12 @@ void CGonome::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case GONOME_AE_BITE3:
 	case GONOME_AE_BITE4:
 		{
-			int iPitch;
 			CBaseEntity *pHurt = CheckTraceHullAttack(GONOME_MELEE_ATTACK_RADIUS, gSkillData.gonomeDmgOneBite, DMG_SLASH);
 
 			if (pHurt)
 			{
 				// croonchy bite sound
-				iPitch = RANDOM_FLOAT(90, 110);
-				switch (RANDOM_LONG(0, 1))
-				{
-				case 0:
-					EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite2.wav", 1, ATTN_NORM, 0, iPitch);
-					break;
-				case 1:
-					EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite3.wav", 1, ATTN_NORM, 0, iPitch);
-					break;
-				}
+				EmitSoundScript(biteSoundScript);
 
 				if (FBitSet(pHurt->pev->flags, FL_MONSTER|FL_CLIENT))
 				{
@@ -658,29 +662,31 @@ void CGonome::Precache()
 {
 	PrecacheMyModel("models/gonome.mdl");
 
-	UTIL_PrecacheOther("gonomeguts", m_soundList);
+	EntityOverrides entityOverrides;
+	entityOverrides.soundList = m_soundList;
 
-	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
+	UTIL_PrecacheOther("gonomeguts", entityOverrides);
+
+	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 
 	PRECACHE_SOUND("gonome/gonome_eat.wav");
 	PRECACHE_SOUND("gonome/gonome_jumpattack.wav");
-	PRECACHE_SOUND("gonome/gonome_melee1.wav");
-	PRECACHE_SOUND("gonome/gonome_melee2.wav");
 #if FEATURE_GONOME_STEP_SOUNDS
 	PRECACHE_SOUND("gonome/gonome_step1.wav");
 	PRECACHE_SOUND("gonome/gonome_step2.wav");
 #endif
 
-	PRECACHE_SOUND_ARRAY(pIdleSounds);
-	PRECACHE_SOUND_ARRAY(pPainSounds);
-	PRECACHE_SOUND_ARRAY(pDeathSounds);
-	PRECACHE_SOUND_ARRAY(pAttackHitSounds);
-	PRECACHE_SOUND_ARRAY(pAttackMissSounds);
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
+	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
+	RegisterAndPrecacheSoundScript(biteSoundScript);
+	RegisterAndPrecacheSoundScript(melee1SoundScript);
+	RegisterAndPrecacheSoundScript(melee2SoundScript);
 
 	PRECACHE_SOUND("gonome/gonome_run.wav");
-
-	PRECACHE_SOUND("bullchicken/bc_bite2.wav");
-	PRECACHE_SOUND("bullchicken/bc_bite3.wav");
 }
 
 //=========================================================
@@ -688,7 +694,7 @@ void CGonome::Precache()
 //=========================================================
 void CGonome::DeathSound(void)
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 1, ATTN_NORM);
+	EmitSoundScript(dieSoundScript);
 }
 
 //=========================================================
@@ -855,16 +861,14 @@ void CGonome::RunTask(Task_t *pTask)
 	{
 		if (!m_playedAttackSound)
 		{
-			const char* sample = NULL;
 			if (m_meleeAttack2)
 			{
-				sample = "gonome/gonome_melee2.wav";
+				EmitSoundScript(melee2SoundScript);
 			}
 			else
 			{
-				sample = "gonome/gonome_melee1.wav";
+				EmitSoundScript(melee1SoundScript);
 			}
-			EmitSound( CHAN_BODY, sample, 1, ATTN_NORM);
 			m_playedAttackSound = true;
 		}
 	}

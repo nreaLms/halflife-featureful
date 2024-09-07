@@ -65,8 +65,6 @@ void CUzi::Precache( void )
 	PRECACHE_SOUND( "weapons/uzi/deploy1.wav" );
 	PRECACHE_SOUND( "weapons/uzi/akimbo_pull2.wav" );
 
-	PRECACHE_SOUND( "weapons/357_cock1.wav" );
-
 	m_usUzi = PRECACHE_EVENT( 1, "events/uzi.sc" );
 }
 

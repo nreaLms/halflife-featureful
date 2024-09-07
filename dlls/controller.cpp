@@ -82,11 +82,11 @@ public:
 	void AttackSound( void );
 	void DeathSound( void );
 
-	static const char *pAttackSounds[];
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
-	static const char *pPainSounds[];
-	static const char *pDeathSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript attackSoundScript;
 
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void OnDying();
@@ -120,40 +120,44 @@ TYPEDESCRIPTION	CController::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CController, CSquadMonster )
 
-const char *CController::pAttackSounds[] =
-{
-	"controller/con_attack1.wav",
-	"controller/con_attack2.wav",
-	"controller/con_attack3.wav",
+constexpr IntRange controllerPitch(95, 105);
+
+const NamedSoundScript CController::idleSoundScript = {
+	CHAN_VOICE,
+	{
+		"controller/con_idle1.wav", "controller/con_idle2.wav", "controller/con_idle3.wav",
+		"controller/con_idle4.wav", "controller/con_idle5.wav"
+	},
+	controllerPitch,
+	"Controller.Idle"
 };
 
-const char *CController::pIdleSounds[] =
-{
-	"controller/con_idle1.wav",
-	"controller/con_idle2.wav",
-	"controller/con_idle3.wav",
-	"controller/con_idle4.wav",
-	"controller/con_idle5.wav",
+const NamedSoundScript CController::alertSoundScript = {
+	CHAN_VOICE,
+	{"controller/con_alert1.wav", "controller/con_alert2.wav", "controller/con_alert3.wav"},
+	controllerPitch,
+	"Controller.Alert"
 };
 
-const char *CController::pAlertSounds[] =
-{
-	"controller/con_alert1.wav",
-	"controller/con_alert2.wav",
-	"controller/con_alert3.wav",
+const NamedSoundScript CController::painSoundScript = {
+	CHAN_VOICE,
+	{"controller/con_pain1.wav", "controller/con_pain2.wav", "controller/con_pain3.wav"},
+	controllerPitch,
+	"Controller.Pain"
 };
 
-const char *CController::pPainSounds[] =
-{
-	"controller/con_pain1.wav",
-	"controller/con_pain2.wav",
-	"controller/con_pain3.wav",
+const NamedSoundScript CController::dieSoundScript = {
+	CHAN_VOICE,
+	{"controller/con_die1.wav", "controller/con_die2.wav"},
+	controllerPitch,
+	"Controller.Die"
 };
 
-const char *CController::pDeathSounds[] =
-{
-	"controller/con_die1.wav",
-	"controller/con_die2.wav",
+const NamedSoundScript CController::attackSoundScript = {
+	CHAN_VOICE,
+	{"controller/con_attack1.wav", "controller/con_attack2.wav", "controller/con_attack3.wav"},
+	controllerPitch,
+	"Controller.Attack"
 };
 
 //=========================================================
@@ -225,27 +229,27 @@ void CController::GibMonster( void )
 void CController::PainSound( void )
 {
 	if( RANDOM_LONG( 0, 5 ) < 2 )
-		EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pPainSounds ); 
-}	
+		EmitSoundScript(painSoundScript);
+}
 
 void CController::AlertSound( void )
 {
-	EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pAlertSounds ); 
+	EmitSoundScript(alertSoundScript);
 }
 
 void CController::IdleSound( void )
 {
-	EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pIdleSounds ); 
+	EmitSoundScript(idleSoundScript);
 }
 
 void CController::AttackSound( void )
 {
-	EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pAttackSounds ); 
+	EmitSoundScript(attackSoundScript);
 }
 
 void CController::DeathSound( void )
 {
-	EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pDeathSounds ); 
+	EmitSoundScript(dieSoundScript);
 }
 
 //=========================================================
@@ -376,11 +380,11 @@ void CController::Precache()
 {
 	PrecacheMyModel( "models/controller.mdl" );
 
-	PRECACHE_SOUND_ARRAY( pAttackSounds );
-	PRECACHE_SOUND_ARRAY( pIdleSounds );
-	PRECACHE_SOUND_ARRAY( pAlertSounds );
-	PRECACHE_SOUND_ARRAY( pPainSounds );
-	PRECACHE_SOUND_ARRAY( pDeathSounds );
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(attackSoundScript);
 
 	PRECACHE_MODEL( "sprites/xspark4.spr" );
 
@@ -1156,9 +1160,20 @@ class CControllerHeadBall : public CBaseMonster
 	int m_flNextAttack;
 	Vector m_vecIdeal;
 	EHANDLE m_hOwner;
+
+	static const NamedSoundScript electroSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( controller_head_ball, CControllerHeadBall )
+
+const NamedSoundScript CControllerHeadBall::electroSoundScript = {
+	CHAN_STATIC,
+	{"weapons/electro4.wav"},
+	0.5f,
+	ATTN_NORM,
+	IntRange(140, 160),
+	"Controller.HeadElectro"
+};
 
 void CControllerHeadBall::Spawn( void )
 {
@@ -1192,8 +1207,7 @@ void CControllerHeadBall::Spawn( void )
 void CControllerHeadBall::Precache( void )
 {
 	PRECACHE_MODEL( "sprites/xspark4.spr" );
-	PRECACHE_SOUND( "debris/zap4.wav" );
-	PRECACHE_SOUND( "weapons/electro4.wav" );
+	RegisterAndPrecacheSoundScript(electroSoundScript);
 }
 
 void CControllerHeadBall::HuntThink( void )
@@ -1257,7 +1271,7 @@ void CControllerHeadBall::HuntThink( void )
 			WRITE_BYTE( 10 );		// speed
 		MESSAGE_END();
 
-		EmitAmbientSound( tr.vecEndPos, "weapons/electro4.wav", 0.5f, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
+		EmitSoundScriptAmbient(tr.vecEndPos, electroSoundScript);
 
 		m_flNextAttack = gpGlobals->time + 3.0f;
 
@@ -1341,6 +1355,8 @@ class CControllerZapBall : public CBaseMonster
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
+
+	static const NamedSoundScript electroSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( controller_energy_ball, CControllerZapBall )
@@ -1351,6 +1367,15 @@ TYPEDESCRIPTION	CControllerZapBall::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CControllerZapBall, CBaseMonster )
+
+const NamedSoundScript CControllerZapBall::electroSoundScript = {
+	CHAN_STATIC,
+	{"weapons/electro4.wav"},
+	0.3f,
+	ATTN_NORM,
+	IntRange(90, 99),
+	"Controller.ZapElectro"
+};
 
 void CControllerZapBall::Spawn( void )
 {
@@ -1381,8 +1406,7 @@ void CControllerZapBall::Spawn( void )
 void CControllerZapBall::Precache( void )
 {
 	PRECACHE_MODEL( "sprites/xspark4.spr" );
-	// PRECACHE_SOUND( "debris/zap4.wav" );
-	// PRECACHE_SOUND( "weapons/electro4.wav" );
+	RegisterAndPrecacheSoundScript(electroSoundScript);
 }
 
 void CControllerZapBall::AnimateThink( void )
@@ -1417,7 +1441,7 @@ void CControllerZapBall::ExplodeTouch( CBaseEntity *pOther )
 
 		pOther->ApplyTraceAttack(pev, pevOwner, gSkillData.controllerDmgBall, pev->velocity.Normalize(), &tr, DMG_ENERGYBEAM);
 
-		EmitAmbientSound( tr.vecEndPos, "weapons/electro4.wav", 0.3f, ATTN_NORM, 0, RANDOM_LONG( 90, 99 ) );
+		EmitSoundScriptAmbient(tr.vecEndPos, electroSoundScript);
 	}
 
 	UTIL_Remove( this );

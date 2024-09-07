@@ -109,6 +109,14 @@ void CLaserSpot::Precache( void )
 
 LINK_ENTITY_TO_CLASS( rpg_rocket, CRpgRocket )
 
+const NamedSoundScript CRpgRocket::rocketIgniteSoundScript = {
+	CHAN_VOICE,
+	{"weapons/rocket1.wav"},
+	1.0f,
+	0.5f,
+	"RPG.RocketIgnite"
+};
+
 //=========================================================
 //=========================================================
 CRpgRocket *CRpgRocket::CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBaseEntity *pOwner, CRpg *pLauncher )
@@ -135,7 +143,7 @@ void CRpgRocket::Explode( TraceResult *pTrace, int bitsDamageType )
 		m_hLauncher = 0;
 	}
 
-	STOP_SOUND( edict(), CHAN_VOICE, "weapons/rocket1.wav" );
+	StopSoundScript(rocketIgniteSoundScript);
 
 	CGrenade::Explode( pTrace, bitsDamageType );
 }
@@ -186,7 +194,7 @@ void CRpgRocket::RocketTouch( CBaseEntity *pOther )
 		m_hLauncher = 0;
 	}
 
-	STOP_SOUND( edict(), CHAN_VOICE, "weapons/rocket1.wav" );
+	StopSoundScript(rocketIgniteSoundScript);
 	ExplodeTouch( pOther );
 }
 
@@ -194,9 +202,10 @@ void CRpgRocket::RocketTouch( CBaseEntity *pOther )
 //=========================================================
 void CRpgRocket::Precache( void )
 {
+	PrecacheBaseGrenadeSounds();
 	PRECACHE_MODEL( "models/rpgrocket.mdl" );
 	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
-	PRECACHE_SOUND( "weapons/rocket1.wav" );
+	RegisterAndPrecacheSoundScript(rocketIgniteSoundScript);
 }
 
 void CRpgRocket::IgniteThink( void )
@@ -207,7 +216,7 @@ void CRpgRocket::IgniteThink( void )
 	pev->effects |= EF_LIGHT;
 
 	// make rocket sound
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/rocket1.wav", 1, 0.5f );
+	EmitSoundScript(rocketIgniteSoundScript);
 
 	// rocket trail
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
@@ -290,7 +299,7 @@ void CRpgRocket::FollowThink( void )
 		if( pev->effects & EF_LIGHT )
 		{
 			pev->effects = 0;
-			STOP_SOUND( ENT( pev ), CHAN_VOICE, "weapons/rocket1.wav" );
+			StopSoundScript(rocketIgniteSoundScript);
 		}
 		pev->velocity = pev->velocity * 0.2f + vecTarget * flSpeed * 0.798f;
 		if( pev->waterlevel == 0 && pev->velocity.Length() < 1500.0f )
@@ -387,8 +396,6 @@ void CRpg::Precache( void )
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/v_rpg.mdl" );
 	PrecachePModel( "models/p_rpg.mdl" );
-
-	PRECACHE_SOUND( "items/9mmclip1.wav" );
 
 	UTIL_PrecacheOther( "laser_spot" );
 	UTIL_PrecacheOther( "rpg_rocket" );

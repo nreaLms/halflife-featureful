@@ -59,6 +59,10 @@ class CTripmineGrenade : public CGrenade
 	Vector m_posOwner;
 	Vector m_angleOwner;
 	edict_t *m_pRealOwner;// tracelines don't hit PEV->OWNER, which means a player couldn't detonate his own trip mine, so we store the owner here.
+
+	static const NamedSoundScript deploySoundScript;
+	static const NamedSoundScript activateSoundScript;
+	static const NamedSoundScript chargeSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_tripmine, CTripmineGrenade )
@@ -78,6 +82,29 @@ TYPEDESCRIPTION	CTripmineGrenade::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CTripmineGrenade, CGrenade )
+
+const NamedSoundScript CTripmineGrenade::deploySoundScript = {
+	CHAN_VOICE,
+	{"weapons/mine_deploy.wav"},
+	"TripmineGrenade.Deploy"
+};
+
+const NamedSoundScript CTripmineGrenade::activateSoundScript = {
+	CHAN_VOICE,
+	{"weapons/mine_activate.wav"},
+	0.5f,
+	ATTN_NORM,
+	75,
+	"TripmineGrenade.Activate"
+};
+
+const NamedSoundScript CTripmineGrenade::chargeSoundScript = {
+	CHAN_BODY,
+	{"weapons/mine_charge.wav"},
+	0.2f,
+	ATTN_NORM,
+	"TripmineGrenade.Charge"
+};
 
 void CTripmineGrenade::Spawn( void )
 {
@@ -127,8 +154,8 @@ void CTripmineGrenade::Spawn( void )
 	if( pev->owner != NULL )
 	{
 		// play deploy sound
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/mine_deploy.wav", 1.0, ATTN_NORM );
-		EMIT_SOUND( ENT( pev ), CHAN_BODY, "weapons/mine_charge.wav", 0.2, ATTN_NORM ); // chargeup
+		EmitSoundScript(deploySoundScript);
+		EmitSoundScript(chargeSoundScript); // chargeup
 
 		m_pRealOwner = pev->owner;// see CTripmineGrenade for why.
 	}
@@ -141,10 +168,11 @@ void CTripmineGrenade::Spawn( void )
 
 void CTripmineGrenade::Precache( void )
 {
+	PrecacheBaseGrenadeSounds();
 	PRECACHE_MODEL( "models/v_tripmine.mdl" );
-	PRECACHE_SOUND( "weapons/mine_deploy.wav" );
-	PRECACHE_SOUND( "weapons/mine_activate.wav" );
-	PRECACHE_SOUND( "weapons/mine_charge.wav" );
+	RegisterAndPrecacheSoundScript(deploySoundScript);
+	RegisterAndPrecacheSoundScript(activateSoundScript);
+	RegisterAndPrecacheSoundScript(chargeSoundScript);
 }
 
 void CTripmineGrenade::UpdateOnRemove()
@@ -190,8 +218,8 @@ void CTripmineGrenade::PowerupThink( void )
 		}
 		else
 		{
-			STOP_SOUND( ENT( pev ), CHAN_VOICE, "weapons/mine_deploy.wav" );
-			STOP_SOUND( ENT( pev ), CHAN_BODY, "weapons/mine_charge.wav" );
+			StopSoundScript(deploySoundScript);
+			StopSoundScript(chargeSoundScript);
 			SetThink( &CBaseEntity::SUB_Remove );
 			pev->nextthink = gpGlobals->time + 0.1f;
 			ALERT( at_console, "WARNING:Tripmine at %.0f, %.0f, %.0f removed\n", (double)pev->origin.x, (double)pev->origin.y, (double)pev->origin.z );
@@ -202,8 +230,8 @@ void CTripmineGrenade::PowerupThink( void )
 	else if( m_posOwner != m_hOwner->pev->origin || m_angleOwner != m_hOwner->pev->angles )
 	{
 		// disable
-		STOP_SOUND( ENT( pev ), CHAN_VOICE, "weapons/mine_deploy.wav" );
-		STOP_SOUND( ENT( pev ), CHAN_BODY, "weapons/mine_charge.wav" );
+		StopSoundScript(deploySoundScript);
+		StopSoundScript(chargeSoundScript);
 		CBaseEntity *pMine = Create( "weapon_tripmine", pev->origin + m_vecDir * 24.0f, pev->angles );
 		pMine->pev->spawnflags |= SF_NORESPAWN;
 
@@ -223,7 +251,7 @@ void CTripmineGrenade::PowerupThink( void )
 		MakeBeam();
 
 		// play enabled sound
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "weapons/mine_activate.wav", 0.5, ATTN_NORM, 1, 75 );
+		EmitSoundScript(activateSoundScript, SoundScriptParamOverride(), 1); // TODO: the original code passed the 1 as flags. What is it?
 	}
 	pev->nextthink = gpGlobals->time + 0.1f;
 }

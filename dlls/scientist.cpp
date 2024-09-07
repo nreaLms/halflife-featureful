@@ -151,17 +151,18 @@ public:
 		return pev->body >= TotalHeadCount();
 	}
 
+	static const NamedSoundScript painSoundScript;
+	static constexpr const char* dieSoundScript = "Scientist.Die";
+	static const NamedSoundScript healSoundScript;
+
 protected:
 	void SciSpawnHelper(const char* modelName, float health);
-	void PrecachePainSounds();
 
 	float m_healTime;
 	float m_fearTime;
 
 	// Don't save
 	int m_totalHeadCount;
-
-	static const char* pPainSounds[];
 };
 
 LINK_ENTITY_TO_CLASS( monster_scientist, CScientist )
@@ -174,12 +175,18 @@ TYPEDESCRIPTION	CScientist::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CScientist, CTalkMonster )
 
-const char* CScientist::pPainSounds[] = {
-	"scientist/sci_pain1.wav",
-	"scientist/sci_pain2.wav",
-	"scientist/sci_pain3.wav",
-	"scientist/sci_pain4.wav",
-	"scientist/sci_pain5.wav",
+const NamedSoundScript CScientist::painSoundScript = {
+	CHAN_VOICE,
+	{"scientist/sci_pain1.wav", "scientist/sci_pain2.wav", "scientist/sci_pain3.wav", "scientist/sci_pain4.wav", "scientist/sci_pain5.wav"},
+	"Scientist.Pain"
+};
+
+const NamedSoundScript CScientist::healSoundScript = {
+	CHAN_WEAPON,
+	{"items/medshot4.wav"},
+	0.75f,
+	ATTN_STATIC,
+	"Scientist.Heal"
 };
 
 //=========================================================
@@ -802,8 +809,10 @@ void CScientist::Spawn()
 void CScientist::Precache( void )
 {
 	PrecacheMyModel( "models/scientist.mdl" );
-	PrecachePainSounds();
-	PRECACHE_SOUND( "items/medshot4.wav" );
+
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript, painSoundScript);
+	RegisterAndPrecacheSoundScript(healSoundScript);
 
 	// every new scientist must call this, otherwise
 	// when a level is loaded, nobody will talk (time is reset to 0)
@@ -823,11 +832,6 @@ void CScientist::CalcTotalHeadCount()
 		// Divide by 2 to account for body variants with the needle
 		m_totalHeadCount = GetBodyCount( GET_MODEL_PTR(ENT(pev)) ) / 2;
 	}
-}
-
-void CScientist::PrecachePainSounds()
-{
-	PRECACHE_SOUND_ARRAY(pPainSounds);
 }
 
 const char* CScientist::DefaultSentenceGroup(int group)
@@ -886,7 +890,7 @@ int CScientist::DefaultISoundMask( void )
 //=========================================================
 void CScientist::PlayPainSound()
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundScriptTalk(painSoundScript);
 }
 
 //=========================================================
@@ -894,7 +898,7 @@ void CScientist::PlayPainSound()
 //=========================================================
 void CScientist::DeathSound( void )
 {
-	PlayPainSound();
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 void CScientist::SetActivity( Activity newActivity )
@@ -1177,7 +1181,7 @@ void CScientist::Heal( void )
 		return;
 
 	m_hTargetEnt->TakeHealth(this, gSkillData.scientistHeal, DMG_GENERIC );
-	EmitSound( CHAN_WEAPON, "items/medshot4.wav", 0.75, ATTN_NORM );
+	EmitSoundScript(healSoundScript);
 
 	// Don't heal again for 1 minute
 	m_healTime = gpGlobals->time + gSkillData.scientistHealTime;
@@ -1549,6 +1553,16 @@ public:
 	const char* DefaultDisplayName() { return "Cleansuit Scientist"; }
 	bool AbleToHeal() { return false; }
 	void ReportAIState(ALERT_TYPE level);
+
+	static constexpr const char* painSoundScript = "CleansuitScientist.Pain";
+	static constexpr const char* dieSoundScript = "CleansuitScientist.Die";
+
+	void PlayPainSound() {
+		EmitSoundScriptTalk(painSoundScript);
+	}
+	void DeathSound() {
+		EmitSoundScriptTalk(dieSoundScript);
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist, CCleansuitScientist )
@@ -1562,7 +1576,10 @@ void CCleansuitScientist::Spawn()
 void CCleansuitScientist::Precache()
 {
 	PrecacheMyModel("models/cleansuit_scientist.mdl");
-	PrecachePainSounds();
+
+	RegisterAndPrecacheSoundScript(painSoundScript, CScientist::painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript, CScientist::dieSoundScript, CScientist::painSoundScript);
+
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
@@ -1631,26 +1648,26 @@ public:
 	const char* DefaultSentenceGroup(int group);
 	int DefaultToleranceLevel() { return TOLERANCE_ABSOLUTE; }
 	void PlayPainSound();
+	void DeathSound();
 
 #if FEATURE_ROSENBERG_DECAY
 	bool AbleToHeal() { return false; }
 #endif
 
-	static const char* pPainSounds[];
+	static const NamedSoundScript painSoundScript;
+	static constexpr const char* dieSoundScript = "Rosenberg.Die";
 };
 
 LINK_ENTITY_TO_CLASS( monster_rosenberg, CRosenberg )
 
-const char* CRosenberg::pPainSounds[] = {
-	"rosenberg/ro_pain0.wav",
-	"rosenberg/ro_pain1.wav",
-	"rosenberg/ro_pain2.wav",
-	"rosenberg/ro_pain3.wav",
-	"rosenberg/ro_pain4.wav",
-	"rosenberg/ro_pain5.wav",
-	"rosenberg/ro_pain6.wav",
-	"rosenberg/ro_pain7.wav",
-	"rosenberg/ro_pain8.wav",
+const NamedSoundScript CRosenberg::painSoundScript = {
+	CHAN_VOICE,
+	{
+		"rosenberg/ro_pain0.wav", "rosenberg/ro_pain1.wav", "rosenberg/ro_pain2.wav",
+		"rosenberg/ro_pain3.wav", "rosenberg/ro_pain4.wav", "rosenberg/ro_pain5.wav",
+		"rosenberg/ro_pain6.wav", "rosenberg/ro_pain7.wav", "rosenberg/ro_pain8.wav"
+	},
+	"Rosenberg.Pain"
 };
 
 void CRosenberg::Spawn()
@@ -1673,9 +1690,10 @@ void CRosenberg::Precache()
 	PrecacheMyModel("models/scientist.mdl");
 	CalcTotalHeadCount();
 #endif
-	PRECACHE_SOUND_ARRAY(pPainSounds);
 
-	PRECACHE_SOUND( "items/medshot4.wav" );
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript, painSoundScript);
+	RegisterAndPrecacheSoundScript(CScientist::healSoundScript);
 
 	TalkInit();
 	CTalkMonster::Precache();
@@ -1720,7 +1738,12 @@ const char* CRosenberg::DefaultSentenceGroup(int group)
 
 void CRosenberg::PlayPainSound()
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundScriptTalk(painSoundScript);
+}
+
+void CRosenberg::DeathSound()
+{
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 #endif
@@ -1734,19 +1757,34 @@ public:
 		SciSpawnHelper("models/scientist.mdl", gSkillData.scientistHealth);
 		TalkMonsterInit();
 	}
-	void Precache()
-	{
-		PrecacheMyModel("models/scientist.mdl");
-		PrecachePainSounds();
-		TalkInit();
-		CTalkMonster::Precache();
-		RegisterTalkMonster();
-	}
+	void Precache();
 	const char* DefaultDisplayName() { return "Civilian"; }
 	bool AbleToHeal() { return false; }
+
+	static constexpr const char* painSoundScript = "Civilian.Pain";
+	static constexpr const char* dieSoundScript = "Civilian.Die";
+
+	void PlayPainSound() {
+		EmitSoundScriptTalk(painSoundScript);
+	}
+	void DeathSound() {
+		EmitSoundScriptTalk(dieSoundScript);
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_civilian, CCivilian )
+
+void CCivilian::Precache()
+{
+	PrecacheMyModel("models/scientist.mdl");
+
+	RegisterAndPrecacheSoundScript(painSoundScript, CScientist::painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript, CScientist::dieSoundScript, CScientist::painSoundScript);
+
+	TalkInit();
+	CTalkMonster::Precache();
+	RegisterTalkMonster();
+}
 
 #if FEATURE_GUS
 class CGus : public CScientist
@@ -1854,33 +1892,28 @@ public:
 
 	bool AbleToHeal() { return false; }
 
-protected:
-	static const char* pPainSounds[];
-	static const char* pDeathSounds[];
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_wheelchair, CKeller )
 
-const char* CKeller::pPainSounds[] =
-{
-	"keller/dk_pain1.wav",
-	"keller/dk_pain2.wav",
-	"keller/dk_pain3.wav",
-	"keller/dk_pain4.wav",
-	"keller/dk_pain5.wav",
-	"keller/dk_pain6.wav",
-	"keller/dk_pain7.wav",
+const NamedSoundScript CKeller::painSoundScript = {
+	CHAN_VOICE,
+	{
+		"keller/dk_pain1.wav", "keller/dk_pain2.wav", "keller/dk_pain3.wav", "keller/dk_pain4.wav",
+		"keller/dk_pain5.wav", "keller/dk_pain6.wav", "keller/dk_pain7.wav"
+	},
+	"Keller.Pain"
 };
 
-const char* CKeller::pDeathSounds[] =
-{
-	"keller/dk_die1.wav",
-	"keller/dk_die2.wav",
-	"keller/dk_die3.wav",
-	"keller/dk_die4.wav",
-	"keller/dk_die5.wav",
-	"keller/dk_die6.wav",
-	"keller/dk_die7.wav",
+const NamedSoundScript CKeller::dieSoundScript = {
+	CHAN_VOICE,
+	{
+		"keller/dk_die1.wav", "keller/dk_die2.wav", "keller/dk_die3.wav", "keller/dk_die4.wav",
+		"keller/dk_die5.wav", "keller/dk_die6.wav", "keller/dk_die7.wav"
+	},
+	"Keller.Die"
 };
 
 void CKeller::Spawn()
@@ -1892,8 +1925,9 @@ void CKeller::Spawn()
 void CKeller::Precache()
 {
 	PrecacheMyModel("models/wheelchair_sci.mdl");
-	PRECACHE_SOUND_ARRAY( pPainSounds );
-	PRECACHE_SOUND_ARRAY( pDeathSounds );
+
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
 
 	PRECACHE_SOUND( "wheelchair/wheelchair_jog.wav" );
 	PRECACHE_SOUND( "wheelchair/wheelchair_run.wav" );
@@ -1942,11 +1976,11 @@ const char* CKeller::DefaultSentenceGroup(int group)
 
 void CKeller::PlayPainSound()
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundScriptTalk(painSoundScript);
 }
 
 void CKeller::DeathSound()
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), 1.0f, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundScriptTalk(dieSoundScript);
 }
 #endif

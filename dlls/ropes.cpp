@@ -164,11 +164,16 @@ private:
 	CRope* mMasterRope;
 };
 
-static const char* const g_pszCreakSounds[] =
-{
-	"items/rope1.wav",
-	"items/rope2.wav",
-	"items/rope3.wav"
+const NamedSoundScript CRope::grabSoundScript = {
+	CHAN_BODY,
+	{"items/grab_rope.wav"},
+	"Rope.Grab"
+};
+
+const NamedSoundScript CRope::creakSoundScript = {
+	CHAN_BODY,
+	{"items/rope1.wav", "items/rope2.wav", "items/rope3.wav"},
+	"Rope.Creak"
 };
 
 TYPEDESCRIPTION	CRope::m_SaveData[] =
@@ -247,7 +252,9 @@ void CRope::Precache()
 
 	PRECACHE_MODEL(STRING(GetBodyModel()));
 	PRECACHE_MODEL(STRING(GetEndingModel()));
-	PRECACHE_SOUND_ARRAY( g_pszCreakSounds );
+
+	RegisterAndPrecacheSoundScript(grabSoundScript);
+	RegisterAndPrecacheSoundScript(creakSoundScript);
 }
 
 void CRope::Spawn()
@@ -1088,9 +1095,7 @@ bool CRope::ShouldCreak() const
 
 void CRope::Creak()
 {
-	EMIT_SOUND( edict(), CHAN_BODY,
-				g_pszCreakSounds[ RANDOM_LONG( 0, ARRAYSIZE( g_pszCreakSounds ) - 1 ) ],
-				VOL_NORM, ATTN_NORM );
+	EmitSoundScript(creakSoundScript);
 }
 
 float CRope::GetSegmentLength( int uiSegmentIndex ) const
@@ -1262,7 +1267,6 @@ void CRopeSegment::Precache()
 		mModelName = MAKE_STRING( "models/rope16.mdl" );
 
 	PRECACHE_MODEL( STRING( mModelName ) );
-	PRECACHE_SOUND( "items/grab_rope.wav" );
 }
 
 void CRopeSegment::Spawn()
@@ -1327,7 +1331,7 @@ void CRopeSegment::Touch( CBaseEntity* pOther )
 
 				if( GetMasterRope()->IsSoundAllowed() )
 				{
-					EMIT_SOUND( edict(), CHAN_BODY, "items/grab_rope.wav", 1.0, ATTN_NORM );
+					EmitSoundScript(CRope::grabSoundScript);
 				}
 			}
 			else

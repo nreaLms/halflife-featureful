@@ -33,6 +33,7 @@
 // speed - the ideal magnitude of my velocity
 class CCrossbowBolt : public CBaseEntity
 {
+public:
 	void Spawn( void );
 	void Precache( void );
 	int Classify( void );
@@ -42,11 +43,28 @@ class CCrossbowBolt : public CBaseEntity
 
 	int m_iTrail;
 
-public:
 	static CCrossbowBolt *BoltCreate( void );
+
+	static const NamedSoundScript boltHitBody;
+	static const NamedSoundScript boltHitWorld;
 };
 
 LINK_ENTITY_TO_CLASS( crossbow_bolt, CCrossbowBolt )
+
+const NamedSoundScript CCrossbowBolt::boltHitBody = {
+	CHAN_BODY,
+	{"weapons/xbow_hitbod1.wav", "weapons/xbow_hitbod2.wav"},
+	"Crossbow.BoltHitBody"
+};
+
+const NamedSoundScript CCrossbowBolt::boltHitWorld = {
+	CHAN_BODY,
+	{"weapons/xbow_hit1.wav"},
+	FloatRange(0.95f, 1.0f),
+	ATTN_NORM,
+	IntRange(98, 105),
+	"Crossbow.BoltHitWorld"
+};
 
 CCrossbowBolt *CCrossbowBolt::BoltCreate( void )
 {
@@ -79,11 +97,8 @@ void CCrossbowBolt::Spawn()
 void CCrossbowBolt::Precache()
 {
 	PRECACHE_MODEL( "models/crossbow_bolt.mdl" );
-	PRECACHE_SOUND( "weapons/xbow_hitbod1.wav" );
-	PRECACHE_SOUND( "weapons/xbow_hitbod2.wav" );
-	PRECACHE_SOUND( "weapons/xbow_fly1.wav" );
-	PRECACHE_SOUND( "weapons/xbow_hit1.wav" );
-	PRECACHE_SOUND( "fvox/beep.wav" );
+	RegisterAndPrecacheSoundScript(boltHitBody);
+	RegisterAndPrecacheSoundScript(boltHitWorld);
 	m_iTrail = PRECACHE_MODEL( "sprites/streak.spr" );
 }
 
@@ -120,15 +135,7 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 
 		pev->velocity = Vector( 0, 0, 0 );
 		// play body "thwack" sound
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "weapons/xbow_hitbod1.wav", 1, ATTN_NORM );
-			break;
-		case 1:
-			EMIT_SOUND( ENT( pev ), CHAN_BODY, "weapons/xbow_hitbod2.wav", 1, ATTN_NORM );
-			break;
-		}
+		EmitSoundScript(boltHitBody);
 
 		if( !g_pGameRules->IsMultiplayer() )
 		{
@@ -137,7 +144,7 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 	}
 	else
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, "weapons/xbow_hit1.wav", RANDOM_FLOAT( 0.95f, 1.0f ), ATTN_NORM, 0, 98 + RANDOM_LONG( 0, 7 ) );
+		EmitSoundScript(boltHitWorld);
 
 		SetThink( &CBaseEntity::SUB_Remove );
 		pev->nextthink = gpGlobals->time;// this will get changed below if the bolt is allowed to stick in what it hit.

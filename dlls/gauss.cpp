@@ -24,6 +24,9 @@
 #include "shake.h"
 #include "gamerules.h"
 #include "game.h"
+#if !CLIENT_DLL
+#include "common_soundscripts.h"
+#endif
 
 #define	GAUSS_PRIMARY_CHARGE_VOLUME	256// how loud gauss is while charging
 #define GAUSS_PRIMARY_FIRE_VOLUME	450// how loud gauss is when discharged
@@ -64,8 +67,6 @@ void CGauss::Precache( void )
 	PRECACHE_MODEL( MyWModel() );
 	PRECACHE_MODEL( "models/v_gauss.mdl" );
 	PrecachePModel( "models/p_gauss.mdl" );
-
-	PRECACHE_SOUND( "items/9mmclip1.wav" );
 
 	PRECACHE_SOUND( "weapons/gauss2.wav" );
 	PRECACHE_SOUND( "weapons/electro4.wav" );
@@ -174,7 +175,9 @@ void CGauss::SecondaryAttack()
 	{
 		if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 		{
-			EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM );
+#if !CLIENT_DLL
+			m_pPlayer->EmitSoundScript(Items::weaponEmptySoundScript);
+#endif
 			m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5f;
 			return;
 		}

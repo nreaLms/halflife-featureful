@@ -23,6 +23,7 @@
 #include "gamerules.h"
 #if !CLIENT_DLL
 #include "game.h"
+#include "common_soundscripts.h"
 #endif
 
 enum satchel_state
@@ -49,6 +50,7 @@ enum satchel_radio_e
 	SATCHEL_RADIO_HOLSTER
 };
 
+#if !CLIENT_DLL
 class CSatchelCharge : public CGrenade
 {
 public:
@@ -63,13 +65,19 @@ public:
 	bool HandleDoorBlockage(CBaseEntity* pDoor);
 
 	void Deactivate( void );
-#if !CLIENT_DLL
 	int ObjectCaps( void );
 	void EXPORT SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-#endif
+
+	static const NamedSoundScript bounceSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_satchel, CSatchelCharge )
+
+const NamedSoundScript CSatchelCharge::bounceSoundScript = {
+	CHAN_VOICE,
+	{"weapons/g_bounce1.wav", "weapons/g_bounce2.wav", "weapons/g_bounce3.wav"},
+	"SatchelCharge.Bounce"
+};
 
 //=========================================================
 // Deactivate - do whatever it is we do to an orphaned 
@@ -94,9 +102,7 @@ void CSatchelCharge::Spawn( void )
 	UTIL_SetOrigin( pev, pev->origin );
 
 	SetTouch( &CSatchelCharge::SatchelSlide );
-#if !CLIENT_DLL
 	SetUse( &CSatchelCharge::SatchelUse );
-#endif
 	SetThink( &CSatchelCharge::SatchelThink );
 	pev->nextthink = gpGlobals->time + 0.1f;
 
@@ -173,41 +179,27 @@ void CSatchelCharge::SatchelThink( void )
 void CSatchelCharge::Precache( void )
 {
 	PRECACHE_MODEL( "models/w_satchel.mdl" );
-	PRECACHE_SOUND( "weapons/g_bounce1.wav" );
-	PRECACHE_SOUND( "weapons/g_bounce2.wav" );
-	PRECACHE_SOUND( "weapons/g_bounce3.wav" );
+
+	PrecacheBaseGrenadeSounds();
+	RegisterAndPrecacheSoundScript(bounceSoundScript);
 }
 
 void CSatchelCharge::BounceSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/g_bounce1.wav", 1, ATTN_NORM );
-		break;
-	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/g_bounce2.wav", 1, ATTN_NORM );
-		break;
-	case 2:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/g_bounce3.wav", 1, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(bounceSoundScript);
 }
 
 bool CSatchelCharge::HandleDoorBlockage(CBaseEntity *pDoor)
 {
-#if !CLIENT_DLL
 	if( satchelfix.value )
 	{
 		// Detonate satchels
 		Use( pDoor, pDoor, USE_ON, 0 );
 		return true;
 	}
-#endif
 	return false;
 }
 
-#if !CLIENT_DLL
 void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	if (useType == USE_SET && pActivator && pActivator->edict() == pev->owner && g_modFeatures.satchels_pickable)
@@ -219,7 +211,9 @@ void CSatchelCharge::SatchelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 			{
 				if (pPlayer->GiveAmmo(1, "Satchel Charge") > 0)
 				{
-					EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
+#if !CLIENT_DLL
+					pPlayer->EmitSoundScript(Items::ammoPickupSoundScript);
+#endif
 
 					bool anySatchelsLeft = false;
 					CBaseEntity* pSatchel = NULL;
@@ -633,6 +627,7 @@ void CSatchel::SetWeaponData(const weapon_data_t& data)
 //
 // Made this global on purpose.
 //=========================================================
+#if !CLIENT_DLL
 void DeactivateSatchels( CBasePlayer *pOwner )
 {
 	edict_t *pFind; 
@@ -655,3 +650,4 @@ void DeactivateSatchels( CBasePlayer *pOwner )
 		pFind = FIND_ENTITY_BY_CLASSNAME( pFind, "monster_satchel" );
 	}
 }
+#endif

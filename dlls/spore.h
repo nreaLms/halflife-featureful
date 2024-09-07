@@ -28,8 +28,6 @@ public:
 	void Spawn();
 	void UpdateOnRemove();
 
-	void BounceSound();
-
 	void EXPORT IgniteThink();
 	void EXPORT FlyThink();
 	void EXPORT GibThink();
@@ -42,6 +40,9 @@ public:
 
 	static float SporeRocketSpeed() { return 1200.0f; }
 	static float SporeGrenadeSpeed() { return 800.0f; }
+
+	static const NamedSoundScript bounceSoundScript;
+	static const NamedSoundScript impactSoundScript;
 
 private:
 	int m_iBlow;

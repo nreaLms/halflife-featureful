@@ -24,10 +24,11 @@
 #include	"decals.h"
 #include	"mod_features.h"
 #include	"game.h"
+#include	"common_soundscripts.h"
 
 #if FEATURE_PITWORM
 
-#define PITWORM_ATTN 0.1
+#define PITWORM_ATTN 0.1f
 #define NUM_PITWORM_LEVELS		4
 
 class CPitWorm : public CBaseMonster
@@ -54,10 +55,6 @@ public:
 	int		Save(CSave &save);
 	int		Restore(CRestore &restore);
 	static	TYPEDESCRIPTION m_SaveData[];
-
-	void AngrySound(void);
-	void SwipeSound(void);
-	void BeamSound(void);
 
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 	int TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
@@ -137,16 +134,18 @@ public:
 	float m_flLastBlinkInterval;
 	float m_flLastEventTime;
 
-	static const char* pHitGroundSounds[];
-	static const char* pAngrySounds[];
-	static const char* pSwipeSounds[];
-	static const char* pShootSounds[];
+	static const NamedSoundScript hitGroundSoundScript;
+	static const NamedSoundScript angrySoundScript;
+	static const NamedSoundScript blastSoundScript;
+	static const NamedSoundScript swipeSoundScript;
+	static const NamedSoundScript shootSoundScript;
 
-	static const char* pPainSounds[];
-	static const char* pAlertSounds[];
-	static const char* pIdleSounds[];
-	static const char* pDeathSounds[];
-	static const char* pAttackSounds[];
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript dieSoundScript;
+
+	static constexpr const char* attackHitSoundScript = "PitWorm.AttackHit";
 };
 
 LINK_ENTITY_TO_CLASS(monster_pitworm, CPitWorm)
@@ -222,61 +221,74 @@ TYPEDESCRIPTION	CPitWorm::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CPitWorm, CBaseMonster)
 
-const char* CPitWorm::pHitGroundSounds[] =
-{
-	"tentacle/te_strike1.wav",
-	"tentacle/te_strike2.wav",
+const NamedSoundScript CPitWorm::hitGroundSoundScript = {
+	CHAN_WEAPON,
+	{"tentacle/te_strike1.wav", "tentacle/te_strike2.wav"},
+	IntRange(95, 105),
+	"PitWorm.HitGround"
 };
 
-const char* CPitWorm::pAngrySounds[] =
-{
-	"pitworm/pit_worm_angry1.wav",
-	"pitworm/pit_worm_angry2.wav",
-	"pitworm/pit_worm_angry3.wav",
+const NamedSoundScript CPitWorm::angrySoundScript = {
+	CHAN_VOICE,
+	{"pitworm/pit_worm_angry1.wav", "pitworm/pit_worm_angry2.wav", "pitworm/pit_worm_angry3.wav"},
+	VOL_NORM,
+	PITWORM_ATTN,
+	"PitWorm.Angry"
 };
 
-
-const char* CPitWorm::pSwipeSounds[] =
-{
-	"pitworm/pit_worm_attack_swipe1.wav",
-	"pitworm/pit_worm_attack_swipe2.wav",
-	"pitworm/pit_worm_attack_swipe3.wav",
+const NamedSoundScript CPitWorm::blastSoundScript = {
+	CHAN_VOICE,
+	{"pitworm/pit_worm_attack_eyeblast.wav"},
+	VOL_NORM,
+	PITWORM_ATTN,
+	"PitWorm.Blast"
 };
 
-const char* CPitWorm::pShootSounds[] =
-{
-	"debris/beamstart3.wav",
-	"debris/beamstart8.wav",
+const NamedSoundScript CPitWorm::swipeSoundScript = {
+	CHAN_VOICE,
+	{"pitworm/pit_worm_attack_swipe1.wav", "pitworm/pit_worm_attack_swipe2.wav", "pitworm/pit_worm_attack_swipe3.wav"},
+	VOL_NORM,
+	PITWORM_ATTN,
+	"PitWorm.Swipe"
 };
 
-const char* CPitWorm::pPainSounds[] =
-{
-	"pitworm/pit_worm_flinch1.wav",
-	"pitworm/pit_worm_flinch2.wav",
+const NamedSoundScript CPitWorm::shootSoundScript = {
+	CHAN_WEAPON,
+	{"debris/beamstart3.wav", "debris/beamstart8.wav"},
+	IntRange(95, 105),
+	"PitWorm.Shoot"
 };
 
-const char* CPitWorm::pAlertSounds[] =
-{
-	"pitworm/pit_worm_alert.wav",
+const NamedSoundScript CPitWorm::painSoundScript = {
+	CHAN_VOICE,
+	{"pitworm/pit_worm_flinch1.wav", "pitworm/pit_worm_flinch2.wav"},
+	VOL_NORM,
+	PITWORM_ATTN,
+	"PitWorm.Pain"
 };
 
-const char* CPitWorm::pIdleSounds[] =
-{
-	"pitworm/pit_worm_idle1.wav",
-	"pitworm/pit_worm_idle2.wav",
-	"pitworm/pit_worm_idle3.wav",
+const NamedSoundScript CPitWorm::alertSoundScript = {
+	CHAN_VOICE,
+	{"pitworm/pit_worm_alert.wav"},
+	VOL_NORM,
+	PITWORM_ATTN,
+	"PitWorm.Alert"
 };
 
-const char* CPitWorm::pDeathSounds[] =
-{
-	"pitworm/pit_worm_death.wav",
+const NamedSoundScript CPitWorm::idleSoundScript = {
+	CHAN_VOICE,
+	{"pitworm/pit_worm_idle1.wav", "pitworm/pit_worm_idle2.wav", "pitworm/pit_worm_idle3.wav"},
+	VOL_NORM,
+	PITWORM_ATTN,
+	"PitWorm.Idle"
 };
 
-const char *CPitWorm::pAttackSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav"
+const NamedSoundScript CPitWorm::dieSoundScript = {
+	CHAN_VOICE,
+	{"pitworm/pit_worm_death.wav"},
+	VOL_NORM,
+	PITWORM_ATTN,
+	"PitWorm.Die"
 };
 
 //=========================================================
@@ -356,18 +368,20 @@ void CPitWorm::Precache()
 {
 	PrecacheMyModel("models/pit_worm_up.mdl");
 
-	PRECACHE_SOUND("pitworm/pit_worm_alert.wav");
 	PRECACHE_SOUND("pitworm/pit_worm_attack_eyeblast.wav");
 	PRECACHE_SOUND("pitworm/pit_worm_attack_eyeblast_impact.wav");
-	PRECACHE_SOUND("pitworm/pit_worm_death.wav");
 
-	PRECACHE_SOUND_ARRAY(pHitGroundSounds);
-	PRECACHE_SOUND_ARRAY(pAngrySounds);
-	PRECACHE_SOUND_ARRAY(pSwipeSounds);
-	PRECACHE_SOUND_ARRAY(pShootSounds);
-	PRECACHE_SOUND_ARRAY(pIdleSounds);
-	PRECACHE_SOUND_ARRAY(pPainSounds);
-	PRECACHE_SOUND_ARRAY(pAttackSounds);
+	RegisterAndPrecacheSoundScript(hitGroundSoundScript);
+	RegisterAndPrecacheSoundScript(angrySoundScript);
+	RegisterAndPrecacheSoundScript(swipeSoundScript);
+	RegisterAndPrecacheSoundScript(shootSoundScript);
+
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 
 	PRECACHE_MODEL("sprites/laserbeam.spr");
 	PRECACHE_MODEL("sprites/tele1.spr");
@@ -416,7 +430,7 @@ int CPitWorm::DefaultClassify(void)
 //=========================================================
 void CPitWorm::IdleSound(void)
 {
-	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), VOL_NORM, PITWORM_ATTN);
+	EmitSoundScript(idleSoundScript);
 }
 
 //=========================================================
@@ -424,7 +438,7 @@ void CPitWorm::IdleSound(void)
 //=========================================================
 void CPitWorm::AlertSound(void)
 {
-	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), VOL_NORM, PITWORM_ATTN);
+	EmitSoundScript(alertSoundScript);
 }
 
 //=========================================================
@@ -432,7 +446,7 @@ void CPitWorm::AlertSound(void)
 //=========================================================
 void CPitWorm::DeathSound(void)
 {
-	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), VOL_NORM, PITWORM_ATTN);
+	EmitSoundScript(dieSoundScript);
 }
 
 void CPitWorm::PainSound(void)
@@ -440,32 +454,8 @@ void CPitWorm::PainSound(void)
 	if (m_flNextPainSound <= gpGlobals->time)
 	{
 		m_flNextPainSound = gpGlobals->time + RANDOM_LONG(2, 5);
-		EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), VOL_NORM, PITWORM_ATTN);
+		EmitSoundScript(painSoundScript);
 	}
-}
-
-//=========================================================
-// AngrySound
-//=========================================================
-void CPitWorm::AngrySound(void)
-{
-	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pAngrySounds), VOL_NORM, PITWORM_ATTN);
-}
-
-//=========================================================
-// SwipeSound
-//=========================================================
-void CPitWorm::SwipeSound(void)
-{
-	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pSwipeSounds), VOL_NORM, PITWORM_ATTN);
-}
-
-//=========================================================
-// BeamSound
-//=========================================================
-void CPitWorm::BeamSound(void)
-{
-	EmitSound(CHAN_VOICE, "pitworm/pit_worm_attack_eyeblast.wav", VOL_NORM, PITWORM_ATTN);
 }
 
 //=========================================================
@@ -477,7 +467,7 @@ void CPitWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 	{
 	case PITWORM_AE_SWIPE:	// bang
 	{
-		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pHitGroundSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_FLOAT(-5,5));
+		EmitSoundScript(hitGroundSoundScript);
 
 		if (pev->sequence == 2)
 			UTIL_ScreenShake(pev->origin, 12.0, 100.0, 2.0, 100);
@@ -868,7 +858,7 @@ void CPitWorm::HitTouch(CBaseEntity* pOther)
 		pOther->TakeDamage(pev, pev, gSkillData.pwormDmgSwipe, DMG_CRUSH|DMG_SLASH);
 		pOther->pev->punchangle.z = 15;
 		pOther->pev->velocity.z += 200;
-		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_FLOAT(-5,5));
+		EmitSoundScript(attackHitSoundScript);
 		m_flHitTime = gpGlobals->time + 1.0;
 	}
 }
@@ -945,7 +935,7 @@ void CPitWorm::NextActivity()
 	}
 	if (m_hEnemy != 0 && !m_fFirstSighting)
 	{
-		EmitSoundDyn( CHAN_VOICE, "pitworm/pit_worm_alert.wav", VOL_NORM, 0.1, 0, 100);
+		AlertSound();
 		m_fFirstSighting = TRUE;
 		pev->sequence = LookupSequence("scream");
 	}
@@ -1049,7 +1039,7 @@ BOOL CPitWorm::ClawAttack()
 
 		if (shouldClaw)
 		{
-			SwipeSound();
+			EmitSoundScript(swipeSoundScript);
 			m_fLockHeight = TRUE;
 			m_fLockYaw = TRUE;
 			m_fAttacking = TRUE;
@@ -1129,11 +1119,11 @@ BOOL CPitWorm::ClawAttack()
 	}
 	if (pev->sequence == LookupSequence("eyeblast"))
 	{
-		BeamSound();
+		EmitSoundScript(blastSoundScript);
 	}
 	else
 	{
-		SwipeSound();
+		EmitSoundScript(swipeSoundScript);
 	}
 	m_fAttacking = TRUE;
 	m_fLockHeight = TRUE;
@@ -1187,7 +1177,7 @@ void CPitWorm::ShootBeam()
 				m_flIdealHeadYaw += m_flBeamDir * 50;
 			}
 
-			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pShootSounds), VOL_NORM, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5));
+			EmitSoundScript(shootSoundScript);
 
 			EyeLight(vecEyePos);
 

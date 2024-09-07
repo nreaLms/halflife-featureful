@@ -60,6 +60,10 @@ void CHgun::Precache( void )
 	m_usHornetFire = PRECACHE_EVENT( 1, "events/firehornet.sc" );
 
 	UTIL_PrecacheOther( "hornet" );
+
+	PRECACHE_SOUND( "agrunt/ag_fire1.wav" );
+	PRECACHE_SOUND( "agrunt/ag_fire2.wav" );
+	PRECACHE_SOUND( "agrunt/ag_fire3.wav" );
 }
 
 int CHgun::AddToPlayer( CBasePlayer *pPlayer )

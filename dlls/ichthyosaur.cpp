@@ -109,12 +109,12 @@ public:
 
 	float m_flNextAlert;
 
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
-	static const char *pAttackSounds[];
-	static const char *pBiteSounds[];
-	static const char *pDieSounds[];
-	static const char *pPainSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript attackSoundScript;
+	static const NamedSoundScript biteSoundScript;
 
 	void IdleSound( void );
 	void AlertSound( void );
@@ -141,76 +141,91 @@ TYPEDESCRIPTION	CIchthyosaur::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CIchthyosaur, CFlyingMonster )
 
-const char *CIchthyosaur::pIdleSounds[] =
-{
-	"ichy/ichy_idle1.wav",
-	"ichy/ichy_idle2.wav",
-	"ichy/ichy_idle3.wav",
-	"ichy/ichy_idle4.wav",
+constexpr float ichyAttenuation = 0.6f;
+constexpr IntRange ichyPitch(95, 105);
+
+const NamedSoundScript CIchthyosaur::idleSoundScript = {
+	CHAN_VOICE,
+	{"ichy/ichy_idle1.wav", "ichy/ichy_idle2.wav", "ichy/ichy_idle3.wav", "ichy/ichy_idle4.wav"},
+	1.0f,
+	ichyAttenuation,
+	ichyPitch,
+	"Ichthyosaur.Idle"
 };
 
-const char *CIchthyosaur::pAlertSounds[] =
-{
-	"ichy/ichy_alert2.wav",
-	"ichy/ichy_alert3.wav",
+const NamedSoundScript CIchthyosaur::alertSoundScript = {
+	CHAN_VOICE,
+	{"ichy/ichy_alert2.wav", "ichy/ichy_alert3.wav"},
+	1.0f,
+	ichyAttenuation,
+	ichyPitch,
+	"Ichthyosaur.Alert"
 };
 
-const char *CIchthyosaur::pAttackSounds[] =
-{
-	"ichy/ichy_attack1.wav",
-	"ichy/ichy_attack2.wav",
+const NamedSoundScript CIchthyosaur::painSoundScript = {
+	CHAN_VOICE,
+	{"ichy/ichy_pain2.wav", "ichy/ichy_pain3.wav", "ichy/ichy_pain5.wav"},
+	1.0f,
+	ichyAttenuation,
+	ichyPitch,
+	"Ichthyosaur.Pain"
 };
 
-const char *CIchthyosaur::pBiteSounds[] =
-{
-	"ichy/ichy_bite1.wav",
-	"ichy/ichy_bite2.wav",
+const NamedSoundScript CIchthyosaur::dieSoundScript = {
+	CHAN_VOICE,
+	{"ichy/ichy_die2.wav", "ichy/ichy_die4.wav"},
+	1.0f,
+	ichyAttenuation,
+	ichyPitch,
+	"Ichthyosaur.Die"
 };
 
-const char *CIchthyosaur::pPainSounds[] =
-{
-	"ichy/ichy_pain2.wav",
-	"ichy/ichy_pain3.wav",
-	"ichy/ichy_pain5.wav",
+const NamedSoundScript CIchthyosaur::attackSoundScript = {
+	CHAN_VOICE,
+	{"ichy/ichy_attack1.wav", "ichy/ichy_attack2.wav"},
+	1.0f,
+	ichyAttenuation,
+	ichyPitch,
+	"Ichthyosaur.Attack"
 };
 
-const char *CIchthyosaur::pDieSounds[] =
-{
-	"ichy/ichy_die2.wav",
-	"ichy/ichy_die4.wav",
+const NamedSoundScript CIchthyosaur::biteSoundScript = {
+	CHAN_WEAPON,
+	{"ichy/ichy_bite1.wav", "ichy/ichy_bite2.wav"},
+	1.0f,
+	ichyAttenuation,
+	ichyPitch,
+	"Ichthyosaur.Bite"
 };
-
-#define EMIT_ICKY_SOUND( chan, array ) \
-	EmitSoundDyn( chan , array[RANDOM_LONG( 0, ARRAYSIZE( array ) - 1 )], 1.0, 0.6, 0, RANDOM_LONG( 95, 105 ) );
 
 void CIchthyosaur::IdleSound( void )
-{ 
-	EMIT_ICKY_SOUND( CHAN_VOICE, pIdleSounds ); 
+{
+	EmitSoundScript(idleSoundScript);
 }
 
 void CIchthyosaur::AlertSound( void ) 
 {
-	EMIT_ICKY_SOUND( CHAN_VOICE, pAlertSounds ); 
+	EmitSoundScript(alertSoundScript);
 }
 
 void CIchthyosaur::AttackSound( void )
-{ 
-	EMIT_ICKY_SOUND( CHAN_VOICE, pAttackSounds );
+{
+	EmitSoundScript(attackSoundScript);
 }
 
 void CIchthyosaur::BiteSound( void ) 
-{ 
-	EMIT_ICKY_SOUND( CHAN_WEAPON, pBiteSounds );
+{
+	EmitSoundScript(biteSoundScript);
 }
 
 void CIchthyosaur::DeathSound( void ) 
-{ 
-	EMIT_ICKY_SOUND( CHAN_VOICE, pDieSounds ); 
+{
+	EmitSoundScript(dieSoundScript);
 }
 
 void CIchthyosaur::PainSound( void )	
-{ 
-	EMIT_ICKY_SOUND( CHAN_VOICE, pPainSounds ); 
+{
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -508,12 +523,12 @@ void CIchthyosaur::Precache()
 {
 	PrecacheMyModel( "models/icky.mdl" );
 
-	PRECACHE_SOUND_ARRAY( pIdleSounds );
-	PRECACHE_SOUND_ARRAY( pAlertSounds );
-	PRECACHE_SOUND_ARRAY( pAttackSounds );
-	PRECACHE_SOUND_ARRAY( pBiteSounds );
-	PRECACHE_SOUND_ARRAY( pDieSounds );
-	PRECACHE_SOUND_ARRAY( pPainSounds );
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(biteSoundScript);
 }
 
 //=========================================================

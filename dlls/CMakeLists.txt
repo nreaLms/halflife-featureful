@@ -64,6 +64,7 @@ set (SVDLL_SOURCES
 	cbase.cpp
 	client.cpp
 	combat.cpp
+	common_soundscripts.cpp
 	controller.cpp
 	crossbow.cpp
 	crowbar.cpp
@@ -163,6 +164,7 @@ set (SVDLL_SOURCES
 	sound.cpp
 	soundent.cpp
 	soundreplacement.cpp
+	soundscripts.cpp
 	spectator.cpp
 	spore.cpp
 	sporelauncher.cpp

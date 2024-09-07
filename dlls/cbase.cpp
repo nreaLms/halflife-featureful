@@ -731,6 +731,136 @@ void CBaseEntity::StopSound(int channel, const char *sample)
 	STOP_SOUND(edict(), channel, sample);
 }
 
+const SoundScript* CBaseEntity::GetSoundScript(const char *name)
+{
+	// TODO: implement ways of soundscript replacement
+	return ::GetSoundScript(name);
+}
+
+bool CBaseEntity::EmitSoundScript(const SoundScript *soundScript, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	if (soundScript)
+	{
+		const char* sample = soundScript->Wave();
+		if (sample)
+		{
+			FloatRange volume = soundScript->volume;
+			float attenuation = soundScript->attenuation;
+			IntRange pitch = soundScript->pitch;
+
+			paramsOverride.ApplyOverride(volume, attenuation, pitch);
+
+			return EmitSoundDyn(soundScript->channel, sample, RandomizeNumberFromRange(volume), attenuation, flags, RandomizeNumberFromRange(pitch));
+		}
+	}
+	return false;
+}
+
+bool CBaseEntity::EmitSoundScript(const char *name, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	const SoundScript* soundScript = GetSoundScript(name);
+	if (soundScript)
+	{
+		return EmitSoundScript(soundScript, paramsOverride, flags);
+	}
+	return false;
+}
+
+void CBaseEntity::StopSoundScript(const SoundScript* soundScript)
+{
+	if (soundScript)
+	{
+		const char* sample = soundScript->Wave();
+		if (sample)
+		{
+			// TODO: should we loop over all waves and stop each of them? We don't know which one has been playing
+			StopSound(soundScript->channel, sample);
+		}
+	}
+}
+
+void CBaseEntity::StopSoundScript(const char *name)
+{
+	const SoundScript* soundScript = GetSoundScript(name);
+	if (soundScript)
+	{
+		return StopSoundScript(soundScript);
+	}
+}
+
+void CBaseEntity::EmitSoundScriptAmbient(const Vector& vecOrigin, const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	if (soundScript)
+	{
+		const char* sample = soundScript->Wave();
+		if (sample)
+		{
+			FloatRange volume = soundScript->volume;
+			float attenuation = soundScript->attenuation;
+			IntRange pitch = soundScript->pitch;
+
+			paramsOverride.ApplyOverride(volume, attenuation, pitch);
+
+			EmitAmbientSound(vecOrigin, sample, RandomizeNumberFromRange(volume), attenuation, flags, RandomizeNumberFromRange(pitch));
+		}
+	}
+}
+
+void CBaseEntity::EmitSoundScriptAmbient(const Vector& vecOrigin, const char *name, const SoundScriptParamOverride paramsOverride, int flags)
+{
+	const SoundScript* soundScript = GetSoundScript(name);
+	if (soundScript)
+	{
+		return EmitSoundScriptAmbient(vecOrigin, soundScript, paramsOverride, flags);
+	}
+}
+
+void CBaseEntity::PrecacheSoundScript(const SoundScript& soundScript)
+{
+	for (size_t i=0; i<soundScript.waveCount; ++i)
+	{
+		PRECACHE_SOUND(soundScript.waves[i]);
+	}
+}
+
+void CBaseEntity::PrecacheSoundScript(const char *name)
+{
+	const SoundScript* soundScript = GetSoundScript(name);
+	if (soundScript)
+	{
+		PrecacheSoundScript(*soundScript);
+	}
+}
+
+void CBaseEntity::RegisterAndPrecacheSoundScriptByName(const char *name, const SoundScript &defaultSoundScript)
+{
+	const SoundScript* soundScript = ProvideDefaultSoundScript(name, defaultSoundScript);
+	if (soundScript)
+	{
+		PrecacheSoundScript(*soundScript);
+	}
+}
+
+void CBaseEntity::RegisterAndPrecacheSoundScript(const NamedSoundScript &defaultSoundScript)
+{
+	const SoundScript& soundScript = defaultSoundScript;
+	RegisterAndPrecacheSoundScriptByName(defaultSoundScript.name, soundScript);
+}
+
+void CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const char* base, const SoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride)
+{
+	const SoundScript* soundScript = ProvideDefaultSoundScript(derivative, base, defaultSoundScript, paramsOverride);
+	if (soundScript)
+	{
+		PrecacheSoundScript(*soundScript);
+	}
+}
+
+void  CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const NamedSoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride)
+{
+	RegisterAndPrecacheSoundScript(derivative, defaultSoundScript.name, defaultSoundScript, paramsOverride);
+}
+
 int CBaseEntity::Save( CSave &save )
 {
 	if( save.WriteEntVars( "ENTVARS", pev ) )

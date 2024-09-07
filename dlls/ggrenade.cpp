@@ -33,6 +33,22 @@
 
 LINK_ENTITY_TO_CLASS( grenade, CGrenade )
 
+const NamedSoundScript CGrenade::debrisSoundScript = {
+	CHAN_VOICE,
+	{"weapons/debris1.wav", "weapons/debris2.wav", "weapons/debris3.wav"},
+	0.55f,
+	ATTN_NORM,
+	"BaseGrenade.Debris"
+};
+
+const NamedSoundScript CGrenade::bounceSoundScript = {
+	CHAN_VOICE,
+	{"weapons/grenade_hit1.wav", "weapons/grenade_hit2.wav", "weapons/grenade_hit3.wav"},
+	0.25f,
+	ATTN_NORM,
+	"HandGrenade.Bounce"
+};
+
 // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
 #define SF_DETONATE		0x0001
 
@@ -112,18 +128,7 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	//flRndSound = RANDOM_FLOAT( 0, 1 );
 
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-		case 0:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/debris1.wav", 0.55, ATTN_NORM );
-			break;
-		case 1:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/debris2.wav", 0.55, ATTN_NORM );
-			break;
-		case 2:
-			EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/debris3.wav", 0.55, ATTN_NORM );
-			break;
-	}
+	EmitSoundScript(debrisSoundScript);
 
 	pev->effects |= EF_NODRAW;
 	SetThink( &CGrenade::Smoke );
@@ -311,18 +316,7 @@ void CGrenade::SlideTouch( CBaseEntity *pOther )
 
 void CGrenade::BounceSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/grenade_hit1.wav", 0.25, ATTN_NORM );
-		break;
-	case 1:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/grenade_hit2.wav", 0.25, ATTN_NORM );
-		break;
-	case 2:
-		EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/grenade_hit3.wav", 0.25, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(bounceSoundScript);
 }
 
 void CGrenade::TumbleThink( void )
@@ -354,6 +348,7 @@ void CGrenade::TumbleThink( void )
 
 void CGrenade::Spawn( void )
 {
+	Precache();
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->classname = MAKE_STRING( "grenade" );
 
@@ -364,6 +359,17 @@ void CGrenade::Spawn( void )
 
 	pev->dmg = gSkillData.plrDmgHandGrenade;
 	m_fRegisteredSound = FALSE;
+}
+
+void CGrenade::Precache()
+{
+	PrecacheBaseGrenadeSounds();
+	RegisterAndPrecacheSoundScript(bounceSoundScript);
+}
+
+void CGrenade::PrecacheBaseGrenadeSounds()
+{
+	RegisterAndPrecacheSoundScript(debrisSoundScript);
 }
 
 CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity )

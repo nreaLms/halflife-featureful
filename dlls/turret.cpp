@@ -25,6 +25,7 @@
 #include "weapons.h"
 #include "effects.h"
 #include "game.h"
+#include "common_soundscripts.h"
 
 #define TURRET_SHOTS	2
 #define TURRET_RANGE	(100 * 12)
@@ -94,7 +95,7 @@ public:
 	// other functions
 	void SetTurretAnim( TURRET_ANIM anim );
 	int MoveTurret( void );
-	virtual void Shoot( Vector &vecSrc, Vector &vecDirToEnemy ) { };
+	virtual void Shoot( Vector &vecSrc, Vector &vecDirToEnemy ) { }
 
 	void SetEnemy(CBaseEntity* enemy);
 
@@ -128,6 +129,13 @@ public:
 
 	float m_flPingTime;	// Time until the next ping, used when searching
 	float m_flSpinUpTime;	// Amount of time until the barrel should spin down when searching
+
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript deploySoundScript;
+	static const NamedSoundScript undeploySoundScript;
+	static const NamedSoundScript pingSoundScript;
+	static const NamedSoundScript spinupSoundScript;
 };
 
 TYPEDESCRIPTION	CBaseTurret::m_SaveData[] =
@@ -163,6 +171,51 @@ TYPEDESCRIPTION	CBaseTurret::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CBaseTurret, CBaseMonster )
 
+const NamedSoundScript CBaseTurret::alertSoundScript = {
+	CHAN_BODY,
+	{"turret/tu_alert.wav"},
+	TURRET_MACHINE_VOLUME,
+	ATTN_NORM,
+	"Turret.Alert"
+};
+
+const NamedSoundScript CBaseTurret::dieSoundScript = {
+	CHAN_BODY,
+	{"turret/tu_die.wav", "turret/tu_die2.wav", "turret/tu_die3.wav"},
+	"Turret.Die"
+};
+
+const NamedSoundScript CBaseTurret::deploySoundScript = {
+	CHAN_BODY,
+	{"turret/tu_deploy.wav"},
+	TURRET_MACHINE_VOLUME,
+	ATTN_NORM,
+	"Turret.Deploy"
+};
+
+const NamedSoundScript CBaseTurret::undeploySoundScript = {
+	CHAN_BODY,
+	{"turret/tu_deploy.wav"},
+	TURRET_MACHINE_VOLUME,
+	ATTN_NORM,
+	IntRange(120),
+	"Turret.Undeploy"
+};
+
+const NamedSoundScript CBaseTurret::pingSoundScript = {
+	CHAN_ITEM,
+	{"turret/tu_ping.wav"},
+	"Turret.Ping"
+};
+
+const NamedSoundScript CBaseTurret::spinupSoundScript = {
+	CHAN_STATIC,
+	{"turret/tu_active2.wav"},
+	TURRET_MACHINE_VOLUME,
+	ATTN_NORM,
+	"Turret.Spinup"
+};
+
 class CTurret : public CBaseTurret
 {
 public:
@@ -181,8 +234,35 @@ public:
 	// other functions
 	void Shoot( Vector &vecSrc, Vector &vecDirToEnemy );
 
+	static const NamedSoundScript shootSoundScript;
+	static const NamedSoundScript spinupCallSoundScript;
+	static const NamedSoundScript spindownCallSoundScript;
 private:
 	int m_iStartSpin;
+};
+
+const NamedSoundScript CTurret::shootSoundScript = {
+	CHAN_WEAPON,
+	{"turret/tu_fire1.wav"},
+	1.0f,
+	0.6f,
+	"Turret.Shoot"
+};
+
+const NamedSoundScript CTurret::spinupCallSoundScript = {
+	CHAN_BODY,
+	{"turret/tu_spinup.wav"},
+	TURRET_MACHINE_VOLUME,
+	ATTN_NORM,
+	"Turret.SpinUpCall"
+};
+
+const NamedSoundScript CTurret::spindownCallSoundScript = {
+	CHAN_ITEM,
+	{"turret/tu_spindown.wav"},
+	TURRET_MACHINE_VOLUME,
+	ATTN_NORM,
+	"Turret.SpinDownCall"
 };
 
 TYPEDESCRIPTION	CTurret::m_SaveData[] =
@@ -200,6 +280,8 @@ public:
 	// other functions
 	const char* DefaultDisplayName() { return "Miniturret"; }
 	void Shoot( Vector &vecSrc, Vector &vecDirToEnemy );
+
+	static constexpr const char* shootSoundScript = "MiniTurret.Shoot";
 };
 
 LINK_ENTITY_TO_CLASS( monster_turret, CTurret )
@@ -266,18 +348,13 @@ void CBaseTurret::Spawn()
 
 void CBaseTurret::Precache()
 {
-	PRECACHE_SOUND( "turret/tu_fire1.wav" );
-	PRECACHE_SOUND( "turret/tu_ping.wav" );
-	PRECACHE_SOUND( "turret/tu_active2.wav" );
-	PRECACHE_SOUND( "turret/tu_die.wav" );
-	PRECACHE_SOUND( "turret/tu_die2.wav" );
-	PRECACHE_SOUND( "turret/tu_die3.wav" );
-	// PRECACHE_SOUND( "turret/tu_retract.wav" ); // just use deploy sound to save memory
-	PRECACHE_SOUND( "turret/tu_deploy.wav" );
-	PRECACHE_SOUND( "turret/tu_spinup.wav" );
-	PRECACHE_SOUND( "turret/tu_spindown.wav" );
+	RegisterAndPrecacheSoundScript(pingSoundScript);
+	RegisterAndPrecacheSoundScript(spinupSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(deploySoundScript);
+	RegisterAndPrecacheSoundScript(undeploySoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
 	PRECACHE_SOUND( "turret/tu_search.wav" );
-	PRECACHE_SOUND( "turret/tu_alert.wav" );
 }
 
 void CBaseTurret::UpdateOnRemove()
@@ -323,6 +400,9 @@ void CTurret::Precache()
 	CBaseTurret::Precache();
 	PrecacheMyModel( "models/turret.mdl" );	
 	PRECACHE_MODEL( TURRET_GLOW_SPRITE );
+	RegisterAndPrecacheSoundScript(shootSoundScript);
+	RegisterAndPrecacheSoundScript(spinupCallSoundScript);
+	RegisterAndPrecacheSoundScript(spindownCallSoundScript);
 }
 
 void CMiniTurret::Spawn()
@@ -348,9 +428,7 @@ void CMiniTurret::Precache()
 {
 	CBaseTurret::Precache();
 	PrecacheMyModel( "models/miniturret.mdl" );	
-	PRECACHE_SOUND( "weapons/hks1.wav" );
-	PRECACHE_SOUND( "weapons/hks2.wav" );
-	PRECACHE_SOUND( "weapons/hks3.wav" );
+	RegisterAndPrecacheSoundScript(shootSoundScript, NPC::single9mmSoundScript);
 }
 
 void CBaseTurret::Initialize( void )
@@ -426,7 +504,7 @@ void CBaseTurret::Ping( void )
 	else if( m_flPingTime <= gpGlobals->time )
 	{
 		m_flPingTime = gpGlobals->time + 1;
-		EmitSound( CHAN_ITEM, "turret/tu_ping.wav", 1, ATTN_NORM );
+		EmitSoundScript(pingSoundScript);
 		EyeOn();
 	}
 	else if( m_eyeBrightness > 0 )
@@ -617,26 +695,14 @@ void CBaseTurret::ActiveThink( void )
 void CTurret::Shoot( Vector &vecSrc, Vector &vecDirToEnemy )
 {
 	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_12MM, 1 );
-	EmitSound( CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.6 );
+	EmitSoundScript(shootSoundScript);
 	pev->effects = pev->effects | EF_MUZZLEFLASH;
 }
 
 void CMiniTurret::Shoot( Vector &vecSrc, Vector &vecDirToEnemy )
 {
 	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_9MM, 1 );
-
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSound( CHAN_WEAPON, "weapons/hks1.wav", 1, ATTN_NORM );
-		break;
-	case 1:
-		EmitSound( CHAN_WEAPON, "weapons/hks2.wav", 1, ATTN_NORM );
-		break;
-	case 2:
-		EmitSound( CHAN_WEAPON, "weapons/hks3.wav", 1, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(shootSoundScript);
 	pev->effects = pev->effects | EF_MUZZLEFLASH;
 }
 
@@ -650,7 +716,7 @@ void CBaseTurret::Deploy( void )
 	{
 		m_iOn = 1;
 		SetTurretAnim( TURRET_ANIM_DEPLOY );
-		EmitSound( CHAN_BODY, "turret/tu_deploy.wav", TURRET_MACHINE_VOLUME, ATTN_NORM );
+		EmitSoundScript(deploySoundScript);
 		SUB_UseTargets( this, USE_ON );
 	}
 
@@ -701,7 +767,7 @@ void CBaseTurret::Retire( void )
 		else if( pev->sequence != TURRET_ANIM_RETIRE )
 		{
 			SetTurretAnim( TURRET_ANIM_RETIRE );
-			EmitSoundDyn( CHAN_BODY, "turret/tu_deploy.wav", TURRET_MACHINE_VOLUME, ATTN_NORM, 0, 120 );
+			EmitSoundScript(undeploySoundScript);
 			SUB_UseTargets( this, USE_OFF );
 		}
 		else if( m_fSequenceFinished )
@@ -741,7 +807,7 @@ void CTurret::SpinUpCall( void )
 		if( !m_iStartSpin )
 		{
 			pev->nextthink = gpGlobals->time + 1.0f; // spinup delay
-			EmitSound( CHAN_BODY, "turret/tu_spinup.wav", TURRET_MACHINE_VOLUME, ATTN_NORM );
+			EmitSoundScript(spinupCallSoundScript);
 			m_iStartSpin = 1;
 			pev->framerate = 0.1f;
 		}
@@ -749,7 +815,7 @@ void CTurret::SpinUpCall( void )
 		else if( pev->framerate >= 1.0f )
 		{
 			pev->nextthink = gpGlobals->time + 0.1f; // retarget delay
-			EmitSound( CHAN_STATIC, "turret/tu_active2.wav", TURRET_MACHINE_VOLUME, ATTN_NORM );
+			EmitSoundScript(spinupSoundScript);
 			SetThink( &CBaseTurret::ActiveThink );
 			m_iStartSpin = 0;
 			m_iSpin = 1;
@@ -773,8 +839,8 @@ void CTurret::SpinDownCall( void )
 		SetTurretAnim( TURRET_ANIM_SPIN );
 		if( pev->framerate == 1.0f )
 		{
-			EmitSoundDyn( CHAN_STATIC, "turret/tu_active2.wav", 0, 0, SND_STOP, 100 );
-			EmitSound( CHAN_ITEM, "turret/tu_spindown.wav", TURRET_MACHINE_VOLUME, ATTN_NORM );
+			StopSoundScript(spinupSoundScript);
+			EmitSoundScript(spindownCallSoundScript);
 		}
 		pev->framerate -= 0.02f;
 		if( pev->framerate <= 0 )
@@ -914,7 +980,7 @@ void CBaseTurret::AutoSearchThink( void )
 	if( m_hEnemy != 0 )
 	{
 		SetThink( &CBaseTurret::Deploy );
-		EmitSound( CHAN_BODY, "turret/tu_alert.wav", TURRET_MACHINE_VOLUME, ATTN_NORM );
+		EmitSoundScript(alertSoundScript);
 	}
 }
 
@@ -931,16 +997,9 @@ void CBaseTurret::TurretDeath( void )
 		pev->deadflag = DEAD_DEAD;
 		FCheckAITrigger();
 
-		float flRndSound = RANDOM_FLOAT( 0, 1 );
+		EmitSoundScript(dieSoundScript);
 
-		if( flRndSound <= 0.33f )
-			EmitSound( CHAN_BODY, "turret/tu_die.wav", 1.0, ATTN_NORM );
-		else if( flRndSound <= 0.66f )
-			EmitSound( CHAN_BODY, "turret/tu_die2.wav", 1.0, ATTN_NORM );
-		else 
-			EmitSound( CHAN_BODY, "turret/tu_die3.wav", 1.0, ATTN_NORM );
-
-		EmitSoundDyn( CHAN_STATIC, "turret/tu_active2.wav", 0, 0, SND_STOP, 100 );
+		StopSoundScript(spinupSoundScript);
 
 		if( m_iOrientation == 0 )
 			m_vecGoalAngles.x = -15;
@@ -1182,6 +1241,8 @@ public:
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void EXPORT SentryTouch( CBaseEntity *pOther );
 	void EXPORT SentryDeath( void );
+
+	static constexpr const char* shootSoundScript = "Sentry.Shoot";
 };
 
 LINK_ENTITY_TO_CLASS( monster_sentry, CSentry )
@@ -1190,9 +1251,7 @@ void CSentry::Precache()
 {
 	CBaseTurret::Precache();
 	PrecacheMyModel( "models/sentry.mdl" );
-	PRECACHE_SOUND( "weapons/hks1.wav" );
-	PRECACHE_SOUND( "weapons/hks2.wav" );
-	PRECACHE_SOUND( "weapons/hks3.wav" );
+	RegisterAndPrecacheSoundScript(shootSoundScript, NPC::single9mmSoundScript);
 }
 
 void CSentry::Spawn()
@@ -1220,19 +1279,7 @@ void CSentry::Spawn()
 void CSentry::Shoot( Vector &vecSrc, Vector &vecDirToEnemy )
 {
 	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_MP5, 1 );
-
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSound( CHAN_WEAPON, "weapons/hks1.wav", 1, ATTN_NORM );
-		break;
-	case 1:
-		EmitSound( CHAN_WEAPON, "weapons/hks2.wav", 1, ATTN_NORM );
-		break;
-	case 2:
-		EmitSound( CHAN_WEAPON, "weapons/hks3.wav", 1, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(shootSoundScript);
 	pev->effects = pev->effects | EF_MUZZLEFLASH;
 }
 
@@ -1295,16 +1342,9 @@ void CSentry::SentryDeath( void )
 		pev->deadflag = DEAD_DEAD;
 		FCheckAITrigger();
 
-		float flRndSound = RANDOM_FLOAT( 0, 1 );
+		EmitSoundScript(dieSoundScript);
 
-		if( flRndSound <= 0.33f )
-			EmitSound( CHAN_BODY, "turret/tu_die.wav", 1.0, ATTN_NORM );
-		else if( flRndSound <= 0.66f )
-			EmitSound( CHAN_BODY, "turret/tu_die2.wav", 1.0, ATTN_NORM );
-		else 
-			EmitSound( CHAN_BODY, "turret/tu_die3.wav", 1.0, ATTN_NORM );
-
-		EmitSoundDyn( CHAN_STATIC, "turret/tu_active2.wav", 0, 0, SND_STOP, 100 );
+		StopSoundScript(spinupSoundScript);
 
 		SetBoneController( 0, 0 );
 		SetBoneController( 1, 0 );

@@ -27,6 +27,7 @@
 #include	"weapons.h"
 #include	"followingmonster.h"
 #include	"mod_features.h"
+#include	"common_soundscripts.h"
 
 #if FEATURE_PITDRONE
 
@@ -57,9 +58,30 @@ public:
 	void EXPORT SpikeTouch(CBaseEntity *pOther);
 	void EXPORT StartTrail();
 	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles, string_t soundList = iStringNull);
+
+	static const NamedSoundScript hitWorldSoundScript;
+	static const NamedSoundScript hitBodySoundScript;
 };
 
 LINK_ENTITY_TO_CLASS(pitdronespike, CPitdroneSpike)
+
+const NamedSoundScript CPitdroneSpike::hitWorldSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/xbow_hit1.wav"},
+	VOL_NORM,
+	ATTN_NORM,
+	IntRange(120, 140),
+	"PitDrone.SpikeHitWorld"
+};
+
+const NamedSoundScript CPitdroneSpike::hitBodySoundScript = {
+	CHAN_WEAPON,
+	{"weapons/xbow_hitbod1.wav", "weapons/xbow_hitbod2.wav"},
+	VOL_NORM,
+	ATTN_NORM,
+	IntRange(120, 140),
+	"PitDrone.SpikeHitBody"
+};
 
 void CPitdroneSpike::Spawn(void)
 {
@@ -80,9 +102,8 @@ void CPitdroneSpike::Spawn(void)
 void CPitdroneSpike::Precache(void)
 {
 	PRECACHE_MODEL("models/pit_drone_spike.mdl");// spit projectile
-	PRECACHE_SOUND("weapons/xbow_hitbod1.wav");
-	PRECACHE_SOUND("weapons/xbow_hitbod2.wav");
-	PRECACHE_SOUND("weapons/xbow_hit1.wav");
+	RegisterAndPrecacheSoundScript(hitWorldSoundScript);
+	RegisterAndPrecacheSoundScript(hitBodySoundScript);
 #if FEATURE_PITDRONE_SPIKE_TRAIL
 	iSpikeTrail = PRECACHE_MODEL("sprites/spike_trail.spr");
 #endif
@@ -90,19 +111,13 @@ void CPitdroneSpike::Precache(void)
 
 void CPitdroneSpike::SpikeTouch(CBaseEntity *pOther)
 {
-	TraceResult tr;
-	int		iPitch;
-
-	// splat sound
-	iPitch = RANDOM_FLOAT(115, 125);
-
 	SetTouch(NULL);
 	SetThink(&CBaseEntity::SUB_Remove);
 	pev->nextthink = gpGlobals->time;
 
 	if (!pOther->pev->takedamage)
 	{
-		EmitSoundDyn( CHAN_WEAPON, "weapons/xbow_hit1.wav", 1, ATTN_NORM, 0, iPitch);
+		EmitSoundScript(hitWorldSoundScript);
 		// make a horn in the wall
 
 		if (FClassnameIs(pOther->pev, "worldspawn"))
@@ -124,10 +139,7 @@ void CPitdroneSpike::SpikeTouch(CBaseEntity *pOther)
 	{
 		entvars_t	*pevOwner = VARS(pev->owner);
 		pOther->TakeDamage(pev, pevOwner, gSkillData.pitdroneDmgSpit, DMG_GENERIC | DMG_NEVERGIB);
-		if (RANDOM_LONG(0,1))
-			EmitSoundDyn( CHAN_WEAPON, "weapons/xbow_hitbod1.wav", 1, ATTN_NORM, 0, iPitch);
-		else
-			EmitSoundDyn( CHAN_WEAPON, "weapons/xbow_hitbod2.wav", 1, ATTN_NORM, 0, iPitch);
+		EmitSoundScript(hitBodySoundScript);
 	}
 }
 
@@ -262,11 +274,12 @@ public:
 	int m_iInitialAmmo;
 	bool shouldAttackWithLeftClaw;
 
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
-	static const char *pPainSounds[];
-	static const char *pDieSounds[];
-	static const char *pAttackMissSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static constexpr const char* attackMissSoundScript = "PitDrone.AttackMiss";
+	static const NamedSoundScript attackHitSoundScript;
 
 	virtual int	Save(CSave &save);
 	virtual int	Restore(CRestore &restore);
@@ -311,43 +324,45 @@ int CPitdrone::IgnoreConditions(void)
 	}
 
 	return iIgnore;
-
 }
 
-const char *CPitdrone::pAttackMissSounds[] =
-{
-	"zombie/claw_miss1.wav",
-	"zombie/claw_miss2.wav",
+#define PITDRONE_ATTN_IDLE	1.5f
+
+const NamedSoundScript CPitdrone::idleSoundScript = {
+	CHAN_VOICE,
+	{"pitdrone/pit_drone_idle1.wav", "pitdrone/pit_drone_idle2.wav", "pitdrone/pit_drone_idle3.wav"},
+	1.0f,
+	PITDRONE_ATTN_IDLE,
+	"PitDrone.Idle"
 };
 
-const char *CPitdrone::pIdleSounds[] =
-{
-	"pitdrone/pit_drone_idle1.wav",
-	"pitdrone/pit_drone_idle2.wav",
-	"pitdrone/pit_drone_idle3.wav",
-
+const NamedSoundScript CPitdrone::alertSoundScript = {
+	CHAN_VOICE,
+	{"pitdrone/pit_drone_alert1.wav", "pitdrone/pit_drone_alert2.wav", "pitdrone/pit_drone_alert3.wav"},
+	IntRange(140, 160),
+	"PitDrone.Alert"
 };
 
-const char *CPitdrone::pAlertSounds[] =
-{
-	"pitdrone/pit_drone_alert1.wav",
-	"pitdrone/pit_drone_alert2.wav",
-	"pitdrone/pit_drone_alert3.wav",
+const NamedSoundScript CPitdrone::painSoundScript = {
+	CHAN_VOICE,
+	{"pitdrone/pit_drone_pain1.wav", "pitdrone/pit_drone_pain2.wav", "pitdrone/pit_drone_pain3.wav", "pitdrone/pit_drone_pain4.wav"},
+	IntRange(85, 120),
+	"PitDrone.Pain"
 };
 
-const char *CPitdrone::pPainSounds[] =
-{
-	"pitdrone/pit_drone_pain1.wav",
-	"pitdrone/pit_drone_pain2.wav",
-	"pitdrone/pit_drone_pain3.wav",
-	"pitdrone/pit_drone_pain4.wav",
+const NamedSoundScript CPitdrone::dieSoundScript = {
+	CHAN_VOICE,
+	{"pitdrone/pit_drone_die1.wav", "pitdrone/pit_drone_die2.wav", "pitdrone/pit_drone_die3.wav"},
+	"PitDrone.Die"
 };
 
-const char *CPitdrone::pDieSounds[] =
-{
-	"pitdrone/pit_drone_die1.wav",
-	"pitdrone/pit_drone_die2.wav",
-	"pitdrone/pit_drone_die3.wav",
+const NamedSoundScript CPitdrone::attackHitSoundScript = {
+	CHAN_WEAPON,
+	{"bullchicken/bc_bite2.wav", "bullchicken/bc_bite3.wav"},
+	0.7f,
+	ATTN_NORM,
+	IntRange(110, 120),
+	"PitDrone.AttackHit"
 };
 
 //=========================================================
@@ -466,16 +481,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 		if( pHurt )
 		{
 			// croonchy bite sound
-			const int iPitch = RANDOM_FLOAT( 110, 120 );
-			switch( RANDOM_LONG( 0, 1 ) )
-			{
-			case 0:
-				EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite2.wav", 0.7, ATTN_NORM, 0, iPitch );
-				break;
-			case 1:
-				EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite3.wav", 0.7, ATTN_NORM, 0, iPitch );
-				break;
-			}
+			EmitSoundScript(attackHitSoundScript);
 
 			// screeshake transforms the viewmodel as well as the viewangle. No problems with seeing the ends of the viewmodels.
 			UTIL_ScreenShake( pHurt->pev->origin, 25.0, 1.5, 0.7, 2 );
@@ -487,7 +493,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 			}
 		}
 		else
-			EmitSoundDyn( CHAN_WEAPON, pAttackMissSounds[RANDOM_LONG(0, ARRAYSIZE(pAttackMissSounds) - 1)], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
+			EmitSoundScript(attackMissSoundScript);
 	}
 	break;
 
@@ -508,7 +514,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 			}
 		}
 		else // Play a random attack miss sound
-			EmitSoundDyn( CHAN_WEAPON, pAttackMissSounds[RANDOM_LONG(0, ARRAYSIZE(pAttackMissSounds) - 1)], 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
+			EmitSoundScript(attackMissSoundScript);
 		shouldAttackWithLeftClaw = !shouldAttackWithLeftClaw;
 	}
 	break;
@@ -654,14 +660,12 @@ void CPitdrone::Precache()
 	PRECACHE_MODEL("models/pit_drone_gibs.mdl");
 	iPitdroneSpitSprite = PRECACHE_MODEL("sprites/tinyspit.spr");// client side spittle.
 
-	PRECACHE_SOUND_ARRAY(pAttackMissSounds);
-	PRECACHE_SOUND_ARRAY(pIdleSounds);
-	PRECACHE_SOUND_ARRAY(pDieSounds);
-	PRECACHE_SOUND_ARRAY(pPainSounds);
-	PRECACHE_SOUND_ARRAY(pAlertSounds);
-
-	PRECACHE_SOUND("bullchicken/bc_bite2.wav");
-	PRECACHE_SOUND("bullchicken/bc_bite3.wav");
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
+	RegisterAndPrecacheSoundScript(attackHitSoundScript);
 
 	PRECACHE_SOUND("pitdrone/pit_drone_melee_attack1.wav");
 	PRECACHE_SOUND("pitdrone/pit_drone_melee_attack2.wav");
@@ -679,18 +683,19 @@ void CPitdrone::Precache()
 	PRECACHE_SOUND("pitdrone/pit_drone_hunt2.wav");
 	PRECACHE_SOUND("pitdrone/pit_drone_hunt3.wav");
 
-	UTIL_PrecacheOther("pitdronespike", m_soundList);
-
+	EntityOverrides entityOverrides;
+	entityOverrides.soundList = m_soundList;
+	UTIL_PrecacheOther("pitdronespike", entityOverrides);
 }
 
 
 //=========================================================
 // IdleSound
 //=========================================================
-#define PITDRONE_ATTN_IDLE	(float)1.5
+
 void CPitdrone::IdleSound(void)
 {
-	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, PITDRONE_ATTN_IDLE);
+	EmitSoundScript(idleSoundScript);
 }
 
 //=========================================================
@@ -698,8 +703,7 @@ void CPitdrone::IdleSound(void)
 //=========================================================
 void CPitdrone::PainSound(void)
 {
-	int iPitch = RANDOM_LONG(85, 120);
-	EmitSoundDyn(CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -707,15 +711,14 @@ void CPitdrone::PainSound(void)
 //=========================================================
 void CPitdrone::AlertSound(void)
 {
-	int iPitch = RANDOM_LONG(140, 160);
-	EmitSoundDyn(CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, iPitch);
+	EmitSoundScript(alertSoundScript);
 }
 //=========================================================
 // DeathSound
 //=========================================================
 void CPitdrone::DeathSound(void)
 {
-	EmitSound(CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM);
+	EmitSoundScript(dieSoundScript);
 }
 
 void CPitdrone::RunAI(void)
@@ -1152,12 +1155,12 @@ void CPitdrone::RunTask(Task_t *pTask)
 
 void CPitdrone::PlayUseSentence()
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
+	EmitSoundScript(idleSoundScript);
 }
 
 void CPitdrone::PlayUnUseSentence()
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
+	EmitSoundScript(alertSoundScript);
 }
 
 class CDeadPitdrone : public CDeadMonster

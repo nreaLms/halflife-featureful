@@ -34,6 +34,7 @@
 #include "gamerules.h"
 #include "scripted.h"
 #include "game.h"
+#include "common_soundscripts.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -427,7 +428,7 @@ void CBaseMonster::GibMonster( void )
 {
 	BOOL		gibbed = FALSE;
 
-	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM );
+	EmitSoundScript(NPC::bodySplatSoundScript);
 
 	const char* gibModel = GibModel();
 	if (gibModel)

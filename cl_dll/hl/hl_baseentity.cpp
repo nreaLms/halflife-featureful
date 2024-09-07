@@ -71,7 +71,7 @@ edict_t *DBG_EntOfVars( const entvars_t *pev ) { return NULL; }
 void DBG_AssertFunction( BOOL fExpr, const char *szExpr, const char *szFile, int szLine, const char *szMessage) { }
 
 // UTIL_* Stubs
-void UTIL_PrecacheOther( const char *szClassname, string_t soundList ) { }
+void UTIL_PrecacheOther( const char *szClassname, EntityOverrides entityOverrides ) { }
 void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, int amount ) { }
 void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber ) { }
 void UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber ) { }
@@ -94,6 +94,7 @@ void CGrenade::Explode( Vector, Vector ) { }
 void CGrenade::Explode( TraceResult *, int ) { }
 void CGrenade::Killed( entvars_t *, entvars_t *, int ) { }
 void CGrenade::Spawn( void ) { }
+void CGrenade::Precache( void ) { }
 CGrenade *CGrenade::ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time ){ return 0; }
 CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity ){ return 0; }
 

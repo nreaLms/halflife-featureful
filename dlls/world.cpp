@@ -36,6 +36,7 @@
 #include "game.h"
 #include "savetitles.h"
 #include "string_utils.h"
+#include "common_soundscripts.h"
 
 extern CSoundEnt *pSoundEnt;
 
@@ -44,7 +45,7 @@ DLL_GLOBAL edict_t				*g_pBodyQueueHead;
 CGlobalState					gGlobalState;
 extern DLL_GLOBAL int				gDisplayTitle;
 
-extern void W_Precache( void );
+extern void W_Precache( CBaseEntity* pWorld );
 
 //
 // This must match the list in util.h
@@ -569,18 +570,23 @@ void CWorld::Precache( void )
 
 	// the area based ambient sounds MUST be the first precache_sounds
 	// player precaches
-	W_Precache();				// get weapon precaches
+	W_Precache(this);				// get weapon precaches
 
 	ClientPrecache();
+
+	RegisterAndPrecacheSoundScript(NPC::bodySplatSoundScript);
 
 	// sounds used from C physics code
 	PRECACHE_SOUND( "common/null.wav" );// clears sound channels
 
-	PRECACHE_SOUND( "items/suitchargeok1.wav" );//!!! temporary sound for respawning weapons.
-	PRECACHE_SOUND( "items/gunpickup2.wav" );// player picks up a gun.
+	RegisterAndPrecacheSoundScript(Items::pickupSoundScript);
+	RegisterAndPrecacheSoundScript(Items::materializeSoundScript);
+	RegisterAndPrecacheSoundScript(Items::ammoPickupSoundScript);
+	RegisterAndPrecacheSoundScript(Items::weaponPickupSoundScript, Items::pickupSoundScript);
 
-	PRECACHE_SOUND( "common/bodydrop3.wav" );// dead bodies hitting the ground (animation events)
-	PRECACHE_SOUND( "common/bodydrop4.wav" );
+	// dead bodies hitting the ground (animation events)
+	RegisterAndPrecacheSoundScript(NPC::bodyDropHeavySoundScript);
+	RegisterAndPrecacheSoundScript(NPC::bodyDropLightSoundScript);
 	
 	PRECACHE_MODEL( "models/hgibs.mdl" );
 	PRECACHE_MODEL( "models/agibs.mdl" );

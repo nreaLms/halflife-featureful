@@ -28,6 +28,7 @@
 #include	"soundent.h"
 #include	"mod_features.h"
 #include	"game.h"
+#include	"common_soundscripts.h"
 
 #define bits_MEMORY_ISLAVE_PROVOKED bits_MEMORY_CUSTOM1
 #define bits_MEMORY_ISLAVE_REVIVED bits_MEMORY_CUSTOM2
@@ -177,6 +178,8 @@ public:
 
 	float m_flLastThink;
 	EHANDLE m_hTarget;
+
+	static const NamedSoundScript suitOnSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( charge_token, CChargeToken )
@@ -188,6 +191,13 @@ TYPEDESCRIPTION	CChargeToken::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CChargeToken, CBaseEntity )
+
+const NamedSoundScript CChargeToken::suitOnSoundScript = {
+	CHAN_ITEM,
+	{"items/suitchargeok1.wav"},
+	150,
+	"Vortigaunt.SuitOn"
+};
 
 void CChargeToken::Spawn()
 {
@@ -213,6 +223,7 @@ void CChargeToken::Spawn()
 void CChargeToken::Precache()
 {
 	PRECACHE_MODEL("sprites/xspark1.spr");
+	RegisterAndPrecacheSoundScript(suitOnSoundScript);
 }
 
 void CChargeToken::ArmorPieceTouch(CBaseEntity *pOther)
@@ -221,7 +232,7 @@ void CChargeToken::ArmorPieceTouch(CBaseEntity *pOther)
 	if (pPlayer && pPlayer->HasSuit())
 	{
 		pPlayer->TakeArmor(this, pev->health);
-		EMIT_SOUND_DYN( ENT( pOther->pev ), CHAN_ITEM, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
+		EmitSoundScript(suitOnSoundScript);
 		SetTouch(NULL);
 		SetThink(&CBaseEntity::SUB_Remove);
 		pev->nextthink = gpGlobals->time;
@@ -371,6 +382,7 @@ public:
 	void IdleSound( void );
 	void PlayUseSentence();
 	void PlayUnUseSentence();
+	bool EmitSoundScriptTalk(const char* name);
 
 	void OnDying();
 	void DeathNotice( entvars_t* pevChild )
@@ -516,11 +528,17 @@ public:
 	int m_iLightningTexture;
 	int m_iTrailTexture;
 
-	static const char *pAttackHitSounds[];
-	static const char *pAttackMissSounds[];
-	static const char *pPainSounds[];
-	static const char *pDeathSounds[];
-	static const char *pGlowArmSounds[];
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static constexpr const char* attackHitSoundScript = "Vortigaunt.AttackHit";
+	static constexpr const char* attackMissSoundScript = "Vortigaunt.AttackMiss";
+	static const NamedSoundScript zapPowerupSoundScript;
+	static const NamedSoundScript zapShootSoundScript;
+	static const NamedSoundScript electroSoundScript;
+	static const NamedSoundScript glowAlarmSoundScript;
+	static const NamedSoundScript idleZapSoundScript;
+	static const NamedSoundScript summonStartSoundScript;
+	static const NamedSoundScript summonEndSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_alien_slave, CISlave )
@@ -558,35 +576,67 @@ TYPEDESCRIPTION	CISlave::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CISlave, CFollowingMonster )
 
-const char *CISlave::pAttackHitSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav",
+const NamedSoundScript CISlave::painSoundScript = {
+	CHAN_WEAPON,
+	{"aslave/slv_pain1.wav", "aslave/slv_pain2.wav"},
+	"Vortigaunt.Pain"
 };
 
-const char *CISlave::pAttackMissSounds[] =
-{
-	"zombie/claw_miss1.wav",
-	"zombie/claw_miss2.wav",
+const NamedSoundScript CISlave::dieSoundScript = {
+	CHAN_WEAPON,
+	{"aslave/slv_die1.wav", "aslave/slv_die2.wav"},
+	"Vortigaunt.Die"
 };
 
-const char *CISlave::pPainSounds[] =
-{
-	"aslave/slv_pain1.wav",
-	"aslave/slv_pain2.wav",
+const NamedSoundScript CISlave::zapPowerupSoundScript = {
+	CHAN_WEAPON,
+	{"debris/zap4.wav"},
+	"Vortigaunt.ZapPowerup"
 };
 
-const char *CISlave::pDeathSounds[] =
-{
-	"aslave/slv_die1.wav",
-	"aslave/slv_die2.wav",
+const NamedSoundScript CISlave::zapShootSoundScript = {
+	CHAN_WEAPON,
+	{"hassault/hw_shoot1.wav"},
+	IntRange(130, 160),
+	"Vortigaunt.ZapShoot"
 };
 
-const char *CISlave::pGlowArmSounds[] =
-{
-	"debris/zap3.wav",
-	"debris/zap8.wav",
+const NamedSoundScript CISlave::electroSoundScript = {
+	CHAN_STATIC,
+	{"weapons/electro4.wav"},
+	0.5f,
+	ATTN_NORM,
+	IntRange(140, 160),
+	"Vortigaunt.Electro"
+};
+
+const NamedSoundScript CISlave::glowAlarmSoundScript = {
+	CHAN_BODY,
+	{"debris/zap3.wav", "debris/zap8.wav"},
+	0.7f,
+	ATTN_NORM,
+	IntRange(70, 90),
+	"Vortigaunt.GlowArm"
+};
+
+const NamedSoundScript CISlave::idleZapSoundScript = {
+	CHAN_WEAPON,
+	{"debris/zap1.wav"},
+	"Vortigaunt.IdleZap"
+};
+
+const NamedSoundScript CISlave::summonStartSoundScript = {
+	CHAN_BODY,
+	{"debris/beamstart1.wav"},
+	"Vortigaunt.SummonStart"
+};
+
+const NamedSoundScript CISlave::summonEndSoundScript = {
+	CHAN_BODY,
+	{"debris/beamstart7.wav"},
+	0.9f,
+	ATTN_NORM,
+	"Vortigaunt.SummonEnd",
 };
 
 //=========================================================
@@ -666,7 +716,7 @@ void CISlave::IdleSound( void )
 		Vector vecSrc = pev->origin + gpGlobals->v_right * 2 * side;
 		MakeDynamicLight(vecSrc, 8, 10);
 
-		EmitSoundDyn( CHAN_WEAPON, "debris/zap1.wav", 1, ATTN_NORM, 0, 100 );
+		EmitSoundScript(idleZapSoundScript);
 	}
 }
 
@@ -677,7 +727,7 @@ void CISlave::PainSound( void )
 {
 	if( RANDOM_LONG( 0, 2 ) == 0 )
 	{
-		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0, ATTN_NORM, 0, m_voicePitch );
+		EmitSoundScriptTalk(painSoundScript);
 	}
 }
 
@@ -686,7 +736,7 @@ void CISlave::PainSound( void )
 //=========================================================
 void CISlave::DeathSound( void )
 {
-	EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pDeathSounds ), 1.0, ATTN_NORM, 0, m_voicePitch );
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 //=========================================================
@@ -777,12 +827,12 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 					pHurt->pev->punchangle.x = 5;
 				}
 				// Play a random attack hit sound
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackHitSounds ), 1.0, ATTN_NORM, 0, m_voicePitch );
+				EmitSoundScriptTalk(attackHitSoundScript);
 			}
 			else
 			{
 				// Play a random attack miss sound
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackMissSounds ), 1.0, ATTN_NORM, 0, m_voicePitch );
+				EmitSoundScriptTalk(attackMissSoundScript);
 			}
 		}
 			break;
@@ -796,11 +846,11 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 					pHurt->pev->punchangle.z = -18;
 					pHurt->pev->punchangle.x = 5;
 				}
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackHitSounds ), 1.0, ATTN_NORM, 0, m_voicePitch );
+				EmitSoundScriptTalk(attackHitSoundScript);
 			}
 			else
 			{
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackMissSounds ), 1.0, ATTN_NORM, 0, m_voicePitch );
+				EmitSoundScriptTalk(attackMissSoundScript);
 			}
 		}
 			break;
@@ -827,7 +877,9 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				ArmBeam( ISLAVE_RIGHT_ARM );
 				BeamGlow();
 			}
-			EmitSoundDyn( CHAN_WEAPON, "debris/zap4.wav", 1, ATTN_NORM, 0, 100 + m_iBeams * 10 );
+			SoundScriptParamOverride params;
+			params.OverridePitchShifted(m_iBeams * 10);
+			EmitSoundScript(zapPowerupSoundScript, params);
 		}
 			break;
 		case ISLAVE_AE_ZAP_SHOOT:
@@ -872,7 +924,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 						WackBeam( ISLAVE_LEFT_ARM, revived );
 						WackBeam( ISLAVE_RIGHT_ARM, revived );
 						m_hDead = NULL;
-						EmitSoundDyn( CHAN_WEAPON, "hassault/hw_shoot1.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 130, 160 ) );
+						EmitSoundScript(zapShootSoundScript);
 
 						SpendEnergy(pev->max_health);
 					}
@@ -952,7 +1004,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 						}
 					}
 				}
-				EmitAmbientSound( pev->origin, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
+				EmitSoundScriptAmbient(pev->origin, electroSoundScript);
 
 				m_flNextAttack = gpGlobals->time + RANDOM_FLOAT( 1.0, 4.0 );
 			} else {
@@ -962,7 +1014,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 				ZapBeam( ISLAVE_LEFT_ARM );
 				ZapBeam( ISLAVE_RIGHT_ARM );
 				
-				EmitSoundDyn( CHAN_WEAPON, "hassault/hw_shoot1.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 130, 160 ) );
+				EmitSoundScript(zapShootSoundScript);
 				// STOP_SOUND( ENT( pev ), CHAN_WEAPON, "debris/zap4.wav" );
 				ApplyMultiDamage( pev, pev );
 
@@ -1080,7 +1132,7 @@ void CISlave::StartTask( Task_t *pTask )
 		if (CanSpawnAtPosition(GetFamiliarSpawnPosition(), FamiliarHull(), edict()))
 		{
 			m_IdealActivity = ACT_CROUCH;
-			EmitSound( CHAN_BODY, "debris/beamstart1.wav", 1, ATTN_NORM );
+			EmitSoundScript(summonStartSoundScript);
 			UTIL_MakeAimVectors( pev->angles );
 			Vector vecSrc = pev->origin + gpGlobals->v_forward * 8;
 			MakeDynamicLight(vecSrc, 10, 15);
@@ -1189,7 +1241,7 @@ void CISlave::PrescheduleThink()
 	if (m_Activity == ACT_MELEE_ATTACK1 && m_clawStrikeNum == 0) {
 		if ( m_handGlow1 && (m_handGlow1->pev->effects & EF_NODRAW) && CanUseGlowArms() ) {
 			StartMeleeAttackGlow(ISLAVE_RIGHT_ARM);
-			EmitSoundDyn( CHAN_BODY, RANDOM_SOUND_ARRAY(pGlowArmSounds), RANDOM_FLOAT(0.6, 0.8), ATTN_NORM, 0, RANDOM_LONG(70,90));
+			EmitSoundScript(glowAlarmSoundScript);
 		}
 	}
 }
@@ -1226,7 +1278,7 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 				pSpr->pev->framerate = 20.0f;
 				pSpr->SetTransparency( kRenderTransAdd, ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE, 255, kRenderFxNoDissipation );
 			}
-			EMIT_SOUND( pNew->edict(), CHAN_BODY, "debris/beamstart7.wav", 0.9, ATTN_NORM );
+			EmitSoundScript(summonEndSoundScript);
 
 			SetBits( pNew->pev->spawnflags, SF_MONSTER_FALL_TO_GROUND );
 			if (pNewMonster) {
@@ -1302,29 +1354,30 @@ void CISlave::Precache()
 	m_iTrailTexture = PRECACHE_MODEL( "sprites/plasma.spr" );
 
 	PrecacheMyModel( "models/islave.mdl" );
-	PRECACHE_SOUND( "debris/zap1.wav" );
-	PRECACHE_SOUND( "debris/zap4.wav" );
-	PRECACHE_SOUND( "debris/beamstart1.wav" );
-	PRECACHE_SOUND( "debris/beamstart7.wav" );
-	PRECACHE_SOUND( "weapons/electro4.wav" );
-	PRECACHE_SOUND( "hassault/hw_shoot1.wav" );
+
 	PRECACHE_SOUND( "zombie/zo_pain2.wav" );
 	PRECACHE_SOUND( "headcrab/hc_headbite.wav" );
 	PRECACHE_SOUND( "weapons/cbar_miss1.wav" );
 	PRECACHE_SOUND( "aslave/slv_word5.wav" );
 	PRECACHE_SOUND( "aslave/slv_word7.wav" );
 
-	PRECACHE_SOUND_ARRAY( pAttackHitSounds );
-	PRECACHE_SOUND_ARRAY( pAttackMissSounds );
-	PRECACHE_SOUND_ARRAY( pPainSounds );
-	PRECACHE_SOUND_ARRAY( pDeathSounds );
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
+	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
+	RegisterAndPrecacheSoundScript(zapPowerupSoundScript);
+	RegisterAndPrecacheSoundScript(zapShootSoundScript);
+	RegisterAndPrecacheSoundScript(electroSoundScript);
+	RegisterAndPrecacheSoundScript(idleZapSoundScript);
+	RegisterAndPrecacheSoundScript(summonStartSoundScript);
+	RegisterAndPrecacheSoundScript(summonEndSoundScript);
 
 	UTIL_PrecacheOther( "test_effect" );
 
 #if FEATURE_ISLAVE_HANDGLOW
 	PRECACHE_MODEL( ISLAVE_HAND_SPRITE_NAME );
 	if (g_modFeatures.vortigaunt_arm_boost)
-		PRECACHE_SOUND_ARRAY(pGlowArmSounds);
+		RegisterAndPrecacheSoundScript(glowAlarmSoundScript);
 #endif
 #if FEATURE_ISLAVE_FAMILIAR
 	PRECACHE_MODEL( ISLAVE_SPAWNFAMILIAR_SPRITE );
@@ -1873,7 +1926,7 @@ CBaseEntity *CISlave::ZapBeam( int side )
 		}
 		pResult = pEntity;
 	}
-	EmitAmbientSound( tr.vecEndPos, "weapons/electro4.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG( 140, 160 ) );
+	EmitSoundScriptAmbient(tr.vecEndPos, electroSoundScript);
 	return pResult;
 }
 
@@ -1895,7 +1948,7 @@ void CISlave::ClearBeams()
 	HandsGlowOff();
 	RemoveSummonBeams();
 
-	StopSound( CHAN_WEAPON, "debris/zap4.wav" );
+	StopSoundScript(zapPowerupSoundScript);
 }
 
 void CISlave::CoilBeam()
@@ -2151,6 +2204,13 @@ void CISlave::PlayUseSentence()
 void CISlave::PlayUnUseSentence()
 {
 	SENTENCEG_PlayRndSz( ENT( pev ), "SLV_ALERT", 0.85, ATTN_NORM, 0, m_voicePitch );
+}
+
+bool CISlave::EmitSoundScriptTalk(const char *name)
+{
+	SoundScriptParamOverride paramOverride;
+	paramOverride.OverridePitchRelative(m_voicePitch);
+	return EmitSoundScript(name, paramOverride);
 }
 
 void CISlave::ReportAIState(ALERT_TYPE level )

@@ -24,6 +24,7 @@
 #include "customentity.h"
 #include "mod_features.h"
 #include "game.h"
+#include "common_soundscripts.h"
 
 #define SF_OSPREY_DONT_DEPLOY SF_MONSTER_SPECIAL_FLAG
 
@@ -110,19 +111,39 @@ public:
 
 	float m_soundAttenuation;
 
+	static const NamedSoundScript rotorSoundScript;
+	static constexpr const char* crashSoundScript = "Osprey.Crash";
+
 protected:
 	void SpawnImpl(const char* modelName, const float defaultHealth);
 	void PrecacheImpl(const char* modelName, const char* tailGibs, const char* bodyGibs, const char* engineGibs);
 	virtual const char* TrooperName();
+	bool HasCustomRotorVolume() const {
+		return pev->armorvalue > 0.0f && pev->armorvalue <= 1.0f;
+	}
 	float RotorVolume() const {
-		if (pev->armorvalue > 0.0f && pev->armorvalue <= 1.0f)
+		if (HasCustomRotorVolume())
 		{
 			return pev->armorvalue;
 		}
 		return VOL_NORM;
 	}
+	bool HasCustomAttenuation() const {
+		return m_soundAttenuation > 0.0f;
+	}
 	float RotorAttenuation() const {
-		return m_soundAttenuation > 0.0f ? m_soundAttenuation : 0.15f;
+		return HasCustomAttenuation() ? m_soundAttenuation : 0.15f;
+	}
+	void SetRotorSoundParams(SoundScriptParamOverride& param)
+	{
+		if (pev->armorvalue > 0.0f && pev->armorvalue <= 1.0f)
+		{
+			param.OverrideVolumeAbsolute(pev->armorvalue);
+		}
+		if (m_soundAttenuation > 0.0f)
+		{
+			param.OverrideAttenuationAbsolute(m_soundAttenuation);
+		}
 	}
 };
 
@@ -166,6 +187,14 @@ TYPEDESCRIPTION	COsprey::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( COsprey, CBaseMonster )
+
+const NamedSoundScript COsprey::rotorSoundScript = {
+	CHAN_STATIC,
+	{"apache/ap_rotor4.wav"},
+	VOL_NORM,
+	0.15f,
+	"Osprey.Rotor"
+};
 
 void COsprey::Spawn()
 {
@@ -223,8 +252,8 @@ void COsprey::PrecacheImpl(const char* modelName, const char* tailGibs, const ch
 	PrecacheMyModel( modelName );
 	PRECACHE_MODEL( "models/HVR.mdl" );
 
-	PRECACHE_SOUND( "apache/ap_rotor4.wav" );
-	PRECACHE_SOUND( "weapons/mortarhit.wav" );
+	RegisterAndPrecacheSoundScript(rotorSoundScript);
+	RegisterAndPrecacheSoundScript(crashSoundScript, NPC::crashSoundScript);
 
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
 
@@ -561,7 +590,10 @@ void COsprey::Flight()
 
 	if( m_iSoundState == 0 )
 	{
-		EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), 0, 110 );
+		SoundScriptParamOverride param;
+		SetRotorSoundParams(param);
+		param.OverridePitchRelative(110);
+		EmitSoundScript(rotorSoundScript, param);
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", 0.5, 0.2, 0, 110 );
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
@@ -589,7 +621,10 @@ void COsprey::Flight()
 			if( pitch != m_iPitch )
 			{
 				m_iPitch = pitch;
-				EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor4.wav", RotorVolume(), RotorAttenuation(), SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
+				SoundScriptParamOverride param;
+				SetRotorSoundParams(param);
+				param.OverridePitchRelative((int)pitch);
+				EmitSoundScript(rotorSoundScript, param, SND_CHANGE_PITCH | SND_CHANGE_VOL);
 				// ALERT( at_console, "%.0f\n", pitch );
 			}
 		}
@@ -625,7 +660,7 @@ void COsprey::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib 
 	pev->gravity = 0.3f;
 	pev->velocity = m_velocity;
 	pev->avelocity = Vector( RANDOM_FLOAT( -20, 20 ), 0, RANDOM_FLOAT( -50, 50 ) );
-	StopSound( CHAN_STATIC, "apache/ap_rotor4.wav" );
+	StopSoundScript(rotorSoundScript);
 
 	UTIL_SetSize( pev, Vector( -32, -32, -64 ), Vector( 32, 32, 0 ) );
 	SetThink( &COsprey::DyingThink );
@@ -789,7 +824,7 @@ void COsprey::DyingThink( void )
 			WRITE_BYTE( 0 );		// speed
 		MESSAGE_END();
 
-		EmitSound( CHAN_STATIC, "weapons/mortarhit.wav", 1.0, 0.3f );
+		EmitSoundScript(crashSoundScript);
 
 		RadiusDamage( pev->origin, pev, pev, 300, CLASS_NONE, DMG_BLAST );
 

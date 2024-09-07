@@ -8,6 +8,7 @@
 #include	"hgrunt.h"
 #include	"mod_features.h"
 #include	"game.h"
+#include	"common_soundscripts.h"
 
 #if FEATURE_ROBOGRUNT
 
@@ -58,6 +59,17 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript sparkSoundScript;
+
+	static constexpr const char* reloadSoundScript = "RGrunt.Reload";
+	static constexpr const char* burst9mmSoundScript = "RGrunt.9MM";
+	static constexpr const char* grenadeLaunchSoundScript = "RGrunt.GrenadeLaunch";
+	static constexpr const char* shotgunSoundScript = "RGrunt.Shotgun";
+
+	static const NamedSoundScript useSoundScript;
+	static const NamedSoundScript unuseSoundScript;
+
 protected:
 	static const char *pRoboSentences[HGRUNT_SENT_COUNT];
 	virtual const char* SentenceByNumber(int sentence);
@@ -66,6 +78,19 @@ protected:
 	}
 
 	void DoSpark(const Vector& sparkLocation, float flVolume);
+
+	virtual void PlayFirstBurstSounds() {
+		EmitSoundScript(burst9mmSoundScript);
+	}
+	virtual void PlayReloadSound() {
+		EmitSoundScript(reloadSoundScript);
+	}
+	virtual void PlayGrenadeLaunchSound() {
+		EmitSoundScript(grenadeLaunchSoundScript);
+	}
+	virtual void PlayShogtunSound() {
+		EmitSoundScript(shotgunSoundScript);
+	}
 };
 
 LINK_ENTITY_TO_CLASS(monster_robogrunt, CRGrunt)
@@ -92,6 +117,33 @@ const char *CRGrunt::pRoboSentences[] =
 	"RB_CLEAR",
 	"RB_ANSWER",
 	"RB_HOSTILE",
+};
+
+const NamedSoundScript CRGrunt::dieSoundScript = {
+	CHAN_VOICE,
+	{"turret/tu_die.wav", "turret/tu_die2.wav", "turret/tu_die3.wav"},
+	"RGrunt.Die"
+};
+
+const NamedSoundScript CRGrunt::sparkSoundScript = {
+	CHAN_BODY,
+	{
+		"buttons/spark1.wav", "buttons/spark2.wav", "buttons/spark3.wav",
+		"buttons/spark4.wav", "buttons/spark5.wav", "buttons/spark6.wav"
+	},
+	"RGrunt.Spark"
+};
+
+const NamedSoundScript CRGrunt::useSoundScript = {
+	CHAN_VOICE,
+	{"buttons/button3.wav"},
+	"RGrunt.Use"
+};
+
+const NamedSoundScript CRGrunt::unuseSoundScript = {
+	CHAN_VOICE,
+	{"buttons/button2.wav"},
+	"RGrunt.UnUse"
 };
 
 const char* CRGrunt::SentenceByNumber(int sentence)
@@ -127,19 +179,17 @@ void CRGrunt::Precache()
 {
 	PrecacheHelper("models/rgrunt.mdl");
 	PRECACHE_MODEL("models/computergibs.mdl");
-	PRECACHE_SOUND( "turret/tu_die.wav" );
-	PRECACHE_SOUND( "turret/tu_die2.wav" );
-	PRECACHE_SOUND( "turret/tu_die3.wav" );
 
-	PRECACHE_SOUND( "buttons/spark1.wav" );
-	PRECACHE_SOUND( "buttons/spark2.wav" );
-	PRECACHE_SOUND( "buttons/spark3.wav" );
-	PRECACHE_SOUND( "buttons/spark4.wav" );
-	PRECACHE_SOUND( "buttons/spark5.wav" );
-	PRECACHE_SOUND( "buttons/spark6.wav" );
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(sparkSoundScript);
 
-	PRECACHE_SOUND( "buttons/button2.wav" );
-	PRECACHE_SOUND( "buttons/button3.wav" );
+	RegisterAndPrecacheSoundScript(reloadSoundScript, NPC::reloadSoundScript);
+	RegisterAndPrecacheSoundScript(burst9mmSoundScript, NPC::burst9mmSoundScript);
+	RegisterAndPrecacheSoundScript(grenadeLaunchSoundScript, NPC::grenadeLaunchSoundScript);
+	RegisterAndPrecacheSoundScript(shotgunSoundScript, NPC::shotgunSoundScript);
+
+	RegisterAndPrecacheSoundScript(useSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript);
 
 	m_voicePitch = 115;
 
@@ -149,30 +199,19 @@ void CRGrunt::Precache()
 
 void CRGrunt::PlayUseSentence()
 {
-	EmitSound( CHAN_VOICE, "buttons/button3.wav", SentenceVolume(), SentenceAttn() );
-	JustSpoke();
+	if (EmitSoundScript(useSoundScript))
+		JustSpoke();
 }
 
 void CRGrunt::PlayUnUseSentence()
 {
-	EmitSound( CHAN_VOICE, "buttons/button2.wav", SentenceVolume(), SentenceAttn() );
-	JustSpoke();
+	if (EmitSoundScript(unuseSoundScript))
+		JustSpoke();
 }
 
 void CRGrunt::DeathSound()
 {
-	switch (RANDOM_LONG(0,2))
-	{
-	case 0:
-		EmitSound( CHAN_VOICE, "turret/tu_die.wav", 1.0, ATTN_NORM );
-		break;
-	case 1:
-		EmitSound( CHAN_VOICE, "turret/tu_die2.wav", 1.0, ATTN_NORM );
-		break;
-	case 2:
-		EmitSound( CHAN_VOICE, "turret/tu_die3.wav", 1.0, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(dieSoundScript);
 }
 
 void CRGrunt::PainSound()
@@ -346,27 +385,10 @@ void CRGrunt::DoSpark(const Vector &sparkLocation, float flVolume)
 {
 	UTIL_Sparks( sparkLocation );
 
-	switch( RANDOM_LONG( 0, 5 ) )
-	{
-		case 0:
-			EmitSound( CHAN_BODY, "buttons/spark1.wav", flVolume, ATTN_NORM );
-			break;
-		case 1:
-			EmitSound( CHAN_BODY, "buttons/spark2.wav", flVolume, ATTN_NORM );
-			break;
-		case 2:
-			EmitSound( CHAN_BODY, "buttons/spark3.wav", flVolume, ATTN_NORM );
-			break;
-		case 3:
-			EmitSound( CHAN_BODY, "buttons/spark4.wav", flVolume, ATTN_NORM );
-			break;
-		case 4:
-			EmitSound( CHAN_BODY, "buttons/spark5.wav", flVolume, ATTN_NORM );
-			break;
-		case 5:
-			EmitSound( CHAN_BODY, "buttons/spark6.wav", flVolume, ATTN_NORM );
-			break;
-	}
+	SoundScriptParamOverride param;
+	param.OverrideVolumeRelative(flVolume);
+
+	EmitSoundScript(sparkSoundScript, param);
 }
 
 class CRGruntRepel : public CHGruntRepel

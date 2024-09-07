@@ -54,7 +54,6 @@ void CEgon::Precache( void )
 	PrecachePModel( "models/p_egon.mdl" );
 
 	PRECACHE_MODEL( "models/w_9mmclip.mdl" );
-	PRECACHE_SOUND( "items/9mmclip1.wav" );
 
 	PRECACHE_SOUND( EGON_SOUND_OFF );
 	PRECACHE_SOUND( EGON_SOUND_RUN );
@@ -62,8 +61,6 @@ void CEgon::Precache( void )
 
 	PRECACHE_MODEL( EGON_BEAM_SPRITE );
 	PRECACHE_MODEL( EGON_FLARE_SPRITE );
-
-	PRECACHE_SOUND( "weapons/357_cock1.wav" );
 
 	m_usEgonFire = PRECACHE_EVENT( 1, "events/egon_fire.sc" );
 	m_usEgonStop = PRECACHE_EVENT( 1, "events/egon_stop.sc" );

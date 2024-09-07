@@ -70,7 +70,7 @@ public:
 	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 
 	MONSTERSTATE GetIdealState( void ) { return MONSTERSTATE_IDLE; };
-	int CanPlaySequence( int interruptFlags ) { return TRUE; };
+	int CanPlaySequence( int interruptFlags ) { return TRUE; }
 
 	int DefaultClassify( void );
 
@@ -104,9 +104,19 @@ public:
 	Vector m_vecPrevSound;
 	float m_flPrevSoundTime;
 
-	static const char *pHitSilo[];
-	static const char *pHitDirt[];
-	static const char *pHitWater[];
+	float m_painSoundTime;
+
+	static const NamedSoundScript fliesSoundScript;
+	static const NamedSoundScript squirmSoundScript;
+	static const NamedSoundScript hitDirtSoundScript;
+	static const NamedSoundScript hitSiloSoundScript;
+	static const NamedSoundScript hitWaterSoundScript;
+	static const NamedSoundScript roarSoundScript;
+	static const NamedSoundScript searchSoundScript;
+	static const NamedSoundScript singSoundScript;
+	static const NamedSoundScript swingSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
 };
 
 int CTentacle::g_fFlySound;
@@ -120,26 +130,70 @@ LINK_ENTITY_TO_CLASS( monster_tentacle, CTentacle )
 #define TE_DIRT 1
 #define TE_WATER 2
 
-const char *CTentacle::pHitSilo[] =
-{
-	"tentacle/te_strike1.wav",
-	"tentacle/te_strike2.wav",
+const NamedSoundScript CTentacle::fliesSoundScript = {
+	CHAN_BODY,
+	{"ambience/flies.wav"},
+	"Tentacle.Flies"
 };
 
-const char *CTentacle::pHitDirt[] =
-{
-	"player/pl_dirt1.wav",
-	"player/pl_dirt2.wav",
-	"player/pl_dirt3.wav",
-	"player/pl_dirt4.wav",
+const NamedSoundScript CTentacle::squirmSoundScript = {
+	CHAN_BODY,
+	{"ambience/squirm2.wav"},
+	"Tentacle.Squirm"
 };
 
-const char *CTentacle::pHitWater[] =
-{
-	"player/pl_slosh1.wav",
-	"player/pl_slosh2.wav",
-	"player/pl_slosh3.wav",
-	"player/pl_slosh4.wav",
+const NamedSoundScript CTentacle::hitDirtSoundScript = {
+	CHAN_STATIC,
+	{"player/pl_dirt1.wav", "player/pl_dirt2.wav", "player/pl_dirt3.wav", "player/pl_dirt4.wav"},
+	"Tentacle.HitDirt"
+};
+
+const NamedSoundScript CTentacle::hitSiloSoundScript = {
+	CHAN_STATIC,
+	{"tentacle/te_strike1.wav", "tentacle/te_strike2.wav"},
+	"Tentacle.HitSilo"
+};
+
+const NamedSoundScript CTentacle::hitWaterSoundScript = {
+	CHAN_STATIC,
+	{"player/pl_slosh1.wav", "player/pl_slosh2.wav", "player/pl_slosh3.wav", "player/pl_slosh4.wav"},
+	"Tentacle.HitWater"
+};
+
+const NamedSoundScript CTentacle::roarSoundScript = {
+	CHAN_STATIC,
+	{"tentacle/te_roar1.wav", "tentacle/te_roar2.wav"},
+	"Tentacle.Roar"
+};
+
+const NamedSoundScript CTentacle::searchSoundScript = {
+	CHAN_STATIC,
+	{"tentacle/te_search1.wav", "tentacle/te_search2.wav"},
+	"Tentacle.Search"
+};
+
+const NamedSoundScript CTentacle::singSoundScript = {
+	CHAN_VOICE,
+	{"tentacle/te_sing1.wav", "tentacle/te_sing2.wav"},
+	"Tentacle.Sing"
+};
+
+const NamedSoundScript CTentacle::swingSoundScript = {
+	CHAN_STATIC,
+	{"tentacle/te_move1.wav", "tentacle/te_move2.wav"},
+	"Tentacle.Swing"
+};
+
+const NamedSoundScript CTentacle::alertSoundScript = {
+	CHAN_STATIC,
+	{}, // intentionally empty as it wasn't used in original Half-Life even though the sounds exist
+	"Tentacle.Alert"
+};
+
+const NamedSoundScript CTentacle::painSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Tentacle.Pain"
 };
 
 TYPEDESCRIPTION	CTentacle::m_SaveData[] =
@@ -161,6 +215,7 @@ TYPEDESCRIPTION	CTentacle::m_SaveData[] =
 	DEFINE_FIELD( CTentacle, m_flMaxYaw, FIELD_FLOAT ),
 	DEFINE_FIELD( CTentacle, m_vecPrevSound, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( CTentacle, m_flPrevSoundTime, FIELD_TIME ),
+	DEFINE_FIELD( CTentacle, m_painSoundTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CTentacle, CBaseMonster )
@@ -292,29 +347,21 @@ void CTentacle::Precache()
 {
 	PrecacheMyModel( "models/tentacle2.mdl" );
 
-	PRECACHE_SOUND( "ambience/flies.wav" );
-	PRECACHE_SOUND( "ambience/squirm2.wav" );
+	RegisterAndPrecacheSoundScript(fliesSoundScript);
+	RegisterAndPrecacheSoundScript(squirmSoundScript);
+	RegisterAndPrecacheSoundScript(roarSoundScript);
+	RegisterAndPrecacheSoundScript(searchSoundScript);
+	RegisterAndPrecacheSoundScript(singSoundScript);
+	RegisterAndPrecacheSoundScript(swingSoundScript);
+	RegisterAndPrecacheSoundScript(hitDirtSoundScript);
+	RegisterAndPrecacheSoundScript(hitSiloSoundScript);
+	RegisterAndPrecacheSoundScript(hitWaterSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
 
-	PRECACHE_SOUND( "tentacle/te_alert1.wav" );
-	PRECACHE_SOUND( "tentacle/te_alert2.wav" );
+	// TODO: not used?
 	PRECACHE_SOUND( "tentacle/te_flies1.wav" );
-	PRECACHE_SOUND( "tentacle/te_move1.wav" );
-	PRECACHE_SOUND( "tentacle/te_move2.wav" );
-	PRECACHE_SOUND( "tentacle/te_roar1.wav" );
-	PRECACHE_SOUND( "tentacle/te_roar2.wav" );
-	PRECACHE_SOUND( "tentacle/te_search1.wav" );
-	PRECACHE_SOUND( "tentacle/te_search2.wav" );
-	PRECACHE_SOUND( "tentacle/te_sing1.wav" );
-	PRECACHE_SOUND( "tentacle/te_sing2.wav" );
 	PRECACHE_SOUND( "tentacle/te_squirm2.wav" );
-	PRECACHE_SOUND( "tentacle/te_strike1.wav" );
-	PRECACHE_SOUND( "tentacle/te_strike2.wav" );
-	PRECACHE_SOUND( "tentacle/te_swing1.wav" );
-	PRECACHE_SOUND( "tentacle/te_swing2.wav" );
-
-	PRECACHE_SOUND_ARRAY( pHitSilo );
-	PRECACHE_SOUND_ARRAY( pHitDirt );
-	PRECACHE_SOUND_ARRAY( pHitWater );
 }
 
 CTentacle::CTentacle()
@@ -518,26 +565,12 @@ void CTentacle::Cycle( void )
 			m_flSoundYaw += 360;
 		if( m_flSoundYaw > 180 )
 			m_flSoundYaw -= 360;
-#if 0
 		// ALERT( at_console, "sound %d %.0f\n", m_iSoundLevel, m_flSoundYaw );
 		if( m_flSoundTime < gpGlobals->time )
 		{
 			// play "I hear new something" sound
-			const char *sound;
-
-			switch( RANDOM_LONG( 0, 1 ) )
-			{
-			case 0:
-				sound = "tentacle/te_alert1.wav";
-				break;
-			case 1:
-				sound = "tentacle/te_alert2.wav";
-				break;
-			}
-
-			// UTIL_EmitAmbientSound( ENT( pev ), pev->origin + Vector( 0, 0, MyHeight() ), sound, 1.0, ATTN_NORM, 0, 100 );
+			EmitSoundScriptAmbient(pev->origin + Vector(0, 0, MyHeight()), alertSoundScript);
 		}
-#endif
 		m_flSoundTime = gpGlobals->time + RANDOM_FLOAT( 5.0f, 10.0f );
 	}
 
@@ -624,19 +657,7 @@ void CTentacle::Cycle( void )
 				if( m_flNextSong < gpGlobals->time )
 				{
 					// play "I hear new something" sound
-					const char *sound;	
-
-					switch( RANDOM_LONG( 0, 1 ) )
-					{
-					case 0:
-						sound = "tentacle/te_sing1.wav";
-						break;
-					case 1:
-						sound = "tentacle/te_sing2.wav";
-						break;
-					}
-
-					EmitSound( CHAN_VOICE, sound, 1.0, ATTN_NORM );
+					EmitSoundScript(singSoundScript);
 
 					m_flNextSong = gpGlobals->time + RANDOM_FLOAT( 10, 20 );
 				}
@@ -825,8 +846,6 @@ void CTentacle::DieThink( void )
 
 void CTentacle::HandleAnimEvent( MonsterEvent_t *pEvent )
 {
-	const char *sound;
-
 	switch( pEvent->event )
 	{
 	case 1:
@@ -842,15 +861,15 @@ void CTentacle::HandleAnimEvent( MonsterEvent_t *pEvent )
 			switch( m_iTapSound )
 			{
 			case TE_SILO:
-				UTIL_EmitAmbientSound( ENT( pev ), vecSrc, RANDOM_SOUND_ARRAY( pHitSilo ), 1.0, ATTN_NORM, 0, 100 );
+				EmitSoundScriptAmbient(vecSrc, hitSiloSoundScript);
 				break;
 			case TE_NONE:
 				break;
 			case TE_DIRT:
-				UTIL_EmitAmbientSound( ENT( pev ), vecSrc, RANDOM_SOUND_ARRAY( pHitDirt ), 1.0, ATTN_NORM, 0, 100 );
+				EmitSoundScriptAmbient(vecSrc, hitDirtSoundScript);
 				break;
 			case TE_WATER:
-				UTIL_EmitAmbientSound( ENT( pev ), vecSrc, RANDOM_SOUND_ARRAY( pHitWater ), 1.0, ATTN_NORM, 0, 100 );
+				EmitSoundScriptAmbient(vecSrc, hitWaterSoundScript);
 				break;
 			}
 			gpGlobals->force_retouch++;
@@ -878,64 +897,36 @@ void CTentacle::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			vecSrc.z += MyHeight();
 
-			float flVol = RANDOM_FLOAT( 0.3f, 0.5f );
+			SoundScriptParamOverride param;
+			param.OverrideVolumeRelative(RANDOM_FLOAT( 0.3f, 0.5f ));
 
 			switch( m_iTapSound )
 			{
 			case TE_SILO:
-				UTIL_EmitAmbientSound( ENT( pev ), vecSrc, RANDOM_SOUND_ARRAY( pHitSilo ), flVol, ATTN_NORM, 0, 100 );
+				EmitSoundScriptAmbient(vecSrc, hitSiloSoundScript, param);
 				break;
 			case TE_NONE:
 				break;
 			case TE_DIRT:
-				UTIL_EmitAmbientSound( ENT( pev ), vecSrc, RANDOM_SOUND_ARRAY( pHitDirt ), flVol, ATTN_NORM, 0, 100 );
+				EmitSoundScriptAmbient(vecSrc, hitDirtSoundScript, param);
 				break;
 			case TE_WATER:
-				UTIL_EmitAmbientSound( ENT( pev ), vecSrc, RANDOM_SOUND_ARRAY( pHitWater ), flVol, ATTN_NORM, 0, 100 );
+				EmitSoundScriptAmbient(vecSrc, hitWaterSoundScript, param);
 				break;
 			}
 		}
 		break;
 	case 7:
 		// roar
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			sound = "tentacle/te_roar1.wav";
-			break;
-		case 1:
-			sound = "tentacle/te_roar2.wav";
-			break;
-		}
-
-		UTIL_EmitAmbientSound( ENT( pev ), pev->origin + Vector( 0, 0, MyHeight() ), sound, 1.0, ATTN_NORM, 0, 100 );
+		EmitSoundScriptAmbient(pev->origin + Vector(0, 0, MyHeight()), roarSoundScript);
 		break;
 	case 8:
 		// search
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			sound = "tentacle/te_search1.wav";
-			break;
-		case 1:
-			sound = "tentacle/te_search2.wav";
-			break;
-		}
-
-		UTIL_EmitAmbientSound(ENT(pev), pev->origin + Vector( 0, 0, MyHeight()), sound, 1.0, ATTN_NORM, 0, 100);
+		EmitSoundScriptAmbient(pev->origin + Vector(0, 0, MyHeight()), searchSoundScript);
 		break;
 	case 9:
 		// swing
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			sound = "tentacle/te_move1.wav";
-			break;
-		case 1:
-			sound = "tentacle/te_move2.wav";
-			break;
-		}
-		UTIL_EmitAmbientSound( ENT( pev ), pev->origin + Vector( 0, 0, MyHeight() ), sound, 1.0, ATTN_NORM, 0, 100 );
+		EmitSoundScriptAmbient(pev->origin + Vector(0, 0, MyHeight()), swingSoundScript);
 		break;
 	default:
 		CBaseMonster::HandleAnimEvent( pEvent );
@@ -952,13 +943,13 @@ void CTentacle::Start( void )
 
 	if( !g_fFlySound )
 	{
-		EmitSound( CHAN_BODY, "ambience/flies.wav", 1, ATTN_NORM );
+		EmitSoundScript(fliesSoundScript);
 		g_fFlySound = TRUE;
 		//pev->nextthink = gpGlobals-> time + 0.1;
 	}
 	else if( !g_fSquirmSound )
 	{
-		EmitSound( CHAN_BODY, "ambience/squirm2.wav", 1, ATTN_NORM );
+		EmitSoundScript(squirmSoundScript);
 		g_fSquirmSound = TRUE;
 	}
 	
@@ -1003,6 +994,11 @@ void CTentacle::HitTouch( CBaseEntity *pOther )
 
 int CTentacle::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	if( m_painSoundTime < gpGlobals->time )
+	{
+		EmitSoundScript(painSoundScript);
+		m_painSoundTime = gpGlobals->time + RANDOM_FLOAT( 2.5, 4 );
+	}
 	if( flDamage > pev->health )
 	{
 		pev->health = 1;

@@ -32,6 +32,7 @@
 #include "monsters.h"
 #include "talkmonster.h"
 #include "locus.h"
+#include "common_soundscripts.h"
 
 #define FEATURE_TRIGGER_RANDOM 1
 #define FEATURE_TRIGGER_RESPAWN 1
@@ -4168,7 +4169,7 @@ void CTriggerXenReturn::Spawn(void)
 
 void CTriggerXenReturn::Precache()
 {
-	PRECACHE_SOUND( "debris/beamstart7.wav" );
+	PRECACHE_SOUND( "weapons/displacer_self.wav" );
 }
 
 void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
@@ -4186,7 +4187,7 @@ void CTriggerXenReturn::TeleportTouch(CBaseEntity* pOther)
 		}
 
 		// Play teleport sound.
-		EMIT_SOUND(ENT(pOther->pev), CHAN_STATIC, "debris/beamstart7.wav", 1, ATTN_NORM );
+		EMIT_SOUND(ENT(pOther->pev), CHAN_STATIC, "weapons/displacer_self.wav", 1, ATTN_NORM );
 	}
 }
 
@@ -4583,14 +4584,14 @@ public:
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("geneworm"); }
 	void EXPORT GeneWormTouch(CBaseEntity *pOther);
 
-	static const char* pAttackSounds[];
-
 	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
 
 	float m_flLastDamageTime;
+
+	static constexpr const char* attackHitSoundScript = "GeneWorm.AttackHit";
 };
 
 TYPEDESCRIPTION CTriggerGenewormHit::m_SaveData[] =
@@ -4599,13 +4600,6 @@ TYPEDESCRIPTION CTriggerGenewormHit::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE(CTriggerGenewormHit, CBaseTrigger)
-
-const char *CTriggerGenewormHit::pAttackSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav"
-};
 
 void CTriggerGenewormHit::Spawn()
 {
@@ -4628,7 +4622,9 @@ void CTriggerGenewormHit::Spawn()
 
 void CTriggerGenewormHit::Precache()
 {
-	PRECACHE_SOUND_ARRAY(pAttackSounds);
+	SoundScriptParamOverride paramOverride;
+	paramOverride.OverrideAttenuationAbsolute(0.1f);
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript, paramOverride);
 }
 
 void CTriggerGenewormHit::GeneWormTouch(CBaseEntity *pOther)
@@ -4709,7 +4705,7 @@ void CTriggerGenewormHit::GeneWormTouch(CBaseEntity *pOther)
 	// Apply damage every half second
 	pev->dmgtime = gpGlobals->time + 0.5;// half second delay until this trigger can hurt toucher again
 
-	EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, RANDOM_SOUND_ARRAY(pAttackSounds), VOL_NORM, 0.1, 0, 100 + RANDOM_FLOAT(-5,5));
+	EmitSoundScript(attackHitSoundScript);
 	m_flLastDamageTime = gpGlobals->time;
 
 	if( pev->target )

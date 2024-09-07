@@ -17,6 +17,7 @@
 #include "cbase.h"
 #include "animation.h"
 #include "effects.h"
+#include "common_soundscripts.h"
 
 #define SF_XEN_PLANT_DROP_TO_FLOOR 2
 #define SF_XEN_PLANT_NONSOLID 8
@@ -286,8 +287,8 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	static const char *pAttackHitSounds[];
-	static const char *pAttackMissSounds[];
+	static constexpr const char* attackHitSoundScript = "XenTree.AttackHit";
+	static constexpr const char* attackMissSoundScript = "XenTree.AttackMiss";
 
 private:
 	CXenTreeTrigger	*m_pTrigger;
@@ -334,25 +335,11 @@ void CXenTree::Spawn( void )
 	UTIL_SetSize( m_pTrigger->pev, Vector( -24, -24, 0 ), Vector( 24, 24, 128 ) );
 }
 
-const char *CXenTree::pAttackHitSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav",
-};
-
-const char *CXenTree::pAttackMissSounds[] =
-{
-	"zombie/claw_miss1.wav",
-	"zombie/claw_miss2.wav",
-};
-
 void CXenTree::Precache( void )
 {
 	PRECACHE_MODEL( "models/tree.mdl" );
-	PRECACHE_MODEL( XEN_PLANT_GLOW_SPRITE );
-	PRECACHE_SOUND_ARRAY( pAttackHitSounds );
-	PRECACHE_SOUND_ARRAY( pAttackMissSounds );
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
+	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
 }
 
 void CXenTree::Touch( CBaseEntity *pOther )
@@ -369,7 +356,7 @@ void CXenTree::Attack( void )
 	{
 		SetActivity( ACT_MELEE_ATTACK1 );
 		pev->framerate = RANDOM_FLOAT( 1.0f, 1.4f );
-		EMIT_SOUND_ARRAY_DYN( CHAN_WEAPON, pAttackMissSounds );
+		EmitSoundScript(attackMissSoundScript);
 	}
 }
 
@@ -402,7 +389,7 @@ void CXenTree::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			if( sound )
 			{
-				EMIT_SOUND_ARRAY_DYN( CHAN_WEAPON, pAttackHitSounds );
+				EmitSoundScript(attackHitSoundScript);
 			}
 		}
 		return;

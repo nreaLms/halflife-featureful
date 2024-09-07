@@ -397,8 +397,12 @@ void CMonsterMaker::Precache( void )
 	if (!FStringNull(m_gibModel))
 		PRECACHE_MODEL(STRING(m_gibModel));
 
+	EntityOverrides entityOverrides;
+	entityOverrides.model = m_customModel;
+	entityOverrides.soundList = m_soundList;
+
 	if (CheckMonsterClassname())
-		m_childIsValid = UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize, m_soundList );
+		m_childIsValid = UTIL_PrecacheMonster( STRING(m_iszMonsterClassname), m_reverseRelationship, &m_defaultMinHullSize, &m_defaultMaxHullSize, entityOverrides );
 
 	if (!FStringNull(WarpballName()))
 		PrecacheWarpballTemplate(STRING(WarpballName()), STRING(m_iszMonsterClassname));

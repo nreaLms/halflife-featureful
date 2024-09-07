@@ -29,6 +29,7 @@ class CSquidSpit : public CBaseEntity
 public:
 	void Spawn(void);
 	void Precache();
+	virtual void PrecacheSounds();
 
 	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList = iStringNull);
 	static float SpitSpeed() { return 900.0f; }
@@ -40,7 +41,9 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 
 	int  m_maxFrame;
-	
+
+	static constexpr const char* spitTouchSoundScript = "Bullsquid.SpitTouch";
+	static constexpr const char* spitHitSoundScript = "Bullsquid.SpitHit";
 protected:
 	void SpawnHelper(const char* className);
 };
@@ -51,7 +54,7 @@ public:
 	void Spawn( void );
 	void Precache();
 
-	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity , string_t soundList = iStringNull);
+	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList = iStringNull);
 	static float SpitSpeed() { return 600.0f; }
 	void Touch( CBaseEntity *pOther );
 	void EXPORT Animate( void );
@@ -65,6 +68,9 @@ public:
 
 	int m_iImpactSprite;
 	int m_iFleckSprite;
+
+	static const NamedSoundScript acidSoundScript;
+	static const NamedSoundScript spithitSoundScript;
 };
 
 #endif // BULLSQUID_H

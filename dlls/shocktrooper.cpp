@@ -30,6 +30,7 @@
 #include	"game.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
+#include	"common_soundscripts.h"
 
 #if FEATURE_SHOCKTROOPER
 
@@ -89,7 +90,7 @@ public:
 	void HandleAnimEvent(MonsterEvent_t *pEvent);
 
 	void DeathSound(void);
-	void PainSound(void);
+	void PlayPainSound(void);
 	void GibMonster(void);
 	void PlayUseSentence();
 	void PlayUnUseSentence();
@@ -134,6 +135,10 @@ protected:
 	bool AlertSentenceIsForPlayerOnly() {
 		return false;
 	}
+public:
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript fireSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS(monster_shocktrooper, CShockTrooper)
@@ -149,6 +154,31 @@ TYPEDESCRIPTION	CShockTrooper::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE(CShockTrooper, CHGrunt)
+
+const NamedSoundScript CShockTrooper::painSoundScript = {
+	CHAN_VOICE,
+	{
+		"shocktrooper/shock_trooper_pain1.wav", "shocktrooper/shock_trooper_pain2.wav",
+		"shocktrooper/shock_trooper_pain3.wav", "shocktrooper/shock_trooper_pain4.wav",
+		"shocktrooper/shock_trooper_pain5.wav"
+	},
+	"ShockTrooper.Pain"
+};
+
+const NamedSoundScript CShockTrooper::dieSoundScript = {
+	CHAN_VOICE,
+	{
+		"shocktrooper/shock_trooper_die1.wav", "shocktrooper/shock_trooper_die2.wav",
+		"shocktrooper/shock_trooper_die3.wav", "shocktrooper/shock_trooper_die4.wav"
+	},
+	"ShockTrooper.Die"
+};
+
+const NamedSoundScript CShockTrooper::fireSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/shock_fire.wav"},
+	"ShockTrooper.Fire"
+};
 
 const char *CShockTrooper::pTrooperSentences[] =
 {
@@ -368,7 +398,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			SetBlending( 0, vecGunAngles.x );
 
 			// Play fire sound.
-			EmitSound(CHAN_WEAPON, "weapons/shock_fire.wav", 1, ATTN_NORM);
+			EmitSoundScript(fireSoundScript);
 			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 384, 0.3);
 		}
 		else if (m_pSchedule)
@@ -380,7 +410,6 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 	case STROOPER_AE_KICK:
 	{
-		EmitSoundDyn( CHAN_WEAPON, "zombie/claw_miss2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM + RANDOM_LONG( -5, 5 ) );
 		PerformKick(gSkillData.strooperDmgKick, (m_bRightClaw) ? -10 : 10);
 
 		m_bRightClaw = !m_bRightClaw;
@@ -469,23 +498,16 @@ void CShockTrooper::Precache()
 	iStrooperMuzzleFlash = PRECACHE_MODEL(STROOPER_MUZZLEFLASH);
 	PRECACHE_SOUND("shocktrooper/shock_trooper_attack.wav");
 
-	PRECACHE_SOUND("shocktrooper/shock_trooper_die1.wav");
-	PRECACHE_SOUND("shocktrooper/shock_trooper_die2.wav");
-	PRECACHE_SOUND("shocktrooper/shock_trooper_die3.wav");
-	PRECACHE_SOUND("shocktrooper/shock_trooper_die4.wav");
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(fireSoundScript);
 
-	PRECACHE_SOUND("shocktrooper/shock_trooper_pain1.wav");
-	PRECACHE_SOUND("shocktrooper/shock_trooper_pain2.wav");
-	PRECACHE_SOUND("shocktrooper/shock_trooper_pain3.wav");
-	PRECACHE_SOUND("shocktrooper/shock_trooper_pain4.wav");
-	PRECACHE_SOUND("shocktrooper/shock_trooper_pain5.wav");
+	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
 
-	PRECACHE_SOUND("weapons/shock_fire.wav");
-
-	PRECACHE_SOUND("zombie/claw_miss2.wav");
-
-	UTIL_PrecacheOther("shock_beam", m_soundList);
-	UTIL_PrecacheOther("spore", m_soundList);
+	EntityOverrides entityOverrides;
+	entityOverrides.soundList = m_soundList;
+	UTIL_PrecacheOther("shock_beam", entityOverrides);
+	UTIL_PrecacheOther("spore", entityOverrides);
 	UTIL_PrecacheOther("monster_shockroach");
 
 	// get voice pitch
@@ -501,31 +523,9 @@ void CShockTrooper::Precache()
 //=========================================================
 // PainSound
 //=========================================================
-void CShockTrooper::PainSound(void)
+void CShockTrooper::PlayPainSound(void)
 {
-	if (gpGlobals->time > m_flNextPainTime)
-	{
-		switch (RANDOM_LONG(0, 4))
-		{
-		case 0:
-			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain1.wav", 1, ATTN_NORM);
-			break;
-		case 1:
-			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain2.wav", 1, ATTN_NORM);
-			break;
-		case 2:
-			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain3.wav", 1, ATTN_NORM);
-			break;
-		case 3:
-			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain4.wav", 1, ATTN_NORM);
-			break;
-		case 4:
-			EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_pain5.wav", 1, ATTN_NORM);
-			break;
-		}
-
-		m_flNextPainTime = gpGlobals->time + 1;
-	}
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -533,21 +533,7 @@ void CShockTrooper::PainSound(void)
 //=========================================================
 void CShockTrooper::DeathSound(void)
 {
-	switch (RANDOM_LONG(0, 3))
-	{
-	case 0:
-		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die1.wav", 1, ATTN_IDLE);
-		break;
-	case 1:
-		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die2.wav", 1, ATTN_IDLE);
-		break;
-	case 2:
-		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die3.wav", 1, ATTN_IDLE);
-		break;
-	case 3:
-		EmitSound( CHAN_VOICE, "shocktrooper/shock_trooper_die4.wav", 1, ATTN_IDLE);
-		break;
-	}
+	EmitSoundScript(dieSoundScript);
 }
 
 //=========================================================

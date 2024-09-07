@@ -29,6 +29,7 @@
 #include	"mod_features.h"
 #include	"game.h"
 #include	"gamerules.h"
+#include	"common_soundscripts.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -50,7 +51,7 @@ public:
 	void KeyValue(KeyValueData* pkvd);
 	void SetYawSpeed( void );
 	int DefaultISoundMask( void );
-	void BarneyFirePistol( const char* shotSound, Bullet bullet );
+	void BarneyFirePistol( const char* shotSoundScript, Bullet bullet );
 	void AlertSound( void );
 	const char* DefaultDisplayName() { return "Barney"; }
 	int DefaultClassify( void );
@@ -68,6 +69,11 @@ public:
 
 	void DeathSound( void );
 	void PlayPainSound( void );
+
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript firePistolSoundScript;
+	static constexpr const char* firePythonSoundScript = "Barney.FirePython";
 
 	const char* DefaultSentenceGroup(int group);
 
@@ -88,7 +94,6 @@ public:
 
 protected:
 	void SpawnImpl(const char* modelName, float health);
-	void PrecacheImpl( const char* modelName );
 	void TraceAttackImpl( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet);
 	virtual bool PrioritizeMeleeAttack() { return false; }
 };
@@ -103,6 +108,24 @@ TYPEDESCRIPTION	CBarney::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CBarney, CTalkMonster )
+
+const NamedSoundScript CBarney::painSoundScript = {
+	CHAN_VOICE,
+	{"barney/ba_pain1.wav", "barney/ba_pain2.wav", "barney/ba_pain3.wav"},
+	"Barney.Pain"
+};
+
+const NamedSoundScript CBarney::dieSoundScript = {
+	CHAN_VOICE,
+	{"barney/ba_die1.wav", "barney/ba_die2.wav", "barney/ba_die3.wav"},
+	"Barney.Die"
+};
+
+const NamedSoundScript CBarney::firePistolSoundScript = {
+	CHAN_WEAPON,
+	{"barney/ba_attack2.wav"},
+	"Barney.FirePistol"
+};
 
 //=========================================================
 // AI Schedules Specific to this monster
@@ -282,7 +305,7 @@ BOOL CBarney::CheckRangeAttack1( float flDot, float flDist )
 // BarneyFirePistol - shoots one round from the pistol at
 // the enemy barney is facing.
 //=========================================================
-void CBarney::BarneyFirePistol( const char* shotSound, Bullet bullet )
+void CBarney::BarneyFirePistol( const char* shotSoundScript, Bullet bullet )
 {
 	Vector vecShootOrigin;
 
@@ -296,14 +319,13 @@ void CBarney::BarneyFirePistol( const char* shotSound, Bullet bullet )
 
 	FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, bullet );
 
-	int pitchShift = RANDOM_LONG( 0, 20 );
-	
 	// Only shift about half the time
-	if( pitchShift > 10 )
-		pitchShift = 0;
-	else
-		pitchShift -= 5;
-	EmitSoundDyn( CHAN_WEAPON, shotSound, 1.0f, ATTN_NORM, 0, 100 + pitchShift );
+	SoundScriptParamOverride soundParams;
+	if (RANDOM_LONG(0,1) == 1)
+	{
+		soundParams.OverridePitchShifted(RANDOM_LONG(0,15));
+	}
+	EmitSoundScript(shotSoundScript, soundParams);
 
 	CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 384, 0.3f );
 
@@ -324,16 +346,12 @@ void CBarney::HandleAnimEvent( MonsterEvent_t *pEvent )
 	case BARNEY_AE_SHOOT:
 		if (pev->frags)
 		{
-			if (RANDOM_LONG(0, 1))
-				BarneyFirePistol("weapons/357_shot1.wav", BULLET_MONSTER_357);
-			else
-				BarneyFirePistol("weapons/357_shot2.wav", BULLET_MONSTER_357);
+			BarneyFirePistol(firePythonSoundScript, BULLET_MONSTER_357);
 		}
 		else
 		{
-			BarneyFirePistol("barney/ba_attack2.wav", BULLET_MONSTER_9MM);
+			BarneyFirePistol(firePistolSoundScript, BULLET_MONSTER_9MM);
 		}
-
 		break;
 	case BARNEY_AE_DRAW:
 		// barney's bodygroup switches here so he can pull gun from holster
@@ -389,25 +407,17 @@ void CBarney::SetGunState(int gunState)
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================
-void CBarney::PrecacheImpl(const char* modelName)
-{
-	PrecacheMyModel( modelName );
-	
-	PRECACHE_SOUND("barney/ba_pain1.wav");
-	PRECACHE_SOUND("barney/ba_pain2.wav");
-	PRECACHE_SOUND("barney/ba_pain3.wav");
-	
-	PRECACHE_SOUND("barney/ba_die1.wav");
-	PRECACHE_SOUND("barney/ba_die2.wav");
-	PRECACHE_SOUND("barney/ba_die3.wav");
-}
 
 void CBarney::Precache()
 {
-	PrecacheImpl( "models/barney.mdl" );
+	PrecacheMyModel("models/barney.mdl");
+
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(firePistolSoundScript);
+	RegisterAndPrecacheSoundScript(firePythonSoundScript, NPC::pythonSoundScript);
 
 	PRECACHE_SOUND( "barney/ba_attack1.wav" );
-	PRECACHE_SOUND( "barney/ba_attack2.wav" );
 
 	// every new barney must call this, otherwise
 	// when a level is loaded, nobody will talk (time is reset to 0)
@@ -462,18 +472,7 @@ void CBarney::KeyValue(KeyValueData *pkvd)
 //=========================================================
 void CBarney::PlayPainSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 2:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain3.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EmitSoundScriptTalk(painSoundScript);
 }
 
 //=========================================================
@@ -481,18 +480,7 @@ void CBarney::PlayPainSound( void )
 //=========================================================
 void CBarney::DeathSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 2:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 void CBarney::TraceAttackImpl( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, bool hasHelmet)
@@ -711,6 +699,17 @@ public:
 	
 	int m_iHead;
 	void SetGunState(int gunState);
+
+	static constexpr const char* fireDesertEagleSoundScript = "Otis.FireDesertEagle";
+	static constexpr const char* painSoundScript = "Otis.Pain";
+	static constexpr const char* dieSoundScript = "Otis.Die";
+
+	void DeathSound() {
+		EmitSoundScriptTalk(dieSoundScript);
+	}
+	void PlayPainSound() {
+		EmitSoundScriptTalk(painSoundScript);
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_otis, COtis )
@@ -737,8 +736,12 @@ void COtis::SetGunState(int gunState)
 
 void COtis::Precache()
 {
-	PrecacheImpl("models/otis.mdl");
-	PRECACHE_SOUND("weapons/desert_eagle_fire.wav");
+	PrecacheMyModel("models/otis.mdl");
+
+	RegisterAndPrecacheSoundScript(fireDesertEagleSoundScript, NPC::desertEagleSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript, CBarney::painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript, CBarney::dieSoundScript);
+
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
@@ -795,7 +798,7 @@ void COtis::HandleAnimEvent( MonsterEvent_t *pEvent )
 	switch( pEvent->event )
 	{
 		case BARNEY_AE_SHOOT:
-			BarneyFirePistol("weapons/desert_eagle_fire.wav", BULLET_MONSTER_357);
+			BarneyFirePistol(fireDesertEagleSoundScript, BULLET_MONSTER_357);
 			break;
 			
 		case BARNEY_AE_DRAW:
@@ -891,10 +894,32 @@ public:
 	void DeathSound( void );
 	void PlayPainSound( void );
 
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript firePistolSoundScript;
+
 	void OnDying();
 };
 
 LINK_ENTITY_TO_CLASS( monster_barniel, CBarniel )
+
+const NamedSoundScript CBarniel::painSoundScript = {
+	CHAN_VOICE,
+	{ "barniel/bn_pain1.wav" },
+	"Barniel.Pain"
+};
+
+const NamedSoundScript CBarniel::dieSoundScript = {
+	CHAN_VOICE,
+	{ "barniel/bn_die1.wav" },
+	"Barniel.Die"
+};
+
+const NamedSoundScript CBarniel::firePistolSoundScript = {
+	CHAN_WEAPON,
+	{"barniel/bn_attack2.wav"},
+	"Barniel.FirePistol"
+};
 
 void CBarniel::Spawn()
 {
@@ -909,12 +934,13 @@ void CBarniel::Spawn()
 
 void CBarniel::Precache()
 {
-	PrecacheImpl("models/barniel.mdl");
-	PRECACHE_SOUND( "barniel/bn_attack1.wav" );
-	PRECACHE_SOUND( "barniel/bn_attack2.wav" );
+	PrecacheMyModel("models/barniel.mdl");
 
-	PRECACHE_SOUND( "barniel/bn_pain1.wav" );
-	PRECACHE_SOUND( "barniel/bn_die1.wav" );
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(firePistolSoundScript);
+
+	PRECACHE_SOUND( "barniel/bn_attack1.wav" );
 
 	TalkInit();
 	CTalkMonster::Precache();
@@ -956,7 +982,7 @@ void CBarniel::HandleAnimEvent( MonsterEvent_t *pEvent )
 	switch( pEvent->event )
 	{
 	case BARNEY_AE_SHOOT:
-		BarneyFirePistol("barniel/bn_attack2.wav", BULLET_MONSTER_9MM);
+		BarneyFirePistol(firePistolSoundScript, BULLET_MONSTER_9MM);
 		break;
 	default:
 		CBarney::HandleAnimEvent( pEvent );
@@ -965,12 +991,12 @@ void CBarniel::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 void CBarniel::DeathSound( void )
 {
-	EmitSoundDyn( CHAN_VOICE, "barniel/bn_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 void CBarniel::PlayPainSound()
 {
-	EmitSoundDyn( CHAN_VOICE, "barniel/bn_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundScriptTalk(painSoundScript);
 }
 
 void CBarniel::OnDying()
@@ -1036,6 +1062,10 @@ public:
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void OnDying();
 
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript firePistolSoundScript;
+
 protected:
 	CBaseEntity* FindKickTarget();
 	bool PrioritizeMeleeAttack() { return true; }
@@ -1045,6 +1075,24 @@ protected:
 };
 
 LINK_ENTITY_TO_CLASS( monster_kate, CKate )
+
+const NamedSoundScript CKate::painSoundScript = {
+	CHAN_VOICE,
+	{ "kate/ka_pain1.wav", "kate/ka_pain2.wav" },
+	"Kate.Pain"
+};
+
+const NamedSoundScript CKate::dieSoundScript = {
+	CHAN_VOICE,
+	{ "kate/ka_die1.wav" },
+	"Kate.Die"
+};
+
+const NamedSoundScript CKate::firePistolSoundScript = {
+	CHAN_WEAPON,
+	{"kate/ka_attack2.wav"},
+	"Kate.FirePistol"
+};
 
 void CKate::Spawn()
 {
@@ -1060,13 +1108,14 @@ void CKate::Spawn()
 
 void CKate::Precache()
 {
-	PrecacheImpl("models/kate.mdl");
-	PRECACHE_SOUND( "kate/ka_attack1.wav" );
-	PRECACHE_SOUND( "kate/ka_attack2.wav" );
+	PrecacheMyModel("models/kate.mdl");
 
-	PRECACHE_SOUND( "kate/ka_pain1.wav" );
-	PRECACHE_SOUND( "kate/ka_pain2.wav" );
-	PRECACHE_SOUND( "kate/ka_die1.wav" );
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(firePistolSoundScript);
+	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
+
+	PRECACHE_SOUND( "kate/ka_attack1.wav" );
 
 	PRECACHE_SOUND( "zombie/claw_miss1.wav" );
 	PRECACHE_SOUND( "zombie/claw_miss2.wav" );
@@ -1113,7 +1162,7 @@ void CKate::HandleAnimEvent( MonsterEvent_t *pEvent )
 	switch( pEvent->event )
 	{
 	case BARNEY_AE_SHOOT:
-		BarneyFirePistol("kate/ka_attack2.wav", BULLET_MONSTER_9MM);
+		BarneyFirePistol(firePistolSoundScript, BULLET_MONSTER_9MM);
 		break;
 	case KATE_AE_KICK:
 	{
@@ -1195,20 +1244,12 @@ BOOL CKate::CheckMeleeAttack1(float flDot, float flDist)
 
 void CKate::DeathSound( void )
 {
-	EmitSoundDyn( CHAN_VOICE, "kate/ka_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 void CKate::PlayPainSound()
 {
-	switch( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_VOICE, "kate/ka_pain1.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_VOICE, "kate/ka_pain2.wav", 1.0f, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EmitSoundScriptTalk(painSoundScript);
 }
 
 void CKate::OnDying()

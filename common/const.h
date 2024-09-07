@@ -634,9 +634,9 @@
 
 // attenuation values
 #define ATTN_NONE			0
-#define ATTN_NORM			(float)0.8
-#define ATTN_IDLE			(float)2
-#define ATTN_STATIC			(float)1.25 
+#define ATTN_NORM			0.8f
+#define ATTN_IDLE			2.0f
+#define ATTN_STATIC			1.25f
 
 // pitch values
 #define PITCH_NORM			100	// non-pitch shifted
@@ -644,7 +644,7 @@
 #define PITCH_HIGH			120
 
 // volume values
-#define VOL_NORM			1.0
+#define VOL_NORM			1.0f
 
 // plats
 #define PLAT_LOW_TRIGGER		1

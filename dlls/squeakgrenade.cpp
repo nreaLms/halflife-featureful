@@ -73,6 +73,12 @@ public:
 protected:
 	void SpawnImpl(const char* modelName, float damage);
 	void PrecacheImpl(const char* modelName);
+
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript gibbedSoundScript;
+	static const NamedSoundScript squeakSoundScript;
+	static const NamedSoundScript deploySoundScript;
+	static const NamedSoundScript bounceSoundScript;
 };
 
 float CSqueakGrenade::m_flNextBounceSoundTime = 0;
@@ -90,6 +96,42 @@ TYPEDESCRIPTION	CSqueakGrenade::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CSqueakGrenade, CGrenade )
+
+const NamedSoundScript CSqueakGrenade::dieSoundScript = {
+	CHAN_ITEM,
+	{"squeek/sqk_blast1.wav"},
+	1.0f,
+	0.5f,
+	"Snark.Die"
+};
+
+const NamedSoundScript CSqueakGrenade::gibbedSoundScript = {
+	CHAN_VOICE,
+	{"common/bodysplat.wav"},
+	0.75f,
+	ATTN_NORM,
+	200,
+	"Snark.Gibbed"
+};
+
+const NamedSoundScript CSqueakGrenade::squeakSoundScript = {
+	CHAN_VOICE,
+	{"squeek/sqk_die1.wav"},
+	IntRange(100, 163),
+	"Snark.Squeak"
+};
+
+const NamedSoundScript CSqueakGrenade::deploySoundScript = {
+	CHAN_WEAPON,
+	{"squeek/sqk_deploy1.wav"},
+	"Snark.Deploy"
+};
+
+const NamedSoundScript CSqueakGrenade::bounceSoundScript = {
+	CHAN_VOICE,
+	{"squeek/sqk_hunt1.wav", "squeek/sqk_hunt2.wav", "squeek/sqk_hunt3.wav"},
+	"Snark.Bounce"
+};
 
 #define SQUEEK_DETONATE_DELAY	15.0f
 
@@ -149,13 +191,11 @@ void CSqueakGrenade::Precache()
 void CSqueakGrenade::PrecacheImpl( const char* modelName )
 {
 	PRECACHE_MODEL( modelName );
-	PRECACHE_SOUND( "squeek/sqk_blast1.wav" );
-	PRECACHE_SOUND( "common/bodysplat.wav" );
-	PRECACHE_SOUND( "squeek/sqk_die1.wav" );
-	PRECACHE_SOUND( "squeek/sqk_hunt1.wav" );
-	PRECACHE_SOUND( "squeek/sqk_hunt2.wav" );
-	PRECACHE_SOUND( "squeek/sqk_hunt3.wav" );
-	PRECACHE_SOUND( "squeek/sqk_deploy1.wav" );
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(gibbedSoundScript);
+	RegisterAndPrecacheSoundScript(squeakSoundScript);
+	RegisterAndPrecacheSoundScript(deploySoundScript);
+	RegisterAndPrecacheSoundScript(bounceSoundScript);
 }
 
 void CSqueakGrenade::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
@@ -171,7 +211,7 @@ void CSqueakGrenade::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, in
 	pev->takedamage = DAMAGE_NO;
 
 	// play squeek blast
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_ITEM, "squeek/sqk_blast1.wav", 1, 0.5f, 0, PITCH_NORM );
+	EmitSoundScript(dieSoundScript);
 
 	CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, SMALL_EXPLOSION_VOLUME, 3.0f );
 
@@ -191,7 +231,7 @@ void CSqueakGrenade::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, in
 
 void CSqueakGrenade::GibMonster( void )
 {
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "common/bodysplat.wav", 0.75f, ATTN_NORM, 0, 200 );
+	EmitSoundScript(gibbedSoundScript);
 }
 
 float CSqueakGrenade::AdditionalExplosionDamage()
@@ -268,7 +308,7 @@ void CSqueakGrenade::HuntThink( void )
 	// squeek if it's about time blow up
 	if( ( m_flDie - gpGlobals->time <= 0.5f ) && ( m_flDie - gpGlobals->time >= 0.3f ) )
 	{
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "squeek/sqk_die1.wav", 1, ATTN_NORM, 0, 100 + RANDOM_LONG( 0, 0x3F ) );
+		EmitSoundScript(squeakSoundScript);
 		CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 256, 0.25f );
 	}
 
@@ -372,7 +412,9 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 				// m_flDie += 2.0f; // add more life
 
 				// make bite sound
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "squeek/sqk_deploy1.wav", 1.0f, ATTN_NORM, 0, (int)flpitch );
+				SoundScriptParamOverride param;
+				param.OverridePitchRelative((int)flpitch);
+				EmitSoundScript(deploySoundScript, param);
 				m_flNextAttack = gpGlobals->time + 0.5f;
 			}
 		}
@@ -398,14 +440,9 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 	if( !( pev->flags & FL_ONGROUND ) )
 	{
 		// play bounce sound
-		float flRndSound = RANDOM_FLOAT( 0.0f, 1.0f );
-
-		if( flRndSound <= 0.33f )
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "squeek/sqk_hunt1.wav", 1, ATTN_NORM, 0, (int)flpitch );
-		else if( flRndSound <= 0.66f )
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "squeek/sqk_hunt2.wav", 1, ATTN_NORM, 0, (int)flpitch );
-		else
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "squeek/sqk_hunt3.wav", 1, ATTN_NORM, 0, (int)flpitch );
+		SoundScriptParamOverride param;
+		param.OverridePitchRelative((int)flpitch);
+		EmitSoundScript(bounceSoundScript, param);
 		CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 256, 0.25f );
 	}
 	else
@@ -439,6 +476,7 @@ void CPenguinGrenade::Spawn()
 
 void CPenguinGrenade::Precache()
 {
+	PrecacheBaseGrenadeSounds();
 	PrecacheImpl("models/w_penguin.mdl");
 }
 

@@ -30,6 +30,7 @@
 #include "items.h"
 #include "gamerules.h"
 #include "animation.h"
+#include "common_soundscripts.h"
 
 extern int gmsgItemPickup;
 
@@ -378,7 +379,7 @@ void CPickup::Materialize( void )
 	if( pev->effects & EF_NODRAW )
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
+		EmitSoundScript(Items::materializeSoundScript);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
@@ -569,6 +570,8 @@ LINK_ENTITY_TO_CLASS( item_suit, CItemSuit )
 class CItemBattery : public CItem
 {
 public:
+	static constexpr const char* pickupSoundScript = "Battery.Pickup";
+
 	void Spawn( void )
 	{
 		Precache();
@@ -578,7 +581,7 @@ public:
 	void Precache( void )
 	{
 		PrecacheMyModel( DefaultModel() );
-		PRECACHE_SOUND( "items/gunpickup2.wav" );
+		RegisterAndPrecacheSoundScript(pickupSoundScript, Items::pickupSoundScript);
 	}
 	BOOL MyTouch( CBasePlayer *pPlayer )
 	{
@@ -591,7 +594,7 @@ public:
 		{
 			pPlayer->TakeArmor(this, pev->health > 0 ? pev->health : DefaultCapacity());
 
-			EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+			pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 				WRITE_STRING( STRING( pev->classname ) );
@@ -837,6 +840,8 @@ class CItemFlashlight : public CItem
 	static bool g_hasFlashlightModel;
 	static bool g_checkedFlashligthModel;
 public:
+	static constexpr const char* pickupSoundScript = "Flashlight.Pickup";
+
 	void Spawn( void )
 	{
 		Precache();
@@ -858,7 +863,7 @@ public:
 		}
 
 		PrecacheMyModel (DefaultModel());
-		PRECACHE_SOUND( "items/gunpickup2.wav" );
+		RegisterAndPrecacheSoundScript(pickupSoundScript, Items::pickupSoundScript);
 	}
 	const char* DefaultModel()
 	{
@@ -880,7 +885,7 @@ public:
 		MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
 			WRITE_STRING( STRING(pev->classname) );
 		MESSAGE_END();
-		EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+		pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 		return TRUE;
 	}
 };

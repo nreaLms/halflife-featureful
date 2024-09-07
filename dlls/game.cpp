@@ -22,6 +22,8 @@
 #include "saverestore.h"
 #include "locus.h"
 #include "ammo_amounts.h"
+#include "inventory.h"
+#include "soundscripts.h"
 #include "followers.h"
 #include "savetitles.h"
 #include "vcs_info.h"
@@ -1363,7 +1365,6 @@ cvar_t sv_busters = { "sv_busters", "0" };
 extern void RegisterAmmoTypes();
 extern void ReportRegisteredAmmoTypes();
 extern void LoadWarpballTemplates();
-extern void ReadInventorySpec();
 
 // Register your console variables here
 // This gets called one time when the game is initialied
@@ -1378,6 +1379,7 @@ void GameDLLInit( void )
 	RegisterAmmoTypes();
 	LoadWarpballTemplates();
 	ReadInventorySpec();
+	ReadSoundScripts();
 	ReadFollowersDescription();
 	ReadSaveTitles();
 
@@ -1968,6 +1970,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("dump_precached_models", ReportPrecachedModels);
 	g_engfuncs.pfnAddServerCommand("dump_precached_sounds", ReportPrecachedSounds);
 	g_engfuncs.pfnAddServerCommand("dump_sound_replacements", ReportSoundReplacements);
+	g_engfuncs.pfnAddServerCommand("dump_soundscripts", DumpSoundScripts);
 }
 
 bool ItemsPickableByTouch()

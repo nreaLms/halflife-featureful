@@ -78,6 +78,16 @@ public:
 
 	int		m_iM249Shell;
 	int		m_iM249Link;
+
+	static constexpr const char* painSoundScript = "HWGrunt.Pain";
+	static constexpr const char* dieSoundScript = "HWGrunt.Die";
+
+	static const NamedSoundScript shootSoundScript;
+	static const NamedSoundScript spinDownSoundScript;
+	static const NamedSoundScript spinUpSoundScript;
+
+	static constexpr const char* useSoundScript = "HWGrunt.Use";
+	static constexpr const char* unuseSoundScript = "HWGrunt.UnUse";
 };
 
 LINK_ENTITY_TO_CLASS( monster_hwgrunt, CHWGrunt )
@@ -88,6 +98,24 @@ TYPEDESCRIPTION	CHWGrunt::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CHWGrunt, CFollowingMonster )
+
+const NamedSoundScript CHWGrunt::shootSoundScript = {
+	CHAN_WEAPON,
+	{"hassault/hw_shoot2.wav", "hassault/hw_shoot3.wav"},
+	"HWGrunt.Shoot"
+};
+
+const NamedSoundScript CHWGrunt::spinDownSoundScript = {
+	CHAN_WEAPON,
+	{"hassault/hw_spindown.wav"},
+	"HWGrunt.Spindown"
+};
+
+const NamedSoundScript CHWGrunt::spinUpSoundScript = {
+	CHAN_WEAPON,
+	{"hassault/hw_spinup.wav"},
+	"HWGrunt.Spinup"
+};
 
 void CHWGrunt::Spawn()
 {
@@ -118,20 +146,15 @@ void CHWGrunt::Precache()
 {
 	PrecacheMyModel("models/hwgrunt.mdl");
 
-	PRECACHE_SOUND( "hgrunt/gr_die1.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_die2.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_die3.wav" );
+	RegisterAndPrecacheSoundScript(painSoundScript, CHGrunt::painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript, CHGrunt::dieSoundScript);
 
-	PRECACHE_SOUND( "hgrunt/gr_pain1.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain2.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain3.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain4.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain5.wav" );
+	RegisterAndPrecacheSoundScript(shootSoundScript);
+	RegisterAndPrecacheSoundScript(spinDownSoundScript);
+	RegisterAndPrecacheSoundScript(spinUpSoundScript);
 
-	PRECACHE_SOUND( "hassault/hw_shoot2.wav" );
-	PRECACHE_SOUND( "hassault/hw_shoot3.wav" );
-	PRECACHE_SOUND( "hassault/hw_spindown.wav" );
-	PRECACHE_SOUND( "hassault/hw_spinup.wav" );
+	RegisterAndPrecacheSoundScript(useSoundScript, CHGrunt::useSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript, CHGrunt::unuseSoundScript);
 
 	m_iM249Shell = PRECACHE_MODEL ("models/saw_shell.mdl");// saw shell
 	m_iM249Link = PRECACHE_MODEL ("models/saw_link.mdl");// saw link
@@ -195,7 +218,7 @@ void CHWGrunt::SetActivity( Activity NewActivity )
 {
 	if (NewActivity == ACT_THREAT_DISPLAY)
 	{
-		EmitSound( CHAN_WEAPON, "hassault/hw_spinup.wav", 1, ATTN_NORM );
+		EmitSoundScript(spinUpSoundScript);
 	}
 	CFollowingMonster::SetActivity(NewActivity);
 }
@@ -233,7 +256,7 @@ void CHWGrunt::StartTask( Task_t *pTask )
 		break;
 	case TASK_HWGRUNT_PLAY_SPINDOWN:
 	{
-		EmitSound( CHAN_WEAPON, "hassault/hw_spindown.wav", 1, ATTN_NORM );
+		EmitSoundScript(spinDownSoundScript);
 		int iSequence = LookupSequence("spindown");
 		if( iSequence > ACTIVITY_NOT_AVAILABLE )
 		{
@@ -291,71 +314,24 @@ void CHWGrunt::RunTask( Task_t *pTask )
 
 void CHWGrunt::PlayUseSentence()
 {
-	switch(RANDOM_LONG(0,2))
-	{
-	case 0:
-		EmitSound( CHAN_VOICE, "!HG_ANSWER0", HWGRUNT_VOLUME, ATTN_NORM );
-		break;
-	case 1:
-		EmitSound( CHAN_VOICE, "!HG_ANSWER1", HWGRUNT_VOLUME, ATTN_NORM );
-		break;
-	case 2:
-		EmitSound( CHAN_VOICE, "!HG_ANSWER2", HWGRUNT_VOLUME, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(useSoundScript);
 }
 
 void CHWGrunt::PlayUnUseSentence()
 {
-	switch(RANDOM_LONG(0,1))
-	{
-	case 0:
-		EmitSound( CHAN_VOICE, "!HG_ANSWER5", HWGRUNT_VOLUME, ATTN_NORM );
-		break;
-	case 1:
-		EmitSound( CHAN_VOICE, "!HG_QUEST4", HWGRUNT_VOLUME, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(unuseSoundScript);
 }
 
 void CHWGrunt::DeathSound()
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSound( CHAN_VOICE, "hgrunt/gr_die1.wav", 1, ATTN_IDLE );
-		break;
-	case 1:
-		EmitSound( CHAN_VOICE, "hgrunt/gr_die2.wav", 1, ATTN_IDLE );
-		break;
-	case 2:
-		EmitSound( CHAN_VOICE, "hgrunt/gr_die3.wav", 1, ATTN_IDLE );
-		break;
-	}
+	EmitSoundScript(dieSoundScript);
 }
 
 void CHWGrunt::PainSound( void )
 {
 	if( gpGlobals->time > m_flNextPainTime )
 	{
-		switch( RANDOM_LONG( 0, 6 ) )
-		{
-		case 0:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain3.wav", 1, ATTN_NORM );
-			break;
-		case 1:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain4.wav", 1, ATTN_NORM );
-			break;
-		case 2:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain5.wav", 1, ATTN_NORM );
-			break;
-		case 3:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain1.wav", 1, ATTN_NORM );
-			break;
-		case 4:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain2.wav", 1, ATTN_NORM );
-			break;
-		}
+		EmitSoundScript(painSoundScript);
 
 		m_flNextPainTime = gpGlobals->time + 1;
 	}
@@ -368,11 +344,7 @@ void CHWGrunt::Shoot()
 		return;
 	}
 
-	switch ( RANDOM_LONG(0,1) )
-	{
-		case 0: EmitSound( CHAN_WEAPON, "hassault/hw_shoot2.wav", 1, ATTN_NORM ); break;
-		case 1: EmitSound( CHAN_WEAPON, "hassault/hw_shoot3.wav", 1, ATTN_NORM ); break;
-	}
+	EmitSoundScript(shootSoundScript);
 
 	Vector vecShootOrigin = GetGunPosition();
 	Vector vecShootDir = ShootAtEnemy( vecShootOrigin );

@@ -88,8 +88,10 @@ public:
 		pev->absmax = pev->origin + Vector( 8, 8, 2 );
 	}
 
-	void AttackSound( void );
-	void AlertSound( void );
+	void AttackSound();
+	void AlertSound();
+	void PainSound();
+	void DeathSound();
 	void UpdateMotion( void );
 	float ObstacleDistance( CBaseEntity *pTarget );
 	void MakeVectors( void );
@@ -111,8 +113,10 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	static const char *pAttackSounds[];
-	static const char *pAlertSounds[];
+	static const NamedSoundScript attackSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
 
 	virtual int DefaultSizeForGrapple() { return GRAPPLE_SMALL; }
 	bool IsDisplaceable() { return true; }
@@ -160,17 +164,30 @@ TYPEDESCRIPTION	CLeech::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CLeech, CBaseMonster )
 
-const char *CLeech::pAttackSounds[] =
-{
-	"leech/leech_bite1.wav",
-	"leech/leech_bite2.wav",
-	"leech/leech_bite3.wav",
+const NamedSoundScript CLeech::attackSoundScript = {
+	CHAN_VOICE,
+	{"leech/leech_bite1.wav", "leech/leech_bite2.wav", "leech/leech_bite3.wav"},
+	"Leech.Attack"
 };
 
-const char *CLeech::pAlertSounds[] =
-{
-	"leech/leech_alert1.wav",
-	"leech/leech_alert2.wav",
+const NamedSoundScript CLeech::alertSoundScript = {
+	CHAN_VOICE,
+	{"leech/leech_alert1.wav", "leech/leech_alert2.wav"},
+	1.0f,
+	ATTN_NORM * 0.5f,
+	"Leech.Alert"
+};
+
+const NamedSoundScript CLeech::painSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Leech.Pain"
+};
+
+const NamedSoundScript CLeech::dieSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Leech.Die"
 };
 
 void CLeech::Spawn( void )
@@ -267,14 +284,24 @@ void CLeech::AttackSound( void )
 {
 	if( gpGlobals->time > m_attackSoundTime )
 	{
-		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0f, ATTN_NORM, 0, PITCH_NORM );
+		EmitSoundScript(attackSoundScript);
 		m_attackSoundTime = gpGlobals->time + 0.5f;
 	}
 }
 
 void CLeech::AlertSound( void )
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAlertSounds ), 1.0f, ATTN_NORM * 0.5f, 0, PITCH_NORM );
+	EmitSoundScript(alertSoundScript);
+}
+
+void CLeech::PainSound()
+{
+	EmitSoundScript(painSoundScript);
+}
+
+void CLeech::DeathSound()
+{
+	EmitSoundScript(dieSoundScript);
 }
 
 void CLeech::Precache( void )
@@ -282,8 +309,10 @@ void CLeech::Precache( void )
 	//PRECACHE_MODEL( "models/icky.mdl" );
 	PrecacheMyModel( "models/leech.mdl" );
 
-	PRECACHE_SOUND_ARRAY( pAttackSounds );
-	PRECACHE_SOUND_ARRAY( pAlertSounds );
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
 }
 
 int CLeech::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
@@ -689,4 +718,5 @@ void CLeech::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 	pev->movetype = MOVETYPE_TOSS;
 	pev->takedamage = DAMAGE_NO;
 	SetThink( &CLeech::DeadThink );
+	DeathSound();
 }

@@ -40,6 +40,7 @@
 #include "color_utils.h"
 #include "inventory.h"
 #include "followers.h"
+#include "common_soundscripts.h"
 
 #if FEATURE_ROPE
 #include "ropes.h"
@@ -484,7 +485,7 @@ int CBasePlayer::TakeHealth( CBaseEntity* pHealer, float flHealth, int bitsDamag
 					MESSAGE_END();
 
 					if (healed == 0) {
-						EMIT_SOUND( ENT( pev ), CHAN_ITEM, AMMO_PICKUP_SOUND, 1, ATTN_NORM );
+						EmitSoundScript(Items::ammoPickupSoundScript);
 					}
 				}
 
@@ -1874,11 +1875,11 @@ void CBasePlayer::PlayerUse( void )
 
 					if( pTrain->Classify() == CLASS_VEHICLE )
 					{
-						EMIT_SOUND( ENT( pev ), CHAN_ITEM, "plats/vehicle_ignition.wav", 0.8, ATTN_NORM );
+						EmitSoundScript(Player::vehicleIgnitionSoundScript);
 						( (CFuncVehicle *)pTrain )->m_pDriver = this;
 					}
 					else
-						EMIT_SOUND( ENT( pev ), CHAN_ITEM, "plats/train_use1.wav", 0.8, ATTN_NORM );
+						EmitSoundScript(Player::trainUseSoundScript);
 					return;
 				}
 			}
@@ -3426,7 +3427,7 @@ void CBasePlayer::PostThink()
 			{
 				//splat
 				// note: play on item channel because we play footstep landing on body channel
-				EMIT_SOUND( ENT( pev ), CHAN_ITEM, "common/bodysplat.wav", 1, ATTN_NORM );
+				EmitSoundScript(Player::fallBodySplatSoundScript);
 			}
 
 			if( flFallDamage > 0 )

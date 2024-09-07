@@ -33,6 +33,7 @@
 #include "gamerules.h"
 #include "ammoregistry.h"
 #include "ammo_amounts.h"
+#include "common_soundscripts.h"
 
 extern int gEvilImpulse101;
 
@@ -284,7 +285,7 @@ void RegisterAmmoTypes()
 }
 
 // called by worldspawn
-void W_Precache( void )
+void W_Precache( CBaseEntity* pWorld )
 {
 	memset( CBasePlayerWeapon::ItemInfoArray, 0, sizeof(CBasePlayerWeapon::ItemInfoArray) );
 
@@ -410,18 +411,13 @@ void W_Precache( void )
 	PRECACHE_MODEL( "models/grenade.mdl" );
 	PRECACHE_MODEL( "sprites/explode1.spr" );
 
-	PRECACHE_SOUND( "weapons/debris1.wav" );// explosion aftermaths
-	PRECACHE_SOUND( "weapons/debris2.wav" );// explosion aftermaths
-	PRECACHE_SOUND( "weapons/debris3.wav" );// explosion aftermaths
-
-	PRECACHE_SOUND( "weapons/grenade_hit1.wav" );//grenade
-	PRECACHE_SOUND( "weapons/grenade_hit2.wav" );//grenade
-	PRECACHE_SOUND( "weapons/grenade_hit3.wav" );//grenade
-
 	PRECACHE_SOUND( "weapons/bullet_hit1.wav" );	// hit by bullet
 	PRECACHE_SOUND( "weapons/bullet_hit2.wav" );	// hit by bullet
 
-	PRECACHE_SOUND( "items/weapondrop1.wav" );// weapon falls to the ground
+	pWorld->RegisterAndPrecacheSoundScript(Items::weaponDropSoundScript);// weapon falls to the ground
+	pWorld->RegisterAndPrecacheSoundScript(Items::weaponEmptySoundScript);
+
+	UTIL_PrecacheOther("grenade");
 }
 
 TYPEDESCRIPTION	CBasePlayerWeapon::m_SaveData[] =
@@ -504,8 +500,7 @@ void CBasePlayerWeapon::FallThink( void )
 		// don't clatter if the gun is waiting to respawn (if it's waiting, it is invisible!)
 		if( !FNullEnt( pev->owner ) )
 		{
-			int pitch = 95 + RANDOM_LONG( 0, 29 );
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "items/weapondrop1.wav", 1, ATTN_NORM, 0, pitch );
+			EmitSoundScript(Items::weaponDropSoundScript);
 		}
 
 		// lie flat
@@ -537,7 +532,7 @@ void CBasePlayerWeapon::Materialize( void )
 	if( pev->effects & EF_NODRAW )
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "items/suitchargeok1.wav", 1, ATTN_NORM, 0, 150 );
+		EmitSoundScript(Items::materializeSoundScript);
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
@@ -671,7 +666,7 @@ void CBasePlayerWeapon::TouchOrUse(CBaseEntity *pOther )
 
 	if( pOther->AddPlayerItem( this ) == GOT_NEW_ITEM )
 	{
-		EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+		pPlayer->EmitSoundScript(GetSoundScript(Items::weaponPickupSoundScript));
 	}
 
 	SUB_UseTargets( pOther );
@@ -887,7 +882,7 @@ BOOL CBasePlayerWeapon::AddPrimaryAmmo( int iCount )
 		{
 			// play the "got ammo" sound only if we gave some ammo to a player that already had this gun.
 			// if the player is just getting this gun for the first time, DefaultTouch will play the "picked up gun" sound for us.
-			EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
+			EmitSoundScript(Items::ammoPickupSoundScript);
 		}
 	}
 
@@ -903,7 +898,7 @@ BOOL CBasePlayerWeapon::AddSecondaryAmmo(int iCount)
 	if( iIdAmmo > 0 )
 	{
 		m_iSecondaryAmmoType = iIdAmmo;
-		EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
+		EmitSoundScript(Items::ammoPickupSoundScript);
 	}
 	return iIdAmmo > 0 ? TRUE : FALSE;
 }
@@ -978,7 +973,7 @@ BOOL CBasePlayerWeapon::PlayEmptySound( void )
 {
 	if( m_iPlayEmptySound )
 	{
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM );
+		m_pPlayer->EmitSoundScript(Items::weaponEmptySoundScript);
 		m_iPlayEmptySound = 0;
 		return 0;
 	}
@@ -1296,7 +1291,7 @@ void CWeaponBox::TouchOrUse( CBaseEntity *pOther )
 	}
 
 	if (shouldRemove) {
-		EMIT_SOUND( pOther->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
+		pOther->EmitSoundScript(GetSoundScript(Items::weaponPickupSoundScript));
 		SetTouch( NULL );
 		SUB_UseTargets( pOther );
 		UTIL_Remove(this);

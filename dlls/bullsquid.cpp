@@ -28,6 +28,7 @@
 #include	"scripted.h"
 #include	"game.h"
 #include	"bullsquid.h"
+#include	"common_soundscripts.h"
 
 // Slow big poisonous ball as alternative range attack for bullsquid
 #define FEATURE_BULLSQUID_TOXICSPIT 1
@@ -78,12 +79,14 @@ void CSquidSpit::Spawn( void )
 void CSquidSpit::Precache()
 {
 	PRECACHE_MODEL( "sprites/bigspit.spr" );
-	PRECACHE_SOUND( "bullchicken/bc_acid1.wav" );
-
-	PRECACHE_SOUND( "bullchicken/bc_spithit1.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_spithit2.wav" );
-
+	PrecacheSounds();
 	iSquidSpitSprite = PRECACHE_MODEL( "sprites/tinyspit.spr" );// client side spittle.
+}
+
+void CSquidSpit::PrecacheSounds()
+{
+	RegisterAndPrecacheSoundScript(spitTouchSoundScript, NPC::spitTouchSoundScript);
+	RegisterAndPrecacheSoundScript(spitHitSoundScript, NPC::spitHitSoundScript);
 }
 
 void CSquidSpit::SpawnHelper(const char *className)
@@ -135,22 +138,9 @@ void CSquidSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity
 void CSquidSpit::Touch( CBaseEntity *pOther )
 {
 	TraceResult tr;
-	int iPitch;
 
-	// splat sound
-	iPitch = RANDOM_FLOAT( 90.0f, 110.0f );
-
-	EmitSoundDyn( CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );
-
-	switch( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	}
+	EmitSoundScript(spitTouchSoundScript);
+	EmitSoundScript(spitHitSoundScript);
 
 	if( !pOther->pev->takedamage )
 	{
@@ -195,6 +185,20 @@ TYPEDESCRIPTION	CSquidToxicSpit::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CSquidToxicSpit, CBaseEntity )
 
+const NamedSoundScript CSquidToxicSpit::acidSoundScript = {
+	CHAN_VOICE,
+	{"bullchicken/bc_acid2.wav"},
+	IntRange(90, 110),
+	"Bullsquid.ToxicSpitTouch"
+};
+
+const NamedSoundScript CSquidToxicSpit::spithitSoundScript = {
+	CHAN_WEAPON,
+	{"bullchicken/bc_spithit2.wav", "bullchicken/bc_spithit3.wav"},
+	IntRange(90, 110),
+	"Bullsquid.ToxicSpitHit"
+};
+
 void CSquidToxicSpit::Spawn( void )
 {
 	Precache();
@@ -220,10 +224,9 @@ void CSquidToxicSpit::Spawn( void )
 void CSquidToxicSpit::Precache()
 {
 	PRECACHE_MODEL( "sprites/cnt1.spr" );
-	PRECACHE_SOUND( "bullchicken/bc_acid2.wav" );
 
-	PRECACHE_SOUND( "bullchicken/bc_spithit2.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_spithit3.wav" );
+	RegisterAndPrecacheSoundScript(acidSoundScript);
+	RegisterAndPrecacheSoundScript(spithitSoundScript);
 
 	m_iImpactSprite = PRECACHE_MODEL( "sprites/tinyspit.spr" );
 	m_iFleckSprite = PRECACHE_MODEL( "sprites/glow01.spr" );
@@ -299,22 +302,9 @@ void CSquidToxicSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVel
 void CSquidToxicSpit::Touch( CBaseEntity *pOther )
 {
 	TraceResult tr;
-	int iPitch;
 
-	// splat sound
-	iPitch = RANDOM_FLOAT( 90, 110 );
-
-	EmitSoundDyn( CHAN_VOICE, "bullchicken/bc_acid2.wav", 1, ATTN_NORM, 0, iPitch );
-
-	switch( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit3.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	}
+	EmitSoundScript(acidSoundScript);
+	EmitSoundScript(spithitSoundScript);
 
 	if( !pOther->pev->takedamage )
 	{
@@ -421,11 +411,14 @@ public:
 	float m_flNextSpitTime;// last time the bullsquid used the spit attack.
 	float m_flNextHopTime;
 
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
-	static const char *pPainSounds[];
-	static const char *pDieSounds[];
-	static const char *pAttackGrowlSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript attackGrowlSoundScript;
+	static const NamedSoundScript attackSoundScript;
+	static const NamedSoundScript attackToxicSoundScript;
+	static const NamedSoundScript biteSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_bullchicken, CBullsquid )
@@ -440,41 +433,59 @@ TYPEDESCRIPTION	CBullsquid::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CBullsquid, CBaseMonster )
 
-const char *CBullsquid::pIdleSounds[] =
-{
-	"bullchicken/bc_idle1.wav",
-	"bullchicken/bc_idle2.wav",
-	"bullchicken/bc_idle3.wav",
-	"bullchicken/bc_idle4.wav",
-	"bullchicken/bc_idle5.wav",
+#define SQUID_ATTN_IDLE	1.5f
+
+const NamedSoundScript CBullsquid::idleSoundScript = {
+	CHAN_VOICE,
+	{"bullchicken/bc_idle1.wav", "bullchicken/bc_idle2.wav", "bullchicken/bc_idle3.wav", "bullchicken/bc_idle4.wav", "bullchicken/bc_idle5.wav"},
+	1.0f,
+	SQUID_ATTN_IDLE,
+	"Bullsquid.Idle"
 };
 
-const char *CBullsquid::pAlertSounds[] =
-{
-	"bullchicken/bc_idle1.wav",
-	"bullchicken/bc_idle2.wav",
+const NamedSoundScript CBullsquid::alertSoundScript = {
+	CHAN_VOICE,
+	{ "bullchicken/bc_idle1.wav", "bullchicken/bc_idle2.wav" },
+	IntRange(140, 160),
+	"Bullsquid.Alert"
 };
 
-const char *CBullsquid::pPainSounds[] =
-{
-	"bullchicken/bc_pain1.wav",
-	"bullchicken/bc_pain2.wav",
-	"bullchicken/bc_pain3.wav",
-	"bullchicken/bc_pain4.wav",
+const NamedSoundScript CBullsquid::painSoundScript = {
+	CHAN_VOICE,
+	{"bullchicken/bc_pain1.wav", "bullchicken/bc_pain2.wav", "bullchicken/bc_pain3.wav", "bullchicken/bc_pain4.wav"},
+	IntRange(85, 120),
+	"Bullsquid.Pain"
 };
 
-const char *CBullsquid::pDieSounds[] =
-{
-	"bullchicken/bc_die1.wav",
-	"bullchicken/bc_die2.wav",
-	"bullchicken/bc_die3.wav",
+const NamedSoundScript CBullsquid::dieSoundScript = {
+	CHAN_VOICE,
+	{"bullchicken/bc_die1.wav", "bullchicken/bc_die2.wav", "bullchicken/bc_die3.wav"},
+	"Bullsquid.Die"
 };
 
-const char *CBullsquid::pAttackGrowlSounds[] =
-{
-	"bullchicken/bc_attackgrowl.wav",
-	"bullchicken/bc_attackgrowl2.wav",
-	"bullchicken/bc_attackgrowl3.wav",
+const NamedSoundScript CBullsquid::attackGrowlSoundScript = {
+	CHAN_VOICE,
+	{"bullchicken/bc_attackgrowl.wav", "bullchicken/bc_attackgrowl2.wav", "bullchicken/bc_attackgrowl3.wav"},
+	"Bullsquid.Growl"
+};
+
+const NamedSoundScript CBullsquid::attackSoundScript = {
+	CHAN_WEAPON,
+	{"bullchicken/bc_attack2.wav", "bullchicken/bc_attack3.wav"},
+	"Bullsquid.Attack"
+};
+
+const NamedSoundScript CBullsquid::attackToxicSoundScript = {
+	CHAN_WEAPON,
+	{"bullchicken/bc_attack1.wav"},
+	"Bullsquid.AttackToxic"
+};
+
+const NamedSoundScript CBullsquid::biteSoundScript = {
+	CHAN_WEAPON,
+	{"bullchicken/bc_bite2.wav", "bullchicken/bc_bite3.wav"},
+	IntRange(90, 110),
+	"Bullsquid.Bite"
 };
 
 //=========================================================
@@ -671,10 +682,10 @@ int CBullsquid::DefaultClassify( void )
 //=========================================================
 // IdleSound 
 //=========================================================
-#define SQUID_ATTN_IDLE	(float)1.5
+
 void CBullsquid::IdleSound( void )
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1, SQUID_ATTN_IDLE );
+	EmitSoundScript(idleSoundScript);
 }
 
 //=========================================================
@@ -682,8 +693,7 @@ void CBullsquid::IdleSound( void )
 //=========================================================
 void CBullsquid::PainSound( void )
 {
-	int iPitch = RANDOM_LONG( 85, 120 );
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1, ATTN_NORM, 0, iPitch );
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -691,8 +701,7 @@ void CBullsquid::PainSound( void )
 //=========================================================
 void CBullsquid::AlertSound( void )
 {
-	int iPitch = RANDOM_LONG( 140, 160 );
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1, ATTN_NORM, 0, iPitch );
+	EmitSoundScript(alertSoundScript);
 }
 
 //=========================================================
@@ -842,24 +851,13 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 			break;
 		case BSQUID_AE_THROW:
 			{
-				int iPitch;
-
 				// squid throws its prey IF the prey is a client. 
 				CBaseEntity *pHurt = CheckTraceHullAttack( 70, 0, 0 );
 
 				if( pHurt )
 				{
 					// croonchy bite sound
-					iPitch = RANDOM_FLOAT( 90.0f, 110.0f );
-					switch( RANDOM_LONG( 0, 1 ) )
-					{
-					case 0:
-						EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite2.wav", 1.0f, ATTN_NORM, 0, iPitch );
-						break;
-					case 1:
-						EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_bite3.wav", 1.0f, ATTN_NORM, 0, iPitch );
-						break;
-					}
+					EmitSoundScript(biteSoundScript);
 
 					//pHurt->pev->punchangle.x = RANDOM_LONG( 0, 34 ) - 5;
 					//pHurt->pev->punchangle.z = RANDOM_LONG( 0, 49 ) - 25;
@@ -912,25 +910,25 @@ void CBullsquid::Precache()
 {
 	PrecacheMyModel( "models/bullsquid.mdl" );
 
-	UTIL_PrecacheOther("squidspit", m_soundList);
+	EntityOverrides entityOverrides;
+	entityOverrides.soundList = m_soundList;
+
+	UTIL_PrecacheOther("squidspit", entityOverrides);
 #if FEATURE_BULLSQUID_TOXICSPIT
-	UTIL_PrecacheOther("squidtoxicspit", m_soundList); // toxic spit projectile
+	UTIL_PrecacheOther("squidtoxicspit", entityOverrides); // toxic spit projectile
 #endif
 
-	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
+	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 
-	PRECACHE_SOUND( "bullchicken/bc_attack1.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_attack2.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_attack3.wav" );
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(attackGrowlSoundScript);
 
-	PRECACHE_SOUND_ARRAY(pIdleSounds);
-	PRECACHE_SOUND_ARRAY(pAlertSounds);
-	PRECACHE_SOUND_ARRAY(pPainSounds);
-	PRECACHE_SOUND_ARRAY(pDieSounds);
-	PRECACHE_SOUND_ARRAY(pAttackGrowlSounds);
-
-	PRECACHE_SOUND( "bullchicken/bc_bite2.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_bite3.wav" );
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(attackToxicSoundScript);
+	RegisterAndPrecacheSoundScript(biteSoundScript);
 }
 
 //=========================================================
@@ -938,7 +936,7 @@ void CBullsquid::Precache()
 //=========================================================
 void CBullsquid::DeathSound( void )
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDieSounds), 1, ATTN_NORM );
+	EmitSoundScript(dieSoundScript);
 }
 
 //=========================================================
@@ -947,17 +945,9 @@ void CBullsquid::DeathSound( void )
 void CBullsquid::AttackSound( bool bigSpit )
 {
 	if (bigSpit) {
-		EmitSound( CHAN_WEAPON, "bullchicken/bc_attack1.wav", 1, ATTN_NORM );
+		EmitSoundScript(attackToxicSoundScript);
 	} else {
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EmitSound( CHAN_WEAPON, "bullchicken/bc_attack2.wav", 1, ATTN_NORM );
-			break;
-		case 1:
-			EmitSound( CHAN_WEAPON, "bullchicken/bc_attack3.wav", 1, ATTN_NORM );
-			break;
-		}
+		EmitSoundScript(attackSoundScript);
 	}
 }
 
@@ -1409,7 +1399,7 @@ void CBullsquid::StartTask( Task_t *pTask )
 	{
 	case TASK_MELEE_ATTACK2:
 		{
-			EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackGrowlSounds), 1, ATTN_NORM );
+			EmitSoundScript(attackGrowlSoundScript);
 			CBaseMonster::StartTask( pTask );
 			break;
 		}

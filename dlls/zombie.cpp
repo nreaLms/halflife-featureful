@@ -25,6 +25,7 @@
 #include	"schedule.h"
 #include	"mod_features.h"
 #include	"game.h"
+#include	"common_soundscripts.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -54,12 +55,12 @@ public:
 	void IdleSound( void );
 	void AttackSound( void );
 
-	static const char *pAttackSounds[];
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
-	static const char *pPainSounds[];
-	static const char *pAttackHitSounds[];
-	static const char *pAttackMissSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript attackSoundScript;
+	static constexpr const char* attackHitSoundScript = "Zombie.AttackHit";
+	static constexpr const char* attackMissSoundScript = "Zombie.AttackMiss";
 
 	// No range attacks
 	BOOL CheckRangeAttack1( float flDot, float flDist ) { return FALSE; }
@@ -80,44 +81,32 @@ protected:
 
 LINK_ENTITY_TO_CLASS( monster_zombie, CZombie )
 
-const char *CZombie::pAttackHitSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav",
+const NamedSoundScript CZombie::idleSoundScript = {
+	CHAN_VOICE,
+	{"zombie/zo_idle1.wav", "zombie/zo_idle2.wav", "zombie/zo_idle3.wav", "zombie/zo_idle4.wav"},
+	IntRange(95, 104),
+	"Zombie.Idle"
 };
 
-const char *CZombie::pAttackMissSounds[] =
-{
-	"zombie/claw_miss1.wav",
-	"zombie/claw_miss2.wav",
+const NamedSoundScript CZombie::alertSoundScript = {
+	CHAN_VOICE,
+	{"zombie/zo_alert10.wav", "zombie/zo_alert20.wav", "zombie/zo_alert30.wav"},
+	IntRange(95, 104),
+	"Zombie.Alert"
 };
 
-const char *CZombie::pAttackSounds[] =
-{
-	"zombie/zo_attack1.wav",
-	"zombie/zo_attack2.wav",
+const NamedSoundScript CZombie::painSoundScript = {
+	CHAN_VOICE,
+	{"zombie/zo_pain1.wav", "zombie/zo_pain2.wav"},
+	IntRange(95, 104),
+	"Zombie.Pain"
 };
 
-const char *CZombie::pIdleSounds[] =
-{
-	"zombie/zo_idle1.wav",
-	"zombie/zo_idle2.wav",
-	"zombie/zo_idle3.wav",
-	"zombie/zo_idle4.wav",
-};
-
-const char *CZombie::pAlertSounds[] =
-{
-	"zombie/zo_alert10.wav",
-	"zombie/zo_alert20.wav",
-	"zombie/zo_alert30.wav",
-};
-
-const char *CZombie::pPainSounds[] =
-{
-	"zombie/zo_pain1.wav",
-	"zombie/zo_pain2.wav",
+const NamedSoundScript CZombie::attackSoundScript = {
+	CHAN_VOICE,
+	{"zombie/zo_attack1.wav", "zombie/zo_attack2.wav"},
+	IntRange(95, 104),
+	"Zombie.Attack"
 };
 
 //=========================================================
@@ -160,33 +149,23 @@ int CZombie::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 
 void CZombie::PainSound( void )
 {
-	int pitch = 95 + RANDOM_LONG( 0, 9 );
-
 	if( RANDOM_LONG( 0, 5 ) < 2 )
-		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0, ATTN_NORM, 0, pitch );
+		EmitSoundScript(painSoundScript);
 }
 
 void CZombie::AlertSound( void )
 {
-	int pitch = 95 + RANDOM_LONG( 0, 9 );
-
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAlertSounds ), 1.0, ATTN_NORM, 0, pitch );
+	EmitSoundScript(alertSoundScript);
 }
 
 void CZombie::IdleSound( void )
 {
-	int pitch = 95 + RANDOM_LONG( 0, 9 );
-
-	// Play a random idle sound
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pIdleSounds ), 1.0, ATTN_NORM, 0, pitch );
+	EmitSoundScript(idleSoundScript);
 }
 
 void CZombie::AttackSound( void )
 {
-	int pitch = 95 + RANDOM_LONG( 0, 9 );
-
-	// Play a random attack sound
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0, ATTN_NORM, 0, pitch );
+	EmitSoundScript(attackSoundScript);
 }
 
 //=========================================================
@@ -206,11 +185,10 @@ void CZombie::SlashAttack(float dmg, float rightScalar, float forwardScalar, flo
 			pHurt->pev->punchangle.x = 5;
 			pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * rightScalar + gpGlobals->v_forward * forwardScalar;
 		}
-		// Play a random attack hit sound
-		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackHitSounds), 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5) );
+		EmitSoundScript(attackHitSoundScript);
 	}
 	else // Play a random attack miss sound
-		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pAttackMissSounds), 1.0, ATTN_NORM, 0, 100 + RANDOM_LONG(-5,5) );
+		EmitSoundScript(attackMissSoundScript);
 
 	if (RANDOM_LONG(0,1))
 		AttackSound();
@@ -275,12 +253,12 @@ void CZombie::Precache()
 
 void CZombie::PrecacheSounds()
 {
-	PRECACHE_SOUND_ARRAY( pAttackHitSounds );
-	PRECACHE_SOUND_ARRAY( pAttackMissSounds );
-	PRECACHE_SOUND_ARRAY( pAttackSounds );
-	PRECACHE_SOUND_ARRAY( pIdleSounds );
-	PRECACHE_SOUND_ARRAY( pAlertSounds );
-	PRECACHE_SOUND_ARRAY( pPainSounds );
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
+	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
 }
 
 //=========================================================

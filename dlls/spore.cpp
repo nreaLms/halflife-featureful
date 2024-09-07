@@ -26,6 +26,20 @@ TYPEDESCRIPTION	CSpore::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CSpore, CGrenade)
 
+const NamedSoundScript CSpore::bounceSoundScript = {
+	CHAN_VOICE,
+	{"weapons/splauncher_bounce.wav"},
+	0.25f,
+	ATTN_NORM,
+	"Spore.Bounce"
+};
+
+const NamedSoundScript CSpore::impactSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/splauncher_impact.wav"},
+	"Spore.Impact"
+};
+
 void CSpore::Precache(void)
 {
 	PRECACHE_MODEL("models/spore.mdl");
@@ -35,8 +49,8 @@ void CSpore::Precache(void)
 	m_iBlowSmall = PRECACHE_MODEL("sprites/spore_exp_c_01.spr");
 	m_iSpitSprite = m_iTrail = PRECACHE_MODEL("sprites/tinyspit.spr");
 
-	PRECACHE_SOUND("weapons/splauncher_bounce.wav");
-	PRECACHE_SOUND("weapons/splauncher_impact.wav");
+	RegisterAndPrecacheSoundScript(bounceSoundScript);
+	RegisterAndPrecacheSoundScript(impactSoundScript);
 }
 
 void CSpore::Spawn()
@@ -101,11 +115,6 @@ void CSpore::Spawn()
 	m_flSoundDelay = gpGlobals->time;
 }
 
-void CSpore::BounceSound()
-{
-	//Nothing
-}
-
 void CSpore::IgniteThink()
 {
 	SetThink(NULL);
@@ -117,7 +126,7 @@ void CSpore::IgniteThink()
 		m_hSprite = 0;
 	}
 
-	EmitSound(CHAN_WEAPON, "weapons/splauncher_impact.wav", VOL_NORM, ATTN_NORM);
+	EmitSoundScript(impactSoundScript);
 
 	const Vector vecDir = pev->velocity.Normalize();
 
@@ -254,7 +263,7 @@ void CSpore::MyBounceTouch(CBaseEntity* pOther)
 			}
 			else
 			{
-				EmitSoundDyn(CHAN_VOICE, "weapons/splauncher_bounce.wav", 0.25, ATTN_NORM, 0, PITCH_NORM);
+				EmitSoundScript(bounceSoundScript);
 			}
 		}
 	}
@@ -324,6 +333,8 @@ public:
 
 	virtual int SizeForGrapple() { return GRAPPLE_FIXED; }
 
+	static const NamedSoundScript ammoSoundScript;
+
 	int m_iExplode;
 };
 
@@ -341,17 +352,23 @@ typedef enum
 
 LINK_ENTITY_TO_CLASS( ammo_spore, CSporeAmmo )
 
-void CSporeAmmo :: Precache( void )
+const NamedSoundScript CSporeAmmo::ammoSoundScript = {
+	CHAN_ITEM,
+	{"weapons/spore_ammo.wav"},
+	"Spore.Ammo"
+};
+
+void CSporeAmmo::Precache( void )
 {
 	PRECACHE_MODEL("models/spore_ammo.mdl");
 	m_iExplode = PRECACHE_MODEL ("sprites/spore_exp_c_01.spr");
-	PRECACHE_SOUND("weapons/spore_ammo.wav");
+	RegisterAndPrecacheSoundScript(ammoSoundScript);
 	UTIL_PrecacheOther ( "spore" );
 }
 //=========================================================
 // Spawn
 //=========================================================
-void CSporeAmmo :: Spawn( void )
+void CSporeAmmo::Spawn( void )
 {
 	Precache( );
 	SET_MODEL(ENT(pev), "models/spore_ammo.mdl");
@@ -429,7 +446,7 @@ int CSporeAmmo::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 	return 0;
 }
 
-void CSporeAmmo :: IdleThink ( void )
+void CSporeAmmo::IdleThink ( void )
 {
 	switch (pev->sequence)
 	{
@@ -462,7 +479,7 @@ void CSporeAmmo :: IdleThink ( void )
 	}
 }
 
-void CSporeAmmo :: AmmoTouch ( CBaseEntity *pOther )
+void CSporeAmmo::AmmoTouch ( CBaseEntity *pOther )
 {
 	if ( !pOther->IsPlayer() || pev->body == 0 )
 		return;
@@ -470,7 +487,7 @@ void CSporeAmmo :: AmmoTouch ( CBaseEntity *pOther )
 	int bResult = (pOther->GiveAmmo( AMMO_SPORE_GIVE, "spores" ) != -1);
 	if (bResult)
 	{
-		EmitSound(CHAN_ITEM, "weapons/spore_ammo.wav", 1, ATTN_NORM);
+		EmitSoundScript(ammoSoundScript);
 
 		pev->frame = 0;
 		pev->animtime		= gpGlobals->time;

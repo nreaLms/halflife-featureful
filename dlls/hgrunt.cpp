@@ -43,6 +43,7 @@
 #include	"gamerules.h"
 #include	"hgrunt.h"
 #include	"mod_features.h"
+#include	"common_soundscripts.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -124,6 +125,34 @@ const char *CHGrunt::pGruntSentences[] =
 	"HG_HOSTILE",
 };
 
+const NamedSoundScript CHGrunt::painSoundScript = {
+	CHAN_VOICE,
+	{"hgrunt/gr_pain1.wav", "hgrunt/gr_pain2.wav", "hgrunt/gr_pain3.wav", "hgrunt/gr_pain4.wav", "hgrunt/gr_pain5.wav"},
+	"HGrunt.Pain"
+};
+
+const NamedSoundScript CHGrunt::dieSoundScript = {
+	CHAN_VOICE,
+	{"hgrunt/gr_die1.wav", "hgrunt/gr_die2.wav", "hgrunt/gr_die3.wav"},
+	"HGrunt.Die"
+};
+
+const NamedSoundScript CHGrunt::useSoundScript = {
+	CHAN_VOICE,
+	{"!HG_ANSWER0", "!HG_ANSWER1", "!HG_ANSWER2"},
+	HGRUNT_SENTENCE_VOLUME,
+	GRUNT_ATTN,
+	"HGrunt.Use"
+};
+
+const NamedSoundScript CHGrunt::unuseSoundScript = {
+	CHAN_VOICE,
+	{"!HG_ANSWER5", "!HG_QUEST4"},
+	HGRUNT_SENTENCE_VOLUME,
+	GRUNT_ATTN,
+	"HGrunt.UnUse"
+};
+
 //=========================================================
 // Speak Sentence - say your cued up sentence.
 //
@@ -166,39 +195,27 @@ bool CHGrunt::PlaySentenceGroup(const char *group, int flags)
 	return false;
 }
 
-void CHGrunt::PlaySentenceSound(const char *sound)
+void CHGrunt::PlaySentenceSoundScript(const char *soundScript)
 {
-	EMIT_SOUND_DYN( edict(), CHAN_VOICE, sound, SentenceVolume(), SentenceAttn(), 0, m_voicePitch );
-	JustSpoke();
+	if (EmitSoundScriptTalk(soundScript))
+		JustSpoke();
+}
+
+bool CHGrunt::EmitSoundScriptTalk(const char* name)
+{
+	SoundScriptParamOverride paramOverride;
+	paramOverride.OverridePitchRelative(m_voicePitch);
+	return EmitSoundScript(name, paramOverride);
 }
 
 void CHGrunt::PlayUseSentence()
 {
-	switch(RANDOM_LONG(0,2))
-	{
-	case 0:
-		PlaySentenceSound("!HG_ANSWER0");
-		break;
-	case 1:
-		PlaySentenceSound("!HG_ANSWER1");
-		break;
-	case 2:
-		PlaySentenceSound("!HG_ANSWER2");
-		break;
-	}
+	PlaySentenceSoundScript(useSoundScript);
 }
 
 void CHGrunt::PlayUnUseSentence()
 {
-	switch(RANDOM_LONG(0,1))
-	{
-	case 0:
-		PlaySentenceSound("!HG_ANSWER5");
-		break;
-	case 1:
-		PlaySentenceSound("!HG_QUEST4");
-		break;
-	}
+	PlaySentenceSoundScript(unuseSoundScript);
 }
 
 //=========================================================
@@ -845,14 +862,22 @@ void CHGrunt::Shotgun( void )
 void CHGrunt::PlayFirstBurstSounds()
 {
 	// the first round of the three round burst plays the sound and puts a sound in the world sound list.
-	if( RANDOM_LONG( 0, 1 ) )
-	{
-		EmitSound( CHAN_WEAPON, "hgrunt/gr_mgun1.wav", 1, ATTN_NORM );
-	}
-	else
-	{
-		EmitSound( CHAN_WEAPON, "hgrunt/gr_mgun2.wav", 1, ATTN_NORM );
-	}
+	EmitSoundScript(burst9mmSoundScript);
+}
+
+void CHGrunt::PlayReloadSound()
+{
+	EmitSoundScript(reloadSoundScript);
+}
+
+void CHGrunt::PlayGrenadeLaunchSound()
+{
+	EmitSoundScript(grenadeLaunchSoundScript);
+}
+
+void CHGrunt::PlayShogtunSound()
+{
+	EmitSoundScript(shotgunSoundScript);
 }
 
 void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
@@ -866,7 +891,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 			break;
 		case HGRUNT_AE_RELOAD:
-			EmitSound( CHAN_WEAPON, "hgrunt/gr_reload1.wav", 1, ATTN_NORM );
+			PlayReloadSound();
 			m_cAmmoLoaded = m_cClipSize;
 			ClearConditions( bits_COND_NO_AMMO_LOADED );
 			break;
@@ -898,7 +923,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			break;
 		case HGRUNT_AE_GREN_LAUNCH:
 		{
-			EmitSound( CHAN_WEAPON, "weapons/glauncher.wav", 0.8, ATTN_NORM );
+			PlayGrenadeLaunchSound();
 			//LRC: firing due to a script?
 			if (m_pCine)
 			{
@@ -938,7 +963,7 @@ void CHGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			else
 			{
 				Shotgun();
-				EmitSound( CHAN_WEAPON, "weapons/sbarrel1.wav", 1, ATTN_NORM );
+				PlayShogtunSound();
 			}
 
 			CSoundEnt::InsertSound( bits_SOUND_COMBAT, pev->origin, 384, 0.3 );
@@ -1066,31 +1091,23 @@ void CHGrunt::Spawn()
 void CHGrunt::PrecacheHelper(const char *modelName)
 {
 	PrecacheMyModel( modelName );
-	PRECACHE_SOUND( "hgrunt/gr_mgun1.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_mgun2.wav" );
-
-	PRECACHE_SOUND( "hgrunt/gr_reload1.wav" );
-
-	PRECACHE_SOUND( "weapons/glauncher.wav" );
-
-	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
+	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 }
 
 void CHGrunt::Precache()
 {
 	PrecacheHelper("models/hgrunt.mdl");
 
-	PRECACHE_SOUND( "hgrunt/gr_die1.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_die2.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_die3.wav" );
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
 
-	PRECACHE_SOUND( "hgrunt/gr_pain1.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain2.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain3.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain4.wav" );
-	PRECACHE_SOUND( "hgrunt/gr_pain5.wav" );
+	RegisterAndPrecacheSoundScript(reloadSoundScript, NPC::reloadSoundScript);
+	RegisterAndPrecacheSoundScript(burst9mmSoundScript, NPC::burst9mmSoundScript);
+	RegisterAndPrecacheSoundScript(grenadeLaunchSoundScript, NPC::grenadeLaunchSoundScript);
+	RegisterAndPrecacheSoundScript(shotgunSoundScript, NPC::shotgunSoundScript);
 
-	PRECACHE_SOUND( "weapons/sbarrel1.wav" );
+	RegisterAndPrecacheSoundScript(useSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript);
 
 	// get voice pitch
 	if( RANDOM_LONG( 0, 1 ) )
@@ -1184,27 +1201,14 @@ void CHGrunt::PainSound( void )
 			}
 		}
 #endif
-		switch( RANDOM_LONG( 0, 6 ) )
-		{
-		case 0:	
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain3.wav", 1, ATTN_NORM );
-			break;
-		case 1:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain4.wav", 1, ATTN_NORM );
-			break;
-		case 2:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain5.wav", 1, ATTN_NORM );
-			break;
-		case 3:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain1.wav", 1, ATTN_NORM );
-			break;
-		case 4:
-			EmitSound( CHAN_VOICE, "hgrunt/gr_pain2.wav", 1, ATTN_NORM );
-			break;
-		}
-
+		PlayPainSound();
 		m_flNextPainTime = gpGlobals->time + 1;
 	}
+}
+
+void CHGrunt::PlayPainSound()
+{
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -1212,18 +1216,7 @@ void CHGrunt::PainSound( void )
 //=========================================================
 void CHGrunt::DeathSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSound( CHAN_VOICE, "hgrunt/gr_die1.wav", 1, ATTN_IDLE );
-		break;
-	case 1:
-		EmitSound( CHAN_VOICE, "hgrunt/gr_die2.wav", 1, ATTN_IDLE );
-		break;
-	case 2:
-		EmitSound( CHAN_VOICE, "hgrunt/gr_die3.wav", 1, ATTN_IDLE );
-		break;
-	}
+	EmitSoundScript(dieSoundScript);
 }
 
 float CHGrunt::SentenceVolume()
@@ -2397,10 +2390,12 @@ const char* CHGruntRepel::TrooperName()
 
 void CHGruntRepel::Precache( void )
 {
-	UTIL_PrecacheOther( TrooperName(), m_soundList );
+	EntityOverrides entityOverrides;
+	entityOverrides.model = pev->model;
+	entityOverrides.soundList = m_soundList;
+
+	UTIL_PrecacheOther( TrooperName(), entityOverrides );
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
-	if (!FStringNull(pev->model))
-		PRECACHE_MODEL(STRING(pev->model));
 	if (!FStringNull(m_gibModel))
 		PRECACHE_MODEL(STRING(m_gibModel));
 }

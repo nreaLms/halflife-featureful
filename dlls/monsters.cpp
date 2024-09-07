@@ -35,6 +35,7 @@
 #include "gamerules.h"
 #include "mod_features.h"
 #include "game.h"
+#include "common_soundscripts.h"
 
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
@@ -3173,10 +3174,13 @@ void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 		break;
 	case SCRIPT_EVENT_SOUND:			// Play a named wave file
-		EMIT_SOUND( edict(), CHAN_BODY, pEvent->options, 1.0, ATTN_IDLE );
+		EmitSound( CHAN_BODY, pEvent->options, 1.0, ATTN_IDLE );
 		break;
 	case SCRIPT_EVENT_SOUND_VOICE:
-		EMIT_SOUND( edict(), CHAN_VOICE, pEvent->options, 1.0, ATTN_IDLE );
+		EmitSound( CHAN_VOICE, pEvent->options, 1.0, ATTN_IDLE );
+		break;
+	case SCRIPT_EVENT_SOUND_VOICE_BODY:
+		EmitSound( CHAN_BODY, pEvent->options, 1.0, ATTN_NORM );
 		break;
 	case SCRIPT_EVENT_SENTENCE_RND1:		// Play a named sentence group 33% of the time
 		if( RANDOM_LONG( 0, 2 ) == 0 )
@@ -3204,33 +3208,19 @@ void CBaseMonster::HandleAnimEvent( MonsterEvent_t *pEvent )
 	case MONSTER_EVENT_BODYDROP_HEAVY:
 		if( pev->flags & FL_ONGROUND )
 		{
-			if( RANDOM_LONG( 0, 1 ) == 0 )
-			{
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, "common/bodydrop3.wav", 1, ATTN_NORM, 0, 90 );
-			}
-			else
-			{
-				EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, "common/bodydrop4.wav", 1, ATTN_NORM, 0, 90 );
-			}
+			EmitSoundScript(NPC::bodyDropHeavySoundScript);
 		}
 		break;
 	case MONSTER_EVENT_BODYDROP_LIGHT:
 		if( pev->flags & FL_ONGROUND )
 		{
-			if( RANDOM_LONG( 0, 1 ) == 0 )
-			{
-				EMIT_SOUND( ENT( pev ), CHAN_BODY, "common/bodydrop3.wav", 1, ATTN_NORM );
-			}
-			else
-			{
-				EMIT_SOUND( ENT( pev ), CHAN_BODY, "common/bodydrop4.wav", 1, ATTN_NORM );
-			}
+			EmitSoundScript(NPC::bodyDropLightSoundScript);
 		}
 		break;
 	case MONSTER_EVENT_SWISHSOUND:
 		{
 			// NO MONSTER may use this anim event unless that monster's precache precaches this sound!!!
-			EmitSound( CHAN_BODY, "zombie/claw_miss2.wav", 1, ATTN_NORM );
+			EmitSoundScript(NPC::swishSoundScript);
 			break;
 		}
 	default:

@@ -41,6 +41,7 @@
 #include "pm_shared.h"
 #include "nodes.h"
 #include "game.h"
+#include "common_soundscripts.h"
 
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL		g_fGameOver;
@@ -947,6 +948,9 @@ int PM_IsThereSnowTexture();
 
 void ClientPrecache( void )
 {
+	entvars_t *pevWorld = VARS(INDEXENT(0));
+	CBaseEntity* pWorld = CBaseEntity::Instance(pevWorld);
+
 	// setup precaches always needed
 	PRECACHE_SOUND( "player/sprayer.wav" );			// spray paint sound for PreAlpha
 
@@ -1023,7 +1027,7 @@ void ClientPrecache( void )
 	PRECACHE_SOUND( "debris/wood2.wav" );
 	PRECACHE_SOUND( "debris/wood3.wav" );
 
-	PRECACHE_SOUND( "plats/train_use1.wav" );		// use a train
+	pWorld->RegisterAndPrecacheSoundScript(Player::trainUseSoundScript);		// use a train
 
 	PRECACHE_SOUND( "buttons/spark5.wav" );		// hit computer texture
 	PRECACHE_SOUND( "buttons/spark6.wav" );
@@ -1040,7 +1044,7 @@ void ClientPrecache( void )
 		PRECACHE_SOUND( g_modFeatures.nvg_sound_off );
 
 	// player gib sounds
-	PRECACHE_SOUND( "common/bodysplat.wav" );
+	pWorld->RegisterAndPrecacheSoundScript(Player::fallBodySplatSoundScript);
 
 	// player pain sounds
 	//PRECACHE_SOUND( "player/pl_pain2.wav" );

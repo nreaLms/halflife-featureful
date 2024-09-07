@@ -26,6 +26,7 @@
 #include	"soundent.h"
 #include	"hornet.h"
 #include	"scripted.h"
+#include	"common_soundscripts.h"
 
 //=========================================================
 // monster-specific schedule types
@@ -113,13 +114,18 @@ public:
 	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 64.0f ); }
 
-	static const char *pAttackHitSounds[];
-	static const char *pAttackMissSounds[];
-	static const char *pAttackSounds[];
-	static const char *pDieSounds[];
-	static const char *pPainSounds[];
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
+	static constexpr const char* attackHitSoundScript = "AlienGrunt.AttackHit";
+	static constexpr const char* attackMissSoundScript = "AlienGrunt.AttackMiss";
+	static const NamedSoundScript attackSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript leftFootSoundScript;
+	static const NamedSoundScript rightFootSoundScript;
+	static const NamedSoundScript fireSoundScript;
+	static constexpr const char* useSoundScript = "AlienGrunt.Use";
+	static constexpr const char* unuseSoundScript = "AlienGrunt.UnUse";
 
 	BOOL m_fCanHornetAttack;
 	float m_flNextHornetAttackCheck;
@@ -146,56 +152,54 @@ TYPEDESCRIPTION	CAGrunt::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CAGrunt, CFollowingMonster )
 
-const char *CAGrunt::pAttackHitSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav",
+const NamedSoundScript CAGrunt::attackSoundScript = {
+	CHAN_VOICE,
+	{"agrunt/ag_attack1.wav", "agrunt/ag_attack2.wav", "agrunt/ag_attack3.wav"},
+	"AlienGrunt.Attack"
 };
 
-const char *CAGrunt::pAttackMissSounds[] =
-{
-	"zombie/claw_miss1.wav",
-	"zombie/claw_miss2.wav",
+const NamedSoundScript CAGrunt::dieSoundScript = {
+	CHAN_VOICE,
+	{"agrunt/ag_die1.wav", "agrunt/ag_die4.wav", "agrunt/ag_die5.wav"},
+	"AlienGrunt.Die"
 };
 
-const char *CAGrunt::pAttackSounds[] =
-{
-	"agrunt/ag_attack1.wav",
-	"agrunt/ag_attack2.wav",
-	"agrunt/ag_attack3.wav",
+const NamedSoundScript CAGrunt::painSoundScript = {
+	CHAN_VOICE,
+	{"agrunt/ag_pain1.wav", "agrunt/ag_pain2.wav", "agrunt/ag_pain3.wav", "agrunt/ag_pain4.wav", "agrunt/ag_pain5.wav"},
+	"AlienGrunt.Pain"
 };
 
-const char *CAGrunt::pDieSounds[] =
-{
-	"agrunt/ag_die1.wav",
-	"agrunt/ag_die4.wav",
-	"agrunt/ag_die5.wav",
+const NamedSoundScript CAGrunt::idleSoundScript = {
+	CHAN_VOICE,
+	{"agrunt/ag_idle1.wav", "agrunt/ag_idle2.wav", "agrunt/ag_idle3.wav", "agrunt/ag_idle4.wav"},
+	"AlienGrunt.Idle"
 };
 
-const char *CAGrunt::pPainSounds[] =
-{
-	"agrunt/ag_pain1.wav",
-	"agrunt/ag_pain2.wav",
-	"agrunt/ag_pain3.wav",
-	"agrunt/ag_pain4.wav",
-	"agrunt/ag_pain5.wav",
+const NamedSoundScript CAGrunt::alertSoundScript = {
+	CHAN_VOICE,
+	{"agrunt/ag_alert1.wav", "agrunt/ag_alert3.wav", "agrunt/ag_alert4.wav", "agrunt/ag_alert5.wav"},
+	"AlienGrunt.Alert"
 };
 
-const char *CAGrunt::pIdleSounds[] =
-{
-	"agrunt/ag_idle1.wav",
-	"agrunt/ag_idle2.wav",
-	"agrunt/ag_idle3.wav",
-	"agrunt/ag_idle4.wav",
+const NamedSoundScript CAGrunt::leftFootSoundScript = {
+	CHAN_BODY,
+	{"player/pl_ladder2.wav", "player/pl_ladder4.wav"},
+	IntRange(70),
+	"AlienGrunt.LeftFoot"
 };
 
-const char *CAGrunt::pAlertSounds[] =
-{
-	"agrunt/ag_alert1.wav",
-	"agrunt/ag_alert3.wav",
-	"agrunt/ag_alert4.wav",
-	"agrunt/ag_alert5.wav",
+const NamedSoundScript CAGrunt::rightFootSoundScript = {
+	CHAN_BODY,
+	{"player/pl_ladder1.wav", "player/pl_ladder3.wav"},
+	IntRange(70),
+	"AlienGrunt.RightFoot"
+};
+
+const NamedSoundScript CAGrunt::fireSoundScript = {
+	CHAN_WEAPON,
+	{"agrunt/ag_fire1.wav", "agrunt/ag_fire2.wav", "agrunt/ag_fire3.wav"},
+	"AlienGrunt.Fire"
 };
 
 //=========================================================
@@ -323,15 +327,34 @@ void CAGrunt::PrescheduleThink( void )
 		{
 			int num = -1;
 
-			do
+			const SoundScript* myIdleSoundScript = GetSoundScript(idleSoundScript.name);
+			if (myIdleSoundScript)
 			{
-				num = RANDOM_LONG( 0, ARRAYSIZE( pIdleSounds ) - 1 );
-			} while( num == m_iLastWord );
+				if (myIdleSoundScript->waveCount == 1)
+				{
+					num = 0;
+				}
+				else if (myIdleSoundScript->waveCount > 1)
+				{
+					do
+					{
+						num = RANDOM_LONG(0, myIdleSoundScript->waveCount-1);
+					}
+					while( num == m_iLastWord );
+				}
+				else
+				{
+					num = -1;
+				}
+
+				if (num >= 0)
+				{
+					// play a new sound
+					EmitSoundDyn(myIdleSoundScript->channel, myIdleSoundScript->waves[num], RandomizeNumberFromRange(myIdleSoundScript->volume), myIdleSoundScript->attenuation, 0, RandomizeNumberFromRange(myIdleSoundScript->pitch));
+				}
+			}
 
 			m_iLastWord = num;
-
-			// play a new sound
-			EmitSound( CHAN_VOICE, pIdleSounds[num], 1.0f, ATTN_NORM );
 
 			// is this word our last?
 			if( RANDOM_LONG( 1, 10 ) <= 1 )
@@ -354,8 +377,7 @@ void CAGrunt::PrescheduleThink( void )
 void CAGrunt::DeathSound( void )
 {
 	StopTalking();
-
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pDieSounds ), 1.0f, ATTN_NORM );
+	EmitSoundScript(dieSoundScript);
 }
 
 //=========================================================
@@ -364,8 +386,7 @@ void CAGrunt::DeathSound( void )
 void CAGrunt::AlertSound( void )
 {
 	StopTalking();
-
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAlertSounds ), 1.0f, ATTN_NORM );
+	EmitSoundScript(alertSoundScript);
 }
 
 //=========================================================
@@ -374,8 +395,7 @@ void CAGrunt::AlertSound( void )
 void CAGrunt::AttackSound( void )
 {
 	StopTalking();
-
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0f, ATTN_NORM );
+	EmitSoundScript(attackSoundScript);
 }
 
 //=========================================================
@@ -387,12 +407,10 @@ void CAGrunt::PainSound( void )
 	{
 		return;
 	}
-
 	m_flNextPainTime = gpGlobals->time + 0.6f;
 
 	StopTalking();
-
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), 1.0f, ATTN_NORM );
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -486,18 +504,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			UTIL_MakeVectors( pHornet->pev->angles );
 			pHornet->pev->velocity = gpGlobals->v_forward * 300.0f;
 
-			switch( RANDOM_LONG( 0, 2 ) )
-			{
-				case 0:
-					EmitSoundDyn( CHAN_WEAPON, "agrunt/ag_fire1.wav", 1.0, ATTN_NORM, 0, 100 );
-					break;
-				case 1:
-					EmitSoundDyn( CHAN_WEAPON, "agrunt/ag_fire2.wav", 1.0, ATTN_NORM, 0, 100 );
-					break;
-				case 2:
-					EmitSoundDyn( CHAN_WEAPON, "agrunt/ag_fire3.wav", 1.0, ATTN_NORM, 0, 100 );
-					break;
-			}
+			EmitSoundScript(fireSoundScript);
 
 			CBaseMonster *pHornetMonster = pHornet->MyMonsterPointer();
 
@@ -513,28 +520,11 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 		break;
 	case AGRUNT_AE_LEFT_FOOT:
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		// left foot
-		case 0:
-			EmitSoundDyn( CHAN_BODY, "player/pl_ladder2.wav", 1, ATTN_NORM, 0, 70 );
-			break;
-		case 1:
-			EmitSoundDyn( CHAN_BODY, "player/pl_ladder4.wav", 1, ATTN_NORM, 0, 70 );
-			break;
-		}
+		EmitSoundScript(leftFootSoundScript);
 		break;
 	case AGRUNT_AE_RIGHT_FOOT:
 		// right foot
-		switch( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EmitSoundDyn( CHAN_BODY, "player/pl_ladder1.wav", 1, ATTN_NORM, 0, 70 );
-			break;
-		case 1:
-			EmitSoundDyn( CHAN_BODY, "player/pl_ladder3.wav", 1, ATTN_NORM, 0, 70 );
-			break;
-		}
+		EmitSoundScript(rightFootSoundScript);
 		break;
 
 	case AGRUNT_AE_LEFT_PUNCH:
@@ -553,7 +543,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 					pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * 250.0f;
 				}
 
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackHitSounds ), 1.0f, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
+				EmitSoundScript(attackHitSoundScript);
 
 				Vector vecArmPos, vecArmAng;
 				GetAttachment( 0, vecArmPos, vecArmAng );
@@ -561,8 +551,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 			else
 			{
-				// Play a random attack miss sound
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackMissSounds ), 1.0f, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
+				EmitSoundScript(attackMissSoundScript);
 			}
 		}
 		break;
@@ -582,7 +571,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 					pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_right * -250.0f;
 				}
 
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackHitSounds ), 1.0f, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
+				EmitSoundScript(attackHitSoundScript);
 
 				Vector vecArmPos, vecArmAng;
 				GetAttachment( 0, vecArmPos, vecArmAng );
@@ -590,8 +579,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 			else
 			{
-				// Play a random attack miss sound
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackMissSounds ), 1.0f, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
+				EmitSoundScript(attackMissSoundScript);
 			}
 		}
 		break;
@@ -635,24 +623,24 @@ void CAGrunt::Precache()
 {
 	PrecacheMyModel( "models/agrunt.mdl" );
 
-	PRECACHE_SOUND_ARRAY( pAttackHitSounds );
-	PRECACHE_SOUND_ARRAY( pAttackMissSounds );
-	PRECACHE_SOUND_ARRAY( pIdleSounds );
-	PRECACHE_SOUND_ARRAY( pDieSounds );
-	PRECACHE_SOUND_ARRAY( pPainSounds );
-	PRECACHE_SOUND_ARRAY( pAttackSounds );
-	PRECACHE_SOUND_ARRAY( pAlertSounds );
-
-	PRECACHE_SOUND( "hassault/hw_shoot1.wav" );
-
-	PRECACHE_SOUND( "player/pl_ladder1.wav" );
-	PRECACHE_SOUND( "player/pl_ladder2.wav" );
-	PRECACHE_SOUND( "player/pl_ladder3.wav" );
-	PRECACHE_SOUND( "player/pl_ladder4.wav" );
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
+	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(leftFootSoundScript);
+	RegisterAndPrecacheSoundScript(rightFootSoundScript);
+	RegisterAndPrecacheSoundScript(fireSoundScript);
+	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
+	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 
 	iAgruntMuzzleFlash = PRECACHE_MODEL( "sprites/muz4.spr" );
 
-	UTIL_PrecacheOther( "hornet", m_soundList );
+	EntityOverrides entityOverrides;
+	entityOverrides.soundList = m_soundList;
+	UTIL_PrecacheOther( "hornet", entityOverrides );
 }
 
 //=========================================================
@@ -1200,13 +1188,13 @@ Schedule_t *CAGrunt::GetScheduleOfType( int Type )
 
 void CAGrunt::PlayUseSentence()
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), 1.0, ATTN_NORM );
+	EmitSoundScript(useSoundScript);
 	StopTalking();
 }
 
 void CAGrunt::PlayUnUseSentence()
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), 1.0, ATTN_NORM );
+	EmitSoundScript(unuseSoundScript);
 	StopTalking();
 }
 

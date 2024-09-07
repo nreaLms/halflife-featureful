@@ -29,6 +29,14 @@ TYPEDESCRIPTION	CShock::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CShock, CBaseAnimating)
 
+const NamedSoundScript CShock::impactSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/shock_impact.wav"},
+	FloatRange(0.8f, 0.9f),
+	ATTN_NORM,
+	"ShockBeam.Impact"
+};
+
 void CShock::Spawn(void)
 {
 	Precache();
@@ -54,7 +62,7 @@ void CShock::Precache()
 	PRECACHE_MODEL("sprites/flare3.spr");
 	PRECACHE_MODEL("sprites/lgtning.spr");
 	PRECACHE_MODEL("models/shock_effect.mdl");
-	PRECACHE_SOUND("weapons/shock_impact.wav");
+	RegisterAndPrecacheSoundScript(impactSoundScript);
 }
 
 void CShock::FlyThink()
@@ -62,7 +70,7 @@ void CShock::FlyThink()
 	if (pev->waterlevel == 3)
 	{
 		entvars_t *pevOwner = VARS(pev->owner);
-		EmitSound(CHAN_VOICE, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
+		EmitSoundScript(impactSoundScript);
 		RadiusDamage(pev->origin, pev, pevOwner ? pevOwner : pev, pev->dmg * 3, 144, CLASS_NONE, DMG_SHOCK | DMG_ALWAYSGIB );
 		ClearEffects();
 		SetThink( &CBaseEntity::SUB_Remove );
@@ -153,7 +161,7 @@ void CShock::Touch(CBaseEntity *pOther)
 	}
 
 	// splat sound
-	EmitSound(CHAN_WEAPON, "weapons/shock_impact.wav", VOL_NORM, ATTN_NORM);
+	EmitSoundScript(impactSoundScript);
 
 	pev->modelindex = 0;
 	pev->solid = SOLID_NOT;

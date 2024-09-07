@@ -22,6 +22,7 @@
 #include "effects.h"
 #include "mod_features.h"
 #include "game.h"
+#include "common_soundscripts.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -93,16 +94,20 @@ public:
 
 	int m_iDoSmokePuff;
 	CBeam *m_pBeam;
-	
+
+	static const NamedSoundScript rotorSoundScript;
+	static const NamedSoundScript fireGunSoundScript;
+	static constexpr const char* crashSoundScript = "Apache.Crash";
+
 protected:
 	void SpawnImpl(const char* modelName);
 	void PrecacheImpl(const char* modelName, const char* gibModel);
-	float RotorVolume() const {
+	void SetRotorVolumeOverride(SoundScriptParamOverride& param)
+	{
 		if (pev->armorvalue > 0.0f && pev->armorvalue <= 1.0f)
 		{
-			return pev->armorvalue;
+			param.OverrideVolumeAbsolute(pev->armorvalue);
 		}
-		return VOL_NORM;
 	}
 };
 
@@ -131,6 +136,22 @@ TYPEDESCRIPTION	CApache::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CApache, CBaseMonster )
+
+const NamedSoundScript CApache::rotorSoundScript =  {
+	CHAN_STATIC,
+	{"apache/ap_rotor2.wav"},
+	VOL_NORM,
+	0.3f,
+	"Apache.Rotor"
+};
+
+const NamedSoundScript CApache::fireGunSoundScript = {
+	CHAN_WEAPON,
+	{"turret/tu_fire1.wav"},
+	1.0f,
+	0.3f,
+	"Apache.FireGun"
+};
 
 void CApache::Spawn( void )
 {
@@ -186,22 +207,24 @@ void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
 	PrecacheMyModel( modelName );
 
 	PRECACHE_SOUND( "apache/ap_rotor1.wav" );
-	PRECACHE_SOUND( "apache/ap_rotor2.wav" );
+	RegisterAndPrecacheSoundScript(rotorSoundScript);
 	PRECACHE_SOUND( "apache/ap_rotor3.wav" );
 	PRECACHE_SOUND( "apache/ap_whine1.wav" );
 
-	PRECACHE_SOUND( "weapons/mortarhit.wav" );
+	RegisterAndPrecacheSoundScript(crashSoundScript, NPC::crashSoundScript);
 
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/white.spr" );
 
-	PRECACHE_SOUND( "turret/tu_fire1.wav" );
+	RegisterAndPrecacheSoundScript(fireGunSoundScript);
 
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 
 	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
 	m_iBodyGibs = PRECACHE_MODEL( gibModel );
 
-	UTIL_PrecacheOther( "hvr_rocket" );
+	EntityOverrides entityOverrides;
+	entityOverrides.soundList = m_soundList;
+	UTIL_PrecacheOther( "hvr_rocket", entityOverrides );
 }
 
 void CApache::KeyValue(KeyValueData *pkvd)
@@ -236,7 +259,7 @@ void CApache::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib 
 	pev->movetype = MOVETYPE_TOSS;
 	pev->gravity = 0.3f;
 
-	StopSound( CHAN_STATIC, "apache/ap_rotor2.wav" );
+	StopSoundScript(rotorSoundScript);
 
 	UTIL_SetSize( pev, Vector( -32.0f, -32.0f, -64.0f ), Vector( 32.0f, 32.0f, 0.0f ) );
 	SetThink( &CApache::DyingThink );
@@ -392,7 +415,7 @@ void CApache::DyingThink( void )
 			WRITE_BYTE( 0 );		// speed
 		MESSAGE_END();
 
-		EMIT_SOUND( ENT( pev ), CHAN_STATIC, "weapons/mortarhit.wav", 1.0f, 0.3f );
+		EmitSoundScript(crashSoundScript);
 
 		RadiusDamage( pev->origin, pev, pev, 300, CLASS_NONE, DMG_BLAST );
 
@@ -754,7 +777,10 @@ void CApache::Flight( void )
 	// make rotor, engine sounds
 	if( m_iSoundState == 0 )
 	{
-		EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3f, 0, 110 );
+		SoundScriptParamOverride param;
+		SetRotorVolumeOverride(param);
+		param.OverridePitchRelative(110);
+		EmitSoundScript(rotorSoundScript, param);
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", 0.5, 0.2, 0, 110 );
 
 		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
@@ -782,7 +808,10 @@ void CApache::Flight( void )
 			if( flVol > 1.0f ) 
 				flVol = 1.0f;*/
 
-			EmitSoundDyn( CHAN_STATIC, "apache/ap_rotor2.wav", RotorVolume(), 0.3f, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
+			SoundScriptParamOverride param;
+			SetRotorVolumeOverride(param);
+			param.OverridePitchRelative(pitch);
+			EmitSoundScript(rotorSoundScript, param, SND_CHANGE_PITCH | SND_CHANGE_VOL);
 		}
 		// EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "apache/ap_whine1.wav", flVol, 0.2f, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch );
 	
@@ -886,7 +915,7 @@ BOOL CApache::FireGun()
 	{
 #if 1
 		FireBullets( 1, posGun, vecGun, VECTOR_CONE_4DEGREES, 8192, BULLET_MONSTER_12MM, 1 );
-		EmitSound( CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.3f );
+		EmitSoundScript(fireGunSoundScript);
 #else
 		static float flNext;
 		TraceResult tr;
@@ -1020,6 +1049,8 @@ class CApacheHVR : public CGrenade
 
 	int m_iTrail;
 	Vector m_vecForward;
+
+	static const NamedSoundScript rpgSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( hvr_rocket, CApacheHVR )
@@ -1031,6 +1062,14 @@ TYPEDESCRIPTION	CApacheHVR::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CApacheHVR, CGrenade )
+
+const NamedSoundScript CApacheHVR::rpgSoundScript = {
+	CHAN_VOICE,
+	{"weapons/rocket1.wav"},
+	1.0f,
+	0.5f,
+	"Apache.RPG"
+};
 
 void CApacheHVR::Spawn( void )
 {
@@ -1057,9 +1096,10 @@ void CApacheHVR::Spawn( void )
 
 void CApacheHVR::Precache( void )
 {
+	PrecacheBaseGrenadeSounds();
 	PRECACHE_MODEL( "models/HVR.mdl" );
 	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
-	PRECACHE_SOUND( "weapons/rocket1.wav" );
+	RegisterAndPrecacheSoundScript(rpgSoundScript);
 }
 
 void CApacheHVR::IgniteThink( void )
@@ -1070,7 +1110,7 @@ void CApacheHVR::IgniteThink( void )
 	pev->effects |= EF_LIGHT;
 
 	// make rocket sound
-	EmitSound( CHAN_VOICE, "weapons/rocket1.wav", 1, 0.5f );
+	EmitSoundScript(rpgSoundScript);
 
 	// rocket trail
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );

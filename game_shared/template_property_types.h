@@ -14,9 +14,9 @@ struct Color
 template <typename N>
 struct NumberRange
 {
-	NumberRange(): min(), max() {}
-	NumberRange(N mini, N maxi): min(mini), max(maxi) {}
-	NumberRange(N val): min(val), max(val) {}
+	constexpr NumberRange(): min(), max() {}
+	constexpr NumberRange(N mini, N maxi): min(mini), max(maxi) {}
+	constexpr NumberRange(N val): min(val), max(val) {}
 	N min;
 	N max;
 };

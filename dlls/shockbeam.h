@@ -34,6 +34,8 @@ public:
 	CBeam *m_pBeam;
 	CBeam *m_pNoise;
 	CSprite *m_pSprite;
+
+	static const NamedSoundScript impactSoundScript;
 };
 #endif
 #endif

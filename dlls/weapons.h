@@ -37,6 +37,8 @@ class CGrenade : public CBaseMonster
 {
 public:
 	void Spawn( void );
+	void Precache();
+	void PrecacheBaseGrenadeSounds();
 
 	typedef enum { SATCHEL_DETONATE = 0, SATCHEL_RELEASE } SATCHELCODE;
 
@@ -64,6 +66,11 @@ public:
 	virtual float ExplosionRadius() { return 0.0f; } // if 0 the default radius is used (depending on amount of damage)
 
 	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
+
+#if !CLIENT_DLL
+	static const NamedSoundScript debrisSoundScript;
+	static const NamedSoundScript bounceSoundScript;
+#endif
 };
 
 // constant items
@@ -198,8 +205,6 @@ public:
 #define ITEM_FLAG_NOCHOICE		32
 
 #define WEAPON_IS_ONTARGET 0x40
-
-#define AMMO_PICKUP_SOUND "items/9mmclip1.wav"
 
 typedef struct
 {
@@ -753,6 +758,10 @@ public:
 	int m_iTrail;
 	float m_flIgniteTime;
 	EHANDLE m_hLauncher; // handle back to the launcher that fired me.
+
+#if !CLIENT_DLL
+	static const NamedSoundScript rocketIgniteSoundScript;
+#endif
 };
 
 class CGauss : public CBasePlayerWeapon

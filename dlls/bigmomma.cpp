@@ -25,6 +25,7 @@
 #include	"decals.h"
 #include	"weapons.h"
 #include	"game.h"
+#include	"common_soundscripts.h"
 
 #define SF_INFOBM_RUN		0x0001
 #define SF_INFOBM_WAIT		0x0002
@@ -105,6 +106,7 @@ class CBMortar : public CBaseEntity
 {
 public:
 	void Spawn( void );
+	void Precache();
 
 	static CBMortar *Shoot( edict_t *pOwner, Vector vecStart, Vector vecVelocity, string_t soundList = iStringNull );
 	void Touch( CBaseEntity *pOther );
@@ -115,6 +117,12 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	int m_maxFrame;
+
+	static constexpr const char* spitTouchSoundScript = "BigMomma.SpitTouch";
+	static constexpr const char* spitHitSoundScript = "BigMomma.SpitHit";
+
+	int m_SpitSprite;
+	int m_SpitDebrisSprite;
 };
 
 LINK_ENTITY_TO_CLASS( bmortar, CBMortar )
@@ -161,7 +169,6 @@ IMPLEMENT_SAVERESTORE( CBMortar, CBaseEntity )
 #define bits_MEMORY_COMPLETED_NODE	( bits_MEMORY_CUSTOM3 )
 #define bits_MEMORY_FIRED_NODE		( bits_MEMORY_CUSTOM4 )
 
-int gSpitSprite, gSpitDebrisSprite;
 Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, float maxHeight );
 void MortarSpray( const Vector &position, const Vector &direction, int spriteModel, int count );
 
@@ -297,15 +304,18 @@ public:
 	Vector DefaultMinHullSize() { return Vector( -32.0f, -32.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 32.0f, 32.0f, 64.0f ); }
 
-	static const char *pChildDieSounds[];
-	static const char *pSackSounds[];
-	static const char *pDeathSounds[];
-	static const char *pAttackSounds[];
-	static const char *pAttackHitSounds[];
-	static const char *pBirthSounds[];
-	static const char *pAlertSounds[];
-	static const char *pPainSounds[];
-	static const char *pFootSounds[];
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript attackSoundScript;
+	static constexpr const char* attackHitSoundScript = "BigMomma.AttackHit";
+	static const NamedSoundScript footstepLeftSoundScript;
+	static const NamedSoundScript footstepRightSoundScript;
+	static const NamedSoundScript birthSoundScript;
+	static const NamedSoundScript layHeadcrabSoundScript;
+	static const NamedSoundScript childDieSoundScript;
+	static const NamedSoundScript sackSoundScript;
+	static const NamedSoundScript launchMortarSoundScript;
 
 	CUSTOM_SCHEDULES
 
@@ -315,6 +325,8 @@ private:
 	float m_mortarTime;
 	float m_painSoundTime;
 	int m_crabCount;
+
+	int m_SpitSprite;
 };
 
 LINK_ENTITY_TO_CLASS( monster_bigmomma, CBigMomma )
@@ -330,65 +342,82 @@ TYPEDESCRIPTION	CBigMomma::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CBigMomma, CBaseMonster )
 
-const char *CBigMomma::pChildDieSounds[] =
-{
-	"gonarch/gon_childdie1.wav",
-	"gonarch/gon_childdie2.wav",
-	"gonarch/gon_childdie3.wav",
+constexpr IntRange bigMommaPitch(95, 105);
+
+const NamedSoundScript CBigMomma::alertSoundScript = {
+	CHAN_VOICE,
+	{"gonarch/gon_alert1.wav", "gonarch/gon_alert2.wav", "gonarch/gon_alert3.wav"},
+	bigMommaPitch,
+	"BigMomma.Alert"
 };
 
-const char *CBigMomma::pSackSounds[] =
-{
-	"gonarch/gon_sack1.wav",
-	"gonarch/gon_sack2.wav",
-	"gonarch/gon_sack3.wav",
+const NamedSoundScript CBigMomma::painSoundScript = {
+	CHAN_VOICE,
+	{"gonarch/gon_pain2.wav", "gonarch/gon_pain4.wav", "gonarch/gon_pain5.wav"},
+	bigMommaPitch,
+	"BigMomma.Pain"
 };
 
-const char *CBigMomma::pDeathSounds[] =
-{
-	"gonarch/gon_die1.wav",
+const NamedSoundScript CBigMomma::dieSoundScript = {
+	CHAN_VOICE,
+	{"gonarch/gon_die1.wav"},
+	bigMommaPitch,
+	"BigMomma.Die"
 };
 
-const char *CBigMomma::pAttackSounds[] =
-{
-	"gonarch/gon_attack1.wav",
-	"gonarch/gon_attack2.wav",
-	"gonarch/gon_attack3.wav",
+const NamedSoundScript CBigMomma::attackSoundScript = {
+	CHAN_VOICE,
+	{"gonarch/gon_attack1.wav", "gonarch/gon_attack2.wav", "gonarch/gon_attack3.wav"},
+	"BigMomma.Attack"
 };
 
-const char *CBigMomma::pAttackHitSounds[] =
-{
-	"zombie/claw_strike1.wav",
-	"zombie/claw_strike2.wav",
-	"zombie/claw_strike3.wav",
+const NamedSoundScript CBigMomma::footstepLeftSoundScript = {
+	CHAN_ITEM,
+	{"gonarch/gon_step1.wav", "gonarch/gon_step2.wav", "gonarch/gon_step3.wav"},
+	bigMommaPitch,
+	"BigMomma.FootstepLeft"
 };
 
-const char *CBigMomma::pBirthSounds[] =
-{
-	"gonarch/gon_birth1.wav",
-	"gonarch/gon_birth2.wav",
-	"gonarch/gon_birth3.wav",
+const NamedSoundScript CBigMomma::footstepRightSoundScript = {
+	CHAN_BODY,
+	{"gonarch/gon_step1.wav", "gonarch/gon_step2.wav", "gonarch/gon_step3.wav"},
+	bigMommaPitch,
+	"BigMomma.FootstepRight"
 };
 
-const char *CBigMomma::pAlertSounds[] =
-{
-	"gonarch/gon_alert1.wav",
-	"gonarch/gon_alert2.wav",
-	"gonarch/gon_alert3.wav",
+const NamedSoundScript CBigMomma::birthSoundScript = {
+	CHAN_BODY,
+	{"gonarch/gon_birth1.wav", "gonarch/gon_birth2.wav", "gonarch/gon_birth3.wav"},
+	bigMommaPitch,
+	"BigMomma.Birth"
 };
 
-const char *CBigMomma::pPainSounds[] =
-{
-	"gonarch/gon_pain2.wav",
-	"gonarch/gon_pain4.wav",
-	"gonarch/gon_pain5.wav",
+const NamedSoundScript CBigMomma::layHeadcrabSoundScript = {
+	CHAN_WEAPON,
+	{"gonarch/gon_birth1.wav", "gonarch/gon_birth2.wav", "gonarch/gon_birth3.wav"},
+	bigMommaPitch,
+	"BigMomma.LayHeadcrab"
 };
 
-const char *CBigMomma::pFootSounds[] =
-{
-	"gonarch/gon_step1.wav",
-	"gonarch/gon_step2.wav",
-	"gonarch/gon_step3.wav",
+const NamedSoundScript CBigMomma::childDieSoundScript = {
+	CHAN_WEAPON,
+	{"gonarch/gon_childdie1.wav", "gonarch/gon_childdie2.wav", "gonarch/gon_childdie3.wav"},
+	bigMommaPitch,
+	"BigMomma.ChildDie"
+};
+
+const NamedSoundScript CBigMomma::sackSoundScript = {
+	CHAN_BODY,
+	{"gonarch/gon_sack1.wav", "gonarch/gon_sack2.wav", "gonarch/gon_sack3.wav"},
+	bigMommaPitch,
+	"BigMomma.Sack"
+};
+
+const NamedSoundScript CBigMomma::launchMortarSoundScript = {
+	CHAN_WEAPON,
+	{"gonarch/gon_sack1.wav", "gonarch/gon_sack2.wav", "gonarch/gon_sack3.wav"},
+	bigMommaPitch,
+	"BigMomma.LaunchMortar"
 };
 
 void CBigMomma::KeyValue( KeyValueData *pkvd )
@@ -486,36 +515,36 @@ void CBigMomma::HandleAnimEvent( MonsterEvent_t *pEvent )
 				}
 
 				pHurt->pev->flags &= ~FL_ONGROUND;
-				EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pAttackHitSounds ), 1.0f, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
+				EmitSoundScript(attackHitSoundScript);
 			}
 		}
 		break;
 		case BIG_AE_SCREAM:
-			EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pAlertSounds );
+			EmitSoundScript(alertSoundScript);
 			break;
 		case BIG_AE_PAIN_SOUND:
-			EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pPainSounds );
+			EmitSoundScript(painSoundScript);
 			break;
 		case BIG_AE_ATTACK_SOUND:
-			EMIT_SOUND_ARRAY_DYN( CHAN_WEAPON, pAttackSounds );
+			EmitSoundScript(attackSoundScript);
 			break;
 		case BIG_AE_BIRTH_SOUND:
-			EMIT_SOUND_ARRAY_DYN( CHAN_BODY, pBirthSounds );
+			EmitSoundScript(birthSoundScript);
 			break;
 		case BIG_AE_SACK:
 			if( RANDOM_LONG( 0, 100 ) < 30 )
-				EMIT_SOUND_ARRAY_DYN( CHAN_BODY, pSackSounds );
+				EmitSoundScript(sackSoundScript);
 			break;
 		case BIG_AE_DEATHSOUND:
-			EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pDeathSounds );
+			EmitSoundScript(dieSoundScript);
 			break;
 		case BIG_AE_STEP1:		// Footstep left
 		case BIG_AE_STEP3:		// Footstep back left
-			EMIT_SOUND_ARRAY_DYN( CHAN_ITEM, pFootSounds );
+			EmitSoundScript(footstepLeftSoundScript);
 			break;
 		case BIG_AE_STEP4:		// Footstep back right
 		case BIG_AE_STEP2:		// Footstep right
-			EMIT_SOUND_ARRAY_DYN( CHAN_BODY, pFootSounds );
+			EmitSoundScript(footstepRightSoundScript);
 			break;
 		case BIG_AE_MORTAR_ATTACK1:
 			LaunchMortar();
@@ -561,7 +590,7 @@ void CBigMomma::TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	else if( !HasMemory(bits_MEMORY_KILLED) && gpGlobals->time > m_painSoundTime )
 	{
 		m_painSoundTime = gpGlobals->time + RANDOM_LONG( 1, 3 );
-		EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pPainSounds );
+		EmitSoundScript(painSoundScript);
 	}
 
 	CBaseMonster::TraceAttack( pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
@@ -628,7 +657,7 @@ void CBigMomma::LayHeadcrab( void )
 	UTIL_TraceLine( pev->origin, pev->origin - Vector( 0.0f, 0.0f, 100.0f ), ignore_monsters, edict(), &tr );
 	UTIL_DecalTrace( &tr, DECAL_MOMMABIRTH );
 
-	EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBirthSounds ), 1.0f, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
+	EmitSoundScript(layHeadcrabSoundScript);
 	m_crabCount++;
 }
 
@@ -639,7 +668,7 @@ void CBigMomma::DeathNotice( entvars_t *pevChild )
 	if( IsFullyAlive() )
 	{
 		// Make the "my baby's dead" noise!
-		EMIT_SOUND_ARRAY_DYN( CHAN_WEAPON, pChildDieSounds );
+		EmitSoundScript(childDieSoundScript);
 	}
 }
 
@@ -668,10 +697,10 @@ void CBigMomma::LaunchMortar( void )
 		vecLaunch = pev->movedir;
 	}
 
-	EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pSackSounds ), 1.0f, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
+	EmitSoundScript(launchMortarSoundScript);
 	CBMortar *pBomb = CBMortar::Shoot( edict(), startPos, vecLaunch, m_soundList );
 	pBomb->pev->gravity = 1.0f;
-	MortarSpray( startPos, Vector( 0.0f, 0.0f, 1.0f ), gSpitSprite, 24 );
+	MortarSpray( startPos, Vector( 0.0f, 0.0f, 1.0f ), m_SpitSprite, 24 );
 }
 
 //=========================================================
@@ -702,27 +731,27 @@ void CBigMomma::Precache()
 {
 	PrecacheMyModel( "models/big_mom.mdl" );
 
-	PRECACHE_SOUND_ARRAY( pChildDieSounds );
-	PRECACHE_SOUND_ARRAY( pSackSounds );
-	PRECACHE_SOUND_ARRAY( pDeathSounds );
-	PRECACHE_SOUND_ARRAY( pAttackSounds );
-	PRECACHE_SOUND_ARRAY( pAttackHitSounds );
-	PRECACHE_SOUND_ARRAY( pBirthSounds );
-	PRECACHE_SOUND_ARRAY( pAlertSounds );
-	PRECACHE_SOUND_ARRAY( pPainSounds );
-	PRECACHE_SOUND_ARRAY( pFootSounds );
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
+	RegisterAndPrecacheSoundScript(footstepLeftSoundScript);
+	RegisterAndPrecacheSoundScript(footstepRightSoundScript);
+	RegisterAndPrecacheSoundScript(birthSoundScript);
+	RegisterAndPrecacheSoundScript(sackSoundScript);
+	RegisterAndPrecacheSoundScript(layHeadcrabSoundScript);
+	RegisterAndPrecacheSoundScript(childDieSoundScript);
+	RegisterAndPrecacheSoundScript(launchMortarSoundScript);
 
-	UTIL_PrecacheOther( BIG_CHILDCLASS );
+	EntityOverrides entityOverrides;
+	entityOverrides.soundList = m_soundList;
 
-	// TEMP: Squid
-	PRECACHE_MODEL( "sprites/mommaspit.spr" );// spit projectile.
-	gSpitSprite = PRECACHE_MODEL( "sprites/mommaspout.spr" );// client side spittle.
-	gSpitDebrisSprite = PRECACHE_MODEL( "sprites/mommablob.spr" );
+	UTIL_PrecacheOther(BIG_CHILDCLASS, entityOverrides);
+	UTIL_PrecacheOther("bmortar", entityOverrides);
 
-	PRECACHE_SOUND( "bullchicken/bc_acid1.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_spithit1.wav" );
-	PRECACHE_SOUND( "bullchicken/bc_spithit2.wav" );
-}	
+	m_SpitSprite = PRECACHE_MODEL( "sprites/mommaspout.spr" );// client side spittle.
+}
 
 void CBigMomma::Activate( void )
 {
@@ -1025,7 +1054,7 @@ void CBigMomma::StartTask( Task_t *pTask )
 		break;
 	case TASK_MELEE_ATTACK1:
 		// Play an attack sound here
-		EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAttackSounds ), 1.0, ATTN_NORM, 0, PITCH_NORM );
+		EmitSoundScript(attackSoundScript);
 		CBaseMonster::StartTask( pTask );
 		break;
 	default: 
@@ -1168,6 +1197,7 @@ void MortarSpray( const Vector &position, const Vector &direction, int spriteMod
 // UNDONE: right now this is pretty much a copy of the squid spit with minor changes to the way it does damage
 void CBMortar::Spawn( void )
 {
+	Precache();
 	pev->movetype = MOVETYPE_TOSS;
 	pev->classname = MAKE_STRING( "bmortar" );
 	
@@ -1185,6 +1215,16 @@ void CBMortar::Spawn( void )
 	pev->dmgtime = gpGlobals->time + 0.4f;
 }
 
+void CBMortar::Precache()
+{
+	PRECACHE_MODEL( "sprites/mommaspit.spr" );// spit projectile.
+	m_SpitSprite = PRECACHE_MODEL( "sprites/mommaspout.spr" );// client side spittle.
+	m_SpitDebrisSprite = PRECACHE_MODEL( "sprites/mommablob.spr" ); // TODO: not used?
+
+	RegisterAndPrecacheSoundScript(spitTouchSoundScript, NPC::spitTouchSoundScript);
+	RegisterAndPrecacheSoundScript(spitHitSoundScript, NPC::spitHitSoundScript);
+}
+
 void CBMortar::Animate( void )
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
@@ -1192,7 +1232,7 @@ void CBMortar::Animate( void )
 	if( gpGlobals->time > pev->dmgtime )
 	{
 		pev->dmgtime = gpGlobals->time + 0.2f;
-		MortarSpray( pev->origin, -pev->velocity.Normalize(), gSpitSprite, 3 );
+		MortarSpray( pev->origin, -pev->velocity.Normalize(), m_SpitSprite, 3 );
 	}
 	if( pev->frame++ )
 	{
@@ -1222,22 +1262,9 @@ CBMortar *CBMortar::Shoot(edict_t *pOwner, Vector vecStart, Vector vecVelocity ,
 void CBMortar::Touch( CBaseEntity *pOther )
 {
 	TraceResult tr;
-	int iPitch;
 
-	// splat sound
-	iPitch = RANDOM_FLOAT( 90, 110 );
-
-	EmitSoundDyn( CHAN_VOICE, "bullchicken/bc_acid1.wav", 1, ATTN_NORM, 0, iPitch );
-
-	switch( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit1.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_WEAPON, "bullchicken/bc_spithit2.wav", 1, ATTN_NORM, 0, iPitch );
-		break;
-	}
+	EmitSoundScript(spitTouchSoundScript);
+	EmitSoundScript(spitHitSoundScript);
 
 	if( pOther->IsBSPModel() )
 	{
@@ -1253,7 +1280,7 @@ void CBMortar::Touch( CBaseEntity *pOther )
 	}
 
 	// make some flecks
-	MortarSpray( tr.vecEndPos, tr.vecPlaneNormal, gSpitSprite, 24 );
+	MortarSpray( tr.vecEndPos, tr.vecPlaneNormal, m_SpitSprite, 24 );
 
 	entvars_t *pevOwner = NULL;
 	if( pev->owner )

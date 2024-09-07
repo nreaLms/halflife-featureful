@@ -26,6 +26,8 @@ public:
 	BOOL m_iSoundedOff;
 	float m_flIgniteTime;
 	float m_velocity;
+
+	static const NamedSoundScript flySoundScript;
 };
 
 LINK_ENTITY_TO_CLASS(mortar_shell, CMortarShell)
@@ -39,11 +41,20 @@ TYPEDESCRIPTION CMortarShell::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CMortarShell, CGrenade)
 
+const NamedSoundScript CMortarShell::flySoundScript = {
+	CHAN_VOICE,
+	{"weapons/ofmortar.wav"},
+	FloatRange(0.8f, 0.9f),
+	ATTN_NONE,
+	"Op4Mortar.Fly"
+};
+
 void CMortarShell::Precache()
 {
+	PrecacheBaseGrenadeSounds();
 	PRECACHE_MODEL("models/mortarshell.mdl");
 	m_iTrail = PRECACHE_MODEL("sprites/wep_smoke_01.spr");
-	PRECACHE_SOUND("weapons/ofmortar.wav");
+	RegisterAndPrecacheSoundScript(flySoundScript);
 }
 
 void CMortarShell::Spawn()
@@ -125,18 +136,7 @@ void CMortarShell::MortarExplodeTouch(CBaseEntity *pOther)
 	else
 		UTIL_DecalTrace(&tr, DECAL_SCORCH1);
 
-	switch (RANDOM_LONG(0, 2))
-	{
-	case 0:
-		EMIT_SOUND(edict(), CHAN_VOICE, "weapons/debris1.wav", 0.55, ATTN_NORM);
-		break;
-	case 1:
-		EMIT_SOUND(edict(), CHAN_VOICE, "weapons/debris2.wav", 0.55, ATTN_NORM);
-		break;
-	case 2:
-		EMIT_SOUND(edict(), CHAN_VOICE, "weapons/debris3.wav", 0.55, ATTN_NORM);
-		break;
-	}
+	EmitSoundScript(debrisSoundScript);
 
 	pev->effects |= EF_NODRAW;
 
@@ -194,7 +194,7 @@ void CMortarShell::FlyThink()
 	if(pev->velocity.z < 20.0f && !m_iSoundedOff)
 	{
 		m_iSoundedOff = TRUE;
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/ofmortar.wav", RANDOM_FLOAT(0.8, 0.9), ATTN_NONE);
+		EmitSoundScript(flySoundScript);
 	}
 
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -259,6 +259,9 @@ public:
 	Vector m_vIdealGunAngle;
 
 	float m_lastTimePlayedSound;
+
+	static const NamedSoundScript rotateSoundScript;
+	static const NamedSoundScript launchSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS(op4mortar, COp4Mortar)
@@ -289,12 +292,25 @@ TYPEDESCRIPTION	COp4Mortar::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( COp4Mortar, CBaseMonster )
 
+const NamedSoundScript COp4Mortar::rotateSoundScript = {
+	CHAN_VOICE,
+	{"player/pl_grate1.wav"},
+	"Op4Mortar.Rotate"
+};
+
+const NamedSoundScript COp4Mortar::launchSoundScript = {
+	CHAN_VOICE,
+	{"weapons/mortarhit.wav"},
+	1.0f,
+	ATTN_NONE,
+	"Op4Mortar.Launch"
+};
 
 void COp4Mortar::Precache()
 {
 	PRECACHE_MODEL("models/mortar.mdl");
-	PRECACHE_SOUND("weapons/mortarhit.wav");
-	PRECACHE_SOUND("player/pl_grate1.wav");
+	RegisterAndPrecacheSoundScript(rotateSoundScript);
+	RegisterAndPrecacheSoundScript(launchSoundScript);
 	UTIL_PrecacheOther("mortar_shell");
 }
 
@@ -346,7 +362,7 @@ void COp4Mortar::PlaySound()
 {
 	if (gpGlobals->time > m_lastTimePlayedSound + 0.12f)
 	{
-		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_grate1.wav", 1.0f, ATTN_NORM);
+		EmitSoundScript(rotateSoundScript);
 		m_lastTimePlayedSound = gpGlobals->time + 0.12f;
 	}
 }
@@ -462,7 +478,7 @@ void COp4Mortar::MortarThink()
 				{
 					if (gpGlobals->time - m_fireLast > m_fireDelay)
 					{
-						EMIT_SOUND(edict(), CHAN_VOICE, "weapons/mortarhit.wav", VOL_NORM, ATTN_NORM);
+						EmitSoundScript(launchSoundScript);
 						UTIL_ScreenShake(pev->origin, 12.0, 100.0, 2.0, 1000.0);
 
 						Vector vecPos, vecAngle;
@@ -655,7 +671,7 @@ void COp4Mortar::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 		if ((pev->spawnflags & SF_MORTAR_ACTIVE) == 0 && (pev->spawnflags & SF_MORTAR_CONTROLLABLE) != 0)
 		{
 			//Player fired a mortar
-			EMIT_SOUND(edict(), CHAN_VOICE, "weapons/mortarhit.wav", VOL_NORM, ATTN_NONE);
+			EmitSoundScript(launchSoundScript);
 			UTIL_ScreenShake(pev->origin, 12.0, 100.0, 2.0, 1000.0);
 
 			Vector pos, angle;

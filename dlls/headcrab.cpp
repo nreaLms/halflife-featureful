@@ -81,7 +81,6 @@ public:
 	void Spawn( void );
 	void SpawnHelper(const char* modelName, float health);
 	void Precache( void );
-	void PrecacheSounds();
 	void RunTask ( Task_t *pTask );
 	void StartTask ( Task_t *pTask );
 	void SetYawSpeed ( void );
@@ -101,8 +100,7 @@ public:
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 
 	virtual float GetDamageAmount( void ) { return gSkillData.headcrabDmgBite; }
-	virtual int GetVoicePitch( void ) { return 100; }
-	virtual float GetSoundVolue( void ) { return 1.0; }
+
 	Schedule_t* GetScheduleOfType ( int Type );
 
 	CUSTOM_SCHEDULES
@@ -112,15 +110,25 @@ public:
 	Vector DefaultMinHullSize() { return Vector( -12.0f, -12.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 12.0f, 12.0f, 24.0f ); }
 
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
-	static const char *pPainSounds[];
-	static const char *pAttackSounds[];
-	static const char *pDeathSounds[];
-	static const char *pBiteSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript leapSoundScript;
+	static const NamedSoundScript attackSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript biteSoundScript;
 
 protected:
-	virtual void AttackSound();
+	virtual void AttackSound() {
+		if( RANDOM_LONG(0,2) != 0 )
+			EmitSoundScript(attackSoundScript);
+	}
+	virtual void LeapSound() {
+		EmitSoundScript(leapSoundScript);
+	}
+	virtual void BiteSound() {
+		EmitSoundScript(biteSoundScript);
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_headcrab, CHeadCrab )
@@ -133,41 +141,60 @@ DEFINE_CUSTOM_SCHEDULES( CHeadCrab )
 
 IMPLEMENT_CUSTOM_SCHEDULES( CHeadCrab, CBaseMonster )
 
-const char *CHeadCrab::pIdleSounds[] =
-{
-	"headcrab/hc_idle1.wav",
-	"headcrab/hc_idle2.wav",
-	"headcrab/hc_idle3.wav",
+const NamedSoundScript CHeadCrab::idleSoundScript = {
+	CHAN_VOICE,
+	{ "headcrab/hc_idle1.wav", "headcrab/hc_idle2.wav", "headcrab/hc_idle3.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Headcrab.Idle"
 };
 
-const char *CHeadCrab::pAlertSounds[] =
-{
-	"headcrab/hc_alert1.wav",
+const NamedSoundScript CHeadCrab::alertSoundScript = {
+	CHAN_VOICE,
+	{ "headcrab/hc_alert1.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Headcrab.Alert"
 };
 
-const char *CHeadCrab::pPainSounds[] =
-{
-	"headcrab/hc_pain1.wav",
-	"headcrab/hc_pain2.wav",
-	"headcrab/hc_pain3.wav",
+const NamedSoundScript CHeadCrab::painSoundScript = {
+	CHAN_VOICE,
+	{ "headcrab/hc_pain1.wav", "headcrab/hc_pain2.wav", "headcrab/hc_pain3.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Headcrab.Pain"
 };
 
-const char *CHeadCrab::pAttackSounds[] =
-{
-	"headcrab/hc_attack1.wav",
-	"headcrab/hc_attack2.wav",
-	"headcrab/hc_attack3.wav",
+const NamedSoundScript CHeadCrab::leapSoundScript = {
+	CHAN_WEAPON,
+	{ "headcrab/hc_attack1.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Headcrab.Leap"
 };
 
-const char *CHeadCrab::pDeathSounds[] =
-{
-	"headcrab/hc_die1.wav",
-	"headcrab/hc_die2.wav",
+const NamedSoundScript CHeadCrab::attackSoundScript = {
+	CHAN_VOICE,
+	{ "headcrab/hc_attack2.wav", "headcrab/hc_attack3.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Headcrab.Attack"
 };
 
-const char *CHeadCrab::pBiteSounds[] =
-{
-	"headcrab/hc_headbite.wav",
+const NamedSoundScript CHeadCrab::dieSoundScript = {
+	CHAN_VOICE,
+	{ "headcrab/hc_die1.wav", "headcrab/hc_die2.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Headcrab.Die"
+};
+
+const NamedSoundScript CHeadCrab::biteSoundScript = {
+	CHAN_WEAPON,
+	{ "headcrab/hc_headbite.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Headcrab.Bite"
 };
 
 //=========================================================
@@ -288,13 +315,6 @@ void CHeadCrab::HandleAnimEvent( MonsterEvent_t *pEvent )
 	}
 }
 
-void CHeadCrab::AttackSound()
-{
-	int iSound = RANDOM_LONG(0,2);
-	if( iSound != 0 )
-		EmitSoundDyn( CHAN_VOICE, pAttackSounds[iSound], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
-}
-
 //=========================================================
 // Spawn
 //=========================================================
@@ -326,19 +346,15 @@ void CHeadCrab::SpawnHelper(const char *modelName, float health)
 //=========================================================
 void CHeadCrab::Precache()
 {
-	PrecacheSounds();
-
 	PrecacheMyModel( "models/headcrab.mdl" );
-}
 
-void CHeadCrab::PrecacheSounds()
-{
-	PRECACHE_SOUND_ARRAY( pIdleSounds );
-	PRECACHE_SOUND_ARRAY( pAlertSounds );
-	PRECACHE_SOUND_ARRAY( pPainSounds );
-	PRECACHE_SOUND_ARRAY( pAttackSounds );
-	PRECACHE_SOUND_ARRAY( pDeathSounds );
-	PRECACHE_SOUND_ARRAY( pBiteSounds );
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(leapSoundScript);
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(biteSoundScript);
 }
 
 //=========================================================
@@ -385,8 +401,7 @@ void CHeadCrab::LeapTouch( CBaseEntity *pOther )
 	// Don't hit if back on ground
 	if( !FBitSet( pev->flags, FL_ONGROUND ) )
 	{
-		EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY( pBiteSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
-
+		BiteSound();
 		pOther->TakeDamage( pev, pev, GetDamageAmount(), DMG_SLASH );
 	}
 
@@ -411,7 +426,7 @@ void CHeadCrab::StartTask( Task_t *pTask )
 	{
 	case TASK_RANGE_ATTACK1:
 		{
-			EmitSoundDyn( CHAN_WEAPON, pAttackSounds[0], GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+			LeapSound();
 			m_IdealActivity = ACT_RANGE_ATTACK1;
 			SetTouch( &CHeadCrab::LeapTouch );
 			break;
@@ -467,7 +482,7 @@ int CHeadCrab::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 //=========================================================
 void CHeadCrab::IdleSound( void )
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pIdleSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundScript(idleSoundScript);
 }
 
 //=========================================================
@@ -475,7 +490,7 @@ void CHeadCrab::IdleSound( void )
 //=========================================================
 void CHeadCrab::AlertSound( void )
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pAlertSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundScript(alertSoundScript);
 }
 
 //=========================================================
@@ -483,7 +498,7 @@ void CHeadCrab::AlertSound( void )
 //=========================================================
 void CHeadCrab::PainSound( void )
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pPainSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -491,7 +506,7 @@ void CHeadCrab::PainSound( void )
 //=========================================================
 void CHeadCrab::DeathSound( void )
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY( pDeathSounds ), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	EmitSoundScript(dieSoundScript);
 }
 
 Schedule_t *CHeadCrab::GetScheduleOfType( int Type )
@@ -538,8 +553,39 @@ public:
 	float GetDamageAmount( void ) { return gSkillData.headcrabDmgBite * 0.3f; }
 	BOOL CheckRangeAttack1( float flDot, float flDist );
 	Schedule_t *GetScheduleOfType ( int Type );
-	virtual int GetVoicePitch( void ) { return PITCH_NORM + RANDOM_LONG( 40, 50 ); }
-	virtual float GetSoundVolue( void ) { return 0.8f; }
+
+	static constexpr const char* idleSoundScript = "Babycrab.Idle";
+	static constexpr const char* alertSoundScript = "Babycrab.Alert";
+	static constexpr const char* painSoundScript = "Babycrab.Pain";
+	static constexpr const char* leapSoundScript = "Babycrab.Leap";
+	static constexpr const char* attackSoundScript = "Babycrab.Attack";
+	static constexpr const char* dieSoundScript = "Babycrab.Die";
+	static constexpr const char* biteSoundScript  ="Babycrab.Bite";
+
+	void IdleSound() {
+		EmitSoundScript(idleSoundScript);
+	}
+	void AlertSound() {
+		EmitSoundScript(alertSoundScript);
+	}
+	void PainSound() {
+		EmitSoundScript(painSoundScript);
+	}
+	void DeathSound( void ) {
+		EmitSoundScript(dieSoundScript);
+	}
+protected:
+	void AttackSound()
+	{
+		if( RANDOM_LONG(0,2) != 0 )
+			EmitSoundScript(attackSoundScript);
+	}
+	void LeapSound() {
+		EmitSoundScript(leapSoundScript);
+	}
+	void BiteSound() {
+		EmitSoundScript(biteSoundScript);
+	}
 };
 
 LINK_ENTITY_TO_CLASS( monster_babycrab, CBabyCrab )
@@ -555,9 +601,19 @@ void CBabyCrab::Spawn( void )
 
 void CBabyCrab::Precache( void )
 {
-	PrecacheSounds();
-
 	PrecacheMyModel( "models/baby_headcrab.mdl" );
+
+	SoundScriptParamOverride paramOverride;
+	paramOverride.OverridePitchRelative(IntRange(140, 150));
+	paramOverride.OverrideVolumeRelative(0.8f);
+
+	RegisterAndPrecacheSoundScript(idleSoundScript, CHeadCrab::idleSoundScript, paramOverride);
+	RegisterAndPrecacheSoundScript(alertSoundScript, CHeadCrab::alertSoundScript, paramOverride);
+	RegisterAndPrecacheSoundScript(painSoundScript, CHeadCrab::painSoundScript, paramOverride);
+	RegisterAndPrecacheSoundScript(leapSoundScript, CHeadCrab::leapSoundScript, paramOverride);
+	RegisterAndPrecacheSoundScript(attackSoundScript, CHeadCrab::attackSoundScript, paramOverride);
+	RegisterAndPrecacheSoundScript(dieSoundScript, CHeadCrab::dieSoundScript, paramOverride);
+	RegisterAndPrecacheSoundScript(biteSoundScript, CHeadCrab::biteSoundScript, paramOverride);
 }
 
 void CBabyCrab::SetYawSpeed( void )
@@ -642,12 +698,13 @@ public:
 
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	static const char *pIdleSounds[];
-	static const char *pAlertSounds[];
-	static const char *pPainSounds[];
-	static const char *pAttackSounds[];
-	static const char *pDeathSounds[];
-	static const char *pBiteSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript leapSoundScript;
+	static const NamedSoundScript attackSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript biteSoundScript;
 
 	float m_flBirthTime;
 	BOOL m_fRoachSolid;
@@ -666,34 +723,60 @@ TYPEDESCRIPTION	CShockRoach::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CShockRoach, CHeadCrab)
 
-const char *CShockRoach::pIdleSounds[] =
-{
-	"shockroach/shock_idle1.wav",
-	"shockroach/shock_idle2.wav",
-	"shockroach/shock_idle3.wav",
-};
-const char *CShockRoach::pAlertSounds[] =
-{
-	"shockroach/shock_angry.wav",
-};
-const char *CShockRoach::pPainSounds[] =
-{
-	"shockroach/shock_flinch.wav",
-};
-const char *CShockRoach::pAttackSounds[] =
-{
-	"shockroach/shock_jump1.wav",
-	"shockroach/shock_jump2.wav",
+const NamedSoundScript CShockRoach::idleSoundScript = {
+	CHAN_VOICE,
+	{ "shockroach/shock_idle1.wav", "shockroach/shock_idle2.wav", "shockroach/shock_idle3.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Shockroach.Idle"
 };
 
-const char *CShockRoach::pDeathSounds[] =
-{
-	"shockroach/shock_die.wav",
+const NamedSoundScript CShockRoach::alertSoundScript = {
+	CHAN_VOICE,
+	{ "shockroach/shock_angry.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Shockroach.Alert"
 };
 
-const char *CShockRoach::pBiteSounds[] =
-{
-	"shockroach/shock_bite.wav",
+const NamedSoundScript CShockRoach::painSoundScript = {
+	CHAN_VOICE,
+	{ "shockroach/shock_flinch.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Shockroach.Pain"
+};
+
+const NamedSoundScript CShockRoach::leapSoundScript = {
+	CHAN_WEAPON,
+	{ "shockroach/shock_jump1.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Shockroach.Leap"
+};
+
+const NamedSoundScript CShockRoach::attackSoundScript = {
+	CHAN_VOICE,
+	{ "shockroach/shock_jump2.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Shockroach.Attack"
+};
+
+const NamedSoundScript CShockRoach::dieSoundScript = {
+	CHAN_VOICE,
+	{ "shockroach/shock_die.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Shockroach.Die"
+};
+
+const NamedSoundScript CShockRoach::biteSoundScript = {
+	CHAN_WEAPON,
+	{ "shockroach/shock_bite.wav" },
+	1.0f,
+	ATTN_IDLE,
+	"Shockroach.Bite"
 };
 
 
@@ -734,12 +817,13 @@ void CShockRoach::Spawn()
 //=========================================================
 void CShockRoach::Precache()
 {
-	PRECACHE_SOUND_ARRAY(pIdleSounds);
-	PRECACHE_SOUND_ARRAY(pAlertSounds);
-	PRECACHE_SOUND_ARRAY(pPainSounds);
-	PRECACHE_SOUND_ARRAY(pAttackSounds);
-	PRECACHE_SOUND_ARRAY(pDeathSounds);
-	PRECACHE_SOUND_ARRAY(pBiteSounds);
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(leapSoundScript);
+	RegisterAndPrecacheSoundScript(attackSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(biteSoundScript);
 
 	PRECACHE_SOUND("shockroach/shock_walk.wav");
 
@@ -766,7 +850,7 @@ void CShockRoach::LeapTouch(CBaseEntity *pOther)
 	{
 		if (!FBitSet(pev->flags, FL_ONGROUND))
 		{
-			EmitSoundDyn( CHAN_WEAPON, RANDOM_SOUND_ARRAY(pBiteSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+			EmitSoundScript(biteSoundScript);
 			pOther->TakeDamage(pev, pev, GetDamageAmount(), DMG_SLASH);
 		}
 	}
@@ -823,7 +907,7 @@ void CShockRoach::MonsterThink(void)
 //=========================================================
 void CShockRoach::IdleSound(void)
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundScript(idleSoundScript);
 }
 
 //=========================================================
@@ -831,7 +915,7 @@ void CShockRoach::IdleSound(void)
 //=========================================================
 void CShockRoach::AlertSound(void)
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAlertSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundScript(alertSoundScript);
 }
 
 //=========================================================
@@ -839,7 +923,7 @@ void CShockRoach::AlertSound(void)
 //=========================================================
 void CShockRoach::PainSound(void)
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -847,7 +931,7 @@ void CShockRoach::PainSound(void)
 //=========================================================
 void CShockRoach::DeathSound(void)
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch());
+	EmitSoundScript(dieSoundScript);
 }
 
 
@@ -857,6 +941,7 @@ void CShockRoach::StartTask(Task_t *pTask)
 	{
 	case TASK_RANGE_ATTACK1:
 	{
+		EmitSoundScript(leapSoundScript);
 		m_IdealActivity = ACT_RANGE_ATTACK1;
 		SetTouch(&CShockRoach::LeapTouch);
 		break;
@@ -875,7 +960,8 @@ BOOL CShockRoach::ShouldFadeOnDeath()
 
 void CShockRoach::AttackSound()
 {
-	EmitSoundDyn( CHAN_VOICE, RANDOM_SOUND_ARRAY(pAttackSounds), GetSoundVolue(), ATTN_IDLE, 0, GetVoicePitch() );
+	if ( RANDOM_LONG(0, 2) != 0 )
+		EmitSoundScript(attackSoundScript);
 }
 
 int CShockRoach::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )

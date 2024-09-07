@@ -43,9 +43,6 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	// Sounds are shared by the flock
-	static void PrecacheFlockSounds( string_t soundList );
-
 	int m_cFlockSize;
 	float m_flFlockRadius;
 
@@ -127,6 +124,9 @@ public:
 	float CheckDist() const {
 		return m_customCheckDist > 0 ? m_customCheckDist : AFLOCK_CHECK_DIST;
 	}
+
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_flyer, CFlockingFlyer )
@@ -152,6 +152,18 @@ TYPEDESCRIPTION	CFlockingFlyer::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CFlockingFlyer, CBaseMonster )
+
+const NamedSoundScript CFlockingFlyer::idleSoundScript = {
+	CHAN_WEAPON,
+	{"boid/boid_idle1.wav", "boid/boid_idle2.wav"},
+	"FlockingFlyer.Idle"
+};
+
+const NamedSoundScript CFlockingFlyer::alertSoundScript = {
+	CHAN_WEAPON,
+	{"boid/boid_alert1.wav", "boid/boid_alert2.wav"},
+	"FlockingFlyer.Alert"
+};
 
 //=========================================================
 //=========================================================
@@ -200,19 +212,10 @@ void CFlockingFlyerFlock::Spawn()
 //=========================================================
 void CFlockingFlyerFlock::Precache()
 {
-	//PRECACHE_MODEL( "models/aflock.mdl" );		
-	PrecacheMyModel( "models/boid.mdl" );
-
-	PrecacheFlockSounds(m_soundList);
-}
-
-void CFlockingFlyerFlock::PrecacheFlockSounds(string_t soundList)
-{
-	::PRECACHE_SOUND( "boid/boid_alert1.wav", soundList );
-	::PRECACHE_SOUND( "boid/boid_alert2.wav", soundList );
-
-	::PRECACHE_SOUND( "boid/boid_idle1.wav", soundList );
-	::PRECACHE_SOUND( "boid/boid_idle2.wav", soundList );
+	EntityOverrides entityOverrides;
+	entityOverrides.model = pev->model;
+	entityOverrides.soundList = m_soundList;
+	UTIL_PrecacheOther("monster_flyer", entityOverrides);
 }
 
 //=========================================================
@@ -286,7 +289,8 @@ void CFlockingFlyer::Precache()
 {
 	//PRECACHE_MODEL( "models/aflock.mdl" );
 	PrecacheMyModel( "models/boid.mdl" );
-	CFlockingFlyerFlock::PrecacheFlockSounds(m_soundList);
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
 }
 
 //=========================================================
@@ -296,29 +300,12 @@ void CFlockingFlyer::MakeSound( void )
 	if( m_flAlertTime > gpGlobals->time )
 	{
 		// make agitated sounds
-		switch ( RANDOM_LONG( 0, 1 ) )
-		{
-		case 0:
-			EmitSound( CHAN_WEAPON, "boid/boid_alert1.wav", 1, ATTN_NORM );
-			break;
-		case 1:
-			EmitSound( CHAN_WEAPON, "boid/boid_alert2.wav", 1, ATTN_NORM );
-			break;
-		}
-
+		EmitSoundScript(alertSoundScript);
 		return;
 	}
 
 	// make normal sound
-	switch( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EmitSound( CHAN_WEAPON, "boid/boid_idle1.wav", 1, ATTN_NORM );
-		break;
-	case 1:
-		EmitSound( CHAN_WEAPON, "boid/boid_idle2.wav", 1, ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(idleSoundScript);
 }
 
 //=========================================================

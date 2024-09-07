@@ -8,6 +8,7 @@
 #include "game.h"
 #include "gamerules.h"
 #include "ammo_amounts.h"
+#include "common_soundscripts.h"
 
 void CBasePlayerAmmo::Spawn( void )
 {
@@ -45,7 +46,7 @@ void CBasePlayerAmmo::Spawn( void )
 void CBasePlayerAmmo::Precache()
 {
 	PRECACHE_MODEL( pev->model ? STRING(pev->model) : MyModel() );
-	PRECACHE_SOUND( AMMO_PICKUP_SOUND );
+	RegisterAndPrecacheSoundScript(Items::ammoPickupSoundScript);
 }
 
 void CBasePlayerAmmo::KeyValue(KeyValueData *pkvd)
@@ -136,7 +137,7 @@ bool CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
 
 	if ( pOther->GiveAmmo( amount, ammoName ) != -1 )
 	{
-		EMIT_SOUND( ENT( pev ), CHAN_ITEM, AMMO_PICKUP_SOUND, 1, ATTN_NORM );
+		EmitSoundScript(Items::ammoPickupSoundScript);
 		return TRUE;
 	}
 	return FALSE;

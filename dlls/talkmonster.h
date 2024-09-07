@@ -184,6 +184,7 @@ public:
 	virtual const char* DefaultSentenceGroup(int group) { return NULL; }
 	virtual const char* SentenceGroup(int group);
 	virtual void PlayPainSound() {}
+	bool EmitSoundScriptTalk(const char* name);
 
 	// Following related
 	virtual void	StartFollowing( CBaseEntity *pLeader, bool saySentence = true );

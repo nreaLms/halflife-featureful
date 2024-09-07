@@ -1744,6 +1744,13 @@ bool CTalkMonster::SomeoneIsTalking()
 	return gpGlobals->time <= CTalkMonster::g_talkWaitTime;
 }
 
+bool CTalkMonster::EmitSoundScriptTalk(const char* name)
+{
+	SoundScriptParamOverride paramOverride;
+	paramOverride.OverridePitchRelative(GetVoicePitch());
+	return EmitSoundScript(name, paramOverride);
+}
+
 void CTalkMonster::RegisterTalkMonster(const char *className, bool canFollow, short followerCategory)
 {
 	int i;

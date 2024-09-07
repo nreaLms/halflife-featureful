@@ -3,6 +3,7 @@
 #include "cbase.h"
 #include "trains.h"
 #include "saverestore.h"
+#include "common_soundscripts.h"
 
 #define VEHICLE_SPEED0_ACCELERATION	0.005000000000000000
 #define VEHICLE_SPEED1_ACCELERATION	0.002142857142857143
@@ -954,7 +955,7 @@ void CFuncVehicle::Precache()
 
 	PRECACHE_SOUND( "plats/vehicle_brake1.wav" );
 	PRECACHE_SOUND( "plats/vehicle_start1.wav" );
-	PRECACHE_SOUND( "plats/vehicle_ignition.wav" );
+	RegisterAndPrecacheSoundScript(Player::vehicleIgnitionSoundScript);
 
 	m_usAdjustPitch = PRECACHE_EVENT( 1, "events/vehicle.sc" );
 }

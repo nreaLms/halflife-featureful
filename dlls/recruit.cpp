@@ -26,19 +26,30 @@ public:
 	Schedule_t *GetSchedule( void );
 
 	const char* DefaultSentenceGroup(int group);
+
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_recruit, CRecruit )
 
+const NamedSoundScript CRecruit::painSoundScript = {
+	CHAN_VOICE,
+	{ "barney/ba_pain1.wav", "barney/ba_pain2.wav", "barney/ba_pain3.wav" },
+	"Recruit.Pain"
+};
+
+const NamedSoundScript CRecruit::dieSoundScript = {
+	CHAN_VOICE,
+	{ "barney/ba_die1.wav", "barney/ba_die2.wav", "barney/ba_die3.wav" },
+	"Recruit.Die"
+};
+
 void CRecruit::Precache()
 {
 	PrecacheMyModel("models/recruit.mdl");
-	PRECACHE_SOUND("barney/ba_pain1.wav");
-	PRECACHE_SOUND("barney/ba_pain2.wav");
-	PRECACHE_SOUND("barney/ba_pain3.wav");
-	PRECACHE_SOUND("barney/ba_die1.wav");
-	PRECACHE_SOUND("barney/ba_die2.wav");
-	PRECACHE_SOUND("barney/ba_die3.wav");
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
 	TalkInit();
 	CTalkMonster::Precache();
 }
@@ -103,18 +114,7 @@ int CRecruit::DefaultClassify(void)
 
 void CRecruit::PlayPainSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain2.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 2:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EmitSoundScriptTalk(painSoundScript);
 }
 
 //=========================================================
@@ -122,18 +122,7 @@ void CRecruit::PlayPainSound( void )
 //=========================================================
 void CRecruit::DeathSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die2.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 2:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 const char* CRecruit::DefaultSentenceGroup(int group)

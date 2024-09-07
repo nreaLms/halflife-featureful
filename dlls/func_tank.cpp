@@ -22,6 +22,7 @@
 
 #include "monsters.h"
 #include "player.h"
+#include "common_soundscripts.h"
 
 #define SF_TANK_ACTIVE			0x0001
 #define SF_TANK_PLAYER			0x0002
@@ -242,7 +243,7 @@ void CFuncTank::Precache( void )
 	if( pev->noise )
 		PRECACHE_SOUND( STRING( pev->noise ) );
 
-	PRECACHE_SOUND("weapons/357_cock1.wav");
+	RegisterAndPrecacheSoundScript(Items::weaponEmptySoundScript);
 }
 
 void CFuncTank::KeyValue( KeyValueData *pkvd )
@@ -530,7 +531,7 @@ void CFuncTank::RemoveBullet()
 void CFuncTank::OnEmptyGun()
 {
 	if (m_flEmptySoundTime < gpGlobals->time) {
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "weapons/357_cock1.wav", 0.8, ATTN_NORM );
+		EmitSoundScript(Items::weaponEmptySoundScript);
 		m_flEmptySoundTime = gpGlobals->time + 0.5;
 	}
 }

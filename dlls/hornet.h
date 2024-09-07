@@ -60,5 +60,8 @@ public:
 	float m_flStopAttack;
 	int m_iHornetType;
 	float m_flFlySpeed;
+
+	static const NamedSoundScript buzzSoundScript;
+	static const NamedSoundScript dieSoundScript;
 };
 #endif // HORNET_H

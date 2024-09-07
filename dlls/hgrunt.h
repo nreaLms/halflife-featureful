@@ -74,6 +74,7 @@ public:
 	void RunTask( Task_t *pTask );
 	void DeathSound( void );
 	void PainSound( void );
+	virtual void PlayPainSound();
 	void IdleSound( void );
 	Vector GetGunPosition( void );
 	void Shoot( void );
@@ -83,7 +84,8 @@ public:
 	virtual void SpeakSentence( void );
 	bool PlayGruntSentence(int sentence, int flags = 0);
 	bool PlaySentenceGroup(const char* group, int flags = 0);
-	void PlaySentenceSound(const char* sound);
+	void PlaySentenceSoundScript(const char* soundScript);
+	bool EmitSoundScriptTalk(const char* soundScript);
 	void PlayUseSentence();
 	void PlayUnUseSentence();
 
@@ -143,7 +145,10 @@ protected:
 
 	void SpawnHelper(const char* modelName, int health, int bloodColor = BLOOD_COLOR_RED);
 	void PrecacheHelper(const char* modelName);
-	void PlayFirstBurstSounds();
+	virtual void PlayFirstBurstSounds();
+	virtual void PlayReloadSound();
+	virtual void PlayGrenadeLaunchSound();
+	virtual void PlayShogtunSound();
 	BOOL CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist, bool contact);
 	virtual int GetRangeAttack1Sequence();
 	virtual int GetRangeAttack2Sequence();
@@ -157,6 +162,18 @@ protected:
 
 	virtual void SpeakCaughtEnemy();
 	virtual bool AlertSentenceIsForPlayerOnly();
+
+public:
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+
+	static constexpr const char* reloadSoundScript = "HGrunt.Reload";
+	static constexpr const char* burst9mmSoundScript = "HGrunt.9MM";
+	static constexpr const char* grenadeLaunchSoundScript = "HGrunt.GrenadeLaunch";
+	static constexpr const char* shotgunSoundScript = "HGrunt.Shotgun";
+
+	static const NamedSoundScript useSoundScript;
+	static const NamedSoundScript unuseSoundScript;
 };
 
 class CHGruntRepel : public CFollowingMonster

@@ -38,6 +38,7 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 */
+	static const NamedSoundScript pickupSoundScript;
 protected:
 	virtual int DefaultCapacity() { return gSkillData.healthkitCapacity; }
 };
@@ -53,6 +54,12 @@ TYPEDESCRIPTION	CHealthKit::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CHealthKit, CItem )
 */
 
+const NamedSoundScript CHealthKit::pickupSoundScript = {
+	CHAN_ITEM,
+	{"items/smallmedkit1.wav"},
+	"HealthKit.Pickup"
+};
+
 void CHealthKit::Spawn( void )
 {
 	Precache();
@@ -64,7 +71,7 @@ void CHealthKit::Spawn( void )
 void CHealthKit::Precache( void )
 {
 	PrecacheMyModel( "models/w_medkit.mdl" );
-	PRECACHE_SOUND( "items/smallmedkit1.wav" );
+	RegisterAndPrecacheSoundScript(pickupSoundScript);
 }
 
 BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
@@ -82,7 +89,7 @@ BOOL CHealthKit::MyTouch( CBasePlayer *pPlayer )
 				WRITE_STRING( STRING( pev->classname ) );
 			MESSAGE_END();
 
-			EMIT_SOUND( ENT( pPlayer->pev ), CHAN_ITEM, "items/smallmedkit1.wav", 1, ATTN_NORM );
+			pPlayer->EmitSoundScript(GetSoundScript(pickupSoundScript));
 		}
 
 		return TRUE;

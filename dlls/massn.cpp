@@ -8,6 +8,7 @@
 #include	"mod_features.h"
 #include	"gamerules.h"
 #include	"game.h"
+#include	"common_soundscripts.h"
 
 #if FEATURE_MASSN
 
@@ -75,7 +76,7 @@ public:
 	void MonsterInit();
 
 	void DeathSound(void);
-	void PainSound(void);
+	void PlayPainSound();
 	void IdleSound(void);
 
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
@@ -85,9 +86,43 @@ public:
 	void DropMyItems(BOOL isGibbed);
 
 	int m_iHead;
+
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
+
+	static constexpr const char* reloadSoundScript = "Massn.Reload";
+	static constexpr const char* burst9mmSoundScript = "Massn.9MM";
+	static constexpr const char* grenadeLaunchSoundScript = "Massn.GrenadeLaunch";
+	static constexpr const char* sniperSoundScript = "Massn.Sniper";
+
+protected:
+	virtual void PlayFirstBurstSounds() {
+		EmitSoundScript(burst9mmSoundScript);
+	}
+	virtual void PlayReloadSound() {
+		EmitSoundScript(reloadSoundScript);
+	}
+	virtual void PlayGrenadeLaunchSound() {
+		EmitSoundScript(grenadeLaunchSoundScript);
+	}
+	virtual void PlayShogtunSound() {
+		EmitSoundScript(shotgunSoundScript);
+	}
 };
 
 LINK_ENTITY_TO_CLASS(monster_male_assassin, CMassn)
+
+const NamedSoundScript CMassn::painSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Massn.Pain"
+};
+
+const NamedSoundScript CMassn::dieSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Massn.Die"
+};
 
 void CMassn::PlayUseSentence()
 {
@@ -214,7 +249,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 		else if (FBitSet(pev->weapons, MASSN_SNIPERRIFLE))
 		{
 			Sniperrifle();
-			EmitSound( CHAN_WEAPON, "weapons/sniper_fire.wav", 1, 0.6);
+			EmitSoundScript(sniperSoundScript);
 			CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 512, 0.3);
 
 			Vector vecGunPos;
@@ -315,7 +350,14 @@ void CMassn::Precache()
 {
 	PrecacheHelper("models/massn.mdl");
 
-	PRECACHE_SOUND("weapons/sniper_fire.wav");
+	// Note: these are optional
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+
+	RegisterAndPrecacheSoundScript(reloadSoundScript, NPC::reloadSoundScript);
+	RegisterAndPrecacheSoundScript(burst9mmSoundScript, NPC::burst9mmSoundScript);
+	RegisterAndPrecacheSoundScript(grenadeLaunchSoundScript, NPC::grenadeLaunchSoundScript);
+	RegisterAndPrecacheSoundScript(sniperSoundScript, NPC::sniperSoundScript);
 
 	m_iBrassShell = PRECACHE_MODEL("models/shell.mdl");// brass shell
 }
@@ -323,8 +365,9 @@ void CMassn::Precache()
 //=========================================================
 // PainSound
 //=========================================================
-void CMassn::PainSound(void)
+void CMassn::PlayPainSound()
 {
+	EmitSoundScript(painSoundScript);
 }
 
 //=========================================================
@@ -332,6 +375,7 @@ void CMassn::PainSound(void)
 //=========================================================
 void CMassn::DeathSound(void)
 {
+	EmitSoundScript(dieSoundScript);
 }
 
 //=========================================================

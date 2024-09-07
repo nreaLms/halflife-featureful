@@ -61,9 +61,38 @@ public:
 	BOOL m_fLightHacked;
 	int m_iMode;
 	// -----------------------------
+
+	static const NamedSoundScript walkSoundScript;
+	static const NamedSoundScript dieSoundScript;
+	static const NamedSoundScript smashSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_cockroach, CRoach )
+
+const NamedSoundScript CRoach::walkSoundScript = {
+	CHAN_BODY,
+	{"roach/rch_walk.wav"},
+	IntRange(80, 119),
+	"Roach.Walk"
+};
+
+const NamedSoundScript CRoach::dieSoundScript = {
+	CHAN_VOICE,
+	{"roach/rch_die.wav"},
+	0.8f,
+	ATTN_NORM,
+	IntRange(80, 119),
+	"Roach.Die"
+};
+
+const NamedSoundScript CRoach::smashSoundScript = {
+	CHAN_BODY,
+	{"roach/rch_smash.wav"},
+	0.7f,
+	ATTN_NORM,
+	IntRange(80, 119),
+	"Roach.Smash"
+};
 
 //=========================================================
 // ISoundMask - returns a bit mask indicating which types
@@ -155,9 +184,9 @@ void CRoach::Precache()
 {
 	PrecacheMyModel( "models/roach.mdl" );
 
-	PRECACHE_SOUND( "roach/rch_die.wav" );
-	PRECACHE_SOUND( "roach/rch_walk.wav" );
-	PRECACHE_SOUND( "roach/rch_smash.wav" );
+	RegisterAndPrecacheSoundScript(walkSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+	RegisterAndPrecacheSoundScript(smashSoundScript);
 }
 
 //=========================================================
@@ -170,11 +199,11 @@ void CRoach::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib )
 	//random sound
 	if( RANDOM_LONG( 0, 4 ) == 1 )
 	{
-		EmitSoundDyn( CHAN_VOICE, "roach/rch_die.wav", 0.8, ATTN_NORM, 0, 80 + RANDOM_LONG( 0, 39 ) );
+		EmitSoundScript(dieSoundScript);
 	}
 	else
 	{
-		EmitSoundDyn( CHAN_BODY, "roach/rch_smash.wav", 0.7, ATTN_NORM, 0, 80 + RANDOM_LONG( 0, 39 ) );
+		EmitSoundScript(smashSoundScript);
 	}
 
 	CSoundEnt::InsertSound( bits_SOUND_WORLD, pev->origin, 128, 1 );
@@ -342,7 +371,7 @@ void CRoach::PickNewDest( int iCondition )
 	if( RANDOM_LONG( 0, 9 ) == 1 )
 	{
 		// every once in a while, a roach will play a skitter sound when they decide to run
-		EmitSoundDyn( CHAN_BODY, "roach/rch_walk.wav", 1, ATTN_NORM, 0, 80 + RANDOM_LONG( 0, 39 ) );
+		EmitSoundScript(walkSoundScript);
 	}
 }
 

@@ -28,6 +28,8 @@
 
 #if FEATURE_GENEWORM
 
+#define GENEWORM_ATTN 0.1f
+
 #define GENEWORM_LEVEL0					0
 #define GENEWORM_LEVEL1					1
 
@@ -266,6 +268,8 @@ public:
 	float m_flBirthTime;
 	int m_maxFrame;
 	BOOL m_bTrooperDropped;
+
+	static const NamedSoundScript spawnSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS(env_genewormspawn, CGeneWormSpawn)
@@ -279,10 +283,20 @@ TYPEDESCRIPTION CGeneWormSpawn::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CGeneWormSpawn, CBaseEntity)
 
+const NamedSoundScript CGeneWormSpawn::spawnSoundScript = {
+	CHAN_WEAPON,
+	{"debris/beamstart2.wav"},
+	VOL_NORM,
+	ATTN_NORM,
+	"GeneWorm.Spawn"
+};
+
 void CGeneWormSpawn::Precache()
 {
 	PRECACHE_MODEL("sprites/tele1.spr");
 	PRECACHE_MODEL("sprites/boss_glow.spr");
+
+	RegisterAndPrecacheSoundScript(spawnSoundScript);
 }
 
 void CGeneWormSpawn::Spawn()
@@ -333,7 +347,7 @@ void CGeneWormSpawn::SpawnThink()
 		{
 			if(!m_bTrooperDropped)
 			{
-				EmitSoundDyn( CHAN_ITEM, "debris/beamstart2.wav", 1, 0.4, 0, 100);
+				EmitSoundScript(spawnSoundScript);
 				CBaseEntity *pEntity = CreateNoSpawn("monster_shocktrooper", pev->origin, pev->angles, ENT(pev));
 				if (pEntity)
 				{
@@ -413,7 +427,7 @@ public:
 	int  DefaultClassify(void) { return CLASS_RACEX_SHOCK; }
 	void Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib);
 	void TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	void FireHurtTargets(const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
+	void FireHurtTargets(const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value = 0.0f);
 
 	void SetObjectCollisionBox(void)
 	{
@@ -437,8 +451,6 @@ public:
 
 	int  TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 
-	void PainSound(void);
-	void DeathSound(void);
 	void IdleSound(void);
 
 	BOOL ClawAttack();
@@ -472,12 +484,22 @@ public:
 	int m_iMaxHitTimes;
 	int m_iWasHit;
 
-	static const char *pAttackSounds[];
-	static const char *pDeathSounds[];
-	static const char *pEntrySounds[];
-	static const char *pPainSounds[];
-	static const char *pIdleSounds[];
-	static const char *pEyePainSounds[];
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript dieSoundScript;
+
+	static const NamedSoundScript attack1SoundScript;
+	static const NamedSoundScript attack2SoundScript;
+	static const NamedSoundScript attack3SoundScript;
+	static const NamedSoundScript beamAttackSoundScript;
+
+	static const NamedSoundScript entrySoundScript;
+	static const NamedSoundScript bigPain1SoundScript;
+	static const NamedSoundScript bigPain2SoundScript;
+	static const NamedSoundScript bigPain3SoundScript;
+	static const NamedSoundScript bigPain4SoundScript;
+	static const NamedSoundScript eyePainSoundScript;
+
+	static const NamedSoundScript launchSpawnSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS(monster_geneworm, CGeneWorm)
@@ -512,43 +534,110 @@ IMPLEMENT_SAVERESTORE(CGeneWorm, CBaseMonster)
 //=========================================================
 //=========================================================
 
-const char *CGeneWorm::pAttackSounds[] =
-{
-	"geneworm/geneworm_attack_mounted_gun.wav",
-	"geneworm/geneworm_attack_mounted_rocket.wav",
-	"geneworm/geneworm_beam_attack.wav",
-	"geneworm/geneworm_big_attack_forward.wav",
+const NamedSoundScript CGeneWorm::idleSoundScript = {
+	CHAN_BODY,
+	{"geneworm/geneworm_idle1.wav", "geneworm/geneworm_idle2.wav", "geneworm/geneworm_idle3.wav", "geneworm/geneworm_idle4.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	IntRange(95, 105),
+	"GeneWorm.Idle"
 };
 
-const char *CGeneWorm::pDeathSounds[] =
-{
-	"geneworm/geneworm_death.wav",
+const NamedSoundScript CGeneWorm::dieSoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_death.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.Die"
 };
 
-const char *CGeneWorm::pEntrySounds[] =
-{
-	"geneworm/geneworm_entry.wav",
+const NamedSoundScript CGeneWorm::attack1SoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_attack_mounted_rocket.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.Attack1"
 };
 
-const char *CGeneWorm::pPainSounds[] =
-{
-	"geneworm/geneworm_final_pain1.wav",
-	"geneworm/geneworm_final_pain2.wav",
-	"geneworm/geneworm_final_pain3.wav",
-	"geneworm/geneworm_final_pain4.wav",
+const NamedSoundScript CGeneWorm::attack2SoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_attack_mounted_gun.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.Attack2"
 };
 
-const char *CGeneWorm::pIdleSounds[] =
-{
-	"geneworm/geneworm_idle1.wav",
-	"geneworm/geneworm_idle2.wav",
-	"geneworm/geneworm_idle3.wav",
-	"geneworm/geneworm_idle4.wav",
+const NamedSoundScript CGeneWorm::attack3SoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_big_attack_forward.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.Attack3"
 };
 
-const char *CGeneWorm::pEyePainSounds[] =
-{
-	"geneworm/geneworm_shot_in_eye.wav",
+const NamedSoundScript CGeneWorm::beamAttackSoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_beam_attack.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.BeamAttack"
+};
+
+const NamedSoundScript CGeneWorm::entrySoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_entry.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.Entry"
+};
+
+const NamedSoundScript CGeneWorm::bigPain1SoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_final_pain1.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.BigPain1"
+};
+
+const NamedSoundScript CGeneWorm::bigPain2SoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_final_pain2.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.BigPain2"
+};
+
+const NamedSoundScript CGeneWorm::bigPain3SoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_final_pain3.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.BigPain1"
+};
+
+const NamedSoundScript CGeneWorm::bigPain4SoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_final_pain4.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.BigPain4"
+};
+
+const NamedSoundScript CGeneWorm::eyePainSoundScript = {
+	CHAN_VOICE,
+	{"geneworm/geneworm_shot_in_eye.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	"GeneWorm.EyePain"
+};
+
+const NamedSoundScript CGeneWorm::launchSpawnSoundScript = {
+	CHAN_WEAPON,
+	{"debris/beamstart7.wav"},
+	VOL_NORM,
+	GENEWORM_ATTN,
+	IntRange(95, 105),
+	"GeneWorm.LaunchSpawn"
 };
 
 //=========================================================
@@ -616,18 +705,28 @@ void CGeneWorm::Precache()
 {
 	PRECACHE_MODEL("models/geneworm.mdl");
 
-	PRECACHE_SOUND_ARRAY(pAttackSounds);
-	PRECACHE_SOUND_ARRAY(pDeathSounds);
-	PRECACHE_SOUND_ARRAY(pEntrySounds);
-	PRECACHE_SOUND_ARRAY(pPainSounds);
-	PRECACHE_SOUND_ARRAY(pIdleSounds);
-	PRECACHE_SOUND_ARRAY(pEyePainSounds);
-	PRECACHE_SOUND("debris/beamstart7.wav");
-	PRECACHE_SOUND("debris/beamstart2.wav");
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
+
+	RegisterAndPrecacheSoundScript(attack1SoundScript);
+	RegisterAndPrecacheSoundScript(attack2SoundScript);
+	RegisterAndPrecacheSoundScript(attack3SoundScript);
+	RegisterAndPrecacheSoundScript(beamAttackSoundScript);
+
+	RegisterAndPrecacheSoundScript(entrySoundScript);
+	RegisterAndPrecacheSoundScript(bigPain1SoundScript);
+	RegisterAndPrecacheSoundScript(bigPain2SoundScript);
+	RegisterAndPrecacheSoundScript(bigPain3SoundScript);
+	RegisterAndPrecacheSoundScript(bigPain4SoundScript);
+	RegisterAndPrecacheSoundScript(eyePainSoundScript);
+
+	RegisterAndPrecacheSoundScript(launchSpawnSoundScript);
+
 	PRECACHE_MODEL("sprites/tele1.spr");
-	PRECACHE_MODEL("sprites/ballsmoke.spr");
 	PRECACHE_MODEL("sprites/boss_glow.spr");
 	UTIL_PrecacheOther("monster_shocktrooper");
+	UTIL_PrecacheOther("env_genewormcloud");
+	UTIL_PrecacheOther("env_genewormspawn");
 }
 
 //=========================================================
@@ -722,7 +821,7 @@ void CGeneWorm::DyingThink(void)
 		pev->renderamt = 255;
 		pev->solid = SOLID_NOT;
 
-		EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_death.wav", 1, 0.1, 0, 100);
+		EmitSoundScript(dieSoundScript);
 
 		FireTargets("GeneWormDead", this, this);
 
@@ -810,7 +909,7 @@ void CGeneWorm::NextActivity(void)
 		if(gpGlobals->time <= m_flOrificeOpenTime  && !m_fOrificeHit)
 		{
 			pev->sequence = LookupSequence("bigpain2");
-			EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_final_pain2.wav", VOL_NORM, 0.1, 0, 100);
+			EmitSoundScript(bigPain2SoundScript);
 			return;
 		}
 
@@ -819,7 +918,7 @@ void CGeneWorm::NextActivity(void)
 		if(!m_fSpawningTrooper)
 		{
 			pev->sequence = LookupSequence("bigpain4");
-			EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_final_pain4.wav", VOL_NORM, 0.1, 0, 100);
+			EmitSoundScript(bigPain4SoundScript);
 			m_fSpawningTrooper = TRUE;
 			return;
 		}
@@ -857,7 +956,6 @@ void CGeneWorm::TrackHead()
 BOOL CGeneWorm::ClawAttack()
 {
 	Vector targetAngle;
-	const char *sound;
 
 	if(m_hEnemy)
 	{
@@ -874,7 +972,7 @@ BOOL CGeneWorm::ClawAttack()
 			else if(AngleDiff < 0)
 				pev->sequence = LookupSequence("dattack3");
 
-			EmitSoundDyn( CHAN_VOICE, "geneworm/geneworm_beam_attack.wav", 1, 0.1, 0, 100);
+			EmitSoundScript(beamAttackSoundScript);
 
 			m_flNextRangeTime = gpGlobals->time + RANDOM_FLOAT(10,15);
 
@@ -891,23 +989,20 @@ BOOL CGeneWorm::ClawAttack()
 				if(AngleDiff >= 10)
 				{
 					pev->sequence = LookupSequence("melee1");
-					sound = "geneworm/geneworm_attack_mounted_rocket.wav";
+					EmitSoundScript(attack1SoundScript);
 				}
 				else if(AngleDiff <= -2)
 				{
 					pev->sequence = LookupSequence("melee2");
-					sound = "geneworm/geneworm_big_attack_forward.wav";
+					EmitSoundScript(attack2SoundScript);
 				}
 				else
 				{
 					pev->sequence = LookupSequence("melee3");
-					sound = "geneworm/geneworm_attack_mounted_gun.wav";
+					EmitSoundScript(attack3SoundScript);
 				}
 
-				EmitSoundDyn( CHAN_VOICE, sound, 1, 0.1, 0, 100);
-
 				m_flNextMeleeTime = gpGlobals->time + RANDOM_FLOAT(3,5);
-
 				return TRUE;
 			}
 		}
@@ -1067,13 +1162,13 @@ void CGeneWorm::HuntThink(void)
 
 		int iDir = 1;
 		const char* painAnimation = 0;
-		const char* painSound = "geneworm/geneworm_shot_in_eye.wav";
+		const char* painSoundScript = eyePainSoundScript;
 		if (m_fLeftEyeHit && m_fRightEyeHit)
 		{
 			if (!m_fOrificeHit)
 			{
 				painAnimation = "bigpain1";
-				painSound = "geneworm/geneworm_final_pain1.wav";
+				painSoundScript = bigPain1SoundScript;
 
 				if(!m_pBall)
 				{
@@ -1093,7 +1188,7 @@ void CGeneWorm::HuntThink(void)
 			else
 			{
 				painAnimation = "bigpain3";
-				painSound = "geneworm/geneworm_final_pain3.wav";
+				painSoundScript = bigPain3SoundScript;
 			}
 		}
 		else if (m_fLeftEyeHit)
@@ -1105,7 +1200,7 @@ void CGeneWorm::HuntThink(void)
 			painAnimation = "eyepain2";
 		}
 
-		EmitSoundDyn( CHAN_VOICE, painSound, VOL_NORM, 0.1, 0, 100);
+		EmitSoundScript(painSoundScript);
 
 		if (painAnimation)
 		{
@@ -1230,30 +1325,30 @@ void CGeneWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 			m_orificeGlow = NULL;
 
-			EmitSoundDyn( CHAN_WEAPON, "debris/beamstart7.wav", 1, 0.1, 0, RANDOM_LONG(-5, 5)+100);
+			EmitSoundScript(launchSpawnSoundScript);
 		}
 		break;
 	}
 	case GENEWORM_AE_MELEE_LEFT1:
-		FireHurtTargets("GeneWormLeftSlash", this, this, USE_TOGGLE, 1);
+		FireHurtTargets("GeneWormLeftSlash", this, this, USE_ON);
 		break;
 	case GENEWORM_AE_MELEE_LEFT2:
-		FireHurtTargets("GeneWormLeftSlash", this, this, USE_TOGGLE, 0);
+		FireHurtTargets("GeneWormLeftSlash", this, this, USE_OFF);
 		break;
 	case GENEWORM_AE_MELEE_RIGHT1:
-		FireHurtTargets("GeneWormRightSlash", this, this, USE_TOGGLE, 1);
+		FireHurtTargets("GeneWormRightSlash", this, this, USE_ON);
 		break;
 	case GENEWORM_AE_MELEE_RIGHT2:
-		FireHurtTargets("GeneWormRightSlash", this, this, USE_TOGGLE, 0);
+		FireHurtTargets("GeneWormRightSlash", this, this, USE_OFF);
 		break;
 	case GENEWORM_AE_MELEE_FORWARD1:
-		FireHurtTargets("GeneWormCenterSlash", this, this, USE_TOGGLE, 1);
+		FireHurtTargets("GeneWormCenterSlash", this, this, USE_ON);
 		break;
 	case GENEWORM_AE_MELEE_FORWARD2:
-		FireHurtTargets("GeneWormCenterSlash", this, this, USE_TOGGLE, 0);
+		FireHurtTargets("GeneWormCenterSlash", this, this, USE_OFF);
 		break;
 	case GENEWORM_AE_MAD:
-		FireHurtTargets("GeneWormWallHit", this, this, USE_TOGGLE, 0);
+		FireHurtTargets("GeneWormWallHit", this, this, USE_TOGGLE);
 		UTIL_ScreenShake(pev->origin, 24, 3, 5, 2048);
 		break;
 	default:
@@ -1277,7 +1372,7 @@ void CGeneWorm::CommandUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		pev->solid = SOLID_BBOX;
 
 		UTIL_SetOrigin(pev, pev->origin);
-		EmitSoundDyn( CHAN_VOICE, pEntrySounds[0], 1, 0.1, 0, 100);
+		EmitSoundScript(entrySoundScript);
 	}
 }
 
@@ -1286,19 +1381,9 @@ int CGeneWorm::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float
 	return 0;
 }
 
-void CGeneWorm::PainSound(void)
-{
-
-}
-
-void CGeneWorm::DeathSound(void)
-{
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pDeathSounds), 2, ATTN_NORM);
-}
-
 void CGeneWorm::IdleSound(void)
 {
-	EmitSound( CHAN_VOICE, RANDOM_SOUND_ARRAY(pIdleSounds), VOL_NORM, ATTN_NORM);
+	EmitSoundScript(idleSoundScript);
 }
 
 #endif

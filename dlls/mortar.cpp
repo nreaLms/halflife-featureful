@@ -52,6 +52,8 @@ public:
 	float m_flDelay;
 	int m_iCount;
 	int m_fControl;
+
+	static const NamedSoundScript launchSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( func_mortar_field, CFuncMortarField )
@@ -67,6 +69,15 @@ TYPEDESCRIPTION	CFuncMortarField::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CFuncMortarField, CBaseToggle )
+
+const NamedSoundScript CFuncMortarField::launchSoundScript = {
+	CHAN_VOICE,
+	{"weapons/mortar.wav"},
+	1.0f,
+	ATTN_NONE,
+	IntRange(95, 124),
+	"Mortar.Launch"
+};
 
 void CFuncMortarField::KeyValue( KeyValueData *pkvd )
 {
@@ -110,8 +121,8 @@ void CFuncMortarField::Spawn( void )
 
 void CFuncMortarField::Precache( void )
 {
-	PRECACHE_SOUND( "weapons/mortar.wav" );
-	PRECACHE_SOUND( "weapons/mortarhit.wav" );
+	RegisterAndPrecacheSoundScript(launchSoundScript);
+	PRECACHE_SOUND( "weapons/mortarhit.wav" ); // TODO: not used?
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 }
 
@@ -162,9 +173,7 @@ void CFuncMortarField::FieldUse( CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		break;
 	}
 
-	int pitch = RANDOM_LONG( 95,124 );
-
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "weapons/mortar.wav", 1.0, ATTN_NONE, 0, pitch );
+	EmitSoundScript(launchSoundScript);
 
 	float t = 2.5;
 	for( int i = 0; i < m_iCount; i++ )

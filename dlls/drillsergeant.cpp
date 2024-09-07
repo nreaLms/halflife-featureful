@@ -27,19 +27,30 @@ public:
 	Schedule_t *GetSchedule( void );
 
 	const char* DefaultSentenceGroup(int group);
+
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript dieSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_drillsergeant, CDrillSergeant )
 
+const NamedSoundScript CDrillSergeant::painSoundScript = {
+	CHAN_VOICE,
+	{ "barney/ba_pain1.wav", "barney/ba_pain2.wav", "barney/ba_pain3.wav" },
+	"DrillSergeant.Pain"
+};
+
+const NamedSoundScript CDrillSergeant::dieSoundScript = {
+	CHAN_VOICE,
+	{ "barney/ba_die1.wav", "barney/ba_die2.wav", "barney/ba_die3.wav" },
+	"DrillSergeant.Die"
+};
+
 void CDrillSergeant::Precache()
 {
 	PrecacheMyModel("models/drill.mdl");
-	PRECACHE_SOUND("barney/ba_pain1.wav");
-	PRECACHE_SOUND("barney/ba_pain2.wav");
-	PRECACHE_SOUND("barney/ba_pain3.wav");
-	PRECACHE_SOUND("barney/ba_die1.wav");
-	PRECACHE_SOUND("barney/ba_die2.wav");
-	PRECACHE_SOUND("barney/ba_die3.wav");
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript);
 	TalkInit();
 	CTalkMonster::Precache();
 }
@@ -104,18 +115,7 @@ int CDrillSergeant::DefaultClassify(void)
 
 void CDrillSergeant::PlayPainSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain2.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 2:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_pain3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EmitSoundScriptTalk(painSoundScript);
 }
 
 //=========================================================
@@ -123,18 +123,7 @@ void CDrillSergeant::PlayPainSound( void )
 //=========================================================
 void CDrillSergeant::DeathSound( void )
 {
-	switch( RANDOM_LONG( 0, 2 ) )
-	{
-	case 0:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die1.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 1:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die2.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	case 2:
-		EmitSoundDyn( CHAN_VOICE, "barney/ba_die3.wav", 1, ATTN_NORM, 0, GetVoicePitch() );
-		break;
-	}
+	EmitSoundScriptTalk(dieSoundScript);
 }
 
 const char* CDrillSergeant::DefaultSentenceGroup(int group)

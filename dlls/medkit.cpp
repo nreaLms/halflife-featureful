@@ -98,8 +98,6 @@ void CMedkit::Precache(void)
 	PRECACHE_MODEL(MyWModel());
 	PrecachePModel("models/p_medkit.mdl");
 
-	PRECACHE_SOUND("items/9mmclip1.wav");
-
 	PRECACHE_SOUND("items/medshot4.wav");
 	PRECACHE_SOUND("items/medshot5.wav");
 	PRECACHE_SOUND("items/medshotno1.wav");

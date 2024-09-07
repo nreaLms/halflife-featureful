@@ -103,6 +103,11 @@ int PRECACHE_MODEL(const char* name)
 
 int PRECACHE_SOUND(const char* name)
 {
+	if (name && *name == '!')
+	{
+		// no need to precache since it's a sentence
+		return -1;
+	}
 	if (g_psv_developer && g_psv_developer->value > 0)
 		g_precachedSounds.insert(name);
 	return g_engfuncs.pfnPrecacheSound(name);
@@ -1669,7 +1674,15 @@ BOOL UTIL_IsValidEntity( edict_t *pent )
 	return TRUE;
 }
 
-void UTIL_PrecacheOther( const char *szClassname, string_t soundList )
+static void UTIL_PrecacheOtherWithOverride(CBaseEntity* pEntity, EntityOverrides entityOverrides)
+{
+	if (entityOverrides.model)
+		pEntity->pev->model = entityOverrides.model;
+	pEntity->m_soundList = entityOverrides.soundList;
+	pEntity->Precache();
+}
+
+void UTIL_PrecacheOther( const char *szClassname, EntityOverrides entityOverrides )
 {
 	edict_t	*pent;
 
@@ -1683,13 +1696,12 @@ void UTIL_PrecacheOther( const char *szClassname, string_t soundList )
 	CBaseEntity *pEntity = CBaseEntity::Instance( VARS( pent ) );
 	if( pEntity && pEntity->IsEnabledInMod() )
 	{
-		pEntity->m_soundList = soundList;
-		pEntity->Precache();
+		UTIL_PrecacheOtherWithOverride(pEntity, entityOverrides);
 	}
 	REMOVE_ENTITY( pent );
 }
 
-bool UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax, string_t soundList)
+bool UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vector* vecMin, Vector* vecMax, EntityOverrides entityOverrides)
 {
 	edict_t	*pent = CREATE_NAMED_ENTITY( MAKE_STRING( szClassname ) );
 	if( FNullEnt( pent ) )
@@ -1714,8 +1726,7 @@ bool UTIL_PrecacheMonster(const char *szClassname, BOOL reverseRelationship, Vec
 		enabled = pEntity->IsEnabledInMod();
 		if (enabled)
 		{
-			pEntity->m_soundList = soundList;
-			pEntity->Precache();
+			UTIL_PrecacheOtherWithOverride(pEntity, entityOverrides);
 		}
 	}
 	REMOVE_ENTITY( pent );

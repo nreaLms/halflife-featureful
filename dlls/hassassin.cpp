@@ -111,6 +111,10 @@ public:
 	int m_iFrustration;
 
 	int m_iShell;
+
+	static const NamedSoundScript shotSoundScript;
+	static const NamedSoundScript cloakSoundScript;
+	static const NamedSoundScript footstepSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_assassin, CHAssassin )
@@ -132,6 +136,30 @@ TYPEDESCRIPTION	CHAssassin::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CHAssassin, CFollowingMonster )
+
+const NamedSoundScript CHAssassin::shotSoundScript = {
+	CHAN_WEAPON,
+	{"weapons/pl_gun1.wav", "weapons/pl_gun2.wav"},
+	FloatRange(0.6f, 0.8f),
+	ATTN_NORM,
+	"HAssassin.Shot"
+};
+
+const NamedSoundScript CHAssassin::footstepSoundScript = {
+	CHAN_BODY,
+	{"player/pl_step1.wav", "player/pl_step2.wav", "player/pl_step3.wav", "player/pl_step4.wav"},
+	0.5f,
+	ATTN_NORM,
+	"HAssassin.Footstep"
+};
+
+const NamedSoundScript CHAssassin::cloakSoundScript = {
+	CHAN_BODY,
+	{"debris/beamstart1.wav"},
+	0.2f,
+	ATTN_NORM,
+	"HAssassin.Cloak"
+};
 
 void CHAssassin::PlayUseSentence()
 {
@@ -260,15 +288,7 @@ void CHAssassin::Shoot( void )
 	EjectBrass( pev->origin + gpGlobals->v_up * 32 + gpGlobals->v_forward * 12, vecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHELL ); 
 	FireBullets( 1, vecShootOrigin, vecShootDir, Vector( m_flDiviation, m_flDiviation, m_flDiviation ), 2048, BULLET_MONSTER_9MM ); // shoot +-8 degrees
 
-	switch( RANDOM_LONG( 0, 1 ) )
-	{
-	case 0:
-		EmitSound( CHAN_WEAPON, "weapons/pl_gun1.wav", RANDOM_FLOAT( 0.6f, 0.8f ), ATTN_NORM );
-		break;
-	case 1:
-		EmitSound( CHAN_WEAPON, "weapons/pl_gun2.wav", RANDOM_FLOAT( 0.6f, 0.8f ), ATTN_NORM );
-		break;
-	}
+	EmitSoundScript(shotSoundScript);
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -399,15 +419,9 @@ void CHAssassin::Precache()
 {
 	PrecacheMyModel( "models/hassassin.mdl" );
 
-	PRECACHE_SOUND( "weapons/pl_gun1.wav" );
-	PRECACHE_SOUND( "weapons/pl_gun2.wav" );
-
-	PRECACHE_SOUND( "player/pl_step1.wav" );
-	PRECACHE_SOUND( "player/pl_step2.wav" );
-	PRECACHE_SOUND( "player/pl_step3.wav" );
-	PRECACHE_SOUND( "player/pl_step4.wav" );
-
-	PRECACHE_SOUND( "debris/beamstart1.wav" );
+	RegisterAndPrecacheSoundScript(shotSoundScript);
+	RegisterAndPrecacheSoundScript(footstepSoundScript);
+	RegisterAndPrecacheSoundScript(cloakSoundScript);
 
 	m_iShell = PRECACHE_MODEL( "models/shell.mdl" );// brass shell
 }	
@@ -796,7 +810,7 @@ void CHAssassin::RunAI( void )
 	{
 		if( pev->renderamt == 255 )
 		{
-			EmitSound( CHAN_BODY, "debris/beamstart1.wav", 0.2, ATTN_NORM );
+			EmitSoundScript(cloakSoundScript);
 		}
 
 		pev->renderamt = Q_max( pev->renderamt - 50, m_iTargetRanderamt );
@@ -815,21 +829,7 @@ void CHAssassin::RunAI( void )
 		iStep = !iStep;
 		if( iStep )
 		{
-			switch( RANDOM_LONG( 0, 3 ) )
-			{
-			case 0:
-				EmitSound( CHAN_BODY, "player/pl_step1.wav", 0.5, ATTN_NORM );
-				break;
-			case 1:
-				EmitSound( CHAN_BODY, "player/pl_step3.wav", 0.5, ATTN_NORM );
-				break;
-			case 2:
-				EmitSound( CHAN_BODY, "player/pl_step2.wav", 0.5, ATTN_NORM );
-				break;
-			case 3:
-				EmitSound( CHAN_BODY, "player/pl_step4.wav", 0.5, ATTN_NORM );
-				break;
-			}
+			EmitSoundScript(footstepSoundScript);
 		}
 	}
 }

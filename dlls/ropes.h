@@ -258,6 +258,9 @@ public:
 	*/
 	Vector GetAttachedObjectsPosition() const;
 
+	static const NamedSoundScript grabSoundScript;
+	static const NamedSoundScript creakSoundScript;
+
 private:
 	int m_iSegments;
 

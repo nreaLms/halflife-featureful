@@ -18,6 +18,7 @@
 
 #include "extdll.h"
 #include "util.h"
+#include "soundscripts.h"
 /*
 
 Class Hierachy
@@ -289,6 +290,20 @@ public:
 	bool EmitSound( int channel, const char *sample, float volume, float attenuation );
 	void EmitAmbientSound( const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch );
 	void StopSound( int channel, const char* sample );
+
+	const SoundScript* GetSoundScript(const char* name);
+	bool EmitSoundScript(const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	bool EmitSoundScript(const char* name, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	void StopSoundScript(const SoundScript* soundScript);
+	void StopSoundScript(const char* name);
+	void EmitSoundScriptAmbient(const Vector& vecOrigin, const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	void EmitSoundScriptAmbient(const Vector& vecOrigin, const char* name, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
+	void PrecacheSoundScript(const SoundScript& soundScript);
+	void PrecacheSoundScript(const char* name);
+	void RegisterAndPrecacheSoundScriptByName(const char* name, const SoundScript& defaultSoundScript);
+	void RegisterAndPrecacheSoundScript(const NamedSoundScript& defaultSoundScript);
+	void RegisterAndPrecacheSoundScript(const char* derivative, const char* base, const SoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
+	void RegisterAndPrecacheSoundScript(const char* derivative, const NamedSoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )

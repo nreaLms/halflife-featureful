@@ -69,6 +69,7 @@ void CAirtank::Spawn( void )
 
 void CAirtank::Precache( void )
 {
+	PrecacheBaseGrenadeSounds();
 	PRECACHE_MODEL( "models/w_oxygen.mdl" );
 	PRECACHE_SOUND( "doors/aliendoor3.wav" );
 }

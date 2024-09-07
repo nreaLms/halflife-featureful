@@ -783,10 +783,15 @@ void CMultiSource::Register( void )
 	pev->spawnflags &= ~SF_MULTI_INIT;
 }
 
-static const char* const g_sparkSounds[] =
-{
-	"buttons/spark1.wav", "buttons/spark2.wav", "buttons/spark3.wav",
-	"buttons/spark4.wav", "buttons/spark5.wav", "buttons/spark6.wav"
+static const NamedSoundScript sparkSoundScript = {
+	CHAN_VOICE,
+	{
+		"buttons/spark1.wav", "buttons/spark2.wav", "buttons/spark3.wav",
+		"buttons/spark4.wav", "buttons/spark5.wav", "buttons/spark6.wav"
+	},
+	FloatRange(0.1f, 0.3f),
+	ATTN_NORM,
+	"DoSpark"
 };
 
 int CBaseButton::ObjectCaps( void )
@@ -836,7 +841,7 @@ void CBaseButton::Precache( void )
 
 	if( IsSparkingButton() )// this button should spark in OFF state
 	{
-		PRECACHE_SOUND_ARRAY(g_sparkSounds);
+		RegisterAndPrecacheSoundScript(sparkSoundScript);
 	}
 
 	// get door button sounds, for doors which require buttons to open
@@ -1247,30 +1252,33 @@ const char *ButtonSound( int sound )
 	return pszSound;
 }
 
-
-struct SparkSoundParams
+void PlaySparkSound( entvars_t *pev, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
 {
-	float volumeFactor = 1.0f;
-	float attenuation = 1.0f;
-	bool silent = false;
-};
+	const SoundScript* soundScript = GetSoundScript(sparkSoundScript);
+	if (soundScript)
+	{
+		const char* sample = soundScript->Wave();
+		if (sample)
+		{
+			FloatRange volume = soundScript->volume;
+			float attenuation = soundScript->attenuation;
+			IntRange pitch = soundScript->pitch;
 
-void PlaySparkSound( entvars_t *pev, SparkSoundParams soundParams = SparkSoundParams() )
-{
-	if (soundParams.silent)
-		return;
-	const float flVolume = (RANDOM_FLOAT( 0.25f, 0.75f ) * 0.4f) * soundParams.volumeFactor;//random volume range
-	EMIT_SOUND( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY( g_sparkSounds ), flVolume, soundParams.attenuation );
+			soundParams.ApplyOverride(volume, attenuation, pitch);
+
+			EMIT_SOUND_DYN(ENT(pev), soundScript->channel, sample, RandomizeNumberFromRange(volume), attenuation, 0, RandomizeNumberFromRange(pitch));
+		}
+	}
 }
 
-void DoSpark( entvars_t *pev, const Vector &location, SparkSoundParams soundParams = SparkSoundParams() )
+void DoSpark( entvars_t *pev, const Vector &location, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
 {
 	Vector tmp = location + pev->size * 0.5f;
 	UTIL_Sparks( tmp );
 	PlaySparkSound(pev, soundParams);
 }
 
-void DoSparkShower( entvars_t *pev, const Vector &location, const SparkEffectParams& params, SparkSoundParams soundParams = SparkSoundParams() )
+void DoSparkShower( entvars_t *pev, const Vector &location, const SparkEffectParams& params, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
 {
 	Vector tmp = location + pev->size * 0.5f;
 	UTIL_SparkShower( tmp, params );
@@ -2038,7 +2046,7 @@ void CEnvSpark::Spawn( void )
 
 void CEnvSpark::Precache( void )
 {
-	PRECACHE_SOUND_ARRAY(g_sparkSounds);
+	RegisterAndPrecacheSoundScript(sparkSoundScript);
 	if (!FStringNull(pev->model))
 	{
 		m_modelIndex = PRECACHE_MODEL(STRING(pev->model));
@@ -2162,10 +2170,22 @@ void CEnvSpark::MakeSpark()
 	{
 		params.flags |= SPARK_EFFECT_NO_STREAK;
 	}
-	SparkSoundParams soundParams;
-	soundParams.silent = IsSilent();
-	soundParams.volumeFactor = m_volume > 0.0f ? m_volume : 1.0f;
-	soundParams.attenuation = ::SoundAttenuation(m_soundRadius);
+	SoundScriptParamOverride soundParams;
+	if (IsSilent())
+	{
+		soundParams.OverrideVolumeAbsolute(0.0f);
+	}
+	else
+	{
+		if (m_volume > 0.0f)
+		{
+			soundParams.OverrideVolumeRelative(m_volume);
+		}
+	}
+	if (m_soundRadius)
+	{
+		soundParams.OverrideAttenuationAbsolute(::SoundAttenuation(m_soundRadius));
+	}
 	DoSparkShower(pev, pev->origin, params, soundParams);
 }
 
