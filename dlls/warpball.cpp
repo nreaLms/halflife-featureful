@@ -606,7 +606,7 @@ void LoadWarpballTemplates()
 	ALERT(at_console, "Parsing %s\n", fileName);
 
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, warpballCatalogSchema);
+	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, warpballCatalogSchema, fileName);
 	g_engfuncs.pfnFreeFile(pMemFile);
 
 	if (!success)

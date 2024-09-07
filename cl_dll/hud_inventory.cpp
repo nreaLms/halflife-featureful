@@ -73,7 +73,7 @@ bool InventoryHudSpec::ReadFromFile(const char *fileName)
 	gEngfuncs.Con_DPrintf("Parsing %s\n", fileName);
 
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, hudInventorySchema);
+	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, hudInventorySchema, fileName);
 	gEngfuncs.COM_FreeFile(pMemFile);
 
 	if (!success)

@@ -3,7 +3,7 @@
 #if CLIENT_DLL
 #include "cl_dll.h"
 #define JSON_LOG gEngfuncs.Con_DPrintf
-#define JSON_ERROR gEngfuncs.Con_Printf
+#define JSON_ERROR gEngfuncs.Con_DPrintf
 #else
 #include "util.h"
 #define JSON_LOG(...) ALERT(at_aiconsole, ##__VA_ARGS__ )
@@ -20,18 +20,48 @@
 
 using namespace rapidjson;
 
-static void ReportParseErrors(ParseResult& parseResult)
+static void CalculateLineAndColumnFromOffset(const char* pMemFile, size_t offset, size_t& line, size_t& column)
 {
-	JSON_ERROR("JSON parse error: %s (%lu)\n", GetParseError_En(parseResult.Code()), parseResult.Offset());
+	const char* cur = pMemFile;
+	line = 1;
+	column = 0;
+	size_t i = 0;
+	bool nextLine = false;
+	while (cur && *cur && i <= offset)
+	{
+		if (nextLine)
+		{
+			nextLine = false;
+			line++;
+			column = 0;
+		}
+		if (*cur == '\n')
+		{
+			nextLine = true;
+		}
+		++column;
+		++cur;
+		++i;
+	}
 }
 
-bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fileSize, const char *schemaText)
+static void ReportParseErrors(const char* fileName, ParseResult& parseResult, const char *pMemFile)
 {
+	size_t errorLine, errorColumn;
+	CalculateLineAndColumnFromOffset(pMemFile, parseResult.Offset(), errorLine, errorColumn);
+	JSON_ERROR("%s: JSON parse error: %s (Line %lu, column %lu)\n", fileName, GetParseError_En(parseResult.Code()), errorLine, errorColumn);
+}
+
+bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fileSize, const char *schemaText, const char* fileName)
+{
+	if (!fileName)
+		fileName = "";
+
 	Document schemaDocument;
 	schemaDocument.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>(schemaText);
 	ParseResult parseResult = schemaDocument;
 	if (!parseResult) {
-		ReportParseErrors(parseResult);
+		ReportParseErrors(fileName, parseResult, pMemFile);
 		return false;
 	}
 	SchemaDocument schema(schemaDocument);
@@ -39,7 +69,7 @@ bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fi
 	document.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>(pMemFile, fileSize);
 	parseResult = document;
 	if (!parseResult) {
-		ReportParseErrors(parseResult);
+		ReportParseErrors(fileName, parseResult, pMemFile);
 		return false;
 	}
 
@@ -71,7 +101,8 @@ bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fi
 			schemaPartValue->Accept(writer);
 		}
 
-		JSON_ERROR("Value %s of property '%s' doesn't match the constraint '%s' in '%s': %s\n",
+		JSON_ERROR("%s: value %s of property '%s' doesn't match the constraint '%s' in '%s': %s\n",
+			fileName,
 			badValueBuffer.GetString(),
 			docPathBuffer.GetString(),
 			validator.GetInvalidSchemaKeyword(),

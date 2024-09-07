@@ -7,7 +7,7 @@
 #include "rapidjson/document.h"
 #include "template_property_types.h"
 
-bool ReadJsonDocumentWithSchema(rapidjson::Document& document, const char* pMemFile, int fileSize, const char* schemaText);
+bool ReadJsonDocumentWithSchema(rapidjson::Document& document, const char* pMemFile, int fileSize, const char* schemaText, const char* fileName);
 
 bool UpdatePropertyFromJson(std::string& str, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(int& i, rapidjson::Value& jsonValue, const char* key);

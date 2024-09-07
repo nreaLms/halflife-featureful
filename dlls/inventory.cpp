@@ -50,7 +50,7 @@ bool InventorySpec::ReadFromFile(const char *fileName)
 	ALERT(at_console, "Parsing %s\n", fileName);
 
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, inventorySpecSchema);
+	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, inventorySpecSchema, fileName);
 	g_engfuncs.pfnFreeFile(pMemFile);
 
 	if (!success)

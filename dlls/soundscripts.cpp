@@ -301,7 +301,7 @@ bool SoundScriptSystem::ReadFromFile(const char *fileName)
 	ALERT(at_console, "Parsing %s\n", fileName);
 
 	Document document;
-	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, soundScriptsSchema);
+	bool success = ReadJsonDocumentWithSchema(document, pMemFile, fileSize, soundScriptsSchema, fileName);
 	g_engfuncs.pfnFreeFile(pMemFile);
 
 	if (!success)
