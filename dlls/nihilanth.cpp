@@ -309,7 +309,7 @@ const NamedSoundScript CNihilanth::rechargeSoundScript = {
 	CHAN_VOICE,
 	{"X/x_recharge1.wav", "X/x_recharge2.wav", "X/x_recharge3.wav"},
 	1.0f,
-	0.2,
+	0.2f,
 	"Nihilanth.Recharge"
 };
 
