@@ -1727,7 +1727,7 @@ LINK_ENTITY_TO_CLASS( env_smoker, CSmoker )
 TYPEDESCRIPTION	CSmoker::m_SaveData[] =
 {
 	DEFINE_FIELD( CSmoker, m_iszPosition, FIELD_STRING ),
-	DEFINE_FIELD( CSmoker, m_iszDirection, FIELD_EHANDLE ),
+	DEFINE_FIELD( CSmoker, m_iszDirection, FIELD_STRING ),
 	DEFINE_FIELD( CSmoker, m_hActivator, FIELD_EHANDLE ),
 };
 
