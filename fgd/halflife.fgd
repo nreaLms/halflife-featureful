@@ -1693,6 +1693,7 @@
 	density(integer) : "Bubble density" : 2
 	frequency(integer) : "Bubble frequency" : 2
 	current(integer) : "Speed of Current" : 0
+	bubble_model(sprite) : "Custom Bubble Sprite"
 	spawnflags(Flags) =
 	[
 		1 : "Start Off" 	: 0

@@ -62,10 +62,13 @@ public:
 	virtual int ObjectCaps( void ) { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	static TYPEDESCRIPTION m_SaveData[];
 
+	const char* BubbleModel();
+
 	int m_density;
 	int m_frequency;
 	int m_bubbleModel;
 	int m_state;
+	string_t m_bubbleModelStr;
 };
 
 LINK_ENTITY_TO_CLASS( env_bubbles, CBubbling )
@@ -75,6 +78,7 @@ TYPEDESCRIPTION	CBubbling::m_SaveData[] =
 	DEFINE_FIELD( CBubbling, m_density, FIELD_INTEGER ),
 	DEFINE_FIELD( CBubbling, m_frequency, FIELD_INTEGER ),
 	DEFINE_FIELD( CBubbling, m_state, FIELD_INTEGER ),
+	DEFINE_FIELD( CBubbling, m_bubbleModelStr, FIELD_STRING ),
 	// Let spawn restore this!
 	//DEFINE_FIELD( CBubbling, m_bubbleModel, FIELD_INTEGER ),
 };
@@ -82,6 +86,11 @@ TYPEDESCRIPTION	CBubbling::m_SaveData[] =
 IMPLEMENT_SAVERESTORE( CBubbling, CBaseEntity )
 
 #define SF_BUBBLES_STARTOFF		0x0001
+
+const char* CBubbling::BubbleModel()
+{
+	return FStringNull(m_bubbleModelStr) ? "sprites/bubble.spr" : STRING(m_bubbleModelStr);
+}
 
 void CBubbling::Spawn( void )
 {
@@ -110,7 +119,7 @@ void CBubbling::Spawn( void )
 
 void CBubbling::Precache( void )
 {
-	m_bubbleModel = PRECACHE_MODEL( "sprites/bubble.spr" );			// Precache bubble sprite
+	m_bubbleModel = PRECACHE_MODEL(BubbleModel());			// Precache bubble sprite
 }
 
 void CBubbling::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -145,6 +154,11 @@ void CBubbling::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "current" ) )
 	{
 		pev->speed = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "bubble_model" ) )
+	{
+		m_bubbleModelStr = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
