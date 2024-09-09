@@ -134,6 +134,7 @@ set (SVDLL_SOURCES
 	observer.cpp
 	op4mortar.cpp
 	osprey.cpp
+	panthereye.cpp
 	pathcorner.cpp
 	pipewrench.cpp
 	pitdrone.cpp

@@ -259,6 +259,14 @@ void CGameRules::RefreshSkillData ( void )
 	// Nihilanth
 	gSkillData.nihilanthHealth = GetSkillCvar( "sk_nihilanth_health" );
 	gSkillData.nihilanthZap = GetSkillCvar( "sk_nihilanth_zap" );
+
+	// Panthereye
+	if (g_modFeatures.IsMonsterEnabled("panthereye"))
+	{
+		gSkillData.panthereyeHealth = GetSkillCvar( "sk_panthereye_health" );
+		gSkillData.panthereyeDmgClaw = GetSkillCvar( "sk_panthereye_dmg_claw" );
+	}
+
 #if FEATURE_PITDRONE
 	// Pitdrone
 	if (g_modFeatures.IsMonsterEnabled("pitdrone"))

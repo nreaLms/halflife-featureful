@@ -909,6 +909,9 @@ DECLARE_SKILL_VALUE(sk_otis_health, "0")
 DECLARE_SKILL_VALUE(sk_kate_health, "0")
 #endif
 
+DECLARE_SKILL_VALUE(sk_panthereye_health, "150")
+DECLARE_SKILL_VALUE(sk_panthereye_dmg_claw, "20")
+
 #if FEATURE_PITDRONE
 // Pitdrone
 DECLARE_SKILL_VALUE(sk_pitdrone_health, "0")
@@ -1641,6 +1644,13 @@ void GameDLLInit( void )
 	if (g_modFeatures.IsMonsterEnabled("kate"))
 		REGISTER_SKILL_CVARS(sk_kate_health);
 #endif
+
+	// Panthereye
+	if (g_modFeatures.IsMonsterEnabled("panthereye"))
+	{
+		REGISTER_SKILL_CVARS(sk_panthereye_health);
+		REGISTER_SKILL_CVARS(sk_panthereye_dmg_claw);
+	}
 
 #if FEATURE_PITDRONE
 	// Pitdrone

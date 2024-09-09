@@ -125,6 +125,9 @@ struct skilldata_t
 	float nihilanthHealth;
 	float nihilanthZap;
 
+	float panthereyeHealth;
+	float panthereyeDmgClaw;
+
 #if FEATURE_PITDRONE
 	float pitdroneHealth;
 	float pitdroneDmgBite;
