@@ -169,6 +169,16 @@ void CGameRules::RefreshSkillData ( void )
 	if (g_modFeatures.IsMonsterEnabled("cleansuit_scientist"))
 		gSkillData.cleansuitScientistHealth = GetSkillCvar( "sk_cleansuit_scientist_health", "sk_scientist_health" );
 #endif
+
+	// Flybee
+	if (g_modFeatures.IsMonsterEnabled("flybee"))
+	{
+		gSkillData.flybeeHealth = GetSkillCvar("sk_flybee_health", "sk_ichthyosaur_health");
+		gSkillData.flybeeDmgKick = GetSkillCvar("sk_flybee_dmg_kick");
+		gSkillData.flybeeDmgBeam = GetSkillCvar("sk_flybee_dmg_beam");
+		gSkillData.flybeeDmgFlyball = GetSkillCvar("sk_flybee_dmg_flyball");
+	}
+
 	// Gargantua
 	gSkillData.gargantuaHealth = GetSkillCvar( "sk_gargantua_health" );
 	gSkillData.gargantuaDmgSlash = GetSkillCvar( "sk_gargantua_dmg_slash" );

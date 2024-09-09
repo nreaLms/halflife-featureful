@@ -810,6 +810,12 @@ DECLARE_SKILL_VALUE(sk_bigmomma_radius_blast, "250")
 DECLARE_SKILL_VALUE(sk_cleansuit_scientist_health, "0")
 #endif
 
+// Flybee
+DECLARE_SKILL_VALUE(sk_flybee_health, "0")
+DECLARE_SKILL_VALUE(sk_flybee_dmg_kick, "20")
+DECLARE_SKILL_VALUE(sk_flybee_dmg_beam, "50")
+DECLARE_SKILL_VALUE(sk_flybee_dmg_flyball, "20")
+
 // Gargantua
 DECLARE_SKILL_VALUE(sk_gargantua_health, "0")
 DECLARE_SKILL_VALUE(sk_gargantua_dmg_slash, "0")
@@ -1529,6 +1535,15 @@ void GameDLLInit( void )
 	if (g_modFeatures.IsMonsterEnabled("cleansuit_scientist"))
 		REGISTER_SKILL_CVARS(sk_cleansuit_scientist_health);
 #endif
+
+	// Flybee
+	if (g_modFeatures.IsMonsterEnabled("flybee"))
+	{
+		REGISTER_SKILL_CVARS(sk_flybee_health);
+		REGISTER_SKILL_CVARS(sk_flybee_dmg_kick);
+		REGISTER_SKILL_CVARS(sk_flybee_dmg_beam);
+		REGISTER_SKILL_CVARS(sk_flybee_dmg_flyball);
+	}
 
 	// Gargantua
 	REGISTER_SKILL_CVARS(sk_gargantua_health);

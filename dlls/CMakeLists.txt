@@ -78,6 +78,7 @@ set (SVDLL_SOURCES
 	egon.cpp
 	explode.cpp
 	fgrunt.cpp
+	flybee.cpp
 	flyingmonster.cpp
 	followers.cpp
 	followingmonster.cpp

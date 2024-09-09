@@ -60,6 +60,11 @@ struct skilldata_t
 	float cleansuitScientistHealth;
 #endif
 
+	float flybeeHealth;
+	float flybeeDmgKick;
+	float flybeeDmgBeam;
+	float flybeeDmgFlyball;
+
 #if FEATURE_OPFOR_GRUNT
 	float fgruntHealth;
 	float fgruntDmgKick;

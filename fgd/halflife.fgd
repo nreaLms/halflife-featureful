@@ -4690,6 +4690,7 @@
 		1 : "Black"
 	]
 ]
+@PointClass base(Monster) size(-24 -24 0, 24 24 24) studio("models/flybee.mdl") = monster_flybee : "Flybee" []
 @PointClass base(Monster, Sequence) size(-16 -16 0, 16 16 16) studio("models/aflock.mdl") = monster_flyer_flock : "Flock of Flyers"
 [
 	sequence(Choices) : "Animation Sequence (editor)" : 0 =
