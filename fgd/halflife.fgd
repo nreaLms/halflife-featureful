@@ -6599,6 +6599,8 @@
 	]
 ]
 
+@PointClass base(Monster) size(-32 -32 0, 32 32 128) studio("models/robocop.mdl") = monster_robocop : "Robocop" []
+
 @PointClass base(Monster, FollowingMonster) size(-16 -16 0, 16 16 72) studio("models/rgrunt.mdl") = monster_robogrunt : "Robot Grunt"
 [
 	spawnflags(Flags) =

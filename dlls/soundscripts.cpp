@@ -157,8 +157,18 @@ void SoundScriptParamOverride::OverridePitchShifted(int pitchShift)
 	pitch = pitchShift;
 }
 
-void SoundScriptParamOverride::ApplyOverride(FloatRange &origVolume, float &origAttenuation, IntRange &origPitch) const
+void SoundScriptParamOverride::OverrideChannel(int newChannel)
 {
+	channelOverride = OVERRIDE_ABSOLUTE;
+	channel = newChannel;
+}
+
+void SoundScriptParamOverride::ApplyOverride(int& origChannel, FloatRange &origVolume, float &origAttenuation, IntRange &origPitch) const
+{
+	if (channelOverride == OVERRIDE_ABSOLUTE)
+	{
+		origChannel = channel;
+	}
 	if (volumeOverride == OVERRIDE_ABSOLUTE)
 	{
 		origVolume = volume;
@@ -453,7 +463,7 @@ const SoundScript* SoundScriptSystem::ProvideDefaultSoundScript(const char *deri
 				if (paramOverride.HasOverrides())
 				{
 					SoundScript overrideSoundScript = *baseScript;
-					paramOverride.ApplyOverride(overrideSoundScript.volume, overrideSoundScript.attenuation, overrideSoundScript.pitch);
+					paramOverride.ApplyOverride(overrideSoundScript.channel, overrideSoundScript.volume, overrideSoundScript.attenuation, overrideSoundScript.pitch);
 					EnsureExistingScriptDefined(existing, meta, overrideSoundScript);
 				}
 				else
@@ -474,7 +484,7 @@ const SoundScript* SoundScriptSystem::ProvideDefaultSoundScript(const char *deri
 			if (paramOverride.HasOverrides())
 			{
 				SoundScript overrideSoundScript = *baseScript;
-				paramOverride.ApplyOverride(overrideSoundScript.volume, overrideSoundScript.attenuation, overrideSoundScript.pitch);
+				paramOverride.ApplyOverride(overrideSoundScript.channel, overrideSoundScript.volume, overrideSoundScript.attenuation, overrideSoundScript.pitch);
 				return ProvideDefaultSoundScript(derivative, overrideSoundScript);
 			}
 			else

@@ -222,6 +222,11 @@ struct skilldata_t
 	float miniturretHealth;
 	float sentryHealth;
 
+	float robocopHealth;
+	float robocopDmgMortar;
+	float robocopDmgFist;
+	float robocopSWRadius;
+
 	float zaptrapSenseRadius;
 	float zaptrapRespawnTime;
 

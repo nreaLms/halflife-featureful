@@ -69,9 +69,10 @@ struct SoundScriptParamOverride
 	void OverridePitchAbsolute(IntRange newPitch);
 	void OverridePitchRelative(IntRange newPitch);
 	void OverridePitchShifted(int pitchShift);
-	void ApplyOverride(FloatRange& origVolume, float& origAttenuation, IntRange& origPitch) const;
+	void OverrideChannel(int newChannel);
+	void ApplyOverride(int& origChannel, FloatRange& origVolume, float& origAttenuation, IntRange& origPitch) const;
 	bool HasOverrides() const {
-		return volumeOverride || attenuationOverride || pitchOverride;
+		return channelOverride || volumeOverride || attenuationOverride || pitchOverride;
 	}
 
 private:
@@ -83,9 +84,11 @@ private:
 		OVERRIDE_SHIFT = 3,
 	};
 
+	unsigned char channelOverride = NO_OVERRIDE;
 	unsigned char volumeOverride = NO_OVERRIDE;
 	unsigned char attenuationOverride = NO_OVERRIDE;
 	unsigned char pitchOverride = NO_OVERRIDE;
+	int channel = CHAN_AUTO;
 	FloatRange volume = VOL_NORM;
 	float attenuation = ATTN_NORM;
 	IntRange pitch = PITCH_NORM;

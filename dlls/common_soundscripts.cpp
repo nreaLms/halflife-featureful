@@ -1,6 +1,15 @@
 #include "extdll.h"
 #include "common_soundscripts.h"
 
+const NamedSoundScript sparkBaseSoundScript = {
+	CHAN_VOICE,
+	{
+		"buttons/spark1.wav", "buttons/spark2.wav", "buttons/spark3.wav",
+		"buttons/spark4.wav", "buttons/spark5.wav", "buttons/spark6.wav"
+	},
+	"DoSparkBase"
+};
+
 namespace NPC {
 
 const NamedSoundScript bodySplatSoundScript = {

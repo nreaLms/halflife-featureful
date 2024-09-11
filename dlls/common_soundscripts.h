@@ -4,6 +4,8 @@
 
 #include "soundscripts.h"
 
+extern const NamedSoundScript sparkBaseSoundScript;
+
 namespace NPC
 {
 

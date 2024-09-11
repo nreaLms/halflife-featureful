@@ -149,6 +149,7 @@ set (SVDLL_SOURCES
 	rgrunt.cpp
 	recruit.cpp
 	roach.cpp
+	robocop.cpp
 	ropes.cpp
 	rpg.cpp
 	satchel.cpp

@@ -744,11 +744,12 @@ bool CBaseEntity::EmitSoundScript(const SoundScript *soundScript, const SoundScr
 		const char* sample = soundScript->Wave();
 		if (sample)
 		{
+			int channel = soundScript->channel;
 			FloatRange volume = soundScript->volume;
 			float attenuation = soundScript->attenuation;
 			IntRange pitch = soundScript->pitch;
 
-			paramsOverride.ApplyOverride(volume, attenuation, pitch);
+			paramsOverride.ApplyOverride(channel, volume, attenuation, pitch);
 
 			return EmitSoundDyn(soundScript->channel, sample, RandomizeNumberFromRange(volume), attenuation, flags, RandomizeNumberFromRange(pitch));
 		}
@@ -795,11 +796,12 @@ void CBaseEntity::EmitSoundScriptAmbient(const Vector& vecOrigin, const SoundScr
 		const char* sample = soundScript->Wave();
 		if (sample)
 		{
+			int channel = soundScript->channel;
 			FloatRange volume = soundScript->volume;
 			float attenuation = soundScript->attenuation;
 			IntRange pitch = soundScript->pitch;
 
-			paramsOverride.ApplyOverride(volume, attenuation, pitch);
+			paramsOverride.ApplyOverride(channel, volume, attenuation, pitch);
 
 			EmitAmbientSound(vecOrigin, sample, RandomizeNumberFromRange(volume), attenuation, flags, RandomizeNumberFromRange(pitch));
 		}

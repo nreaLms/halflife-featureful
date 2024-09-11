@@ -410,6 +410,15 @@ void CGameRules::RefreshSkillData ( void )
 	// Sentry Turret
 	gSkillData.sentryHealth = GetSkillCvar( "sk_sentry_health" );
 
+	// Robocop
+	if (g_modFeatures.IsMonsterEnabled("robocop"))
+	{
+		gSkillData.robocopHealth = GetSkillCvar( "sk_robocop_health" );
+		gSkillData.robocopDmgMortar = GetSkillCvar( "sk_robocop_dmg_mortar" );
+		gSkillData.robocopDmgFist = GetSkillCvar( "sk_robocop_dmg_fist" );
+		gSkillData.robocopSWRadius = GetSkillCvar( "sk_robocop_sw_radius" );
+	}
+
 	// Zap ball trap
 	gSkillData.zaptrapSenseRadius = GetSkillCvar( "sk_zaptrap_sense_radius" );
 	gSkillData.zaptrapRespawnTime = GetSkillCvar( "sk_zaptrap_respawn_time" );

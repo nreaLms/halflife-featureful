@@ -1014,6 +1014,12 @@ DECLARE_SKILL_VALUE(sk_miniturret_health, "0")
 // Sentry Turret
 DECLARE_SKILL_VALUE(sk_sentry_health, "0")
 
+// Robocop
+DECLARE_SKILL_VALUE(sk_robocop_health, "0")
+DECLARE_SKILL_VALUE(sk_robocop_dmg_mortar, "0")
+DECLARE_SKILL_VALUE(sk_robocop_dmg_fist, "0")
+DECLARE_SKILL_VALUE(sk_robocop_sw_radius, "0")
+
 DECLARE_SKILL_VALUE(sk_zaptrap_sense_radius, "244")
 DECLARE_SKILL_VALUE(sk_zaptrap_respawn_time, "18")
 
@@ -1794,6 +1800,15 @@ void GameDLLInit( void )
 
 	// Sentry Turret
 	REGISTER_SKILL_CVARS(sk_sentry_health);
+
+	// Robocop
+	if (g_modFeatures.IsMonsterEnabled("robocop"))
+	{
+		REGISTER_SKILL_CVARS(sk_robocop_health);
+		REGISTER_SKILL_CVARS(sk_robocop_dmg_mortar);
+		REGISTER_SKILL_CVARS(sk_robocop_dmg_fist);
+		REGISTER_SKILL_CVARS(sk_robocop_sw_radius);
+	}
 
 	REGISTER_SKILL_CVARS(sk_zaptrap_sense_radius);
 	REGISTER_SKILL_CVARS(sk_zaptrap_respawn_time);

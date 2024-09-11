@@ -60,7 +60,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	static const NamedSoundScript dieSoundScript;
-	static const NamedSoundScript sparkSoundScript;
+	static constexpr const char* sparkSoundScript = "RGrunt.Spark";
 
 	static constexpr const char* reloadSoundScript = "RGrunt.Reload";
 	static constexpr const char* burst9mmSoundScript = "RGrunt.9MM";
@@ -125,15 +125,6 @@ const NamedSoundScript CRGrunt::dieSoundScript = {
 	"RGrunt.Die"
 };
 
-const NamedSoundScript CRGrunt::sparkSoundScript = {
-	CHAN_BODY,
-	{
-		"buttons/spark1.wav", "buttons/spark2.wav", "buttons/spark3.wav",
-		"buttons/spark4.wav", "buttons/spark5.wav", "buttons/spark6.wav"
-	},
-	"RGrunt.Spark"
-};
-
 const NamedSoundScript CRGrunt::useSoundScript = {
 	CHAN_VOICE,
 	{"buttons/button3.wav"},
@@ -181,7 +172,10 @@ void CRGrunt::Precache()
 	PRECACHE_MODEL("models/computergibs.mdl");
 
 	RegisterAndPrecacheSoundScript(dieSoundScript);
-	RegisterAndPrecacheSoundScript(sparkSoundScript);
+
+	SoundScriptParamOverride param;
+	param.OverrideChannel(CHAN_BODY);
+	RegisterAndPrecacheSoundScript(sparkSoundScript, ::sparkBaseSoundScript, param);
 
 	RegisterAndPrecacheSoundScript(reloadSoundScript, NPC::reloadSoundScript);
 	RegisterAndPrecacheSoundScript(burst9mmSoundScript, NPC::burst9mmSoundScript);

@@ -27,6 +27,7 @@
 #include "doors.h"
 #include "soundradius.h"
 #include "game.h"
+#include "common_soundscripts.h"
 
 #define SF_BUTTON_DONTMOVE		1
 #define SF_ROTBUTTON_NOTSOLID		1
@@ -39,6 +40,8 @@
 
 #define SF_GLOBAL_SET			1	// Set global state to initial state on spawn
 #define SF_GLOBAL_ACT_AS_MASTER 4
+
+constexpr FloatRange sparkVolumeRange(0.1f, 0.3f);
 
 class CEnvGlobal : public CPointEntity
 {
@@ -783,16 +786,7 @@ void CMultiSource::Register( void )
 	pev->spawnflags &= ~SF_MULTI_INIT;
 }
 
-static const NamedSoundScript sparkSoundScript = {
-	CHAN_VOICE,
-	{
-		"buttons/spark1.wav", "buttons/spark2.wav", "buttons/spark3.wav",
-		"buttons/spark4.wav", "buttons/spark5.wav", "buttons/spark6.wav"
-	},
-	FloatRange(0.1f, 0.3f),
-	ATTN_NORM,
-	"DoSpark"
-};
+static constexpr const char* sparkSoundScript = "DoSpark";
 
 int CBaseButton::ObjectCaps( void )
 {
@@ -841,7 +835,9 @@ void CBaseButton::Precache( void )
 
 	if( IsSparkingButton() )// this button should spark in OFF state
 	{
-		RegisterAndPrecacheSoundScript(sparkSoundScript);
+		SoundScriptParamOverride param;
+		param.OverrideVolumeRelative(sparkVolumeRange);
+		RegisterAndPrecacheSoundScript(sparkSoundScript, ::sparkBaseSoundScript, param);
 	}
 
 	// get door button sounds, for doors which require buttons to open
@@ -1260,11 +1256,12 @@ void PlaySparkSound( entvars_t *pev, const SoundScriptParamOverride soundParams 
 		const char* sample = soundScript->Wave();
 		if (sample)
 		{
+			int channel = soundScript->channel;
 			FloatRange volume = soundScript->volume;
 			float attenuation = soundScript->attenuation;
 			IntRange pitch = soundScript->pitch;
 
-			soundParams.ApplyOverride(volume, attenuation, pitch);
+			soundParams.ApplyOverride(channel, volume, attenuation, pitch);
 
 			EMIT_SOUND_DYN(ENT(pev), soundScript->channel, sample, RandomizeNumberFromRange(volume), attenuation, 0, RandomizeNumberFromRange(pitch));
 		}
@@ -2046,7 +2043,9 @@ void CEnvSpark::Spawn( void )
 
 void CEnvSpark::Precache( void )
 {
-	RegisterAndPrecacheSoundScript(sparkSoundScript);
+	SoundScriptParamOverride param;
+	param.OverrideVolumeRelative(sparkVolumeRange);
+	RegisterAndPrecacheSoundScript(sparkSoundScript, ::sparkBaseSoundScript, param);
 	if (!FStringNull(pev->model))
 	{
 		m_modelIndex = PRECACHE_MODEL(STRING(pev->model));
