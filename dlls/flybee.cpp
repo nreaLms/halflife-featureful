@@ -16,6 +16,9 @@
 #include	"soundent.h"
 #include	"game.h"
 #include	"decals.h"
+#include	"mod_features.h"
+
+#if FEATURE_FLYBEE
 
 #define FLYBEE_SPEED		150
 #define PROBE_LENGTH		150
@@ -1349,3 +1352,4 @@ void CFlyBall::ExplodeTouch( CBaseEntity *pOther )
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.01f; // let the sound play
 }
+#endif

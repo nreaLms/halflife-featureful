@@ -170,6 +170,7 @@ void CGameRules::RefreshSkillData ( void )
 		gSkillData.cleansuitScientistHealth = GetSkillCvar( "sk_cleansuit_scientist_health", "sk_scientist_health" );
 #endif
 
+#if FEATURE_FLYBEE
 	// Flybee
 	if (g_modFeatures.IsMonsterEnabled("flybee"))
 	{
@@ -178,6 +179,7 @@ void CGameRules::RefreshSkillData ( void )
 		gSkillData.flybeeDmgBeam = GetSkillCvar("sk_flybee_dmg_beam");
 		gSkillData.flybeeDmgFlyball = GetSkillCvar("sk_flybee_dmg_flyball");
 	}
+#endif
 
 	// Gargantua
 	gSkillData.gargantuaHealth = GetSkillCvar( "sk_gargantua_health" );
@@ -269,13 +271,14 @@ void CGameRules::RefreshSkillData ( void )
 	// Nihilanth
 	gSkillData.nihilanthHealth = GetSkillCvar( "sk_nihilanth_health" );
 	gSkillData.nihilanthZap = GetSkillCvar( "sk_nihilanth_zap" );
-
+#if FEATURE_PANTHEREYE
 	// Panthereye
 	if (g_modFeatures.IsMonsterEnabled("panthereye"))
 	{
 		gSkillData.panthereyeHealth = GetSkillCvar( "sk_panthereye_health" );
 		gSkillData.panthereyeDmgClaw = GetSkillCvar( "sk_panthereye_dmg_claw" );
 	}
+#endif
 
 #if FEATURE_PITDRONE
 	// Pitdrone
@@ -401,9 +404,14 @@ void CGameRules::RefreshSkillData ( void )
 		gSkillData.gonomeDmgOneBite = GetSkillCvar( "sk_gonome_dmg_one_bite" );
 	}
 #endif
+#if FEATURE_FLOATER
 	// Floater
-	gSkillData.floaterHealth = GetSkillCvar( "sk_floater_health" );
-	gSkillData.floaterExplode = GetSkillCvar( "sk_floater_explode" );
+	if (g_modFeatures.IsMonsterEnabled("floater"))
+	{
+		gSkillData.floaterHealth = GetSkillCvar( "sk_floater_health" );
+		gSkillData.floaterExplode = GetSkillCvar( "sk_floater_explode" );
+	}
+#endif
 
 	//Turret
 	gSkillData.turretHealth = GetSkillCvar( "sk_turret_health" );
@@ -414,6 +422,7 @@ void CGameRules::RefreshSkillData ( void )
 	// Sentry Turret
 	gSkillData.sentryHealth = GetSkillCvar( "sk_sentry_health" );
 
+#if FEATURE_ROBOCOP
 	// Robocop
 	if (g_modFeatures.IsMonsterEnabled("robocop"))
 	{
@@ -422,6 +431,7 @@ void CGameRules::RefreshSkillData ( void )
 		gSkillData.robocopDmgFist = GetSkillCvar( "sk_robocop_dmg_fist" );
 		gSkillData.robocopSWRadius = GetSkillCvar( "sk_robocop_sw_radius" );
 	}
+#endif
 
 	// Zap ball trap
 	gSkillData.zaptrapSenseRadius = GetSkillCvar( "sk_zaptrap_sense_radius" );

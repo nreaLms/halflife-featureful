@@ -4,6 +4,9 @@
 #include	"monsters.h"
 #include	"game.h"
 #include	"common_soundscripts.h"
+#include	"mod_features.h"
+
+#if FEATURE_PANTHEREYE
 
 #define PANTHEREYE_AE_STRIKE_LEFT			( 1 )
 #define PANTHEREYE_AE_STRIKE_RIGHT_LOW				( 2 )
@@ -237,3 +240,4 @@ Schedule_t* CPantherEye::GetScheduleOfType(int Type)
 	}
 	return CBaseMonster::GetScheduleOfType(Type);
 }
+#endif

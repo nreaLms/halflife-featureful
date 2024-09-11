@@ -10,6 +10,9 @@
 #include	"explode.h"
 #include	"game.h"
 #include	"common_soundscripts.h"
+#include	"mod_features.h"
+
+#if FEATURE_ROBOCOP
 
 class CFireTrail : public CBaseEntity
 {
@@ -999,4 +1002,4 @@ void CRoboCop::SetActivity( Activity NewActivity )
 		break;
 	}
 }
-
+#endif

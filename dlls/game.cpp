@@ -810,11 +810,13 @@ DECLARE_SKILL_VALUE(sk_bigmomma_radius_blast, "250")
 DECLARE_SKILL_VALUE(sk_cleansuit_scientist_health, "0")
 #endif
 
+#if FEATURE_FLYBEE
 // Flybee
 DECLARE_SKILL_VALUE(sk_flybee_health, "0")
 DECLARE_SKILL_VALUE(sk_flybee_dmg_kick, "20")
 DECLARE_SKILL_VALUE(sk_flybee_dmg_beam, "50")
 DECLARE_SKILL_VALUE(sk_flybee_dmg_flyball, "20")
+#endif
 
 // Gargantua
 DECLARE_SKILL_VALUE(sk_gargantua_health, "0")
@@ -915,8 +917,11 @@ DECLARE_SKILL_VALUE(sk_otis_health, "0")
 DECLARE_SKILL_VALUE(sk_kate_health, "0")
 #endif
 
+#if FEATURE_PANTHEREYE
+// Panthereye
 DECLARE_SKILL_VALUE(sk_panthereye_health, "150")
 DECLARE_SKILL_VALUE(sk_panthereye_dmg_claw, "20")
+#endif
 
 #if FEATURE_PITDRONE
 // Pitdrone
@@ -1005,8 +1010,11 @@ DECLARE_SKILL_VALUE(sk_gonome_dmg_guts, "0")
 DECLARE_SKILL_VALUE(sk_gonome_dmg_one_bite, "0")
 #endif
 
+#if FEATURE_FLOATER
+// Floater
 DECLARE_SKILL_VALUE(sk_floater_health, "0")
 DECLARE_SKILL_VALUE(sk_floater_explode, "0")
+#endif
 
 //Turret
 DECLARE_SKILL_VALUE(sk_turret_health, "0")
@@ -1017,11 +1025,13 @@ DECLARE_SKILL_VALUE(sk_miniturret_health, "0")
 // Sentry Turret
 DECLARE_SKILL_VALUE(sk_sentry_health, "0")
 
+#if FEATURE_ROBOCOP
 // Robocop
 DECLARE_SKILL_VALUE(sk_robocop_health, "0")
 DECLARE_SKILL_VALUE(sk_robocop_dmg_mortar, "0")
 DECLARE_SKILL_VALUE(sk_robocop_dmg_fist, "0")
 DECLARE_SKILL_VALUE(sk_robocop_sw_radius, "0")
+#endif
 
 DECLARE_SKILL_VALUE(sk_zaptrap_sense_radius, "244")
 DECLARE_SKILL_VALUE(sk_zaptrap_respawn_time, "18")
@@ -1545,6 +1555,7 @@ void GameDLLInit( void )
 		REGISTER_SKILL_CVARS(sk_cleansuit_scientist_health);
 #endif
 
+#if FEATURE_FLYBEE
 	// Flybee
 	if (g_modFeatures.IsMonsterEnabled("flybee"))
 	{
@@ -1553,6 +1564,7 @@ void GameDLLInit( void )
 		REGISTER_SKILL_CVARS(sk_flybee_dmg_beam);
 		REGISTER_SKILL_CVARS(sk_flybee_dmg_flyball);
 	}
+#endif
 
 	// Gargantua
 	REGISTER_SKILL_CVARS(sk_gargantua_health);
@@ -1669,12 +1681,14 @@ void GameDLLInit( void )
 		REGISTER_SKILL_CVARS(sk_kate_health);
 #endif
 
+#if FEATURE_PANTHEREYE
 	// Panthereye
 	if (g_modFeatures.IsMonsterEnabled("panthereye"))
 	{
 		REGISTER_SKILL_CVARS(sk_panthereye_health);
 		REGISTER_SKILL_CVARS(sk_panthereye_dmg_claw);
 	}
+#endif
 
 #if FEATURE_PITDRONE
 	// Pitdrone
@@ -1795,8 +1809,13 @@ void GameDLLInit( void )
 	}
 #endif
 
-	REGISTER_SKILL_CVARS(sk_floater_health);
-	REGISTER_SKILL_CVARS(sk_floater_explode);
+#if FEATURE_FLOATER
+	if (g_modFeatures.IsMonsterEnabled("floater"))
+	{
+		REGISTER_SKILL_CVARS(sk_floater_health);
+		REGISTER_SKILL_CVARS(sk_floater_explode);
+	}
+#endif
 
 	//Turret
 	REGISTER_SKILL_CVARS(sk_turret_health);
@@ -1807,6 +1826,7 @@ void GameDLLInit( void )
 	// Sentry Turret
 	REGISTER_SKILL_CVARS(sk_sentry_health);
 
+#if FEATURE_ROBOCOP
 	// Robocop
 	if (g_modFeatures.IsMonsterEnabled("robocop"))
 	{
@@ -1815,6 +1835,7 @@ void GameDLLInit( void )
 		REGISTER_SKILL_CVARS(sk_robocop_dmg_fist);
 		REGISTER_SKILL_CVARS(sk_robocop_sw_radius);
 	}
+#endif
 
 	REGISTER_SKILL_CVARS(sk_zaptrap_sense_radius);
 	REGISTER_SKILL_CVARS(sk_zaptrap_respawn_time);

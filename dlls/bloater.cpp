@@ -25,6 +25,8 @@
 #include	"soundent.h"
 #include	"scripted.h"
 #include	"studio.h"
+#include	"game.h"
+#include	"mod_features.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -149,6 +151,8 @@ void CBloater::Precache()
 // AI Schedules Specific to this monster
 //=========================================================
 
+#if FEATURE_FLOATER
+
 #define BLOATING_TIME 2.1
 #define BASE_FLOATER_SPEED 100
 #define FLOATER_GLOW_SPRITE "sprites/glow02.spr"
@@ -169,6 +173,7 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
+	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("floater"); }
 	void SetYawSpeed( void );
 	int DefaultISoundMask();
 	int DefaultClassify( void );
@@ -1025,3 +1030,4 @@ void CFloater::AlertOthers()
 		}
 	}
 }
+#endif
