@@ -24,6 +24,7 @@
 #include	"effects.h"
 #include	"soundent.h"
 #include	"scripted.h"
+#include	"studio.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -186,6 +187,8 @@ public:
 //		pev->absmax = pev->origin + Vector( 24, 24, 48 );
 //	}
 
+	void IdleSound();
+	void AlertSound();
 	void PainSound();
 	float HearingSensitivity( void );
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
@@ -220,8 +223,17 @@ public:
 	float m_originalScale;
 	float m_targetScale;
 
-	static const char *pPainSounds[];
+	float m_idleSoundTime;
+
 	static float g_howlTime;
+
+	static const NamedSoundScript idleSoundScript;
+	static const NamedSoundScript alertSoundScript;
+
+	static const NamedSoundScript painSoundScript;
+	static const NamedSoundScript howlSoundScript;
+	static const NamedSoundScript bloatSoundScript;
+	static const NamedSoundScript explodeSoundScript;
 
 protected:
 	inline float OriginalScale() const { return m_originalScale; }
@@ -254,9 +266,23 @@ protected:
 
 	Vector m_velocity;
 
+	void CheckForAttachments()
+	{
+		if (pev->modelindex)
+		{
+			void *pmodel = GET_MODEL_PTR(edict());
+			if (pmodel)
+			{
+				studiohdr_t *pstudiohdr = (studiohdr_t *)pmodel;
+				m_hasAttachments = pstudiohdr->numattachments >= 2;
+			}
+		}
+	}
+
 	int m_tinySpit;
 	int m_explode1;
 	int m_explode2;
+	bool m_hasAttachments;
 };
 
 LINK_ENTITY_TO_CLASS( monster_floater, CFloater )
@@ -268,17 +294,51 @@ TYPEDESCRIPTION	CFloater::m_SaveData[] =
 	DEFINE_FIELD( CFloater, m_nextPainTime, FIELD_TIME ),
 	DEFINE_FIELD( CFloater, m_originalScale, FIELD_FLOAT ),
 	DEFINE_FIELD( CFloater, m_targetScale, FIELD_FLOAT ),
+	DEFINE_FIELD( CFloater, m_idleSoundTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CFloater, CBaseMonster )
 
 float CFloater::g_howlTime = 0;
 
-const char *CFloater::pPainSounds[] =
-{
-	"floater/floater_pain1.wav",
-	"floater/floater_pain2.wav",
-	"floater/floater_pain3.wav",
+const NamedSoundScript CFloater::idleSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Floater.Idle"
+};
+
+const NamedSoundScript CFloater::alertSoundScript = {
+	CHAN_VOICE,
+	{},
+	"Floater.Alert"
+};
+
+const NamedSoundScript CFloater::painSoundScript = {
+	CHAN_VOICE,
+	{"floater/floater_pain1.wav", "floater/floater_pain2.wav", "floater/floater_pain3.wav"},
+	IntRange(95, 105),
+	"Floater.Pain"
+};
+
+const NamedSoundScript CFloater::howlSoundScript = {
+	CHAN_VOICE,
+	{"floater/floater_howl.wav"},
+	1.0f,
+	FLOATER_HOWL_ATTN,
+	IntRange(95, 105),
+	"Floater.Howl"
+};
+
+const NamedSoundScript CFloater::bloatSoundScript = {
+	CHAN_ITEM,
+	{"floater/floater_spinup.wav"},
+	"Floater.Bloat"
+};
+
+const NamedSoundScript CFloater::explodeSoundScript = {
+	CHAN_BODY,
+	{"weapons/splauncher_impact.wav"},
+	"Floater.Explode"
 };
 
 int CFloater::DefaultISoundMask()
@@ -324,11 +384,21 @@ void CFloater::Spawn()
 
 	SetOriginalScale();
 
-	Vector glowColor(FLOATER_NORMAL_COLOR);
-	if (FBitSet(pev->spawnflags, SF_MONSTER_WAIT_UNTIL_PROVOKED))
-		glowColor = FLOATER_PREPROVOKED_COLOR;
-	m_leftGlow = CreateGlow(glowColor,2);
-	m_rightGlow = CreateGlow(glowColor,1);
+	CheckForAttachments();
+
+	if (m_hasAttachments)
+	{
+		Vector glowColor(FLOATER_NORMAL_COLOR);
+		if (FBitSet(pev->spawnflags, SF_MONSTER_WAIT_UNTIL_PROVOKED))
+			glowColor = FLOATER_PREPROVOKED_COLOR;
+		m_leftGlow = CreateGlow(glowColor,2);
+		m_rightGlow = CreateGlow(glowColor,1);
+	}
+	else
+	{
+		m_leftGlow = NULL;
+		m_rightGlow = NULL;
+	}
 
 	SetTouch(&CFloater::FloaterTouch);
 
@@ -342,17 +412,20 @@ void CFloater::Precache()
 	PrecacheMyModel( "models/floater.mdl" );
 
 	m_tinySpit = PRECACHE_MODEL("sprites/tinyspit.spr");
-	m_explode1 = PRECACHE_MODEL ("sprites/spore_exp_01.spr");
-	m_explode2 = PRECACHE_MODEL ("sprites/spore_exp_c_01.spr");
+	m_explode1 = PRECACHE_MODEL("sprites/spore_exp_01.spr");
+	m_explode2 = PRECACHE_MODEL("sprites/spore_exp_c_01.spr");
 
-	PRECACHE_SOUND("weapons/splauncher_impact.wav");
-	PRECACHE_SOUND("floater/floater_spinup.wav");
-	PRECACHE_SOUND("floater/floater_howl.wav");
-	PRECACHE_SOUND_ARRAY(pPainSounds);
+	RegisterAndPrecacheSoundScript(idleSoundScript);
+	RegisterAndPrecacheSoundScript(alertSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(howlSoundScript);
+	RegisterAndPrecacheSoundScript(bloatSoundScript);
+	RegisterAndPrecacheSoundScript(explodeSoundScript);
 
 	PRECACHE_MODEL(FLOATER_GLOW_SPRITE);
 
 	g_howlTime = 0;
+	CheckForAttachments();
 }
 
 void CFloater::FloaterTouch(CBaseEntity *pOther)
@@ -464,10 +537,10 @@ void CFloater::PrescheduleThink()
 	{
 		if (gpGlobals->time > m_nextPainTime && !FBitSet(pev->spawnflags, SF_MONSTER_GAG))
 		{
-			const int pitch = 95 + RANDOM_LONG(0,10);
-
-			g_howlTime = gpGlobals->time + 5;
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "floater/floater_howl.wav", 1.0, FLOATER_HOWL_ATTN, 0, pitch );
+			if (EmitSoundScript(howlSoundScript))
+			{
+				m_idleSoundTime = g_howlTime = gpGlobals->time + 5.0f;
+			}
 		}
 	}
 	GlowUpdate();
@@ -501,6 +574,10 @@ Schedule_t *CFloater::GetSchedule( void )
 			if( HasConditions( bits_COND_ENEMY_DEAD|bits_COND_ENEMY_LOST ) )
 			{
 				return CBaseMonster::GetSchedule();
+			}
+			if (HasConditions(bits_COND_NEW_ENEMY))
+			{
+				AlertSound();
 			}
 			return GetScheduleOfType(SCHED_CHASE_ENEMY);
 		}
@@ -750,13 +827,23 @@ void CFloater::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float
 	UTIL_MoveToOrigin( ENT( pev ), pev->origin + m_velocity, m_velocity.Length() * flInterval, MOVE_STRAFE );
 }
 
+void CFloater::IdleSound()
+{
+	if (gpGlobals->time > m_idleSoundTime)
+		EmitSoundScript(idleSoundScript);
+}
+
+void CFloater::AlertSound()
+{
+	EmitSoundScript(alertSoundScript);
+}
+
 void CFloater::PainSound( void )
 {
 	if( gpGlobals->time > m_nextPainTime )
 	{
 		m_nextPainTime = gpGlobals->time + 1.5;
-		const int pitch = 95 + RANDOM_LONG( 0, 10 );
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, RANDOM_SOUND_ARRAY(pPainSounds), 1.0, ATTN_NORM, 0, pitch );
+		EmitSoundScript(painSoundScript);
 	}
 }
 
@@ -778,7 +865,7 @@ void CFloater::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib)
 {
 	CBaseMonster::Killed(pevInflictor, pevAttacker, GIB_ALWAYS);
 	g_howlTime = gpGlobals->time;
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "floater/floater_howl.wav", 1.0, FLOATER_HOWL_ATTN, SND_STOP, 100 );
+	StopSoundScript(howlSoundScript);
 	ExplodeEffect();
 	CSoundEnt::InsertSound( bits_SOUND_DANGER, pev->origin, 300, 0.3 );
 }
@@ -839,7 +926,7 @@ CSprite* CFloater::CreateGlow(const Vector& glowColor, int attachment)
 
 void CFloater::StartBloating()
 {
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "floater/floater_spinup.wav", 1, ATTN_NORM);
+	EmitSoundScript(bloatSoundScript);
 	SetTargetScale( OriginalScale() * 1.5 );
 	SetStartBloatingTime( gpGlobals->time );
 }
@@ -886,7 +973,7 @@ void CFloater::ExplodeEffect()
 		WRITE_BYTE( 20 );		// decay * 0.1
 	MESSAGE_END( );
 
-	EMIT_SOUND(ENT(pev), CHAN_BODY, "weapons/splauncher_impact.wav", 1, ATTN_NORM);
+	EmitSoundScript(explodeSoundScript);
 
 	RadiusDamage(exploOrigin, pev, pev, gSkillData.floaterExplode, Classify(), DMG_BLAST|DMG_ACID);
 }
