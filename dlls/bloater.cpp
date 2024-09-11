@@ -156,7 +156,6 @@ void CBloater::Precache()
 #define BLOATING_TIME 2.1
 #define BASE_FLOATER_SPEED 100
 #define FLOATER_GLOW_SPRITE "sprites/glow02.spr"
-#define FLOATER_HOWL_ATTN 0.7
 
 #define bits_MEMORY_FLOATER_PROVOKED bits_MEMORY_CUSTOM1
 
@@ -329,7 +328,7 @@ const NamedSoundScript CFloater::howlSoundScript = {
 	CHAN_VOICE,
 	{"floater/floater_howl.wav"},
 	1.0f,
-	FLOATER_HOWL_ATTN,
+	0.7f,
 	IntRange(95, 105),
 	"Floater.Howl"
 };

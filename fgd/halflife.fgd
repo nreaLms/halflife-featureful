@@ -2500,7 +2500,7 @@
 	]
 	minlife : "Min life" : 0.1
 	maxlife : "Min life" : 0.5
-	pt_type(choices) : "Particel type" : 1 =
+	pt_type(choices) : "Particle type" : 1 =
 	[
 		1 : "Gravity"
 		2 : "Slow gravity"
@@ -5971,7 +5971,6 @@
 		8 : "Sniper Rifle"
 		10 : "Sniper Rifle + HG"
 	]
-	standgroundrange(string) : "Stand Ground Range" : "0.0"
 	sequence(Choices) : "Animation Sequence (editor)" : 7 =
 	[
 		0 : "walk1"
