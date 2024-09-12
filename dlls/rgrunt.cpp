@@ -51,6 +51,7 @@ public:
 
 	void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
 	void BecomeDead();
+	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 
 	float m_flSparkTime;
@@ -361,6 +362,15 @@ void CRGrunt::BecomeDead()
 
 #define ROBOGRUNT_DAMAGE (DMG_ENERGYBEAM|DMG_CRUSH|DMG_MORTAR|DMG_BLAST|DMG_SHOCK|DMG_FREEZE|DMG_ACID)
 
+int CRGrunt::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
+{
+	if ((bitsDamageType & ROBOGRUNT_DAMAGE) == 0)
+	{
+		flDamage *= 0.2f;
+	}
+	return CHGrunt::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+}
+
 void CRGrunt::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
 	if ((bitsDamageType & ROBOGRUNT_DAMAGE) == 0)
@@ -370,7 +380,6 @@ void CRGrunt::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float
 			UTIL_Ricochet( ptr->vecEndPos, RANDOM_FLOAT( 1, 2 ) );
 			pev->dmgtime = gpGlobals->time;
 		}
-		flDamage *= 0.2;
 	}
 	CSquadMonster::TraceAttack( pevInflictor, pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
