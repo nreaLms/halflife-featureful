@@ -39,22 +39,6 @@ struct NamedSoundScript : public SoundScript
 	NamedSoundScript(int soundChannel, std::initializer_list<const char*> sounds, const char* scriptName):
 		SoundScript(soundChannel, sounds), name(scriptName) {}
 	const char* name;
-	NamedSoundScript renamed(const char* newName) const {
-		NamedSoundScript s = *this;
-		s.name = newName;
-		return s;
-	}
-	NamedSoundScript repitched(IntRange newPitch) const {
-		NamedSoundScript s = *this;
-		s.pitch = newPitch;
-		return s;
-	}
-	NamedSoundScript renamedAndRepitched(const char* newName, IntRange newPitch) const {
-		NamedSoundScript s = *this;
-		s.name = newName;
-		s.pitch = newPitch;
-		return s;
-	}
 	operator const char* () const {
 		return name;
 	}
@@ -98,8 +82,6 @@ void ReadSoundScripts();
 
 const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript);
 const SoundScript* ProvideDefaultSoundScript(const char *derivative, const char *base, const SoundScript &soundScript, const SoundScriptParamOverride paramOverride);
-
-void SetSoundScriptAlias(const char* alias, const char* original);
 
 const SoundScript* GetSoundScript(const char* name);
 
