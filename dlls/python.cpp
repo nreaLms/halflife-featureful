@@ -79,11 +79,7 @@ void CPython::Precache( void )
 
 BOOL CPython::Deploy()
 {
-#if CLIENT_DLL
 	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
 	{
 		// enable laser sight geometry.
 		pev->body = 1;
@@ -112,11 +108,7 @@ void CPython::Holster()
 
 void CPython::SecondaryAttack( void )
 {
-#if CLIENT_DLL
 	if( !bIsMultiplayer() )
-#else
-	if( !g_pGameRules->IsMultiplayer() )
-#endif
 	{
 		return;
 	}
@@ -198,12 +190,7 @@ void CPython::Reload( void )
 		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 0;  // 0 means reset to default fov
 	}
 
-	int bUseScope = FALSE;
-#if CLIENT_DLL
-	bUseScope = bIsMultiplayer();
-#else
-	bUseScope = g_pGameRules->IsMultiplayer();
-#endif
+	int bUseScope = bIsMultiplayer() ? 1 : 0;
 	if( DefaultReload( PYTHON_MAX_CLIP, PYTHON_RELOAD, 2.0f, bUseScope ) )
 	{
 		m_flSoundDelay = 1.5f;
@@ -249,11 +236,6 @@ void CPython::WeaponIdle( void )
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ( 170.0f / 30.0f );
 	}
 	
-	int bUseScope = FALSE;
-#if CLIENT_DLL
-	bUseScope = bIsMultiplayer();
-#else
-	bUseScope = g_pGameRules->IsMultiplayer();
-#endif
+	int bUseScope = bIsMultiplayer() ? 1 : 0;
 	SendWeaponAnim( iAnim, bUseScope );
 }

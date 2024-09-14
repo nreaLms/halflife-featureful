@@ -27,7 +27,6 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "rpgrocket.h"
-#include "nodes.h"
 #include "soundent.h"
 #include "decals.h"
 #include "game.h"
@@ -213,6 +212,11 @@ void ExplodeModel( const Vector &vecOrigin, float speed, int model, int count )
 	MESSAGE_END();
 }
 #endif
+
+bool bIsMultiplayer()
+{
+	return g_pGameRules->IsMultiplayer();
+}
 
 // Precaches the weapon and queues the weapon info for sending to clients
 bool UTIL_PrecacheOtherWeapon( const char *szClassname )

@@ -261,11 +261,7 @@ void CHgun::Reload( void )
 	while( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] < g_AmmoRegistry.GetMaxAmmo(m_iPrimaryAmmoType) && m_flRechargeTime < gpGlobals->time )
 	{
 		float flRechargeTimePause = 0.5f;
-#if CLIENT_DLL
 		if( bIsMultiplayer() )
-#else
-		if( g_pGameRules->IsMultiplayer() )
-#endif
 			flRechargeTimePause = 0.3f;
 
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]++;

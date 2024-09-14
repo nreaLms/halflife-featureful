@@ -124,11 +124,7 @@ int CShockrifle::GetItemInfo(ItemInfo *p)
 
 BOOL CShockrifle::Deploy()
 {
-#if CLIENT_DLL
 	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
 		m_flRechargeTime = gpGlobals->time + 0.25;
 	else
 		m_flRechargeTime = gpGlobals->time + 0.5;
@@ -203,11 +199,7 @@ void CShockrifle::PrimaryAttack()
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-#if CLIENT_DLL
 	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
 		m_flNextPrimaryAttack = GetNextAttackDelay(0.1);
 	else
 		m_flNextPrimaryAttack = GetNextAttackDelay(0.2);

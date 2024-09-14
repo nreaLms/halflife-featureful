@@ -273,11 +273,7 @@ BOOL CMedkit::PlayEmptySound(void)
 
 bool CMedkit::CanRecharge()
 {
-#if CLIENT_DLL
 	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
 	{
 		return gSkillData.plrMedkitTime != 0;
 	}

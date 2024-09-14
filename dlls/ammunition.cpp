@@ -295,11 +295,7 @@ class CRpgAmmo : public CBasePlayerAmmo
 	}
 	int DefaultAmount() {
 		int iGive;
-#if CLIENT_DLL
 	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
 		{
 			// hand out more ammo per rocket in multiplayer.
 			iGive = AMMO_RPGCLIP_GIVE * 2;

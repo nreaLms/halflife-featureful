@@ -374,11 +374,7 @@ void CRpg::Spawn()
 	SET_MODEL( ENT( pev ), MyWModel() );
 	m_fSpotActive = 1;
 
-#if CLIENT_DLL
 	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
 	{
 		// more default ammo in multiplay. 
 		InitDefaultAmmo(RPG_DEFAULT_GIVE * 2);
@@ -418,11 +414,7 @@ int CRpg::GetItemInfo( ItemInfo *p )
 	p->iFlags = ITEM_FLAG_NOCHOICE;
 	p->iWeight = RPG_WEIGHT;
 	p->pszAmmoEntity = "ammo_rpgclip";
-#ifdef CLIENT_DLL
 	if( bIsMultiplayer() )
-#else
-	if( g_pGameRules->IsMultiplayer() )
-#endif
 	{
 		// hand out more ammo per rocket in multiplayer.
 		p->iDropAmmo = AMMO_RPGCLIP_GIVE * 2;

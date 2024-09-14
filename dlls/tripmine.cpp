@@ -412,12 +412,9 @@ void CTripmine::Spawn()
 
 	InitDefaultAmmo(TRIPMINE_DEFAULT_GIVE);
 
-#if CLIENT_DLL
 	if( !bIsMultiplayer() )
-#else
-	if( !g_pGameRules->IsDeathmatch() )
-#endif
 	{
+		// TODO: why a different size in singleplayer?
 		UTIL_SetSize( pev, Vector( -16.0f, -16.0f, 0.0f ), Vector( 16.0f, 16.0f, 28.0f ) ); 
 	}
 }

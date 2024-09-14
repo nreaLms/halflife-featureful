@@ -3,7 +3,6 @@
 #include	"cbase.h"
 #include	"monsters.h"
 #include	"schedule.h"
-#include	"nodes.h"
 #include	"soundent.h"
 #include	"animation.h"
 #include	"effects.h"
