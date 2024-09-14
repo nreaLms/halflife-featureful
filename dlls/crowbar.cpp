@@ -140,7 +140,9 @@ void CCrowbar::PrimaryAttack()
 
 void CCrowbar::Smack()
 {
+#if !CLIENT_DLL
 	DecalGunshot( &m_trHit, BULLET_PLAYER_CROWBAR );
+#endif
 }
 
 void CCrowbar::SwingAgain( void )

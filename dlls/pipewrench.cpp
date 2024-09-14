@@ -137,7 +137,9 @@ void CPipeWrench::SecondaryAttack(void)
 
 void CPipeWrench::Smack()
 {
+#if !CLIENT_DLL
 	DecalGunshot(&m_trHit, BULLET_PLAYER_CROWBAR);
+#endif
 }
 
 

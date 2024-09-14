@@ -19,7 +19,6 @@
 #include "monsters.h"
 #include "customentity.h"
 #include "effects.h"
-#include "weapons.h"
 #include "decals.h"
 #include "func_break.h"
 #include "shake.h"
@@ -35,6 +34,7 @@
 #include "soundent.h"
 #include "fx_flags.h"
 #include "warpball.h"
+#include "combat.h"
 
 #define FEATURE_ENV_WARPBALL 1
 #define FEATURE_ENV_XENMAKER 1

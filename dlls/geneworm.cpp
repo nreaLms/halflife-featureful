@@ -22,7 +22,7 @@
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"player.h"
-#include	"weapons.h"
+#include	"effects.h"
 #include	"mod_features.h"
 #include	"game.h"
 

@@ -23,6 +23,7 @@
 #include "gamerules.h"
 
 #if !CLIENT_DLL
+#include "combat.h"
 #include "global_models.h"
 
 #define BOLT_AIR_VELOCITY	2000

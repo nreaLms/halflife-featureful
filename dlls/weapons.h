@@ -26,6 +26,7 @@
 #include "ammoregistry.h"
 
 #if !CLIENT_DLL
+#include "combat.h"
 #include "ggrenade.h"
 #include "global_models.h"
 #endif
@@ -340,15 +341,6 @@ public:
 	//Hack so deploy animations work when weapon prediction is enabled.
 	bool m_ForceSendAnimations;
 };
-
-extern void ClearMultiDamage(void);
-extern void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker );
-extern void AddMultiDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, CBaseEntity *pEntity, float flDamage, int bitsDamageType);
-
-extern void DecalGunshot( TraceResult *pTrace, int iBulletType );
-extern void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
-extern int DamageDecal( CBaseEntity *pEntity, int bitsDamageType );
-extern void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType );
 
 typedef struct
 {

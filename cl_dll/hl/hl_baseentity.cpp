@@ -221,13 +221,6 @@ void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { }
 void CBasePlayer::AddFloatPoints(float score, BOOL bAllowNegativeScore) {}
 void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { }
 
-void ClearMultiDamage( void ) { }
-void ApplyMultiDamage( entvars_t *pevInflictor, entvars_t *pevAttacker ) { }
-void AddMultiDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, CBaseEntity *pEntity, float flDamage, int bitsDamageType) { }
-void SpawnBlood( Vector vecSpot, int bloodColor, float flDamage ) { }
-int DamageDecal( CBaseEntity *pEntity, int bitsDamageType ) { return 0; }
-void DecalGunshot( TraceResult *pTrace, int iBulletType ) { }
-void EjectBrass( const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype ) { }
 float CBasePlayerWeapon::GetNextAttackDelay( float flTime ) { return flTime; }
 void CBasePlayerWeapon::SetObjectCollisionBox( void ) { }
 void CBasePlayerWeapon::KeyValue( KeyValueData *pkvd ) {}
@@ -252,4 +245,3 @@ int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon ) { return 0;
 void CBasePlayerWeapon::RetireWeapon( void ) { }
 void CBasePlayerWeapon::InitDefaultAmmo(int defaultGive) { m_iDefaultAmmo = defaultGive; }
 void CSoundEnt::InsertSound( int iType, const Vector &vecOrigin, int iVolume, float flDuration ) {}
-void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType ){}

@@ -24,6 +24,10 @@
 #include "customentity.h"
 #include "gamerules.h"
 
+#if !CLIENT_DLL
+#include "combat.h"
+#endif
+
 #define	EGON_PRIMARY_VOLUME		450
 #define EGON_BEAM_SPRITE		"sprites/xbeam1.spr"
 #define EGON_FLARE_SPRITE		"sprites/XSpark1.spr"
