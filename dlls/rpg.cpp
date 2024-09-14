@@ -18,13 +18,12 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "gamerules.h"
 
 LINK_ENTITY_TO_CLASS( weapon_rpg, CRpg )
 
 #if !CLIENT_DLL
+#include "gamerules.h"
 #include "rpgrocket.h"
 
 LINK_ENTITY_TO_CLASS( laser_spot, CLaserSpot )

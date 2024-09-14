@@ -27,6 +27,7 @@
 #include "player.h"
 #include "trains.h"
 #include "nodes.h"
+#include "items.h"
 #include "weapons.h"
 #include "soundent.h"
 #include "monsters.h"

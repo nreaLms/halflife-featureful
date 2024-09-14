@@ -18,15 +18,15 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "effects.h"
-#include "gamerules.h"
-#include "game.h"
 
 #define	TRIPMINE_PRIMARY_VOLUME		450
 
 #if !CLIENT_DLL
+#include "game.h"
+#include "gamerules.h"
+
 class CTripmineGrenade : public CGrenade
 {
 	void Spawn( void );
@@ -399,7 +399,7 @@ void CTripmine::Spawn()
 	SET_MODEL( ENT( pev ), MyWModel() );
 	pev->frame = 0;
 
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	pev->body = 0;
 #else
 	pev->body = 3;

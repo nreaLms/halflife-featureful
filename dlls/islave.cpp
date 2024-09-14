@@ -23,7 +23,7 @@
 #include	"followingmonster.h"
 #include	"schedule.h"
 #include	"effects.h"
-#include	"weapons.h"
+#include	"combat.h"
 #include	"player.h"
 #include	"soundent.h"
 #include	"mod_features.h"

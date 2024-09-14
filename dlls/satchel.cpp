@@ -18,11 +18,11 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "gamerules.h"
+
 #if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #include "common_soundscripts.h"
 #endif
 

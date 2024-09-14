@@ -18,10 +18,12 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "hornet.h"
+
+#if !CLIENT_DLL
 #include "gamerules.h"
+#endif
 
 enum firemode_e
 {

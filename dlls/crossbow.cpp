@@ -18,13 +18,12 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "gamerules.h"
 
 #if !CLIENT_DLL
 #include "combat.h"
 #include "global_models.h"
+#include "gamerules.h"
 
 #define BOLT_AIR_VELOCITY	2000
 #define BOLT_WATER_VELOCITY	1000

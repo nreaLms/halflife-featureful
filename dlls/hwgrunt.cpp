@@ -1,13 +1,13 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include	"weapons.h"
 #include	"talkmonster.h"
 #include	"soundent.h"
 #include	"hgrunt.h"
 #include	"animation.h"
 #include	"mod_features.h"
 #include	"game.h"
+#include	"combat.h"
 
 #if FEATURE_HWGRUNT
 

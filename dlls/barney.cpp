@@ -24,7 +24,7 @@
 #include	"talkmonster.h"
 #include	"schedule.h"
 #include	"scripted.h"
-#include	"weapons.h"
+#include	"combat.h"
 #include	"soundent.h"
 #include	"mod_features.h"
 #include	"game.h"

@@ -23,7 +23,6 @@
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"customentity.h"
-#include	"weapons.h"
 #include	"effects.h"
 #include	"soundent.h"
 #include	"decals.h"

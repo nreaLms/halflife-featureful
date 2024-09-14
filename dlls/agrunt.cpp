@@ -22,7 +22,7 @@
 #include	"monsters.h"
 #include	"schedule.h"
 #include	"followingmonster.h"
-#include	"weapons.h"
+#include	"combat.h"
 #include	"soundent.h"
 #include	"hornet.h"
 #include	"scripted.h"

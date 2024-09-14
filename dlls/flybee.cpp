@@ -10,7 +10,7 @@
 #include	"monsters.h"
 #include	"effects.h"
 #include	"schedule.h"
-#include	"weapons.h"
+#include	"combat.h"
 #include	"flyingmonster.h"
 #include	"nodes.h"
 #include	"soundent.h"

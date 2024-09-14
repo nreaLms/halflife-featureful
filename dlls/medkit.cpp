@@ -19,9 +19,9 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "gamerules.h"
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #endif
 
 #if FEATURE_MEDKIT
@@ -32,7 +32,7 @@ void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, fl
 
 CBaseEntity* CMedkit::FindHealTarget(bool increasedRadius)
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	TraceResult tr;
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
@@ -107,7 +107,7 @@ void CMedkit::Precache(void)
 
 bool CMedkit::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_MEDKIT);
 #else
 	return true;

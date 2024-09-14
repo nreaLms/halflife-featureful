@@ -20,9 +20,10 @@
 #include "weapons.h"
 #include "player.h"
 #include "soundent.h"
-#include "gamerules.h"
-#ifndef CLIENT_DLL
+
+#if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #endif
 
 enum w_squeak_e
@@ -750,7 +751,7 @@ LINK_ENTITY_TO_CLASS( weapon_penguin, CPenguin )
 
 bool CPenguin::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WeaponId());
 #else
 	return true;

@@ -19,10 +19,9 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "soundent.h"
-#include "gamerules.h"
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #endif
 
 #if FEATURE_UZI
@@ -70,7 +69,7 @@ void CUzi::Precache( void )
 
 bool CUzi::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_UZI);
 #else
 	return true;
@@ -139,7 +138,7 @@ void CUzi::PrimaryAttack()
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	Vector vecDir;
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	if( !bIsMultiplayer() )
 #else
 	if( !g_pGameRules->IsMultiplayer() )

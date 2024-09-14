@@ -27,7 +27,8 @@
 #include "shake.h"
 #include "decals.h"
 #include "player.h"
-#include "weapons.h"
+#include "combat.h"
+#include "global_models.h"
 #include "gamerules.h"
 
 #include <map>

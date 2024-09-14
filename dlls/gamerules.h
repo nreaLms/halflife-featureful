@@ -16,7 +16,7 @@
 // GameRules
 //=========================================================
 #pragma once
-#if !defined(GAMERULES_H) && !defined(CLIENT_DLL)
+#if !defined(GAMERULES_H)
 #define GAMERULES_H
 
 #include "cbase.h"

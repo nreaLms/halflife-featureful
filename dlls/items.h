@@ -18,6 +18,12 @@
 
 #include "cbase.h"
 
+// constant items
+#define ITEM_HEALTHKIT		1
+#define ITEM_ANTIDOTE		2
+#define ITEM_SECURITY		3
+#define ITEM_BATTERY		4
+
 class CPickup : public CBaseDelay
 {
 public:

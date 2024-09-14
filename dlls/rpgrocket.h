@@ -3,6 +3,7 @@
 #define RPGROCKET_H
 
 #include "ggrenade.h"
+#include "weapons.h"
 
 class CRpgRocket : public CGrenade
 {

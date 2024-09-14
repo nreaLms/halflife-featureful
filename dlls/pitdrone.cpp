@@ -24,7 +24,7 @@
 #include	"soundent.h"
 #include	"scripted.h"
 #include	"game.h"
-#include	"weapons.h"
+#include	"combat.h"
 #include	"followingmonster.h"
 #include	"mod_features.h"
 #include	"common_soundscripts.h"

@@ -28,7 +28,6 @@ This file contains "stubs" of class member implementations so that we can predic
 #include	"player.h"
 #include	"weapons.h"
 #include	"nodes.h"
-#include	"soundent.h"
 #include	"skill.h"
 
 // Globals used by game logic
@@ -244,4 +243,3 @@ int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }
 int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon ) { return 0; }	
 void CBasePlayerWeapon::RetireWeapon( void ) { }
 void CBasePlayerWeapon::InitDefaultAmmo(int defaultGive) { m_iDefaultAmmo = defaultGive; }
-void CSoundEnt::InsertSound( int iType, const Vector &vecOrigin, int iVolume, float flDuration ) {}

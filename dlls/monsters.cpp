@@ -27,7 +27,8 @@
 #include "monsters.h"
 #include "animation.h"
 #include "saverestore.h"
-#include "weapons.h"
+#include "combat.h"
+#include "global_models.h"
 #include "scripted.h"
 #include "followingmonster.h"
 #include "decals.h"
@@ -42,8 +43,6 @@
 Vector VecBModelOrigin( entvars_t *pevBModel );
 
 extern DLL_GLOBAL	BOOL	g_fDrawLines;
-extern DLL_GLOBAL	short	g_sModelIndexLaser;// holds the index for the laser beam
-extern DLL_GLOBAL	short	g_sModelIndexLaserDot;// holds the index for the laser beam dot
 
 // Global Savedata for monster
 // UNDONE: Save schedule data?  Can this be done?  We may

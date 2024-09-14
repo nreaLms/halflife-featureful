@@ -19,10 +19,9 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "soundent.h"
-#include "gamerules.h"
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #endif
 
 #if FEATURE_M249
@@ -69,7 +68,7 @@ void CM249::Precache(void)
 
 bool CM249::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_M249);
 #else
 	return true;
@@ -151,7 +150,7 @@ void CM249::PrimaryAttack()
 	Vector vecAiming = m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
 	Vector vecDir;
 
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	if (bIsMultiplayer())
 #else
 	if (g_pGameRules->IsMultiplayer())
@@ -176,7 +175,7 @@ void CM249::PrimaryAttack()
 	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usM249, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, pev->body, m_bAlternatingEject ? 1 : 0, 0);
 
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecVelocity = m_pPlayer->pev->velocity;
 	Vector vecInvPushDir = gpGlobals->v_forward * 35.0;

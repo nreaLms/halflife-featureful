@@ -17,7 +17,6 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "ggrenade.h"
-#include "nodes.h"
 #include "player.h"
 
 class CAirtank : public CGrenade

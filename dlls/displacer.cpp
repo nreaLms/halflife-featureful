@@ -19,17 +19,17 @@
 #include "weapons.h"
 #include "monsters.h"
 #include "player.h"
-#include "gamerules.h"
 #include "shake.h"
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #include "displacerball.h"
 #endif
 
 #if FEATURE_DISPLACER
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 #endif // !defined ( CLIENT_DLL )
 
@@ -109,7 +109,7 @@ void CDisplacer::Precache(void)
 
 bool CDisplacer::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_DISPLACER);
 #else
 	return true;
@@ -247,7 +247,7 @@ void CDisplacer::Displace( void )
         m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 	m_pPlayer->pev->punchangle.x -= 2;
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	Vector vecSrc;
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= DISPLACER_PRIMARY_USAGE;
 
@@ -271,7 +271,7 @@ void CDisplacer::Teleport( void )
 {
 	ClearBeams();
 	ClearSpin();
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	CBaseEntity *pTarget = NULL;
 	Vector tmp( 0, 0, 0 );
 
@@ -356,7 +356,7 @@ void CDisplacer::Teleport( void )
 
 void CDisplacer::LightningEffect( void )
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	int m_iBeams = 0;
 
 	if( g_pGameRules->IsMultiplayer())
@@ -381,7 +381,7 @@ void CDisplacer::LightningEffect( void )
 
 void CDisplacer::ClearBeams( void )
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	if( g_pGameRules->IsMultiplayer())
 		return;
 

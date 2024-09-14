@@ -3,6 +3,23 @@
 #define COMBAT_H
 
 #include "cbase.h"
+#include "bullet_types.h"
+#include "cone_degrees.h"
+
+#define DEFAULT_EXPLOSION_RADIUS_MULTIPLIER 2.5f
+
+#define BIG_EXPLOSION_VOLUME	2048
+#define NORMAL_EXPLOSION_VOLUME	1024
+#define SMALL_EXPLOSION_VOLUME	512
+
+typedef struct
+{
+	CBaseEntity		*pEntity;
+	float			amount;
+	int				type;
+} MULTIDAMAGE;
+
+extern MULTIDAMAGE gMultiDamage;
 
 extern void ClearMultiDamage(void);
 extern void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker );

@@ -23,7 +23,6 @@
 #include "cbase.h"
 #include "doors.h"
 #include "game.h"
-#include "weapons.h"
 #include "soundradius.h"
 
 #define noiseMoving noise1

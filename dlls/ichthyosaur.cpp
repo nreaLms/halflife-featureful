@@ -27,7 +27,6 @@
 #include	"soundent.h"
 #include	"animation.h"
 #include	"effects.h"
-#include	"weapons.h"
 
 #define SEARCH_RETRY	16
 

@@ -19,9 +19,9 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "gamerules.h"
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #endif
 
 #if FEATURE_PIPEWRENCH
@@ -72,7 +72,7 @@ void CPipeWrench::Precache(void)
 
 bool CPipeWrench::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_PIPEWRENCH);
 #else
 	return true;
@@ -116,7 +116,7 @@ void CPipeWrench::PrimaryAttack()
 {
 	if (!m_iSwingMode && !Swing(1))
 	{
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		SetThink(&CPipeWrench::SwingAgain);
 		pev->nextthink = gpGlobals->time + 0.1f;
 #endif
@@ -160,7 +160,7 @@ int CPipeWrench::Swing(int fFirst)
 
 	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	if ( tr.flFraction >= 1.0f )
 	{
 		UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT( m_pPlayer->pev ), &tr );
@@ -211,7 +211,7 @@ int CPipeWrench::Swing(int fFirst)
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 
 		// hit
 		fDidHit = TRUE;
@@ -321,7 +321,7 @@ void CPipeWrench::BigSwing(void)
 
 	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	if ( tr.flFraction >= 1.0f )
 	{
 		UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT( m_pPlayer->pev ), &tr );
@@ -358,7 +358,7 @@ void CPipeWrench::BigSwing(void)
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 
 		// hit
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);

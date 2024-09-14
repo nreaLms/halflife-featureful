@@ -18,14 +18,13 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "soundent.h"
 #include "shake.h"
-#include "gamerules.h"
-#include "game.h"
 #if !CLIENT_DLL
 #include "common_soundscripts.h"
+#include "game.h"
+#include "gamerules.h"
+#include "soundent.h"
 #endif
 
 #define	GAUSS_PRIMARY_CHARGE_VOLUME	256// how loud gauss is while charging

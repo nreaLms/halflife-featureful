@@ -19,13 +19,12 @@
 #include "player.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "effects.h"
 #include "customentity.h"
-#include "gamerules.h"
 
 #if !CLIENT_DLL
 #include "combat.h"
+#include "gamerules.h"
 #endif
 
 #define	EGON_PRIMARY_VOLUME		450
@@ -141,7 +140,11 @@ void CEgon::Attack( void )
 	// don't fire underwater
 	if( m_pPlayer->pev->waterlevel == 3 )
 	{
-		if( m_fireState != FIRE_OFF || m_pBeam )
+		if( m_fireState != FIRE_OFF
+#if !CLIENT_DLL
+				|| m_pBeam
+#endif
+				)
 		{
 			EndAttack();
 		}

@@ -18,7 +18,6 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
 
 #define	HANDGRENADE_PRIMARY_VOLUME		450

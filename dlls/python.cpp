@@ -19,7 +19,10 @@
 #include "weapons.h"
 #include "monsters.h"
 #include "player.h"
+
+#if !CLIENT_DLL
 #include "gamerules.h"
+#endif
 
 LINK_ENTITY_TO_CLASS( weapon_python, CPython )
 LINK_ENTITY_TO_CLASS( weapon_357, CPython )

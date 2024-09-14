@@ -19,10 +19,10 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "gamerules.h"
 #ifndef CLIENT_DLL
 #include "spore.h"
 #include "game.h"
+#include "gamerules.h"
 #endif
 
 #if FEATURE_SPORELAUNCHER

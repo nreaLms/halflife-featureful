@@ -18,9 +18,8 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons.h"
-#include "nodes.h"
 #include "player.h"
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
 #endif
 
@@ -28,7 +27,7 @@
 
 LINK_ENTITY_TO_CLASS( weapon_eagle, CEagle )
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 LINK_ENTITY_TO_CLASS( eagle_laser, CLaserSpot )
 #endif
 
@@ -64,7 +63,7 @@ void CEagle::Precache( void )
 
 bool CEagle::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_EAGLE);
 #else
 	return true;
@@ -104,7 +103,7 @@ void CEagle::Holster()
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
 	SendWeaponAnim( EAGLE_HOLSTER );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	if (m_pEagleLaser)
 	{
 		m_pEagleLaser->Killed( NULL, NULL, GIB_NEVER );
@@ -120,7 +119,7 @@ void CEagle::SecondaryAttack()
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.5f;
 	if (wasActive)
 	{
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		if (m_pEagleLaser)
 		{
 			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/desert_eagle_sight2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
@@ -180,7 +179,7 @@ void CEagle::PrimaryAttack()
 	{
 		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_EAGLE, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.5f;
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		if (m_pEagleLaser)
 			m_pEagleLaser->Suspend( 0.6f );
 #endif
@@ -211,7 +210,7 @@ void CEagle::Reload( void )
 
 	if ( m_pEagleLaser && m_fEagleLaserActive )
 	{
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		m_pEagleLaser->Suspend( 1.6 );
 #endif
 		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 1.5f;
@@ -232,7 +231,7 @@ void CEagle::Reload( void )
 
 void CEagle::UpdateSpot( void )
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	if (m_fEagleLaserActive)
 	{
 		if (m_pPlayer->pev->viewmodel == 0)

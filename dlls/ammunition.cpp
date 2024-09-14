@@ -295,7 +295,7 @@ class CRpgAmmo : public CBasePlayerAmmo
 	}
 	int DefaultAmount() {
 		int iGive;
-#ifdef CLIENT_DLL
+#if CLIENT_DLL
 	if( bIsMultiplayer() )
 #else
 	if( g_pGameRules->IsMultiplayer() )

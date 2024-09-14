@@ -17,16 +17,17 @@
 #define WEAPONS_H
 
 #include "weapon_ids.h"
-#include "effects.h"
 #include "mod_features.h"
 #include "bullet_types.h"
 #include "weapon_animations.h"
 #include "weaponinfo.h"
 #include "player_items.h"
 #include "ammoregistry.h"
+#include "cone_degrees.h"
 
 #if !CLIENT_DLL
 #include "combat.h"
+#include "effects.h"
 #include "ggrenade.h"
 #include "global_models.h"
 #endif
@@ -34,15 +35,7 @@
 class CBasePlayer;
 extern int gmsgWeapPickup;
 
-#define DEFAULT_EXPLOSION_RADIUS_MULTIPLIER 2.5f
-
 void DeactivateSatchels( CBasePlayer *pOwner );
-
-// constant items
-#define ITEM_HEALTHKIT		1
-#define ITEM_ANTIDOTE		2
-#define ITEM_SECURITY		3
-#define ITEM_BATTERY		4
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
@@ -342,15 +335,6 @@ public:
 	bool m_ForceSendAnimations;
 };
 
-typedef struct
-{
-	CBaseEntity		*pEntity;
-	float			amount;
-	int				type;
-} MULTIDAMAGE;
-
-extern MULTIDAMAGE gMultiDamage;
-
 #define LOUD_GUN_VOLUME			1000
 #define NORMAL_GUN_VOLUME		600
 #define QUIET_GUN_VOLUME		200
@@ -359,24 +343,7 @@ extern MULTIDAMAGE gMultiDamage;
 #define NORMAL_GUN_FLASH		256
 #define	DIM_GUN_FLASH			128
 
-#define BIG_EXPLOSION_VOLUME	2048
-#define NORMAL_EXPLOSION_VOLUME	1024
-#define SMALL_EXPLOSION_VOLUME	512
-
 #define	WEAPON_ACTIVITY_VOLUME	64
-
-#define VECTOR_CONE_1DEGREES	Vector( 0.00873, 0.00873, 0.00873 )
-#define VECTOR_CONE_2DEGREES	Vector( 0.01745, 0.01745, 0.01745 )
-#define VECTOR_CONE_3DEGREES	Vector( 0.02618, 0.02618, 0.02618 )
-#define VECTOR_CONE_4DEGREES	Vector( 0.03490, 0.03490, 0.03490 )
-#define VECTOR_CONE_5DEGREES	Vector( 0.04362, 0.04362, 0.04362 )
-#define VECTOR_CONE_6DEGREES	Vector( 0.05234, 0.05234, 0.05234 )
-#define VECTOR_CONE_7DEGREES	Vector( 0.06105, 0.06105, 0.06105 )
-#define VECTOR_CONE_8DEGREES	Vector( 0.06976, 0.06976, 0.06976 )
-#define VECTOR_CONE_9DEGREES	Vector( 0.07846, 0.07846, 0.07846 )
-#define VECTOR_CONE_10DEGREES	Vector( 0.08716, 0.08716, 0.08716 )
-#define VECTOR_CONE_15DEGREES	Vector( 0.13053, 0.13053, 0.13053 )
-#define VECTOR_CONE_20DEGREES	Vector( 0.17365, 0.17365, 0.17365 )
 
 //=========================================================
 // CWeaponBox - a single entity that can store weapons
@@ -775,9 +742,11 @@ public:
 
 	enum EGON_FIREMODE { FIRE_NARROW, FIRE_WIDE};
 
+#if !CLIENT_DLL
 	CBeam				*m_pBeam;
 	CBeam				*m_pNoise;
 	CSprite				*m_pSprite;
+#endif
 
 	virtual BOOL UseDecrement( void )
 	{
@@ -1178,8 +1147,9 @@ public:
 
 private:
 	CBarnacleGrappleTip* m_pTip;
-
+#if !CLIENT_DLL
 	CBeam* m_pBeam;
+#endif
 
 	float m_flShootTime;
 	float m_flDamageTime;
@@ -1330,7 +1300,9 @@ public:
 	void LightningEffect( void );
 	void ClearBeams( void );
 private:
+#if !CLIENT_DLL
 	CBeam *m_pBeam[3];
+#endif
 	int m_iFireMode;
 	unsigned short m_usDisplacer;
 };
@@ -1367,7 +1339,9 @@ public:
 	const char* MyWModel() { return "models/w_shock_rifle.mdl"; }
 private:
 	unsigned short m_usShockFire;
+#if !CLIENT_DLL
 	CBeam* m_pBeam[4];
+#endif
 };
 #endif
 

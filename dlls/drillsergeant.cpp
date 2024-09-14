@@ -4,7 +4,6 @@
 #include	"monsters.h"
 #include	"talkmonster.h"
 #include	"schedule.h"
-#include	"scripted.h"
 #include	"soundent.h"
 #include	"mod_features.h"
 #include	"game.h"

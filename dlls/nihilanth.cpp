@@ -17,7 +17,8 @@
 #include "util.h"
 #include "cbase.h"
 #include "monsters.h"
-#include "weapons.h"
+#include "combat.h"
+#include "global_models.h"
 #include "nodes.h"
 #include "effects.h"
 

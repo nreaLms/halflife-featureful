@@ -3,7 +3,10 @@
 #include "cbase.h"
 #include "player.h"
 #include "weapons.h"
+
+#if !CLIENT_DLL
 #include "gamerules.h"
+#endif
 
 BOOL CBasePlayerWeapon::CanDeploy( void )
 {

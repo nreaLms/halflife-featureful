@@ -19,9 +19,9 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#include "gamerules.h"
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
+#include "gamerules.h"
 #endif
 
 #if FEATURE_KNIFE
@@ -63,7 +63,7 @@ void CKnife::Precache(void)
 
 bool CKnife::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_KNIFE);
 #else
 	return true;
@@ -107,7 +107,7 @@ void CKnife::PrimaryAttack()
 {
 	if (!m_iSwingMode && !Swing(1))
 	{
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 		SetThink(&CKnife::SwingAgain);
 		pev->nextthink = gpGlobals->time + 0.1;
 #endif
@@ -152,7 +152,7 @@ int CKnife::Swing(int fFirst)
 
 	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	if (tr.flFraction >= 1.0)
 	{
 		UTIL_TraceHull(vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT(m_pPlayer->pev), &tr);
@@ -206,7 +206,7 @@ int CKnife::Swing(int fFirst)
 		// player "shoot" animation
 		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 
 		// hit
 		fDidHit = TRUE;
@@ -316,7 +316,7 @@ void CKnife::Stab()
 
 	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	if ( tr.flFraction >= 1.0f )
 	{
 		UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, head_hull, ENT( m_pPlayer->pev ), &tr );
@@ -350,7 +350,7 @@ void CKnife::Stab()
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 
 		// hit
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);

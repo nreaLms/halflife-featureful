@@ -19,7 +19,7 @@
 #include "monsters.h"
 #include "weapons.h"
 #include "player.h"
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 #include "game.h"
 #endif
 
@@ -58,7 +58,7 @@ void CSniperrifle::Precache( void )
 
 bool CSniperrifle::IsEnabledInMod()
 {
-#ifndef CLIENT_DLL
+#if !CLIENT_DLL
 	return g_modFeatures.IsWeaponEnabled(WEAPON_SNIPERRIFLE);
 #else
 	return true;

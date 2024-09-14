@@ -29,7 +29,6 @@
 #include "effects.h"
 #include "customentity.h"
 #include "wallcharger.h"
-#include "weapons.h"
 #include "player.h"
 
 class CRecharge : public CWallCharger
