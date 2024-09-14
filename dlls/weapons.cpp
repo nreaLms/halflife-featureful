@@ -26,6 +26,7 @@
 #include "player.h"
 #include "monsters.h"
 #include "weapons.h"
+#include "rpgrocket.h"
 #include "nodes.h"
 #include "soundent.h"
 #include "decals.h"

@@ -23,6 +23,8 @@
 #include "gamerules.h"
 
 #if !CLIENT_DLL
+#include "global_models.h"
+
 #define BOLT_AIR_VELOCITY	2000
 #define BOLT_WATER_VELOCITY	1000
 

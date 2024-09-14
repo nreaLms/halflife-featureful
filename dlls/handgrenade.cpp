@@ -176,7 +176,9 @@ void CHandGrenade::WeaponIdle( void )
 		if( time < 0.0f )
 			time = 0.0f;
 
+#if !CLIENT_DLL
 		CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, time );
+#endif
 
 		if( flVel < 500.0f )
 		{

@@ -26,6 +26,7 @@
 #include	"weapons.h"
 #include	"squadmonster.h"
 #include	"scripted.h"
+#include	"global_models.h"
 
 //=========================================================
 // Monster's Anim Events Go Here

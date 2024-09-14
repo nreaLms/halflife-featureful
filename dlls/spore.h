@@ -4,7 +4,7 @@
 #include "mod_features.h"
 
 #if FEATURE_SPOREGRENADE
-#include "weapons.h"
+#include "ggrenade.h"
 
 // Contact/Timed spore grenade
 class CSpore : public CGrenade

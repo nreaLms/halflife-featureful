@@ -25,53 +25,17 @@
 #include "player_items.h"
 #include "ammoregistry.h"
 
+#if !CLIENT_DLL
+#include "ggrenade.h"
+#include "global_models.h"
+#endif
+
 class CBasePlayer;
 extern int gmsgWeapPickup;
 
 #define DEFAULT_EXPLOSION_RADIUS_MULTIPLIER 2.5f
 
 void DeactivateSatchels( CBasePlayer *pOwner );
-
-// Contact Grenade / Timed grenade / Satchel Charge
-class CGrenade : public CBaseMonster
-{
-public:
-	void Spawn( void );
-	void Precache();
-	void PrecacheBaseGrenadeSounds();
-
-	typedef enum { SATCHEL_DETONATE = 0, SATCHEL_RELEASE } SATCHELCODE;
-
-	static CGrenade *ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time );
-	static CGrenade *ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
-	static CGrenade *ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
-	static void UseSatchelCharges( entvars_t *pevOwner, SATCHELCODE code );
-
-	void Explode( Vector vecSrc, Vector vecAim );
-	virtual void Explode( TraceResult *pTrace, int bitsDamageType );
-	void EXPORT Smoke( void );
-
-	void EXPORT BounceTouch( CBaseEntity *pOther );
-	void EXPORT SlideTouch( CBaseEntity *pOther );
-	void EXPORT ExplodeTouch( CBaseEntity *pOther );
-	void EXPORT DangerSoundThink( void );
-	void EXPORT PreDetonate( void );
-	void EXPORT Detonate( void );
-	void EXPORT DetonateUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void EXPORT TumbleThink( void );
-
-	virtual void BounceSound( void );
-	virtual int	BloodColor( void ) { return DONT_BLEED; }
-	virtual void Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int iGib );
-	virtual float ExplosionRadius() { return 0.0f; } // if 0 the default radius is used (depending on amount of damage)
-
-	BOOL m_fRegisteredSound;// whether or not this grenade has issued its DANGER sound to the world sound list yet.
-
-#if !CLIENT_DLL
-	static const NamedSoundScript debrisSoundScript;
-	static const NamedSoundScript bounceSoundScript;
-#endif
-};
 
 // constant items
 #define ITEM_HEALTHKIT		1
@@ -376,17 +340,6 @@ public:
 	//Hack so deploy animations work when weapon prediction is enabled.
 	bool m_ForceSendAnimations;
 };
-
-extern DLL_GLOBAL	short	g_sModelIndexLaser;// holds the index for the laser beam
-extern DLL_GLOBAL	const char *g_pModelNameLaser;
-
-extern DLL_GLOBAL	short	g_sModelIndexLaserDot;// holds the index for the laser beam dot
-extern DLL_GLOBAL	short	g_sModelIndexFireball;// holds the index for the fireball
-extern DLL_GLOBAL	short	g_sModelIndexSmoke;// holds the index for the smoke cloud
-extern DLL_GLOBAL	short	g_sModelIndexWExplosion;// holds the index for the underwater explosion
-extern DLL_GLOBAL	short	g_sModelIndexBubbles;// holds the index for the bubbles model
-extern DLL_GLOBAL	short	g_sModelIndexBloodDrop;// holds the sprite index for blood drops
-extern DLL_GLOBAL	short	g_sModelIndexBloodSpray;// holds the sprite index for blood spray (bigger)
 
 extern void ClearMultiDamage(void);
 extern void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker );
@@ -738,30 +691,6 @@ public:
 
 private:
 	unsigned short m_usRpg;
-};
-
-class CRpgRocket : public CGrenade
-{
-public:
-	int		Save( CSave &save );
-	int		Restore( CRestore &restore );
-	static	TYPEDESCRIPTION m_SaveData[];
-	void Spawn( void );
-	void Precache( void );
-	void EXPORT FollowThink( void );
-	void EXPORT IgniteThink( void );
-	void EXPORT RocketTouch( CBaseEntity *pOther );
-	static CRpgRocket *CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBaseEntity *pOwner, CRpg *pLauncher );
-	void Explode( TraceResult *pTrace, int bitsDamageType );
-	inline CRpg *GetLauncher( void );
-
-	int m_iTrail;
-	float m_flIgniteTime;
-	EHANDLE m_hLauncher; // handle back to the launcher that fired me.
-
-#if !CLIENT_DLL
-	static const NamedSoundScript rocketIgniteSoundScript;
-#endif
 };
 
 class CGauss : public CBasePlayerWeapon

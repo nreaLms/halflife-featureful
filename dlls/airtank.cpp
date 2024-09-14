@@ -16,7 +16,7 @@
 #include "util.h"
 #include "cbase.h"
 #include "monsters.h"
-#include "weapons.h"
+#include "ggrenade.h"
 #include "nodes.h"
 #include "player.h"
 

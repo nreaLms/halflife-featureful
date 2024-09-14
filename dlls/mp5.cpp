@@ -197,9 +197,11 @@ void CMP5::SecondaryAttack( void )
  	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
 	// we don't add in player velocity anymore.
+#if !CLIENT_DLL
 	CGrenade::ShootContact( m_pPlayer->pev,
 					m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16.0f,
 					gpGlobals->v_forward * 800.0f );
+#endif
 
 	int flags;
 #if CLIENT_WEAPONS

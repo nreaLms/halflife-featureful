@@ -88,16 +88,6 @@ int CBaseToggle::Restore( class CRestore & ) { return 1; }
 int CBaseToggle::Save( class CSave & ) { return 1; }
 void CBaseToggle::KeyValue( struct KeyValueData_s * ) { }
 
-// CGrenade Stubs
-void CGrenade::BounceSound( void ) { }
-void CGrenade::Explode( Vector, Vector ) { }
-void CGrenade::Explode( TraceResult *, int ) { }
-void CGrenade::Killed( entvars_t *, entvars_t *, int ) { }
-void CGrenade::Spawn( void ) { }
-void CGrenade::Precache( void ) { }
-CGrenade *CGrenade::ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time ){ return 0; }
-CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity ){ return 0; }
-
 void UTIL_Remove( CBaseEntity *pEntity ){ }
 struct skilldata_t gSkillData;
 void UTIL_SetSize( entvars_t *pev, const Vector &vecMin, const Vector &vecMax ){ }
