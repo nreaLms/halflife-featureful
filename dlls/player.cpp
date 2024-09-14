@@ -4409,7 +4409,6 @@ void CBasePlayer::ImpulseCommands()
 //=========================================================
 void CBasePlayer::CheatImpulseCommands( int iImpulse )
 {
-#if !HLDEMO_BUILD
 	if( g_enable_cheats->value == 0 )
 	{
 		return;
@@ -4635,7 +4634,6 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		}
 		break;
 	}
-#endif	// HLDEMO_BUILD
 }
 
 //

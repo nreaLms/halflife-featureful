@@ -129,10 +129,6 @@ foreach(LINE IN LISTS MOD_OPTIONS_STRINGS)
 	endif()
 endforeach()
 
-if(HLDEMO_BUILD AND OEM_BUILD)
-	message(FATAL_ERROR "Don't mix Demo and OEM builds!")
-endif()
-
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND NOT 64BIT)
 	if(MSVC)
 		error("UNDONE: set 32 build flags")
