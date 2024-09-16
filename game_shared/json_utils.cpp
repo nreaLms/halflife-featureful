@@ -178,6 +178,7 @@ bool UpdatePropertyFromJson(Color& color, Value& jsonValue, const char* key)
 			color.r = arr[0].GetInt();
 			color.g = arr[1].GetInt();
 			color.b = arr[2].GetInt();
+			return true;
 		}
 	}
 	return false;
