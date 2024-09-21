@@ -3811,7 +3811,7 @@ void CBlowerCannon::BlowerCannonThink( void )
 		{
 			if (!FStringNull(pev->target))
 			{
-				CBaseEntity *pTarget = GetNextTarget();
+				CBaseEntity *pTarget = UTIL_FindEntityByTargetname(nullptr, STRING(pev->target), m_hActivator);
 				if (pTarget)
 				{
 					direction = pTarget->pev->origin - position;

@@ -1671,7 +1671,7 @@
 	projectile_owner(target_destination) : "Projectile owner [LE]" : : "Don't collide with this entity"
 	delay(string) : "Delay" : "0"
 	zoffset(integer) : "Z Offset"
-	target(target_destination) : "Target to shoot at"
+	target(target_generic) : "Target to shoot at [LE]"
 	weaptype(choices) :"Weapon Type" : 1 =
 	[
 		0: "Squid spit"
