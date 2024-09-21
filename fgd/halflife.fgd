@@ -1686,6 +1686,10 @@
 		1: "Toggle On/Off"
 		2: "Fire When Triggered"
 	]
+	spawnflags(flags) =
+	[
+		32: "Don't delay first fire" : 0
+	]
 ]
 
 @SolidClass base(Targetname) = env_bubbles : "Bubble Volume"

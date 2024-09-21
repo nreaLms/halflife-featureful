@@ -3657,6 +3657,8 @@ enum
 	BLOWERCANNON_FIRE,
 };
 
+#define SF_BLOWERCANNON_NO_FIRST_DELAY 32
+
 class CBlowerCannon : public CBaseDelay
 {
 public:
@@ -3769,7 +3771,8 @@ void CBlowerCannon::BlowerCannonStart( CBaseEntity *pActivator, CBaseEntity *pCa
 	m_hActivator = pActivator;
 	SetUse( &CBlowerCannon::BlowerCannonStop );
 	SetThink( &CBlowerCannon::BlowerCannonThink );
-	pev->nextthink = gpGlobals->time + m_flDelay;
+	const float delay = FBitSet(pev->spawnflags, SF_BLOWERCANNON_NO_FIRST_DELAY) ? 0.0f : m_flDelay;
+	pev->nextthink = gpGlobals->time + delay;
 }
 
 void CBlowerCannon::BlowerCannonStop( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
