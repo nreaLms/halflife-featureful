@@ -68,63 +68,13 @@ const char warpballCatalogSchema[] = R"(
           "maximum": 1.0
         },
         "pitch": {
-          "$ref": "#/definitions/range"
+          "$ref": "definitions.json#/range_int"
         },
         "attenuation": {
           "type": "number",
           "minimum": 0
         }
       }
-    },
-    "alpha": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255
-    },
-    "color": {
-      "type": ["string", "array"],
-      "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$",
-      "items": {
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 255
-      },
-      "minItems": 3,
-      "maxItems": 3
-    },
-    "range": {
-      "type": ["string", "object", "number", "array"],
-      "pattern": "[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?",
-      "properties": {
-        "min": {
-          "type": "number"
-        },
-        "max": {
-          "type": "number"
-        }
-      },
-      "items": {
-        "type": "number"
-      },
-      "minItems": 2,
-      "maxItems": 2
-    },
-    "range_int": {
-      "type": ["string", "object", "integer", "array"],
-      "pattern": "[0-9]+(,[0-9]+)?",
-      "properties": {
-        "min": {
-          "type": "integer"
-        },
-        "max": {
-          "type": "integer"
-        }
-      },
-      "items": {
-        "type": "integer",
-      },
-      "minItems": 2,
-      "maxItems": 2
     }
   },
   "properties": {
@@ -165,10 +115,10 @@ const char warpballCatalogSchema[] = R"(
                 "$ref": "#/definitions/sprite_name"
               },
               "color": {
-                "$ref": "#/definitions/color"
+                "$ref": "definitions.json#/color"
               },
               "alpha": {
-                "$ref": "#/definitions/alpha"
+                "$ref": "definitions.json#/alpha"
               },
               "width": {
                 "type": "integer",
@@ -178,7 +128,7 @@ const char warpballCatalogSchema[] = R"(
                 "type": "integer"
               },
               "life": {
-                "$ref": "#/definitions/range"
+                "$ref": "definitions.json#/range"
               }
             }
           },
@@ -187,13 +137,13 @@ const char warpballCatalogSchema[] = R"(
             "minumum": 1
           },
           "beam_count": {
-            "$ref": "#/definitions/range_int"
+            "$ref": "definitions.json#/range_int"
           },
           "light": {
             "type": ["object", "null"],
             "properties": {
               "color": {
-                "$ref": "#/definitions/color"
+                "$ref": "definitions.json#/color"
               },
               "radius": {
                 "type": "integer"

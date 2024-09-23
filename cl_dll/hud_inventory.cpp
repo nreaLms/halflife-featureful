@@ -13,20 +13,9 @@ using namespace rapidjson;
 const char hudInventorySchema[] = R"(
 {
   "type": "object",
-  "definitions": {
-    "alpha": {
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 255
-    },
-    "color": {
-      "type": ["string", "null"],
-      "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$"
-    }
-  },
   "properties": {
-    "default_sprite_alpha": "#/definitions/alpha",
-    "text_alpha": "#/definitions/alpha",
+    "default_sprite_alpha": "definitions.json#/alpha",
+    "text_alpha": "definitions.json#/alpha",
     "items": {
       "additionalProperties": {
         "type": "object",
@@ -35,10 +24,10 @@ const char hudInventorySchema[] = R"(
             "type": ["string", "null"]
           },
           "color": {
-            "$ref": "#/definitions/color"
+            "$ref": "definitions.json#/color"
           },
           "alpha": {
-            "$ref": "#/definitions/alpha"
+            "$ref": "definitions.json#/alpha"
           },
           "position": {
             "type": "string",
@@ -102,6 +91,14 @@ bool InventoryHudSpec::ReadFromFile(const char *fileName)
 				}
 			}
 			auto colorIt = value.FindMember("color");
+
+			Color color;
+			if (UpdatePropertyFromJson(color, value, "color"))
+			{
+				item.packedColor = PackRGB(color.r, color.g, color.b);
+				item.colorDefined = true;
+			}
+
 			if (colorIt != value.MemberEnd())
 			{
 				if (colorIt->value.IsString())

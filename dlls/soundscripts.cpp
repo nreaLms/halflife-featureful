@@ -14,32 +14,6 @@ using namespace rapidjson;
 const char* soundScriptsSchema = R"(
 {
   "definitions": {
-    "range": {
-      "type": ["string", "object", "number"],
-      "minimum": 0.0,
-      "maximum": 1.0,
-      "pattern": "[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?",
-      "properties": {
-        "min": {
-          "type": "number"
-        },
-        "max": {
-          "type": "number"
-        }
-      }
-    },
-    "range_int": {
-      "type": ["string", "object", "integer"],
-      "pattern": "[0-9]+(,[0-9]+)?",
-      "properties": {
-        "min": {
-          "type": "integer"
-        },
-        "max": {
-          "type": "integer"
-        }
-      }
-    },
     "soundscript": {
       "type": "object",
       "properties": {
@@ -55,7 +29,7 @@ const char* soundScriptsSchema = R"(
           "pattern": "^auto|weapon|voice|item|body|static$"
         },
         "volume": {
-          "$ref": "#/definitions/range",
+          "$ref": "definitions.json#/range",
         },
         "attenuation": {
           "type": ["number", "string"],
@@ -63,7 +37,7 @@ const char* soundScriptsSchema = R"(
           "pattern": "^norm|idle|static|none$"
         },
         "pitch": {
-          "$ref": "#/definitions/range_int"
+          "$ref": "definitions.json#/range_int"
         }
       }
     }

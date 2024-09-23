@@ -20,6 +20,60 @@
 
 using namespace rapidjson;
 
+constexpr const char definitions[] = R"(
+{
+    "alpha": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "color": {
+      "type": ["string", "array", "null"],
+      "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 255
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "range": {
+      "type": ["string", "object", "number", "array"],
+      "pattern": "[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?",
+      "properties": {
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        }
+      },
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "range_int": {
+      "type": ["string", "object", "integer", "array"],
+      "pattern": "[0-9]+(,[0-9]+)?",
+      "properties": {
+        "min": {
+          "type": "integer"
+        },
+        "max": {
+          "type": "integer"
+        }
+      },
+      "items": {
+        "type": "integer",
+      },
+      "minItems": 2,
+      "maxItems": 2
+    }
+})";
+
 static void CalculateLineAndColumnFromOffset(const char* pMemFile, size_t offset, size_t& line, size_t& column)
 {
 	const char* cur = pMemFile;
@@ -52,19 +106,41 @@ static void ReportParseErrors(const char* fileName, ParseResult& parseResult, co
 	JSON_ERROR("%s: JSON parse error: %s (Line %lu, column %lu)\n", fileName, GetParseError_En(parseResult.Code()), errorLine, errorColumn);
 }
 
+class DefinitionsProvider : public IRemoteSchemaDocumentProvider
+{
+public:
+	DefinitionsProvider(const SchemaDocument* schema): _schema(schema) {}
+	const SchemaDocument* GetRemoteDocument(const char* uri, SizeType length) {
+		return _schema;
+	}
+private:
+	const SchemaDocument* _schema;
+};
+
 bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fileSize, const char *schemaText, const char* fileName)
 {
 	if (!fileName)
 		fileName = "";
 
-	Document schemaDocument;
-	schemaDocument.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>(schemaText);
-	ParseResult parseResult = schemaDocument;
+	Document definitionsSchemaDocument;
+	definitionsSchemaDocument.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>(definitions);
+	ParseResult parseResult = definitionsSchemaDocument;
 	if (!parseResult) {
 		ReportParseErrors(fileName, parseResult, pMemFile);
 		return false;
 	}
-	SchemaDocument schema(schemaDocument);
+	SchemaDocument definitionsSchema(definitionsSchemaDocument);
+
+	Document schemaDocument;
+	schemaDocument.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>(schemaText);
+	parseResult = schemaDocument;
+	if (!parseResult) {
+		ReportParseErrors(fileName, parseResult, pMemFile);
+		return false;
+	}
+
+	DefinitionsProvider provider(&definitionsSchema);
+	SchemaDocument schema(schemaDocument, 0, 0, &provider);
 
 	document.Parse<kParseTrailingCommasFlag | kParseCommentsFlag>(pMemFile, fileSize);
 	parseResult = document;
