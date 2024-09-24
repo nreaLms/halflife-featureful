@@ -6228,6 +6228,7 @@ class CTriggerLook : public CBaseDelay
 public:
 	void KeyValue(KeyValueData *pkvd);
 	void Spawn();
+	int ObjectCaps() { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void Touch(CBaseEntity* pOther);
 
 	EHANDLE m_hLookTarget;
