@@ -556,7 +556,7 @@ bool CHudCaption::ParseCaptionsFile()
 
 				if (tokenLength != 2 || !IsLatinLowerCase(pfile[currentTokenStart]) || !IsLatinLowerCase(pfile[currentTokenStart+1]))
 				{
-					gEngfuncs.Con_Printf("invalid caption profile for %s! Must be 2 lowercase latin characters\n", caption.name);
+					gEngfuncs.Con_Printf("invalid caption profile for \"%s\"! Must be 2 lowercase latin characters\n", caption.name);
 					ConsumeLine(pfile, i, length);
 					continue;
 				}
@@ -567,7 +567,7 @@ bool CHudCaption::ParseCaptionsFile()
 
 				if (!caption.profile)
 				{
-					gEngfuncs.Con_Printf("Could not find a caption profile %c%c for %s\n", firstLetter, secondLetter, caption.name);
+					gEngfuncs.Con_Printf("Could not find a caption profile '%c%c' for %s\n", firstLetter, secondLetter, caption.name);
 				}
 
 				SkipSpaces(pfile, i, length);

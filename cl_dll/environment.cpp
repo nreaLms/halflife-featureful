@@ -1354,7 +1354,6 @@ int CEnvironment::MsgFunc_Snow(const char *pszName, int iSize, void *pbuf)
 	const char* snowflakeSprite = READ_STRING();
 	if (snowflakeSprite && *snowflakeSprite)
 	{
-		gEngfuncs.Con_Printf("Snowflake sprite: %s\n", snowflakeSprite);
 		snowData.snowSprite = LoadSprite(snowflakeSprite);
 	}
 	else
