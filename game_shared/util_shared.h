@@ -12,4 +12,6 @@ extern float		UTIL_Approach( float target, float value, float speed );
 extern float		UTIL_ApproachAngle( float target, float value, float speed );
 extern float		UTIL_AngleDistance( float next, float cur );
 
+extern void			UTIL_StringToVector( float *pVector, const char *pString, int* componentsRead = nullptr );
+
 #endif

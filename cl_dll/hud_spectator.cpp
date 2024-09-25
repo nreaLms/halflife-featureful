@@ -29,6 +29,7 @@
 #include "screenfade.h"
 
 #include "string_utils.h"
+#include "util_shared.h"
 
 #pragma warning(disable: 4244)
 
@@ -210,37 +211,6 @@ int CHudSpectator::Init()
 	}
 
 	return 1;
-}
-
-//-----------------------------------------------------------------------------
-// UTIL_StringToVector originally from ..\dlls\util.cpp, slightly changed
-//-----------------------------------------------------------------------------
-void UTIL_StringToVector( float * pVector, const char *pString )
-{
-	char *pstr, *pfront, tempString[128];
-	int	j;
-
-	strncpyEnsureTermination( tempString, pString, sizeof( tempString ) );
-
-	pstr = pfront = tempString;
-
-	for( j = 0; j < 3; j++ )		
-	{
-		pVector[j] = atof( pfront );
-
-		while( *pstr && *pstr != ' ' )
-			pstr++;
-		if( !( *pstr ) )
-			break;
-		pstr++;
-		pfront = pstr;
-	}
-
-	if( j < 2 )
-	{
-		for( j = j + 1;j < 3; j++ )
-			pVector[j] = 0;
-	}
 }
 
 int UTIL_FindEntityInMap( const char *name, float *origin, float *angle )

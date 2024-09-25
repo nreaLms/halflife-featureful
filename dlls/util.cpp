@@ -1430,41 +1430,6 @@ BOOL UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 )
 	return FALSE;
 }
 
-void UTIL_StringToVector( float *pVector, const char *pString, int* componentsRead )
-{
-	char *pstr, *pfront, tempString[128];
-	int j;
-
-	strncpyEnsureTermination( tempString, pString, sizeof( tempString ));
-	pstr = pfront = tempString;
-
-	int componentsParsed = 0;
-
-	for( j = 0; j < 3; j++ )			// lifted from pr_edict.c
-	{
-		pVector[j] = atof( pfront );
-		componentsParsed++;
-
-		while( *pstr && *pstr != ' ' )
-			pstr++;
-		if( !( *pstr ) )
-			break;
-		pstr++;
-		pfront = pstr;
-	}
-	if (componentsRead)
-		*componentsRead = componentsParsed;
-	if( j < 2 )
-	{
-		/*
-		ALERT( at_error, "Bad field in entity!! %s:%s == \"%s\"\n",
-			pkvd->szClassName, pkvd->szKeyName, pkvd->szValue );
-		*/
-		for( j = j + 1;j < 3; j++ )
-			pVector[j] = 0;
-	}
-}
-
 Vector UTIL_StringToVector(const char* str)
 {
 	float x, y, z;
