@@ -5605,7 +5605,7 @@ static bool ItemDropIsProhibited()
 // DropPlayerItem - drop the named item, or if no name,
 // the active item. 
 //=========================================================
-void CBasePlayer::DropPlayerItem( char *pszItemName )
+void CBasePlayer::DropPlayerItem( const char* pszItemName )
 {
 	if( !g_pGameRules->PlayerCanDropWeapon(this) ) {
 		return;

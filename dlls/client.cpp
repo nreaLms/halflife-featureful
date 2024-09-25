@@ -622,7 +622,7 @@ void ClientCommand( edict_t *pEntity )
 	else if( FStrEq( pcmd, "drop" ) )
 	{
 		// player is dropping an item.
-		pPlayer->DropPlayerItem( (char *)CMD_ARGV( 1 ) );
+		pPlayer->DropPlayerItem( CMD_ARGV( 1 ) );
 	}
 	else if (FStrEq( pcmd, "dropammo") )
 	{

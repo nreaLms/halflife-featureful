@@ -364,7 +364,7 @@ public:
 	void AddFloatPoints( float score, BOOL bAllowNegativeScore );
 	BOOL AddPlayerItem( CBasePlayerWeapon *pItem );
 	BOOL RemovePlayerItem( CBasePlayerWeapon *pItem, bool bCallHoster );
-	void DropPlayerItem ( char *pszItemName );
+	void DropPlayerItem ( const char *pszItemName );
 	void DropPlayerItemById( int iId );
 	void DropAmmo();
 	BOOL HasPlayerItem( CBasePlayerWeapon *pCheckItem );
