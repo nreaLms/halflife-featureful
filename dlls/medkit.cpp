@@ -172,7 +172,7 @@ void CMedkit::PrimaryAttack(void)
 	}
 
 	m_secondaryAttack = FALSE;
-	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0, 0, 0, 0);
+	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, g_vecZero, g_vecZero, 0, 0, 0, 0, 0, 0);
 	float delay = GetNextAttackDelay(2);
 	if (delay < UTIL_WeaponTimeBase())
 		delay = UTIL_WeaponTimeBase() + 2;
@@ -193,7 +193,7 @@ void CMedkit::SecondaryAttack()
 
 	m_secondaryAttack = TRUE;
 
-	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 1, 0.0, 0, 0.0);
+	PLAYBACK_EVENT_FULL(0, m_pPlayer->edict(), m_usMedkitFire, 0.0, g_vecZero, g_vecZero, 0, 0, 1, 0.0, 0, 0.0);
 	float delay = GetNextAttackDelay(3);
 	if (delay < UTIL_WeaponTimeBase())
 		delay = UTIL_WeaponTimeBase() + 3;

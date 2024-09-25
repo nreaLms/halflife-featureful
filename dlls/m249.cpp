@@ -160,7 +160,7 @@ void CM249::PrimaryAttack()
 	flags = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usM249, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, pev->body, m_bAlternatingEject ? 1 : 0, 0);
+	PLAYBACK_EVENT_FULL(flags, m_pPlayer->edict(), m_usM249, 0.0, g_vecZero, g_vecZero, vecDir.x, vecDir.y, 0, pev->body, m_bAlternatingEject ? 1 : 0, 0);
 
 
 #if !CLIENT_DLL
