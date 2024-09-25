@@ -23,7 +23,7 @@ jobs:
       fgd_name: "halflife_featureful.fgd"
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -39,14 +39,14 @@ jobs:
 
     - name: Checkout steam-runtime
       if: startsWith(matrix.os, 'ubuntu')
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: ValveSoftware/steam-runtime
         path: steam-runtime
     - name: Cache steam-runtime
       if: startsWith(matrix.os, 'ubuntu')
       id: cache-steam-runtime
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: com.valvesoftware.SteamRuntime.Sdk-i386-scout-sysroot.tar.gz
         key: ${{ runner.os }}-steam-runtime
@@ -70,7 +70,7 @@ jobs:
 
     - name: Add msbuild to PATH
       if: startsWith(matrix.os, 'windows')
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
     - name: Build on Windows
       if: startsWith(matrix.os, 'windows')
       run: |
@@ -101,14 +101,13 @@ jobs:
 
     - name: Upload linux artifact
       if: startsWith(matrix.os, 'ubuntu')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: hlsdk-${{ steps.extract_branch.outputs.branch }}-linux${{ env.vgui_suffix }}
         path: dist/${{ steps.extract_gamedir.outputs.gamedir }}
-
     - name: Upload windows artifact
       if: startsWith(matrix.os, 'windows')
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: hlsdk-${{ steps.extract_branch.outputs.branch }}-windows${{ env.vgui_suffix }}
         path: dist/${{ steps.extract_gamedir.outputs.gamedir }}

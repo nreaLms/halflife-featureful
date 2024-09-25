@@ -30,6 +30,7 @@
 #include "combat.h"
 #include "global_models.h"
 #include "gamerules.h"
+#include "string_utils.h"
 
 #include <map>
 #include <set>
@@ -383,10 +384,10 @@ edict_t *DBG_EntOfVars( const entvars_t *pev )
 {
 	if( pev->pContainingEntity != NULL )
 		return pev->pContainingEntity;
-	ALERT( at_console, "entvars_t pContainingEntity is NULL, calling into engine" );
+	ALERT( at_console, "entvars_t pContainingEntity is NULL, calling into engine\n" );
 	edict_t *pent = (*g_engfuncs.pfnFindEntityByVars)( (entvars_t*)pev );
 	if( pent == NULL )
-		ALERT( at_console, "DAMN!  Even the engine couldn't FindEntityByVars!" );
+		ALERT( at_console, "DAMN!  Even the engine couldn't FindEntityByVars!\n" );
 	( (entvars_t *)pev )->pContainingEntity = pent;
 	return pent;
 }
@@ -1434,7 +1435,7 @@ void UTIL_StringToVector( float *pVector, const char *pString, int* componentsRe
 	char *pstr, *pfront, tempString[128];
 	int j;
 
-	strcpy( tempString, pString );
+	strncpyEnsureTermination( tempString, pString, sizeof( tempString ));
 	pstr = pfront = tempString;
 
 	int componentsParsed = 0;
@@ -1521,7 +1522,7 @@ void UTIL_StringToIntArray( int *pVector, int count, const char *pString )
 	char *pstr, *pfront, tempString[128];
 	int j;
 
-	strcpy( tempString, pString );
+	strncpyEnsureTermination( tempString, pString, sizeof( tempString ));
 	pstr = pfront = tempString;
 
 	for( j = 0; j < count; j++ )			// lifted from pr_edict.c
@@ -1768,11 +1769,11 @@ float UTIL_DotPoints( const Vector &vecSrc, const Vector &vecCheck, const Vector
 //=========================================================
 // UTIL_StripToken - for redundant keynames
 //=========================================================
-void UTIL_StripToken( const char *pKey, char *pDest )
+void UTIL_StripToken( const char *pKey, char *pDest, int nLen )
 {
 	int i = 0;
 
-	while( pKey[i] && pKey[i] != '#' )
+	while( i < nLen - 1 && pKey[i] && pKey[i] != '#' )
 	{
 		pDest[i] = pKey[i];
 		i++;
@@ -1791,7 +1792,7 @@ static int gSizes[FIELD_TYPECOUNT] =
 	sizeof(string_t),		// FIELD_STRING
 	sizeof(void*),		// FIELD_ENTITY
 	sizeof(void*),		// FIELD_CLASSPTR
-	sizeof(EHANDLE),		// FIELD_EHANDLE
+	sizeof(EHANDLE),	// FIELD_EHANDLE
 	sizeof(void*),		// FIELD_entvars_t
 	sizeof(void*),		// FIELD_EDICT
 	sizeof(float) * 3,	// FIELD_VECTOR
@@ -1956,7 +1957,7 @@ unsigned short CSaveRestoreBuffer::TokenHash( const char *pszToken )
 	static int tokensparsed = 0;
 	tokensparsed++;
 	if( !m_pdata->tokenCount || !m_pdata->pTokens )
-		ALERT( at_error, "No token table array in TokenHash()!" );
+		ALERT( at_error, "No token table array in TokenHash()!\n" );
 #endif
 	for( int i = 0; i < m_pdata->tokenCount; i++ )
 	{
@@ -1965,7 +1966,7 @@ unsigned short CSaveRestoreBuffer::TokenHash( const char *pszToken )
 		if( i > 50 && !beentheredonethat )
 		{
 			beentheredonethat = TRUE;
-			ALERT( at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!" );
+			ALERT( at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!\n" );
 		}
 #endif
 		int index = hash + i;
@@ -1981,7 +1982,7 @@ unsigned short CSaveRestoreBuffer::TokenHash( const char *pszToken )
 
 	// Token hash table full!!! 
 	// [Consider doing overflow table(s) after the main table & limiting linear hash table search]
-	ALERT( at_error, "CSaveRestoreBuffer :: TokenHash() is COMPLETELY FULL!" );
+	ALERT( at_error, "CSaveRestoreBuffer :: TokenHash() is COMPLETELY FULL!\n" );
 	return 0;
 }
 
@@ -2332,7 +2333,7 @@ void CSave::BufferHeader( const char *pname, int size )
 {
 	short hashvalue = TokenHash( pname );
 	if( size > 1 << ( sizeof(short) * 8 ) )
-		ALERT( at_error, "CSave :: BufferHeader() size parameter exceeds 'short'!" );
+		ALERT( at_error, "CSave :: BufferHeader() size parameter exceeds 'short'!\n" );
 	BufferData( (const char *)&size, sizeof(short) );
 	BufferData( (const char *)&hashvalue, sizeof(short) );
 }
@@ -2344,7 +2345,7 @@ void CSave::BufferData( const char *pdata, int size )
 
 	if( m_pdata->size + size > m_pdata->bufferSize )
 	{
-		ALERT( at_error, "Save/Restore overflow!" );
+		ALERT( at_error, "Save/Restore overflow!\n" );
 		m_pdata->size = m_pdata->bufferSize;
 		return;
 	}
@@ -2382,7 +2383,7 @@ int CRestore::ReadField( void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCou
 	{
 		fieldNumber = ( i + startField ) % fieldCount;
 		pTest = &pFields[fieldNumber];
-		if( !stricmp( pTest->fieldName, pName ) )
+		if( pTest->fieldName && !stricmp( pTest->fieldName, pName ) )
 		{
 			if( !m_global || !(pTest->flags & FTYPEDESC_GLOBAL ) )
 			{
@@ -2650,7 +2651,7 @@ void CRestore::BufferReadBytes( char *pOutput, int size )
 
 	if( ( m_pdata->size + size ) > m_pdata->bufferSize )
 	{
-		ALERT( at_error, "Restore overflow!" );
+		ALERT( at_error, "Restore overflow!\n" );
 		m_pdata->size = m_pdata->bufferSize;
 		return;
 	}

@@ -401,7 +401,7 @@ extern void			UTIL_LogPrintf( const char *fmt, ... );
 // Sorta like FInViewCone, but for nonmonsters. 
 extern float UTIL_DotPoints ( const Vector &vecSrc, const Vector &vecCheck, const Vector &vecDir );
 
-extern void UTIL_StripToken( const char *pKey, char *pDest );// for redundant keynames
+extern void UTIL_StripToken( const char *pKey, char *pDest, int nLen );// for redundant keynames
 
 extern void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd );
 extern int ReadEntvarKeyvalue(entvars_t* pev, const char* keyName, int* offset, float* outFloat, int* outInteger, Vector* outVector, string_t* outString);

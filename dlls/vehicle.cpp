@@ -887,7 +887,7 @@ void CFuncVehicle::Spawn()
 
 	if( FStringNull( pev->target ))
 	{
-		ALERT( at_console, "Vehicle with no target" );
+		ALERT( at_console, "Vehicle with no target\n" );
 	}
 
 	if( pev->spawnflags & SF_TRACKTRAIN_PASSABLE )
@@ -928,7 +928,7 @@ void CFuncVehicle::Restart()
 
 	if( FStringNull( pev->target ))
 	{
-		ALERT( at_console, "Vehicle with no target" );
+		ALERT( at_console, "Vehicle with no target\n" );
 	}
 
 	UTIL_SetOrigin( pev, pev->oldorigin );

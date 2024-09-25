@@ -28,6 +28,8 @@
 #include "studio_util.h"
 #include "screenfade.h"
 
+#include "string_utils.h"
+
 #pragma warning(disable: 4244)
 
 extern int		iJumpSpectator;
@@ -218,7 +220,8 @@ void UTIL_StringToVector( float * pVector, const char *pString )
 	char *pstr, *pfront, tempString[128];
 	int	j;
 
-	strcpy( tempString, pString );
+	strncpyEnsureTermination( tempString, pString, sizeof( tempString ) );
+
 	pstr = pfront = tempString;
 
 	for( j = 0; j < 3; j++ )		
@@ -309,7 +312,7 @@ int UTIL_FindEntityInMap( const char *name, float *origin, float *angle )
 	
 			if( token[0] == '}' )
 			{
-				gEngfuncs.Con_DPrintf( "UTIL_FindEntityInMap: closing brace without data" );
+				gEngfuncs.Con_DPrintf( "UTIL_FindEntityInMap: closing brace without data\n" );
 				return 0;
 			}
 

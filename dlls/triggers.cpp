@@ -432,7 +432,7 @@ void CMultiManager::KeyValue( KeyValueData *pkvd )
 		{
 			char tmp[128];
 
-			UTIL_StripToken( pkvd->szKeyName, tmp );
+			UTIL_StripToken( pkvd->szKeyName, tmp, sizeof( tmp ));
 			m_iTargetName[m_cTargets] = ALLOC_STRING( tmp );
 			float delay;
 			short mmUseType;
@@ -2060,7 +2060,7 @@ void CChangeLevel::Spawn( void )
 	Precache();
 	const int solid = pev->solid;
 	if( FStrEq( m_szMapName, "" ) )
-		ALERT( at_console, "a trigger_changelevel doesn't have a map" );
+		ALERT( at_console, "a trigger_changelevel doesn't have a map\n" );
 
 	if( FStrEq( m_szLandmarkName, "" ) )
 		ALERT( at_console, "trigger_changelevel to %s doesn't have a landmark\n", m_szMapName );
@@ -2367,7 +2367,7 @@ int CChangeLevel::ChangeList( LEVELLIST *pLevelList, int maxList )
 							entityFlags[entityCount] = flags;
 							entityCount++;
 							if( entityCount > MAX_ENTITY )
-								ALERT( at_error, "Too many entities across a transition!" );
+								ALERT( at_error, "Too many entities across a transition!\n" );
 						}
 						//else
 						//	ALERT( at_console, "Failed %s\n", STRING( pEntity->pev->classname ) );

@@ -439,7 +439,7 @@ int FindTransition( void *pmodel, int iEndingAnim, int iGoalAnim, int *piDir )
 		}
 	}
 
-	ALERT( at_console, "error in transition graph" );
+	ALERT( at_console, "error in transition graph\n" );
 	return iGoalAnim;
 }
 

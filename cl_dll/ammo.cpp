@@ -26,6 +26,7 @@
 
 #include "ammohistory.h"
 #include "ammoregistry.h"
+#include "string_utils.h"
 
 #if USE_VGUI
 #include "vgui_TeamFortressViewport.h"
@@ -834,7 +835,8 @@ int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 	
 	WEAPON Weapon;
 
-	strcpy( Weapon.szName, READ_STRING() );
+	strncpyEnsureTermination( Weapon.szName, READ_STRING(), sizeof(Weapon.szName) );
+
 	Weapon.iAmmoType = (int)READ_CHAR();	
 	Weapon.iAmmo2Type = READ_CHAR();
 	Weapon.iSlot = READ_CHAR();
@@ -842,6 +844,17 @@ int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 	Weapon.iId = READ_CHAR();
 	Weapon.iFlags = READ_BYTE();
 	Weapon.iClip = 0;
+
+	if( Weapon.iId < 0 || Weapon.iId >= MAX_WEAPONS )
+		return 0;
+	if( Weapon.iSlot < 0 || Weapon.iSlot >= WEAPON_SLOTS_HARDLIMIT + 1 )
+		return 0;
+	if( Weapon.iSlotPos < 0 || Weapon.iSlotPos >= MAX_WEAPON_POSITIONS + 1 )
+		return 0;
+	if( Weapon.iAmmoType < -1 || Weapon.iAmmoType >= MAX_AMMO_TYPES )
+		return 0;
+	if( Weapon.iAmmo2Type < -1 || Weapon.iAmmo2Type >= MAX_AMMO_TYPES )
+		return 0;
 
 	gWR.AddWeapon( &Weapon );
 
