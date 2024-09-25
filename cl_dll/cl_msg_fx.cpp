@@ -261,7 +261,72 @@ int __MsgFunc_CustomBeam( const char* pszName, int iSize, void *pbuf )
 	return 1;
 }
 
-void FX_Sprite_Trail( Vector start, Vector end, int modelIndex, int count, float life, float size, float amp, int renderamt, float speed, int r = 0, int g = 0, int b = 0, float extraLifeMax = 0.0f )
+void FX_TempSprite(Vector pos, int modelIndex, float scale, int rendermode, color24 color, int a, int renderfx, float framerate, float life)
+{
+	model_t *pmodel;
+	if(( pmodel = gEngfuncs.pfnGetModelByIndex( modelIndex )) == NULL )
+		return;
+
+	TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( pos, pmodel );
+	if( !pTemp ) return;
+
+	const float clientTime = gEngfuncs.GetClientTime();
+
+	pTemp->frameMax = pmodel->numframes - 1;
+
+	pTemp->entity.curstate.rendermode = rendermode;
+	pTemp->entity.baseline.renderamt = pTemp->entity.curstate.renderamt = a;
+	pTemp->entity.curstate.renderfx = renderfx;
+	pTemp->entity.curstate.rendercolor = color;
+	pTemp->entity.curstate.scale = scale;
+	pTemp->entity.curstate.framerate = framerate;
+
+	if (framerate > 0 && pmodel->numframes > 1)
+	{
+		pTemp->flags |= FTENT_SPRANIMATE;
+	}
+
+	if (life)
+	{
+		if (pTemp->flags & FTENT_SPRANIMATE)
+			pTemp->flags |= FTENT_SPRANIMATELOOP;
+		pTemp->die = clientTime + life;
+	}
+	else if (framerate > 0)
+	{
+		pTemp->die = clientTime + (pTemp->frameMax / framerate);
+	}
+	else
+	{
+		pTemp->die = clientTime + 0.1f;
+	}
+}
+
+int __MsgFunc_Sprite( const char* pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	Vector pos;
+
+	pos[0] = READ_COORD();
+	pos[1] = READ_COORD();
+	pos[2] = READ_COORD();
+	int modelIndex = READ_SHORT();
+	float scale = READ_BYTE() * 0.1f;
+	int rendermode = READ_BYTE();
+	color24 color = READ_COLOR();
+	int a = READ_BYTE();
+	int renderfx = READ_BYTE();
+	float framerate = READ_SHORT() * 0.1f;
+	float life = READ_BYTE() * 0.1f;
+
+	FX_TempSprite(pos, modelIndex, scale, rendermode, color, a, renderfx, framerate, life);
+
+	return 1;
+}
+
+void FX_Sprite_Trail( Vector start, Vector end, int modelIndex, int count, float life, float scale, float amp,
+					  float speed, int rendermode, color24 color, int renderamt, int renderfx = kRenderFxNone, float extraLifeMax = 0.0f )
 {
 	Vector delta, dir;
 	model_t *pmodel;
@@ -289,7 +354,7 @@ void FX_Sprite_Trail( Vector start, Vector end, int modelIndex, int count, float
 		if( !pTemp ) return;
 
 		pTemp->flags = (FTENT_COLLIDEWORLD|FTENT_FADEOUT|FTENT_SLOWGRAVITY);
-		pTemp->frameMax = pmodel->numframes;
+		pTemp->frameMax = pmodel->numframes - 1;
 		if (pmodel->numframes > 1)
 			pTemp->flags |= FTENT_SPRCYCLE;
 
@@ -300,16 +365,14 @@ void FX_Sprite_Trail( Vector start, Vector end, int modelIndex, int count, float
 		VectorCopy( vel, pTemp->entity.baseline.origin );
 		VectorCopy( pos, pTemp->entity.origin );
 
-		pTemp->entity.curstate.scale = size;
-		pTemp->entity.curstate.rendermode = kRenderGlow;
-		pTemp->entity.curstate.renderfx = kRenderFxNoDissipation;
+		pTemp->entity.curstate.scale = scale;
+		pTemp->entity.curstate.rendermode = rendermode;
+		pTemp->entity.curstate.renderfx = renderfx;
 		pTemp->entity.curstate.renderamt = pTemp->entity.baseline.renderamt = renderamt;
-		pTemp->entity.curstate.rendercolor.r = r;
-		pTemp->entity.curstate.rendercolor.g = g;
-		pTemp->entity.curstate.rendercolor.b = b;
+		pTemp->entity.curstate.rendercolor = color;
 
 		if (pmodel->numframes > 1)
-			pTemp->entity.curstate.frame = Com_RandomLong( 0, pmodel->numframes-1 );
+			pTemp->entity.curstate.frame = Com_RandomLong( 0, pmodel->numframes - 1 );
 		pTemp->die = clientTime + life;
 		if (extraLifeMax)
 			pTemp->die += Com_RandomFloat( 0.0f, extraLifeMax );
@@ -338,12 +401,105 @@ int __MsgFunc_SpriteTrail( const char* pszName, int iSize, void *pbuf )
 		scale *= 0.1f;
 	float vel = (float)READ_BYTE() * 10;
 	float random = (float)READ_BYTE() * 10;
-	int r = READ_BYTE();
-	int g = READ_BYTE();
-	int b = READ_BYTE();
+	int rendermode = READ_BYTE();
+	color24 color = READ_COLOR();
 	int a = READ_BYTE();
+	int renderfx = READ_BYTE();
 	float extraLifeMax = READ_BYTE() * 0.1f;
-	FX_Sprite_Trail( pos, pos2, modelIndex, count, life, scale, random, a, vel, r, g, b, extraLifeMax );
+	FX_Sprite_Trail( pos, pos2, modelIndex, count, life, scale, random, vel, rendermode, color, a, renderfx, extraLifeMax );
+
+	return 1;
+}
+
+void FX_Spray( Vector pos, Vector dir, int modelIndex, int count, int speed, int spread, int rendermode, color24 color, int renderamt, int renderfx, float scale, float framerate, int flags )
+{
+	TEMPENTITY *pTemp;
+	model_t	*pmodel;
+	int		i;
+
+	if(( pmodel = gEngfuncs.pfnGetModelByIndex( modelIndex )) == NULL )
+		return;
+
+	float noise = (float)spread / 100.0f;
+	float znoise = Q_min( 1.0f, noise * 1.5f );
+
+	const float clientTime = gEngfuncs.GetClientTime();
+
+	for( i = 0; i < count; i++ )
+	{
+		pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( pos, pmodel );
+		if( !pTemp ) return;
+
+		pTemp->frameMax = pmodel->numframes - 1;
+		if (pmodel->numframes > 1)
+			pTemp->flags |= FTENT_SPRCYCLE;
+
+		pTemp->entity.curstate.scale = scale;
+		pTemp->entity.curstate.rendermode = rendermode;
+		pTemp->entity.curstate.rendercolor = color;
+		pTemp->entity.baseline.renderamt = pTemp->entity.curstate.renderamt = renderamt;
+		pTemp->entity.curstate.renderfx = renderfx;
+		pTemp->entity.curstate.framerate = framerate;
+
+		pTemp->flags |= FTENT_SLOWGRAVITY;
+		if (flags & SPRAY_FLAG_COLLIDEWORLD)
+			pTemp->flags |= FTENT_COLLIDEWORLD;
+		if (flags & SPRAY_FLAG_ANIMATE)
+			pTemp->flags |= FTENT_SPRANIMATE;
+		if (flags & SPRAY_FLAG_FADEOUT)
+		{
+			pTemp->flags |= FTENT_FADEOUT;
+			pTemp->fadeSpeed = 2.0f;
+		}
+
+		if(pmodel->numframes > 1 && (flags & SPRAY_FLAG_ANIMATE))
+		{
+			pTemp->die = clientTime + (pTemp->frameMax / framerate);
+		}
+		else
+			pTemp->die = clientTime + 0.35f;
+
+		if (pmodel->numframes > 1 && !(flags & SPRAY_FLAG_ANIMATE))
+		{
+			pTemp->entity.curstate.frame = Com_RandomLong( 0, pmodel->numframes - 1 );
+		}
+
+		pTemp->entity.baseline.origin[0] = dir[0] + Com_RandomFloat( -noise, noise );
+		pTemp->entity.baseline.origin[1] = dir[1] + Com_RandomFloat( -noise, noise );
+		pTemp->entity.baseline.origin[2] = dir[2] + Com_RandomFloat( 0, znoise );
+		VectorScale( pTemp->entity.baseline.origin, Com_RandomFloat(( speed * 0.8f ), ( speed * 1.2f )), pTemp->entity.baseline.origin );
+	}
+}
+
+int __MsgFunc_Spray( const char* pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	Vector pos, dir;
+
+	pos[0] = READ_COORD();
+	pos[1] = READ_COORD();
+	pos[2] = READ_COORD();
+	dir[0] = READ_COORD();
+	dir[1] = READ_COORD();
+	dir[2] = READ_COORD();
+	int modelIndex = READ_SHORT();
+	int count = READ_BYTE();
+	int speed = READ_BYTE();
+	int spread = READ_BYTE();
+	int rendermode = READ_BYTE();
+	color24 color = READ_COLOR();
+	int a = READ_BYTE();
+	int renderfx = READ_BYTE();
+	float scale = (float)READ_BYTE();
+	if( !scale )
+		scale = 1.0f;
+	else
+		scale *= 0.1f;
+	float framerate = READ_SHORT() * 0.1f;
+	int flags = READ_BYTE();
+
+	FX_Spray(pos, dir, modelIndex, count, speed, spread, rendermode, color, a, renderfx, scale, framerate, flags);
 
 	return 1;
 }
@@ -405,14 +561,12 @@ void ExpandCallback(TEMPENTITY *ent, float frametime, float currenttime)
 	}
 }
 
-void FX_Smoke(TEMPENTITY* pTemp, float scale, float speed, float zOffset, int rendermode, int renderamt, int r, int g, int b )
+void FX_Smoke(TEMPENTITY* pTemp, float scale, float speed, float zOffset, int rendermode, int renderamt, color24 color)
 {
 	pTemp->entity.curstate.rendermode = rendermode;
 	pTemp->entity.curstate.renderfx = kRenderFxNone;
 	pTemp->entity.baseline.origin[2] = speed;
-	pTemp->entity.curstate.rendercolor.r = r;
-	pTemp->entity.curstate.rendercolor.g = g;
-	pTemp->entity.curstate.rendercolor.b = b;
+	pTemp->entity.curstate.rendercolor = color;
 	pTemp->entity.curstate.renderamt = renderamt;
 	pTemp->entity.origin[2] += zOffset;
 	pTemp->entity.curstate.scale = scale;
@@ -443,9 +597,7 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	zOffset = READ_SHORT();
 	rendermode = READ_BYTE();
 	renderamt = READ_BYTE();
-	r = READ_BYTE();
-	g = READ_BYTE();
-	b = READ_BYTE();
+	color24 color = READ_COLOR();
 	scaleSpeed = READ_SHORT() / 10.0f;
 
 	if (directed)
@@ -465,14 +617,14 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 		renderamt = 255;
 	if (rendermode == 0)
 		rendermode = kRenderTransAlpha;
-	if (r + g + b == 0)
-		r = g = b = Com_RandomLong( 20, 35 );
+	if (color.r + color.g + color.b == 0)
+		color.r = color.g = color.b = Com_RandomLong( 20, 35 );
 
 	TEMPENTITY* pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( pos, modelIndex, frameRate );
 
 	if (pTemp)
 	{
-		FX_Smoke(pTemp, scale, speed, zOffset, rendermode, renderamt, r, g, b);
+		FX_Smoke(pTemp, scale, speed, zOffset, rendermode, renderamt, color);
 		if (directed)
 		{
 			pTemp->entity.baseline.origin = dir * speed;
@@ -590,7 +742,9 @@ void HookFXMessages()
 	HOOK_MESSAGE( RandomGibs );
 	HOOK_MESSAGE( MuzzleLight );
 	HOOK_MESSAGE( CustomBeam );
+	HOOK_MESSAGE( Sprite );
 	HOOK_MESSAGE( SpriteTrail );
+	HOOK_MESSAGE( Spray );
 	HOOK_MESSAGE( Streaks );
 	HOOK_MESSAGE( Smoke );
 	HOOK_MESSAGE( SparkShower );

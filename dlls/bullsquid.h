@@ -16,6 +16,7 @@
 // bullsquid - big, spotty tentacle-mouthed meanie.
 //=========================================================
 
+#pragma once
 #ifndef BULLSQUID_H
 #define BULLSQUID_H
 
@@ -29,7 +30,6 @@ class CSquidSpit : public CBaseEntity
 public:
 	void Spawn(void);
 	void Precache();
-	virtual void PrecacheSounds();
 
 	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList = iStringNull);
 	static float SpitSpeed() { return 900.0f; }
@@ -44,8 +44,11 @@ public:
 
 	static constexpr const char* spitTouchSoundScript = "Bullsquid.SpitTouch";
 	static constexpr const char* spitHitSoundScript = "Bullsquid.SpitHit";
+
+	static const NamedVisual spitVisual;
+	static const NamedVisual fleckVisual;
 protected:
-	void SpawnHelper(const char* className);
+	void SpawnHelper(const char* className, const char* spitVisualName);
 };
 
 class CSquidToxicSpit : public CBaseEntity
@@ -66,11 +69,12 @@ public:
 
 	int m_maxFrame;
 
-	int m_iImpactSprite;
-	int m_iFleckSprite;
-
 	static const NamedSoundScript acidSoundScript;
 	static const NamedSoundScript spithitSoundScript;
+
+	static const NamedVisual toxicSpitVisual;
+	static const NamedVisual fleckVisual;
+	static const NamedVisual particleVisual;
 };
 
 #endif // BULLSQUID_H

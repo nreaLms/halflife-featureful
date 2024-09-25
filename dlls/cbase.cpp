@@ -863,6 +863,19 @@ void  CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const 
 	RegisterAndPrecacheSoundScript(derivative, defaultSoundScript.name, defaultSoundScript, paramsOverride);
 }
 
+const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool precache)
+{
+	if (defaultVisual.mixin)
+	{
+		const Visual* visual = RegisterVisual(*defaultVisual.mixin, false);
+		Visual changedVisual = defaultVisual;
+		changedVisual.CompleteFrom(*visual);
+		return ProvideDefaultVisual(defaultVisual.name, changedVisual, precache);
+	}
+	else
+		return ProvideDefaultVisual(defaultVisual.name, defaultVisual, precache);
+}
+
 int CBaseEntity::Save( CSave &save )
 {
 	if( save.WriteEntVars( "ENTVARS", pev ) )

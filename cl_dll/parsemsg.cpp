@@ -16,8 +16,7 @@
 //  parsemsg.cpp
 //
 
-typedef unsigned char byte;
-#define true 1
+#include "parsemsg.h"
 
 static byte *gpBuf;
 static int giSize;
@@ -38,7 +37,7 @@ int READ_CHAR( void )
 
 	if( giRead + 1 > giSize )
 	{
-		giBadRead = true;
+		giBadRead = 1;
 		return -1;
 	}
 
@@ -54,7 +53,7 @@ int READ_BYTE( void )
 
 	if( giRead + 1 > giSize )
 	{
-		giBadRead = true;
+		giBadRead = 1;
 		return -1;
 	}
 		
@@ -70,7 +69,7 @@ int READ_SHORT( void )
 
 	if( giRead + 2 > giSize )
 	{
-		giBadRead = true;
+		giBadRead = 1;
 		return -1;
 	}
 
@@ -92,7 +91,7 @@ int READ_LONG( void )
 
 	if( giRead + 4 > giSize )
 	{
-		giBadRead = true;
+		giBadRead = 1;
 		return -1;
 	}
 
@@ -161,4 +160,13 @@ float READ_ANGLE( void )
 float READ_HIRESANGLE( void )
 {
 	return (float)( READ_SHORT() * ( 360.0 / 65536 ) );
+}
+
+color24 READ_COLOR( void )
+{
+	color24 color;
+	color.r = READ_BYTE();
+	color.g = READ_BYTE();
+	color.b = READ_BYTE();
+	return color;
 }

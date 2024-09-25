@@ -26,12 +26,16 @@
 #include	"combat.h"
 #include	"game.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
+#include	"fx_flags.h"
 
 #define SF_INFOBM_RUN		0x0001
 #define SF_INFOBM_WAIT		0x0002
 
 #define SF_BIGMOM_NOBABYCRABS SF_MONSTER_DONT_DROP_GUN
 #define SF_MONSTERCLIP_BABYCRABS SF_MONSTER_SPECIAL_FLAG
+
+extern int gmsgSpray;
 
 // AI Nodes for Big Momma
 class CInfoBM : public CPointEntity
@@ -121,7 +125,9 @@ public:
 	static constexpr const char* spitTouchSoundScript = "BigMomma.SpitTouch";
 	static constexpr const char* spitHitSoundScript = "BigMomma.SpitHit";
 
-	int m_SpitSprite;
+	static const NamedVisual mortarVisual;
+	static const NamedVisual mortarSprayVisual;
+
 	int m_SpitDebrisSprite;
 };
 
@@ -133,6 +139,16 @@ TYPEDESCRIPTION	CBMortar::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CBMortar, CBaseEntity )
+
+const NamedVisual CBMortar::mortarVisual = BuildVisual("BigMomma.Mortar")
+		.Model("sprites/mommaspit.spr")
+		.RenderMode(kRenderTransAlpha)
+		.Alpha(255)
+		.Scale(2.5f)
+		.Framerate(10.0f);
+
+const NamedVisual CBMortar::mortarSprayVisual = BuildVisual::Spray("BigMomma.MortarSpray")
+		.Model("sprites/mommaspout.spr");
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -170,7 +186,7 @@ IMPLEMENT_SAVERESTORE( CBMortar, CBaseEntity )
 #define bits_MEMORY_FIRED_NODE		( bits_MEMORY_CUSTOM4 )
 
 Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, float maxHeight );
-void MortarSpray( const Vector &position, const Vector &direction, int spriteModel, int count );
+void MortarSpray( const Vector &position, const Vector &direction, const Visual* visual, int count );
 
 // UNDONE:
 //
@@ -700,7 +716,7 @@ void CBigMomma::LaunchMortar( void )
 	EmitSoundScript(launchMortarSoundScript);
 	CBMortar *pBomb = CBMortar::Shoot( edict(), startPos, vecLaunch, m_soundList );
 	pBomb->pev->gravity = 1.0f;
-	MortarSpray( startPos, Vector( 0.0f, 0.0f, 1.0f ), m_SpitSprite, 24 );
+	MortarSpray( startPos, Vector( 0.0f, 0.0f, 1.0f ), GetVisual(CBMortar::mortarSprayVisual), 24 );
 }
 
 //=========================================================
@@ -750,7 +766,7 @@ void CBigMomma::Precache()
 	UTIL_PrecacheOther(BIG_CHILDCLASS, entityOverrides);
 	UTIL_PrecacheOther("bmortar", entityOverrides);
 
-	m_SpitSprite = PRECACHE_MODEL( "sprites/mommaspout.spr" );// client side spittle.
+	RegisterVisual(CBMortar::mortarSprayVisual);// client side spittle.
 }
 
 void CBigMomma::Activate( void )
@@ -1177,20 +1193,22 @@ Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot
 // Mortar
 //
 // ---------------------------------
-void MortarSpray( const Vector &position, const Vector &direction, int spriteModel, int count )
+void MortarSpray( const Vector &position, const Vector &direction, const Visual* visual, int count )
 {
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, position );
-		WRITE_BYTE( TE_SPRITE_SPRAY );
-		WRITE_COORD( position.x );	// pos
-		WRITE_COORD( position.y );	
-		WRITE_COORD( position.z );	
-		WRITE_COORD( direction.x );	// dir
-		WRITE_COORD( direction.y );	
-		WRITE_COORD( direction.z );	
-		WRITE_SHORT( spriteModel );	// model
+	MESSAGE_BEGIN( MSG_PVS, gmsgSpray, position );
+		WRITE_VECTOR( position );	// pos
+		WRITE_VECTOR( direction );	// dir
+		WRITE_SHORT( visual->modelIndex );	// model
 		WRITE_BYTE ( count );			// count
 		WRITE_BYTE ( 130 );			// speed
 		WRITE_BYTE ( 80 );			// noise ( client will divide by 100 )
+		WRITE_BYTE( visual->rendermode );
+		WRITE_COLOR( visual->rendercolor );
+		WRITE_BYTE( visual->renderamt );
+		WRITE_BYTE( visual->renderfx );
+		WRITE_BYTE( (int)(visual->scale * 10) );
+		WRITE_SHORT( (int)(visual->framerate * 10) );
+		WRITE_BYTE( SPRAY_FLAG_FADEOUT );
 	MESSAGE_END();
 }
 
@@ -1202,12 +1220,12 @@ void CBMortar::Spawn( void )
 	pev->classname = MAKE_STRING( "bmortar" );
 	
 	pev->solid = SOLID_BBOX;
-	pev->rendermode = kRenderTransAlpha;
-	pev->renderamt = 255;
 
-	SET_MODEL( ENT( pev ), "sprites/mommaspit.spr" );
+	const Visual* visual = GetVisual(mortarVisual);
+
+	ApplyVisualToEntity(this, visual);
+
 	pev->frame = 0;
-	pev->scale = 0.5f;
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
@@ -1217,8 +1235,8 @@ void CBMortar::Spawn( void )
 
 void CBMortar::Precache()
 {
-	PRECACHE_MODEL( "sprites/mommaspit.spr" );// spit projectile.
-	m_SpitSprite = PRECACHE_MODEL( "sprites/mommaspout.spr" );// client side spittle.
+	RegisterVisual( mortarVisual );// spit projectile.
+	RegisterVisual( mortarSprayVisual );// client side spittle.
 	m_SpitDebrisSprite = PRECACHE_MODEL( "sprites/mommablob.spr" ); // TODO: not used?
 
 	RegisterAndPrecacheSoundScript(spitTouchSoundScript, NPC::spitTouchSoundScript);
@@ -1232,15 +1250,9 @@ void CBMortar::Animate( void )
 	if( gpGlobals->time > pev->dmgtime )
 	{
 		pev->dmgtime = gpGlobals->time + 0.2f;
-		MortarSpray( pev->origin, -pev->velocity.Normalize(), m_SpitSprite, 3 );
+		MortarSpray( pev->origin, -pev->velocity.Normalize(), GetVisual(mortarSprayVisual), 3 );
 	}
-	if( pev->frame++ )
-	{
-		if( pev->frame > m_maxFrame )
-		{
-			pev->frame = 0;
-		}
-	}
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 }
 
 CBMortar *CBMortar::Shoot(edict_t *pOwner, Vector vecStart, Vector vecVelocity , string_t soundList)
@@ -1252,7 +1264,6 @@ CBMortar *CBMortar::Shoot(edict_t *pOwner, Vector vecStart, Vector vecVelocity ,
 	UTIL_SetOrigin( pSpit->pev, vecStart );
 	pSpit->pev->velocity = vecVelocity;
 	pSpit->pev->owner = pOwner;
-	pSpit->pev->scale = 2.5f;
 	pSpit->SetThink( &CBMortar::Animate );
 	pSpit->pev->nextthink = gpGlobals->time + 0.1f;
 
@@ -1280,7 +1291,7 @@ void CBMortar::Touch( CBaseEntity *pOther )
 	}
 
 	// make some flecks
-	MortarSpray( tr.vecEndPos, tr.vecPlaneNormal, m_SpitSprite, 24 );
+	MortarSpray( tr.vecEndPos, tr.vecPlaneNormal, GetVisual(mortarSprayVisual), 24 );
 
 	entvars_t *pevOwner = NULL;
 	if( pev->owner )

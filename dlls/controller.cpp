@@ -26,6 +26,7 @@
 #include	"squadmonster.h"
 #include	"scripted.h"
 #include	"global_models.h"
+#include	"visuals_utils.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -38,6 +39,11 @@
 
 #define CONTROLLER_FLINCH_DELAY			2		// at most one flinch every n secs
 
+const NamedVisual sharedEnergyBallVisual = BuildVisual("Controller.EnergyBallBase")
+		.Model("sprites/xspark4.spr")
+		.RenderColor(255, 255, 255)
+		.Alpha(255);
+
 class CController : public CSquadMonster
 {
 public:
@@ -47,6 +53,7 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
+	void ClearBalls();
 	void UpdateOnRemove();
 	void SetYawSpeed( void );
 	int DefaultClassify( void );
@@ -87,6 +94,13 @@ public:
 	static const NamedSoundScript painSoundScript;
 	static const NamedSoundScript dieSoundScript;
 	static const NamedSoundScript attackSoundScript;
+
+	static const NamedVisual sharedBallLightVisual;
+
+	static const NamedVisual energyBallVisual;
+	static const NamedVisual headOpenLightVisual;
+	static const NamedVisual headShootLightVisual;
+	static const NamedVisual energyBallLightVisual;
 
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	void OnDying();
@@ -160,6 +174,30 @@ const NamedSoundScript CController::attackSoundScript = {
 	"Controller.Attack"
 };
 
+const NamedVisual CController::energyBallVisual = BuildVisual("Controller.EnergyBall")
+		.RenderMode(kRenderGlow)
+		.RenderFx(kRenderFxNoDissipation)
+		.Scale(1.0f)
+		.Mixin(&sharedEnergyBallVisual);
+
+const NamedVisual CController::sharedBallLightVisual = BuildVisual("Controller.EnergyBallLightBase")
+		.RenderColor(255, 192, 64);
+
+const NamedVisual CController::headOpenLightVisual = BuildVisual("Controller.HeadOpenLight")
+		.Radius(1)
+		.Life(2.0f)
+		.Mixin(&CController::sharedBallLightVisual);
+
+const NamedVisual CController::headShootLightVisual = BuildVisual("Controller.HeadShootLight")
+		.Radius(32)
+		.Life(1.0f)
+		.Mixin(&CController::sharedBallLightVisual);
+
+const NamedVisual CController::energyBallLightVisual = BuildVisual("Controller.EnergyBallLight")
+		.Radius(8)
+		.Life(0.5f)
+		.Mixin(&CController::sharedBallLightVisual);
+
 //=========================================================
 // Classify - indicates this monster's place in the 
 // relationship table.
@@ -212,17 +250,7 @@ void CController::OnDying()
 
 void CController::GibMonster( void )
 {
-	// delete balls
-	if( m_pBall[0] )
-	{
-		UTIL_Remove( m_pBall[0] );
-		m_pBall[0] = NULL;
-	}
-	if( m_pBall[1] )
-	{
-		UTIL_Remove( m_pBall[1] );
-		m_pBall[1] = NULL;
-	}
+	ClearBalls();
 	CSquadMonster::GibMonster();
 }
 
@@ -266,17 +294,12 @@ void CController::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			GetAttachment( 0, vecStart, angleGun );
 
+			const Visual* visual = GetVisual(headOpenLightVisual);
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_ELIGHT );
 				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
-				WRITE_COORD( vecStart.x );		// origin
-				WRITE_COORD( vecStart.y );
-				WRITE_COORD( vecStart.z );
-				WRITE_COORD( 1 );	// radius
-				WRITE_BYTE( 255 );	// R
-				WRITE_BYTE( 192 );	// G
-				WRITE_BYTE( 64 );	// B
-				WRITE_BYTE( 20 );	// life * 10
+				WRITE_VECTOR( vecStart );		// origin
+				WriteEntLightVisual( visual );
 				WRITE_COORD( -32 ); // decay
 			MESSAGE_END();
 
@@ -292,17 +315,12 @@ void CController::HandleAnimEvent( MonsterEvent_t *pEvent )
 			
 			GetAttachment( 0, vecStart, angleGun );
 
+			const Visual* visual = GetVisual(headShootLightVisual);
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_ELIGHT );
 				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
-				WRITE_COORD( 0 );		// origin
-				WRITE_COORD( 0 );
-				WRITE_COORD( 0 );
-				WRITE_COORD( 32 );	// radius
-				WRITE_BYTE( 255 );	// R
-				WRITE_BYTE( 192 );	// G
-				WRITE_BYTE( 64 );	// B
-				WRITE_BYTE( 10 );	// life * 10
+				WRITE_VECTOR( g_vecZero );		// origin
+				WriteEntLightVisual( visual );
 				WRITE_COORD( 32 ); // decay
 			MESSAGE_END();
 
@@ -386,25 +404,26 @@ void CController::Precache()
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 
-	PRECACHE_MODEL( "sprites/xspark4.spr" );
+	RegisterVisual(energyBallVisual);
+	RegisterVisual(headOpenLightVisual);
+	RegisterVisual(headShootLightVisual);
+	RegisterVisual(energyBallLightVisual);
 
 	UTIL_PrecacheOther( "controller_energy_ball" );
 	UTIL_PrecacheOther( "controller_head_ball" );
 }	
 
+void CController::ClearBalls()
+{
+	UTIL_Remove( m_pBall[0] );
+	m_pBall[0] = 0;
+	UTIL_Remove( m_pBall[1] );
+	m_pBall[1] = 0;
+}
+
 void CController::UpdateOnRemove()
 {
-	if( m_pBall[0] )
-	{
-		UTIL_Remove( m_pBall[0] );
-		m_pBall[0] = 0;
-	}
-
-	if( m_pBall[1] )
-	{
-		UTIL_Remove( m_pBall[1] );
-		m_pBall[1] = 0;
-	}
+	ClearBalls();
 	CSquadMonster::UpdateOnRemove();
 }
 
@@ -850,10 +869,9 @@ void CController::RunAI( void )
 	{
 		if( m_pBall[i] == NULL )
 		{
-			m_pBall[i] = CSprite::SpriteCreate( "sprites/xspark4.spr", pev->origin, TRUE );
-			m_pBall[i]->SetTransparency( kRenderGlow, 255, 255, 255, 255, kRenderFxNoDissipation );
+
+			m_pBall[i] = CreateSpriteFromVisual(GetVisual(energyBallVisual), pev->origin);
 			m_pBall[i]->SetAttachment( edict(), ( i + 3 ) );
-			m_pBall[i]->SetScale( 1.0f );
 		}
 
 		float t = m_iBallTime[i] - gpGlobals->time;
@@ -869,17 +887,14 @@ void CController::RunAI( void )
 		GetAttachment( i + 2, vecStart, angleGun );
 		UTIL_SetOrigin( m_pBall[i]->pev, vecStart );
 
+		const Visual* visual = GetVisual(energyBallLightVisual);
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_ELIGHT );
 			WRITE_SHORT( entindex() + 0x1000 * ( i + 3 ) );		// entity, attachment
-			WRITE_COORD( vecStart.x );		// origin
-			WRITE_COORD( vecStart.y );
-			WRITE_COORD( vecStart.z );
+			WRITE_VECTOR( vecStart );		// origin
 			WRITE_COORD( m_iBallCurrent[i] / 8 );	// radius
-			WRITE_BYTE( 255 );	// R
-			WRITE_BYTE( 192 );	// G
-			WRITE_BYTE( 64 );	// B
-			WRITE_BYTE( 5 );	// life * 10
+			WRITE_COLOR( visual->rendercolor );
+			WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );	// life * 10
 			WRITE_COORD( 0 ); // decay
 		MESSAGE_END();
 	}
@@ -1157,14 +1172,39 @@ class CControllerHeadBall : public CBaseMonster
 	void EXPORT BounceTouch( CBaseEntity *pOther );
 	void MovetoTarget( Vector vecTarget );
 	void Crawl( void );
+	void MakeTraceBeam(const Vector& vecSrc);
+
 	int m_flNextAttack;
 	Vector m_vecIdeal;
 	EHANDLE m_hOwner;
 
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
 	static const NamedSoundScript electroSoundScript;
+	static const NamedVisual headBallVisual;
+	static const NamedVisual headBallBeamVisual;
+	static const NamedVisual headBallLightVisual;
+
+private:
+	int m_maxFrame;
+	void SetMaxFrame() {
+		if (pev->modelindex)
+		{
+			m_maxFrame = MODEL_FRAMES(pev->modelindex) - 1;
+		}
+	}
 };
 
 LINK_ENTITY_TO_CLASS( controller_head_ball, CControllerHeadBall )
+
+TYPEDESCRIPTION	CControllerHeadBall::m_SaveData[] =
+{
+	DEFINE_FIELD( CControllerHeadBall, m_hOwner, FIELD_EHANDLE ),
+};
+
+IMPLEMENT_SAVERESTORE( CControllerHeadBall, CBaseMonster )
 
 const NamedSoundScript CControllerHeadBall::electroSoundScript = {
 	CHAN_STATIC,
@@ -1175,6 +1215,24 @@ const NamedSoundScript CControllerHeadBall::electroSoundScript = {
 	"Controller.HeadElectro"
 };
 
+const NamedVisual CControllerHeadBall::headBallVisual = BuildVisual("Controller.HeadBall")
+		.RenderMode(kRenderTransAdd)
+		.Scale(2.0f)
+		.Mixin(&sharedEnergyBallVisual);
+
+const NamedVisual CControllerHeadBall::headBallBeamVisual = BuildVisual("Controller.HeadBallBeam")
+		.Model(g_pModelNameLaser)
+		.RenderColor(255, 255, 255)
+		.Alpha(255)
+		.BeamParams(20, 0, 10)
+		.Framerate(10.f)
+		.Life(0.3f);
+
+const NamedVisual CControllerHeadBall::headBallLightVisual = BuildVisual("Controller.HeadBallLight")
+		.RenderColor(255, 255, 255)
+		.Radius(16)
+		.Life(0.2f);
+
 void CControllerHeadBall::Spawn( void )
 {
 	Precache();
@@ -1182,13 +1240,7 @@ void CControllerHeadBall::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT( pev ), "sprites/xspark4.spr" );
-	pev->rendermode = kRenderTransAdd;
-	pev->rendercolor.x = 255;
-	pev->rendercolor.y = 255;
-	pev->rendercolor.z = 255;
-	pev->renderamt = 255;
-	pev->scale = 2.0f;
+	ApplyVisualToEntity(this, GetVisual(headBallVisual));
 
 	UTIL_SetSize(pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
@@ -1202,33 +1254,26 @@ void CControllerHeadBall::Spawn( void )
 
 	m_hOwner = Instance( pev->owner );
 	pev->dmgtime = gpGlobals->time;
+
+	SetMaxFrame();
 }
 
 void CControllerHeadBall::Precache( void )
 {
-	PRECACHE_MODEL( "sprites/xspark4.spr" );
+	RegisterVisual(headBallVisual);
+	RegisterVisual(headBallBeamVisual);
+	RegisterVisual(headBallLightVisual);
 	RegisterAndPrecacheSoundScript(electroSoundScript);
+	SetMaxFrame();
 }
 
 void CControllerHeadBall::HuntThink( void )
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-	pev->renderamt -= 5;
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_ELIGHT );
-		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_COORD( pev->origin.x );		// origin
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
-		WRITE_COORD( pev->renderamt / 16 );	// radius
-		WRITE_BYTE( 255 );	// R
-		WRITE_BYTE( 255 );	// G
-		WRITE_BYTE( 255 );	// B
-		WRITE_BYTE( 2 );	// life * 10
-		WRITE_COORD( 0 ); // decay
-	MESSAGE_END();
+	pev->renderamt -= 5;
 
 	// check world boundaries
 	if( gpGlobals->time - pev->dmgtime > 5 || pev->renderamt < 64 || m_hEnemy == 0 || m_hOwner == 0 || pev->origin.x < -4096 || pev->origin.x > 4096 || pev->origin.y < -4096 || pev->origin.y > 4096 || pev->origin.z < -4096 || pev->origin.z > 4096 )
@@ -1237,6 +1282,17 @@ void CControllerHeadBall::HuntThink( void )
 		UTIL_Remove( this );
 		return;
 	}
+
+	const Visual* visual = GetVisual(headBallLightVisual);
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_ELIGHT );
+		WRITE_SHORT( entindex() );		// entity, attachment
+		WRITE_VECTOR( pev->origin );		// origin
+		WRITE_COORD( pev->renderamt / 16 );	// radius
+		WRITE_COLOR( visual->rendercolor );
+		WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );	// life * 10
+		WRITE_COORD( 0 ); // decay
+	MESSAGE_END();
 
 	MovetoTarget( m_hEnemy->Center() );
 
@@ -1252,25 +1308,7 @@ void CControllerHeadBall::HuntThink( void )
 			pEntity->ApplyTraceAttack(pev, m_hOwner->pev, gSkillData.controllerDmgZap, pev->velocity, &tr, DMG_SHOCK);
 		}
 
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_BEAMENTPOINT );
-			WRITE_SHORT( entindex() );
-			WRITE_COORD( tr.vecEndPos.x );
-			WRITE_COORD( tr.vecEndPos.y );
-			WRITE_COORD( tr.vecEndPos.z );
-			WRITE_SHORT( g_sModelIndexLaser );
-			WRITE_BYTE( 0 ); // frame start
-			WRITE_BYTE( 10 ); // framerate
-			WRITE_BYTE( 3 ); // life
-			WRITE_BYTE( 20 );  // width
-			WRITE_BYTE( 0 );   // noise
-			WRITE_BYTE( 255 );   // r, g, b
-			WRITE_BYTE( 255 );   // r, g, b
-			WRITE_BYTE( 255 );   // r, g, b
-			WRITE_BYTE( 255 );	// brightness
-			WRITE_BYTE( 10 );		// speed
-		MESSAGE_END();
-
+		MakeTraceBeam(tr.vecEndPos);
 		EmitSoundScriptAmbient(tr.vecEndPos, electroSoundScript);
 
 		m_flNextAttack = gpGlobals->time + 3.0f;
@@ -1310,24 +1348,21 @@ void CControllerHeadBall::Crawl( void )
 	Vector vecAim = Vector( RANDOM_FLOAT( -1.0f, 1.0f ), RANDOM_FLOAT( -1.0f, 1.0f ), RANDOM_FLOAT( -1.0f, 1.0f ) ).Normalize();
 	Vector vecPnt = pev->origin + pev->velocity * 0.3f + vecAim * 64.0f;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMENTPOINT );
-		WRITE_SHORT( entindex() );
-		WRITE_COORD( vecPnt.x );
-		WRITE_COORD( vecPnt.y );
-		WRITE_COORD( vecPnt.z );
-		WRITE_SHORT( g_sModelIndexLaser );
-		WRITE_BYTE( 0 ); // frame start
-		WRITE_BYTE( 10 ); // framerate
-		WRITE_BYTE( 3 ); // life
-		WRITE_BYTE( 20 );  // width
-		WRITE_BYTE( 0 );   // noise
-		WRITE_BYTE( 255 );   // r, g, b
-		WRITE_BYTE( 255 );   // r, g, b
-		WRITE_BYTE( 255 );   // r, g, b
-		WRITE_BYTE( 255 );	// brightness
-		WRITE_BYTE( 10 );		// speed
-	MESSAGE_END();
+	MakeTraceBeam(vecPnt);
+}
+
+void CControllerHeadBall::MakeTraceBeam(const Vector &vecSrc)
+{
+	const Visual* visual = GetVisual(headBallBeamVisual);
+	if (visual->modelIndex)
+	{
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_BEAMENTPOINT );
+			WRITE_SHORT( entindex() );
+			WRITE_VECTOR( vecSrc );
+			WriteBeamVisual(visual);
+		MESSAGE_END();
+	}
 }
 
 void CControllerHeadBall::BounceTouch( CBaseEntity *pOther )
@@ -1357,6 +1392,16 @@ class CControllerZapBall : public CBaseMonster
 	static TYPEDESCRIPTION m_SaveData[];
 
 	static const NamedSoundScript electroSoundScript;
+	static const NamedVisual zapBallVisual;
+
+private:
+	int m_maxFrame; // don't save
+	void SetMaxFrame() {
+		if (pev->modelindex)
+		{
+			m_maxFrame = MODEL_FRAMES(pev->modelindex) - 1;
+		}
+	}
 };
 
 LINK_ENTITY_TO_CLASS( controller_energy_ball, CControllerZapBall )
@@ -1377,6 +1422,11 @@ const NamedSoundScript CControllerZapBall::electroSoundScript = {
 	"Controller.ZapElectro"
 };
 
+const NamedVisual CControllerZapBall::zapBallVisual = BuildVisual::Animated("Controller.ZapBall")
+		.RenderMode(kRenderTransAdd)
+		.Scale(0.5f)
+		.Mixin(&sharedEnergyBallVisual);
+
 void CControllerZapBall::Spawn( void )
 {
 	Precache();
@@ -1384,13 +1434,7 @@ void CControllerZapBall::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "sprites/xspark4.spr" );
-	pev->rendermode = kRenderTransAdd;
-	pev->rendercolor.x = 255;
-	pev->rendercolor.y = 255;
-	pev->rendercolor.z = 255;
-	pev->renderamt = 255;
-	pev->scale = 0.5f;
+	ApplyVisualToEntity(this, GetVisual(zapBallVisual));
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
@@ -1401,19 +1445,22 @@ void CControllerZapBall::Spawn( void )
 	m_hOwner = Instance( pev->owner );
 	pev->dmgtime = gpGlobals->time; // keep track of when ball spawned
 	pev->nextthink = gpGlobals->time + 0.1f;
+
+	SetMaxFrame();
 }
 
 void CControllerZapBall::Precache( void )
 {
-	PRECACHE_MODEL( "sprites/xspark4.spr" );
+	RegisterVisual(zapBallVisual);
 	RegisterAndPrecacheSoundScript(electroSoundScript);
+	SetMaxFrame();
 }
 
 void CControllerZapBall::AnimateThink( void )
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
 
-	pev->frame = ( (int)pev->frame + 1 ) % 11;
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 
 	if( gpGlobals->time - pev->dmgtime > 5 || pev->velocity.Length() < 10.0f )
 	{
@@ -1509,9 +1556,36 @@ public:
 	float RespawnTime() const {
 		return pev->dmg_take > 0 ? pev->dmg_take : gSkillData.zaptrapRespawnTime;
 	}
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+	static TYPEDESCRIPTION m_SaveData[];
+
+	static const NamedVisual zapBallVisual;
+
+private:
+	int m_maxFrame;
+	float m_lastTime;
+	void SetMaxFrame() {
+		if (pev->modelindex)
+		{
+			m_maxFrame = MODEL_FRAMES(pev->modelindex) - 1;
+		}
+	}
 };
 
 LINK_ENTITY_TO_CLASS( env_energy_ball_trap, CZapBallTrap )
+
+TYPEDESCRIPTION	CZapBallTrap::m_SaveData[] =
+{
+	DEFINE_FIELD( CZapBallTrap, m_lastTime, FIELD_TIME ),
+};
+
+IMPLEMENT_SAVERESTORE( CZapBallTrap, CBaseEntity )
+
+const NamedVisual CZapBallTrap::zapBallVisual = BuildVisual::Animated("ZapTrap.EnergyBall")
+		.RenderMode(kRenderTransAdd)
+		.Mixin(&sharedEnergyBallVisual);
 
 void CZapBallTrap::KeyValue( KeyValueData *pkvd )
 {
@@ -1534,6 +1608,8 @@ void CZapBallTrap::Precache()
 	UTIL_PrecacheOther("controller_head_ball");
 	PRECACHE_SOUND(ZAPBALLTRAP_DETECT_SOUND);
 	PRECACHE_SOUND(ZAPBALLTRAP_LAUNCH_SOUND);
+
+	SetMaxFrame();
 }
 
 void CZapBallTrap::Spawn()
@@ -1543,11 +1619,7 @@ void CZapBallTrap::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT;
 
-	SET_MODEL(ENT( pev ), "sprites/xspark4.spr" );
-	pev->rendermode = kRenderTransAdd;
-	pev->rendercolor.x = 255;
-	pev->rendercolor.y = 255;
-	pev->rendercolor.z = 255;
+	ApplyVisualToEntity(this, zapBallVisual);
 
 	UTIL_SetSize(pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
@@ -1561,6 +1633,8 @@ void CZapBallTrap::Spawn()
 		pev->effects |= EF_NODRAW;
 		SetUse(&CZapBallTrap::EnableUse);
 	}
+
+	SetMaxFrame();
 }
 
 void CZapBallTrap::EnableUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -1574,7 +1648,7 @@ void CZapBallTrap::EnableUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 
 void CZapBallTrap::Animate()
 {
-	pev->frame = ( (int)pev->frame + 1 ) % 11;
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate, &m_lastTime);
 }
 
 void CZapBallTrap::DetectThink()
@@ -1633,6 +1707,7 @@ void CZapBallTrap::Materialize()
 	pev->frame = 0;
 	SetThink( &CZapBallTrap::DetectThink );
 	pev->nextthink = gpGlobals->time + 0.1f;
+	m_lastTime = gpGlobals->time;
 }
 
 bool CZapBallTrap::IncreaseAwareness(CBaseEntity *pTarget, int value)

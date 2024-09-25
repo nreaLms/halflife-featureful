@@ -25,6 +25,7 @@ LINK_ENTITY_TO_CLASS( weapon_rpg, CRpg )
 #if !CLIENT_DLL
 #include "gamerules.h"
 #include "rpgrocket.h"
+#include "visuals_utils.h"
 
 LINK_ENTITY_TO_CLASS( laser_spot, CLaserSpot )
 
@@ -117,6 +118,13 @@ const NamedSoundScript CRpgRocket::rocketIgniteSoundScript = {
 	"RPG.RocketIgnite"
 };
 
+const NamedVisual CRpgRocket::trailVisual = BuildVisual("RPG.Trail")
+		.Model("sprites/smoke.spr")
+		.Life(4)
+		.BeamWidth(5)
+		.RenderColor(224, 224, 255)
+		.Alpha(255);
+
 //=========================================================
 //=========================================================
 CRpgRocket *CRpgRocket::CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBaseEntity *pOwner, CRpg *pLauncher )
@@ -204,7 +212,7 @@ void CRpgRocket::Precache( void )
 {
 	PrecacheBaseGrenadeSounds();
 	PRECACHE_MODEL( "models/rpgrocket.mdl" );
-	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
+	RegisterVisual(trailVisual);
 	RegisterAndPrecacheSoundScript(rocketIgniteSoundScript);
 }
 
@@ -219,17 +227,15 @@ void CRpgRocket::IgniteThink( void )
 	EmitSoundScript(rocketIgniteSoundScript);
 
 	// rocket trail
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMFOLLOW );
-		WRITE_SHORT( entindex() );	// entity
-		WRITE_SHORT( m_iTrail );	// model
-		WRITE_BYTE( 40 ); // life
-		WRITE_BYTE( 5 );  // width
-		WRITE_BYTE( 224 );   // r, g, b
-		WRITE_BYTE( 224 );   // r, g, b
-		WRITE_BYTE( 255 );   // r, g, b
-		WRITE_BYTE( 255 );	// brightness
-	MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+	const Visual* visual = GetVisual(trailVisual);
+	if (visual->modelIndex)
+	{
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_BEAMFOLLOW );
+			WRITE_SHORT( entindex() );	// entity
+			WriteBeamFollowVisual( visual );
+		MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+	}
 
 	m_flIgniteTime = gpGlobals->time;
 

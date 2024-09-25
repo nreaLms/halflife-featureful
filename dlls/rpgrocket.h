@@ -20,11 +20,12 @@ public:
 	void Explode( TraceResult *pTrace, int bitsDamageType );
 	inline CRpg *GetLauncher( void );
 
-	int m_iTrail;
 	float m_flIgniteTime;
 	EHANDLE m_hLauncher; // handle back to the launcher that fired me.
 
 	static const NamedSoundScript rocketIgniteSoundScript;
+
+	static const NamedVisual trailVisual;
 };
 
 #endif

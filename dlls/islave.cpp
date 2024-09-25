@@ -29,6 +29,7 @@
 #include	"mod_features.h"
 #include	"game.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
 
 #define bits_MEMORY_ISLAVE_PROVOKED bits_MEMORY_CUSTOM1
 #define bits_MEMORY_ISLAVE_REVIVED bits_MEMORY_CUSTOM2
@@ -79,21 +80,13 @@ enum
 
 #define ISLAVE_HAND_SPRITE_NAME "sprites/glow02.spr"
 
-#define ISLAVE_ZAP_RED 180
-#define ISLAVE_ZAP_GREEN 255
-#define ISLAVE_ZAP_BLUE 96
+constexpr Color VortigauntZapBeamColor = Color(180, 255, 96);
+constexpr Color VortigauntZapBeamLeaderColor = Color(150, 255, 120);
 
-#define ISLAVE_LEADER_ZAP_RED 150
-#define ISLAVE_LEADER_ZAP_GREEN 255
-#define ISLAVE_LEADER_ZAP_BLUE 120
+constexpr Color VortigauntArmBeamColor = Color(96, 128, 16);
+constexpr Color VortigauntArmBeamLeaderColor = Color(72, 180, 72);
 
-#define ISLAVE_ARMBEAM_RED 96
-#define ISLAVE_ARMBEAM_GREEN 128
-#define ISLAVE_ARMBEAM_BLUE 16
-
-#define ISLAVE_LEADER_ARMBEAM_RED 72
-#define ISLAVE_LEADER_ARMBEAM_GREEN 180
-#define ISLAVE_LEADER_ARMBEAM_BLUE 72
+constexpr Color VortigauntBeamLightColor = Color(255, 180, 96);
 
 #define ISLAVE_LIGHT_RED 255
 #define ISLAVE_LIGHT_GREEN 180
@@ -180,6 +173,9 @@ public:
 	EHANDLE m_hTarget;
 
 	static const NamedSoundScript suitOnSoundScript;
+
+	static const NamedVisual tokenVisual;
+	static const NamedVisual tokenLightVisual;
 };
 
 LINK_ENTITY_TO_CLASS( charge_token, CChargeToken )
@@ -199,13 +195,20 @@ const NamedSoundScript CChargeToken::suitOnSoundScript = {
 	"Vortigaunt.SuitOn"
 };
 
+const NamedVisual CChargeToken::tokenVisual = BuildVisual::Animated("Vortigaunt.ChargeToken")
+		.Model("sprites/xspark1.spr")
+		.RenderProps(kRenderTransAdd, Color(255, 255, 255), 225);
+
+const NamedVisual CChargeToken::tokenLightVisual = BuildVisual("Vortigaunt.ChargeTokenLight")
+		.RenderColor(0, 255, 255)
+		.Radius(30);
+
 void CChargeToken::Spawn()
 {
 	pev->classname = MAKE_STRING("charge_token");
 	Precache();
-	SET_MODEL( ENT(pev), "sprites/xspark1.spr" );
-	pev->rendermode = kRenderTransAdd;
-	pev->renderamt = 225;
+
+	ApplyVisualToEntity(this, GetVisual(tokenVisual));
 
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT;
@@ -222,7 +225,8 @@ void CChargeToken::Spawn()
 
 void CChargeToken::Precache()
 {
-	PRECACHE_MODEL("sprites/xspark1.spr");
+	RegisterVisual(tokenVisual);
+	RegisterVisual(tokenLightVisual);
 	RegisterAndPrecacheSoundScript(suitOnSoundScript);
 }
 
@@ -253,13 +257,7 @@ void CChargeToken::AnimateThink()
 
 void CChargeToken::Animate()
 {
-	if( pev->frame++ )
-	{
-		if( pev->frame > pev->frags )
-		{
-			pev->frame = 0;
-		}
-	}
+	pev->frame = AnimateWithFramerate(pev->frame, pev->frags, pev->framerate);
 }
 
 void CChargeToken::HuntThink()
@@ -339,16 +337,14 @@ void CChargeToken::Launch(CBaseEntity* pTarget, const Vector& pos)
 
 void CChargeToken::MakeEntLight(int timeDs)
 {
+	const Visual* visual = GetVisual(tokenLightVisual);
+
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_ELIGHT );
 		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_COORD( pev->origin.x );		// origin
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
-		WRITE_COORD( pev->renderamt / 8 );	// radius
-		WRITE_BYTE( 0 );	// R
-		WRITE_BYTE( 255 );	// G
-		WRITE_BYTE( 255 );	// B
+		WRITE_VECTOR( pev->origin );		// origin
+		WRITE_COORD( RandomizeNumberFromRange(visual->radius) * pev->renderamt / 225 );	// radius
+		WRITE_COLOR( visual->rendercolor );
 		WRITE_BYTE( timeDs );	// life * 10
 		WRITE_COORD( 0 ); // decay
 	MESSAGE_END();
@@ -428,7 +424,7 @@ public:
 	void RemoveHandGlows();
 	void RemoveChargeToken();
 	void CoilBeam();
-	void MakeDynamicLight(const Vector& vecSrc, int radius, int t);
+	void MakeDynamicLight(const Vector& vecSrc, const char* visualName, int t);
 
 	Vector HandPosition(int side);
 
@@ -447,9 +443,6 @@ public:
 	bool CanRevive();
 	int HealOther(CBaseEntity* pEntity);
 	bool CanSpawnFamiliar();
-
-	Vector GetZapColor();
-	Vector GetArmBeamColor(int& brightness);
 
 	inline int AttachmentFromSide(int side) {
 		return side < 0 ? 2 : 1;
@@ -525,9 +518,6 @@ public:
 
 	CChargeToken* m_chargeToken;
 
-	int m_iLightningTexture;
-	int m_iTrailTexture;
-
 	static const NamedSoundScript painSoundScript;
 	static const NamedSoundScript dieSoundScript;
 	static constexpr const char* attackHitSoundScript = "Vortigaunt.AttackHit";
@@ -539,6 +529,25 @@ public:
 	static const NamedSoundScript idleZapSoundScript;
 	static const NamedSoundScript summonStartSoundScript;
 	static const NamedSoundScript summonEndSoundScript;
+
+	static const NamedVisual zapBeamColorVisual;
+	static const NamedVisual armBeamColorVisual;
+	static const NamedVisual beamLightColorVisual;
+
+	static const NamedVisual zapBeamVisual;
+	static const NamedVisual powerupBeamVisual;
+	static const NamedVisual revivalBeamVisual;
+	static const NamedVisual summonBeamVisual;
+	static const NamedVisual idleBeamVisual;
+	static const NamedVisual coilBeamVisual;
+	static const NamedVisual trailBeamVisual;
+
+	static const NamedVisual summonSpriteVisual;
+	static const NamedVisual handGlowVisual;
+
+	static const NamedVisual powerupLightVisual;
+	static const NamedVisual idleLightVisual;
+	static const NamedVisual summonLightVisual;
 };
 
 LINK_ENTITY_TO_CLASS( monster_alien_slave, CISlave )
@@ -639,6 +648,87 @@ const NamedSoundScript CISlave::summonEndSoundScript = {
 	"Vortigaunt.SummonEnd",
 };
 
+const NamedVisual CISlave::zapBeamColorVisual = BuildVisual("Vortigaunt.ZapBeamColor")
+		.RenderColor(VortigauntZapBeamColor);
+
+const NamedVisual CISlave::armBeamColorVisual = BuildVisual("Vortigaunt.ArmBeamColor")
+		.RenderColor(VortigauntArmBeamColor);
+
+const NamedVisual CISlave::beamLightColorVisual = BuildVisual("Vortigaunt.BeamLightColor")
+		.RenderColor(VortigauntBeamLightColor);
+
+const NamedVisual CISlave::zapBeamVisual = BuildVisual("Vortigaunt.ZapBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(255)
+		.BeamParams(50, 20)
+		.Mixin(&CISlave::zapBeamColorVisual);
+
+const NamedVisual CISlave::powerupBeamVisual = BuildVisual("Vortigaunt.PowerupBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(64)
+		.BeamParams(30, 80)
+		.Mixin(&CISlave::armBeamColorVisual);
+
+const NamedVisual CISlave::revivalBeamVisual = BuildVisual("Vortigaunt.RevivalBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(255)
+		.BeamParams(30, 80)
+		.Mixin(&CISlave::zapBeamColorVisual);
+
+const NamedVisual CISlave::summonBeamVisual = BuildVisual("Vortigaunt.SummonBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(192)
+		.BeamParams(30, 80)
+		.Mixin(&CISlave::zapBeamColorVisual);
+
+const NamedVisual CISlave::idleBeamVisual = BuildVisual("Vortigaunt.IdleBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(64)
+		.Framerate(10.0f)
+		.BeamParams(30, 80, 10)
+		.Life(FloatRange(0.8f, 1.5f))
+		.Mixin(&CISlave::armBeamColorVisual);
+
+const NamedVisual CISlave::coilBeamVisual = BuildVisual("Vortigaunt.CoilBeam")
+		.Model("sprites/lgtning.spr")
+		.Alpha(255)
+		.Framerate(10.0f)
+		.BeamParams(128, 20)
+		.Life(0.2f)
+		.Mixin(&CISlave::zapBeamColorVisual);
+
+const NamedVisual CISlave::trailBeamVisual = BuildVisual("Vortigaunt.MeleeTrailBeam")
+		.Model("sprites/plasma.spr")
+		.Alpha(128)
+		.BeamParams(3, 0)
+		.Life(0.5f)
+		.Mixin(&CISlave::armBeamColorVisual);
+
+const NamedVisual CISlave::summonSpriteVisual = BuildVisual("Vortigaunt.SummonSprite")
+		.Model("sprites/bexplo.spr")
+		.RenderProps(kRenderTransAdd, VortigauntArmBeamColor, 255, kRenderFxNoDissipation)
+		.Framerate(20.0f);
+
+const NamedVisual CISlave::handGlowVisual = BuildVisual("Vortigaunt.HandGlow")
+		.Model("sprites/glow02.spr")
+		.RenderMode(kRenderTransAdd)
+		.Alpha(224)
+		.RenderFx(kRenderFxNoDissipation)
+		.Scale(0.25f)
+		.Mixin(&CISlave::zapBeamColorVisual);
+
+const NamedVisual CISlave::powerupLightVisual = BuildVisual("Vortigaunt.PowerupLight")
+		.Radius(120)
+		.Mixin(&CISlave::beamLightColorVisual);
+
+const NamedVisual CISlave::idleLightVisual = BuildVisual("Vortigaunt.IdleLight")
+		.Radius(80)
+		.Mixin(&CISlave::beamLightColorVisual);
+
+const NamedVisual CISlave::summonLightVisual = BuildVisual("Vortigaunt.SummonLight")
+		.Radius(100)
+		.Mixin(&CISlave::beamLightColorVisual);
+
 //=========================================================
 // Classify - indicates this monster's place in the 
 // relationship table.
@@ -714,7 +804,7 @@ void CISlave::IdleSound( void )
 
 		UTIL_MakeAimVectors( pev->angles );
 		Vector vecSrc = pev->origin + gpGlobals->v_right * 2 * side;
-		MakeDynamicLight(vecSrc, 8, 10);
+		MakeDynamicLight(vecSrc, idleLightVisual, 10);
 
 		EmitSoundScript(idleZapSoundScript);
 	}
@@ -864,7 +954,7 @@ void CISlave::HandleAnimEvent( MonsterEvent_t *pEvent )
 			if( m_iBeams == 0 )
 			{
 				Vector vecSrc = pev->origin + gpGlobals->v_forward * 2;
-				MakeDynamicLight(vecSrc, 12, (int)(20/pev->framerate));
+				MakeDynamicLight(vecSrc, powerupLightVisual, (int)(20/pev->framerate));
 			}
 			if( CanRevive() )
 			{
@@ -1135,7 +1225,7 @@ void CISlave::StartTask( Task_t *pTask )
 			EmitSoundScript(summonStartSoundScript);
 			UTIL_MakeAimVectors( pev->angles );
 			Vector vecSrc = pev->origin + gpGlobals->v_forward * 8;
-			MakeDynamicLight(vecSrc, 10, 15);
+			MakeDynamicLight(vecSrc, summonLightVisual, 15);
 			HandsGlowOn();
 			CreateSummonBeams();
 		}
@@ -1272,12 +1362,7 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 			CBaseMonster *pNewMonster = pNew->MyMonsterPointer( );
 
 			Remember(bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE);
-			CSprite *pSpr = CSprite::SpriteCreate( ISLAVE_SPAWNFAMILIAR_SPRITE, origin, TRUE, SF_SPRITE_ONCE_AND_REMOVE );
-			if (pSpr)
-			{
-				pSpr->pev->framerate = 20.0f;
-				pSpr->SetTransparency( kRenderTransAdd, ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE, 255, kRenderFxNoDissipation );
-			}
+			CreateSpriteFromVisual(GetVisual(summonSpriteVisual), origin, SF_SPRITE_ONCE_AND_REMOVE);
 			EmitSoundScript(summonEndSoundScript);
 
 			SetBits( pNew->pev->spawnflags, SF_MONSTER_FALL_TO_GROUND );
@@ -1297,9 +1382,8 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 
 CSprite* CISlave::CreateHandGlow(int attachment)
 {
-	CSprite* handSprite = CSprite::SpriteCreate( ISLAVE_HAND_SPRITE_NAME, pev->origin, FALSE );
+	CSprite* handSprite = CreateSpriteFromVisual(GetVisual(handGlowVisual), pev->origin);
 	handSprite->SetAttachment( edict(), attachment );
-	handSprite->SetScale(0.25);
 	return handSprite;
 }
 
@@ -1350,8 +1434,18 @@ void CISlave::Spawn()
 //=========================================================
 void CISlave::Precache()
 {
-	m_iLightningTexture = PRECACHE_MODEL( "sprites/lgtning.spr" );
-	m_iTrailTexture = PRECACHE_MODEL( "sprites/plasma.spr" );
+	RegisterVisual(zapBeamVisual);
+	RegisterVisual(powerupBeamVisual);
+	RegisterVisual(revivalBeamVisual);
+	RegisterVisual(summonBeamVisual);
+
+	RegisterVisual(idleBeamVisual);
+	RegisterVisual(coilBeamVisual);
+	RegisterVisual(trailBeamVisual);
+
+	RegisterVisual(powerupLightVisual);
+	RegisterVisual(idleLightVisual);
+	RegisterVisual(summonLightVisual);
 
 	PrecacheMyModel( "models/islave.mdl" );
 
@@ -1375,12 +1469,12 @@ void CISlave::Precache()
 	UTIL_PrecacheOther( "test_effect" );
 
 #if FEATURE_ISLAVE_HANDGLOW
-	PRECACHE_MODEL( ISLAVE_HAND_SPRITE_NAME );
+	RegisterVisual(handGlowVisual);
 	if (g_modFeatures.vortigaunt_arm_boost)
 		RegisterAndPrecacheSoundScript(glowAlarmSoundScript);
 #endif
 #if FEATURE_ISLAVE_FAMILIAR
-	PRECACHE_MODEL( ISLAVE_SPAWNFAMILIAR_SPRITE );
+	RegisterVisual(summonSpriteVisual);
 	UTIL_PrecacheOther( "monster_snark" );
 	UTIL_PrecacheOther( "monster_headcrab" );
 #endif
@@ -1745,18 +1839,12 @@ void CISlave::ArmBeam( int side )
 
 	DecalGunshot( &tr, BULLET_PLAYER_CROWBAR );
 
-	m_pBeam[m_iBeams] = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
+	m_pBeam[m_iBeams] = CreateBeamFromVisual(GetVisual(powerupBeamVisual));
 	if( !m_pBeam[m_iBeams] )
 		return;
 
-	int brightness;
-	const Vector armBeamColor = GetArmBeamColor(brightness);
 	m_pBeam[m_iBeams]->PointEntInit( tr.vecEndPos, entindex() );
 	m_pBeam[m_iBeams]->SetEndAttachment( AttachmentFromSide(side) );
-	// m_pBeam[m_iBeams]->SetColor( 180, 255, 96 );
-	m_pBeam[m_iBeams]->SetColor( armBeamColor.x, armBeamColor.y, armBeamColor.z );
-	m_pBeam[m_iBeams]->SetBrightness( brightness );
-	m_pBeam[m_iBeams]->SetNoise( 80 );
 	m_pBeam[m_iBeams]->pev->spawnflags |= SF_BEAM_TEMPORARY; // Flag these to be destroyed on save/restore or level transition
 	m_iBeams++;
 }
@@ -1785,26 +1873,16 @@ void CISlave::ArmBeamMessage( int side )
 	if( flDist == 1.0 )
 		return;
 
-	int brightness;
-	const Vector armBeamColor = GetArmBeamColor(brightness);
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
-		WRITE_BYTE( TE_BEAMENTPOINT );
-		WRITE_SHORT( entindex() + 0x1000 * (AttachmentFromSide(side)) );
-		WRITE_COORD( tr.vecEndPos.x );
-		WRITE_COORD( tr.vecEndPos.y );
-		WRITE_COORD( tr.vecEndPos.z );
-		WRITE_SHORT( m_iLightningTexture );
-		WRITE_BYTE( 0 ); // framestart
-		WRITE_BYTE( 10 ); // framerate
-		WRITE_BYTE( (int)(10*RANDOM_FLOAT( 0.8, 1.5 )) ); // life
-		WRITE_BYTE( 30 );  // width
-		WRITE_BYTE( 80 );   // noise
-		WRITE_BYTE( armBeamColor.x );   // r, g, b
-		WRITE_BYTE( armBeamColor.y );   // r, g, b
-		WRITE_BYTE( armBeamColor.z );   // r, g, b
-		WRITE_BYTE( brightness );	// brightness
-		WRITE_BYTE( 10 );		// speed
-	MESSAGE_END();
+	const Visual* visual = GetVisual(idleBeamVisual);
+	if (visual->modelIndex)
+	{
+		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
+			WRITE_BYTE( TE_BEAMENTPOINT );
+			WRITE_SHORT( entindex() + 0x1000 * (AttachmentFromSide(side)) );
+			WRITE_VECTOR( tr.vecEndPos );
+			WriteBeamVisual(visual);
+		MESSAGE_END();
+	}
 }
 
 //=========================================================
@@ -1841,16 +1919,12 @@ void CISlave::WackBeam( int side, CBaseEntity *pEntity )
 	if( pEntity == NULL )
 		return;
 
-	m_pBeam[m_iBeams] = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
+	m_pBeam[m_iBeams] = CreateBeamFromVisual(GetVisual(revivalBeamVisual));
 	if( !m_pBeam[m_iBeams] )
 		return;
 
-	Vector zapColor = GetZapColor();
 	m_pBeam[m_iBeams]->PointEntInit( pEntity->Center(), entindex() );
 	m_pBeam[m_iBeams]->SetEndAttachment( AttachmentFromSide(side) );
-	m_pBeam[m_iBeams]->SetColor( zapColor.x, zapColor.y, zapColor.z );
-	m_pBeam[m_iBeams]->SetBrightness( 255 );
-	m_pBeam[m_iBeams]->SetNoise( 80 );
 	m_pBeam[m_iBeams]->pev->spawnflags |= SF_BEAM_TEMPORARY; // Flag these to be destroyed on save/restore or level transition
 	m_iBeams++;
 }
@@ -1882,16 +1956,12 @@ CBaseEntity *CISlave::ZapBeam( int side )
 	vecAim = vecAim + side * gpGlobals->v_right * RANDOM_FLOAT( 0, deflection ) + gpGlobals->v_up * RANDOM_FLOAT( -deflection, deflection );
 	UTIL_TraceLine( vecSrc, vecSrc + vecAim * 1024, dont_ignore_monsters, ENT( pev ), &tr );
 
-	m_pBeam[m_iBeams] = CBeam::BeamCreate( "sprites/lgtning.spr", 50 );
+	m_pBeam[m_iBeams] = CreateBeamFromVisual(GetVisual(zapBeamVisual));
 	if( !m_pBeam[m_iBeams] )
 		return NULL;
 
-	const Vector zapColor = GetZapColor();
 	m_pBeam[m_iBeams]->PointEntInit( tr.vecEndPos, entindex() );
 	m_pBeam[m_iBeams]->SetEndAttachment( AttachmentFromSide(side) );
-	m_pBeam[m_iBeams]->SetColor( zapColor.x, zapColor.y, zapColor.z );
-	m_pBeam[m_iBeams]->SetBrightness( 255 );
-	m_pBeam[m_iBeams]->SetNoise( 20 );
 	m_pBeam[m_iBeams]->pev->spawnflags |= SF_BEAM_TEMPORARY; // Flag these to be destroyed on save/restore or level transition
 	m_iBeams++;
 
@@ -1953,8 +2023,11 @@ void CISlave::ClearBeams()
 
 void CISlave::CoilBeam()
 {
-	Vector zapColor = GetZapColor();
-	
+	const Visual* visual = GetVisual(coilBeamVisual);
+
+	if (!visual->modelIndex)
+		return;
+
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMCYLINDER );
 		WRITE_COORD( pev->origin.x );
@@ -1962,22 +2035,10 @@ void CISlave::CoilBeam()
 		WRITE_COORD( pev->origin.z + 16 );
 		WRITE_COORD( pev->origin.x );
 		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 16 + ISLAVE_COIL_ATTACK_RADIUS*5 ); 
-		WRITE_SHORT( m_iLightningTexture );
-		WRITE_BYTE( 0 ); // startframe
-		WRITE_BYTE( 10 ); // framerate
-		WRITE_BYTE( 2 ); // life
-		WRITE_BYTE( 128 );  // width
-		WRITE_BYTE( 20 );   // noise
-
-		WRITE_BYTE( zapColor.x );
-		WRITE_BYTE( zapColor.y );
-		WRITE_BYTE( zapColor.z );
-
-		WRITE_BYTE( 255 ); //brightness
-		WRITE_BYTE( 0 );		// speed
+		WRITE_COORD( pev->origin.z + 16 + ISLAVE_COIL_ATTACK_RADIUS*5 );
+		WriteBeamVisual(visual);
 	MESSAGE_END();
-	
+
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMCYLINDER );
 		WRITE_COORD( pev->origin.x );
@@ -1985,34 +2046,20 @@ void CISlave::CoilBeam()
 		WRITE_COORD( pev->origin.z + 48 );
 		WRITE_COORD( pev->origin.x );
 		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 48 + ISLAVE_COIL_ATTACK_RADIUS*2 ); 
-		WRITE_SHORT( m_iLightningTexture );
-		WRITE_BYTE( 0 ); // startframe
-		WRITE_BYTE( 10 ); // framerate
-		WRITE_BYTE( 2 ); // life
-		WRITE_BYTE( 128 );  // width
-		WRITE_BYTE( 25 );   // noise
-
-		WRITE_BYTE( zapColor.x );
-		WRITE_BYTE( zapColor.y );
-		WRITE_BYTE( zapColor.z );
-
-		WRITE_BYTE( 255 ); //brightness
-		WRITE_BYTE( 0 );		// speed
+		WRITE_COORD( pev->origin.z + 48 + ISLAVE_COIL_ATTACK_RADIUS*2 );
+		WriteBeamVisual(visual);
 	MESSAGE_END();
 }
 
-void CISlave::MakeDynamicLight(const Vector &vecSrc, int radius, int t)
+void CISlave::MakeDynamicLight(const Vector &vecSrc, const char* visualName, int t)
 {
+	const Visual* visual = GetVisual(visualName);
+
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
 		WRITE_BYTE( TE_DLIGHT );
-		WRITE_COORD( vecSrc.x );	// X
-		WRITE_COORD( vecSrc.y );	// Y
-		WRITE_COORD( vecSrc.z );	// Z
-		WRITE_BYTE( radius );		// radius * 0.1
-		WRITE_BYTE( ISLAVE_LIGHT_RED );		// r
-		WRITE_BYTE( ISLAVE_LIGHT_GREEN);		// g
-		WRITE_BYTE( ISLAVE_LIGHT_BLUE );		// b
+		WRITE_VECTOR( vecSrc );
+		WRITE_BYTE( RandomizeNumberFromRange(visual->radius) * 0.1f );		// radius * 0.1
+		WRITE_COLOR( visual->rendercolor );
 		WRITE_BYTE( t );		// time * 10
 		WRITE_BYTE( 0 );		// decay * 0.1
 	MESSAGE_END();
@@ -2040,8 +2087,7 @@ void CISlave::HandsGlowOn(int brightness)
 void CISlave::HandGlowOn(CSprite *handGlow, int brightness)
 {
 	if (handGlow) {
-		Vector zapColor = GetZapColor();
-		handGlow->SetTransparency( kRenderTransAdd, zapColor.x, zapColor.y, zapColor.z, brightness, kRenderFxNoDissipation );
+		handGlow->SetBrightness(brightness);
 		UTIL_SetOrigin(handGlow->pev, pev->origin);
 		handGlow->SetScale(brightness / (float)255 * 0.3);
 		handGlow->pev->effects &= ~EF_NODRAW;
@@ -2052,18 +2098,15 @@ void CISlave::StartMeleeAttackGlow(int side)
 {
 	CSprite* handGlow = side == ISLAVE_LEFT_ARM ? m_handGlow2 : m_handGlow1;
 	HandGlowOn(handGlow);
-	int brightness;
-	const Vector armBeamColor = GetArmBeamColor(brightness);
+
+	const Visual* visual = GetVisual(trailBeamVisual);
+	if (!visual->modelIndex)
+		return;
+
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMFOLLOW );
 		WRITE_SHORT( entindex() + 0x1000 * (AttachmentFromSide(side)) );
-		WRITE_SHORT( m_iTrailTexture );
-		WRITE_BYTE( 5 ); // life
-		WRITE_BYTE( 3 );  // width
-		WRITE_BYTE( armBeamColor.x );   // r, g, b
-		WRITE_BYTE( armBeamColor.y );   // r, g, b
-		WRITE_BYTE( armBeamColor.z );   // r, g, b
-		WRITE_BYTE( 128 );	// brightness
+		WriteBeamFollowVisual( visual );
 	MESSAGE_END();
 }
 
@@ -2092,16 +2135,12 @@ void CISlave::CreateSummonBeams()
 
 CBeam* CISlave::CreateSummonBeam(const Vector& vecEnd, int attachment)
 {
-	CBeam* beam = CBeam::BeamCreate( "sprites/lgtning.spr", 30 );
+	CBeam* beam = CreateBeamFromVisual(GetVisual(summonBeamVisual));
 	if( !beam )
 		return beam;
 
-	Vector zapColor = GetZapColor();
 	beam->PointEntInit(vecEnd, entindex());
 	beam->SetEndAttachment(attachment);
-	beam->SetColor( zapColor.x, zapColor.y, zapColor.z );
-	beam->SetBrightness( 192 );
-	beam->SetNoise( 80 );
 	return beam;
 }
 
@@ -2172,28 +2211,6 @@ bool CISlave::CanSpawnFamiliar()
 	}
 #endif
 	return false;
-}
-
-Vector CISlave::GetZapColor()
-{
-#if FEATURE_ISLAVE_LEADER_COLOR
-	if (pev->spawnflags & SF_SQUADMONSTER_LEADER) {
-		return Vector(ISLAVE_LEADER_ZAP_RED, ISLAVE_LEADER_ZAP_GREEN, ISLAVE_LEADER_ZAP_BLUE);
-	}
-#endif
-	return Vector(ISLAVE_ZAP_RED, ISLAVE_ZAP_GREEN, ISLAVE_ZAP_BLUE);
-}
-
-Vector CISlave::GetArmBeamColor(int &brightness)
-{
-#if FEATURE_ISLAVE_LEADER_COLOR
-	if (pev->spawnflags & SF_SQUADMONSTER_LEADER) {
-		brightness = 128;
-		return Vector(ISLAVE_LEADER_ARMBEAM_RED, ISLAVE_LEADER_ARMBEAM_GREEN, ISLAVE_LEADER_ARMBEAM_BLUE);
-	}
-#endif
-	brightness = 64;
-	return Vector(ISLAVE_ARMBEAM_RED, ISLAVE_ARMBEAM_GREEN, ISLAVE_ARMBEAM_BLUE);
 }
 
 void CISlave::PlayUseSentence()

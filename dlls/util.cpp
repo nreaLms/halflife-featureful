@@ -171,6 +171,27 @@ void AddMapBSPAsPrecachedModel()
 	g_precachedModels.insert(buf);
 }
 
+void WRITE_COLOR(const Color& color)
+{
+	WRITE_BYTE( color.r );
+	WRITE_BYTE( color.g );
+	WRITE_BYTE( color.b );
+}
+
+void WRITE_COLOR(const Vector& color)
+{
+	WRITE_BYTE( color.x );
+	WRITE_BYTE( color.y );
+	WRITE_BYTE( color.z );
+}
+
+void WRITE_VECTOR(const Vector& vecSrc)
+{
+	WRITE_COORD( vecSrc.x );
+	WRITE_COORD( vecSrc.y );
+	WRITE_COORD( vecSrc.z );
+}
+
 void UTIL_DynamicLight( const Vector &vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay )
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );

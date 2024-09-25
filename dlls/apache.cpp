@@ -25,6 +25,7 @@
 #include "mod_features.h"
 #include "game.h"
 #include "common_soundscripts.h"
+#include "visuals_utils.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -322,9 +323,7 @@ void CApache::DyingThink( void )
 			WRITE_BYTE( TE_BREAKMODEL );
 
 			// position
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z );
+			WRITE_VECTOR( vecSpot );
 
 			// size
 			WRITE_COORD( 400 );
@@ -332,9 +331,7 @@ void CApache::DyingThink( void )
 			WRITE_COORD( 132 );
 
 			// velocity
-			WRITE_COORD( pev->velocity.x ); 
-			WRITE_COORD( pev->velocity.y );
-			WRITE_COORD( pev->velocity.z );
+			WRITE_VECTOR( pev->velocity );
 
 			// randomization
 			WRITE_BYTE( 50 ); 
@@ -854,9 +851,7 @@ void CApache::FireRocket( void )
 	{
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( vecSrc.x );
-			WRITE_COORD( vecSrc.y );
-			WRITE_COORD( vecSrc.z );
+			WRITE_VECTOR( vecSrc );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate
@@ -1049,10 +1044,11 @@ class CApacheHVR : public CGrenade
 	int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
-	int m_iTrail;
 	Vector m_vecForward;
 
 	static const NamedSoundScript rpgSoundScript;
+
+	static const NamedVisual trailVisual;
 };
 
 LINK_ENTITY_TO_CLASS( hvr_rocket, CApacheHVR )
@@ -1072,6 +1068,13 @@ const NamedSoundScript CApacheHVR::rpgSoundScript = {
 	0.5f,
 	"Apache.RPG"
 };
+
+const NamedVisual CApacheHVR::trailVisual = BuildVisual("Apache.RocketTrail")
+		.Model("sprites/smoke.spr")
+		.Life(1.5f)
+		.BeamWidth(5)
+		.RenderColor(224, 224, 255)
+		.Alpha(255);
 
 void CApacheHVR::Spawn( void )
 {
@@ -1100,7 +1103,7 @@ void CApacheHVR::Precache( void )
 {
 	PrecacheBaseGrenadeSounds();
 	PRECACHE_MODEL( "models/HVR.mdl" );
-	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
+	RegisterVisual(trailVisual);
 	RegisterAndPrecacheSoundScript(rpgSoundScript);
 }
 
@@ -1115,17 +1118,15 @@ void CApacheHVR::IgniteThink( void )
 	EmitSoundScript(rpgSoundScript);
 
 	// rocket trail
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMFOLLOW );
-		WRITE_SHORT( entindex() ); // entity
-		WRITE_SHORT( m_iTrail ); // model
-		WRITE_BYTE( 15 ); // life
-		WRITE_BYTE( 5 );  // width
-		WRITE_BYTE( 224 );   // r, g, b
-		WRITE_BYTE( 224 );   // r, g, b
-		WRITE_BYTE( 255 );   // r, g, b
-		WRITE_BYTE( 255 );	// brightness
-	MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+	const Visual* visual = GetVisual(trailVisual);
+	if (visual->modelIndex)
+	{
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_BEAMFOLLOW );
+			WRITE_SHORT( entindex() ); // entity
+			WriteBeamFollowVisual(visual);
+		MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+	}
 
 	// set to accelerate
 	SetThink( &CApacheHVR::AccelerateThink );

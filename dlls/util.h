@@ -64,6 +64,10 @@ extern void ReportPrecachedModels();
 extern void ReportPrecachedSounds();
 extern void AddMapBSPAsPrecachedModel();
 
+extern void WRITE_COLOR(const Color& color);
+extern void WRITE_COLOR(const Vector& color);
+extern void WRITE_VECTOR(const Vector& vecSrc);
+
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
 {
 	return FIND_ENTITY_BY_STRING(entStart, "classname", pszName);

@@ -24,6 +24,7 @@
 #include "ammo_amounts.h"
 #include "inventory.h"
 #include "soundscripts.h"
+#include "visuals.h"
 #include "followers.h"
 #include "savetitles.h"
 #include "vcs_info.h"
@@ -1408,6 +1409,7 @@ void GameDLLInit( void )
 	LoadWarpballTemplates();
 	ReadInventorySpec();
 	ReadSoundScripts();
+	ReadVisuals();
 	ReadFollowersDescription();
 	ReadSaveTitles();
 
@@ -2038,6 +2040,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("dump_precached_sounds", ReportPrecachedSounds);
 	g_engfuncs.pfnAddServerCommand("dump_sound_replacements", ReportSoundReplacements);
 	g_engfuncs.pfnAddServerCommand("dump_soundscripts", DumpSoundScripts);
+	g_engfuncs.pfnAddServerCommand("dump_visuals", DumpVisuals);
 }
 
 bool ItemsPickableByTouch()

@@ -184,6 +184,8 @@ set (SVDLL_SOURCES
 	uzi.cpp
 	util.cpp
 	vehicle.cpp
+	visuals.cpp
+	visuals_utils.cpp
 	voltigore.cpp
 	warpball.cpp
 	weapons.cpp

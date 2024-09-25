@@ -29,14 +29,19 @@
 #include	"game.h"
 #include	"bullsquid.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
+#include	"fx_flags.h"
+
+extern int gmsgSpray;
+
+const NamedVisual sharedTinySpitVisual = BuildVisual("Bullsquid.TinySpitBase")
+		.Model("sprites/tinyspit.spr");
 
 // Slow big poisonous ball as alternative range attack for bullsquid
 #define FEATURE_BULLSQUID_TOXICSPIT 1
 
 #define		SQUID_SPRINT_DIST	256.0f // how close the squid has to get before starting to sprint and refusing to swerve
 
-int iSquidSpitSprite;
-	
 //=========================================================
 // monster-specific schedule types
 //=========================================================
@@ -71,37 +76,36 @@ TYPEDESCRIPTION	CSquidSpit::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE( CSquidSpit, CBaseEntity )
 
+
+const NamedVisual CSquidSpit::spitVisual = BuildVisual::Animated("Bullsquid.Spit")
+		.Model("sprites/bigspit.spr")
+		.RenderMode(kRenderTransAlpha)
+		.Scale(0.5f);
+
+const NamedVisual CSquidSpit::fleckVisual = BuildVisual::Spray("Bullsquid.Fleck").Mixin(&sharedTinySpitVisual);
+
 void CSquidSpit::Spawn( void )
 {
-	SpawnHelper("squidspit");
+	SpawnHelper("squidspit", spitVisual);
 }
 
 void CSquidSpit::Precache()
 {
-	PRECACHE_MODEL( "sprites/bigspit.spr" );
-	PrecacheSounds();
-	iSquidSpitSprite = PRECACHE_MODEL( "sprites/tinyspit.spr" );// client side spittle.
-}
-
-void CSquidSpit::PrecacheSounds()
-{
+	RegisterVisual(spitVisual);
 	RegisterAndPrecacheSoundScript(spitTouchSoundScript, NPC::spitTouchSoundScript);
 	RegisterAndPrecacheSoundScript(spitHitSoundScript, NPC::spitHitSoundScript);
+	RegisterVisual(fleckVisual);// client side spittle.
 }
 
-void CSquidSpit::SpawnHelper(const char *className)
+void CSquidSpit::SpawnHelper(const char *className, const char* spitVisualName)
 {
 	Precache();
 	pev->movetype = MOVETYPE_FLY;
 	pev->classname = MAKE_STRING( className );
-
 	pev->solid = SOLID_BBOX;
-	pev->rendermode = kRenderTransAlpha;
-	pev->renderamt = 255;
 
-	SET_MODEL( ENT( pev ), "sprites/bigspit.spr" );
+	ApplyVisualToEntity(this, GetVisual(spitVisualName));
 	pev->frame = 0;
-	pev->scale = 0.5f;
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
@@ -111,14 +115,7 @@ void CSquidSpit::SpawnHelper(const char *className)
 void CSquidSpit::Animate( void )
 {
 	pev->nextthink = gpGlobals->time + 0.1f;
-
-	if( pev->frame++ )
-	{
-		if( pev->frame > m_maxFrame )
-		{
-			pev->frame = 0;
-		}
-	}
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 }
 
 void CSquidSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList )
@@ -148,20 +145,26 @@ void CSquidSpit::Touch( CBaseEntity *pOther )
 		UTIL_TraceLine( pev->origin, pev->origin + pev->velocity * 10, dont_ignore_monsters, ENT( pev ), &tr );
 		UTIL_DecalTrace( &tr, DECAL_SPIT1 + RANDOM_LONG( 0, 1 ) );
 
-		// make some flecks
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos );
-			WRITE_BYTE( TE_SPRITE_SPRAY );
-			WRITE_COORD( tr.vecEndPos.x );	// pos
-			WRITE_COORD( tr.vecEndPos.y );
-			WRITE_COORD( tr.vecEndPos.z );
-			WRITE_COORD( tr.vecPlaneNormal.x );	// dir
-			WRITE_COORD( tr.vecPlaneNormal.y );
-			WRITE_COORD( tr.vecPlaneNormal.z );
-			WRITE_SHORT( iSquidSpitSprite );	// model
-			WRITE_BYTE( 5 );			// count
-			WRITE_BYTE( 30 );			// speed
-			WRITE_BYTE( 80 );			// noise ( client will divide by 100 )
-		MESSAGE_END();
+		const Visual* visual = GetVisual(fleckVisual);
+		if (visual->modelIndex)
+		{
+			// make some flecks
+			MESSAGE_BEGIN( MSG_PVS, gmsgSpray, tr.vecEndPos );
+				WRITE_VECTOR( tr.vecEndPos );	// pos
+				WRITE_VECTOR( tr.vecPlaneNormal );	// dir
+				WRITE_SHORT( visual->modelIndex );	// model
+				WRITE_BYTE( 5 );			// count
+				WRITE_BYTE( 30 );			// speed
+				WRITE_BYTE( 80 );// noise ( client will divide by 100 )
+				WRITE_BYTE( visual->rendermode );
+				WRITE_COLOR( visual->rendercolor );
+				WRITE_BYTE( visual->renderamt );
+				WRITE_BYTE( visual->renderfx );
+				WRITE_BYTE( (int)(visual->scale * 10) );
+				WRITE_SHORT( (int)(visual->framerate * 10) );
+				WRITE_BYTE( SPRAY_FLAG_FADEOUT );
+			MESSAGE_END();
+		}
 	}
 	else
 	{
@@ -199,22 +202,28 @@ const NamedSoundScript CSquidToxicSpit::spithitSoundScript = {
 	"Bullsquid.ToxicSpitHit"
 };
 
+const NamedVisual CSquidToxicSpit::toxicSpitVisual = BuildVisual::Animated("Bullsquid.ToxicSpit")
+		.Model("sprites/cnt1.spr")
+		.RenderProps(kRenderTransAdd, Color(110, 120, 0), 228)
+		.Scale(0.8f);
+
+const NamedVisual CSquidToxicSpit::fleckVisual = BuildVisual::Spray("Bullsquid.ToxicFleck").Mixin(&sharedTinySpitVisual);
+
+const NamedVisual CSquidToxicSpit::particleVisual = BuildVisual("Bullsquid.ToxicParticle")
+		.Model("sprites/glow01.spr")
+		.RenderProps(kRenderGlow, Color(80, 160, 0), 255, kRenderFxNoDissipation)
+		.Scale(0.3f)
+		.Life(0.1f);
+
 void CSquidToxicSpit::Spawn( void )
 {
 	Precache();
 	pev->movetype = MOVETYPE_FLY;
 	pev->classname = MAKE_STRING( "bigsquidspit" );
-
 	pev->solid = SOLID_BBOX;
-	pev->rendermode = kRenderTransAdd;
-	pev->renderamt = 228;
-	pev->rendercolor.x = 110;
-	pev->rendercolor.y = 120;
-	pev->rendercolor.z = 0;
 
-	SET_MODEL( ENT( pev ), "sprites/cnt1.spr" );
+	ApplyVisualToEntity(this, GetVisual(toxicSpitVisual));
 	pev->frame = 0;
-	pev->scale = 0.8;
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
@@ -223,13 +232,13 @@ void CSquidToxicSpit::Spawn( void )
 
 void CSquidToxicSpit::Precache()
 {
-	PRECACHE_MODEL( "sprites/cnt1.spr" );
+	RegisterVisual(toxicSpitVisual);
 
 	RegisterAndPrecacheSoundScript(acidSoundScript);
 	RegisterAndPrecacheSoundScript(spithitSoundScript);
 
-	m_iImpactSprite = PRECACHE_MODEL( "sprites/tinyspit.spr" );
-	m_iFleckSprite = PRECACHE_MODEL( "sprites/glow01.spr" );
+	RegisterVisual(fleckVisual);
+	RegisterVisual(particleVisual);
 }
 
 extern int gmsgSpriteTrail;
@@ -248,41 +257,34 @@ void CSquidToxicSpit::Animate( void )
 
 	if (pev->dmgtime < gpGlobals->time)
 	{
-		const Vector end = pev->origin + pev->velocity.Normalize() * 16.0f;
+		Vector end = pev->origin + pev->velocity.Normalize() * 16.0f;
+		end.z += 16.0f;
 
-		// make some flecks
-		MESSAGE_BEGIN( MSG_PVS, gmsgSpriteTrail, pev->origin );
-			WRITE_COORD( pev->origin.x );	// start
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z );
-			WRITE_COORD( end.x );	// end
-			WRITE_COORD( end.y );
-			WRITE_COORD( end.z + 16.0f );
-			WRITE_SHORT( m_iFleckSprite );	// model
-			WRITE_BYTE( 3 );			// count
-			WRITE_BYTE( 1 );			// life in 0.1s
-			WRITE_BYTE( 3 );			// scale in 0.1
-			WRITE_BYTE( 20 );			// velocity along vector in 10's
-			WRITE_BYTE( 20 );			// randomness of velocity in 10's
-			WRITE_BYTE( 80 );
-			WRITE_BYTE( 160 );
-			WRITE_BYTE( 0 );
-			WRITE_BYTE( 255 );
-			WRITE_BYTE( 10 ); // random extra life in 0.1s
-		MESSAGE_END();
+		const Visual* visual = GetVisual(particleVisual);
+		if (visual->modelIndex)
+		{
+			MESSAGE_BEGIN( MSG_PVS, gmsgSpriteTrail, pev->origin );
+				WRITE_VECTOR( pev->origin );	// start
+				WRITE_VECTOR( end );	// end
+				WRITE_SHORT( visual->modelIndex );	// model
+				WRITE_BYTE( 3 );			// count
+				WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );			// life in 0.1s
+				WRITE_BYTE( (int)(visual->scale * 10) );			// scale in 0.1
+				WRITE_BYTE( 20 );			// velocity along vector in 10's
+				WRITE_BYTE( 20 );			// randomness of velocity in 10's
+				WRITE_BYTE( visual->rendermode );
+				WRITE_COLOR( visual->rendercolor );
+				WRITE_BYTE( visual->renderamt );
+				WRITE_BYTE( visual->renderfx );
+				WRITE_BYTE( 10 ); // random extra life in 0.1s
+			MESSAGE_END();
+		}
 
 		pev->dmgtime = gpGlobals->time + 0.2f;
 	}
 
 	pev->nextthink = gpGlobals->time + 0.1;
-
-	if( pev->frame++ )
-	{
-		if( pev->frame > m_maxFrame )
-		{
-			pev->frame = 0;
-		}
-	}
+	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 }
 
 void CSquidToxicSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList )
@@ -312,20 +314,27 @@ void CSquidToxicSpit::Touch( CBaseEntity *pOther )
 		UTIL_TraceLine( pev->origin, pev->origin + pev->velocity * 10, dont_ignore_monsters, ENT( pev ), &tr );
 		UTIL_DecalTrace( &tr, DECAL_SPIT1 + RANDOM_LONG( 0, 1 ) );
 
-		// make some flecks
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos );
-			WRITE_BYTE( TE_SPRITE_SPRAY );
-			WRITE_COORD( tr.vecEndPos.x );	// pos
-			WRITE_COORD( tr.vecEndPos.y );
-			WRITE_COORD( tr.vecEndPos.z );
-			WRITE_COORD( tr.vecPlaneNormal.x );	// dir
-			WRITE_COORD( tr.vecPlaneNormal.y );
-			WRITE_COORD( tr.vecPlaneNormal.z );
-			WRITE_SHORT( m_iImpactSprite );	// model
-			WRITE_BYTE( 8 );			// count
-			WRITE_BYTE( 15 );			// speed
-			WRITE_BYTE( 100 );			// noise ( client will divide by 100 )
-		MESSAGE_END();
+		const Visual* visual = GetVisual(fleckVisual);
+
+		if (visual->modelIndex)
+		{
+			// make some flecks
+			MESSAGE_BEGIN( MSG_PVS, gmsgSpray, tr.vecEndPos );
+				WRITE_VECTOR( tr.vecEndPos );	// pos
+				WRITE_VECTOR( tr.vecPlaneNormal );	// dir
+				WRITE_SHORT( visual->modelIndex );	// model
+				WRITE_BYTE( 8 );			// count
+				WRITE_BYTE( 15 );			// speed
+				WRITE_BYTE( 100 );// noise ( client will divide by 100 )
+				WRITE_BYTE( visual->rendermode );
+				WRITE_COLOR( visual->rendercolor );
+				WRITE_BYTE( visual->renderamt );
+				WRITE_BYTE( visual->renderfx );
+				WRITE_BYTE( (int)(visual->scale * 10) );
+				WRITE_SHORT( (int)(visual->framerate * 10) );
+				WRITE_BYTE( SPRAY_FLAG_FADEOUT );
+			MESSAGE_END();
+		}
 	}
 	else if (pev->owner == pOther->edict())
 	{
@@ -419,6 +428,9 @@ public:
 	static const NamedSoundScript attackSoundScript;
 	static const NamedSoundScript attackToxicSoundScript;
 	static const NamedSoundScript biteSoundScript;
+
+	static const NamedVisual tinySpitVisual;
+	static const NamedVisual toxicTinySpitVisual;
 };
 
 LINK_ENTITY_TO_CLASS( monster_bullchicken, CBullsquid )
@@ -487,6 +499,10 @@ const NamedSoundScript CBullsquid::biteSoundScript = {
 	IntRange(90, 110),
 	"Bullsquid.Bite"
 };
+
+const NamedVisual CBullsquid::tinySpitVisual = BuildVisual::Spray("Bullsquid.TinySpit").Mixin(&sharedTinySpitVisual);
+
+const NamedVisual CBullsquid::toxicTinySpitVisual = BuildVisual::Spray("Bullsquid.ToxicTinySpit").Mixin(&sharedTinySpitVisual);
 
 //=========================================================
 // IgnoreConditions 
@@ -773,20 +789,26 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				// do stuff for this event.
 				AttackSound(toxicSpit);
 
-				// spew the spittle temporary ents.
-				MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOrigin );
-					WRITE_BYTE( TE_SPRITE_SPRAY );
-					WRITE_COORD( vecSpitOrigin.x );	// pos
-					WRITE_COORD( vecSpitOrigin.y );
-					WRITE_COORD( vecSpitOrigin.z );
-					WRITE_COORD( vecSpitDir.x );	// dir
-					WRITE_COORD( vecSpitDir.y );	
-					WRITE_COORD( vecSpitDir.z );	
-					WRITE_SHORT( iSquidSpitSprite );	// model
-					WRITE_BYTE( 15 );			// count
-					WRITE_BYTE( 210 );			// speed
-					WRITE_BYTE( 25 );			// noise ( client will divide by 100 )
-				MESSAGE_END();
+				const Visual* visual = toxicSpit ? GetVisual(toxicTinySpitVisual) : GetVisual(tinySpitVisual);
+				if (visual->modelIndex)
+				{
+					// spew the spittle temporary ents.
+					MESSAGE_BEGIN( MSG_PVS, gmsgSpray, vecSpitOrigin );
+						WRITE_VECTOR( vecSpitOrigin );	// pos
+						WRITE_VECTOR( vecSpitDir );	// dir
+						WRITE_SHORT( visual->modelIndex );	// model
+						WRITE_BYTE( 15 );			// count
+						WRITE_BYTE( 210 );			// speed
+						WRITE_BYTE( 25 );// noise ( client will divide by 100 )
+						WRITE_BYTE( visual->rendermode );
+						WRITE_COLOR( visual->rendercolor );
+						WRITE_BYTE( visual->renderamt );
+						WRITE_BYTE( visual->renderfx );
+						WRITE_BYTE( (int)(visual->scale * 10) );
+						WRITE_SHORT( (int)(visual->framerate * 10) );
+						WRITE_BYTE( SPRAY_FLAG_FADEOUT );
+					MESSAGE_END();
+				}
 
 				if (toxicSpit) {
 					CSquidToxicSpit::Shoot(pev, vecSpitOrigin, vecSpitDir * CSquidToxicSpit::SpitSpeed(), m_soundList);
@@ -917,6 +939,9 @@ void CBullsquid::Precache()
 #if FEATURE_BULLSQUID_TOXICSPIT
 	UTIL_PrecacheOther("squidtoxicspit", entityOverrides); // toxic spit projectile
 #endif
+
+	RegisterVisual(tinySpitVisual);
+	RegisterVisual(toxicTinySpitVisual);
 
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 

@@ -15,6 +15,9 @@
 #pragma once
 #if !defined(CONST_H)
 #define CONST_H
+
+#include "common_types.h"
+
 //
 // Constants shared by the engine and dlls
 // This header file included by engine files and DLL files.
@@ -741,9 +744,6 @@ enum
 typedef unsigned int		func_t;
 typedef int		string_t;
 
-typedef unsigned char	byte;
-typedef unsigned short	word;
-
 #undef true
 #undef false
 
@@ -752,11 +752,6 @@ typedef enum { false, true }	qboolean;
 #else 
 typedef int qboolean;
 #endif
-
-typedef struct
-{
-	byte	r, g, b;
-} color24;
 
 typedef struct
 {

@@ -4,8 +4,8 @@
 
 struct Color
 {
-	Color(): r(0), g(0), b(0) {}
-	Color(int red, int green, int blue): r(red), g(green), b(blue) {}
+	constexpr Color(): r(0), g(0), b(0) {}
+	constexpr Color(int red, int green, int blue): r(red), g(green), b(blue) {}
 	int r;
 	int g;
 	int b;

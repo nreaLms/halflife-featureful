@@ -19,6 +19,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "soundscripts.h"
+#include "visuals.h"
 /*
 
 Class Hierachy
@@ -304,6 +305,7 @@ public:
 	void RegisterAndPrecacheSoundScript(const NamedSoundScript& defaultSoundScript);
 	void RegisterAndPrecacheSoundScript(const char* derivative, const char* base, const SoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
 	void RegisterAndPrecacheSoundScript(const char* derivative, const NamedSoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
+	const Visual* RegisterVisual(const NamedVisual& defaultVisual, bool precache = true);
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )

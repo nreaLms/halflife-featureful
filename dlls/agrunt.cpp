@@ -27,6 +27,7 @@
 #include	"hornet.h"
 #include	"scripted.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
 
 //=========================================================
 // monster-specific schedule types
@@ -45,7 +46,7 @@ enum
 	TASK_AGRUNT_SETUP_HIDE_ATTACK = LAST_FOLLOWINGMONSTER_TASK + 1,
 };
 
-int iAgruntMuzzleFlash;
+extern int gmsgSprite;
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -136,6 +137,8 @@ public:
 	float m_flNextSpeakTime;
 	float m_flNextWordTime;
 	int m_iLastWord;
+
+	static const NamedVisual muzzleFlashVisual;
 };
 
 LINK_ENTITY_TO_CLASS( monster_alien_grunt, CAGrunt )
@@ -202,6 +205,12 @@ const NamedSoundScript CAGrunt::fireSoundScript = {
 	"AlienGrunt.Fire"
 };
 
+const NamedVisual CAGrunt::muzzleFlashVisual = BuildVisual("AlienGrunt.MuzzleFlash")
+		.Model("sprites/muz4.spr")
+		.RenderMode(kRenderTransAdd)
+		.Scale(0.6f)
+		.Alpha(128);
+
 //=========================================================
 // IRelationship - overridden because Human Grunts are
 // Alien Grunt's nemesis.
@@ -250,13 +259,8 @@ static void AgruntTraceAttack( CBaseMonster* self, entvars_t *pevInflictor, entv
 
 			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, ptr->vecEndPos );
 			WRITE_BYTE( TE_TRACER );
-				WRITE_COORD( ptr->vecEndPos.x );
-				WRITE_COORD( ptr->vecEndPos.y );
-				WRITE_COORD( ptr->vecEndPos.z );
-
-				WRITE_COORD( vecTracerDir.x );
-				WRITE_COORD( vecTracerDir.y );
-				WRITE_COORD( vecTracerDir.z );
+				WRITE_VECTOR( ptr->vecEndPos );
+				WRITE_VECTOR( vecTracerDir );
 			MESSAGE_END();
 		}
 
@@ -490,15 +494,15 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			GetAttachment( 0, vecArmPos, vecArmDir );
 
 			vecArmPos = vecArmPos + vecDirToEnemy * 32.0f;
-			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecArmPos );
-				WRITE_BYTE( TE_SPRITE );
-				WRITE_COORD( vecArmPos.x );	// pos
-				WRITE_COORD( vecArmPos.y );
-				WRITE_COORD( vecArmPos.z );
-				WRITE_SHORT( iAgruntMuzzleFlash );		// model
-				WRITE_BYTE( 6 );				// size * 10
-				WRITE_BYTE( 128 );			// brightness
-			MESSAGE_END();
+
+			const Visual* visual = GetVisual(muzzleFlashVisual);
+			if (visual->modelIndex)
+			{
+				MESSAGE_BEGIN( MSG_PVS, gmsgSprite, vecArmPos );
+					WRITE_VECTOR( vecArmPos );	// pos
+					WriteSpriteVisual(visual);
+				MESSAGE_END();
+			}
 
 			CBaseEntity *pHornet = CBaseEntity::Create( "hornet", vecArmPos, UTIL_VecToAngles( vecDirToEnemy ), edict(), m_soundList );
 			UTIL_MakeVectors( pHornet->pev->angles );
@@ -636,7 +640,7 @@ void CAGrunt::Precache()
 	RegisterAndPrecacheSoundScript(useSoundScript, idleSoundScript);
 	RegisterAndPrecacheSoundScript(unuseSoundScript, alertSoundScript);
 
-	iAgruntMuzzleFlash = PRECACHE_MODEL( "sprites/muz4.spr" );
+	RegisterVisual(muzzleFlashVisual);
 
 	EntityOverrides entityOverrides;
 	entityOverrides.soundList = m_soundList;

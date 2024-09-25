@@ -20,6 +20,7 @@
 #include "weapons.h"
 #include "player.h"
 #include "effects.h"
+#include "visuals_utils.h"
 
 #define	TRIPMINE_PRIMARY_VOLUME		450
 
@@ -63,6 +64,8 @@ class CTripmineGrenade : public CGrenade
 	static const NamedSoundScript deploySoundScript;
 	static const NamedSoundScript activateSoundScript;
 	static const NamedSoundScript chargeSoundScript;
+
+	static const NamedVisual beamVisual;
 };
 
 LINK_ENTITY_TO_CLASS( monster_tripmine, CTripmineGrenade )
@@ -105,6 +108,13 @@ const NamedSoundScript CTripmineGrenade::chargeSoundScript = {
 	ATTN_NORM,
 	"TripmineGrenade.Charge"
 };
+
+const NamedVisual CTripmineGrenade::beamVisual = BuildVisual("Tripmine.Beam")
+		.Model(g_pModelNameLaser)
+		.RenderColor(0, 214, 198)
+		.Alpha(64)
+		.BeamWidth(10)
+		.BeamScrollRate(255);
 
 void CTripmineGrenade::Spawn( void )
 {
@@ -173,6 +183,7 @@ void CTripmineGrenade::Precache( void )
 	RegisterAndPrecacheSoundScript(deploySoundScript);
 	RegisterAndPrecacheSoundScript(activateSoundScript);
 	RegisterAndPrecacheSoundScript(chargeSoundScript);
+	RegisterVisual(beamVisual);
 }
 
 void CTripmineGrenade::UpdateOnRemove()
@@ -281,13 +292,12 @@ void CTripmineGrenade::MakeBeam( void )
 
 	Vector vecTmpEnd = pev->origin + m_vecDir * 2048.0f * m_flBeamLength;
 
-	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
+	const Visual* visual = GetVisual(beamVisual);
+
+	m_pBeam = CreateBeamFromVisual(visual);
 	//Mark as temporary so the beam will be recreated on save game load and level transitions.
 	m_pBeam->pev->spawnflags |= SF_BEAM_TEMPORARY;
 	m_pBeam->PointEntInit( vecTmpEnd, entindex() );
-	m_pBeam->SetColor( 0, 214, 198 );
-	m_pBeam->SetScrollRate( 255 );
-	m_pBeam->SetBrightness( 64 );
 }
 
 void CTripmineGrenade::BeamBreakThink( void )

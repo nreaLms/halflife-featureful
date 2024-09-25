@@ -27,6 +27,7 @@
 #include "effects.h"
 #include "game.h"
 #include "common_soundscripts.h"
+#include "visuals_utils.h"
 
 #define TURRET_SHOTS	2
 #define TURRET_RANGE	(100 * 12)
@@ -87,6 +88,7 @@ public:
 	virtual void Ping( void );
 	virtual void EyeOn( void );
 	virtual void EyeOff( void );
+	virtual int MaxEyeBrightness() { return 255; }
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -226,6 +228,7 @@ public:
 	const char* DefaultDisplayName() { return "Turret"; }
 	void SpinUpCall( void );
 	void SpinDownCall( void );
+	virtual int MaxEyeBrightness();
 
 	virtual int Save( CSave &save );
 	virtual int Restore( CRestore &restore );
@@ -238,6 +241,8 @@ public:
 	static const NamedSoundScript shootSoundScript;
 	static const NamedSoundScript spinupCallSoundScript;
 	static const NamedSoundScript spindownCallSoundScript;
+
+	static const NamedVisual glowVisual;
 private:
 	int m_iStartSpin;
 };
@@ -265,6 +270,13 @@ const NamedSoundScript CTurret::spindownCallSoundScript = {
 	ATTN_NORM,
 	"Turret.SpinDownCall"
 };
+
+const NamedVisual CTurret::glowVisual = BuildVisual("Turret.Glow")
+		.Model("sprites/flare3.spr")
+		.RenderMode(kRenderGlow)
+		.RenderColor(255, 0, 0)
+		.Alpha(255)
+		.RenderFx(kRenderFxNoDissipation);
 
 TYPEDESCRIPTION	CTurret::m_SaveData[] =
 {
@@ -368,8 +380,6 @@ void CBaseTurret::UpdateOnRemove()
 	CBaseMonster::UpdateOnRemove();
 }
 
-#define TURRET_GLOW_SPRITE "sprites/flare3.spr"
-
 void CTurret::Spawn()
 {
 	Precache();
@@ -388,8 +398,9 @@ void CTurret::Spawn()
 
 	SetThink( &CBaseTurret::Initialize );
 
-	m_pEyeGlow = CSprite::SpriteCreate( TURRET_GLOW_SPRITE, pev->origin, FALSE );
-	m_pEyeGlow->SetTransparency( kRenderGlow, 255, 0, 0, 0, kRenderFxNoDissipation );
+	const Visual* visual = GetVisual(glowVisual);
+	m_pEyeGlow = CreateSpriteFromVisual(visual, pev->origin);
+	m_pEyeGlow->SetBrightness(0);
 	m_pEyeGlow->SetAttachment( edict(), 2 );
 	m_eyeBrightness = 0;
 
@@ -400,7 +411,7 @@ void CTurret::Precache()
 {
 	CBaseTurret::Precache();
 	PrecacheMyModel( "models/turret.mdl" );	
-	PRECACHE_MODEL( TURRET_GLOW_SPRITE );
+	RegisterVisual(glowVisual);
 	RegisterAndPrecacheSoundScript(shootSoundScript);
 	RegisterAndPrecacheSoundScript(spinupCallSoundScript);
 	RegisterAndPrecacheSoundScript(spindownCallSoundScript);
@@ -518,9 +529,10 @@ void CBaseTurret::EyeOn()
 {
 	if( m_pEyeGlow )
 	{
-		if( m_eyeBrightness != 255 )
+		const int maxBrightness = MaxEyeBrightness();
+		if( m_eyeBrightness != maxBrightness )
 		{
-			m_eyeBrightness = 255;
+			m_eyeBrightness = maxBrightness;
 		}
 		m_pEyeGlow->SetBrightness( m_eyeBrightness );
 	}
@@ -850,6 +862,12 @@ void CTurret::SpinDownCall( void )
 			m_iSpin = 0;
 		}
 	}
+}
+
+int CTurret::MaxEyeBrightness()
+{
+	const Visual* visual = GetVisual(glowVisual);
+	return visual->renderamt;
 }
 
 void CBaseTurret::SetTurretAnim( TURRET_ANIM anim )

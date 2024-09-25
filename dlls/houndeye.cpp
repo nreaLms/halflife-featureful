@@ -26,6 +26,7 @@
 #include	"squadmonster.h"
 #include	"soundent.h"
 #include	"game.h"
+#include	"visuals_utils.h"
 
 // houndeye does 20 points of damage spread over a sphere 384 units in diameter, and each additional 
 // squad member increases the BASE damage by 110%, per the spec.
@@ -120,7 +121,7 @@ public:
 	void Activate();
 	int LookupActivity(int activity);
 	void SetActivity( Activity NewActivity );
-	void WriteBeamColor( void );
+	const Visual* GetWaveVisual();
 	BOOL CheckRangeAttack1( float flDot, float flDist );
 	BOOL FValidateHintType( short sHint );
 	BOOL FCanActiveIdle( void );
@@ -144,7 +145,6 @@ public:
 	Vector DefaultMinHullSize() { return Vector( -16.0f, -16.0f, 0.0f ); }
 	Vector DefaultMaxHullSize() { return Vector( 16.0f, 16.0f, 36.0f ); }
 
-	int m_iSpriteTexture;
 	short m_iAsleep;// some houndeyes sleep in idle mode if this is set, the houndeye is lying down
 	short m_iBlink;
 	Vector	m_vecPackCenter; // the center of the pack. The leader maintains this by averaging the origins of all pack members.
@@ -159,6 +159,12 @@ public:
 
 	static const NamedSoundScript anger1SoundScript;
 	static const NamedSoundScript anger2SoundScript;
+
+	static const NamedVisual waveVisual;
+	static const NamedVisual wave1Visual;
+	static const NamedVisual wave2Visual;
+	static const NamedVisual wave3Visual;
+	static const NamedVisual wave4Visual;
 };
 
 LINK_ENTITY_TO_CLASS( monster_houndeye, CHoundeye )
@@ -228,6 +234,28 @@ const NamedSoundScript CHoundeye::anger2SoundScript = {
 	{"houndeye/he_pain1.wav"},
 	"HoundEye.Anger2"
 };
+
+const NamedVisual CHoundeye::waveVisual = BuildVisual("Houndeye.WaveBase")
+		.Model("sprites/shockwave.spr")
+		.Life(0.2f)
+		.BeamParams(16, 0)
+		.Alpha(255);
+
+const NamedVisual CHoundeye::wave1Visual = BuildVisual("Houndeye.Wave1")
+		.RenderColor(188, 220, 255)
+		.Mixin(&CHoundeye::waveVisual);
+
+const NamedVisual CHoundeye::wave2Visual = BuildVisual("Houndeye.Wave2")
+		.RenderColor(101, 133, 221)
+		.Mixin(&CHoundeye::waveVisual);
+
+const NamedVisual CHoundeye::wave3Visual = BuildVisual("Houndeye.Wave3")
+		.RenderColor(67, 85, 255)
+		.Mixin(&CHoundeye::waveVisual);
+
+const NamedVisual CHoundeye::wave4Visual = BuildVisual("Houndeye.Wave4")
+		.RenderColor(62, 33, 211)
+		.Mixin(&CHoundeye::waveVisual);
 
 //=========================================================
 // Classify - indicates this monster's place in the 
@@ -444,7 +472,11 @@ void CHoundeye::Precache()
 	RegisterAndPrecacheSoundScript(anger1SoundScript);
 	RegisterAndPrecacheSoundScript(anger2SoundScript);
 
-	m_iSpriteTexture = PRECACHE_MODEL( "sprites/shockwave.spr" );
+	RegisterVisual(waveVisual);
+	RegisterVisual(wave1Visual);
+	RegisterVisual(wave2Visual);
+	RegisterVisual(wave3Visual);
+	RegisterVisual(wave4Visual);
 }
 
 //=========================================================
@@ -504,10 +536,8 @@ void CHoundeye::PainSound( void )
 // WriteBeamColor - writes a color vector to the network 
 // based on the size of the group. 
 //=========================================================
-void CHoundeye::WriteBeamColor( void )
+const Visual* CHoundeye::GetWaveVisual()
 {
-	BYTE bRed, bGreen, bBlue;
-
 	const int squadSize = SquadCount();
 	switch( squadSize )
 	{
@@ -516,32 +546,15 @@ void CHoundeye::WriteBeamColor( void )
 	case 0:
 	case 1:
 		// solo houndeye - weakest beam
-		bRed = 188;
-		bGreen = 220;
-		bBlue = 255;
-		break;
+		return GetVisual(wave1Visual);
 	case 2:
-		// no case for 0 or 1, cause those are impossible for monsters in Squads.
-		bRed = 101;
-		bGreen = 133;
-		bBlue = 221;
-		break;
+		return GetVisual(wave2Visual);
 	case 3:
-		bRed = 67;
-		bGreen = 85;
-		bBlue = 255;
-		break;
+		return GetVisual(wave3Visual);
 	case 4:
 	case 5:
-		bRed = 62;
-		bGreen = 33;
-		bBlue = 211;
-		break;
+		return GetVisual(wave4Visual);
 	}
-
-	WRITE_BYTE( bRed );
-	WRITE_BYTE( bGreen );
-	WRITE_BYTE( bBlue );
 }
 
 //=========================================================
@@ -554,6 +567,8 @@ void CHoundeye::SonicAttack( void )
 
 	EmitSoundScript(blastSoundScript);
 
+	const Visual* visual = GetWaveVisual();
+
 	// blast circles
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMCYLINDER );
@@ -563,17 +578,7 @@ void CHoundeye::SonicAttack( void )
 		WRITE_COORD( pev->origin.x );
 		WRITE_COORD( pev->origin.y );
 		WRITE_COORD( pev->origin.z + 16.0f + HOUNDEYE_MAX_ATTACK_RADIUS / 0.2f ); // reach damage radius over .3 seconds
-		WRITE_SHORT( m_iSpriteTexture );
-		WRITE_BYTE( 0 ); // startframe
-		WRITE_BYTE( 0 ); // framerate
-		WRITE_BYTE( 2 ); // life
-		WRITE_BYTE( 16 );  // width
-		WRITE_BYTE( 0 );   // noise
-
-		WriteBeamColor();
-
-		WRITE_BYTE( 255 ); //brightness
-		WRITE_BYTE( 0 );		// speed
+		WriteBeamVisual(visual);
 	MESSAGE_END();
 
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
@@ -584,17 +589,7 @@ void CHoundeye::SonicAttack( void )
 		WRITE_COORD( pev->origin.x );
 		WRITE_COORD( pev->origin.y );
 		WRITE_COORD( pev->origin.z + 16.0f + ( HOUNDEYE_MAX_ATTACK_RADIUS / 2.0f ) / 0.2f ); // reach damage radius over .3 seconds
-		WRITE_SHORT( m_iSpriteTexture );
-		WRITE_BYTE( 0 ); // startframe
-		WRITE_BYTE( 0 ); // framerate
-		WRITE_BYTE( 2 ); // life
-		WRITE_BYTE( 16 );  // width
-		WRITE_BYTE( 0 );   // noise
-
-		WriteBeamColor();
-
-		WRITE_BYTE( 255 ); //brightness
-		WRITE_BYTE( 0 );		// speed
+		WriteBeamVisual(visual);
 	MESSAGE_END();
 
 	CBaseEntity *pEntity = NULL;

@@ -63,24 +63,31 @@
 class CGonomeGuts : public CSquidSpit
 {
 public:
-	void Spawn(void);
-	void PrecacheSounds();
+	void Spawn();
+	void Precache();
 	void Touch(CBaseEntity *pOther);
 
 	static constexpr const char* spitTouchSoundScript = "Gonome.SpitTouch";
 	static constexpr const char* spitHitSoundScript = "Gonome.SpitHit";
+
+	static const NamedVisual gutsVisual;
 };
 
 LINK_ENTITY_TO_CLASS( gonomeguts, CGonomeGuts )
 
+const NamedVisual CGonomeGuts::gutsVisual = BuildVisual::Animated("Gonome.Guts")
+		.Model("sprites/bigspit.spr")
+		.RenderProps(kRenderTransAlpha, Color(255, 0, 0))
+		.Scale(0.5f);
+
 void CGonomeGuts::Spawn()
 {
-	SpawnHelper("gonomeguts");
-	pev->rendercolor.x = 255;
+	SpawnHelper("gonomeguts", gutsVisual);
 }
 
-void CGonomeGuts::PrecacheSounds()
+void CGonomeGuts::Precache()
 {
+	RegisterVisual(gutsVisual);
 	RegisterAndPrecacheSoundScript(spitTouchSoundScript, NPC::spitTouchSoundScript);
 	RegisterAndPrecacheSoundScript(spitHitSoundScript, NPC::spitHitSoundScript);
 }

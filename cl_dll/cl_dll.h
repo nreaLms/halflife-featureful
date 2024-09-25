@@ -30,7 +30,6 @@
 #define CL_DLL_H
 #include "build.h"
 typedef unsigned char byte;
-typedef unsigned short word;
 // redefine
 //typedef int ( *pfnUserMsgHook )( const char *pszName, int iSize, void *pbuf );
 

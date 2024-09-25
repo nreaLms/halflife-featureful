@@ -21,6 +21,8 @@
 
 #define ASSERT( x )
 
+#include "common_types.h"
+
 void BEGIN_READ( void *buf, int size );
 int READ_CHAR( void );
 int READ_BYTE( void );
@@ -32,6 +34,8 @@ char* READ_STRING( void );
 float READ_COORD( void );
 float READ_ANGLE( void );
 float READ_HIRESANGLE( void );
+
+color24 READ_COLOR( void );
 
 #endif // PARSEMSG_H
 

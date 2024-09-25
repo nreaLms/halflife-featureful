@@ -30,8 +30,6 @@
 #define HORNET_ORANGE_SPEED		(float)800
 #define	HORNET_BUZZ_VOLUME		(float)0.8
 
-extern int iHornetPuff;
-
 //=========================================================
 // Hornet - this is the projectile that the Alien Grunt fires.
 //=========================================================
@@ -63,5 +61,10 @@ public:
 
 	static const NamedSoundScript buzzSoundScript;
 	static const NamedSoundScript dieSoundScript;
+
+	static const NamedVisual sharedHornetTrailVisual;
+	static const NamedVisual hornetTrailVisual;
+	static const NamedVisual hornetTrailAltVisual;
+	static const NamedVisual hornetPuffVisual;
 };
 #endif // HORNET_H
