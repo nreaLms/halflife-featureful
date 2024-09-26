@@ -140,8 +140,11 @@ float AnimateWithFramerate(float frame, float maxFrame, float framerate, float* 
 	const float frames = framerate * timeBetween;
 
 	frame += frames;
-	if (maxFrame > 0)
-		frame = fmod(frame, maxFrame);
+	if (frame > maxFrame)
+	{
+		if (maxFrame > 0)
+			frame = fmod(frame, maxFrame);
+	}
 
 	if (pLastTime)
 		*pLastTime = gpGlobals->time;

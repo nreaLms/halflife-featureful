@@ -1165,6 +1165,7 @@ void CControllerDead :: Spawn( )
 //=========================================================
 class CControllerHeadBall : public CBaseMonster
 {
+public:
 	void Spawn( void );
 	void Precache( void );
 	void EXPORT HuntThink( void );
@@ -1494,9 +1495,6 @@ void CControllerZapBall::ExplodeTouch( CBaseEntity *pOther )
 	UTIL_Remove( this );
 }
 
-#define ZAPBALLTRAP_DETECT_SOUND "ambience/alien_frantic.wav"
-#define ZAPBALLTRAP_LAUNCH_SOUND "debris/beamstart4.wav"
-
 class CZapBallTrap : public CBaseEntity
 {
 public:
@@ -1540,17 +1538,17 @@ public:
 	}
 
 	int BaseBrigthness() const {
-		return 80;
+		return m_baseBrightness;
 	}
 	int MaxBrightness() const {
-		return 255;
+		return m_maxBrightness;
 	}
 
 	float BaseScale() const {
-		return 1.0f;
+		return m_baseScale;
 	}
 	float MaxScale() const {
-		return BaseScale() * 2;
+		return m_maxScale;
 	}
 
 	float RespawnTime() const {
@@ -1561,11 +1559,19 @@ public:
 	virtual int Restore( CRestore &restore );
 	static TYPEDESCRIPTION m_SaveData[];
 
+	static const NamedSoundScript detectSoundScript;
+	static const NamedSoundScript launchSoundScript;
+
 	static const NamedVisual zapBallVisual;
 
 private:
+	float m_baseScale;
+	float m_maxScale;
+	int m_baseBrightness;
+	int m_maxBrightness;
 	int m_maxFrame;
 	float m_lastTime;
+	float m_detectThinkTime;
 	void SetMaxFrame() {
 		if (pev->modelindex)
 		{
@@ -1579,13 +1585,32 @@ LINK_ENTITY_TO_CLASS( env_energy_ball_trap, CZapBallTrap )
 TYPEDESCRIPTION	CZapBallTrap::m_SaveData[] =
 {
 	DEFINE_FIELD( CZapBallTrap, m_lastTime, FIELD_TIME ),
+	DEFINE_FIELD( CZapBallTrap, m_detectThinkTime, FIELD_TIME ),
 };
 
 IMPLEMENT_SAVERESTORE( CZapBallTrap, CBaseEntity )
 
+const NamedSoundScript CZapBallTrap::detectSoundScript = {
+	CHAN_ITEM,
+	{"ambience/alien_frantic.wav"},
+	0.8f,
+	ATTN_STATIC,
+	110,
+	"ZapTrap.Detect"
+};
+
+const NamedSoundScript CZapBallTrap::launchSoundScript = {
+	CHAN_WEAPON,
+	{"debris/beamstart4.wav"},
+	1.0f,
+	ATTN_STATIC,
+	"ZapTrap.Launch"
+};
+
 const NamedVisual CZapBallTrap::zapBallVisual = BuildVisual::Animated("ZapTrap.EnergyBall")
-		.RenderMode(kRenderTransAdd)
-		.Mixin(&sharedEnergyBallVisual);
+		.Scale(1.0f)
+		.Alpha(80)
+		.Mixin(&CControllerHeadBall::headBallVisual);
 
 void CZapBallTrap::KeyValue( KeyValueData *pkvd )
 {
@@ -1606,8 +1631,16 @@ void CZapBallTrap::KeyValue( KeyValueData *pkvd )
 void CZapBallTrap::Precache()
 {
 	UTIL_PrecacheOther("controller_head_ball");
-	PRECACHE_SOUND(ZAPBALLTRAP_DETECT_SOUND);
-	PRECACHE_SOUND(ZAPBALLTRAP_LAUNCH_SOUND);
+	RegisterAndPrecacheSoundScript(detectSoundScript);
+	RegisterAndPrecacheSoundScript(launchSoundScript);
+
+	const Visual* visual = RegisterVisual(zapBallVisual);
+	m_baseScale = visual->scale;
+	m_baseBrightness = visual->renderamt;
+
+	const Visual* headVisual = GetVisual(CControllerHeadBall::headBallVisual);
+	m_maxScale = headVisual->scale;
+	m_maxBrightness = headVisual->renderamt;
 
 	SetMaxFrame();
 }
@@ -1619,10 +1652,14 @@ void CZapBallTrap::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT;
 
-	ApplyVisualToEntity(this, zapBallVisual);
+	const Visual* visual = GetVisual(zapBallVisual);
+
+	ApplyVisualToEntity(this, visual);
 
 	UTIL_SetSize(pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
+
+	m_baseScale = visual->scale;
 
 	if (FStringNull(pev->targetname))
 	{
@@ -1654,33 +1691,41 @@ void CZapBallTrap::Animate()
 void CZapBallTrap::DetectThink()
 {
 	Animate();
-	CBaseEntity *pFoundTarget = NULL;
-	for( int i = 1; i <= gpGlobals->maxClients; i++ )
+
+	const float detectThinkPeriod = ThinkPeriod();
+
+	if (m_detectThinkTime <= gpGlobals->time)
 	{
-		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
-		if (pPlayer && pPlayer->IsPlayer())
+		m_detectThinkTime = gpGlobals->time + detectThinkPeriod;
+
+		CBaseEntity *pFoundTarget = NULL;
+		for( int i = 1; i <= gpGlobals->maxClients; i++ )
 		{
-			const float distance = (pPlayer->pev->origin - pev->origin).Length();
-			if (distance <= SenseRadius())
+			CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
+			if (pPlayer && pPlayer->IsPlayer())
 			{
-				TraceResult tr;
-				UTIL_TraceLine(pev->origin, pPlayer->Center(), dont_ignore_monsters, ENT(pev), &tr);
-				CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
-				if (pEntity == pPlayer)
+				const float distance = (pPlayer->pev->origin - pev->origin).Length();
+				if (distance <= SenseRadius())
 				{
-					pFoundTarget = pPlayer;
-					bool ballLaunched = IncreaseAwareness(pPlayer, distance <= FastSenseRadius() ? 4 : 2);
-					if (ballLaunched)
-						return;
+					TraceResult tr;
+					UTIL_TraceLine(pev->origin, pPlayer->Center(), dont_ignore_monsters, ENT(pev), &tr);
+					CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
+					if (pEntity == pPlayer)
+					{
+						pFoundTarget = pPlayer;
+						bool ballLaunched = IncreaseAwareness(pPlayer, distance <= FastSenseRadius() ? 4 : 2);
+						if (ballLaunched)
+							return;
+					}
 				}
 			}
 		}
+		if (!pFoundTarget)
+		{
+			DecreaseAwareness();
+		}
 	}
-	if (!pFoundTarget)
-	{
-		DecreaseAwareness();
-	}
-	pev->nextthink = gpGlobals->time + ThinkPeriod();
+	pev->nextthink = gpGlobals->time + Q_min(detectThinkPeriod, 0.1f);
 }
 
 void CZapBallTrap::LaunchBall(CBaseEntity *pTarget)
@@ -1689,7 +1734,7 @@ void CZapBallTrap::LaunchBall(CBaseEntity *pTarget)
 	SetThink(&CZapBallTrap::Materialize);
 	pev->nextthink = gpGlobals->time + RespawnTime();
 
-	EMIT_SOUND(edict(), CHAN_WEAPON, ZAPBALLTRAP_LAUNCH_SOUND, 1.0f, ATTN_STATIC);
+	EmitSoundScript(launchSoundScript);
 
 	CBaseMonster *pBall = (CBaseMonster*)CBaseEntity::Create( "controller_head_ball", pev->origin, pev->angles, edict() );
 
@@ -1706,7 +1751,7 @@ void CZapBallTrap::Materialize()
 	pev->effects &= ~EF_NODRAW;
 	pev->frame = 0;
 	SetThink( &CZapBallTrap::DetectThink );
-	pev->nextthink = gpGlobals->time + 0.1f;
+	m_detectThinkTime = pev->nextthink = gpGlobals->time + 0.1f;
 	m_lastTime = gpGlobals->time;
 }
 
@@ -1718,14 +1763,14 @@ bool CZapBallTrap::IncreaseAwareness(CBaseEntity *pTarget, int value)
 
 	if (newAwareness >= MaxAwareness())
 	{
-		STOP_SOUND(edict(), CHAN_ITEM, ZAPBALLTRAP_DETECT_SOUND);
+		StopSoundScript(detectSoundScript);
 		LaunchBall(pTarget);
 		return true;
 	}
 	if (prevAwareness == 0)
 	{
 		SetThinkPeriod(AlertThinkPeriod());
-		EMIT_SOUND_DYN(edict(), CHAN_ITEM, ZAPBALLTRAP_DETECT_SOUND, 0.8f, ATTN_STATIC, 0, 110);
+		EmitSoundScript(detectSoundScript);
 	}
 
 	AwareEffect();
@@ -1741,7 +1786,7 @@ void CZapBallTrap::DecreaseAwareness()
 		AwareEffect();
 		if (pev->button == 0)
 		{
-			STOP_SOUND(edict(), CHAN_ITEM, ZAPBALLTRAP_DETECT_SOUND);
+			StopSoundScript(detectSoundScript);
 			SetThinkPeriod(IdleThinkPeriod());
 		}
 	}
