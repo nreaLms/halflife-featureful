@@ -35,6 +35,7 @@
 #define bits_MEMORY_ISLAVE_REVIVED bits_MEMORY_CUSTOM2
 #define bits_MEMORY_ISLAVE_LAST_ATTACK_WAS_COIL bits_MEMORY_CUSTOM3
 #define bits_MEMORY_ISLAVE_FAMILIAR_IS_ALIVE bits_MEMORY_CUSTOM4
+#define bits_MEMORY_ISLAVE_HAS_LAUNCHED_TOKEN bits_MEMORY_CUSTOM5
 
 // whether vortigaunts can spawn familiars (snarks and headcrabs)
 #define FEATURE_ISLAVE_FAMILIAR 1
@@ -146,6 +147,7 @@ class CChargeToken : public CBaseEntity
 public:
 	void Spawn();
 	void Precache();
+	void UpdateOnRemove();
 	void EXPORT ArmorPieceTouch(CBaseEntity* pOther);
 	void EXPORT AnimateThink();
 	void EXPORT HuntThink();
@@ -228,6 +230,19 @@ void CChargeToken::Precache()
 	RegisterVisual(tokenVisual);
 	RegisterVisual(tokenLightVisual);
 	RegisterAndPrecacheSoundScript(suitOnSoundScript);
+}
+
+void CChargeToken::UpdateOnRemove()
+{
+	if (!FNullEnt(pev->owner))
+	{
+		CBaseMonster* pOwner = GetMonsterPointer(pev->owner);
+		if (pOwner)
+		{
+			pOwner->Forget(bits_MEMORY_ISLAVE_HAS_LAUNCHED_TOKEN);
+		}
+	}
+	CBaseEntity::UpdateOnRemove();
 }
 
 void CChargeToken::ArmorPieceTouch(CBaseEntity *pOther)
@@ -1254,7 +1269,9 @@ void CISlave::StartTask( Task_t *pTask )
 			m_chargeToken = GetClassPtr( (CChargeToken *)NULL );
 			if (m_chargeToken)
 			{
+				m_chargeToken->pev->owner = edict();
 				m_chargeToken->Spawn();
+				Remember(bits_MEMORY_ISLAVE_HAS_LAUNCHED_TOKEN);
 				m_chargeToken->SetAttachment(edict(), 1);
 				UTIL_SetOrigin(m_chargeToken->pev, pev->origin);
 				m_chargeToken->MakeEntLight(6);
@@ -1738,7 +1755,7 @@ Schedule_t *CISlave::GetSchedule( void )
 				}
 			}
 		}
-		if (HasFreeEnergy() && g_modFeatures.vortigaunt_armor_charge)
+		if (HasFreeEnergy() && g_modFeatures.vortigaunt_armor_charge && !HasMemory(bits_MEMORY_ISLAVE_HAS_LAUNCHED_TOKEN))
 		{
 			CBasePlayer* pPlayer = static_cast<CBasePlayer*>(FollowedPlayer());
 			if (pPlayer && pPlayer->HasSuit() && pPlayer->IsAlive() && pPlayer->pev->armorvalue < pPlayer->MaxArmor()/4 &&
