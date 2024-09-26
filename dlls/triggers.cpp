@@ -5090,6 +5090,9 @@ public:
 	EHANDLE m_hLocus;
 	EHANDLE m_hTarget;
 
+	bool m_reportedPosError; // don't save
+	bool m_reportedDirError; // don't save
+
 	enum {
 		POSMODE_SET = 0,
 		POSMODE_OFFSET,
@@ -5154,44 +5157,54 @@ void CMotionThread::MotionThink( void )
 		switch (m_iPosMode)
 		{
 		case POSMODE_SET: // set position
-			if (TryCalcLocus_Position( this, m_hLocus, STRING(m_iszPosition), vecTemp )) {
+			if (TryCalcLocus_Position( this, m_hLocus, STRING(m_iszPosition), vecTemp, !m_reportedPosError )) {
 				if (debug)
 					Motion_PrintVectors("DEBUG: Set origin", m_hTarget->pev->origin, vecTemp);
 				UTIL_AssignOrigin(m_hTarget, vecTemp);
 			}
+			else
+				m_reportedPosError = true;
 			m_hTarget->pev->flags &= ~FL_ONGROUND;
 			break;
 		case POSMODE_OFFSET: // offset position (= fake velocity)
-			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition), vecTemp )) {
+			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition), vecTemp, !m_reportedPosError )) {
 				vecOld = m_hTarget->pev->origin;
 				UTIL_AssignOrigin(m_hTarget, vecOld + gpGlobals->frametime * vecTemp);
 				if (debug)
 					Motion_PrintVectors("DEBUG: Set origin", vecOld, m_hTarget->pev->origin);
 			}
+			else
+				m_reportedPosError = true;
 			m_hTarget->pev->flags &= ~FL_ONGROUND;
 			break;
 		case POSMODE_SETVEL: // set velocity
-			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition), vecTemp )) {
+			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition), vecTemp, !m_reportedPosError )) {
 				if (debug)
 					Motion_PrintVectors("DEBUG: Set velocity", m_hTarget->pev->velocity, vecTemp);
 				UTIL_SetVelocity(m_hTarget, vecTemp);
 			}
+			else
+				m_reportedPosError = true;
 			break;
 		case POSMODE_ACCELERATE: // accelerate
-			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition), vecTemp )) {
+			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszPosition), vecTemp, !m_reportedPosError )) {
 				vecOld = m_hTarget->pev->velocity;
 				UTIL_SetVelocity(m_hTarget, vecOld + gpGlobals->frametime * vecTemp);
 				if (debug)
 					Motion_PrintVectors("DEBUG: Accelerate", vecOld, m_hTarget->pev->velocity);
 			}
+			else
+				m_reportedPosError = true;
 			break;
 		case POSMODE_FOLLOW: // follow position
-			if (TryCalcLocus_Position( this, m_hLocus, STRING(m_iszPosition), vecTemp )) {
+			if (TryCalcLocus_Position( this, m_hLocus, STRING(m_iszPosition), vecTemp, !m_reportedPosError )) {
 				vecOld = m_hTarget->pev->velocity;
 				UTIL_SetVelocity(m_hTarget, vecTemp - m_hTarget->pev->origin);
 				if (debug)
 					Motion_PrintVectors("DEBUG: Set velocity", vecOld, m_hTarget->pev->velocity);
 			}
+			else
+				m_reportedPosError = true;
 			break;
 		}
 	}
@@ -5204,7 +5217,7 @@ void CMotionThread::MotionThink( void )
 		switch (m_iFaceMode)
 		{
 		case FACEMODE_DIRECTION: // set angles
-			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszFacing), vecTemp ))
+			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszFacing), vecTemp, !m_reportedDirError ))
 			{
 				if (vecTemp != g_vecZero) // if the vector is 0 0 0, don't use it
 				{
@@ -5218,9 +5231,11 @@ void CMotionThread::MotionThink( void )
 					ALERT(at_console, "Zero velocity, don't change angles\n");
 				}
 			}
+			else
+				m_reportedDirError = true;
 			break;
 		case FACEMODE_ROTATE: // offset angles (= fake avelocity)
-			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszFacing), vecTemp ))
+			if (TryCalcLocus_Velocity( this, m_hLocus, STRING(m_iszFacing), vecTemp, !m_reportedDirError ))
 			{
 				if (vecTemp != g_vecZero) // if the vector is 0 0 0, don't use it
 				{
@@ -5234,6 +5249,8 @@ void CMotionThread::MotionThink( void )
 					ALERT(at_console, "Zero velocity, don't change angles\n");
 				}
 			}
+			else
+				m_reportedDirError = true;
 			break;
 		case FACEMODE_ROTATE_BY_VALUES: // offset angles (= fake avelocity)
 			UTIL_StringToRandomVector( vecVelAngles, STRING(m_iszFacing) );
@@ -5261,7 +5278,11 @@ void CMotionThread::MotionThink( void )
 			}
 			else
 			{
-				ALERT(at_error, "Could not find \"%s\" to set angles for \"%s\"", STRING(m_iszFacing), STRING(m_hTarget->pev->targetname));
+				if (!m_reportedDirError)
+				{
+					ALERT(at_error, "Could not find \"%s\" to set angles for \"%s\"", STRING(m_iszFacing), STRING(m_hTarget->pev->targetname));
+					m_reportedDirError = true;
+				}
 			}
 		}
 			break;

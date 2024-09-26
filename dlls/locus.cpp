@@ -18,7 +18,7 @@ bool IsLikelyNumber(const char* szText)
 	return (*szText >= '0' && *szText <= '9') || *szText == '-';
 }
 
-bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result )
+bool TryCalcLocus_Position(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result, bool showError)
 {
 	if (IsLikelyNumber(szText))
 	{ // it's a vector
@@ -34,13 +34,16 @@ bool TryCalcLocus_Position( CBaseEntity *pEntity, CBaseEntity *pLocus, const cha
 		return pCalc->CalcPosition( pLocus, &result );
 	}
 
-	const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
-	const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
-	ALERT(at_error, "%s \"%s\" has bad or missing calc_position value \"%s\"\n", requesterClassname, requesterTargetname, szText);
+	if (showError)
+	{
+		const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
+		const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
+		ALERT(at_error, "%s \"%s\" has bad or missing calc_position value \"%s\"\n", requesterClassname, requesterTargetname, szText);
+	}
 	return false;
 }
 
-bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result)
+bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result, bool showError)
 {
 	if (IsLikelyNumber(szText))
 	{ // it's a vector
@@ -56,13 +59,16 @@ bool TryCalcLocus_Velocity(CBaseEntity *pEntity, CBaseEntity *pLocus, const char
 		return pCalc->CalcVelocity( pLocus, &result );
 	}
 
-	const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
-	const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
-	ALERT(at_error, "%s \"%s\" has bad or missing calc_velocity value \"%s\"\n", requesterClassname, requesterTargetname, szText);
+	if (showError)
+	{
+		const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
+		const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
+		ALERT(at_error, "%s \"%s\" has bad or missing calc_velocity value \"%s\"\n", requesterClassname, requesterTargetname, szText);
+	}
 	return false;
 }
 
-bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText, float& result)
+bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText, float& result, bool showError)
 {
 	if (IsLikelyNumber(szText))
 	{ // assume it's a float
@@ -77,11 +83,14 @@ bool TryCalcLocus_Ratio(CBaseEntity *pLocus, const char *szText, float& result)
 		return pCalc->CalcRatio( pLocus, &result );
 	}
 
-	ALERT(at_error, "Bad or missing calc_ratio entity \"%s\"\n", szText);
+	if (showError)
+	{
+		ALERT(at_error, "Bad or missing calc_ratio entity \"%s\"\n", szText);
+	}
 	return false;
 }
 
-bool TryCalcLocus_Color(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result)
+bool TryCalcLocus_Color(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *szText, Vector& result, bool showError)
 {
 	if (IsLikelyNumber(szText))
 	{ // it's a vector
@@ -98,9 +107,12 @@ bool TryCalcLocus_Color(CBaseEntity *pEntity, CBaseEntity *pLocus, const char *s
 		return true;
 	}
 
-	const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
-	const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
-	ALERT(at_error, "%s \"%s\" has bad or missing color value \"%s\"\n", requesterClassname, requesterTargetname, szText);
+	if (showError)
+	{
+		const char* requesterClassname = pEntity ? STRING(pEntity->pev->classname) : "";
+		const char* requesterTargetname = pEntity ? STRING(pEntity->pev->targetname) : "";
+		ALERT(at_error, "%s \"%s\" has bad or missing color value \"%s\"\n", requesterClassname, requesterTargetname, szText);
+	}
 	return false;
 }
 
