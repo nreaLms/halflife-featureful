@@ -99,7 +99,6 @@ int CHudScoreboard::Draw( float fTime )
 {
 	int can_show_packetloss = 0;
 	int FAR_RIGHT;
-	gHUD.m_iNoConsolePrint &= ~( 1 << 0 );
 
 	if( !m_iShowscoresHeld && gHUD.m_Health.m_iHealth > 0 && !gHUD.m_iIntermission )
 		return 1;
@@ -107,8 +106,6 @@ int CHudScoreboard::Draw( float fTime )
 	if (gViewPort && gViewPort->IsScoreBoardVisible())
 		return 1;
 #endif
-
-	gHUD.m_iNoConsolePrint |= 1 << 0;
 
 	gHUD.GetAllPlayersInfo();
 

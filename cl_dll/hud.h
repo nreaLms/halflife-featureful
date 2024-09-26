@@ -1050,8 +1050,6 @@ public:
 	// sprite indexes
 	int m_HUD_number_0;
 
-	int m_iNoConsolePrint;
-
 	void AddHudElem( CHudBase *p );
 
 	float GetSensitivity();
