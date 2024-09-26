@@ -108,6 +108,7 @@ set (CLDLL_SOURCES
 	health.cpp
 	hud.cpp
 	hud_caption.cpp
+	hud_error_collection.cpp
 	hud_inventory.cpp
 	hud_msg.cpp
 	hud_redraw.cpp
@@ -130,6 +131,7 @@ set (CLDLL_SOURCES
 	../pm_shared/pm_shared.cpp
 	../game_shared/tex_materials.cpp
 	../game_shared/parsetext.cpp
+	../game_shared/error_collector.cpp
 	../game_shared/fx_types.cpp
 	../game_shared/json_utils.cpp
 	../game_shared/util_shared.cpp

@@ -42,6 +42,7 @@
 #include "inventory.h"
 #include "followers.h"
 #include "common_soundscripts.h"
+#include "error_collector.h"
 
 #if FEATURE_ROPE
 #include "ropes.h"
@@ -199,6 +200,7 @@ int gmsgTeamInfo = 0;
 int gmsgTeamScore = 0;
 int gmsgGameMode = 0;
 int gmsgMOTD = 0;
+int gmsgParseErrors = 0;
 int gmsgServerName = 0;
 int gmsgAmmoPickup = 0;
 int gmsgWeapPickup = 0;
@@ -300,6 +302,7 @@ void LinkUserMessages( void )
 	gmsgTeamScore = REG_USER_MSG( "TeamScore", -1 );  // sets the score of a team on the scoreboard
 	gmsgGameMode = REG_USER_MSG( "GameMode", 1 );
 	gmsgMOTD = REG_USER_MSG( "MOTD", -1 );
+	gmsgParseErrors = REG_USER_MSG( "ParseErrors", -1 );
 	gmsgServerName = REG_USER_MSG( "ServerName", -1 );
 	gmsgAmmoPickup = REG_USER_MSG( "AmmoPickup", 3 );
 	gmsgWeapPickup = REG_USER_MSG( "WeapPickup", 1 );
@@ -4919,6 +4922,24 @@ void CBasePlayer::SendAmmoUpdate( void )
 	}
 }
 
+static void SendParseErrorsToClient(edict_t* client, const std::string& str)
+{
+	char chunk[121];
+	const char* cstr = str.c_str();
+	size_t offset = 0;
+	while (offset <= str.size())
+	{
+		strncpy(chunk, cstr + offset, sizeof(chunk)-1);
+		chunk[sizeof(chunk)-1] = '\0';
+		offset += sizeof(chunk)-1;
+
+		MESSAGE_BEGIN( MSG_ONE, gmsgParseErrors, NULL, client );
+			WRITE_BYTE( offset >= str.size() ? TRUE : FALSE );
+			WRITE_STRING( chunk );
+		MESSAGE_END();
+	}
+}
+
 /*
 =========================================================
 	UpdateClientData
@@ -4957,6 +4978,15 @@ void CBasePlayer::UpdateClientData( void )
 						WRITE_STRING(STRING(m_inventoryItems[i]));
 						WRITE_BYTE(INVENTORY_DONT_SHOW_IN_HISTORY);
 					MESSAGE_END();
+				}
+			}
+
+			if ( g_psv_developer->value > 0 && !g_pGameRules->IsMultiplayer() || (entindex() == 1 && !IS_DEDICATED_SERVER()) )
+			{
+				if (g_errorCollector.HasErrors())
+				{
+					std::string fullErrorString = g_errorCollector.GetFullString();
+					SendParseErrorsToClient(edict(), fullErrorString);
 				}
 			}
 

@@ -250,6 +250,25 @@ protected:
 	int m_iMaxLength;
 };
 
+class CHudErrorCollection : public CHudBase
+{
+public:
+	int Init();
+	int VidInit();
+	void Reset();
+	int Draw(float flTime);
+	int MsgFunc_ParseErrors( const char *pszName, int iSize, void *pbuf );
+	void SetClientErrors(const std::string& str);
+
+private:
+	int DrawMultiLineString(const char* str, int xpos, int ypos, int xmax, const int LineHeight);
+
+	std::string m_clientErrorString;
+	std::string m_serverErrorString;
+
+	cvar_t* m_pCvarDeveloper;
+};
+
 struct CaptionProfile_t
 {
 	char firstLetter;
@@ -1011,6 +1030,7 @@ public:
 	CHudStatusIcons m_StatusIcons;
 	CHudScoreboard	m_Scoreboard;
 	CHudMOTD	m_MOTD;
+	CHudErrorCollection	m_ErrorCollection;
 	CHudNightvision m_Nightvision;
 	CHudCaption		m_Caption;
 

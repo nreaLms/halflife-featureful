@@ -1,17 +1,8 @@
 #include "json_utils.h"
 
-#if CLIENT_DLL
-#include "cl_dll.h"
-#define JSON_LOG gEngfuncs.Con_DPrintf
-#define JSON_ERROR gEngfuncs.Con_DPrintf
-#else
-#include "util.h"
-#define JSON_LOG(...) ALERT(at_aiconsole, ##__VA_ARGS__ )
-#define JSON_ERROR(...) ALERT(at_error, ##__VA_ARGS__ )
-#endif
-
 #include "color_utils.h"
 #include "parsetext.h"
+#include "error_collector.h"
 
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -103,7 +94,10 @@ static void ReportParseErrors(const char* fileName, ParseResult& parseResult, co
 {
 	size_t errorLine, errorColumn;
 	CalculateLineAndColumnFromOffset(pMemFile, parseResult.Offset(), errorLine, errorColumn);
-	JSON_ERROR("%s: JSON parse error: %s (Line %lu, column %lu)\n", fileName, GetParseError_En(parseResult.Code()), errorLine, errorColumn);
+
+	char buf[1024];
+	_snprintf(buf, sizeof(buf), "%s: JSON parse error: %s (Line %zu, column %zu)", fileName, GetParseError_En(parseResult.Code()), errorLine, errorColumn);
+	g_errorCollector.AddError(buf);
 }
 
 class DefinitionsProvider : public IRemoteSchemaDocumentProvider
@@ -177,13 +171,15 @@ bool ReadJsonDocumentWithSchema(Document &document, const char *pMemFile, int fi
 			schemaPartValue->Accept(writer);
 		}
 
-		JSON_ERROR("%s: value %s of property '%s' doesn't match the constraint '%s' in '%s': %s\n",
+		char buf[1028];
+		_snprintf(buf, sizeof(buf), "%s: value %s of property '%s' doesn't match the constraint '%s' in '%s': %s\n",
 			fileName,
 			badValueBuffer.GetString(),
 			docPathBuffer.GetString(),
 			validator.GetInvalidSchemaKeyword(),
 			schemaPathBuffer.GetString(),
 			schemaPartBuffer.GetString());
+		g_errorCollector.AddError(buf);
 
 		return false;
 	}

@@ -32,6 +32,7 @@
 #include "demo_api.h"
 
 #include "environment.h"
+#include "error_collector.h"
 
 hud_player_info_t	 g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
 extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
@@ -734,6 +735,7 @@ void CHud::Init( void )
 
 	m_MOTD.Init();
 	m_Scoreboard.Init();
+	m_ErrorCollection.Init();
 
 	m_Menu.Init();
 
@@ -748,6 +750,12 @@ void CHud::Init( void )
 	MsgFunc_ResetHUD( 0, 0, NULL );
 	ClientCmd( "richpresence_gamemode\n" );
 	ClientCmd( "richpresence_update\n" );
+
+	if (g_errorCollector.HasErrors())
+	{
+		m_ErrorCollection.SetClientErrors(g_errorCollector.GetFullString());
+		g_errorCollector.Clear();
+	}
 }
 
 const char* strStartsWith(const char* str, const char* start)
@@ -1251,6 +1259,7 @@ void CHud::VidInit( void )
 #endif
 	m_MOTD.VidInit();
 	m_Scoreboard.VidInit();
+	m_ErrorCollection.VidInit();
 	m_Nightvision.VidInit();
 
 	m_Caption.VidInit();
