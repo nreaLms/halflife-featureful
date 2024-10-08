@@ -192,9 +192,6 @@ void CDisplacer::WeaponIdle(void)
 	SendWeaponAnim(iAnim);
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CDisplacer::ClearSpin( void )
 {
 
@@ -209,9 +206,6 @@ void CDisplacer::ClearSpin( void )
 	}
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CDisplacer::SpinUp( void )
 {
 	SendWeaponAnim( DISPLACER_SPINUP );
@@ -232,9 +226,6 @@ void CDisplacer::SpinUp( void )
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.3;
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CDisplacer::Displace( void )
 {
 	ClearBeams();
@@ -244,7 +235,7 @@ void CDisplacer::Displace( void )
 	EMIT_SOUND( edict(), CHAN_WEAPON, "weapons/displacer_fire.wav", 1, ATTN_NORM );
 
 	// player "shoot" animation
-        m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
+	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 	m_pPlayer->pev->punchangle.x -= 2;
 #if !CLIENT_DLL
@@ -264,9 +255,6 @@ void CDisplacer::Displace( void )
 #endif
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CDisplacer::Teleport( void )
 {
 	ClearBeams();

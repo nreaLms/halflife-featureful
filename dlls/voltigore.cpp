@@ -100,9 +100,6 @@ TYPEDESCRIPTION	CVoltigoreEnergyBall::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CVoltigoreEnergyBall, CBaseEntity)
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CVoltigoreEnergyBall::Spawn(void)
 {
 	pev->movetype = MOVETYPE_FLY;
@@ -121,9 +118,6 @@ void CVoltigoreEnergyBall::Spawn(void)
 	m_iBeams = 0;
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CVoltigoreEnergyBall::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity)
 {
 	CVoltigoreEnergyBall *pEnergyBall = GetClassPtr((CVoltigoreEnergyBall *)NULL);
@@ -139,9 +133,6 @@ void CVoltigoreEnergyBall::Shoot(entvars_t *pevOwner, Vector vecStart, Vector ve
 	pEnergyBall->pev->nextthink = gpGlobals->time + 0.1;
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CVoltigoreEnergyBall::BallTouch(CBaseEntity *pOther)
 {
 	TraceResult tr;
@@ -167,9 +158,6 @@ void CVoltigoreEnergyBall::BallTouch(CBaseEntity *pOther)
 	SetTouch(NULL);
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CVoltigoreEnergyBall::FlyThink(void)
 {
 	pev->nextthink = gpGlobals->time + 0.1;
@@ -209,9 +197,6 @@ void CVoltigoreEnergyBall::FlyThink(void)
 	}
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CVoltigoreEnergyBall::CreateBeam(int nIndex, const Vector& vecPos, int width, int brightness)
 {
 	m_pBeam[nIndex] = CBeam::BeamCreate(VOLTIGORE_ZAP_BEAM, width);
@@ -224,9 +209,6 @@ void CVoltigoreEnergyBall::CreateBeam(int nIndex, const Vector& vecPos, int widt
 	m_pBeam[nIndex]->SetNoise(VOLTIGORE_ZAP_NOISE);
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CVoltigoreEnergyBall::UpdateBeam(int nIndex, const Vector& vecPos, bool show)
 {
 	if (!m_pBeam[nIndex])
@@ -237,9 +219,6 @@ void CVoltigoreEnergyBall::UpdateBeam(int nIndex, const Vector& vecPos, bool sho
 	m_pBeam[nIndex]->RelinkBeam();
 }
 
-//=========================================================
-// Purpose:
-//=========================================================
 void CVoltigoreEnergyBall::ClearBeam(int nIndex)
 {
 	if (m_pBeam[nIndex])
@@ -249,9 +228,6 @@ void CVoltigoreEnergyBall::ClearBeam(int nIndex)
 	}
 }
 
-//=========================================================
-// CreateBeams - create all beams
-//=========================================================
 void CVoltigoreEnergyBall::CreateBeams()
 {
 	for (int i = 0; i < VOLTIGORE_MAX_BEAMS; ++i)
@@ -261,9 +237,6 @@ void CVoltigoreEnergyBall::CreateBeams()
 	m_iBeams = VOLTIGORE_MAX_BEAMS;
 }
 
-//=========================================================
-// ClearBeams - remove all beams
-//=========================================================
 void CVoltigoreEnergyBall::ClearBeams()
 {
 	for (int i = 0; i < VOLTIGORE_MAX_BEAMS; ++i)
