@@ -569,26 +569,17 @@ void CHoundeye::SonicAttack( void )
 
 	const Visual* visual = GetWaveVisual();
 
+	const Vector blastOrigin = pev->origin + Vector(0, 0, 16.0f);
 	// blast circles
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMCYLINDER );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 16.0f );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 16.0f + HOUNDEYE_MAX_ATTACK_RADIUS / 0.2f ); // reach damage radius over .3 seconds
+		WRITE_CIRCLE( blastOrigin, HOUNDEYE_MAX_ATTACK_RADIUS / 0.2f );
 		WriteBeamVisual(visual);
 	MESSAGE_END();
 
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMCYLINDER );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 16.0f );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 16.0f + ( HOUNDEYE_MAX_ATTACK_RADIUS / 2.0f ) / 0.2f ); // reach damage radius over .3 seconds
+		WRITE_CIRCLE( blastOrigin, ( HOUNDEYE_MAX_ATTACK_RADIUS / 2.0f ) / 0.2f );
 		WriteBeamVisual(visual);
 	MESSAGE_END();
 
@@ -815,9 +806,7 @@ void CHoundeye::RunTask( Task_t *pTask )
 
 			MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 				WRITE_BYTE( TE_IMPLOSION );
-				WRITE_COORD( pev->origin.x );
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z + 16.0f );
+				WRITE_VECTOR( pev->origin + Vector(0, 0, 16.0f) );
 				WRITE_BYTE( 50.0f * life + 100.0f );  // radius
 				WRITE_BYTE( pev->frame / 25.0f ); // count
 				WRITE_BYTE( life * 10.0f ); // life

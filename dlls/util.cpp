@@ -192,13 +192,19 @@ void WRITE_VECTOR(const Vector& vecSrc)
 	WRITE_COORD( vecSrc.z );
 }
 
+void WRITE_CIRCLE(const Vector& vecSrc, float radius)
+{
+	WRITE_VECTOR( vecSrc );
+	WRITE_COORD( vecSrc.x );
+	WRITE_COORD( vecSrc.y );
+	WRITE_COORD( vecSrc.z + radius );
+}
+
 void UTIL_DynamicLight( const Vector &vecSrc, float flRadius, byte r, byte g, byte b, float flTime, float flDecay )
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
 		WRITE_BYTE( TE_DLIGHT );
-		WRITE_COORD( vecSrc.x );	// X
-		WRITE_COORD( vecSrc.y );	// Y
-		WRITE_COORD( vecSrc.z );	// Z
+		WRITE_VECTOR( vecSrc );
 		WRITE_BYTE( flRadius * 0.1f );	// radius * 0.1
 		WRITE_BYTE( r );		// r
 		WRITE_BYTE( g );		// g
@@ -212,9 +218,7 @@ void UTIL_MuzzleLight( const Vector& vecSrc )
 {
 	extern int gmsgMuzzleLight;
 	MESSAGE_BEGIN( MSG_PVS, gmsgMuzzleLight, vecSrc );
-		WRITE_COORD( vecSrc.x );
-		WRITE_COORD( vecSrc.y );
-		WRITE_COORD( vecSrc.z );
+		WRITE_VECTOR( vecSrc );
 	MESSAGE_END();
 }
 
@@ -1216,12 +1220,8 @@ void UTIL_BloodStream( const Vector &origin, const Vector &direction, int color,
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, origin );
 		WRITE_BYTE( TE_BLOODSTREAM );
-		WRITE_COORD( origin.x );
-		WRITE_COORD( origin.y );
-		WRITE_COORD( origin.z );
-		WRITE_COORD( direction.x );
-		WRITE_COORD( direction.y );
-		WRITE_COORD( direction.z );
+		WRITE_VECTOR( origin );
+		WRITE_VECTOR( direction );
 		WRITE_BYTE( color );
 		WRITE_BYTE( Q_min( amount, 255 ) );
 	MESSAGE_END();
@@ -1246,9 +1246,7 @@ void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, 
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, origin );
 		WRITE_BYTE( TE_BLOODSPRITE );
-		WRITE_COORD( origin.x);								// pos
-		WRITE_COORD( origin.y);
-		WRITE_COORD( origin.z);
+		WRITE_VECTOR( origin );								// pos
 		WRITE_SHORT( g_sModelIndexBloodSpray );				// initial sprite model
 		WRITE_SHORT( g_sModelIndexBloodDrop );				// droplet sprite models
 		WRITE_BYTE( color );								// color index into host_basepal
@@ -1327,9 +1325,7 @@ void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber )
 
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( message );
-		WRITE_COORD( pTrace->vecEndPos.x );
-		WRITE_COORD( pTrace->vecEndPos.y );
-		WRITE_COORD( pTrace->vecEndPos.z );
+		WRITE_VECTOR( pTrace->vecEndPos );
 		WRITE_BYTE( index );
 		if( entityIndex )
 			WRITE_SHORT( entityIndex );
@@ -1367,9 +1363,7 @@ void UTIL_PlayerDecalTrace( TraceResult *pTrace, int playernum, int decalNumber,
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_PLAYERDECAL );
 		WRITE_BYTE( playernum );
-		WRITE_COORD( pTrace->vecEndPos.x );
-		WRITE_COORD( pTrace->vecEndPos.y );
-		WRITE_COORD( pTrace->vecEndPos.z );
+		WRITE_VECTOR( pTrace->vecEndPos );
 		WRITE_SHORT( (short)ENTINDEX( pTrace->pHit ) );
 		WRITE_BYTE( index );
 	MESSAGE_END();
@@ -1389,9 +1383,7 @@ void UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber )
 
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pTrace->vecEndPos );
 		WRITE_BYTE( TE_GUNSHOTDECAL );
-		WRITE_COORD( pTrace->vecEndPos.x );
-		WRITE_COORD( pTrace->vecEndPos.y );
-		WRITE_COORD( pTrace->vecEndPos.z );
+		WRITE_VECTOR( pTrace->vecEndPos );
 		WRITE_SHORT( (short)ENTINDEX( pTrace->pHit ) );
 		WRITE_BYTE( index );
 	MESSAGE_END();
@@ -1401,9 +1393,7 @@ void UTIL_Sparks( const Vector &position )
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, position );
 		WRITE_BYTE( TE_SPARKS );
-		WRITE_COORD( position.x );
-		WRITE_COORD( position.y );
-		WRITE_COORD( position.z );
+		WRITE_VECTOR( position );
 	MESSAGE_END();
 }
 
@@ -1411,9 +1401,7 @@ void UTIL_SparkShower(const Vector &position, const SparkEffectParams& params)
 {
 	extern int gmsgSparkShower;
 	MESSAGE_BEGIN( MSG_PVS, gmsgSparkShower, position );
-		WRITE_COORD( position.x );
-		WRITE_COORD( position.y );
-		WRITE_COORD( position.z );
+		WRITE_VECTOR( position );
 		WRITE_SHORT( params.sparkModelIndex );
 		WRITE_SHORT( params.streakCount );
 		WRITE_SHORT( params.streakVelocity );
@@ -1428,9 +1416,7 @@ void UTIL_Ricochet( const Vector &position, float scale )
 {
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, position );
 		WRITE_BYTE( TE_ARMOR_RICOCHET );
-		WRITE_COORD( position.x );
-		WRITE_COORD( position.y );
-		WRITE_COORD( position.z );
+		WRITE_VECTOR( position );
 		WRITE_BYTE( (int)( scale * 10.0f ) );
 	MESSAGE_END();
 }
@@ -1598,12 +1584,8 @@ void UTIL_Bubbles( Vector mins, Vector maxs, int count )
 
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, mid );
 		WRITE_BYTE( TE_BUBBLES );
-		WRITE_COORD( mins.x );	// mins
-		WRITE_COORD( mins.y );
-		WRITE_COORD( mins.z );
-		WRITE_COORD( maxs.x );	// maxz
-		WRITE_COORD( maxs.y );
-		WRITE_COORD( maxs.z );
+		WRITE_VECTOR( mins );	// mins
+		WRITE_VECTOR( maxs );	// maxz
 		WRITE_COORD( flHeight );			// height
 		WRITE_SHORT( g_sModelIndexBubbles );
 		WRITE_BYTE( count ); // count
@@ -1632,12 +1614,8 @@ void UTIL_BubbleTrail( Vector from, Vector to, int count )
 
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BUBBLETRAIL );
-		WRITE_COORD( from.x );	// mins
-		WRITE_COORD( from.y );
-		WRITE_COORD( from.z );
-		WRITE_COORD( to.x );	// maxz
-		WRITE_COORD( to.y );
-		WRITE_COORD( to.z );
+		WRITE_VECTOR( from );	// mins
+		WRITE_VECTOR( to );	// maxz
 		WRITE_COORD( flHeight );			// height
 		WRITE_SHORT( g_sModelIndexBubbles );
 		WRITE_BYTE( count ); // count

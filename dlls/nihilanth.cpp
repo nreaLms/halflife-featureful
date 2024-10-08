@@ -597,9 +597,7 @@ void CNihilanth::DyingThink( void )
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BEAMENTPOINT );
 		WRITE_SHORT( entindex() + 0x1000 * iAttachment );
-		WRITE_COORD( tr.vecEndPos.x);
-		WRITE_COORD( tr.vecEndPos.y);
-		WRITE_COORD( tr.vecEndPos.z);
+		WRITE_VECTOR( tr.vecEndPos );
 		WRITE_SHORT( g_sModelIndexLaser );
 		WRITE_BYTE( 0 ); // frame start
 		WRITE_BYTE( 10 ); // framerate
@@ -773,9 +771,7 @@ void CNihilanth::NextActivity()
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_ELIGHT );
 				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
-				WRITE_COORD( pev->origin.x );		// origin
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
+				WRITE_VECTOR( pev->origin );		// origin
 				WRITE_COORD( 256 );	// radius
 				WRITE_BYTE( 255 );	// R
 				WRITE_BYTE( 192 );	// G
@@ -1131,9 +1127,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_ELIGHT );
 				WRITE_SHORT( entindex() + 0x3000 );		// entity, attachment
-				WRITE_COORD( pev->origin.x );		// origin
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
+				WRITE_VECTOR( pev->origin );		// origin
 				WRITE_COORD( 256 );	// radius
 				WRITE_BYTE( 128 );	// R
 				WRITE_BYTE( 128 );	// G
@@ -1145,9 +1139,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_ELIGHT );
 				WRITE_SHORT( entindex() + 0x4000 );		// entity, attachment
-				WRITE_COORD( pev->origin.x );		// origin
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
+				WRITE_VECTOR( pev->origin );		// origin
 				WRITE_COORD( 256 );	// radius
 				WRITE_BYTE( 128 );	// R
 				WRITE_BYTE( 128 );	// G
@@ -1193,9 +1185,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 				MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 					WRITE_BYTE( TE_ELIGHT );
 					WRITE_SHORT( entindex() + 0x3000 );		// entity, attachment
-					WRITE_COORD( pev->origin.x );		// origin
-					WRITE_COORD( pev->origin.y );
-					WRITE_COORD( pev->origin.z );
+					WRITE_VECTOR( pev->origin );		// origin
 					WRITE_COORD( 256 );	// radius
 					WRITE_BYTE( 128 );	// R
 					WRITE_BYTE( 128 );	// G
@@ -1207,9 +1197,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 				MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 					WRITE_BYTE( TE_ELIGHT );
 					WRITE_SHORT( entindex() + 0x4000 );		// entity, attachment
-					WRITE_COORD( pev->origin.x );		// origin
-					WRITE_COORD( pev->origin.y );
-					WRITE_COORD( pev->origin.z );
+					WRITE_VECTOR( pev->origin );		// origin
 					WRITE_COORD( 256 );	// radius
 					WRITE_BYTE( 128 );	// R
 					WRITE_BYTE( 128 );	// G
@@ -1540,9 +1528,7 @@ void CNihilanthHVR::ZapThink( void )
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_BEAMENTPOINT );
 			WRITE_SHORT( entindex() );
-			WRITE_COORD( tr.vecEndPos.x );
-			WRITE_COORD( tr.vecEndPos.y );
-			WRITE_COORD( tr.vecEndPos.z );
+			WRITE_VECTOR( tr.vecEndPos );
 			WRITE_SHORT( g_sModelIndexLaser );
 			WRITE_BYTE( 0 ); // frame start
 			WRITE_BYTE( 10 ); // framerate
@@ -1569,9 +1555,7 @@ void CNihilanthHVR::ZapThink( void )
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_ELIGHT );
 		WRITE_SHORT( entindex( ) );		// entity, attachment
-		WRITE_COORD( pev->origin.x );		// origin
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
+		WRITE_VECTOR( pev->origin );		// origin
 		WRITE_COORD( 128 );	// radius
 		WRITE_BYTE( 128 );	// R
 		WRITE_BYTE( 128 );	// G
@@ -1672,9 +1656,7 @@ void CNihilanthHVR::TeleportThink( void )
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_ELIGHT );
 		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_COORD( pev->origin.x );		// origin
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
+		WRITE_VECTOR( pev->origin );		// origin
 		WRITE_COORD( 256 );	// radius
 		WRITE_BYTE( 0 );	// R
 		WRITE_BYTE( 255 );	// G
@@ -1753,9 +1735,7 @@ void CNihilanthHVR::DissipateThink( void )
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_ELIGHT );
 		WRITE_SHORT( entindex() );		// entity, attachment
-		WRITE_COORD( pev->origin.x );		// origin
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
+		WRITE_VECTOR( pev->origin );		// origin
 		WRITE_COORD( pev->renderamt );	// radius
 		WRITE_BYTE( 255 );	// R
 		WRITE_BYTE( 192 );	// G
@@ -1844,9 +1824,7 @@ void CNihilanthHVR::Crawl( void )
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BEAMENTPOINT );
 		WRITE_SHORT( entindex() );
-		WRITE_COORD( vecPnt.x );
-		WRITE_COORD( vecPnt.y );
-		WRITE_COORD( vecPnt.z );
+		WRITE_VECTOR( vecPnt );
 		WRITE_SHORT( g_sModelIndexLaser );
 		WRITE_BYTE( 0 ); // frame start
 		WRITE_BYTE( 10 ); // framerate

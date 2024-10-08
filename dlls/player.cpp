@@ -5113,9 +5113,7 @@ void CBasePlayer::UpdateClientData( void )
 			WRITE_BYTE( (int)pev->dmg_save );
 			WRITE_BYTE( (int)pev->dmg_take );
 			WRITE_LONG( visibleDamageBits );
-			WRITE_COORD( damageOrigin.x );
-			WRITE_COORD( damageOrigin.y );
-			WRITE_COORD( damageOrigin.z );
+			WRITE_VECTOR( damageOrigin );
 		MESSAGE_END();
 
 		pev->dmg_take = 0;

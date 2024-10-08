@@ -728,9 +728,7 @@ void COsprey::DyingThink( void )
 			WRITE_BYTE( TE_BREAKMODEL);
 
 			// position
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z );
+			WRITE_VECTOR( vecSpot );
 
 			// size
 			WRITE_COORD( 800 );
@@ -738,9 +736,7 @@ void COsprey::DyingThink( void )
 			WRITE_COORD( 132 );
 
 			// velocity
-			WRITE_COORD( pev->velocity.x ); 
-			WRITE_COORD( pev->velocity.y );
-			WRITE_COORD( pev->velocity.z );
+			WRITE_VECTOR( pev->velocity );
 
 			// randomization
 			WRITE_BYTE( 50 ); 
@@ -782,9 +778,7 @@ void COsprey::DyingThink( void )
 		// gibs
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
 			WRITE_BYTE( TE_SPRITE );
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z + 512 );
+			WRITE_VECTOR( vecSpot + Vector(0, 0, 512) );
 			WRITE_SHORT( m_iExplode );
 			WRITE_BYTE( 250 ); // scale * 10
 			WRITE_BYTE( 255 ); // brightness
@@ -805,12 +799,7 @@ void COsprey::DyingThink( void )
 		// blast circle
 		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 			WRITE_BYTE( TE_BEAMCYLINDER );
-			WRITE_COORD( pev->origin.x);
-			WRITE_COORD( pev->origin.y);
-			WRITE_COORD( pev->origin.z);
-			WRITE_COORD( pev->origin.x);
-			WRITE_COORD( pev->origin.y);
-			WRITE_COORD( pev->origin.z + 2000 ); // reach damage radius over .2 seconds
+			WRITE_CIRCLE( pev->origin, 2000 );
 			WRITE_SHORT( m_iSpriteTexture );
 			WRITE_BYTE( 0 ); // startframe
 			WRITE_BYTE( 0 ); // framerate
@@ -834,9 +823,7 @@ void COsprey::DyingThink( void )
 			WRITE_BYTE( TE_BREAKMODEL);
 
 			// position
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z + 64 );
+			WRITE_VECTOR( vecSpot + Vector(0, 0, 64) );
 
 			// size
 			WRITE_COORD( 800 );
@@ -875,9 +862,7 @@ void COsprey::ShowDamage( void )
 		Vector vecSrc = pev->origin + gpGlobals->v_right * -340;
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( vecSrc.x );
-			WRITE_COORD( vecSrc.y );
-			WRITE_COORD( vecSrc.z );
+			WRITE_VECTOR( vecSrc );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( RANDOM_LONG( 0, 9 ) + 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate
@@ -890,9 +875,7 @@ void COsprey::ShowDamage( void )
 		Vector vecSrc = pev->origin + gpGlobals->v_right * 340;
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( vecSrc.x );
-			WRITE_COORD( vecSrc.y );
-			WRITE_COORD( vecSrc.z );
+			WRITE_VECTOR( vecSrc );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( RANDOM_LONG( 0, 9 ) + 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate

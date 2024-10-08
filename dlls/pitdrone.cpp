@@ -565,12 +565,8 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 		// spew the spittle temporary ents.
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOrigin );
 			WRITE_BYTE( TE_SPRITE_SPRAY );
-			WRITE_COORD( vecSpitOrigin.x );	// pos
-			WRITE_COORD( vecSpitOrigin.y );
-			WRITE_COORD( vecSpitOrigin.z );
-			WRITE_COORD( vecSpitDir.x );	// dir
-			WRITE_COORD( vecSpitDir.y );
-			WRITE_COORD( vecSpitDir.z );
+			WRITE_VECTOR( vecSpitOrigin );	// pos
+			WRITE_VECTOR( vecSpitDir );	// dir
 			WRITE_SHORT( iPitdroneSpitSprite );	// model
 			WRITE_BYTE( 15 );			// count
 			WRITE_BYTE( 210 );			// speed

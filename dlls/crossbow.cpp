@@ -213,9 +213,7 @@ void CCrossbowBolt::ExplodeThink( void )
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_EXPLOSION );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
+		WRITE_VECTOR( pev->origin );
 		if( iContents != CONTENTS_WATER )
 		{
 			WRITE_SHORT( g_sModelIndexFireball );

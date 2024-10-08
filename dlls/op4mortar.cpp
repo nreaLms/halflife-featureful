@@ -112,18 +112,16 @@ void CMortarShell::MortarExplodeTouch(CBaseEntity *pOther)
 
 	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_EXPLOSION);
-	WRITE_COORD(pev->origin.x);
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
+		WRITE_VECTOR(pev->origin);
 
-	if (contents == CONTENTS_WATER)
-		WRITE_SHORT(g_sModelIndexWExplosion);
-	else
-		WRITE_SHORT(g_sModelIndexFireball);
+		if (contents == CONTENTS_WATER)
+			WRITE_SHORT(g_sModelIndexWExplosion);
+		else
+			WRITE_SHORT(g_sModelIndexFireball);
 
-	WRITE_BYTE(static_cast<int>((pev->dmg - 50.0) * 5.0));
-	WRITE_BYTE(10);
-	WRITE_BYTE(TE_EXPLFLAG_NONE);
+		WRITE_BYTE(static_cast<int>((pev->dmg - 50.0) * 5.0));
+		WRITE_BYTE(10);
+		WRITE_BYTE(TE_EXPLFLAG_NONE);
 	MESSAGE_END();
 
 	CSoundEnt::InsertSound(bits_SOUND_COMBAT, pev->origin, 1024, 3.0);
@@ -168,9 +166,7 @@ void CMortarShell::BurnThink()
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_SPRITE_SPRAY);
-	WRITE_COORD(pev->origin.x);
-	WRITE_COORD(pev->origin.y);
-	WRITE_COORD(pev->origin.z);
+	WRITE_VECTOR(pev->origin);
 	WRITE_COORD(0);
 	WRITE_COORD(0);
 	WRITE_COORD(1);

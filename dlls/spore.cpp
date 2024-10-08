@@ -143,12 +143,8 @@ void CSpore::IgniteThink()
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_SPRITE_SPRAY);
-	WRITE_COORD( pev->origin.x );
-	WRITE_COORD( pev->origin.y );
-	WRITE_COORD( pev->origin.z );
-	WRITE_COORD( tr.vecPlaneNormal.x );
-	WRITE_COORD( tr.vecPlaneNormal.y );
-	WRITE_COORD( tr.vecPlaneNormal.z );
+	WRITE_VECTOR( pev->origin );
+	WRITE_VECTOR( tr.vecPlaneNormal );
 	WRITE_SHORT(m_iSpitSprite);
 	WRITE_BYTE(100);
 	WRITE_BYTE(40);
@@ -157,9 +153,7 @@ void CSpore::IgniteThink()
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_DLIGHT);
-	WRITE_COORD( pev->origin.x );
-	WRITE_COORD( pev->origin.y );
-	WRITE_COORD( pev->origin.z );
+	WRITE_VECTOR( pev->origin );
 	WRITE_BYTE(10);
 	WRITE_BYTE(15);
 	WRITE_BYTE(220);
@@ -170,9 +164,7 @@ void CSpore::IgniteThink()
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_SPRITE);
-	WRITE_COORD( pev->origin.x );
-	WRITE_COORD( pev->origin.y );
-	WRITE_COORD( pev->origin.z );
+	WRITE_VECTOR( pev->origin );
 	WRITE_SHORT(RANDOM_LONG(0, 1) ? m_iBlow : m_iBlowSmall);
 	WRITE_BYTE(20);
 	WRITE_BYTE(128);
@@ -180,9 +172,7 @@ void CSpore::IgniteThink()
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_SPRITE_SPRAY);
-	WRITE_COORD( pev->origin.x );
-	WRITE_COORD( pev->origin.y );
-	WRITE_COORD( pev->origin.z );
+	WRITE_VECTOR( pev->origin );
 	WRITE_COORD(RANDOM_FLOAT(-1, 1));
 	WRITE_COORD(1);
 	WRITE_COORD(RANDOM_FLOAT(-1, 1));
@@ -209,12 +199,8 @@ void CSpore::FlyThink()
 
 		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 		WRITE_BYTE(TE_SPRITE_SPRAY);
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
-		WRITE_COORD( velocity.x );
-		WRITE_COORD( velocity.y );
-		WRITE_COORD( velocity.z );
+		WRITE_VECTOR( pev->origin );
+		WRITE_VECTOR( velocity );
 		WRITE_SHORT(m_iTrail);
 		WRITE_BYTE(2);
 		WRITE_BYTE(20);
@@ -409,9 +395,7 @@ int CSporeAmmo::TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 
 		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 			WRITE_BYTE( TE_EXPLOSION );		// This makes a dynamic light and the explosion sprites/sound
-			WRITE_COORD( vecSrc.x );	// Send to PAS because of the sound
-			WRITE_COORD( vecSrc.y );
-			WRITE_COORD( vecSrc.z );
+			WRITE_VECTOR( vecSrc );	// Send to PAS because of the sound
 			WRITE_SHORT( m_iExplode );
 			WRITE_BYTE( 25  ); // scale * 10
 			WRITE_BYTE( 12  ); // framerate

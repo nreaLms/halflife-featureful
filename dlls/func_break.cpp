@@ -758,19 +758,13 @@ void CBreakable::BreakModel(const Vector& vecSpot, const Vector& size, const Vec
 		WRITE_BYTE( TE_BREAKMODEL );
 
 		// position
-		WRITE_COORD( vecSpot.x );
-		WRITE_COORD( vecSpot.y );
-		WRITE_COORD( vecSpot.z );
+		WRITE_VECTOR( vecSpot );
 
 		// size
-		WRITE_COORD( size.x );
-		WRITE_COORD( size.y );
-		WRITE_COORD( size.z );
+		WRITE_VECTOR( size );
 
 		// velocity
-		WRITE_COORD( vecVelocity.x );
-		WRITE_COORD( vecVelocity.y );
-		WRITE_COORD( vecVelocity.z );
+		WRITE_VECTOR( vecVelocity );
 
 		// randomization
 		WRITE_BYTE( 10 );

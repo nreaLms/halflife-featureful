@@ -516,9 +516,7 @@ void CFuncTank::RemoveBullet()
 				Vector pos = (pev->spawnflags & SF_TANK_SMOKE_IN_ORIGIN) ? pev->origin : BarrelPosition();
 				MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 					WRITE_BYTE( TE_SMOKE );
-					WRITE_COORD( pos.x );
-					WRITE_COORD( pos.y );
-					WRITE_COORD( pos.z );
+					WRITE_VECTOR( pos );
 					WRITE_SHORT( g_sModelIndexSmoke );
 					WRITE_BYTE( 20 ); // scale * 10
 					WRITE_BYTE( 5 ); // framerate

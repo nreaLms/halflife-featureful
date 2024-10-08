@@ -3192,9 +3192,7 @@ void CTorch::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float 
 				UTIL_Ricochet( ptr->vecEndPos, 1.0 );
 				MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 					WRITE_BYTE( TE_EXPLOSION );		// This makes a dynamic light and the explosion sprites/sound
-					WRITE_COORD( ptr->vecEndPos.x );	// Send to PAS because of the sound
-					WRITE_COORD( ptr->vecEndPos.y );
-					WRITE_COORD( ptr->vecEndPos.z );
+					WRITE_VECTOR( ptr->vecEndPos );	// Send to PAS because of the sound
 					WRITE_SHORT( g_sModelIndexFireball );
 					WRITE_BYTE( 15  ); // scale * 10
 					WRITE_BYTE( 15  ); // framerate
@@ -3245,12 +3243,8 @@ void CTorch::UpdateGas( void )
 
 				MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos );
 					WRITE_BYTE( TE_STREAK_SPLASH );
-					WRITE_COORD( tr.vecEndPos.x );		// origin
-					WRITE_COORD( tr.vecEndPos.y );
-					WRITE_COORD( tr.vecEndPos.z );
-					WRITE_COORD( tr.vecPlaneNormal.x );	// direction
-					WRITE_COORD( tr.vecPlaneNormal.y );
-					WRITE_COORD( tr.vecPlaneNormal.z );
+					WRITE_VECTOR( tr.vecEndPos );		// origin
+					WRITE_VECTOR( tr.vecPlaneNormal );	// direction
 					WRITE_BYTE( 10 );	// Streak color 6
 					WRITE_SHORT( 60 );	// count
 					WRITE_SHORT( 25 );
@@ -3259,9 +3253,7 @@ void CTorch::UpdateGas( void )
 		}
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_DLIGHT );
-			WRITE_COORD( posGun.x );		// origin
-			WRITE_COORD( posGun.y );
-			WRITE_COORD( posGun.z );
+			WRITE_VECTOR( posGun );		// origin
 			WRITE_BYTE( RANDOM_LONG(4, 16) );	// radius
 			WRITE_BYTE( 251 );	// R
 			WRITE_BYTE( 68 );	// G
@@ -3273,9 +3265,7 @@ void CTorch::UpdateGas( void )
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_ELIGHT );
 			WRITE_SHORT( entindex( ) + 0x1000 * 3 );		// entity, attachment
-			WRITE_COORD( posGun.x );		// origin
-			WRITE_COORD( posGun.y );
-			WRITE_COORD( posGun.z );
+			WRITE_VECTOR( posGun );		// origin
 			WRITE_COORD( RANDOM_LONG(8, 12) );	// radius
 			WRITE_BYTE( 251 );	// R
 			WRITE_BYTE( 68 );	// G

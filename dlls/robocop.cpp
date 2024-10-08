@@ -73,9 +73,7 @@ void CFireTrail::Think( void )
 {
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_EXPLOSION);
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
+		WRITE_VECTOR( pev->origin );
 		WRITE_SHORT( g_sModelIndexFireball );
 		WRITE_BYTE( (BYTE)( m_spriteScale * pev->speed ) ); // scale * 10
 		WRITE_BYTE( 15 ); // framerate
@@ -917,9 +915,7 @@ void CRoboCop::RunTask( Task_t *pTask )
 					WRITE_BYTE( TE_BREAKMODEL );
 
 					// position
-					WRITE_COORD( pev->origin.x );
-					WRITE_COORD( pev->origin.y );
-					WRITE_COORD( pev->origin.z );
+					WRITE_VECTOR( pev->origin );
 
 					// size
 					WRITE_COORD( 200 );
@@ -927,9 +923,7 @@ void CRoboCop::RunTask( Task_t *pTask )
 					WRITE_COORD( 128 );
 
 					// velocity
-					WRITE_COORD( 0 );
-					WRITE_COORD( 0 );
-					WRITE_COORD( 0 );
+					WRITE_VECTOR( g_vecZero );
 
 					// randomization
 					WRITE_BYTE( 200 );

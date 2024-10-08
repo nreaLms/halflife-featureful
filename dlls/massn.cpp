@@ -260,9 +260,7 @@ void CMassn::HandleAnimEvent(MonsterEvent_t *pEvent)
 			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecGunPos );
 				WRITE_BYTE( TE_ELIGHT );
 				WRITE_SHORT( entindex() + 0x1000 );		// entity, attachment
-				WRITE_COORD( vecGunPos.x );		// origin
-				WRITE_COORD( vecGunPos.y );
-				WRITE_COORD( vecGunPos.z );
+				WRITE_VECTOR( vecGunPos );		// origin
 				WRITE_COORD( 24 );	// radius
 				WRITE_BYTE( 255 );	// R
 				WRITE_BYTE( 255 );	// G

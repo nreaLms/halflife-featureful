@@ -373,9 +373,7 @@ void CApache::DyingThink( void )
 		// fireball
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
 			WRITE_BYTE( TE_SPRITE );
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z + 256.0f );
+			WRITE_VECTOR( vecSpot + Vector(0, 0, 256.0f) );
 			WRITE_SHORT( m_iExplode );
 			WRITE_BYTE( 120 ); // scale * 10
 			WRITE_BYTE( 255 ); // brightness
@@ -384,9 +382,7 @@ void CApache::DyingThink( void )
 		// big smoke
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z + 512.0f );
+			WRITE_VECTOR( vecSpot + Vector(0, 0, 512.0f) );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 250 ); // scale * 10
 			WRITE_BYTE( 5 ); // framerate
@@ -395,12 +391,7 @@ void CApache::DyingThink( void )
 		// blast circle
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 			WRITE_BYTE( TE_BEAMCYLINDER );
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z );
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z + 2000 ); // reach damage radius over .2 seconds
+			WRITE_CIRCLE( pev->origin, 2000 ); // reach damage radius over .2 seconds
 			WRITE_SHORT( m_iSpriteTexture );
 			WRITE_BYTE( 0 ); // startframe
 			WRITE_BYTE( 0 ); // framerate
@@ -435,9 +426,7 @@ void CApache::DyingThink( void )
 			WRITE_BYTE( TE_BREAKMODEL);
 
 			// position
-			WRITE_COORD( vecSpot.x );
-			WRITE_COORD( vecSpot.y );
-			WRITE_COORD( vecSpot.z + 64.0f );
+			WRITE_VECTOR( vecSpot + Vector(0, 0, 64.0f) );
 
 			// size
 			WRITE_COORD( 400 );
@@ -952,9 +941,7 @@ void CApache::ShowDamage( void )
 	{
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z - 32 );
+			WRITE_VECTOR( pev->origin + Vector(0, 0, -32) );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( RANDOM_LONG( 0, 9 ) + 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate

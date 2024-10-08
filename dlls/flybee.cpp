@@ -413,8 +413,7 @@ void CFlybee::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 				WRITE_BYTE( TE_BEAMCYLINDER );
-				WRITE_COORD( vecEnd.x);	WRITE_COORD( vecEnd.y); WRITE_COORD( vecEnd.z);
-				WRITE_COORD( vecEnd.x); WRITE_COORD( vecEnd.y); WRITE_COORD( vecEnd.z + 1000 );
+				WRITE_CIRCLE( vecEnd, 1000 );
 				WRITE_SHORT( m_iSpriteTexture );
 				WRITE_BYTE( 0 ); // startframe
 				WRITE_BYTE( 0 ); // framerate

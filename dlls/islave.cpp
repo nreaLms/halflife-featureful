@@ -2048,25 +2048,17 @@ void CISlave::CoilBeam()
 	if (!visual->modelIndex)
 		return;
 
+	const Vector coilOrigin = pev->origin + Vector(0, 0, 16.0f);
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMCYLINDER );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 16 );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 16 + ISLAVE_COIL_ATTACK_RADIUS*5 );
+		WRITE_CIRCLE( coilOrigin, ISLAVE_COIL_ATTACK_RADIUS*5 );
 		WriteBeamVisual(visual);
 	MESSAGE_END();
 
+	const Vector coilOrigin2 = pev->origin + Vector(0, 0, 48.0f);
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_BEAMCYLINDER );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 48 );
-		WRITE_COORD( pev->origin.x );
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z + 48 + ISLAVE_COIL_ATTACK_RADIUS*2 );
+		WRITE_CIRCLE( coilOrigin2, ISLAVE_COIL_ATTACK_RADIUS*2 );
 		WriteBeamVisual(visual);
 	MESSAGE_END();
 }

@@ -942,12 +942,8 @@ void CFloater::ExplodeEffect()
 	exploOrigin.z += 32.0f;
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, exploOrigin);
 		WRITE_BYTE(TE_SPRITE_SPRAY);
-		WRITE_COORD(exploOrigin.x);	// pos
-		WRITE_COORD(exploOrigin.y);
-		WRITE_COORD(exploOrigin.z);
-		WRITE_COORD(up.x);			// dir
-		WRITE_COORD(up.y);
-		WRITE_COORD(up.z);
+		WRITE_VECTOR(exploOrigin);	// pos
+		WRITE_VECTOR(up);			// dir
 		WRITE_SHORT(m_tinySpit);	// model
 		WRITE_BYTE(25);// count
 		WRITE_BYTE(15);		// speed
@@ -956,9 +952,7 @@ void CFloater::ExplodeEffect()
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, exploOrigin );
 		WRITE_BYTE( TE_SPRITE );
-		WRITE_COORD( exploOrigin.x );
-		WRITE_COORD( exploOrigin.y );
-		WRITE_COORD( exploOrigin.z );
+		WRITE_VECTOR( exploOrigin );
 		WRITE_SHORT( RANDOM_LONG( 0, 1 ) ? m_explode1 : m_explode2 );
 		WRITE_BYTE( 20 ); // scale * 10
 		WRITE_BYTE( 120 ); // framerate
@@ -966,9 +960,7 @@ void CFloater::ExplodeEffect()
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, exploOrigin );
 		WRITE_BYTE(TE_DLIGHT);
-		WRITE_COORD( exploOrigin.x );	// X
-		WRITE_COORD( exploOrigin.y );	// Y
-		WRITE_COORD( exploOrigin.z );	// Z
+		WRITE_VECTOR( exploOrigin );
 		WRITE_BYTE( 12 );		// radius * 0.1
 		WRITE_BYTE( 60 );		// r
 		WRITE_BYTE( 180 );		// g

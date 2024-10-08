@@ -693,13 +693,9 @@ void PlayWarpballEffect(const WarpballTemplate& warpball, const Vector &vecOrigi
 		auto& light = warpball.light;
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
 			WRITE_BYTE( TE_DLIGHT );
-			WRITE_COORD( vecOrigin.x );	// X
-			WRITE_COORD( vecOrigin.y );	// Y
-			WRITE_COORD( vecOrigin.z );	// Z
+			WRITE_VECTOR( vecOrigin );
 			WRITE_BYTE( (int)(light.radius * 0.1f) );		// radius * 0.1
-			WRITE_BYTE( light.color.r );		// r
-			WRITE_BYTE( light.color.g );		// g
-			WRITE_BYTE( light.color.b );		// b
+			WRITE_COLOR( light.color );
 			WRITE_BYTE( (int)(light.life * 10) );		// time * 10
 			WRITE_BYTE( (int)(light.life * 10 / 2) );		// decay * 0.1
 		MESSAGE_END();

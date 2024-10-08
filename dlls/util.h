@@ -67,6 +67,7 @@ extern void AddMapBSPAsPrecachedModel();
 extern void WRITE_COLOR(const Color& color);
 extern void WRITE_COLOR(const Vector& color);
 extern void WRITE_VECTOR(const Vector& vecSrc);
+extern void WRITE_CIRCLE(const Vector& vecSrc, float radius);
 
 inline edict_t *FIND_ENTITY_BY_CLASSNAME(edict_t *entStart, const char *pszName) 
 {

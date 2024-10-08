@@ -988,12 +988,8 @@ void CVoltigore::Killed(entvars_t *pevInflictor, entvars_t *pevAttacker, int iGi
 			iDrawn++;
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_BEAMPOINTS );
-				WRITE_COORD( vecOrigin.x );
-				WRITE_COORD( vecOrigin.y );
-				WRITE_COORD( vecOrigin.z );
-				WRITE_COORD( tr.vecEndPos.x );
-				WRITE_COORD( tr.vecEndPos.y );
-				WRITE_COORD( tr.vecEndPos.z );
+				WRITE_VECTOR( vecOrigin );
+				WRITE_VECTOR( tr.vecEndPos );
 				WRITE_SHORT( m_beamTexture );
 				WRITE_BYTE( 0 ); // framestart
 				WRITE_BYTE( 10 ); // framerate

@@ -380,9 +380,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecGunPos );
 				WRITE_BYTE( TE_SPRITE );
-				WRITE_COORD( vecGunPos.x );	// pos
-				WRITE_COORD( vecGunPos.y );
-				WRITE_COORD( vecGunPos.z );
+				WRITE_VECTOR( vecGunPos );	// pos
 				WRITE_SHORT( iStrooperMuzzleFlash );		// model
 				WRITE_BYTE( 4 );				// size * 10
 				WRITE_BYTE( 128 );			// brightness

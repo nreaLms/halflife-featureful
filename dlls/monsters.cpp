@@ -817,12 +817,8 @@ static void DrawRoutePart(const Vector& vecStart, const Vector& vecEnd, int r, i
 {
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BEAMPOINTS);
-		WRITE_COORD( vecStart.x );
-		WRITE_COORD( vecStart.y );
-		WRITE_COORD( vecStart.z );
-		WRITE_COORD( vecEnd.x );
-		WRITE_COORD( vecEnd.y );
-		WRITE_COORD( vecEnd.z );
+		WRITE_VECTOR( vecStart );
+		WRITE_VECTOR( vecEnd );
 
 		WRITE_SHORT( g_sModelIndexLaser );
 		WRITE_BYTE( 0 ); // frame start
@@ -1913,22 +1909,14 @@ int CBaseMonster::FTriangulate( const Vector &vecStart, const Vector &vecEnd, fl
 #if 0
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_SHOWLINE);
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z );
-			WRITE_COORD( vecRight.x );
-			WRITE_COORD( vecRight.y );
-			WRITE_COORD( vecRight.z );
+			WRITE_VECTOR( pev->origin );
+			WRITE_VECTOR( vecRight );
 		MESSAGE_END();
 
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_SHOWLINE );
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z );
-			WRITE_COORD( vecLeft.x );
-			WRITE_COORD( vecLeft.y );
-			WRITE_COORD( vecLeft.z );
+			WRITE_VECTOR( pev->origin );
+			WRITE_VECTOR( vecLeft );
 		MESSAGE_END();
 #endif
 #if 0
@@ -1936,22 +1924,14 @@ int CBaseMonster::FTriangulate( const Vector &vecStart, const Vector &vecEnd, fl
 		{
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_SHOWLINE );
-				WRITE_COORD( pev->origin.x );
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
-				WRITE_COORD( vecTop.x );
-				WRITE_COORD( vecTop.y );
-				WRITE_COORD( vecTop.z );
+				WRITE_VECTOR( pev->origin );
+				WRITE_VECTOR( vecTop );
 			MESSAGE_END();
 
 			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 				WRITE_BYTE( TE_SHOWLINE );
-				WRITE_COORD( pev->origin.x );
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
-				WRITE_COORD( vecBottom.x );
-				WRITE_COORD( vecBottom.y );
-				WRITE_COORD( vecBottom.z );
+				WRITE_VECTOR( pev->origin );
+				WRITE_VECTOR( vecBottom );
 			MESSAGE_END();
 		}
 #endif
@@ -2816,13 +2796,9 @@ BOOL CBaseMonster::FindSpotAway(Vector vecThreat, Vector vecViewOffset, float fl
 						MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 							WRITE_BYTE( TE_SHOWLINE );
 
-							WRITE_COORD( node.m_vecOrigin.x );
-							WRITE_COORD( node.m_vecOrigin.y );
-							WRITE_COORD( node.m_vecOrigin.z );
+							WRITE_VECTOR( node.m_vecOrigin );
 
-							WRITE_COORD( vecLookersOffset.x );
-							WRITE_COORD( vecLookersOffset.y );
-							WRITE_COORD( vecLookersOffset.z );
+							WRITE_VECTOR( vecLookersOffset );
 						MESSAGE_END();
 						*/
 

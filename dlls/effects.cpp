@@ -703,19 +703,13 @@ void CLightning::StrikeThink( void )
 				{
 					WRITE_BYTE( TE_BEAMENTPOINT );
 					WRITE_SHORT( pStart->entindex() );
-					WRITE_COORD( pEnd->pev->origin.x );
-					WRITE_COORD( pEnd->pev->origin.y );
-					WRITE_COORD( pEnd->pev->origin.z );
+					WRITE_VECTOR( pEnd->pev->origin );
 				}
 				else
 				{
 					WRITE_BYTE( TE_BEAMPOINTS );
-					WRITE_COORD( pStart->pev->origin.x );
-					WRITE_COORD( pStart->pev->origin.y );
-					WRITE_COORD( pStart->pev->origin.z );
-					WRITE_COORD( pEnd->pev->origin.x );
-					WRITE_COORD( pEnd->pev->origin.y );
-					WRITE_COORD( pEnd->pev->origin.z );
+					WRITE_VECTOR( pStart->pev->origin );
+					WRITE_VECTOR( pEnd->pev->origin );
 				}
 
 			}
@@ -735,9 +729,7 @@ void CLightning::StrikeThink( void )
 			WRITE_BYTE( (int)( m_life * 10.0f ) ); // life
 			WRITE_BYTE( m_boltWidth );  // width
 			WRITE_BYTE( m_noiseAmplitude );   // noise
-			WRITE_BYTE( (int)pev->rendercolor.x );   // r, g, b
-			WRITE_BYTE( (int)pev->rendercolor.y );   // r, g, b
-			WRITE_BYTE( (int)pev->rendercolor.z );   // r, g, b
+			WRITE_COLOR( pev->rendercolor );   // r, g, b
 			WRITE_BYTE( (int)pev->renderamt );	// brightness
 			WRITE_BYTE( m_speed );		// speed
 		if (gmsgCustomBeam)
@@ -787,21 +779,15 @@ void CLightning::Zap( const Vector &vecSrc, const Vector &vecDest )
 #if 1
 	MESSAGE_BEGIN( MSG_BROADCAST, gmsgCustomBeam ? gmsgCustomBeam : SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BEAMPOINTS );
-		WRITE_COORD( vecSrc.x );
-		WRITE_COORD( vecSrc.y );
-		WRITE_COORD( vecSrc.z );
-		WRITE_COORD( vecDest.x );
-		WRITE_COORD( vecDest.y );
-		WRITE_COORD( vecDest.z );
+		WRITE_VECTOR( vecSrc );
+		WRITE_VECTOR( vecDest );
 		WRITE_SHORT( m_spriteTexture );
 		WRITE_BYTE( m_frameStart ); // framestart
 		WRITE_BYTE( (int)pev->framerate ); // framerate
 		WRITE_BYTE( (int)( m_life * 10.0f ) ); // life
 		WRITE_BYTE( m_boltWidth );  // width
 		WRITE_BYTE( m_noiseAmplitude );   // noise
-		WRITE_BYTE( (int)pev->rendercolor.x );   // r, g, b
-		WRITE_BYTE( (int)pev->rendercolor.y );   // r, g, b
-		WRITE_BYTE( (int)pev->rendercolor.z );   // r, g, b
+		WRITE_COLOR( pev->rendercolor );   // r, g, b
 		WRITE_BYTE( (int)pev->renderamt );	// brightness
 		WRITE_BYTE( m_speed );		// speed
 	if (gmsgCustomBeam)
@@ -812,12 +798,8 @@ void CLightning::Zap( const Vector &vecSrc, const Vector &vecDest )
 #else
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_LIGHTNING );
-		WRITE_COORD( vecSrc.x );
-		WRITE_COORD( vecSrc.y );
-		WRITE_COORD( vecSrc.z );
-		WRITE_COORD( vecDest.x );
-		WRITE_COORD( vecDest.y );
-		WRITE_COORD( vecDest.z );
+		WRITE_VECTOR( vecSrc );
+		WRITE_VECTOR( vecDest );
 		WRITE_BYTE( 10 );
 		WRITE_BYTE( 50 );
 		WRITE_BYTE( 40 );
@@ -2064,9 +2046,7 @@ void CTestEffect::TestThink( void )
 		Vector vecMid = ( vecSrc + tr.vecEndPos ) * 0.5f;
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_DLIGHT );
-			WRITE_COORD( vecMid.x );	// X
-			WRITE_COORD( vecMid.y );	// Y
-			WRITE_COORD( vecMid.z );	// Z
+			WRITE_VECTOR( vecMid );
 			WRITE_BYTE( 20 );		// radius * 0.1
 			WRITE_BYTE( 255 );		// r
 			WRITE_BYTE( 180 );		// g
@@ -2584,9 +2564,7 @@ void CEnvFunnel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_LARGEFUNNEL );
-		WRITE_COORD( vecPos.x );
-		WRITE_COORD( vecPos.y );
-		WRITE_COORD( vecPos.z );
+		WRITE_VECTOR( vecPos );
 		WRITE_SHORT( m_iSprite );
 
 		if( pev->spawnflags & SF_FUNNEL_REVERSE )// funnel flows in reverse?
@@ -2651,9 +2629,7 @@ void CEnvQuakeFx::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( pev->impulse );
-		WRITE_COORD( vecPos.x );
-		WRITE_COORD( vecPos.y );
-		WRITE_COORD( vecPos.z );
+		WRITE_VECTOR( vecPos );
 		if (pev->impulse == TE_PARTICLEBURST)
 		{
 			WRITE_SHORT( pev->armortype );  // radius
@@ -2833,12 +2809,8 @@ void DrawChaoticBeam(Vector vecOrigin, Vector vecDest, const BeamParams& params)
 {
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_BEAMPOINTS );
-		WRITE_COORD( vecOrigin.x );
-		WRITE_COORD( vecOrigin.y );
-		WRITE_COORD( vecOrigin.z );
-		WRITE_COORD( vecDest.x );
-		WRITE_COORD( vecDest.y );
-		WRITE_COORD( vecDest.z );
+		WRITE_VECTOR( vecOrigin );
+		WRITE_VECTOR( vecDest );
 		WRITE_SHORT( params.texture );
 		WRITE_BYTE( 0 ); // framestart
 		WRITE_BYTE( 10 ); // framerate
@@ -4020,21 +3992,14 @@ void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	// blast circle
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecPos );
 		WRITE_BYTE( type );
-		WRITE_COORD( vecPos.x );// coord coord coord (center position)
-		WRITE_COORD( vecPos.y );
-		WRITE_COORD( vecPos.z );
-		WRITE_COORD( vecPos.x );// coord coord coord (axis and radius)
-		WRITE_COORD( vecPos.y );
-		WRITE_COORD( vecPos.z + m_iRadius );
+		WRITE_CIRCLE( vecPos, m_iRadius );
 		WRITE_SHORT( m_iSpriteTexture ); // short (sprite index)
 		WRITE_BYTE( m_iStartFrame ); // byte (starting frame)
 		WRITE_BYTE( m_iFrameRate ); // byte (frame rate in 0.1's)
 		WRITE_BYTE( m_iTime ); // byte (life in 0.1's)
 		WRITE_BYTE( m_iHeight );  // byte (line width in 0.1's)
 		WRITE_BYTE( m_iNoise );   // byte (noise amplitude in 0.01's)
-		WRITE_BYTE( pev->rendercolor.x );   // byte,byte,byte (color)
-		WRITE_BYTE( pev->rendercolor.y );
-		WRITE_BYTE( pev->rendercolor.z );
+		WRITE_COLOR( pev->rendercolor );   // byte,byte,byte (color)
 		WRITE_BYTE( pev->renderamt );  // byte (brightness)
 		WRITE_BYTE( m_iScrollRate );	// byte (scroll speed in 0.1's)
 	MESSAGE_END();
@@ -4163,13 +4128,9 @@ void CEnvDLight::TurnOn(CBaseEntity *pClient)
 	MESSAGE_BEGIN( msgType, gmsgKeyedDLight, NULL, pClientEdict );
 		WRITE_BYTE( m_iKey );
 		WRITE_BYTE( 1 );
-		WRITE_COORD( m_vecPos.x );		// X
-		WRITE_COORD( m_vecPos.y );		// Y
-		WRITE_COORD( m_vecPos.z );		// Z
+		WRITE_VECTOR( m_vecPos );
 		WRITE_SHORT( pev->renderamt );		// radius
-		WRITE_BYTE( pev->rendercolor.x );	// r
-		WRITE_BYTE( pev->rendercolor.y );	// g
-		WRITE_BYTE( pev->rendercolor.z );	// b
+		WRITE_COLOR( pev->rendercolor );
 	MESSAGE_END();
 }
 
@@ -4272,12 +4233,8 @@ void CEnvStreak::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 	const Vector direction = pev->movedir;
 
 	MESSAGE_BEGIN( MSG_PVS, gmsgStreaks, origin );
-		WRITE_COORD( origin.x );		// origin
-		WRITE_COORD( origin.y );
-		WRITE_COORD( origin.z );
-		WRITE_COORD( direction.x );	// direction
-		WRITE_COORD( direction.y );
-		WRITE_COORD( direction.z );
+		WRITE_VECTOR( origin );		// origin
+		WRITE_VECTOR( direction );	// direction
 		WRITE_BYTE( pev->skin ); // color
 		WRITE_SHORT( pev->body );	// count
 		WRITE_SHORT( pev->speed );
@@ -4387,9 +4344,7 @@ void CEnvDecal::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY);
 		WRITE_BYTE( TE_BSPDECAL );
-		WRITE_COORD( trace.vecEndPos.x );
-		WRITE_COORD( trace.vecEndPos.y );
-		WRITE_COORD( trace.vecEndPos.z );
+		WRITE_VECTOR( trace.vecEndPos );
 		WRITE_SHORT( iTexture );
 		WRITE_SHORT( entityIndex );
 		if ( entityIndex )
@@ -4769,12 +4724,8 @@ void CBaseWeather::WriteBaseWeaterData(int flags)
 
 	if (FBitSet(flags, WEATHER_BRUSH_ENTITY))
 	{
-		WRITE_COORD(pev->absmin.x);
-		WRITE_COORD(pev->absmin.y);
-		WRITE_COORD(pev->absmin.z);
-		WRITE_COORD(pev->absmax.x);
-		WRITE_COORD(pev->absmax.y);
-		WRITE_COORD(pev->absmax.z);
+		WRITE_VECTOR(pev->absmin);
+		WRITE_VECTOR(pev->absmax);
 	}
 	else
 	{
@@ -4784,9 +4735,7 @@ void CBaseWeather::WriteBaseWeaterData(int flags)
 
 		if (FBitSet(flags, SF_WEATHER_LOCALIZED))
 		{
-			WRITE_COORD(pev->origin.x);
-			WRITE_COORD(pev->origin.y);
-			WRITE_COORD(pev->origin.z);
+			WRITE_VECTOR(pev->origin);
 		}
 	}
 }
@@ -5035,9 +4984,7 @@ void CEnvRain::SendWeather(CBaseEntity *pClient)
 		WRITE_SHORT(m_raindropHeight);
 		WRITE_BYTE(pev->rendermode);
 		WRITE_BYTE(pev->renderamt);
-		WRITE_BYTE((int)pev->rendercolor.x);
-		WRITE_BYTE((int)pev->rendercolor.y);
-		WRITE_BYTE((int)pev->rendercolor.z);
+		WRITE_COLOR(pev->rendercolor);
 		WRITE_BYTE(m_raindropLightMode);
 		WRITE_SHORT(m_raindropMinSpeed);
 		WRITE_SHORT(m_raindropMaxSpeed);
@@ -5189,9 +5136,7 @@ void CEnvSnow::SendWeather(CBaseEntity *pClient)
 		WRITE_SHORT(m_snowflakeMaxSize);
 		WRITE_BYTE(pev->rendermode);
 		WRITE_BYTE(pev->renderamt);
-		WRITE_BYTE((int)pev->rendercolor.x);
-		WRITE_BYTE((int)pev->rendercolor.y);
-		WRITE_BYTE((int)pev->rendercolor.z);
+		WRITE_COLOR(pev->rendercolor);
 		WRITE_BYTE(m_snowflakeLightMode);
 		WRITE_SHORT(m_snowflakeMinSpeed);
 		WRITE_SHORT(m_snowflakeMaxSpeed);
@@ -5291,9 +5236,7 @@ void CEnvBeamTrail::Affect( CBaseEntity *pTarget, USE_TYPE useType )
 			WRITE_SHORT( m_iSprite );	// model
 			WRITE_BYTE( pev->health*10 ); // life
 			WRITE_BYTE( pev->armorvalue );  // width
-			WRITE_BYTE( pev->rendercolor.x );   // r, g, b
-			WRITE_BYTE( pev->rendercolor.y );   // r, g, b
-			WRITE_BYTE( pev->rendercolor.z );   // r, g, b
+			WRITE_COLOR( pev->rendercolor );
 			WRITE_BYTE( pev->renderamt );	// brightness
 		MESSAGE_END();
 	}
@@ -5553,18 +5496,12 @@ void CParticleShooter::ShootParticle()
 	if (gmsgParticleShooter)
 	{
 		MESSAGE_BEGIN( MSG_PVS, gmsgParticleShooter, position );
-			WRITE_COORD(position.x);
-			WRITE_COORD(position.y);
-			WRITE_COORD(position.z);
-			WRITE_COORD(velocity.x);
-			WRITE_COORD(velocity.y);
-			WRITE_COORD(velocity.z);
+			WRITE_VECTOR(position);
+			WRITE_VECTOR(velocity);
 			WRITE_BYTE(pev->rendermode);
 			WRITE_BYTE(m_particleLife * 10);
 			WRITE_SHORT(pev->scale * 10);
-			WRITE_BYTE(pev->rendercolor.x);
-			WRITE_BYTE(pev->rendercolor.y);
-			WRITE_BYTE(pev->rendercolor.z);
+			WRITE_COLOR(pev->rendercolor);
 			WRITE_BYTE(pev->renderamt);
 			WRITE_BYTE(pev->gravity * 100);
 			WRITE_BYTE(m_fadeSpeed * 10);

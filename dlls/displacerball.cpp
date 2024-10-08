@@ -230,12 +230,7 @@ void CDisplacerBall::Circle( void )
 	// portal circle
 	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
 		WRITE_BYTE(TE_BEAMCYLINDER);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z + 800.0f); // reach damage radius over .2 seconds
+		WRITE_CIRCLE(pev->origin, 800.0f);
 		WRITE_SHORT(m_iTrail);
 		WRITE_BYTE(0); // startframe
 		WRITE_BYTE(0); // framerate

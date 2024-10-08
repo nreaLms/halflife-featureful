@@ -106,9 +106,7 @@ void CShock::Touch(CBaseEntity *pOther)
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE(TE_DLIGHT);
-		WRITE_COORD(pev->origin.x);	// X
-		WRITE_COORD(pev->origin.y);	// Y
-		WRITE_COORD(pev->origin.z);	// Z
+		WRITE_VECTOR(pev->origin);
 		WRITE_BYTE( 8 );		// radius * 0.1
 		WRITE_BYTE( 0 );		// r
 		WRITE_BYTE( 255 );		// g
@@ -153,9 +151,7 @@ void CShock::Touch(CBaseEntity *pOther)
 			const Vector position = tr.vecEndPos;
 			MESSAGE_BEGIN( MSG_ONE, SVC_TEMPENTITY, NULL, pOther->pev );
 				WRITE_BYTE( TE_SPARKS );
-				WRITE_COORD( position.x );
-				WRITE_COORD( position.y );
-				WRITE_COORD( position.z );
+				WRITE_VECTOR( position );
 			MESSAGE_END();
 		}
 	}

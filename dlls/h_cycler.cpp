@@ -452,9 +452,7 @@ void CWreckage::Think( void )
 
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, VecSrc );
 		WRITE_BYTE( TE_SMOKE );
-		WRITE_COORD( VecSrc.x );
-		WRITE_COORD( VecSrc.y );
-		WRITE_COORD( VecSrc.z );
+		WRITE_VECTOR( VecSrc );
 		WRITE_SHORT( g_sModelIndexSmoke );
 		WRITE_BYTE( RANDOM_LONG( 0,49 ) + 50 ); // scale * 10
 		WRITE_BYTE( RANDOM_LONG( 0, 3 ) + 8  ); // framerate

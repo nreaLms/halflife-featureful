@@ -947,9 +947,7 @@ void CPitWorm::EyeLight(const Vector &vecEyePos)
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( TE_ELIGHT );
 		WRITE_SHORT( entindex() | (1 << 12) );		// entity, attachment
-		WRITE_COORD( vecEyePos.x );		// origin
-		WRITE_COORD( vecEyePos.y );
-		WRITE_COORD( vecEyePos.z );
+		WRITE_VECTOR( vecEyePos );		// origin
 		WRITE_COORD( 128 );	// radius
 		WRITE_BYTE( 128 );	// R
 		WRITE_BYTE( 255 );	// G

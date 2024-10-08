@@ -900,8 +900,6 @@ void CController::RunAI( void )
 	}
 }
 
-extern void DrawRoute( entvars_t *pev, WayPoint_t *m_Route, int m_iRouteIndex, int r, int g, int b );
-
 void CController::Stop( void )
 { 
 	m_IdealActivity = GetStoppedActivity(); 

@@ -1227,9 +1227,7 @@ void CGeneWorm::HuntThink(void)
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_ELIGHT );
 			WRITE_SHORT( entindex() );		// entity, attachment
-			WRITE_COORD( vecOrigin.x );		// origin
-			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z );
+			WRITE_VECTOR( vecOrigin );		// origin
 			WRITE_COORD( 48 );	// radius
 			WRITE_BYTE( 128 );	// R
 			WRITE_BYTE( 255 );	// G
@@ -1246,9 +1244,7 @@ void CGeneWorm::HuntThink(void)
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_ELIGHT );
 			WRITE_SHORT( entindex() );		// entity, attachment
-			WRITE_COORD( vecOrigin.x );		// origin
-			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z );
+			WRITE_VECTOR( vecOrigin );		// origin
 			WRITE_COORD( 48 );	// radius
 			WRITE_BYTE( 128 );	// R
 			WRITE_BYTE( 255 );	// G

@@ -1460,9 +1460,7 @@ void CGargantua::RunTask( Task_t *pTask )
 				WRITE_BYTE( TE_BREAKMODEL );
 
 				// position
-				WRITE_COORD( pev->origin.x );
-				WRITE_COORD( pev->origin.y );
-				WRITE_COORD( pev->origin.z );
+				WRITE_VECTOR( pev->origin );
 
 				// size
 				WRITE_COORD( 200 );
@@ -1470,9 +1468,7 @@ void CGargantua::RunTask( Task_t *pTask )
 				WRITE_COORD( 128 );
 
 				// velocity
-				WRITE_COORD( 0 ); 
-				WRITE_COORD( 0 );
-				WRITE_COORD( 0 );
+				WRITE_VECTOR( g_vecZero );
 
 				// randomization
 				WRITE_BYTE( 200 ); 
@@ -1884,9 +1880,7 @@ void CSmoker::Think( void )
 			WRITE_SHORT( pev->armorvalue * 10 );
 		if (directed)
 		{
-			WRITE_COORD( direction.x );
-			WRITE_COORD( direction.y );
-			WRITE_COORD( direction.z );
+			WRITE_VECTOR( direction );
 		}
 		MESSAGE_END();
 	}

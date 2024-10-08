@@ -277,19 +277,13 @@ void CGib::SpawnRandomClientGibs(entvars_t *pevVictim, int cGibs, const char *gi
 	{
 		MESSAGE_BEGIN( MSG_PVS, gmsgRandomGibs, pevVictim->origin );
 			// position
-			WRITE_COORD( pevVictim->absmin.x );
-			WRITE_COORD( pevVictim->absmin.y );
-			WRITE_COORD( pevVictim->absmin.z );
+			WRITE_VECTOR( pevVictim->absmin );
 
 			// size
-			WRITE_COORD( pevVictim->size.x );
-			WRITE_COORD( pevVictim->size.y );
-			WRITE_COORD( pevVictim->size.z );
+			WRITE_VECTOR( pevVictim->size );
 
 			// velocity
-			WRITE_COORD( direction.x );
-			WRITE_COORD( direction.y );
-			WRITE_COORD( direction.z );
+			WRITE_VECTOR( direction );
 
 			// randomization
 			WRITE_BYTE( 25 );
@@ -1738,12 +1732,8 @@ void CBaseEntity::FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShootin
 
 			MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecTracerSrc );
 				WRITE_BYTE( TE_TRACER );
-				WRITE_COORD( vecTracerSrc.x );
-				WRITE_COORD( vecTracerSrc.y );
-				WRITE_COORD( vecTracerSrc.z );
-				WRITE_COORD( tr.vecEndPos.x );
-				WRITE_COORD( tr.vecEndPos.y );
-				WRITE_COORD( tr.vecEndPos.z );
+				WRITE_VECTOR( vecTracerSrc );
+				WRITE_VECTOR( tr.vecEndPos );
 			MESSAGE_END();
 		}
 		// do damage, paint decals
@@ -1911,13 +1901,9 @@ void CBaseMonster::MakeDamageBloodDecal( int cCount, float flNoise, TraceResult 
 /*
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_SHOWLINE);
-			WRITE_COORD( ptr->vecEndPos.x );
-			WRITE_COORD( ptr->vecEndPos.y );
-			WRITE_COORD( ptr->vecEndPos.z );
+			WRITE_VECTOR( ptr->vecEndPos );
 
-			WRITE_COORD( Bloodtr.vecEndPos.x );
-			WRITE_COORD( Bloodtr.vecEndPos.y );
-			WRITE_COORD( Bloodtr.vecEndPos.z );
+			WRITE_VECTOR( Bloodtr.vecEndPos );
 		MESSAGE_END();
 */
 
