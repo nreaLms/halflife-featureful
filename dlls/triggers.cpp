@@ -2871,7 +2871,7 @@ edict_t* CTriggerTeleport::GetTeleportTarget()
 			if( RANDOM_LONG( 0, total - 1 ) < 1 )
 				pEntity = pNewEntity;
 		}
-		return pEntity->edict();
+		return pEntity ? pEntity->edict() : nullptr;
 	}
 	return FIND_ENTITY_BY_TARGETNAME( NULL, szName );
 }
