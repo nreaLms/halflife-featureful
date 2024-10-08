@@ -357,10 +357,6 @@ void CTentacle::Precache()
 	RegisterAndPrecacheSoundScript(hitWaterSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
 	RegisterAndPrecacheSoundScript(painSoundScript);
-
-	// TODO: not used?
-	PRECACHE_SOUND( "tentacle/te_flies1.wav" );
-	PRECACHE_SOUND( "tentacle/te_squirm2.wav" );
 }
 
 CTentacle::CTentacle()

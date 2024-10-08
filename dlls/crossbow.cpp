@@ -43,8 +43,6 @@ public:
 	void EXPORT BoltTouch( CBaseEntity *pOther );
 	void EXPORT ExplodeThink( void );
 
-	int m_iTrail;
-
 	static CCrossbowBolt *BoltCreate( void );
 
 	static const NamedSoundScript boltHitBody;
@@ -101,7 +99,6 @@ void CCrossbowBolt::Precache()
 	PRECACHE_MODEL( "models/crossbow_bolt.mdl" );
 	RegisterAndPrecacheSoundScript(boltHitBody);
 	RegisterAndPrecacheSoundScript(boltHitWorld);
-	m_iTrail = PRECACHE_MODEL( "sprites/streak.spr" );
 }
 
 int CCrossbowBolt::Classify( void )

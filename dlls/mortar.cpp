@@ -124,7 +124,9 @@ void CFuncMortarField::Spawn( void )
 void CFuncMortarField::Precache( void )
 {
 	RegisterAndPrecacheSoundScript(launchSoundScript);
-	PRECACHE_SOUND( "weapons/mortarhit.wav" ); // TODO: not used?
+#if 0
+	PRECACHE_SOUND( "weapons/mortarhit.wav" );
+#endif
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 }
 

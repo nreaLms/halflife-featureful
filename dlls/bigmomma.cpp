@@ -127,8 +127,6 @@ public:
 
 	static const NamedVisual mortarVisual;
 	static const NamedVisual mortarSprayVisual;
-
-	int m_SpitDebrisSprite;
 };
 
 LINK_ENTITY_TO_CLASS( bmortar, CBMortar )
@@ -1237,7 +1235,6 @@ void CBMortar::Precache()
 {
 	RegisterVisual( mortarVisual );// spit projectile.
 	RegisterVisual( mortarSprayVisual );// client side spittle.
-	m_SpitDebrisSprite = PRECACHE_MODEL( "sprites/mommablob.spr" ); // TODO: not used?
 
 	RegisterAndPrecacheSoundScript(spitTouchSoundScript, NPC::spitTouchSoundScript);
 	RegisterAndPrecacheSoundScript(spitHitSoundScript, NPC::spitHitSoundScript);
