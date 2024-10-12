@@ -3530,10 +3530,38 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	ALERT( level, "Yaw speed: %3.1f, Current Yaw: %3.1f, Ideal Yaw: %3.1f, ", pev->yaw_speed, UTIL_AngleMod( pev->angles.y ), pev->ideal_yaw );
 	ALERT( level, "Health: %3.1f / %3.1f, ", pev->health, pev->max_health );
 	ALERT( level, "Field of View: %3.1f. ", m_flFieldOfView );
+	ALERT( level, "Boundbox: (%g, %g, %g), (%g, %g, %g). Size: (%g, %g, %g). ",
+		   pev->mins.x, pev->mins.y, pev->mins.z,
+		   pev->maxs.x, pev->maxs.y, pev->maxs.z,
+		   pev->size.x, pev->size.y, pev->size.z);
+
+	const char* targetForGrapple = nullptr;
+	switch (SizeForGrapple()) {
+	case GRAPPLE_NOT_A_TARGET:
+		targetForGrapple = "Not a target";
+		break;
+	case GRAPPLE_SMALL:
+		targetForGrapple = "Small";
+		break;
+	case GRAPPLE_MEDIUM:
+		targetForGrapple = "Medium";
+		break;
+	case GRAPPLE_LARGE:
+		targetForGrapple = "Large";
+		break;
+	case GRAPPLE_FIXED:
+		targetForGrapple = "Fixed";
+		break;
+	default:
+		targetForGrapple = "Unknown";
+		break;
+	}
+	ALERT( level, "Target for Grapple: %s. ", targetForGrapple );
+
 	if( pev->spawnflags & SF_MONSTER_PRISONER )
-		ALERT( level, " PRISONER! " );
+		ALERT( level, "PRISONER! " );
 	if( pev->spawnflags & SF_MONSTER_PREDISASTER )
-		ALERT( level, " Pre-Disaster! " );
+		ALERT( level, "Pre-Disaster! " );
 	if ( pev->flags & FL_MONSTERCLIP )
 		ALERT( level, "Monsterclip. " );
 	if ( pev->spawnflags & SF_MONSTER_ACT_OUT_OF_PVS )
