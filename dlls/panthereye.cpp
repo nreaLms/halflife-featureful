@@ -137,6 +137,7 @@ void CPantherEye::Spawn()
 void CPantherEye::Precache()
 {
 	PrecacheMyModel("models/panthereye.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);

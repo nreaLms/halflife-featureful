@@ -504,7 +504,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 				MESSAGE_END();
 			}
 
-			CBaseEntity *pHornet = CBaseEntity::Create( "hornet", vecArmPos, UTIL_VecToAngles( vecDirToEnemy ), edict(), m_soundList );
+			CBaseEntity *pHornet = CBaseEntity::Create( "hornet", vecArmPos, UTIL_VecToAngles( vecDirToEnemy ), edict(), GetProjectileOverrides() );
 			UTIL_MakeVectors( pHornet->pev->angles );
 			pHornet->pev->velocity = gpGlobals->v_forward * 300.0f;
 
@@ -626,6 +626,7 @@ void CAGrunt::Spawn()
 void CAGrunt::Precache()
 {
 	PrecacheMyModel( "models/agrunt.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
@@ -642,9 +643,7 @@ void CAGrunt::Precache()
 
 	RegisterVisual(muzzleFlashVisual);
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-	UTIL_PrecacheOther( "hornet", entityOverrides );
+	UTIL_PrecacheOther( "hornet", GetProjectileOverrides() );
 }
 
 //=========================================================
@@ -1222,7 +1221,7 @@ const char* CDeadAgrunt::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_alien_grunt_dead, CDeadAgrunt )
 
-void CDeadAgrunt::Spawn( )
+void CDeadAgrunt::Spawn()
 {
 	SpawnHelper("models/agrunt.mdl", BLOOD_COLOR_YELLOW, gSkillData.agruntHealth/2);
 	MonsterInitDead();

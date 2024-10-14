@@ -99,7 +99,7 @@ public:
 	void Spawn( void );
 	void Precache();
 	void Think( void );
-	static CStomp *StompCreate(const StompParams& stompParams);
+	static CStomp *StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides = EntityOverrides());
 
 	static const NamedSoundScript stompSoundScript;
 protected:
@@ -143,7 +143,7 @@ class CBabyStomp : public CStomp
 {
 public:
 	void Precache();
-	static CBabyStomp *StompCreate(const StompParams& stompParams);
+	static CBabyStomp *StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides = EntityOverrides());
 
 	static constexpr const char* stompSoundScript = "BabyGarg.Stomp";
 protected:
@@ -251,10 +251,11 @@ void CStompShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 }
 
-CStomp *CStomp::StompCreate(const StompParams& stompParams)
+CStomp *CStomp::StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides)
 {
 	CStomp *pStomp = GetClassPtr( (CStomp *)NULL );
 	SetStompParams(pStomp, stompParams);
+	pStomp->AssignEntityOverrides(entityOverrides);
 	pStomp->Spawn();
 	return pStomp;
 }
@@ -383,10 +384,11 @@ void CBabyStomp::Precache()
 	RegisterAndPrecacheSoundScript(stompSoundScript, CStomp::stompSoundScript, paramOverride);
 }
 
-CBabyStomp* CBabyStomp::StompCreate(const StompParams& stompParams)
+CBabyStomp* CBabyStomp::StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides)
 {
 	CBabyStomp *pStomp = GetClassPtr( (CBabyStomp *)NULL );
 	SetStompParams(pStomp, stompParams);
+	pStomp->AssignEntityOverrides(entityOverrides);
 	pStomp->Spawn();
 	return pStomp;
 }
@@ -1072,6 +1074,7 @@ void CGargantua::Spawn()
 void CGargantua::Precache()
 {
 	PrecacheMyModel( DefaultModel() );
+	m_GargGibModel = PrecacheMyGibModel();
 
 	SoundScriptParamOverride paramOverride;
 	paramOverride.OverridePitchAbsolute(IntRange(50, 65));
@@ -1095,8 +1098,7 @@ void CGargantua::Precache()
 	RegisterVisual(smallFlameVisual);
 	m_flameVisual = RegisterVisual(flameLightVisual);
 
-	UTIL_PrecacheOther("garg_stomp");
-	m_GargGibModel = PRECACHE_MODEL( GibModel() );
+	UTIL_PrecacheOther("garg_stomp", GetProjectileOverrides());
 }
 
 void CGargantua::UpdateOnRemove()
@@ -1438,11 +1440,13 @@ void CGargantua::RunTask( Task_t *pTask )
 			SetThink( &CBaseEntity::SUB_Remove );
 			int i;
 			int parts = MODEL_FRAMES( m_GargGibModel );
+			const Visual* gibVisual = MyGibVisual();
+			const char* gibModel = GibModel();
 			for( i = 0; i < 10; i++ )
 			{
 				CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-				pGib->Spawn( GibModel() );
+				pGib->Spawn( gibModel, gibVisual );
 
 				int bodyPart = 0;
 				if( parts > 1 )
@@ -1613,7 +1617,7 @@ void CGargantua::FootEffect()
 
 void CGargantua::MakeStomp(const StompParams& stompParams)
 {
-	CStomp::StompCreate(stompParams);
+	CStomp::StompCreate(stompParams, GetProjectileOverrides());
 }
 
 void CGargantua::StompEffect()
@@ -2153,6 +2157,7 @@ const NamedVisual CBabyGargantua::flameLightVisual = BuildVisual("BabyGarg.Flame
 void CBabyGargantua::Precache()
 {
 	PrecacheMyModel( DefaultModel() );
+	PrecacheMyGibModel();
 
 	SoundScriptParamOverride paramOverride;
 	paramOverride.OverridePitchAbsolute(IntRange(60, 75));
@@ -2177,7 +2182,7 @@ void CBabyGargantua::Precache()
 	RegisterVisual(smallFlameVisual);
 	m_flameVisual = RegisterVisual(flameLightVisual);
 
-	UTIL_PrecacheOther("babygarg_stomp");
+	UTIL_PrecacheOther("babygarg_stomp", GetProjectileOverrides());
 }
 
 void CBabyGargantua::StartTask(Task_t *pTask)
@@ -2288,7 +2293,7 @@ void CBabyGargantua::FootEffect()
 
 void CBabyGargantua::MakeStomp(const StompParams& stompParams)
 {
-	CBabyStomp::StompCreate(stompParams);
+	CBabyStomp::StompCreate(stompParams, GetProjectileOverrides());
 }
 
 void CBabyGargantua::StompEffect()

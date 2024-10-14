@@ -340,7 +340,7 @@ void CRGrunt::Explode()
 		UTIL_DecalTrace( &tr, DECAL_SCORCH2 );
 	}
 
-	CGib::SpawnRandomGibs( pev, GibCount(), GibModel() );
+	CGib::SpawnRandomGibs( pev, GibCount(), GibModel(), MyGibVisual() );
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time;

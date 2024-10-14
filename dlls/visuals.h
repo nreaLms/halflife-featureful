@@ -4,6 +4,12 @@
 
 #include "extdll.h"
 #include "template_property_types.h"
+#include "rapidjson/document.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include "icase_compare.h"
 
 struct BeamVisualParams
 {
@@ -35,7 +41,7 @@ struct Visual
 	const char* model = nullptr;
 	int rendermode = kRenderNormal;
 	Color rendercolor;
-	int renderamt = 255;
+	int renderamt = 0;
 	int renderfx = kRenderFxNone;
 	float scale = 1.0f;
 	float framerate = 0.0f;
@@ -46,7 +52,6 @@ struct Visual
 	IntRange radius = 0;
 
 	int modelIndex = 0;
-	int defined = 0;
 
 	inline void SetModel(const char* model)
 	{
@@ -122,6 +127,8 @@ struct Visual
 	void CompleteFrom(const Visual& visual);
 
 private:
+	int defined = 0;
+
 	inline bool ShouldCompleteFrom(const Visual& visual, int param) const {
 		return visual.HasDefined(param) && !HasDefined(param);
 	}
@@ -239,12 +246,25 @@ private:
 	NamedVisual visual;
 };
 
-void ReadVisuals();
+class VisualSystem
+{
+public:
+	bool ReadFromFile(const char* fileName);
+	void AddVisualFromJsonValue(const char* name, rapidjson::Value& value);
+	const Visual* GetVisual(const char* name);
+	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool doPrecache);
+	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);
+	void DumpVisuals();
+	void DumpVisual(const char* name);
+private:
+	void DumpVisualImpl(const char* name, const Visual& visual);
 
-const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool precache);
-const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);
+	std::map<std::string, Visual, CaseInsensitiveCompare> _visuals;
+	std::set<std::string> _modelStringSet;
+	std::string _temp;
+};
 
-const Visual* GetVisual(const char* name);
+extern VisualSystem g_VisualSystem;
 
 void DumpVisuals();
 

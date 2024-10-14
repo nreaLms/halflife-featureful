@@ -22,6 +22,7 @@
 #include	"gamerules.h"
 #include	"game.h"
 #include	"pm_shared.h"
+#include	"ent_templates.h"
 
 bool g_fIsXash3D = false;
 
@@ -673,6 +674,8 @@ TYPEDESCRIPTION	CBaseEntity::m_SaveData[] =
 	DEFINE_FIELD( CBaseEntity, m_pfnUse, FIELD_FUNCTION ),
 	DEFINE_FIELD( CBaseEntity, m_pfnBlocked, FIELD_FUNCTION ),
 
+	DEFINE_FIELD( CBaseEntity, m_entTemplate, FIELD_STRING ),
+	DEFINE_FIELD( CBaseEntity, m_ownerEntTemplate, FIELD_STRING ),
 	DEFINE_FIELD( CBaseEntity, m_soundList, FIELD_STRING ),
 };
 
@@ -680,6 +683,9 @@ void CBaseEntity::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "soundlist")) {
 		m_soundList = ALLOC_STRING(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	} else if (FStrEq(pkvd->szKeyName, "ent_template")) {
+		m_entTemplate = ALLOC_STRING(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	} else {
 		pkvd->fHandled = FALSE;
@@ -731,10 +737,38 @@ void CBaseEntity::StopSound(int channel, const char *sample)
 	STOP_SOUND(edict(), channel, sample);
 }
 
+const char* CBaseEntity::GetSoundScriptNameForTemplate(const char *name, string_t templateName)
+{
+	if (FStringNull(!templateName))
+	{
+		const EntTemplate* entTemplate = GetEntTemplate(STRING(templateName));
+		if (entTemplate)
+		{
+			return entTemplate->GetSoundScriptNameOverride(name);
+		}
+	}
+	return nullptr;
+}
+
+const char* CBaseEntity::GetSoundScriptNameForMyTemplate(const char *name)
+{
+	const char* nameOverride = nullptr;
+
+	nameOverride = GetSoundScriptNameForTemplate(name, m_entTemplate);
+	if (nameOverride)
+		return nameOverride;
+
+	nameOverride = GetSoundScriptNameForTemplate(name, m_ownerEntTemplate);
+	if (nameOverride)
+		return nameOverride;
+
+	return name;
+}
+
 const SoundScript* CBaseEntity::GetSoundScript(const char *name)
 {
-	// TODO: implement ways of soundscript replacement
-	return ::GetSoundScript(name);
+	name = GetSoundScriptNameForMyTemplate(name);
+	return g_SoundScriptSystem.GetSoundScript(name);
 }
 
 bool CBaseEntity::EmitSoundScript(const SoundScript *soundScript, const SoundScriptParamOverride paramsOverride, int flags)
@@ -825,18 +859,9 @@ void CBaseEntity::PrecacheSoundScript(const SoundScript& soundScript)
 	}
 }
 
-void CBaseEntity::PrecacheSoundScript(const char *name)
-{
-	const SoundScript* soundScript = GetSoundScript(name);
-	if (soundScript)
-	{
-		PrecacheSoundScript(*soundScript);
-	}
-}
-
 void CBaseEntity::RegisterAndPrecacheSoundScriptByName(const char *name, const SoundScript &defaultSoundScript)
 {
-	const SoundScript* soundScript = ProvideDefaultSoundScript(name, defaultSoundScript);
+	const SoundScript* soundScript = g_SoundScriptSystem.ProvideDefaultSoundScript(GetSoundScriptNameForMyTemplate(name), defaultSoundScript);
 	if (soundScript)
 	{
 		PrecacheSoundScript(*soundScript);
@@ -851,7 +876,7 @@ void CBaseEntity::RegisterAndPrecacheSoundScript(const NamedSoundScript &default
 
 void CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const char* base, const SoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride)
 {
-	const SoundScript* soundScript = ProvideDefaultSoundScript(derivative, base, defaultSoundScript, paramsOverride);
+	const SoundScript* soundScript = g_SoundScriptSystem.ProvideDefaultSoundScript(GetSoundScriptNameForMyTemplate(derivative), GetSoundScriptNameForMyTemplate(base), defaultSoundScript, paramsOverride);
 	if (soundScript)
 	{
 		PrecacheSoundScript(*soundScript);
@@ -863,6 +888,40 @@ void  CBaseEntity::RegisterAndPrecacheSoundScript(const char* derivative, const 
 	RegisterAndPrecacheSoundScript(derivative, defaultSoundScript.name, defaultSoundScript, paramsOverride);
 }
 
+const char* CBaseEntity::GetVisualNameForTemplate(const char *name, string_t templateName)
+{
+	if (FStringNull(!templateName))
+	{
+		const EntTemplate* entTemplate = GetEntTemplate(STRING(templateName));
+		if (entTemplate)
+		{
+			return entTemplate->GetVisualNameOverride(name);
+		}
+	}
+	return nullptr;
+}
+
+const char* CBaseEntity::GetVisualNameForMyTemplate(const char *name)
+{
+	const char* nameOverride = nullptr;
+
+	nameOverride = GetVisualNameForTemplate(name, m_entTemplate);
+	if (nameOverride)
+		return nameOverride;
+
+	nameOverride = GetVisualNameForTemplate(name, m_ownerEntTemplate);
+	if (nameOverride)
+		return nameOverride;
+
+	return name;
+}
+
+const Visual* CBaseEntity::GetVisual(const char *name)
+{
+	name = GetVisualNameForMyTemplate(name);
+	return g_VisualSystem.GetVisual(name);
+}
+
 const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool precache)
 {
 	if (defaultVisual.mixin)
@@ -870,10 +929,81 @@ const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool
 		const Visual* visual = RegisterVisual(*defaultVisual.mixin, false);
 		Visual changedVisual = defaultVisual;
 		changedVisual.CompleteFrom(*visual);
-		return ProvideDefaultVisual(defaultVisual.name, changedVisual, precache);
+		return g_VisualSystem.ProvideDefaultVisual(GetVisualNameForMyTemplate(defaultVisual.name), changedVisual, precache);
 	}
 	else
-		return ProvideDefaultVisual(defaultVisual.name, defaultVisual, precache);
+		return g_VisualSystem.ProvideDefaultVisual(GetVisualNameForMyTemplate(defaultVisual.name), defaultVisual, precache);
+}
+
+void CBaseEntity::AssignEntityOverrides(EntityOverrides entityOverrides)
+{
+	if (entityOverrides.model)
+		pev->model = entityOverrides.model;
+	m_entTemplate = entityOverrides.entTemplate;
+	m_ownerEntTemplate = entityOverrides.ownerEntTemplate;
+	m_soundList = entityOverrides.soundList;
+}
+
+EntityOverrides CBaseEntity::GetProjectileOverrides() const
+{
+	EntityOverrides entityOverrides;
+	entityOverrides.ownerEntTemplate = m_entTemplate;
+	entityOverrides.soundList = m_soundList;
+	return entityOverrides;
+}
+
+int CBaseEntity::OverridenRenderProps()
+{
+	int defined = 0;
+	if (pev->model)
+		defined |= Visual::MODEL_DEFINED;
+	if (pev->renderamt)
+		defined |= Visual::ALPHA_DEFINED;
+	if (pev->rendermode)
+		defined |= Visual::RENDERMODE_DEFINED;
+	if (pev->rendercolor != g_vecZero)
+		defined |= Visual::COLOR_DEFINED;
+	if (pev->renderfx)
+		defined |= Visual::RENDERFX_DEFINED;
+	if (pev->scale)
+		defined |= Visual::SCALE_DEFINED;
+	return defined;
+}
+
+static bool CheckVisualDefine(const Visual* visual, int param, int ignored)
+{
+	return visual->HasDefined(param) && (ignored & param) == 0;
+}
+
+inline Vector VectorFromColor(const Color& color) {
+	return Vector(color.r, color.g, color.b);
+}
+
+void CBaseEntity::ApplyVisual(const Visual *visual)
+{
+	const int alreadyOverriden = OverridenRenderProps();
+	ApplyDefaultRenderProps(alreadyOverriden);
+
+	if (!visual)
+		return;
+
+	if (CheckVisualDefine(visual, Visual::MODEL_DEFINED, alreadyOverriden) && visual->model && *visual->model)
+	{
+		SET_MODEL(edict(), visual->model);
+	}
+
+	if (CheckVisualDefine(visual, Visual::RENDERMODE_DEFINED, alreadyOverriden))
+		pev->rendermode = visual->rendermode;
+	if (CheckVisualDefine(visual, Visual::COLOR_DEFINED, alreadyOverriden))
+		pev->rendercolor = VectorFromColor(visual->rendercolor);
+	if (CheckVisualDefine(visual, Visual::ALPHA_DEFINED, alreadyOverriden))
+		pev->renderamt = visual->renderamt;
+	if (CheckVisualDefine(visual, Visual::RENDERFX_DEFINED, alreadyOverriden))
+		pev->renderfx = visual->renderfx;
+	if (CheckVisualDefine(visual, Visual::SCALE_DEFINED, alreadyOverriden))
+		pev->scale = visual->scale;
+	if (CheckVisualDefine(visual, Visual::FRAMERATE_DEFINED, alreadyOverriden))
+		pev->framerate = visual->framerate;
 }
 
 int CBaseEntity::Save( CSave &save )
@@ -1039,9 +1169,9 @@ int CBaseEntity::DamageDecal( int bitsDamageType )
 
 // NOTE: szName must be a pointer to constant memory, e.g. "monster_class" because the entity
 // will keep a pointer to it after this call.
-CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner, string_t soundList )
+CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner, EntityOverrides entityOverrides )
 {
-	CBaseEntity *pEntity = CreateNoSpawn(szName, vecOrigin, vecAngles, pentOwner, soundList);
+	CBaseEntity *pEntity = CreateNoSpawn(szName, vecOrigin, vecAngles, pentOwner, entityOverrides);
 	if (pEntity)
 	{
 		if (DispatchSpawn( pEntity->edict() ) == -1 )
@@ -1056,7 +1186,7 @@ CBaseEntity *CBaseEntity::Create( const char *szName, const Vector &vecOrigin, c
 /*
  * Same as Create, but does not call DispatchSpawn. This allows to change some parameters before call to Spawn()
  */
-CBaseEntity *CBaseEntity::CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner, string_t soundList )
+CBaseEntity *CBaseEntity::CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner, EntityOverrides entityOverrides )
 {
 	edict_t	*pent;
 	CBaseEntity *pEntity;
@@ -1077,6 +1207,6 @@ CBaseEntity *CBaseEntity::CreateNoSpawn( const char *szName, const Vector &vecOr
 	pEntity->pev->owner = pentOwner;
 	pEntity->pev->origin = vecOrigin;
 	pEntity->pev->angles = vecAngles;
-	pEntity->m_soundList = soundList;
+	pEntity->AssignEntityOverrides(entityOverrides);
 	return pEntity;
 }

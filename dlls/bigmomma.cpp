@@ -112,7 +112,7 @@ public:
 	void Spawn( void );
 	void Precache();
 
-	static CBMortar *Shoot( edict_t *pOwner, Vector vecStart, Vector vecVelocity, string_t soundList = iStringNull );
+	static CBMortar *Shoot( edict_t *pOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides );
 	void Touch( CBaseEntity *pOther );
 	void EXPORT Animate( void );
 
@@ -712,7 +712,7 @@ void CBigMomma::LaunchMortar( void )
 	}
 
 	EmitSoundScript(launchMortarSoundScript);
-	CBMortar *pBomb = CBMortar::Shoot( edict(), startPos, vecLaunch, m_soundList );
+	CBMortar *pBomb = CBMortar::Shoot( edict(), startPos, vecLaunch, GetProjectileOverrides() );
 	pBomb->pev->gravity = 1.0f;
 	MortarSpray( startPos, Vector( 0.0f, 0.0f, 1.0f ), GetVisual(CBMortar::mortarSprayVisual), 24 );
 }
@@ -744,6 +744,7 @@ void CBigMomma::Spawn()
 void CBigMomma::Precache()
 {
 	PrecacheMyModel( "models/big_mom.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(alertSoundScript);
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -758,11 +759,8 @@ void CBigMomma::Precache()
 	RegisterAndPrecacheSoundScript(childDieSoundScript);
 	RegisterAndPrecacheSoundScript(launchMortarSoundScript);
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-
-	UTIL_PrecacheOther(BIG_CHILDCLASS, entityOverrides);
-	UTIL_PrecacheOther("bmortar", entityOverrides);
+	UTIL_PrecacheOther(BIG_CHILDCLASS);
+	UTIL_PrecacheOther("bmortar", GetProjectileOverrides());
 
 	RegisterVisual(CBMortar::mortarSprayVisual);// client side spittle.
 }
@@ -1221,7 +1219,7 @@ void CBMortar::Spawn( void )
 
 	const Visual* visual = GetVisual(mortarVisual);
 
-	ApplyVisualToEntity(this, visual);
+	ApplyVisual(visual);
 
 	pev->frame = 0;
 
@@ -1252,10 +1250,10 @@ void CBMortar::Animate( void )
 	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 }
 
-CBMortar *CBMortar::Shoot(edict_t *pOwner, Vector vecStart, Vector vecVelocity , string_t soundList)
+CBMortar *CBMortar::Shoot(edict_t *pOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides)
 {
 	CBMortar *pSpit = GetClassPtr( (CBMortar *)NULL );
-	pSpit->m_soundList = soundList;
+	pSpit->AssignEntityOverrides(entityOverrides);
 	pSpit->Spawn();
 	
 	UTIL_SetOrigin( pSpit->pev, vecStart );

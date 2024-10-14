@@ -460,6 +460,7 @@ void CHoundeye::Spawn()
 void CHoundeye::Precache()
 {
 	PrecacheMyModel( "models/houndeye.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);

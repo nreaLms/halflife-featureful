@@ -94,6 +94,7 @@ void CRat::Spawn()
 void CRat::Precache()
 {
 	PrecacheMyModel( "models/bigrat.mdl" );
+	PrecacheMyGibModel();
 }
 
 //=========================================================

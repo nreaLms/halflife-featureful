@@ -65,7 +65,7 @@ class CVoltigoreEnergyBall : public CBaseEntity
 public:
 	void Spawn(void);
 
-	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
+	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides);
 	void EXPORT BallTouch(CBaseEntity *pOther);
 	void EXPORT FlyThink(void);
 
@@ -118,9 +118,10 @@ void CVoltigoreEnergyBall::Spawn(void)
 	m_iBeams = 0;
 }
 
-void CVoltigoreEnergyBall::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity)
+void CVoltigoreEnergyBall::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides)
 {
 	CVoltigoreEnergyBall *pEnergyBall = GetClassPtr((CVoltigoreEnergyBall *)NULL);
+	pEnergyBall->AssignEntityOverrides(entityOverrides);
 	pEnergyBall->Spawn();
 
 	UTIL_SetOrigin(pEnergyBall->pev, vecStart);
@@ -613,7 +614,7 @@ void CVoltigore::HandleAnimEvent(MonsterEvent_t *pEvent)
 		// do stuff for this event.
 		//AttackSound();
 
-		CVoltigoreEnergyBall::Shoot(pev, vecBoltOrigin, vecShootDir * 1000);
+		CVoltigoreEnergyBall::Shoot(pev, vecBoltOrigin, vecShootDir * 1000, GetProjectileOverrides());
 
 		m_flNextBeamAttackCheck = gpGlobals->time + RANDOM_FLOAT( 5.0f, 10.0f );
 
@@ -731,7 +732,7 @@ void CVoltigore::Spawn()
 void CVoltigore::Precache()
 {
 	PrecacheImpl("models/voltigore.mdl");
-	PRECACHE_MODEL("models/vgibs.mdl");
+	PrecacheMyGibModel("models/vgibs.mdl");
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
@@ -758,7 +759,8 @@ void CVoltigore::PrecacheImpl(const char *modelName)
 
 	m_beamTexture = PRECACHE_MODEL(VOLTIGORE_ZAP_BEAM);
 	PRECACHE_MODEL(VOLTIGORE_GLOW_SPRITE);
-	UTIL_PrecacheOther("voltigore_energy_ball");
+
+	UTIL_PrecacheOther("voltigore_energy_ball", GetProjectileOverrides());
 }
 
 //=========================================================

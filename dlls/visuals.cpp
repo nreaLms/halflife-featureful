@@ -1,11 +1,7 @@
 #include "extdll.h"
 #include "enginecallback.h"
-#include "visuals.h"
 #include "util.h"
-
-#include <map>
-#include <set>
-#include <string>
+#include "visuals.h"
 
 #include "json_utils.h"
 
@@ -13,62 +9,9 @@ using namespace rapidjson;
 
 const char* visualsSchema = R"(
 {
-  "definitions": {
-    "visual": {
-      "type": "object",
-      "properties": {
-        "model": {
-          "type": "string"
-        },
-        "sprite": {
-          "type": "string"
-        },
-        "rendermode": {
-          "type": "string",
-          "pattern": "^Normal|normal|Color|color|Texture|texture|Glow|glow|Solid|solid|Additive|additive$"
-        },
-        "color": {
-          "$ref": "definitions.json#/color"
-        },
-        "alpha": {
-          "$ref": "definitions.json#/alpha"
-        },
-        "renderfx": {
-          "type": ["integer", "string"],
-          "pattern": "^Normal|normal|Constant Glow|constant glow$",
-          "minimum": 0,
-          "maximum": 20
-        },
-        "scale": {
-          "type": "number",
-          "minimum": 0.0
-        },
-        "framerate": {
-          "type": "number",
-          "minimum": 0.0
-        },
-        "width": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "noise": {
-          "type": "integer"
-        },
-        "scrollrate": {
-          "type": "integer"
-        },
-        "life": {
-          "$ref": "definitions.json#/range"
-        },
-        "radius": {
-          "$ref": "definitions.json#/range_int"
-        }
-      }
-    }
-  },
   "type": "object",
   "additionalProperties": {
-    "$ref": "#/definitions/visual"
+    "$ref": "definitions.json#/visual"
   }
 }
 )";
@@ -133,31 +76,6 @@ void Visual::CompleteFrom(const Visual &visual)
 	}
 }
 
-struct CaseInsensitiveCompare
-{
-	bool operator()(const std::string& lhs, const std::string& rhs) const noexcept
-	{
-		return stricmp(lhs.c_str(), rhs.c_str()) < 0;
-	}
-};
-
-class VisualSystem
-{
-public:
-	bool ReadFromFile(const char* fileName);
-	const Visual* GetVisual(const char* name);
-	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool doPrecache);
-	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);
-	void DumpVisuals();
-	void DumpVisual(const char* name);
-private:
-	void DumpVisualImpl(const char* name, const Visual& visual);
-
-	std::map<std::string, Visual, CaseInsensitiveCompare> _visuals;
-	std::set<std::string> _modelStringSet;
-	std::string _temp;
-};
-
 static bool ParseRenderMode(const char* str, int& rendermode)
 {
 	constexpr std::pair<const char*, int> modes[] = {
@@ -180,26 +98,6 @@ static bool ParseRenderMode(const char* str, int& rendermode)
 	return false;
 }
 
-static const char* RenderModeToString(int rendermode)
-{
-	switch (rendermode) {
-	case kRenderNormal:
-		return "Normal";
-	case kRenderTransColor:
-		return "Color";
-	case kRenderTransTexture:
-		return "Texture";
-	case kRenderGlow:
-		return "Glow";
-	case kRenderTransAlpha:
-		return "Solid";
-	case kRenderTransAdd:
-		return "Additive";
-	default:
-		return "Unknown";
-	}
-}
-
 static bool ParseRenderFx(const char* str, int& renderfx)
 {
 	constexpr std::pair<const char*, int> modes[] = {
@@ -216,30 +114,6 @@ static bool ParseRenderFx(const char* str, int& renderfx)
 		}
 	}
 	return false;
-}
-
-static const char* RenderFxToString(int renderfx)
-{
-	switch (renderfx) {
-	case kRenderFxNone:			return "Normal";
-	case kRenderFxPulseSlow:	return "Slow Pulse";
-	case kRenderFxPulseFast:	return "Fast Pulse";
-	case kRenderFxPulseSlowWide:return "Slow Wide Pulse";
-	case kRenderFxFadeSlow:		return "Slow Fade Away";
-	case kRenderFxFadeFast:		return "Fast Fade Away";
-	case kRenderFxSolidSlow:	return "Slow Become Solid";
-	case kRenderFxSolidFast:	return "Fast Become Solid";
-	case kRenderFxStrobeSlow:	return "Slow Strobe";
-	case kRenderFxStrobeFast:	return "Fast Strobe";
-	case kRenderFxStrobeFaster:	return "Faster Strobe";
-	case kRenderFxFlickerSlow:	return "Slow Flicker";
-	case kRenderFxFlickerFast:	return "Fast Flicker";
-	case kRenderFxNoDissipation:return "Constant Glow";
-	case kRenderFxDistort:		return "Distort";
-	case kRenderFxHologram:		return "Hologram";
-	case kRenderFxGlowShell:	return "Glow Shell";
-	default: return "Unknown";
-	}
 }
 
 bool VisualSystem::ReadFromFile(const char *fileName)
@@ -262,13 +136,44 @@ bool VisualSystem::ReadFromFile(const char *fileName)
 	{
 		const char* name = scriptIt->name.GetString();
 
-		Visual visual;
-
 		Value& value = scriptIt->value;
+		if (value.IsObject())
+			AddVisualFromJsonValue(name, value);
+		else
+			ALERT(at_warning, "Visual '%s' is not an object!\n");
+	}
 
+	return true;
+}
+
+void VisualSystem::AddVisualFromJsonValue(const char *name, Value &value)
+{
+	Visual visual;
+
+	{
+		auto it = value.FindMember("model");
+		if (it != value.MemberEnd())
 		{
-			auto it = value.FindMember("model");
-			if (it != value.MemberEnd())
+			std::string str = it->value.GetString();
+			auto strIt = _modelStringSet.find(str);
+			if (strIt == _modelStringSet.end())
+			{
+				auto p = _modelStringSet.insert(str);
+				strIt = p.first;
+			}
+			visual.SetModel(strIt->c_str());
+		}
+	}
+
+	{
+		auto it = value.FindMember("sprite");
+		if (it != value.MemberEnd())
+		{
+			if (visual.HasDefined(Visual::MODEL_DEFINED))
+			{
+				ALERT(at_warning, "Visual \"s\" has both 'model' and 'sprite' properties defined!\n", name);
+			}
+			else
 			{
 				std::string str = it->value.GetString();
 				auto strIt = _modelStringSet.find(str);
@@ -280,127 +185,105 @@ bool VisualSystem::ReadFromFile(const char *fileName)
 				visual.SetModel(strIt->c_str());
 			}
 		}
-
-		{
-			auto it = value.FindMember("sprite");
-			if (it != value.MemberEnd())
-			{
-				if (visual.HasDefined(Visual::MODEL_DEFINED))
-				{
-					ALERT(at_warning, "Visual \"s\" has both 'model' and 'sprite' properties defined!\n", name);
-				}
-				else
-				{
-					std::string str = it->value.GetString();
-					auto strIt = _modelStringSet.find(str);
-					if (strIt == _modelStringSet.end())
-					{
-						auto p = _modelStringSet.insert(str);
-						strIt = p.first;
-					}
-					visual.SetModel(strIt->c_str());
-				}
-			}
-		}
-
-		{
-			auto it = value.FindMember("rendermode");
-			if (it != value.MemberEnd())
-			{
-				Value& rendermodeValue = it->value;
-				if (rendermodeValue.IsString())
-				{
-					int rendermode;
-					if (ParseRenderMode(rendermodeValue.GetString(), rendermode))
-					{
-						visual.SetRenderMode(rendermode);
-					}
-				}
-				else if (rendermodeValue.IsInt())
-				{
-					visual.SetRenderMode(rendermodeValue.GetInt());
-				}
-			}
-		}
-
-		Color color;
-		if (UpdatePropertyFromJson(color, value, "color"))
-		{
-			visual.SetColor(color);
-		}
-
-		int renderamt;
-		if (UpdatePropertyFromJson(renderamt, value, "alpha"))
-		{
-			visual.SetAlpha(renderamt);
-		}
-
-		{
-			auto it = value.FindMember("renderfx");
-			if (it != value.MemberEnd())
-			{
-				Value& renderfxValue = it->value;
-				if (renderfxValue.IsString())
-				{
-					int renderfx;
-					if (ParseRenderFx(renderfxValue.GetString(), renderfx))
-					{
-						visual.SetRenderFx(renderfx);
-					}
-				}
-				else if (renderfxValue.IsInt())
-				{
-					visual.SetRenderFx(renderfxValue.GetInt());
-				}
-			}
-		}
-
-		float scale;
-		if (UpdatePropertyFromJson(scale, value, "scale"))
-		{
-			visual.SetScale(scale);
-		}
-
-		float framerate;
-		if (UpdatePropertyFromJson(framerate, value, "framerate"))
-		{
-			visual.SetFramerate(framerate);
-		}
-
-		int beamWidth, beamNoise, beamScrollRate;
-		if (UpdatePropertyFromJson(beamWidth, value, "width"))
-		{
-			visual.SetBeamWidth(beamWidth);
-		}
-		if (UpdatePropertyFromJson(beamNoise, value, "noise"))
-		{
-			visual.SetBeamNoise(beamNoise);
-		}
-		if (UpdatePropertyFromJson(beamScrollRate, value, "scrollrate"))
-		{
-			visual.SetBeamScrollRate(beamScrollRate);
-		}
-
-		FloatRange life;
-		if (UpdatePropertyFromJson(life, value, "life"))
-		{
-			visual.SetLife(life);
-		}
-
-		IntRange radius;
-		if (UpdatePropertyFromJson(radius, value, "radius"))
-		{
-			visual.SetRadius(radius);
-		}
-
-		_visuals[name] = visual;
 	}
 
-	return true;
+	{
+		auto it = value.FindMember("rendermode");
+		if (it != value.MemberEnd())
+		{
+			Value& rendermodeValue = it->value;
+			if (rendermodeValue.IsString())
+			{
+				int rendermode;
+				if (ParseRenderMode(rendermodeValue.GetString(), rendermode))
+				{
+					visual.SetRenderMode(rendermode);
+				}
+			}
+			else if (rendermodeValue.IsInt())
+			{
+				visual.SetRenderMode(rendermodeValue.GetInt());
+			}
+		}
+	}
+
+	Color color;
+	if (UpdatePropertyFromJson(color, value, "color"))
+	{
+		visual.SetColor(color);
+	}
+
+	int renderamt;
+	if (UpdatePropertyFromJson(renderamt, value, "alpha"))
+	{
+		visual.SetAlpha(renderamt);
+	}
+
+	{
+		auto it = value.FindMember("renderfx");
+		if (it != value.MemberEnd())
+		{
+			Value& renderfxValue = it->value;
+			if (renderfxValue.IsString())
+			{
+				int renderfx;
+				if (ParseRenderFx(renderfxValue.GetString(), renderfx))
+				{
+					visual.SetRenderFx(renderfx);
+				}
+			}
+			else if (renderfxValue.IsInt())
+			{
+				visual.SetRenderFx(renderfxValue.GetInt());
+			}
+		}
+	}
+
+	float scale;
+	if (UpdatePropertyFromJson(scale, value, "scale"))
+	{
+		visual.SetScale(scale);
+	}
+
+	float framerate;
+	if (UpdatePropertyFromJson(framerate, value, "framerate"))
+	{
+		visual.SetFramerate(framerate);
+	}
+
+	int beamWidth, beamNoise, beamScrollRate;
+	if (UpdatePropertyFromJson(beamWidth, value, "width"))
+	{
+		visual.SetBeamWidth(beamWidth);
+	}
+	if (UpdatePropertyFromJson(beamNoise, value, "noise"))
+	{
+		visual.SetBeamNoise(beamNoise);
+	}
+	if (UpdatePropertyFromJson(beamScrollRate, value, "scrollrate"))
+	{
+		visual.SetBeamScrollRate(beamScrollRate);
+	}
+
+	FloatRange life;
+	if (UpdatePropertyFromJson(life, value, "life"))
+	{
+		visual.SetLife(life);
+	}
+
+	IntRange radius;
+	if (UpdatePropertyFromJson(radius, value, "radius"))
+	{
+		visual.SetRadius(radius);
+	}
+
+	_visuals[name] = visual;
 }
 
 const Visual* VisualSystem::GetVisual(const char *name)
 {
+	if (!name || *name == '\0')
+		return nullptr;
 	_temp = name; // reuse the same std::string for search to avoid reallocation
 	auto it = _visuals.find(_temp);
 	if (it != _visuals.end())
@@ -521,21 +404,6 @@ void VisualSystem::DumpVisual(const char *name)
 }
 
 VisualSystem g_VisualSystem;
-
-void ReadVisuals()
-{
-	g_VisualSystem.ReadFromFile("templates/visuals.json");
-}
-
-const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool precache)
-{
-	return g_VisualSystem.ProvideDefaultVisual(name, visual, precache);
-}
-
-const Visual* GetVisual(const char* name)
-{
-	return g_VisualSystem.GetVisual(name);
-}
 
 void DumpVisuals()
 {

@@ -37,6 +37,8 @@
 #include "mod_features.h"
 #include "game.h"
 #include "common_soundscripts.h"
+#include "visuals_utils.h"
+#include "classify.h"
 
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
@@ -3365,54 +3367,6 @@ int CBaseMonster::FindHintNode( void )
 	WorldGraph.m_iLastActiveIdleSearch = 0;// start at the top of the list for the next search.
 
 	return NO_NODE;
-}		
-
-static const char* ClassifyDisplayName(int classify)
-{
-	switch (classify) {
-	case CLASS_NONE:
-		return "None";
-	case CLASS_MACHINE:
-		return "Machine";
-	case CLASS_PLAYER:
-		return "Player";
-	case CLASS_HUMAN_PASSIVE:
-		return "Human Passive";
-	case CLASS_HUMAN_MILITARY:
-		return "Human Military";
-	case CLASS_ALIEN_MILITARY:
-		return "Alien Military";
-	case CLASS_ALIEN_PASSIVE:
-		return "Alien Passive";
-	case CLASS_ALIEN_MONSTER:
-		return "Alien Monster";
-	case CLASS_ALIEN_PREY:
-		return "Alien Prey";
-	case CLASS_ALIEN_PREDATOR:
-		return "Alien Predator";
-	case CLASS_INSECT:
-		return "Insect";
-	case CLASS_PLAYER_ALLY:
-		return "Player Ally";
-	case CLASS_PLAYER_BIOWEAPON:
-		return "Player Bioweapon";
-	case CLASS_ALIEN_BIOWEAPON:
-		return "Alien Bioweapon";
-	case CLASS_RACEX_PREDATOR:
-		return "Race X Predator";
-	case CLASS_RACEX_SHOCK:
-		return "Race X Shock";
-	case CLASS_PLAYER_ALLY_MILITARY:
-		return "Player Ally Military";
-	case CLASS_HUMAN_BLACKOPS:
-		return "Human Blackops";
-	case CLASS_SNARK:
-		return "Snark";
-	case CLASS_GARGANTUA:
-		return "Gargantua";
-	default:
-		return "Unknown";
-	}
 }
 
 const char* CBaseMonster::MonsterStateDisplayString(MONSTERSTATE monsterState)
@@ -3534,6 +3488,18 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 		   pev->mins.x, pev->mins.y, pev->mins.z,
 		   pev->maxs.x, pev->maxs.y, pev->maxs.z,
 		   pev->size.x, pev->size.y, pev->size.z);
+
+	if (pev->model)
+		ALERT(level, "Model: %s. ", STRING(pev->model));
+
+	ALERT(level, "Rendermode: %s. Color: (%g, %g, %g). Alpha: %g. Renderfx: %s. ",
+		  RenderModeToString(pev->rendermode),
+		  pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z,
+		  pev->renderamt,
+		  RenderFxToString(pev->renderfx));
+
+	if (pev->scale)
+		ALERT(level, "Scale: %g. ", pev->scale);
 
 	const char* targetForGrapple = nullptr;
 	switch (SizeForGrapple()) {
@@ -3717,7 +3683,15 @@ void CBaseMonster::Activate()
 
 void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax)
 {
-	UTIL_SetSize(pev, m_minHullSize == g_vecZero ? vecMin : m_minHullSize, m_maxHullSize == g_vecZero ? vecMax : m_maxHullSize);
+	Vector vecMins = vecMin;
+	Vector vecMaxs = vecMax;
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate && entTemplate->IsSizeDefined())
+	{
+		vecMins = entTemplate->MinSize();
+		vecMaxs = entTemplate->MaxSize();
+	}
+	UTIL_SetSize(pev, m_minHullSize == g_vecZero ? vecMins : m_minHullSize, m_maxHullSize == g_vecZero ? vecMaxs : m_maxHullSize);
 }
 
 //=========================================================
@@ -4307,61 +4281,137 @@ BOOL CBaseMonster::ShouldFadeOnDeath( void )
 	return FALSE;
 }
 
-void CBaseMonster::SetMyHealth(const float health)
+const EntTemplate* CBaseMonster::GetMyEntTemplate()
+{
+	if (m_entTemplateChecked)
+	{
+		return m_cachedEntTemplate;
+	}
+	if (!FStringNull(m_entTemplate))
+	{
+		m_cachedEntTemplate = GetEntTemplate(STRING(m_entTemplate));
+		m_entTemplateChecked = true;
+		return m_cachedEntTemplate;
+	}
+	else
+	{
+		m_cachedEntTemplate = GetEntTemplate(STRING(pev->classname));
+		m_entTemplateChecked = true;
+		return m_cachedEntTemplate;
+	}
+}
+
+void CBaseMonster::SetMyHealth(const float defaultHealth)
 {
 	if (!pev->health) {
-		pev->health = health;
-	}
-}
-
-void CBaseMonster::SetMyModel(const char *model)
-{
-	if (FStringNull(pev->model)) {
-		const char* reverseModel = NULL;
-#if FEATURE_REVERSE_RELATIONSHIP_MODELS
-		if (m_reverseRelationship)
-			reverseModel = ReverseRelationshipModel();
-#endif
-		if (reverseModel)
-			SET_MODEL( ENT( pev ), reverseModel );
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsHealthDefined())
+			pev->health = entTemplate->Health();
 		else
-			SET_MODEL( ENT( pev ), model );
-	} else {
-		SET_MODEL( ENT( pev ), STRING(pev->model) );
+			pev->health = defaultHealth;
 	}
 }
 
-void CBaseMonster::PrecacheMyModel(const char *model)
+const Visual* CBaseMonster::MyOwnVisual()
 {
-	if (FStringNull(pev->model)) {
-		const char* reverseModel = NULL;
-#if FEATURE_REVERSE_RELATIONSHIP_MODELS
-		if (m_reverseRelationship)
-			reverseModel = ReverseRelationshipModel();
-#endif
-		if (reverseModel)
-			PRECACHE_MODEL(reverseModel);
-		else
-			PRECACHE_MODEL( model );
-	} else {
-		PRECACHE_MODEL( STRING( pev->model ) );
-	}
-	if (!FStringNull(m_gibModel)) {
-		PRECACHE_MODEL( STRING(m_gibModel) );
-	}
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+		return g_VisualSystem.GetVisual(entTemplate->OwnVisualName());
+	return nullptr;
 }
 
-void CBaseMonster::SetMyBloodColor(int bloodColor)
+const char* CBaseMonster::MyOwnModel(const char *defaultModel)
+{
+	if (!FStringNull(pev->model))
+		return STRING(pev->model);
+
+	const Visual* ownVisual = MyOwnVisual();
+	if (ownVisual && ownVisual->model)
+		return ownVisual->model;
+
+#if FEATURE_REVERSE_RELATIONSHIP_MODELS
+	if (m_reverseRelationship)
+	{
+		const char* reverseModel = ReverseRelationshipModel();
+		if (reverseModel)
+			return reverseModel;
+	}
+#endif
+	return defaultModel;
+}
+
+void CBaseMonster::SetMyModel(const char *defaultModel)
+{
+	ApplyVisual(MyOwnVisual());
+
+	if (FStringNull(pev->model))
+		SET_MODEL(ENT(pev), defaultModel);
+	else if (!pev->modelindex && pev->model)
+		SET_MODEL(ENT(pev), STRING(pev->model));
+}
+
+void CBaseMonster::PrecacheMyModel(const char *defaultModel)
+{
+	const char* myModel = MyOwnModel(defaultModel);
+	if (myModel)
+		PRECACHE_MODEL(myModel);
+}
+
+const char* CBaseMonster::MyNonDefaultGibModel()
+{
+	if (!FStringNull(m_gibModel))
+		return STRING(m_gibModel);
+
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const Visual* gibVisual = g_VisualSystem.GetVisual(entTemplate->GibVisualName());
+		if (gibVisual && gibVisual->model)
+			return gibVisual->model;
+	}
+
+	return nullptr;
+}
+
+const Visual* CBaseMonster::MyGibVisual()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+		return g_VisualSystem.GetVisual(entTemplate->GibVisualName());
+	return nullptr;
+}
+
+int CBaseMonster::PrecacheMyGibModel(const char *model)
+{
+	const char* nonDefaultModel = MyNonDefaultGibModel();
+	if (nonDefaultModel)
+	{
+		return PRECACHE_MODEL(nonDefaultModel);
+	}
+	if (model)
+		return PRECACHE_MODEL(model);
+	return 0;
+}
+
+void CBaseMonster::SetMyBloodColor(int defaultBloodColor)
 {
 	if (!m_bloodColor) {
-		m_bloodColor = bloodColor;
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsBloodDefined())
+			m_bloodColor = entTemplate->BloodColor();
+		else
+			m_bloodColor = defaultBloodColor;
 	}
 }
 
 void CBaseMonster::SetMyFieldOfView(const float defaultFieldOfView)
 {
 	if (!m_flFieldOfView) {
-		m_flFieldOfView = defaultFieldOfView;
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsFielfOfViewDefined())
+			m_flFieldOfView = entTemplate->FieldOfView();
+		else
+			m_flFieldOfView = defaultFieldOfView;
 	}
 }
 
@@ -4371,7 +4421,10 @@ int CBaseMonster::Classify()
 		return CLASS_NONE;
 	if (m_iClass)
 		return m_iClass;
-	const int defaultClassify = DefaultClassify();
+
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	const int defaultClassify = (entTemplate && entTemplate->IsClassifyDefined()) ? entTemplate->Classify() : DefaultClassify();
+
 	if (m_reverseRelationship)
 	{
 		switch(defaultClassify)
@@ -4415,6 +4468,12 @@ int CBaseMonster::SizeForGrapple()
 		return GRAPPLE_NOT_A_TARGET;
 	else if (m_sizeForGrapple > 0 && m_sizeForGrapple <= GRAPPLE_FIXED)
 		return m_sizeForGrapple;
+	else
+	{
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsSizeForGrappleDefined())
+			return entTemplate->SizeForGrapple();
+	}
 	return DefaultSizeForGrapple();
 }
 
@@ -4492,12 +4551,12 @@ void CDeadMonster::KeyValue( KeyValueData *pkvd )
 
 void CDeadMonster::Precache()
 {
-	if (!FStringNull(m_gibModel))
-		PRECACHE_MODEL(STRING(m_gibModel));
+	PrecacheMyGibModel();
 }
 
 void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int health)
 {
+	Precache();
 	PrecacheMyModel( modelName );
 	SetMyModel( modelName );
 

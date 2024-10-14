@@ -354,10 +354,10 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			{
 				vecToss = (gpGlobals->v_forward*0.5+gpGlobals->v_up*0.5).Normalize()*gSkillData.strooperGrenadeSpeed;
 			}
-			CSpore::CreateSpore(vecOrigin, pev->angles, vecToss, this, CSpore::GRENADE, true, false, m_soundList);
+			CSpore::CreateSpore(vecOrigin, pev->angles, vecToss, this, CSpore::GRENADE, true, false, GetProjectileOverrides());
 		}
 		else
-			CSpore::CreateSpore(vecOrigin, pev->angles, m_vecTossVelocity, this, CSpore::GRENADE, true, false, m_soundList);
+			CSpore::CreateSpore(vecOrigin, pev->angles, m_vecTossVelocity, this, CSpore::GRENADE, true, false, GetProjectileOverrides());
 
 		m_fThrowGrenade = FALSE;
 		m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
@@ -391,7 +391,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 			Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 			vecGunAngles = UTIL_VecToAngles(vecShootDir);
 
-			CShock::Shoot(pev, vecGunAngles, vecShootOrigin, vecShootDir * CShock::ShockSpeed(), m_soundList);
+			CShock::Shoot(pev, vecGunAngles, vecShootOrigin, vecShootDir * CShock::ShockSpeed(), GetProjectileOverrides());
 			m_cAmmoLoaded--;
 			SetBlending( 0, vecGunAngles.x );
 
@@ -492,7 +492,7 @@ void CShockTrooper::MonsterThink()
 void CShockTrooper::Precache()
 {
 	PrecacheMyModel("models/strooper.mdl");
-	PRECACHE_MODEL("models/strooper_gibs.mdl");
+	PrecacheMyGibModel("models/strooper_gibs.mdl");
 	iStrooperMuzzleFlash = PRECACHE_MODEL(STROOPER_MUZZLEFLASH);
 	PRECACHE_SOUND("shocktrooper/shock_trooper_attack.wav");
 
@@ -502,10 +502,8 @@ void CShockTrooper::Precache()
 
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-	UTIL_PrecacheOther("shock_beam", entityOverrides);
-	UTIL_PrecacheOther("spore", entityOverrides);
+	UTIL_PrecacheOther("shock_beam", GetProjectileOverrides());
+	UTIL_PrecacheOther("spore", GetProjectileOverrides());
 	UTIL_PrecacheOther("monster_shockroach");
 
 	// get voice pitch
@@ -626,13 +624,11 @@ LINK_ENTITY_TO_CLASS( monster_shocktrooper_dead, CDeadStrooper )
 
 void CDeadStrooper::Precache()
 {
-	CDeadMonster::Precache();
-	PRECACHE_MODEL("models/strooper_gibs.mdl");
+	PrecacheMyGibModel(DefaultGibModel());
 }
 
 void CDeadStrooper::Spawn( )
 {
-	Precache();
 	SpawnHelper("models/strooper.mdl", BLOOD_COLOR_YELLOW, gSkillData.strooperHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;

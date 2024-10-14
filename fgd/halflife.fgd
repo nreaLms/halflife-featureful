@@ -231,6 +231,11 @@
 	soundlist(script) : "Sound Replacement File"
 ]
 
+@BaseClass = EntityTemplate
+[
+	ent_template(string): "Entity template" : : "A template name from templates/entities.json"
+]
+
 @BaseClass = BloodColor
 [
 	bloodcolor(choices) : "Blood Color" : : "Blood color of monster" =
@@ -462,7 +467,7 @@
 	displayname(string) : "In-game Name" : : "Name that's displayed when player looks at the monster if mp_allowmonsterinfo is enabled"
 ]
 
-@BaseClass base(MonsterBase, MonsterExtra) flags(Angle) color(0 200 200) = Monster
+@BaseClass base(MonsterBase, EntityTemplate, MonsterExtra) flags(Angle) color(0 200 200) = Monster
 [
 	spawnflags(Flags) =
 	[
@@ -7455,7 +7460,7 @@
 	new_model(studio) : "Custom model"
 ]
 
-@BaseClass base(MonsterMakerBase, MonsterExtra, FollowingMonsterProps, CustomSentences) flags(Angle) size(-16 -16 0, 16 16 72) color(245 128 96) = MonsterMaker
+@BaseClass base(MonsterMakerBase, EntityTemplate, MonsterExtra, FollowingMonsterProps, CustomSentences) flags(Angle) size(-16 -16 0, 16 16 72) color(245 128 96) = MonsterMaker
 [
 	spawnflags(Flags) =
 	[

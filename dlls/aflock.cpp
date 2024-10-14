@@ -215,6 +215,7 @@ void CFlockingFlyerFlock::Precache()
 	EntityOverrides entityOverrides;
 	entityOverrides.model = pev->model;
 	entityOverrides.soundList = m_soundList;
+	entityOverrides.entTemplate = m_entTemplate;
 	UTIL_PrecacheOther("monster_flyer", entityOverrides);
 }
 
@@ -249,6 +250,7 @@ void CFlockingFlyerFlock::SpawnFlock( void )
 
 		pBoid->pev->model = pev->model;
 		pBoid->pev->scale = pev->scale;
+		pBoid->m_entTemplate = m_entTemplate;
 		pBoid->m_soundList = m_soundList;
 		UTIL_SetOrigin( pBoid->pev, vecSpot );
 		pBoid->pev->movetype = MOVETYPE_FLY;
@@ -289,6 +291,7 @@ void CFlockingFlyer::Precache()
 {
 	//PRECACHE_MODEL( "models/aflock.mdl" );
 	PrecacheMyModel( "models/boid.mdl" );
+	PrecacheMyGibModel();
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
 }

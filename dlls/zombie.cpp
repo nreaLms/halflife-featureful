@@ -247,7 +247,8 @@ void CZombie::Spawn()
 //=========================================================
 void CZombie::Precache()
 {
-	PrecacheMyModel( "models/zombie.mdl" );
+	PrecacheMyModel("models/zombie.mdl");
+	PrecacheMyGibModel();
 	PrecacheSounds();
 }
 
@@ -346,6 +347,7 @@ void CZombieBarney::Spawn()
 void CZombieBarney::Precache()
 {
 	PrecacheMyModel("models/zombie_barney.mdl");
+	PrecacheMyGibModel();
 	PrecacheSounds();
 }
 
@@ -388,6 +390,7 @@ void CZombieSoldier::Spawn()
 void CZombieSoldier::Precache()
 {
 	PrecacheMyModel("models/zombie_soldier.mdl");
+	PrecacheMyGibModel();
 	PrecacheSounds();
 }
 

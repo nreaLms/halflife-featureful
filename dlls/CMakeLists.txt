@@ -62,6 +62,7 @@ set (SVDLL_SOURCES
 	bullsquid.cpp
 	buttons.cpp
 	cbase.cpp
+	classify.cpp
 	client.cpp
 	combat.cpp
 	common_soundscripts.cpp
@@ -76,6 +77,7 @@ set (SVDLL_SOURCES
 	eagle.cpp
 	effects.cpp
 	egon.cpp
+	ent_templates.cpp
 	explode.cpp
 	fgrunt.cpp
 	flybee.cpp

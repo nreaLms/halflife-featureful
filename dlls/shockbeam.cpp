@@ -82,11 +82,11 @@ void CShock::FlyThink()
 	}
 }
 
-void CShock::Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity, string_t soundList)
+void CShock::Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity, EntityOverrides entityOverrides)
 {
 	CShock *pShock = GetClassPtr((CShock *)NULL);
 	UTIL_SetOrigin(pShock->pev, vecStart);
-	pShock->m_soundList = soundList;
+	pShock->AssignEntityOverrides(entityOverrides);
 	pShock->Spawn();
 
 	pShock->pev->velocity = vecVelocity;

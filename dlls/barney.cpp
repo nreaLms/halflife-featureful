@@ -411,6 +411,7 @@ void CBarney::SetGunState(int gunState)
 void CBarney::Precache()
 {
 	PrecacheMyModel("models/barney.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
@@ -737,6 +738,7 @@ void COtis::SetGunState(int gunState)
 void COtis::Precache()
 {
 	PrecacheMyModel("models/otis.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(fireDesertEagleSoundScript, NPC::desertEagleSoundScript);
 	RegisterAndPrecacheSoundScript(painSoundScript, CBarney::painSoundScript);
@@ -935,6 +937,7 @@ void CBarniel::Spawn()
 void CBarniel::Precache()
 {
 	PrecacheMyModel("models/barniel.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
@@ -1109,6 +1112,7 @@ void CKate::Spawn()
 void CKate::Precache()
 {
 	PrecacheMyModel("models/kate.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);

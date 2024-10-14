@@ -6,7 +6,13 @@
 #include <initializer_list>
 #include <array>
 #include "const.h"
+#include "rapidjson/document.h"
 #include "template_property_types.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include "icase_compare.h"
 
 constexpr size_t MAX_RANDOM_SOUNDS = 10;
 
@@ -78,12 +84,38 @@ private:
 	IntRange pitch = PITCH_NORM;
 };
 
-void ReadSoundScripts();
+struct SoundScriptMeta
+{
+	bool defaultSet = false;
+	bool wavesSet = false;
+	bool channelSet = false;
+	bool volumeSet = false;
+	bool attenuationSet = false;
+	bool pitchSet = false;
+};
 
-const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript);
-const SoundScript* ProvideDefaultSoundScript(const char *derivative, const char *base, const SoundScript &soundScript, const SoundScriptParamOverride paramOverride);
+class SoundScriptSystem
+{
+public:
+	bool ReadFromFile(const char* fileName);
+	void AddSoundScriptFromJsonValue(const char* name, rapidjson::Value& value);
+	const SoundScript* GetSoundScript(const char* name);
+	const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript);
+	const SoundScript* ProvideDefaultSoundScript(const char* derivative, const char* base, const SoundScript& soundScript, const SoundScriptParamOverride paramOverride = SoundScriptParamOverride());
+	void DumpSoundScripts();
+	void DumpSoundScript(const char* name);
+private:
+	void DumpSoundScriptImpl(const char* name, const SoundScript& soundScript, const SoundScriptMeta& meta);
+	void EnsureExistingScriptDefined(SoundScript& existing, SoundScriptMeta& meta, const SoundScript& soundScript);
 
-const SoundScript* GetSoundScript(const char* name);
+	static constexpr const char* notDefinedYet = "waiting for default";
+
+	std::map<std::string, std::pair<SoundScript, SoundScriptMeta>, CaseInsensitiveCompare> _soundScripts;
+	std::set<std::string> _waveStringSet;
+	std::string _temp;
+};
+
+extern SoundScriptSystem g_SoundScriptSystem;
 
 void DumpSoundScripts();
 

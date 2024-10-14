@@ -1238,11 +1238,26 @@ const char* CTalkMonster::SentenceGroup(int group)
 	if (group == TLK_DECLINE && m_iszDecline)
 		return GetRedefinedSentence(m_iszDecline);
 	const char* defaultSentence = DefaultSentenceGroup(group);
-	if (FStringNull(m_iszSpeakAs))
-		return defaultSentence;
 	if (!defaultSentence || *defaultSentence == '\0')
-		return defaultSentence;
-	return ConstructSentenceWithPrefix(STRING(m_iszSpeakAs), defaultSentence);
+		return nullptr;
+
+	const char* prefix = nullptr;
+	if (!FStringNull(m_iszSpeakAs))
+	{
+		prefix = STRING(m_iszSpeakAs);
+	}
+	else
+	{
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate)
+		{
+			prefix = entTemplate->SpeechPrefix();
+		}
+	}
+
+	if (prefix)
+		return ConstructSentenceWithPrefix(prefix, defaultSentence);
+	return defaultSentence;
 }
 
 // Prepare this talking monster to answer question

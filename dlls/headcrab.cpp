@@ -347,6 +347,7 @@ void CHeadCrab::SpawnHelper(const char *modelName, float health)
 void CHeadCrab::Precache()
 {
 	PrecacheMyModel( "models/headcrab.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
@@ -546,6 +547,7 @@ void CDeadHeadCrab::Spawn( )
 class CBabyCrab : public CHeadCrab
 {
 public:
+	void ApplyDefaultRenderProps(int overridenRenderProps);
 	void Spawn( void );
 	void Precache( void );
 	const char* DefaultDisplayName() { return "Baby Headcrab"; }
@@ -590,18 +592,26 @@ protected:
 
 LINK_ENTITY_TO_CLASS( monster_babycrab, CBabyCrab )
 
+void CBabyCrab::ApplyDefaultRenderProps(int overridenRenderProps)
+{
+	ALERT(at_console, "CBabyCrab::ApplyDefaultRenderProps: %d\n", overridenRenderProps);
+	if ((overridenRenderProps & Visual::RENDERMODE_DEFINED) == 0)
+		pev->rendermode = kRenderTransTexture;
+	if ((overridenRenderProps & Visual::ALPHA_DEFINED) == 0)
+		pev->renderamt = 192;
+}
+
 void CBabyCrab::Spawn( void )
 {
 	Precache();
 	SpawnHelper("models/baby_headcrab.mdl", gSkillData.headcrabHealth * 0.25f); // less health than full grown
-	pev->rendermode = kRenderTransTexture;
-	pev->renderamt = 192;
 	MonsterInit();
 }
 
 void CBabyCrab::Precache( void )
 {
 	PrecacheMyModel( "models/baby_headcrab.mdl" );
+	PrecacheMyGibModel();
 
 	SoundScriptParamOverride paramOverride;
 	paramOverride.OverridePitchRelative(IntRange(140, 150));
@@ -828,6 +838,7 @@ void CShockRoach::Precache()
 	PRECACHE_SOUND("shockroach/shock_walk.wav");
 
 	PrecacheMyModel("models/w_shock_rifle.mdl");
+	PrecacheMyGibModel();
 }
 
 //=========================================================

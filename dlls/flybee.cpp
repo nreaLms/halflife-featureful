@@ -145,7 +145,7 @@ public :
 	void EXPORT AnimateThink( void );
 	void EXPORT ExplodeTouch( CBaseEntity *pOther );
 
-	static CFlyBall *CreateFlyBall( Vector vecOrigin, Vector vecAngles, entvars_s *pevOwner );
+	static CFlyBall *CreateFlyBall(Vector vecOrigin, Vector vecAngles, entvars_s *pevOwner , EntityOverrides entityOverrides);
 
 	int m_iSprite;
 
@@ -296,6 +296,7 @@ void CFlybee::Spawn()
 void CFlybee::Precache()
 {
 	PrecacheMyModel("models/flybee.mdl");
+	PrecacheMyGibModel();
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");
 	PRECACHE_MODEL("sprites/nhth1.spr");
@@ -308,7 +309,7 @@ void CFlybee::Precache()
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	RegisterAndPrecacheSoundScript(beamSoundScript);
 
-	UTIL_PrecacheOther ( "flyball" );
+	UTIL_PrecacheOther ( "flyball", GetProjectileOverrides() );
 
 	m_iSpriteTexture = PRECACHE_MODEL("sprites/shockwave.spr");
 }
@@ -436,10 +437,12 @@ void CFlybee::HandleAnimEvent( MonsterEvent_t *pEvent )
 			Vector vecSrc	= pev->origin + gpGlobals->v_up * 24 + gpGlobals->v_forward * 32;
 			Vector ang		= UTIL_VecToAngles( (m_hEnemy->Center() - vecSrc).Normalize() );
 
-			CFlyBall::CreateFlyBall( vecSrc + gpGlobals->v_right * 30, ang, pev );
-			CFlyBall::CreateFlyBall( vecSrc + gpGlobals->v_right * 10, ang, pev );
-			CFlyBall::CreateFlyBall( vecSrc - gpGlobals->v_right * 30, ang, pev );
-			CFlyBall::CreateFlyBall( vecSrc - gpGlobals->v_right * 10, ang, pev );
+			EntityOverrides flyBallOverrides = GetProjectileOverrides();
+
+			CFlyBall::CreateFlyBall( vecSrc + gpGlobals->v_right * 30, ang, pev, flyBallOverrides );
+			CFlyBall::CreateFlyBall( vecSrc + gpGlobals->v_right * 10, ang, pev, flyBallOverrides );
+			CFlyBall::CreateFlyBall( vecSrc - gpGlobals->v_right * 30, ang, pev, flyBallOverrides );
+			CFlyBall::CreateFlyBall( vecSrc - gpGlobals->v_right * 10, ang, pev, flyBallOverrides );
 
 			break;
 		}
@@ -1223,7 +1226,7 @@ Vector CFlybee::DoProbe(const Vector &Probe)
 	return Vector(0, 0, 0);
 }
 
-CFlyBall *CFlyBall::CreateFlyBall( Vector vecOrigin, Vector vecAngles, entvars_s *pevOwner )
+CFlyBall *CFlyBall::CreateFlyBall( Vector vecOrigin, Vector vecAngles, entvars_s *pevOwner, EntityOverrides entityOverrides )
 {
 	CFlyBall *pBall = GetClassPtr( (CFlyBall *)NULL );
 
@@ -1249,6 +1252,8 @@ CFlyBall *CFlyBall::CreateFlyBall( Vector vecOrigin, Vector vecAngles, entvars_s
 	UTIL_SetOrigin( pBall->pev, vecOrigin );
 
 	pBall->pev->owner = ENT ( pevOwner );
+
+	pBall->AssignEntityOverrides(entityOverrides);
 
 	pBall->Spawn();
 	pBall->SetTouch( &CFlyBall::ExplodeTouch );

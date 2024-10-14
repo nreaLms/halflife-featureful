@@ -89,10 +89,6 @@ constexpr Color VortigauntArmBeamLeaderColor = Color(72, 180, 72);
 
 constexpr Color VortigauntBeamLightColor = Color(255, 180, 96);
 
-#define ISLAVE_LIGHT_RED 255
-#define ISLAVE_LIGHT_GREEN 180
-#define ISLAVE_LIGHT_BLUE 96
-
 #define ISLAVE_ELECTROONLY	(1 << 0)
 #define ISLAVE_SNARKS		(1 << 1)
 #define ISLAVE_HEADCRABS	(1 << 2)
@@ -210,7 +206,7 @@ void CChargeToken::Spawn()
 	pev->classname = MAKE_STRING("charge_token");
 	Precache();
 
-	ApplyVisualToEntity(this, GetVisual(tokenVisual));
+	ApplyVisual(GetVisual(tokenVisual));
 
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT;
@@ -1269,6 +1265,7 @@ void CISlave::StartTask( Task_t *pTask )
 			m_chargeToken = GetClassPtr( (CChargeToken *)NULL );
 			if (m_chargeToken)
 			{
+				m_chargeToken->AssignEntityOverrides(GetProjectileOverrides());
 				m_chargeToken->pev->owner = edict();
 				m_chargeToken->Spawn();
 				Remember(bits_MEMORY_ISLAVE_HAS_LAUNCHED_TOKEN);
@@ -1468,6 +1465,7 @@ void CISlave::Precache()
 	RegisterVisual(summonLightVisual);
 
 	PrecacheMyModel( "models/islave.mdl" );
+	PrecacheMyGibModel();
 
 	PRECACHE_SOUND( "zombie/zo_pain2.wav" );
 	PRECACHE_SOUND( "headcrab/hc_headbite.wav" );
@@ -1499,7 +1497,9 @@ void CISlave::Precache()
 	UTIL_PrecacheOther( "monster_headcrab" );
 #endif
 	if (g_modFeatures.vortigaunt_armor_charge)
-		UTIL_PrecacheOther( "charge_token" );
+	{
+		UTIL_PrecacheOther( "charge_token", GetProjectileOverrides() );
+	}
 }
 
 void CISlave::KeyValue(KeyValueData *pkvd)

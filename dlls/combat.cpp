@@ -36,6 +36,8 @@
 #include "scripted.h"
 #include "game.h"
 #include "common_soundscripts.h"
+#include "visuals_utils.h"
+#include "ent_templates.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -119,11 +121,12 @@ void CGib::SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs )
 	}
 }
 
-void CGib::SpawnHeadGib( entvars_t *pevVictim )
+void CGib::SpawnHeadGib( entvars_t *pevVictim, const Visual* visual )
 {
 	CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-	pGib->Spawn( "models/hgibs.mdl" );// throw one head
+	pGib->Spawn( "models/hgibs.mdl", visual );// throw one head
+
 	pGib->pev->body = 0;
 
 	if( pevVictim )
@@ -168,19 +171,19 @@ void CGib::SpawnHeadGib( entvars_t *pevVictim )
 	pGib->LimitVelocity();
 }
 
-void CGib::SpawnHumanGibs(entvars_t *pevVictim, int cGibs)
+void CGib::SpawnHumanGibs(entvars_t *pevVictim, int cGibs, const Visual* visual)
 {
-	SpawnRandomGibs( pevVictim, cGibs, "models/hgibs.mdl", HUMAN_GIB_COUNT, 1 ); // start at one to avoid throwing random amounts of skulls (0th gib)
+	SpawnRandomGibs( pevVictim, cGibs, "models/hgibs.mdl", HUMAN_GIB_COUNT, 1, visual ); // start at one to avoid throwing random amounts of skulls (0th gib)
 }
 
-void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum , int startGibIndex)
+void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum , int startGibIndex, const Visual* visual)
 {
 	int cSplat;
 
 	for( cSplat = 0; cSplat < cGibs; cSplat++ )
 	{
 		CGib *pGib = GetClassPtr( (CGib *)NULL );
-		pGib->Spawn( gibModel );
+		pGib->Spawn( gibModel, visual );
 		if (gibBodiesNum <= 0)
 		{
 			gibBodiesNum = MODEL_FRAMES(pGib->pev->modelindex);
@@ -231,6 +234,11 @@ void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel
 		}
 		pGib->LimitVelocity();
 	}
+}
+
+void CGib::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, const Visual* visual)
+{
+	SpawnRandomGibs(pevVictim, cGibs, gibModel, 0, 0, visual);
 }
 
 extern int gmsgRandomGibs;
@@ -370,11 +378,11 @@ const char* CBaseMonster::DefaultGibModel()
 
 const char* CBaseMonster::GibModel()
 {
-	if (FStringNull(m_gibModel)) {
-		return DefaultGibModel();
-	} else {
-		return STRING(m_gibModel);
-	}
+	const char* nonDefaultModel = MyNonDefaultGibModel();
+	if (nonDefaultModel)
+		return nonDefaultModel;
+
+	return DefaultGibModel();
 }
 
 int CBaseMonster::DefaultGibCount()
@@ -426,6 +434,7 @@ void CBaseMonster::GibMonster( void )
 	EmitSoundScript(NPC::bodySplatSoundScript);
 
 	const char* gibModel = GibModel();
+	const Visual* gibVisual = MyGibVisual();
 	if (gibModel)
 	{
 		if (HasHumanGibs())
@@ -434,12 +443,12 @@ void CBaseMonster::GibMonster( void )
 			{
 				if (FStrEq(gibModel, "models/hgibs.mdl"))
 				{
-					CGib::SpawnHeadGib(pev);
-					CGib::SpawnHumanGibs(pev);
+					CGib::SpawnHeadGib(pev, gibVisual);
+					CGib::SpawnHumanGibs(pev, 4, gibVisual);
 				}
 				else
 				{
-					CGib::SpawnRandomGibs( pev, GibCount(), gibModel );
+					CGib::SpawnRandomGibs( pev, GibCount(), gibModel, gibVisual );
 				}
 			}
 			gibbed = TRUE;
@@ -448,7 +457,7 @@ void CBaseMonster::GibMonster( void )
 		{
 			if( violence_agibs->value != 0 )
 			{
-				CGib::SpawnRandomGibs( pev, GibCount(), gibModel );
+				CGib::SpawnRandomGibs( pev, GibCount(), gibModel, gibVisual );
 			}
 			gibbed = TRUE;
 		}
@@ -935,7 +944,7 @@ void CGib::StickyGibTouch( CBaseEntity *pOther )
 //
 // Throw a chunk
 //
-void CGib::Spawn( const char *szGibModel )
+void CGib::Spawn( const char *szGibModel, const Visual* visual )
 {
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->friction = 0.55f; // deading the bounce a bit
@@ -949,7 +958,10 @@ void CGib::Spawn( const char *szGibModel )
 	//pev->solid = SOLID_SLIDEBOX;/// hopefully this will fix the VELOCITY TOO LOW crap
 	pev->classname = MAKE_STRING( "gib" );
 
-	SET_MODEL( ENT( pev ), szGibModel );
+	ApplyVisual(visual);
+
+	if (FStringNull(pev->model))
+		SET_MODEL( ENT( pev ), szGibModel );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
 	pev->nextthink = gpGlobals->time + 4.0f;

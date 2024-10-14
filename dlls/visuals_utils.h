@@ -28,13 +28,6 @@ void WriteDynLightVisual(const Visual* visual);
 void WriteEntLightVisual(const Visual& visual);
 void WriteEntLightVisual(const Visual* visual);
 
-void ApplyVisualToEntity(CBaseEntity* pEntity, const Visual& visual);
-void ApplyVisualToEntity(CBaseEntity* pEntity, const Visual* visual);
-
 float AnimateWithFramerate(float frame, float maxFrame, float framerate, float* pLastTime = nullptr);
-
-inline Vector VectorFromColor(const Color& color) {
-	return Vector(color.r, color.g, color.b);
-}
 
 #endif

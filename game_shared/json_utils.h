@@ -4,6 +4,7 @@
 
 #include <string>
 
+#include "extdll.h"
 #include "rapidjson/document.h"
 #include "template_property_types.h"
 
@@ -16,5 +17,6 @@ bool UpdatePropertyFromJson(bool& b, rapidjson::Value& jsonValue, const char* ke
 bool UpdatePropertyFromJson(Color& color, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(FloatRange& floatRange, rapidjson::Value& jsonValue, const char* key);
 bool UpdatePropertyFromJson(IntRange& intRange, rapidjson::Value& jsonValue, const char* key);
+bool UpdatePropertyFromJson(Vector& vector, rapidjson::Value& jsonValue, const char* key);
 
 #endif

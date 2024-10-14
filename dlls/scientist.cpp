@@ -809,6 +809,7 @@ void CScientist::Spawn()
 void CScientist::Precache( void )
 {
 	PrecacheMyModel( "models/scientist.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, painSoundScript);
@@ -1576,6 +1577,7 @@ void CCleansuitScientist::Spawn()
 void CCleansuitScientist::Precache()
 {
 	PrecacheMyModel("models/cleansuit_scientist.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CScientist::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CScientist::dieSoundScript, CScientist::painSoundScript);
@@ -1690,6 +1692,7 @@ void CRosenberg::Precache()
 	PrecacheMyModel("models/scientist.mdl");
 	CalcTotalHeadCount();
 #endif
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, painSoundScript);
@@ -1777,6 +1780,7 @@ LINK_ENTITY_TO_CLASS( monster_civilian, CCivilian )
 void CCivilian::Precache()
 {
 	PrecacheMyModel("models/scientist.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CScientist::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CScientist::dieSoundScript, CScientist::painSoundScript);
@@ -1820,7 +1824,9 @@ void CGus::Spawn()
 void CGus::Precache()
 {
 	PrecacheMyModel("models/gus.mdl");
-	PrecachePainSounds();
+	PrecacheMyGibModel();
+	RegisterAndPrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(dieSoundScript, painSoundScript);
 	TalkInit();
 	CTalkMonster::Precache();
 	RegisterTalkMonster();
@@ -1925,6 +1931,7 @@ void CKeller::Spawn()
 void CKeller::Precache()
 {
 	PrecacheMyModel("models/wheelchair_sci.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);

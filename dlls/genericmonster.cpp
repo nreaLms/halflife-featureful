@@ -173,10 +173,8 @@ void CGenericMonster::Spawn()
 //=========================================================
 void CGenericMonster::Precache()
 {
-	if (!FStringNull(pev->model))
-		PRECACHE_MODEL( STRING( pev->model ) );
-	if (!FStringNull(m_gibModel))
-		PRECACHE_MODEL( STRING(m_gibModel) );
+	PrecacheMyModel(nullptr);
+	PrecacheMyGibModel();
 }
 
 void CGenericMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
@@ -373,6 +371,7 @@ void CLoader::Spawn()
 void CLoader::Precache()
 {
 	PrecacheMyModel("models/loader.mdl");
+	PrecacheMyGibModel();
 }
 
 void CLoader::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)

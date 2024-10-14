@@ -183,6 +183,7 @@ void CRoach::Spawn()
 void CRoach::Precache()
 {
 	PrecacheMyModel( "models/roach.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(walkSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);

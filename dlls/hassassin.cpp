@@ -419,6 +419,7 @@ void CHAssassin::Spawn()
 void CHAssassin::Precache()
 {
 	PrecacheMyModel( "models/hassassin.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(shotSoundScript);
 	RegisterAndPrecacheSoundScript(footstepSoundScript);

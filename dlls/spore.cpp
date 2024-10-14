@@ -261,10 +261,11 @@ void CSpore::MyBounceTouch(CBaseEntity* pOther)
 	}
 }
 
-CSpore* CSpore::CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, const Vector& vecVelocity, CBaseEntity* pOwner, SporeType sporeType, bool bIsAI, bool bPuked, string_t soundList)
+CSpore* CSpore::CreateSpore(const Vector& vecOrigin, const Vector& vecAngles, const Vector& vecVelocity, CBaseEntity* pOwner, SporeType sporeType, bool bIsAI, bool bPuked, EntityOverrides entityOverrides)
 {
 	CSpore* pSpore = GetClassPtr((CSpore *)NULL);
 	UTIL_SetOrigin(pSpore->pev, vecOrigin);
+	pSpore->AssignEntityOverrides(entityOverrides);
 
 	pSpore->m_SporeType = sporeType;
 

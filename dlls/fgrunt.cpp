@@ -1977,6 +1977,7 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 void CHFGrunt :: Precache()
 {
 	PrecacheMyModel("models/hgrunt_opfor.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
@@ -3011,6 +3012,7 @@ void CTorch::Spawn()
 void CTorch::Precache()
 {
 	PrecacheMyModel("models/hgrunt_torch.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CHFGrunt::dieSoundScript);
@@ -3787,6 +3789,7 @@ void CMedic::Spawn()
 void CMedic::Precache()
 {
 	PrecacheMyModel("models/hgrunt_medic.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CHFGrunt::dieSoundScript);

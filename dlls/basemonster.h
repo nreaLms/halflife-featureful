@@ -17,6 +17,7 @@
 #define BASEMONSTER_H
 
 #include "cbase.h"
+#include "ent_templates.h"
 
 class CFollowingMonster;
 class CTalkMonster;
@@ -385,11 +386,17 @@ public:
 			*outResult = 0;
 		return true;
 	}
-	
-	void SetMyHealth( const float health );
-	void SetMyModel( const char* model );
-	void PrecacheMyModel( const char* model );
-	void SetMyBloodColor( int bloodColor );
+
+	const EntTemplate* GetMyEntTemplate();
+	void SetMyHealth( const float defaultHealth );
+	const Visual* MyOwnVisual();
+	const char* MyOwnModel(const char* defaultModel);
+	void SetMyModel( const char* defaultModel );
+	void PrecacheMyModel( const char* defaultModel );
+	const char* MyNonDefaultGibModel();
+	const Visual* MyGibVisual();
+	int PrecacheMyGibModel( const char* model = nullptr );
+	void SetMyBloodColor( int defaultBloodColor );
 	void SetMyFieldOfView(const float defaultFieldOfView );
 
 	int Classify();
@@ -469,6 +476,9 @@ public:
 	float m_flLastYawTime;
 
 	const char* taskFailReason;
+
+	const EntTemplate* m_cachedEntTemplate;
+	bool m_entTemplateChecked;
 };
 
 #define FREEROAM_MAPDEFAULT 0

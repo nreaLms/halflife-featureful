@@ -112,23 +112,9 @@ void WriteEntLightVisual(const Visual *visual)
 	WriteEntLightVisual(*visual);
 }
 
-void ApplyVisualToEntity(CBaseEntity* pEntity, const Visual& visual)
+static bool CheckVisualDefine(const Visual& visual, int param, int ignored)
 {
-	if (visual.model && *visual.model)
-	{
-		SET_MODEL(pEntity->edict(), visual.model);
-	}
-	pEntity->pev->rendermode = visual.rendermode;
-	pEntity->pev->rendercolor = VectorFromColor(visual.rendercolor);
-	pEntity->pev->renderamt = visual.renderamt;
-	pEntity->pev->renderfx = visual.renderfx;
-	pEntity->pev->scale = visual.scale;
-	pEntity->pev->framerate = visual.framerate;
-}
-
-void ApplyVisualToEntity(CBaseEntity* pEntity, const Visual* visual)
-{
-	ApplyVisualToEntity(pEntity, *visual);
+	return visual.HasDefined(param) && (ignored & param) == 0;
 }
 
 float AnimateWithFramerate(float frame, float maxFrame, float framerate, float* pLastTime)

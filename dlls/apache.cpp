@@ -208,6 +208,7 @@ void CApache::Precache( void )
 void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
 {
 	PrecacheMyModel( modelName );
+	m_iBodyGibs = PrecacheMyGibModel(gibModel);
 
 	PRECACHE_SOUND( "apache/ap_rotor1.wav" );
 	RegisterAndPrecacheSoundScript(rotorSoundScript);
@@ -223,11 +224,8 @@ void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 
 	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
-	m_iBodyGibs = PRECACHE_MODEL( gibModel );
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-	UTIL_PrecacheOther( "hvr_rocket", entityOverrides );
+	UTIL_PrecacheOther( "hvr_rocket", GetProjectileOverrides() );
 }
 
 void CApache::KeyValue(KeyValueData *pkvd)
@@ -835,7 +833,7 @@ void CApache::FireRocket( void )
 		break;
 	}
 
-	CBaseEntity *pRocket = CBaseEntity::Create( "hvr_rocket", vecSrc, pev->angles, edict() );
+	CBaseEntity *pRocket = CBaseEntity::Create( "hvr_rocket", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 	if( pRocket )
 	{
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );

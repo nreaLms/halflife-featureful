@@ -56,7 +56,7 @@ public:
 	void Precache(void);
 	void EXPORT SpikeTouch(CBaseEntity *pOther);
 	void EXPORT StartTrail();
-	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles, string_t soundList = iStringNull);
+	static void Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles, EntityOverrides entityOverrides);
 
 	static const NamedSoundScript hitWorldSoundScript;
 	static const NamedSoundScript hitBodySoundScript;
@@ -160,10 +160,10 @@ void CPitdroneSpike::StartTrail()
 	SetTouch(&CPitdroneSpike::SpikeTouch);
 }
 
-void CPitdroneSpike::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles, string_t soundList)
+void CPitdroneSpike::Shoot(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, Vector vecAngles, EntityOverrides entityOverrides)
 {
 	CPitdroneSpike *pSpit = GetClassPtr( (CPitdroneSpike *)NULL );
-	pSpit->m_soundList = soundList;
+	pSpit->AssignEntityOverrides(entityOverrides);
 	pSpit->Spawn();
 
 	UTIL_SetOrigin( pSpit->pev, vecStart );
@@ -560,7 +560,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 		// SOUND HERE! (in the pitdrone model)
 
-		CPitdroneSpike::Shoot(pev, vecSpitOrigin, vecSpitDir * 900, UTIL_VecToAngles(vecSpitDir), m_soundList);
+		CPitdroneSpike::Shoot(pev, vecSpitOrigin, vecSpitDir * 900, UTIL_VecToAngles(vecSpitDir), GetProjectileOverrides());
 
 		// spew the spittle temporary ents.
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOrigin );
@@ -652,7 +652,7 @@ void CPitdrone::Spawn()
 void CPitdrone::Precache()
 {
 	PrecacheMyModel("models/pit_drone.mdl");
-	PRECACHE_MODEL("models/pit_drone_gibs.mdl");
+	PrecacheMyGibModel("models/pit_drone_gibs.mdl");
 	iPitdroneSpitSprite = PRECACHE_MODEL("sprites/tinyspit.spr");// client side spittle.
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
@@ -678,9 +678,7 @@ void CPitdrone::Precache()
 	PRECACHE_SOUND("pitdrone/pit_drone_hunt2.wav");
 	PRECACHE_SOUND("pitdrone/pit_drone_hunt3.wav");
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-	UTIL_PrecacheOther("pitdronespike", entityOverrides);
+	UTIL_PrecacheOther("pitdronespike", GetProjectileOverrides());
 }
 
 
@@ -1184,13 +1182,11 @@ LINK_ENTITY_TO_CLASS( monster_pitdrone_dead, CDeadPitdrone )
 
 void CDeadPitdrone::Precache()
 {
-	CDeadMonster::Precache();
-	PRECACHE_MODEL("models/pit_drone_gibs.mdl");
+	PrecacheMyGibModel(DefaultGibModel());
 }
 
 void CDeadPitdrone::Spawn( )
 {
-	Precache();
 	SpawnHelper("models/pit_drone.mdl", BLOOD_COLOR_YELLOW, gSkillData.pitdroneHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;

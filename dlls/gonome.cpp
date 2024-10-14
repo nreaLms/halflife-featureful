@@ -279,7 +279,7 @@ CGonomeGuts* CGonome::GetGonomeGuts(const Vector &pos)
 	if (m_pGonomeGuts)
 		return m_pGonomeGuts;
 	CGonomeGuts *pGuts = GetClassPtr( (CGonomeGuts *)NULL );
-	pGuts->m_soundList = m_soundList;
+	pGuts->AssignEntityOverrides(GetProjectileOverrides());
 	pGuts->Spawn();
 
 	UTIL_SetOrigin( pGuts->pev, pos );
@@ -668,11 +668,9 @@ void CGonome::Spawn()
 void CGonome::Precache()
 {
 	PrecacheMyModel("models/gonome.mdl");
+	PrecacheMyGibModel();
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-
-	UTIL_PrecacheOther("gonomeguts", entityOverrides);
+	UTIL_PrecacheOther("gonomeguts", GetProjectileOverrides());
 
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 

@@ -1092,6 +1092,7 @@ void CHGrunt::Spawn()
 void CHGrunt::PrecacheHelper(const char *modelName)
 {
 	PrecacheMyModel( modelName );
+	PrecacheMyGibModel();
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);// because we use the basemonster SWIPE animation event
 }
 
@@ -2392,6 +2393,7 @@ const char* CHGruntRepel::TrooperName()
 void CHGruntRepel::Precache( void )
 {
 	EntityOverrides entityOverrides;
+	entityOverrides.entTemplate = m_entTemplate;
 	entityOverrides.model = pev->model;
 	entityOverrides.soundList = m_soundList;
 
@@ -2450,6 +2452,7 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	pEntity->pev->weapons = pev->weapons;
 	pEntity->pev->health = pev->health;
 	pEntity->pev->model = pev->model;
+	pEntity->m_entTemplate = m_entTemplate;
 	pEntity->m_soundList = m_soundList;
 	pGrunt->m_iClass = m_iClass;
 	pGrunt->m_reverseRelationship = m_reverseRelationship;

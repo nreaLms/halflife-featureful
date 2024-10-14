@@ -80,6 +80,7 @@ IMPLEMENT_SAVERESTORE( CSquidSpit, CBaseEntity )
 const NamedVisual CSquidSpit::spitVisual = BuildVisual::Animated("Bullsquid.Spit")
 		.Model("sprites/bigspit.spr")
 		.RenderMode(kRenderTransAlpha)
+		.Alpha(255)
 		.Scale(0.5f);
 
 const NamedVisual CSquidSpit::fleckVisual = BuildVisual::Spray("Bullsquid.Fleck").Mixin(&sharedTinySpitVisual);
@@ -104,7 +105,7 @@ void CSquidSpit::SpawnHelper(const char *className, const char* spitVisualName)
 	pev->classname = MAKE_STRING( className );
 	pev->solid = SOLID_BBOX;
 
-	ApplyVisualToEntity(this, GetVisual(spitVisualName));
+	ApplyVisual(GetVisual(spitVisualName));
 	pev->frame = 0;
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
@@ -118,13 +119,14 @@ void CSquidSpit::Animate( void )
 	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 }
 
-void CSquidSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList )
+void CSquidSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides )
 {
 	CSquidSpit *pSpit = GetClassPtr( (CSquidSpit *)NULL );
-	pSpit->m_soundList = soundList;
+	pSpit->AssignEntityOverrides(entityOverrides);
 	pSpit->Spawn();
 
 	UTIL_SetOrigin( pSpit->pev, vecStart );
+	pSpit->pev->angles = UTIL_VecToAngles(vecVelocity);
 	pSpit->pev->velocity = vecVelocity;
 	pSpit->pev->owner = ENT( pevOwner );
 
@@ -222,7 +224,7 @@ void CSquidToxicSpit::Spawn( void )
 	pev->classname = MAKE_STRING( "bigsquidspit" );
 	pev->solid = SOLID_BBOX;
 
-	ApplyVisualToEntity(this, GetVisual(toxicSpitVisual));
+	ApplyVisual(GetVisual(toxicSpitVisual));
 	pev->frame = 0;
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
@@ -287,10 +289,10 @@ void CSquidToxicSpit::Animate( void )
 	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 }
 
-void CSquidToxicSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, string_t soundList )
+void CSquidToxicSpit::Shoot( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides )
 {
 	CSquidToxicSpit *pSpit = GetClassPtr( (CSquidToxicSpit *)NULL );
-	pSpit->m_soundList = soundList;
+	pSpit->AssignEntityOverrides(entityOverrides);
 	pSpit->Spawn();
 
 	UTIL_SetOrigin( pSpit->pev, vecStart );
@@ -811,9 +813,9 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				}
 
 				if (toxicSpit) {
-					CSquidToxicSpit::Shoot(pev, vecSpitOrigin, vecSpitDir * CSquidToxicSpit::SpitSpeed(), m_soundList);
+					CSquidToxicSpit::Shoot(pev, vecSpitOrigin, vecSpitDir * CSquidToxicSpit::SpitSpeed(), GetProjectileOverrides());
 				} else {
-					CSquidSpit::Shoot( pev, vecSpitOrigin, vecSpitDir * CSquidSpit::SpitSpeed(), m_soundList );
+					CSquidSpit::Shoot( pev, vecSpitOrigin, vecSpitDir * CSquidSpit::SpitSpeed(), GetProjectileOverrides() );
 				}
 			}
 			break;
@@ -931,13 +933,11 @@ void CBullsquid::Spawn()
 void CBullsquid::Precache()
 {
 	PrecacheMyModel( "models/bullsquid.mdl" );
+	PrecacheMyGibModel();
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-
-	UTIL_PrecacheOther("squidspit", entityOverrides);
+	UTIL_PrecacheOther("squidspit", GetProjectileOverrides());
 #if FEATURE_BULLSQUID_TOXICSPIT
-	UTIL_PrecacheOther("squidtoxicspit", entityOverrides); // toxic spit projectile
+	UTIL_PrecacheOther("squidtoxicspit", GetProjectileOverrides()); // toxic spit projectile
 #endif
 
 	RegisterVisual(tinySpitVisual);

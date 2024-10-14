@@ -2,6 +2,7 @@
 #include "enginecallback.h"
 #include "soundscripts.h"
 #include "util.h"
+#include "icase_compare.h"
 
 #include <map>
 #include <set>
@@ -13,38 +14,9 @@ using namespace rapidjson;
 
 const char* soundScriptsSchema = R"(
 {
-  "definitions": {
-    "soundscript": {
-      "type": "object",
-      "properties": {
-        "waves": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 10
-        },
-        "channel": {
-          "type": "string",
-          "pattern": "^auto|weapon|voice|item|body|static$"
-        },
-        "volume": {
-          "$ref": "definitions.json#/range",
-        },
-        "attenuation": {
-          "type": ["number", "string"],
-          "minimum": 0,
-          "pattern": "^norm|idle|static|none$"
-        },
-        "pitch": {
-          "$ref": "definitions.json#/range_int"
-        }
-      }
-    }
-  },
   "type": "object",
   "additionalProperties": {
-    "$ref": "#/definitions/soundscript"
+    "$ref": "definitions.json#/soundscript"
   }
 }
 )";
@@ -175,44 +147,6 @@ void SoundScriptParamOverride::ApplyOverride(int& origChannel, FloatRange &origV
 	}
 }
 
-struct SoundScriptMeta
-{
-	bool defaultSet = false;
-	bool wavesSet = false;
-	bool channelSet = false;
-	bool volumeSet = false;
-	bool attenuationSet = false;
-	bool pitchSet = false;
-};
-
-struct CaseInsensitiveCompare
-{
-	bool operator()(const std::string& lhs, const std::string& rhs) const noexcept
-	{
-		return stricmp(lhs.c_str(), rhs.c_str()) < 0;
-	}
-};
-
-class SoundScriptSystem
-{
-public:
-	bool ReadFromFile(const char* fileName);
-	const SoundScript* GetSoundScript(const char* name);
-	const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript);
-	const SoundScript* ProvideDefaultSoundScript(const char* derivative, const char* base, const SoundScript& soundScript, const SoundScriptParamOverride paramOverride = SoundScriptParamOverride());
-	void DumpSoundScripts();
-	void DumpSoundScript(const char* name);
-private:
-	void DumpSoundScriptImpl(const char* name, const SoundScript& soundScript, const SoundScriptMeta& meta);
-	void EnsureExistingScriptDefined(SoundScript& existing, SoundScriptMeta& meta, const SoundScript& soundScript);
-
-	static constexpr const char* notDefinedYet = "waiting for default";
-
-	std::map<std::string, std::pair<SoundScript, SoundScriptMeta>, CaseInsensitiveCompare> _soundScripts;
-	std::set<std::string> _waveStringSet;
-	std::string _temp;
-};
-
 static bool ParseChannel(const char* str, int& channel)
 {
 	constexpr std::pair<const char*, int> channels[] = {
@@ -295,64 +229,74 @@ bool SoundScriptSystem::ReadFromFile(const char *fileName)
 	{
 		const char* name = scriptIt->name.GetString();
 
-		SoundScript soundScript;
-		SoundScriptMeta soundScriptMeta;
-
 		Value& value = scriptIt->value;
-		{
-			auto it = value.FindMember("waves");
-			if (it != value.MemberEnd())
-			{
-				Value::Array arr = it->value.GetArray();
-				soundScript.waveCount = arr.Size();
-				for (size_t i=0; i<soundScript.waveCount; ++i)
-				{
-					std::string str = arr[i].GetString();
-					auto strIt = _waveStringSet.find(str);
-					if (strIt == _waveStringSet.end())
-					{
-						auto p = _waveStringSet.insert(str);
-						strIt = p.first;
-					}
-					soundScript.waves[i] = strIt->c_str();
-				}
-				soundScriptMeta.wavesSet = true;
-			}
-		}
-		{
-			auto it = value.FindMember("channel");
-			if (it != value.MemberEnd())
-			{
-				soundScriptMeta.channelSet = ParseChannel(it->value.GetString(), soundScript.channel);
-			}
-		}
-		soundScriptMeta.volumeSet = UpdatePropertyFromJson(soundScript.volume, value, "volume");
-		{
-			auto it = value.FindMember("attenuation");
-			if (it != value.MemberEnd())
-			{
-				Value& attnValue = it->value;
-				if (attnValue.IsString())
-				{
-					soundScriptMeta.attenuationSet = ParseAttenuation(attnValue.GetString(), soundScript.attenuation);
-				}
-				else if (attnValue.IsNumber())
-				{
-					soundScript.attenuation = attnValue.GetFloat();
-					soundScriptMeta.attenuationSet = true;
-				}
-			}
-		}
-		soundScriptMeta.pitchSet = UpdatePropertyFromJson(soundScript.pitch, value, "pitch");
-
-		_soundScripts[name] = std::make_pair(soundScript, soundScriptMeta);
+		if (value.IsObject())
+			AddSoundScriptFromJsonValue(name, value);
+		else
+			ALERT(at_warning, "Soundscript '%s' is not an object!\n");
 	}
 
 	return true;
 }
 
+void SoundScriptSystem::AddSoundScriptFromJsonValue(const char *name, Value &value)
+{
+	SoundScript soundScript;
+	SoundScriptMeta soundScriptMeta;
+
+	{
+		auto it = value.FindMember("waves");
+		if (it != value.MemberEnd())
+		{
+			Value::Array arr = it->value.GetArray();
+			soundScript.waveCount = arr.Size();
+			for (size_t i=0; i<soundScript.waveCount; ++i)
+			{
+				std::string str = arr[i].GetString();
+				auto strIt = _waveStringSet.find(str);
+				if (strIt == _waveStringSet.end())
+				{
+					auto p = _waveStringSet.insert(str);
+					strIt = p.first;
+				}
+				soundScript.waves[i] = strIt->c_str();
+			}
+			soundScriptMeta.wavesSet = true;
+		}
+	}
+	{
+		auto it = value.FindMember("channel");
+		if (it != value.MemberEnd())
+		{
+			soundScriptMeta.channelSet = ParseChannel(it->value.GetString(), soundScript.channel);
+		}
+	}
+	soundScriptMeta.volumeSet = UpdatePropertyFromJson(soundScript.volume, value, "volume");
+	{
+		auto it = value.FindMember("attenuation");
+		if (it != value.MemberEnd())
+		{
+			Value& attnValue = it->value;
+			if (attnValue.IsString())
+			{
+				soundScriptMeta.attenuationSet = ParseAttenuation(attnValue.GetString(), soundScript.attenuation);
+			}
+			else if (attnValue.IsNumber())
+			{
+				soundScript.attenuation = attnValue.GetFloat();
+				soundScriptMeta.attenuationSet = true;
+			}
+		}
+	}
+	soundScriptMeta.pitchSet = UpdatePropertyFromJson(soundScript.pitch, value, "pitch");
+
+	_soundScripts[name] = std::make_pair(soundScript, soundScriptMeta);
+}
+
 const SoundScript* SoundScriptSystem::GetSoundScript(const char *name)
 {
+	if (!name || *name == '\0')
+		return nullptr;
 	_temp = name; // reuse the same std::string for search to avoid reallocation
 	auto it = _soundScripts.find(_temp);
 	if (it != _soundScripts.end())
@@ -545,8 +489,10 @@ void SoundScriptSystem::DumpSoundScripts()
 
 void SoundScriptSystem::DumpSoundScript(const char *name)
 {
+	if (!*name)
+		return;
 	_temp = name;
-	if (_temp[_temp.size()-1] == '.')
+	if (_temp[_temp.size()-1] == '.' || _temp[_temp.size()-1] == '#')
 	{
 		bool foundSomething = false;
 		for (const auto& p : _soundScripts)
@@ -573,26 +519,6 @@ void SoundScriptSystem::DumpSoundScript(const char *name)
 }
 
 SoundScriptSystem g_SoundScriptSystem;
-
-void ReadSoundScripts()
-{
-	g_SoundScriptSystem.ReadFromFile("sound/soundscripts.json");
-}
-
-const SoundScript* ProvideDefaultSoundScript(const char* name, const SoundScript& soundScript)
-{
-	return g_SoundScriptSystem.ProvideDefaultSoundScript(name, soundScript);
-}
-
-const SoundScript* ProvideDefaultSoundScript(const char *derivative, const char *base, const SoundScript &soundScript, const SoundScriptParamOverride paramOverride)
-{
-	return g_SoundScriptSystem.ProvideDefaultSoundScript(derivative, base, soundScript, paramOverride);
-}
-
-const SoundScript* GetSoundScript(const char* name)
-{
-	return g_SoundScriptSystem.GetSoundScript(name);
-}
 
 void DumpSoundScripts()
 {

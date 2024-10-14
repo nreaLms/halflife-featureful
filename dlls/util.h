@@ -346,6 +346,8 @@ extern void			UTIL_BubbleTrail( Vector from, Vector to, int count );
 struct EntityOverrides
 {
 	string_t model = iStringNull;
+	string_t entTemplate = iStringNull;
+	string_t ownerEntTemplate = iStringNull;
 	string_t soundList = iStringNull;
 };
 
@@ -604,6 +606,9 @@ int RandomizeNumberFromRange(const IntRange& r);
 int RandomizeNumberFromRange(int minI, int maxI);
 
 void ReportAIStateByClassname(const char* name);
+
+const char* RenderModeToString(int rendermode);
+const char* RenderFxToString(int renderfx);
 
 //TODO: move this to movewith.h later
 extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin );
