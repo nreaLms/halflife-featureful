@@ -1215,8 +1215,9 @@ void CScientist::ReportAIState(ALERT_TYPE level)
 class CDeadScientist : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
+	void Spawn();
+	const char* DefaultModel() { return "models/scientist.mdl"; }
+	int	DefaultClassify() { return	CLASS_HUMAN_PASSIVE; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[7];
@@ -1235,7 +1236,7 @@ LINK_ENTITY_TO_CLASS( monster_scientist_dead, CDeadScientist )
 //
 void CDeadScientist :: Spawn( )
 {
-	SpawnHelper("models/scientist.mdl");
+	SpawnHelper();
 
 	if ( pev->body == -1 )
 	{// -1 chooses a random head
@@ -1595,7 +1596,8 @@ void CCleansuitScientist::ReportAIState(ALERT_TYPE level)
 class CDeadCleansuitScientist : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/cleansuit_scientist.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("cleansuit_scientist"); }
 	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
 
@@ -1613,7 +1615,7 @@ LINK_ENTITY_TO_CLASS( monster_cleansuit_scientist_dead, CDeadCleansuitScientist 
 
 void CDeadCleansuitScientist::Spawn( )
 {
-	SpawnHelper("models/cleansuit_scientist.mdl");
+	SpawnHelper();
 	if ( pev->body == -1 ) {
 		pev->body = RANDOM_LONG(0, g_modFeatures.scientist_random_heads-1);
 	}
@@ -1843,8 +1845,9 @@ void CGus::ReportAIState(ALERT_TYPE level)
 class CDeadWorker : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_HUMAN_PASSIVE; }
+	void Spawn();
+	const char* DefaultModel() { return "models/worker.mdl"; }
+	int	DefaultClassify() { return	CLASS_HUMAN_PASSIVE; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[6];
@@ -1858,22 +1861,23 @@ const char* CDeadWorker::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_worker_dead, CDeadWorker )
 
-void CDeadWorker :: Spawn( )
+void CDeadWorker::Spawn( )
 {
-	SpawnHelper("models/worker.mdl");
+	SpawnHelper();
 	MonsterInitDead();
 }
 
 class CDeadGus : public CDeadWorker
 {
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/gus.mdl"; }
 };
 
 LINK_ENTITY_TO_CLASS( monster_gus_dead, CDeadGus )
 
-void CDeadGus :: Spawn( )
+void CDeadGus::Spawn()
 {
-	SpawnHelper("models/gus.mdl");
+	SpawnHelper();
 	if (pev->body == -1)
 	{
 		pev->body = RANDOM_LONG(0,1);

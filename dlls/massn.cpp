@@ -441,9 +441,10 @@ void CAssassinRepel::PrepareBeforeSpawn(CBaseEntity *pEntity)
 class CDeadMassn : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/massn.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("male_assassin"); }
-	int	DefaultClassify ( void )
+	int	DefaultClassify()
 	{
 		if (g_modFeatures.blackops_classify)
 			return CLASS_HUMAN_BLACKOPS;
@@ -480,7 +481,7 @@ LINK_ENTITY_TO_CLASS( monster_massassin_dead, CDeadMassn )
 
 void CDeadMassn::Spawn( )
 {
-	SpawnHelper("models/massn.mdl");
+	SpawnHelper();
 
 	if ( pev->weapons <= 0 )
 	{

@@ -2500,8 +2500,9 @@ void CHGruntRepel::RepelUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 class CDeadHGrunt : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_HUMAN_MILITARY; }
+	void Spawn();
+	const char* DefaultModel() { return "models/hgrunt.mdl"; }
+	int	DefaultClassify() { return	CLASS_HUMAN_MILITARY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
@@ -2519,9 +2520,9 @@ LINK_ENTITY_TO_CLASS( monster_hgrunt_dead, CDeadHGrunt )
 //=========================================================
 // ********** DeadHGrunt SPAWN **********
 //=========================================================
-void CDeadHGrunt :: Spawn( void )
+void CDeadHGrunt::Spawn()
 {
-	SpawnHelper("models/hgrunt.mdl");
+	SpawnHelper();
 
 	// map old bodies onto new bodies
 	switch( pev->body )

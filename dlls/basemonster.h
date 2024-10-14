@@ -495,12 +495,18 @@ class CDeadMonster : public CBaseMonster
 {
 public:
 	void Precache();
-	void SpawnHelper(const char* modelName, int bloodColor = BLOOD_COLOR_RED, int health = 8);
+	void SpawnHelper(int bloodColor = BLOOD_COLOR_RED, int health = 8);
 	void KeyValue( KeyValueData *pkvd );
- 
+	virtual const char* DefaultModel() {
+		return nullptr;
+	}
+
 	CDeadMonster* MyDeadMonsterPointer() {return this;}
 	virtual const char* getPos(int pose) const = 0;
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
+
+protected:
+	void SpawnHelper(const char* defaultModel, int bloodColor = BLOOD_COLOR_RED, int health = 8);
 };
 
 #endif // BASEMONSTER_H

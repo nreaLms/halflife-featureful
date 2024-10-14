@@ -4345,7 +4345,10 @@ void CBaseMonster::SetMyModel(const char *defaultModel)
 	ApplyVisual(MyOwnVisual());
 
 	if (FStringNull(pev->model))
-		SET_MODEL(ENT(pev), defaultModel);
+	{
+		if (defaultModel)
+			SET_MODEL(ENT(pev), defaultModel);
+	}
 	else if (!pev->modelindex && pev->model)
 		SET_MODEL(ENT(pev), STRING(pev->model));
 }
@@ -4551,14 +4554,15 @@ void CDeadMonster::KeyValue( KeyValueData *pkvd )
 
 void CDeadMonster::Precache()
 {
+	PrecacheMyModel(DefaultModel());
 	PrecacheMyGibModel();
 }
 
-void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int health)
+void CDeadMonster::SpawnHelper(const char* defaultModel, int bloodColor, int health)
 {
 	Precache();
-	PrecacheMyModel( modelName );
-	SetMyModel( modelName );
+	PrecacheMyModel(defaultModel);
+	SetMyModel(defaultModel);
 
 	pev->effects &= EF_INVLIGHT;
 	pev->yaw_speed		= 8;
@@ -4569,17 +4573,23 @@ void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int healt
 	pev->sequence = LookupSequence( seqName );
 	if (pev->sequence == -1)
 	{
-		ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), seqName, modelName );
+		ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), seqName, defaultModel );
 	}
 	SetMyHealth( health );
+}
+
+void CDeadMonster::SpawnHelper(int bloodColor, int health)
+{
+	SpawnHelper(DefaultModel(), bloodColor, health);
 }
 
 #if FEATURE_SKELETON
 class CSkeleton : public CDeadMonster
 {
 public:
-	void Spawn(void);
-	int	DefaultClassify(void) { return	CLASS_NONE; }
+	void Spawn();
+	const char* DefaultModel() { return "models/skeleton.mdl"; }
+	int	DefaultClassify() { return	CLASS_NONE; }
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 
 	const char* getPos(int pos) const;
@@ -4597,7 +4607,7 @@ LINK_ENTITY_TO_CLASS(monster_skeleton_dead, CSkeleton)
 
 void CSkeleton::Spawn(void)
 {
-	SpawnHelper("models/skeleton.mdl", DONT_BLEED);
+	SpawnHelper(DONT_BLEED);
 	MonsterInitDead();
 }
 

@@ -1140,6 +1140,7 @@ class CControllerDead : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	const char* DefaultModel() { return "models/controller.mdl"; }
 	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
 
 	const char* getPos(int pos) const;
@@ -1152,9 +1153,9 @@ const char* CControllerDead::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_alien_controller_dead, CControllerDead )
 
-void CControllerDead :: Spawn( )
+void CControllerDead::Spawn()
 {
-	SpawnHelper("models/controller.mdl", BLOOD_COLOR_YELLOW, gSkillData.controllerHealth/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW, gSkillData.controllerHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;
 }

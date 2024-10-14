@@ -600,6 +600,7 @@ class CDeadStrooper : public CDeadMonster
 public:
 	void Spawn( void );
 	void Precache();
+	const char* DefaultModel() { return "models/strooper.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("shocktrooper"); }
 	int	DefaultClassify ( void ) { return	CLASS_RACEX_SHOCK; }
 	const char* DefaultGibModel() {
@@ -624,12 +625,13 @@ LINK_ENTITY_TO_CLASS( monster_shocktrooper_dead, CDeadStrooper )
 
 void CDeadStrooper::Precache()
 {
+	PrecacheMyModel(DefaultModel());
 	PrecacheMyGibModel(DefaultGibModel());
 }
 
 void CDeadStrooper::Spawn( )
 {
-	SpawnHelper("models/strooper.mdl", BLOOD_COLOR_YELLOW, gSkillData.strooperHealth/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW, gSkillData.strooperHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;
 }

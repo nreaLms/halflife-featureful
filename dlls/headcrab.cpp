@@ -527,8 +527,9 @@ Schedule_t *CHeadCrab::GetScheduleOfType( int Type )
 class CDeadHeadCrab : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_ALIEN_PREY; }
+	void Spawn();
+	const char* DefaultModel() { return "models/headcrab.mdl"; }
+	int	DefaultClassify() { return	CLASS_ALIEN_PREY; }
 
 	const char* getPos(int pos) const {
 		return "dieback";
@@ -539,7 +540,7 @@ LINK_ENTITY_TO_CLASS( monster_headcrab_dead, CDeadHeadCrab )
 
 void CDeadHeadCrab::Spawn( )
 {
-	SpawnHelper("models/headcrab.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }
@@ -991,8 +992,9 @@ void CShockRoach::OnDying()
 class CDeadShockRoach : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_ALIEN_PREY; }
+	void Spawn();
+	const char* DefaultModel() { return "models/w_shock_rifle.mdl"; }
+	int	DefaultClassify () { return	CLASS_ALIEN_PREY; }
 
 	const char* getPos(int pos) const {
 		return "dieback";
@@ -1001,9 +1003,9 @@ public:
 
 LINK_ENTITY_TO_CLASS( monster_shockroach_dead, CDeadShockRoach )
 
-void CDeadShockRoach::Spawn( )
+void CDeadShockRoach::Spawn()
 {
-	SpawnHelper("models/w_shock_rifle.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }

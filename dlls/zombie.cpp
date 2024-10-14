@@ -302,8 +302,9 @@ Schedule_t* CZombie::GetScheduleOfType(int Type)
 class CDeadZombie : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MONSTER; }
+	void Spawn();
+	const char* DefaultModel() { return "models/zombie.mdl"; }
+	int	DefaultClassify() { return	CLASS_ALIEN_MONSTER; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[2];
@@ -320,7 +321,7 @@ LINK_ENTITY_TO_CLASS( monster_zombie_dead, CDeadZombie )
 
 void CDeadZombie::Spawn( )
 {
-	SpawnHelper("models/zombie.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }
@@ -355,6 +356,7 @@ class CDeadZombieBarney : public CDeadZombie
 {
 public:
 	void Spawn( void );
+	const char* DefaultModel() { return "models/zombie_barney.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("zombie_barney"); }
 };
 
@@ -362,7 +364,7 @@ LINK_ENTITY_TO_CLASS( monster_zombie_barney_dead, CDeadZombieBarney )
 
 void CDeadZombieBarney::Spawn( )
 {
-	SpawnHelper("models/zombie_barney.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 	pev->frame = 255;
 }
@@ -398,6 +400,7 @@ class CDeadZombieSoldier : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	const char* DefaultModel() { return "models/zombie_soldier.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("zombie_soldier"); }
 	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MONSTER; }
 
@@ -416,7 +419,7 @@ LINK_ENTITY_TO_CLASS( monster_zombie_soldier_dead, CDeadZombieSoldier )
 
 void CDeadZombieSoldier::Spawn( )
 {
-	SpawnHelper("models/zombie_soldier.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
 #endif

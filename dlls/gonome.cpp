@@ -890,9 +890,10 @@ void CGonome::RunTask(Task_t *pTask)
 class CDeadGonome : public CDeadMonster
 {
 public:
-	void Spawn(void);
+	void Spawn();
+	const char* DefaultModel() { return "models/gonome.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("gonome"); }
-	int	DefaultClassify(void) { return	CLASS_ALIEN_MONSTER; }
+	int	DefaultClassify() { return	CLASS_ALIEN_MONSTER; }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
 };
@@ -911,7 +912,7 @@ LINK_ENTITY_TO_CLASS(monster_gonome_dead, CDeadGonome)
 //=========================================================
 void CDeadGonome::Spawn(void)
 {
-	SpawnHelper("models/gonome.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
 #endif

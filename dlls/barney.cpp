@@ -646,7 +646,8 @@ Schedule_t *CBarney::GetSchedule()
 class CDeadBarney : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/barney.mdl"; }
 	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY; }
 
 	const char* getPos(int pos) const;
@@ -665,9 +666,9 @@ LINK_ENTITY_TO_CLASS( monster_barney_dead, CDeadBarney )
 //=========================================================
 // ********** DeadBarney SPAWN **********
 //=========================================================
-void CDeadBarney :: Spawn( )
+void CDeadBarney::Spawn()
 {
-	SpawnHelper("models/barney.mdl");
+	SpawnHelper();
 	MonsterInitDead();
 }
 
@@ -842,7 +843,8 @@ void COtis::SetHead(int head)
 class CDeadOtis : public CDeadBarney
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/otis.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("otis"); }
 	void KeyValue( KeyValueData *pkvd );
 	const char* getPos(int pos) const;
@@ -860,9 +862,9 @@ const char* CDeadOtis::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_otis_dead, CDeadOtis )
 
-void CDeadOtis::Spawn( )
+void CDeadOtis::Spawn()
 {
-	SpawnHelper("models/otis.mdl");
+	SpawnHelper();
 	if ( head == -1 )
 		SetBodygroup(2, RANDOM_LONG(0, 1));
 	else
@@ -1020,7 +1022,8 @@ void CBarniel::OnDying()
 class CDeadBarniel : public CDeadBarney
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/barniel.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("barniel"); }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
@@ -1035,9 +1038,9 @@ const char* CDeadBarniel::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_barniel_dead, CDeadBarniel )
 
-void CDeadBarniel::Spawn( )
+void CDeadBarniel::Spawn()
 {
-	SpawnHelper("models/barniel.mdl");
+	SpawnHelper();
 	MonsterInitDead();
 }
 #endif
@@ -1305,6 +1308,7 @@ class CDeadKate : public CDeadBarney
 {
 public:
 	void Spawn( void );
+	const char* DefaultModel() { return "models/kate.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("kate"); }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
@@ -1321,7 +1325,7 @@ LINK_ENTITY_TO_CLASS( monster_kate_dead, CDeadKate )
 
 void CDeadKate::Spawn( )
 {
-	SpawnHelper("models/kate.mdl");
+	SpawnHelper();
 	MonsterInitDead();
 }
 #endif

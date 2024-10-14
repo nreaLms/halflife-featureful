@@ -2254,8 +2254,9 @@ void CISlave::ReportAIState(ALERT_TYPE level )
 class CDeadISlave : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
+	void Spawn();
+	const char* DefaultModel() { return "models/islave.mdl"; }
+	int	DefaultClassify() { return	CLASS_ALIEN_MILITARY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[5];
@@ -2270,10 +2271,10 @@ const char* CDeadISlave::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_alien_slave_dead, CDeadISlave )
 
-void CDeadISlave::Spawn( )
+void CDeadISlave::Spawn()
 {
 	bool shouldForceLastFrame = m_iPose != 0;
-	SpawnHelper("models/islave.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	if (pev->sequence == -1)
 	{
 		if (strcmp(getPos(m_iPose), "dead_on_stomach") == 0)

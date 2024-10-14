@@ -1204,7 +1204,8 @@ void CAGrunt::PlayUnUseSentence()
 class CDeadAgrunt : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/agrunt.mdl"; }
 	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 
@@ -1223,7 +1224,7 @@ LINK_ENTITY_TO_CLASS( monster_alien_grunt_dead, CDeadAgrunt )
 
 void CDeadAgrunt::Spawn()
 {
-	SpawnHelper("models/agrunt.mdl", BLOOD_COLOR_YELLOW, gSkillData.agruntHealth/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW, gSkillData.agruntHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;
 }

@@ -1159,8 +1159,9 @@ void CPitdrone::PlayUnUseSentence()
 class CDeadPitdrone : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
 	void Precache();
+	const char* DefaultModel() { return "models/pit_drone.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("pitdrone"); }
 	int	DefaultClassify ( void ) { return	CLASS_RACEX_PREDATOR; }
 	const char* DefaultGibModel() {
@@ -1182,12 +1183,13 @@ LINK_ENTITY_TO_CLASS( monster_pitdrone_dead, CDeadPitdrone )
 
 void CDeadPitdrone::Precache()
 {
+	PrecacheMyModel(DefaultModel());
 	PrecacheMyGibModel(DefaultGibModel());
 }
 
-void CDeadPitdrone::Spawn( )
+void CDeadPitdrone::Spawn()
 {
-	SpawnHelper("models/pit_drone.mdl", BLOOD_COLOR_YELLOW, gSkillData.pitdroneHealth/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW, gSkillData.pitdroneHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;
 }

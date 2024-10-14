@@ -1509,8 +1509,9 @@ void CHoundeye::UseSleeping(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 class CDeadHoundeye : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MONSTER; }
+	void Spawn();
+	const char* DefaultModel() { return "models/houndeye_dead.mdl"; }
+	int	DefaultClassify() { return CLASS_ALIEN_MONSTER; }
 
 	const char* getPos(int pos) const;
 };
@@ -1522,9 +1523,9 @@ const char* CDeadHoundeye::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_houndeye_dead, CDeadHoundeye )
 
-void CDeadHoundeye :: Spawn( )
+void CDeadHoundeye::Spawn()
 {
-	SpawnHelper("models/houndeye_dead.mdl", BLOOD_COLOR_YELLOW);
+	SpawnHelper(BLOOD_COLOR_YELLOW);
 	MonsterInitDead();
 }
 #endif

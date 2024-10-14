@@ -6223,8 +6223,9 @@ void CBasePlayer::DisbandFollowers()
 class CDeadHEV : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_HUMAN_MILITARY; }
+	void Spawn();
+	const char* DefaultModel() { return g_modFeatures.DeadHazModel(); }
+	int	DefaultClassify() { return	CLASS_HUMAN_MILITARY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[4];
@@ -6242,9 +6243,9 @@ LINK_ENTITY_TO_CLASS( monster_hevsuit_dead, CDeadHEV )
 //=========================================================
 // ********** DeadHEV SPAWN **********
 //=========================================================
-void CDeadHEV :: Spawn( void )
+void CDeadHEV::Spawn()
 {
-	SpawnHelper(g_modFeatures.DeadHazModel());
+	SpawnHelper();
 	pev->body			= 1;
 	MonsterInitDead();
 }
