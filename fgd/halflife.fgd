@@ -514,9 +514,9 @@
 
 @BaseClass = CustomSentences
 [
-	UseSentence(String) : "Use Sentence" : : "Special case: 'null' means no sentense"
-	UnUseSentence(String) : "Un-Use Sentence" : : "Special case: 'null' means no sentense"
-	RefusalSentence(String) : "Refusal Sentence" : : "Special case: 'null' means no sentense"
+	UseSentence(string) : "Use Sentence" : : "The sentence group to play when monster starts following the player. Special case: 'null' means no sentence"
+	UnUseSentence(string) : "Un-Use Sentence" : : "The sentence group to play when monster stops following the player. Special case: 'null' means no sentence"
+	RefusalSentence(string) : "Refusal Sentence" : : "The sentence group to play when monster declines the player's request (e.g. if monster is set to Pre-Disaster). Special case: 'null' means no sentence"
 ]
 
 @BaseClass base(FollowingMonsterProps) = FollowingMonster
