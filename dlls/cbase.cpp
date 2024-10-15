@@ -979,18 +979,25 @@ inline Vector VectorFromColor(const Color& color) {
 	return Vector(color.r, color.g, color.b);
 }
 
-void CBaseEntity::ApplyVisual(const Visual *visual)
+void CBaseEntity::ApplyVisual(const Visual *visual, const char* modelOverride)
 {
 	const int alreadyOverriden = OverridenRenderProps();
 	ApplyDefaultRenderProps(alreadyOverriden);
+	const char* model = modelOverride;
+	if (!model && pev->model)
+		model = STRING(pev->model);
 
-	if (!visual)
+	if (!visual) {
+		if (model)
+			SET_MODEL(edict(), model);
 		return;
-
-	if (CheckVisualDefine(visual, Visual::MODEL_DEFINED, alreadyOverriden) && visual->model && *visual->model)
-	{
-		SET_MODEL(edict(), visual->model);
 	}
+
+	if (!model && CheckVisualDefine(visual, Visual::MODEL_DEFINED, alreadyOverriden) && visual->model && *visual->model)
+		model = visual->model;
+
+	if (model)
+		SET_MODEL(edict(), model);
 
 	if (CheckVisualDefine(visual, Visual::RENDERMODE_DEFINED, alreadyOverriden))
 		pev->rendermode = visual->rendermode;

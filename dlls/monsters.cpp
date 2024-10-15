@@ -4349,8 +4349,6 @@ void CBaseMonster::SetMyModel(const char *defaultModel)
 		if (defaultModel)
 			SET_MODEL(ENT(pev), defaultModel);
 	}
-	else if (!pev->modelindex && pev->model)
-		SET_MODEL(ENT(pev), STRING(pev->model));
 }
 
 void CBaseMonster::PrecacheMyModel(const char *defaultModel)

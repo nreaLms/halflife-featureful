@@ -284,7 +284,7 @@ public:
 
 	int OverridenRenderProps();
 	virtual void ApplyDefaultRenderProps(int overridenRenderProps) {}
-	void ApplyVisual(const Visual* visual);
+	void ApplyVisual(const Visual* visual, const char* modelOverride = nullptr);
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )

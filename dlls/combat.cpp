@@ -461,6 +461,11 @@ void CBaseMonster::GibMonster( void )
 			}
 			gibbed = TRUE;
 		}
+		else
+		{
+			CGib::SpawnRandomGibs( pev, GibCount(), gibModel, gibVisual );
+			gibbed = TRUE;
+		}
 	}
 
 	if( !IsPlayer() )
@@ -958,10 +963,8 @@ void CGib::Spawn( const char *szGibModel, const Visual* visual )
 	//pev->solid = SOLID_SLIDEBOX;/// hopefully this will fix the VELOCITY TOO LOW crap
 	pev->classname = MAKE_STRING( "gib" );
 
-	ApplyVisual(visual);
+	ApplyVisual(visual, szGibModel);
 
-	if (FStringNull(pev->model))
-		SET_MODEL( ENT( pev ), szGibModel );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 
 	pev->nextthink = gpGlobals->time + 4.0f;
