@@ -71,6 +71,28 @@ cmake -G "Visual Studio 16 2019" -A Win32 -B build
 
 After the configuration step, `HALFLIFE-FEATUREFUL.sln` should appear in the `build` directory. You can open this solution in Visual Studio and continue developing there.
 
+## Linux x86. Portable steam-compatible build using Steam Runtime inside a container
+
+### Prerequisites
+Install Podman.
+```
+sudo apt install podman
+```
+
+### Building
+```
+# Start a shell inside a Steam Runtime SDK container.
+podman run --rm -it \
+    --volume "$(pwd):/data" \
+    --workdir "/data" \
+    "registry.gitlab.steamos.cloud/steamrt/scout/sdk" \
+    /bin/bash
+
+# Build inside the container.
+cmake -DCMAKE_BUILD_TYPE=Release -B build -S .
+cmake --build build
+```
+
 ## Linux x86. Portable steam-compatible build using Steam Runtime in chroot
 
 ### Prerequisites
