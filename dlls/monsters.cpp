@@ -3410,6 +3410,8 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	} else {
 		ALERT( level, "%s (%s): ", STRING(pev->classname), STRING(pev->targetname) );
 	}
+	if (!FStringNull(m_entTemplate))
+		ALERT( level , "Template: %s. ", STRING(m_entTemplate) );
 	const int classify = Classify();
 	ALERT( level, "Classify: %s (%d), ", ClassifyDisplayName(classify), classify );
 
@@ -3491,6 +3493,9 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 
 	if (pev->model)
 		ALERT(level, "Model: %s. ", STRING(pev->model));
+	const char* gibModel = GibModel();
+	if (gibModel)
+		ALERT(level, "Gib Model: %s. ", gibModel);
 
 	ALERT(level, "Rendermode: %s. Color: (%g, %g, %g). Alpha: %g. Renderfx: %s. ",
 		  RenderModeToString(pev->rendermode),
