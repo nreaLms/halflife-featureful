@@ -173,24 +173,30 @@ void V_InterpolateAngles( float *start, float *end, float *output, float frac )
 } */
 
 // Quakeworld bob code, this fixes jitters in the mutliplayer since the clock (pparams->time) isn't quite linear
-float V_CalcBob( struct ref_params_s *pparams )
+
+enum calcBobMode_t
 {
-	static double bobtime;
-	static float bob;
+	VB_COS,
+	VB_SIN,
+	VB_COS2,
+	VB_SIN2
+};
+
+void V_CalcBob( struct ref_params_s* pparams, float freqmod, calcBobMode_t mode, double& bobtime, float& bob, float& lasttime )
+{
 	float cycle;
-	static float lasttime;
 	Vector	vel;
 
 	if( pparams->onground == -1 ||
 		 pparams->time == lasttime )
 	{
 		// just use old value
-		return bob;	
+		return;	
 	}
 
 	lasttime = pparams->time;
 
-	bobtime += pparams->frametime;
+	bobtime += pparams->frametime * freqmod;
 	cycle = bobtime - (int)( bobtime / cl_bobcycle->value ) * cl_bobcycle->value;
 	cycle /= cl_bobcycle->value;
 
@@ -209,10 +215,16 @@ float V_CalcBob( struct ref_params_s *pparams )
 	vel[2] = 0;
 
 	bob = sqrt( vel[0] * vel[0] + vel[1] * vel[1] ) * cl_bob->value;
-	bob = bob * 0.3f + bob * 0.7f * sin(cycle);
-	bob = Q_min( bob, 4.0f );
-	bob = Q_max( bob, -7.0f );
-	return bob;
+
+	// Weapon bob presets
+	if ( mode == VB_SIN )
+		bob = bob * 0.05 + bob * 0.125 * sin( cycle );
+	else if ( mode == VB_COS )
+		bob = bob * 0.05 + bob * -0.125 * cos( cycle );
+	else if ( mode == VB_SIN2 )
+		bob = bob * 0.05 + bob * 0.125 * sin( cycle ) * sin( cycle );
+	else if ( mode == VB_COS2 )
+		bob = bob * 0.05 + bob * 0.125 * cos( cycle ) * cos( cycle );
 }
 
 /*
@@ -429,11 +441,14 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	cl_entity_t *ent, *view;
 	int i;
 	Vector angles;
-	float bob, waterOffset;
+	float bobRight = 0, bobUp = 0, bobForward = 0, waterOffset;
 	static viewinterp_t ViewInterp;
 
 	static float oldz = 0;
 	static float lasttime;
+
+	static double bobtimes[3] = { 0, 0, 0 };
+	static float lasttimes[3] = { 0, 0, 0 };
 
 	Vector camAngles, camForward, camRight, camUp;
 	cl_entity_t *pwater;
@@ -451,13 +466,8 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	// view is the weapon model (only visible from inside body)
 	view = gEngfuncs.GetViewModel();
 
-	// transform the view offset by the model's matrix to get the offset from
-	// model origin for the view
-	bob = V_CalcBob( pparams );
-
 	// refresh position
 	VectorCopy( pparams->simorg, pparams->vieworg );
-	pparams->vieworg[2] += bob ;
 	VectorAdd( pparams->vieworg, pparams->viewheight, pparams->vieworg );
 
 	if( pparams->health <= 0 )
@@ -606,21 +616,48 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	// Let the viewmodel shake at about 10% of the amplitude
 	gEngfuncs.V_ApplyShake( view->origin, view->angles, 0.9f );
 
-	for( i = 0; i < 3; i++ )
+	// Weapon bob frequence
+	if ( pparams->onground == 1 )
 	{
-		view->origin[i] += bob * 0.4f * pparams->forward[i];
+		V_CalcBob( pparams, 1.20f, VB_COS, bobtimes[0], bobRight, lasttimes[0] );
+		V_CalcBob( pparams, 2.40f, VB_COS, bobtimes[1], bobUp, lasttimes[1] );
+		V_CalcBob( pparams, 2.40f, VB_COS, bobtimes[2], bobForward, lasttimes[2] );
 	}
-	view->origin[2] += bob;
+	else if ( pparams->onground == 0 )
+	{
+		V_CalcBob( pparams, 0.00f, VB_COS, bobtimes[0], bobRight, lasttimes[0] );
+		V_CalcBob( pparams, 0.00f, VB_COS, bobtimes[1], bobUp, lasttimes[1] );
+		V_CalcBob( pparams, 0.00f, VB_COS, bobtimes[2], bobForward, lasttimes[2] );
+	}
+	else if ( pparams->waterlevel >= 2 )
+	{
+		V_CalcBob( pparams, 0.50f, VB_COS, bobtimes[0], bobRight, lasttimes[0] );
+		V_CalcBob( pparams, 1.00f, VB_COS, bobtimes[1], bobUp, lasttimes[1] );
+		V_CalcBob( pparams, 1.00f, VB_COS, bobtimes[2], bobForward, lasttimes[2] );
+	}
 
-	// throw in a little tilt.
-	view->angles[YAW] -= bob * 0.5f;
-	view->angles[ROLL] -= bob * 1.0f;
-	view->angles[PITCH] -= bob * 0.3f;
+	// Weapon bob amplitude
+	for ( i = 0; i < 3; i++ )
+	{
+		view->origin[i] += bobRight * 0.20f * pparams->right[i];
+		view->origin[i] += bobUp * 1.15f * pparams->up[i];
+		view->origin[i] += bobForward * 0.0f * pparams->forward[i];
+	}
 
 	// pushing the view origin down off of the same X/Z plane as the ent's origin will give the
 	// gun a very nice 'shifting' effect when the player looks up/down. If there is a problem
 	// with view model distortion, this may be a cause. (SJB). 
+
 	view->origin[2] -= 1.0f;
+
+	view->angles[YAW] -= bobRight * 10.0f;
+	view->angles[ROLL] -= bobRight * 5.0f;
+
+	// Head bob code (HL: Extended - Bacontsu)
+	Vector forward, right;
+	VectorMA( view->origin, bobRight * 0.8f, right, view->origin );
+	pparams->viewangles[PITCH] -= bobUp * 0.50;
+	pparams->viewangles[YAW] -= bobRight * 0.50;
 
 	// fudge position around to keep amount of weapon visible
 	// roughly equal with different FOV
