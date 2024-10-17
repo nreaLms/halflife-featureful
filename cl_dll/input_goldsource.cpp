@@ -902,6 +902,9 @@ void GoldSourceInput::IN_MouseMove ( float frametime, usercmd_t *cmd)
 		}
 	}
 
+	gHUD.mouse_x = mouse_x;
+	gHUD.mouse_y = mouse_y;
+
 	// HACKHACK: change viewangles directly in viewcode,
 	// so viewangles when player is dead will not be changed on server
 	if( !CL_IsDead() )

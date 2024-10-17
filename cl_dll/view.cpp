@@ -172,8 +172,27 @@ void V_InterpolateAngles( float *start, float *end, float *output, float frac )
 	V_NormalizeAngles( output );
 } */
 
-// Quakeworld bob code, this fixes jitters in the mutliplayer since the clock (pparams->time) isn't quite linear
+float SmoothValues( float startValue, float endValue, float speed )
+{
+	float absd, d, finalValue;
+	d = endValue - startValue;
+	absd = fabs( d );
+	if ( absd > 0.01f )
+	{
+		if ( d > 0 )
+			finalValue = startValue + ( absd * speed );
+		else
+			finalValue = startValue - ( absd * speed );
+	}
+	else
+	{
+		finalValue = endValue;
+	}
+	startValue = finalValue;
+	return startValue;
+}
 
+// Quakeworld bob code, this fixes jitters in the mutliplayer since the clock (pparams->time) isn't quite linear
 enum calcBobMode_t
 {
 	VB_COS,
@@ -615,6 +634,50 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 
 	// Let the viewmodel shake at about 10% of the amplitude
 	gEngfuncs.V_ApplyShake( view->origin, view->angles, 0.9f );
+
+	float mouseX = gHUD.mouse_x * 0.025;
+	float mouseY = gHUD.mouse_y * 0.025;
+	float mouseZ = gHUD.mouse_x * 0.025;
+	float frameadj = ( 1.0f / pparams->frametime ) * 0.01;
+
+	gHUD.lagangle_x = SmoothValues( gHUD.lagangle_x, mouseX * frameadj, pparams->frametime * 8 ); // changed number value for lag speed
+	if ( gHUD.lagangle_x >= 15 )
+		gHUD.lagangle_x = 15;
+	if ( gHUD.lagangle_x <= -15 )
+		gHUD.lagangle_x = -15; // caps model from swaying too far
+	view->angles[1] -= gHUD.lagangle_x;
+
+	gHUD.lagangle_z = SmoothValues( gHUD.lagangle_z, mouseZ * frameadj, pparams->frametime * 8 );
+	if ( gHUD.lagangle_z >= 8 )
+		gHUD.lagangle_z = 8;
+	if ( gHUD.lagangle_z <= -8 )
+		gHUD.lagangle_z = -8; // caps model from swaying too far
+	view->angles[2] += gHUD.lagangle_z;
+
+	gHUD.lagangle_y = SmoothValues( gHUD.lagangle_y, mouseY * frameadj, pparams->frametime * 8 );
+	if ( gHUD.lagangle_y >= 15 )
+		gHUD.lagangle_y = 15;
+	if ( gHUD.lagangle_y <= -15 )
+		gHUD.lagangle_y = -15; // caps model from swaying too far
+	view->angles[0] -= gHUD.lagangle_y;
+
+	// this controls the origin of the weapon when moving up/down (jumping, etc)
+	float simvelzmid = pparams->simvel[2] * 0.01;
+	if ( simvelzmid <= -1.0 )
+		simvelzmid = -1.0; // disabled weapon sway when falling
+	if ( simvelzmid >= 1.5 )
+		simvelzmid = 1.5; // another cap
+	gHUD.velz = SmoothValues( gHUD.velz, simvelzmid, pparams->frametime * 7 );
+	view->origin[2] -= gHUD.velz * 1.3;
+	view->angles[0] -= gHUD.velz * 2.5;
+
+	// this moves the weapon origin left/right, up/down based on input (very similar to the hl2 weapon lag)
+	for ( int i = 0; i < 3; i++ )
+	{
+		view->origin[i] += 0.25 * gHUD.lagangle_x * pparams->right[i];
+		view->origin[i] += 0.25 * gHUD.lagangle_y * pparams->up[i];
+		view->origin[i] -= 0.25 * abs( gHUD.lagangle_x ) * pparams->forward[i];
+	}
 
 	// Weapon bob frequence
 	if ( pparams->onground == 1 )
