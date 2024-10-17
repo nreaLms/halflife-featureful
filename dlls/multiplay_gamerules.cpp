@@ -804,11 +804,6 @@ int CHalfLifeMultiplay::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKi
 //=========================================================
 void CHalfLifeMultiplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor )
 {
-	DeathNotice( pVictim, pKiller, pInflictor );
-
-	pVictim->m_iDeaths += 1;
-
-	FireTargets( "game_playerdie", pVictim, pVictim );
 	CBasePlayer *peKiller = NULL;
 	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
 	if( ktmp && (ktmp->Classify() == CLASS_PLAYER ) )
@@ -823,6 +818,12 @@ void CHalfLifeMultiplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller,
 			peKiller = (CBasePlayer *)pDriver;
 		}
 	}
+
+	DeathNotice( pVictim, pKiller, pInflictor );
+
+	pVictim->m_iDeaths += 1;
+
+	FireTargets( "game_playerdie", pVictim, pVictim );
 
 	if( pVictim->pev == pKiller )
 	{
