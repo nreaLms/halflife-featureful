@@ -2,6 +2,7 @@
 #include "enginecallback.h"
 #include "util.h"
 #include "visuals.h"
+#include "customentity.h"
 
 #include "json_utils.h"
 
@@ -74,6 +75,10 @@ void Visual::CompleteFrom(const Visual &visual)
 	{
 		SetRadius(visual.radius);
 	}
+	if (ShouldCompleteFrom(visual, BEAMFLAGS_DEFINED))
+	{
+		SetBeamFlags(visual.beamFlags);
+	}
 }
 
 static bool ParseRenderMode(const char* str, int& rendermode)
@@ -103,6 +108,9 @@ static bool ParseRenderFx(const char* str, int& renderfx)
 	constexpr std::pair<const char*, int> modes[] = {
 		{"normal", kRenderFxNone},
 		{"constant glow", kRenderFxNoDissipation},
+		{"distort", kRenderFxDistort},
+		{"hologram", kRenderFxHologram},
+		{"glow shell", kRenderFxGlowShell},
 	};
 
 	for (auto& p : modes)
@@ -239,7 +247,7 @@ void VisualSystem::AddVisualFromJsonValue(const char *name, Value &value)
 		}
 	}
 
-	float scale;
+	FloatRange scale;
 	if (UpdatePropertyFromJson(scale, value, "scale"))
 	{
 		visual.SetScale(scale);
@@ -275,6 +283,28 @@ void VisualSystem::AddVisualFromJsonValue(const char *name, Value &value)
 	if (UpdatePropertyFromJson(radius, value, "radius"))
 	{
 		visual.SetRadius(radius);
+	}
+
+	{
+		auto it = value.FindMember("beamflags");
+		if (it != value.MemberEnd())
+		{
+			int beamFlags = 0;
+			Value::Array arr = it->value.GetArray();
+			for (size_t i=0; i<arr.Size(); ++i)
+			{
+				const char* str = arr[i].GetString();
+				if (stricmp(str, "sine") == 0)
+					beamFlags |= BEAM_FSINE;
+				else if (stricmp(str, "solid") == 0)
+					beamFlags |= BEAM_FSOLID;
+				else if (stricmp(str, "shadein") == 0)
+					beamFlags |= BEAM_FSHADEIN;
+				else if (stricmp(str, "shadeout") == 0)
+					beamFlags |= BEAM_FSHADEOUT;
+			}
+			visual.SetBeamFlags(beamFlags);
+		}
 	}
 
 	_visuals[name] = visual;
@@ -320,6 +350,18 @@ const Visual* VisualSystem::ProvideDefaultVisual(const char *name, const Visual 
 	}
 }
 
+static void PrintRange(const char* name, FloatRange range)
+{
+	if (range.max <= range.min)
+	{
+		ALERT(at_console, "%s: %g. ", name, range.min);
+	}
+	else
+	{
+		ALERT(at_console, "%s: %g-%g. ", name, range.min, range.max);
+	}
+}
+
 void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 {
 	ALERT(at_console, "%s:\n", name);
@@ -332,7 +374,8 @@ void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 		  visual.renderamt,
 		  RenderFxToString(visual.renderfx));
 
-	ALERT(at_console, "Scale: %g. Framerate: %g. ", visual.scale, visual.framerate);
+	PrintRange("Scale", visual.scale);
+	PrintRange("Framerate", visual.framerate);
 
 	if (visual.HasDefined(Visual::BEAMWIDTH_DEFINED))
 	{
@@ -341,14 +384,7 @@ void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 
 	if (visual.HasDefined(Visual::LIFE_DEFINED))
 	{
-		if (visual.life.max <= visual.life.min)
-		{
-			ALERT(at_console, "Life: %g. ", visual.life.min);
-		}
-		else
-		{
-			ALERT(at_console, "Life: %g-%g. ", visual.life.min, visual.life.max);
-		}
+		PrintRange("Life", visual.life);
 	}
 
 	if (visual.HasDefined(Visual::RADIUS_DEFINED))
@@ -361,6 +397,20 @@ void VisualSystem::DumpVisualImpl(const char *name, const Visual &visual)
 		{
 			ALERT(at_console, "Radius: %d-%d. ", visual.radius.min, visual.radius.max);
 		}
+	}
+
+	if (visual.HasDefined(Visual::BEAMFLAGS_DEFINED))
+	{
+		const int beamFlags = visual.beamFlags;
+		ALERT(at_console, "Beam flags: ");
+		if (FBitSet(beamFlags, BEAM_FSINE))
+			ALERT(at_console, "Sine; ");
+		if (FBitSet(beamFlags, BEAM_FSOLID))
+			ALERT(at_console, "Solid; ");
+		if (FBitSet(beamFlags, BEAM_FSHADEIN))
+			ALERT(at_console, "Shadein; ");
+		if (FBitSet(beamFlags, BEAM_FSHADEOUT))
+			ALERT(at_console, "Shadeout; ");
 	}
 
 	ALERT(at_console, "\n\n");

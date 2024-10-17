@@ -400,8 +400,11 @@ void CTurret::Spawn()
 
 	const Visual* visual = GetVisual(glowVisual);
 	m_pEyeGlow = CreateSpriteFromVisual(visual, pev->origin);
-	m_pEyeGlow->SetBrightness(0);
-	m_pEyeGlow->SetAttachment( edict(), 2 );
+	if (m_pEyeGlow)
+	{
+		m_pEyeGlow->SetBrightness(0);
+		m_pEyeGlow->SetAttachment( edict(), 2 );
+	}
 	m_eyeBrightness = 0;
 
 	pev->nextthink = gpGlobals->time + 0.3f; 

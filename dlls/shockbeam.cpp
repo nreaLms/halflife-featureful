@@ -10,6 +10,7 @@
 #include	"skill.h"
 #include	"shockbeam.h"
 #include	"game.h"
+#include	"visuals_utils.h"
 
 #if FEATURE_SHOCKBEAM
 
@@ -37,6 +38,36 @@ const NamedSoundScript CShock::impactSoundScript = {
 	"ShockBeam.Impact"
 };
 
+const NamedVisual CShock::spriteVisual = BuildVisual("ShockBeam.Sprite")
+		.Model("sprites/flare3.spr")
+		.Scale(0.35f)
+		.RenderProps(kRenderTransAdd, Color(255, 255, 255), 255, kRenderFxDistort);
+
+const NamedVisual CShock::beam1Visual = BuildVisual("ShockBeam.Beam1")
+		.Model("sprites/lgtning.spr")
+		.Alpha(180)
+		.BeamParams(60, 0, 10)
+		.RenderColor(0, 253, 253)
+		.BeamFlags(BEAM_FSHADEOUT);
+
+const NamedVisual CShock::beam2Visual = BuildVisual("ShockBeam.Beam2")
+		.Model("sprites/lgtning.spr")
+		.Alpha(180)
+		.BeamParams(20, 30, 30)
+		.RenderColor(255, 255, 157)
+		.BeamFlags(BEAM_FSHADEOUT);
+
+const NamedVisual CShock::lightVisual = BuildVisual("ShockBeam.Light")
+		.Radius(80)
+		.RenderColor(8, 253, 253)
+		.Life(0.5f);
+
+const NamedVisual CShock::shellVisual = BuildVisual("ShockBeam.Shell")
+		.RenderColor(0, 220, 255)
+		.Life(0.5f)
+		.Alpha(5)
+		.RenderFx(kRenderFxGlowShell);
+
 void CShock::Spawn(void)
 {
 	Precache();
@@ -59,8 +90,11 @@ void CShock::Spawn(void)
 
 void CShock::Precache()
 {
-	PRECACHE_MODEL("sprites/flare3.spr");
-	PRECACHE_MODEL("sprites/lgtning.spr");
+	RegisterVisual(spriteVisual);
+	RegisterVisual(beam1Visual);
+	RegisterVisual(beam2Visual);
+	RegisterVisual(lightVisual);
+	RegisterVisual(shellVisual);
 	PRECACHE_MODEL("models/shock_effect.mdl");
 	RegisterAndPrecacheSoundScript(impactSoundScript);
 }
@@ -104,21 +138,12 @@ void CShock::Touch(CBaseEntity *pOther)
 
 	TraceResult tr = UTIL_GetGlobalTrace( );
 
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
-		WRITE_BYTE(TE_DLIGHT);
-		WRITE_VECTOR(pev->origin);
-		WRITE_BYTE( 8 );		// radius * 0.1
-		WRITE_BYTE( 0 );		// r
-		WRITE_BYTE( 255 );		// g
-		WRITE_BYTE( 255 );		// b
-		WRITE_BYTE( 10 );		// time * 10
-		WRITE_BYTE( 10 );		// decay * 0.1
-	MESSAGE_END( );
+	SendDynLight(pev->origin, GetVisual(lightVisual), 10);
 
 	CBaseMonster* pMonster = pOther->MyMonsterPointer();
 	if (pMonster && pMonster->IsAlive())
 	{
-		pMonster->GlowShellOn( Vector( 0, 220, 255 ), .5f );
+		pMonster->GlowShellOn(GetVisual(shellVisual));
 	}
 
 	ClearEffects();
@@ -167,53 +192,22 @@ void CShock::Touch(CBaseEntity *pOther)
 
 void CShock::CreateEffects()
 {
-	m_pSprite = CSprite::SpriteCreate( "sprites/flare3.spr", pev->origin, FALSE );
-	m_pSprite->SetAttachment( edict(), 0 );
-	m_pSprite->pev->scale = 0.35;
-	m_pSprite->SetTransparency( kRenderTransAdd, 255, 255, 255, 170, kRenderFxDistort );
-	//m_pSprite->pev->spawnflags |= SF_SPRITE_TEMPORARY;
-	//m_pSprite->pev->flags |= FL_SKIPLOCALHOST;
+	m_pSprite = CreateSpriteFromVisual(GetVisual(spriteVisual), pev->origin);
+	if (m_pSprite)
+		m_pSprite->SetAttachment( edict(), 0 );
 
-	m_pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 60 );
-
+	m_pBeam = CreateBeamFromVisual(GetVisual(beam1Visual));
 	if (m_pBeam)
 	{
 		UTIL_SetOrigin(m_pBeam->pev, pev->origin);
-
-		m_pBeam->EntsInit( entindex(), entindex() );
-		m_pBeam->SetStartAttachment( 1 );
-		m_pBeam->SetEndAttachment( 2 );
-		m_pBeam->SetBrightness( 180 );
-		m_pBeam->SetScrollRate( 10 );
-		m_pBeam->SetNoise( 0 );
-		m_pBeam->SetFlags( BEAM_FSHADEOUT );
-		m_pBeam->SetColor( 0, 253, 253 );
-		//m_pBeam->RelinkBeam();
-	}
-	else
-	{
-		ALERT(at_console, "Could no create shockbeam beam!\n");
+		m_pBeam->EntsInit( entindex(), entindex(), 1, 2 );
 	}
 
-	m_pNoise = CBeam::BeamCreate( "sprites/lgtning.spr", 20 );
-
+	m_pNoise = CreateBeamFromVisual(GetVisual(beam2Visual));
 	if (m_pNoise)
 	{
 		UTIL_SetOrigin(m_pNoise->pev, pev->origin);
-
-		m_pNoise->EntsInit( entindex(), entindex() );
-		m_pNoise->SetStartAttachment( 1 );
-		m_pNoise->SetEndAttachment( 2 );
-		m_pNoise->SetBrightness( 180 );
-		m_pNoise->SetScrollRate( 30 );
-		m_pNoise->SetNoise( 30 );
-		m_pNoise->SetFlags( BEAM_FSHADEOUT );
-		m_pNoise->SetColor( 255, 255, 157 );
-		//m_pNoise->RelinkBeam();
-	}
-	else
-	{
-		ALERT(at_console, "Could no create shockbeam noise!\n");
+		m_pNoise->EntsInit( entindex(), entindex(), 1, 2 );
 	}
 }
 

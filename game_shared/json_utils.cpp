@@ -109,7 +109,7 @@ constexpr const char definitions[] = R"(
       },
       "rendermode": {
         "type": "string",
-        "pattern": "^Normal|normal|Color|color|Texture|texture|Glow|glow|Solid|solid|Additive|additive$"
+        "pattern": ["Normal","normal","Color","color","Texture","texture","Glow","glow","Solid","solid","Additive","additive$"]
       },
       "color": {
         "$ref": "definitions.json#/color"
@@ -119,12 +119,12 @@ constexpr const char definitions[] = R"(
       },
       "renderfx": {
         "type": ["integer", "string"],
-        "pattern": "^Normal|normal|Constant Glow|constant glow$",
+        "enum": ["Normal","normal","Constant Glow","constant glow","Constant glow","Distort","distort","Hologram","hologram","Glow Shell","glow shell","Glow shell"],
         "minimum": 0,
         "maximum": 20
       },
       "scale": {
-        "type": "number",
+        "$ref": "definitions.json#/range",
         "minimum": 0.0
       },
       "framerate": {
@@ -146,6 +146,13 @@ constexpr const char definitions[] = R"(
       },
       "radius": {
         "$ref": "#/range_int"
+      },
+      "beamflags": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["Sine", "sine", "Solid", "solid", "Shadein", "shadein", "Shadeout", "shadeout"]
+        }
       }
     }
   }

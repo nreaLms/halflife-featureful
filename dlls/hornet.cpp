@@ -25,8 +25,6 @@
 #include	"gamerules.h"
 #include	"visuals_utils.h"
 
-extern int gmsgSprite;
-
 LINK_ENTITY_TO_CLASS( hornet, CHornet )
 
 //=========================================================
@@ -57,21 +55,24 @@ const NamedSoundScript CHornet::dieSoundScript = {
 	"Hornet.Die"
 };
 
-const NamedVisual CHornet::sharedHornetTrailVisual = BuildVisual("Hornet.TrailBase")
+const NamedVisual CHornet::modelVisual = BuildVisual("Hornet.Model")
+		.Model("models/hornet.mdl");
+
+const NamedVisual CHornet::sharedTrailVisual = BuildVisual("Hornet.TrailBase")
 		.Model("sprites/laserbeam.spr")
 		.Alpha(128)
 		.BeamParams(2, 0)
 		.Life(1.0f);
 
-const NamedVisual CHornet::hornetTrailVisual = BuildVisual("Hornet.Trail")
+const NamedVisual CHornet::trailVisual = BuildVisual("Hornet.Trail")
 		.RenderColor(179, 39, 14)
-		.Mixin(&CHornet::sharedHornetTrailVisual);
+		.Mixin(&CHornet::sharedTrailVisual);
 
-const NamedVisual CHornet::hornetTrailAltVisual = BuildVisual("Hornet.TrailAlt")
+const NamedVisual CHornet::trailAltVisual = BuildVisual("Hornet.TrailAlt")
 		.RenderColor(255, 128, 0)
-		.Mixin(&CHornet::sharedHornetTrailVisual);
+		.Mixin(&CHornet::sharedTrailVisual);
 
-const NamedVisual CHornet::hornetPuffVisual = BuildVisual("Hornet.Puff")
+const NamedVisual CHornet::puffVisual = BuildVisual("Hornet.Puff")
 		.Model("sprites/muz1.spr")
 		.RenderMode(kRenderTransAdd)
 		.Scale(0.2f)
@@ -124,7 +125,7 @@ void CHornet::Spawn( void )
 		m_flFlySpeed = HORNET_ORANGE_SPEED;
 	}
 
-	SET_MODEL( ENT( pev ), "models/hornet.mdl" );
+	ApplyVisual(GetVisual(modelVisual));
 	UTIL_SetSize( pev, Vector( -4, -4, -4 ), Vector( 4, 4, 4 ) );
 
 	SetTouch( &CHornet::DieTouch );
@@ -150,14 +151,14 @@ void CHornet::Spawn( void )
 
 void CHornet::Precache()
 {
-	PRECACHE_MODEL( "models/hornet.mdl" );
+	RegisterVisual(modelVisual);
 
 	RegisterAndPrecacheSoundScript(buzzSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 
-	RegisterVisual(hornetPuffVisual);
-	RegisterVisual(hornetTrailVisual);
-	RegisterVisual(hornetTrailAltVisual);
+	RegisterVisual(puffVisual);
+	RegisterVisual(trailVisual);
+	RegisterVisual(trailAltVisual);
 }
 
 //=========================================================
@@ -256,20 +257,13 @@ old colors
 	const Visual* visual;
 	if (m_iHornetType == HORNET_TYPE_RED)
 	{
-		visual = GetVisual(hornetTrailVisual);
+		visual = GetVisual(trailVisual);
 	}
 	else
 	{
-		visual = GetVisual(hornetTrailAltVisual);
+		visual = GetVisual(trailAltVisual);
 	}
-	if (visual->modelIndex)
-	{
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_BEAMFOLLOW );
-			WRITE_SHORT( entindex() );	// entity
-			WriteBeamFollowVisual( visual );
-		MESSAGE_END();
-	}
+	SendBeamFollow(entindex(), visual);
 }
 
 //=========================================================
@@ -362,14 +356,7 @@ void CHornet::TrackTarget( void )
 	{
 		if( flDelta >= 0.4f && ( pev->origin - m_vecEnemyLKP ).Length() <= 300 )
 		{
-			const Visual* visual = GetVisual(hornetPuffVisual);
-			if (visual->modelIndex)
-			{
-				MESSAGE_BEGIN( MSG_PVS, gmsgSprite, pev->origin );
-					WRITE_VECTOR( pev->origin );	// pos
-					WriteSpriteVisual(visual);
-				MESSAGE_END();
-			}
+			SendSprite(pev->origin, GetVisual(puffVisual));
 
 			EmitSoundScript(buzzSoundScript);
 			pev->velocity = pev->velocity * 2.0f;

@@ -872,7 +872,8 @@ void CController::RunAI( void )
 		{
 
 			m_pBall[i] = CreateSpriteFromVisual(GetVisual(energyBallVisual), pev->origin);
-			m_pBall[i]->SetAttachment( edict(), ( i + 3 ) );
+			if (m_pBall[i])
+				m_pBall[i]->SetAttachment( edict(), ( i + 3 ) );
 		}
 
 		float t = m_iBallTime[i] - gpGlobals->time;
@@ -883,10 +884,13 @@ void CController::RunAI( void )
 
 		m_iBallCurrent[i] += ( m_iBall[i] - m_iBallCurrent[i] ) * t;
 
-		m_pBall[i]->SetBrightness( m_iBallCurrent[i] );
+		if (m_pBall[i])
+			m_pBall[i]->SetBrightness( m_iBallCurrent[i] );
 
 		GetAttachment( i + 2, vecStart, angleGun );
-		UTIL_SetOrigin( m_pBall[i]->pev, vecStart );
+
+		if (m_pBall[i])
+			UTIL_SetOrigin( m_pBall[i]->pev, vecStart );
 
 		const Visual* visual = GetVisual(energyBallLightVisual);
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
@@ -1636,11 +1640,11 @@ void CZapBallTrap::Precache()
 	RegisterAndPrecacheSoundScript(launchSoundScript);
 
 	const Visual* visual = RegisterVisual(zapBallVisual);
-	m_baseScale = visual->scale;
+	m_baseScale = RandomizeNumberFromRange(visual->scale);
 	m_baseBrightness = visual->renderamt;
 
 	const Visual* headVisual = GetVisual(CControllerHeadBall::headBallVisual);
-	m_maxScale = headVisual->scale;
+	m_maxScale = RandomizeNumberFromRange(headVisual->scale);
 	m_maxBrightness = headVisual->renderamt;
 
 	SetMaxFrame();
@@ -1660,7 +1664,7 @@ void CZapBallTrap::Spawn()
 	UTIL_SetSize(pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
-	m_baseScale = visual->scale;
+	m_baseScale = RandomizeNumberFromRange(visual->scale);
 
 	if (FStringNull(pev->targetname))
 	{

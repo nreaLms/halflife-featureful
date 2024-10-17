@@ -296,7 +296,7 @@ void CBeam::PointEntInit(const Vector &start, int endIndex , int endAttachment)
 	RelinkBeam();
 }
 
-void CBeam::EntsInit(int startIndex, int endIndex , int startAttachment, int endAttachment)
+void CBeam::EntsInit(int startIndex, int endIndex, int startAttachment, int endAttachment)
 {
 	SetType( BEAM_ENTS );
 	SetStartEntity( startIndex );

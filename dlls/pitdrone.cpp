@@ -27,6 +27,7 @@
 #include	"followingmonster.h"
 #include	"mod_features.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
 
 #if FEATURE_PITDRONE
 
@@ -39,13 +40,6 @@
  */
 #define FEATURE_PITDRONE_SPAWN_WITH_SPIKES 1
 
-// Disable this feature if you don't want to include spike_trail.spr in your mod
-#define FEATURE_PITDRONE_SPIKE_TRAIL 1
-
-#if FEATURE_PITDRONE_SPIKE_TRAIL
-int		iSpikeTrail;
-#endif
-int		iPitdroneSpitSprite;
 //=========================================================
 // CPitDrone's spit projectile
 //=========================================================
@@ -60,9 +54,23 @@ public:
 
 	static const NamedSoundScript hitWorldSoundScript;
 	static const NamedSoundScript hitBodySoundScript;
+
+	static const NamedVisual spikeVisual;
+	static const NamedVisual trailVisual;
 };
 
 LINK_ENTITY_TO_CLASS(pitdronespike, CPitdroneSpike)
+
+const NamedVisual CPitdroneSpike::spikeVisual = BuildVisual("Pitdrone.Spike")
+		.Model("models/pit_drone_spike.mdl")
+		.Scale(0.5f);
+
+const NamedVisual CPitdroneSpike::trailVisual = BuildVisual("Pitdrone.SpikeTrail")
+		.Model("sprites/spike_trail.spr")
+		.BeamWidth(1)
+		.Life(0.2f)
+		.RenderColor(197, 194, 11)
+		.Alpha(192);
 
 const NamedSoundScript CPitdroneSpike::hitWorldSoundScript = {
 	CHAN_WEAPON,
@@ -88,24 +96,19 @@ void CPitdroneSpike::Spawn(void)
 	pev->classname = MAKE_STRING("pitdronespike");
 
 	pev->solid = SOLID_BBOX;
-	pev->rendermode = kRenderTransAlpha;
-	pev->renderamt = 255;
 
-	SET_MODEL(ENT(pev), "models/pit_drone_spike.mdl");
+	ApplyVisual(GetVisual(spikeVisual));
 	pev->frame = 0;
-	pev->scale = 0.5;
 
 	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4));
 }
 
 void CPitdroneSpike::Precache(void)
 {
-	PRECACHE_MODEL("models/pit_drone_spike.mdl");// spit projectile
+	RegisterVisual(spikeVisual);
 	RegisterAndPrecacheSoundScript(hitWorldSoundScript);
 	RegisterAndPrecacheSoundScript(hitBodySoundScript);
-#if FEATURE_PITDRONE_SPIKE_TRAIL
-	iSpikeTrail = PRECACHE_MODEL("sprites/spike_trail.spr");
-#endif
+	RegisterVisual(trailVisual);
 }
 
 void CPitdroneSpike::SpikeTouch(CBaseEntity *pOther)
@@ -144,19 +147,7 @@ void CPitdroneSpike::SpikeTouch(CBaseEntity *pOther)
 
 void CPitdroneSpike::StartTrail()
 {
-#if FEATURE_PITDRONE_SPIKE_TRAIL
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-		WRITE_BYTE( TE_BEAMFOLLOW );
-		WRITE_SHORT( entindex() );
-		WRITE_SHORT( iSpikeTrail );	// model
-		WRITE_BYTE(2); // life
-		WRITE_BYTE(1); // width
-		WRITE_BYTE(197); // r
-		WRITE_BYTE(194); // g
-		WRITE_BYTE(11); // b
-		WRITE_BYTE(192); //brigtness
-	MESSAGE_END();
-#endif
+	SendBeamFollow(entindex(), GetVisual(trailVisual));
 	SetTouch(&CPitdroneSpike::SpikeTouch);
 }
 
@@ -280,6 +271,8 @@ public:
 	static constexpr const char* attackMissSoundScript = "PitDrone.AttackMiss";
 	static const NamedSoundScript attackHitSoundScript;
 
+	static const NamedVisual tinySpitVisual;
+
 	virtual int	Save(CSave &save);
 	virtual int	Restore(CRestore &restore);
 	static	TYPEDESCRIPTION m_SaveData[];
@@ -363,6 +356,9 @@ const NamedSoundScript CPitdrone::attackHitSoundScript = {
 	IntRange(110, 120),
 	"PitDrone.AttackHit"
 };
+
+const NamedVisual CPitdrone::tinySpitVisual = BuildVisual::Spray("Pitdrone.TinySpit")
+		.Model("sprites/tinyspit.spr");
 
 //=========================================================
 // TakeDamage - overridden for gonome so we can keep track
@@ -562,16 +558,7 @@ void CPitdrone::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 		CPitdroneSpike::Shoot(pev, vecSpitOrigin, vecSpitDir * 900, UTIL_VecToAngles(vecSpitDir), GetProjectileOverrides());
 
-		// spew the spittle temporary ents.
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpitOrigin );
-			WRITE_BYTE( TE_SPRITE_SPRAY );
-			WRITE_VECTOR( vecSpitOrigin );	// pos
-			WRITE_VECTOR( vecSpitDir );	// dir
-			WRITE_SHORT( iPitdroneSpitSprite );	// model
-			WRITE_BYTE( 15 );			// count
-			WRITE_BYTE( 210 );			// speed
-			WRITE_BYTE( 25 );			// noise ( client will divide by 100 )
-		MESSAGE_END();
+		SendSpray(vecSpitOrigin, vecSpitDir, GetVisual(tinySpitVisual), 15, 210, 25);
 	}
 	break;
 	case PIT_DRONE_AE_ATTACK:
@@ -652,8 +639,8 @@ void CPitdrone::Spawn()
 void CPitdrone::Precache()
 {
 	PrecacheMyModel("models/pit_drone.mdl");
-	PrecacheMyGibModel("models/pit_drone_gibs.mdl");
-	iPitdroneSpitSprite = PRECACHE_MODEL("sprites/tinyspit.spr");// client side spittle.
+	PrecacheMyGibModel(DefaultGibModel());
+	RegisterVisual(tinySpitVisual);// client side spittle.
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);

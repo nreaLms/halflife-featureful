@@ -46,8 +46,6 @@ enum
 	TASK_AGRUNT_SETUP_HIDE_ATTACK = LAST_FOLLOWINGMONSTER_TASK + 1,
 };
 
-extern int gmsgSprite;
-
 //=========================================================
 // Monster's Anim Events Go Here
 //=========================================================
@@ -495,14 +493,7 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			vecArmPos = vecArmPos + vecDirToEnemy * 32.0f;
 
-			const Visual* visual = GetVisual(muzzleFlashVisual);
-			if (visual->modelIndex)
-			{
-				MESSAGE_BEGIN( MSG_PVS, gmsgSprite, vecArmPos );
-					WRITE_VECTOR( vecArmPos );	// pos
-					WriteSpriteVisual(visual);
-				MESSAGE_END();
-			}
+			SendSprite(vecArmPos, GetVisual(muzzleFlashVisual));
 
 			CBaseEntity *pHornet = CBaseEntity::Create( "hornet", vecArmPos, UTIL_VecToAngles( vecDirToEnemy ), edict(), GetProjectileOverrides() );
 			UTIL_MakeVectors( pHornet->pev->angles );

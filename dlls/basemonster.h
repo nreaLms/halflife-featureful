@@ -433,17 +433,17 @@ public:
 	//
 	// Glowshell effects
 	//
-	void GlowShellOn( Vector color, float flDuration );
+	void GlowShellOn( const Visual* visual );
 
 	void GlowShellOff( void );
 	void GlowShellUpdate( void );
 
 	float m_glowShellTime;
-	Vector m_glowShellColor;
 	BOOL m_glowShellUpdate;
 
 	Vector m_prevRenderColor;
-	int m_prevRenderFx;
+	short m_prevRenderFx;
+	short m_prevRenderMode;
 	int m_prevRenderAmt;
 
 	float m_nextPatrolPathCheck;

@@ -37,13 +37,12 @@
 
 extern int gEvilImpulse101;
 
-#define NOT_USED 255
-
 DLL_GLOBAL	short g_sModelIndexLaser;// holds the index for the laser beam
-DLL_GLOBAL const char *g_pModelNameLaser = "sprites/laserbeam.spr";
+DLL_GLOBAL	const char *g_pModelNameLaser = "sprites/laserbeam.spr";
 DLL_GLOBAL	short g_sModelIndexLaserDot;// holds the index for the laser beam dot
 DLL_GLOBAL	short g_sModelIndexFireball;// holds the index for the fireball
 DLL_GLOBAL	short g_sModelIndexSmoke;// holds the index for the smoke cloud
+DLL_GLOBAL	const char* g_pModelNameSmoke = "sprites/steam1.spr";
 DLL_GLOBAL	short g_sModelIndexWExplosion;// holds the index for the underwater explosion
 DLL_GLOBAL	short g_sModelIndexBubbles;// holds the index for the bubbles model
 DLL_GLOBAL	short g_sModelIndexBloodDrop;// holds the sprite index for the initial blood
@@ -398,7 +397,7 @@ void W_Precache( CBaseEntity* pWorld )
 #endif
 	g_sModelIndexFireball = PRECACHE_MODEL( "sprites/zerogxplode.spr" );// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL( "sprites/WXplo1.spr" );// underwater fireball
-	g_sModelIndexSmoke = PRECACHE_MODEL( "sprites/steam1.spr" );// smoke
+	g_sModelIndexSmoke = PRECACHE_MODEL( g_pModelNameSmoke );// smoke
 	g_sModelIndexBubbles = PRECACHE_MODEL( "sprites/bubble.spr" );//bubbles
 	g_sModelIndexBloodSpray = PRECACHE_MODEL( "sprites/bloodspray.spr" ); // initial blood
 	g_sModelIndexBloodDrop = PRECACHE_MODEL( "sprites/blood.spr" ); // splattered blood 

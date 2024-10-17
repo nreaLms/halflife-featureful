@@ -610,6 +610,10 @@ void ReportAIStateByClassname(const char* name);
 const char* RenderModeToString(int rendermode);
 const char* RenderFxToString(int renderfx);
 
+inline Vector VectorFromColor(const Color& color) {
+	return Vector(color.r, color.g, color.b);
+}
+
 //TODO: move this to movewith.h later
 extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin );
 extern void			UTIL_AssignOrigin		( CBaseEntity* pEntity, const Vector vecOrigin, BOOL bInitiator );

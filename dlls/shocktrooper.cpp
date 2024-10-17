@@ -31,6 +31,7 @@
 #include	"hgrunt.h"
 #include	"mod_features.h"
 #include	"common_soundscripts.h"
+#include	"visuals_utils.h"
 
 #if FEATURE_SHOCKTROOPER
 
@@ -47,7 +48,6 @@
 #define STROOPER_NUM_HEADS					2 // how many grunt heads are there?
 #define STROOPER_MINIMUM_HEADSHOT_DAMAGE	15 // must do at least this much damage in one shot to head to score a headshot kill
 #define	STROOPER_SENTENCE_VOLUME			(float)0.45 // volume of grunt sentences
-#define STROOPER_MUZZLEFLASH	"sprites/muzzle_shock.spr"
 
 #define STROOPER_SHOCKRIFLE			(1 << 0)
 #define STROOPER_HANDGRENADE		(1 << 1)
@@ -119,8 +119,6 @@ public:
 	float m_rechargeTime;
 	float m_blinkTime;
 	float m_eyeChangeTime;
-
-	static int iStrooperMuzzleFlash;
 protected:
 	static const char *pTrooperSentences[HGRUNT_SENT_COUNT];
 
@@ -139,11 +137,11 @@ public:
 	static const NamedSoundScript painSoundScript;
 	static const NamedSoundScript dieSoundScript;
 	static const NamedSoundScript fireSoundScript;
+
+	static const NamedVisual muzzleFlashVisual;
 };
 
 LINK_ENTITY_TO_CLASS(monster_shocktrooper, CShockTrooper)
-
-int CShockTrooper::iStrooperMuzzleFlash = 0;
 
 TYPEDESCRIPTION	CShockTrooper::m_SaveData[] =
 {
@@ -179,6 +177,12 @@ const NamedSoundScript CShockTrooper::fireSoundScript = {
 	{"weapons/shock_fire.wav"},
 	"ShockTrooper.Fire"
 };
+
+const NamedVisual CShockTrooper::muzzleFlashVisual = BuildVisual("ShockTrooper.MuzzleFlash")
+		.Model("sprites/muzzle_shock.spr")
+		.RenderMode(kRenderTransAdd)
+		.Scale(0.4f)
+		.Alpha(128);
 
 const char *CShockTrooper::pTrooperSentences[] =
 {
@@ -378,13 +382,7 @@ void CShockTrooper::HandleAnimEvent(MonsterEvent_t *pEvent)
 
 			GetAttachment(0, vecGunPos, vecGunAngles);
 
-			MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecGunPos );
-				WRITE_BYTE( TE_SPRITE );
-				WRITE_VECTOR( vecGunPos );	// pos
-				WRITE_SHORT( iStrooperMuzzleFlash );		// model
-				WRITE_BYTE( 4 );				// size * 10
-				WRITE_BYTE( 128 );			// brightness
-			MESSAGE_END();
+			SendSprite(vecGunPos, GetVisual(muzzleFlashVisual));
 
 			UTIL_MakeVectors(pev->angles);
 			Vector vecShootOrigin = vecGunPos + gpGlobals->v_forward * 32;
@@ -492,8 +490,8 @@ void CShockTrooper::MonsterThink()
 void CShockTrooper::Precache()
 {
 	PrecacheMyModel("models/strooper.mdl");
-	PrecacheMyGibModel("models/strooper_gibs.mdl");
-	iStrooperMuzzleFlash = PRECACHE_MODEL(STROOPER_MUZZLEFLASH);
+	PrecacheMyGibModel(DefaultGibModel());
+	RegisterVisual(muzzleFlashVisual);
 	PRECACHE_SOUND("shocktrooper/shock_trooper_attack.wav");
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -511,8 +509,6 @@ void CShockTrooper::Precache()
 		m_voicePitch = 109 + RANDOM_LONG(0, 7);
 	else
 		m_voicePitch = 100;
-
-	m_iBrassShell = PRECACHE_MODEL("models/shell.mdl");// brass shell
 }
 
 

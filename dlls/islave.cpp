@@ -1400,7 +1400,8 @@ void CISlave::SpawnFamiliar(const char *entityName, const Vector &origin, int hu
 CSprite* CISlave::CreateHandGlow(int attachment)
 {
 	CSprite* handSprite = CreateSpriteFromVisual(GetVisual(handGlowVisual), pev->origin);
-	handSprite->SetAttachment( edict(), attachment );
+	if (handSprite)
+		handSprite->SetAttachment( edict(), attachment );
 	return handSprite;
 }
 

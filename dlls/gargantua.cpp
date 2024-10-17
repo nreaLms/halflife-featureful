@@ -332,7 +332,7 @@ void CStomp::Think( void )
 	float stompInterval = STOMP_INTERVAL;
 	int numOfSprites = 2;
 	int maxNumOfSprites = 8;
-	float spriteScale = m_stompVisual->scale;
+	float spriteScale = RandomizeNumberFromRange(m_stompVisual->scale);
 	if (g_pGameRules->IsMultiplayer())
 	{
 		stompInterval = STOMP_INTERVAL*2;
@@ -663,12 +663,14 @@ const NamedVisual CGargantua::bigFlameVisual = BuildVisual("Garg.FlameWide")
 		.Model(GARG_BEAM_SPRITE_NAME)
 		.RenderColor(255, 130, 90)
 		.BeamWidth(240)
+		.BeamFlags(BEAM_FSHADEIN)
 		.Mixin(&CGargantua::flameVisual);
 
 const NamedVisual CGargantua::smallFlameVisual = BuildVisual("Garg.FlameNarrow")
 		.Model(GARG_BEAM_SPRITE2)
 		.RenderColor(0, 120, 255)
 		.BeamWidth(140)
+		.BeamFlags(BEAM_FSHADEIN)
 		.Mixin(&CGargantua::flameVisual);
 
 const NamedVisual CGargantua::flameLightVisual = BuildVisual("Garg.FlameLight")
@@ -832,7 +834,6 @@ void CGargantua::FlameCreate( void )
 			UTIL_TraceLine( posGun, vecEnd, dont_ignore_monsters, edict(), &trace );
 
 			m_pFlame[i]->PointEntInit( trace.vecEndPos, entindex() );
-			m_pFlame[i]->SetFlags( BEAM_FSHADEIN );
 			// attachment is 1 based in SetEndAttachment
 			m_pFlame[i]->SetEndAttachment( attach + 2 );
 			CSoundEnt::InsertSound( bits_SOUND_COMBAT, posGun, 384, 0.3 );
@@ -1061,8 +1062,11 @@ void CGargantua::Spawn()
 	FollowingMonsterInit();
 
 	m_pEyeGlow = CreateSpriteFromVisual(m_eyeVisual, pev->origin);
-	m_pEyeGlow->SetAttachment( edict(), 1 );
-	m_pEyeGlow->SetBrightness(0); // start with eye off
+	if (m_pEyeGlow)
+	{
+		m_pEyeGlow->SetAttachment( edict(), 1 );
+		m_pEyeGlow->SetBrightness(0); // start with eye off
+	}
 	EyeOff();
 	m_seeTime = gpGlobals->time + 5;
 	m_flameTime = gpGlobals->time + 2;

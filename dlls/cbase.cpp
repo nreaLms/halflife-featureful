@@ -975,10 +975,6 @@ static bool CheckVisualDefine(const Visual* visual, int param, int ignored)
 	return visual->HasDefined(param) && (ignored & param) == 0;
 }
 
-inline Vector VectorFromColor(const Color& color) {
-	return Vector(color.r, color.g, color.b);
-}
-
 void CBaseEntity::ApplyVisual(const Visual *visual, const char* modelOverride)
 {
 	const int alreadyOverriden = OverridenRenderProps();
@@ -1008,9 +1004,9 @@ void CBaseEntity::ApplyVisual(const Visual *visual, const char* modelOverride)
 	if (CheckVisualDefine(visual, Visual::RENDERFX_DEFINED, alreadyOverriden))
 		pev->renderfx = visual->renderfx;
 	if (CheckVisualDefine(visual, Visual::SCALE_DEFINED, alreadyOverriden))
-		pev->scale = visual->scale;
+		pev->scale = RandomizeNumberFromRange(visual->scale);
 	if (CheckVisualDefine(visual, Visual::FRAMERATE_DEFINED, alreadyOverriden))
-		pev->framerate = visual->framerate;
+		pev->framerate = RandomizeNumberFromRange(visual->framerate);
 }
 
 int CBaseEntity::Save( CSave &save )

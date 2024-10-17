@@ -62,9 +62,10 @@ public:
 	static const NamedSoundScript buzzSoundScript;
 	static const NamedSoundScript dieSoundScript;
 
-	static const NamedVisual sharedHornetTrailVisual;
-	static const NamedVisual hornetTrailVisual;
-	static const NamedVisual hornetTrailAltVisual;
-	static const NamedVisual hornetPuffVisual;
+	static const NamedVisual modelVisual;
+	static const NamedVisual sharedTrailVisual;
+	static const NamedVisual trailVisual;
+	static const NamedVisual trailAltVisual;
+	static const NamedVisual puffVisual;
 };
 #endif // HORNET_H

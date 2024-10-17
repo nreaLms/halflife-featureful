@@ -114,12 +114,12 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_displayName, FIELD_STRING ),
 
 	DEFINE_FIELD( CBaseMonster, m_glowShellTime, FIELD_TIME ),
-	DEFINE_FIELD( CBaseMonster, m_glowShellColor, FIELD_VECTOR ),
 	DEFINE_FIELD( CBaseMonster, m_glowShellUpdate, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseMonster, m_prevRenderAmt, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_prevRenderColor, FIELD_VECTOR ),
-	DEFINE_FIELD( CBaseMonster, m_prevRenderFx, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseMonster, m_prevRenderFx, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseMonster, m_prevRenderMode, FIELD_SHORT ),
 
 	DEFINE_FIELD( CBaseMonster, m_nextPatrolPathCheck, FIELD_TIME ),
 
@@ -4503,23 +4503,23 @@ bool CBaseMonster::HandleDoorBlockage(CBaseEntity *pDoor)
 	return false;
 }
 
-void CBaseMonster::GlowShellOn( Vector color, float flDuration )
+void CBaseMonster::GlowShellOn(const Visual* visual)
 {
 	if (!m_glowShellUpdate)
 	{
 		m_prevRenderColor = pev->rendercolor;
 		m_prevRenderAmt = pev->renderamt;
 		m_prevRenderFx = pev->renderfx;
+		m_prevRenderMode = pev->rendermode;
 
-		pev->renderamt = 5;
-		pev->rendercolor = color;
-		pev->renderfx = kRenderFxGlowShell;
-
-		m_glowShellColor = color;
+		pev->renderamt = visual->renderamt;
+		pev->rendercolor = VectorFromColor(visual->rendercolor);
+		pev->renderfx = visual->renderfx;
+		pev->rendermode = visual->rendermode;
 
 		m_glowShellUpdate = TRUE;
 	}
-	m_glowShellTime = gpGlobals->time + flDuration;
+	m_glowShellTime = gpGlobals->time + RandomizeNumberFromRange(visual->life);
 }
 
 void CBaseMonster::GlowShellOff( void )
@@ -4529,6 +4529,7 @@ void CBaseMonster::GlowShellOff( void )
 		pev->renderamt = m_prevRenderAmt;
 		pev->rendercolor = m_prevRenderColor;
 		pev->renderfx = m_prevRenderFx;
+		pev->rendermode = m_prevRenderMode;
 
 		m_glowShellTime = 0.0f;
 

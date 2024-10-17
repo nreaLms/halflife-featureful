@@ -89,8 +89,6 @@ public:
 
 	int m_iSoundState; // don't save this
 
-	int m_iSpriteTexture;
-	int m_iExplode;
 	int m_iBodyGibs;
 
 	float m_flGoalSpeed;
@@ -101,6 +99,14 @@ public:
 	static const NamedSoundScript rotorSoundScript;
 	static const NamedSoundScript fireGunSoundScript;
 	static constexpr const char* crashSoundScript = "Apache.Crash";
+
+	static const NamedVisual sharedSmokeVisual;
+	static const NamedVisual fallingSmokeVisual;
+	static const NamedVisual crashSmokeVisual;
+	static const NamedVisual rocketSmokeVisual;
+	static const NamedVisual damageSmokeVisual;
+	static const NamedVisual fireBallVisual;
+	static const NamedVisual blastCircleVisual;
 
 protected:
 	void SpawnImpl(const char* modelName);
@@ -155,6 +161,44 @@ const NamedSoundScript CApache::fireGunSoundScript = {
 	0.3f,
 	"Apache.FireGun"
 };
+
+const NamedVisual CApache::sharedSmokeVisual = BuildVisual("Apache.SmokeBase")
+		.Model(g_pModelNameSmoke)
+		.Alpha(255)
+		.RenderMode(kRenderTransAlpha);
+
+const NamedVisual CApache::fallingSmokeVisual = BuildVisual("Apache.FallingSmoke")
+		.Scale(10.0f)
+		.Framerate(10.0f)
+		.Mixin(&CApache::sharedSmokeVisual);
+
+const NamedVisual CApache::crashSmokeVisual = BuildVisual("Apache.CrashSmoke")
+		.Scale(25.0f)
+		.Framerate(5.0f)
+		.Mixin(&CApache::sharedSmokeVisual);
+
+const NamedVisual CApache::rocketSmokeVisual = BuildVisual("Apache.RocketSmoke")
+		.Scale(2.0f)
+		.Framerate(12)
+		.Mixin(&CApache::sharedSmokeVisual);
+
+const NamedVisual CApache::damageSmokeVisual = BuildVisual("Apache.DamageSmoke")
+		.Scale(FloatRange(0.9f, 2.9f))
+		.Framerate(12)
+		.Mixin(&CApache::sharedSmokeVisual);
+
+const NamedVisual CApache::fireBallVisual = BuildVisual::Animated("Apache.Fireball")
+		.Model("sprites/fexplo.spr")
+		.RenderMode(kRenderTransAdd)
+		.Scale(12.0f)
+		.Alpha(255);
+
+const NamedVisual CApache::blastCircleVisual = BuildVisual("Apache.BlastCircle")
+		.Model("sprites/white.spr")
+		.Life(0.4f)
+		.BeamParams(32, 0)
+		.RenderColor(255, 255, 192)
+		.Alpha(128);
 
 void CApache::Spawn( void )
 {
@@ -217,15 +261,21 @@ void CApache::PrecacheImpl(const char* modelName, const char* gibModel)
 
 	RegisterAndPrecacheSoundScript(crashSoundScript, NPC::crashSoundScript);
 
-	m_iSpriteTexture = PRECACHE_MODEL( "sprites/white.spr" );
+	RegisterVisual(blastCircleVisual);
 
 	RegisterAndPrecacheSoundScript(fireGunSoundScript);
 
+	RegisterVisual(fallingSmokeVisual);
+	RegisterVisual(crashSmokeVisual);
+	RegisterVisual(rocketSmokeVisual);
+	RegisterVisual(damageSmokeVisual);
+
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 
-	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
+	RegisterVisual(fireBallVisual);
 
 	UTIL_PrecacheOther( "hvr_rocket", GetProjectileOverrides() );
+	UTIL_PrecacheOther( "cycler_wreckage", GetProjectileOverrides() );
 }
 
 void CApache::KeyValue(KeyValueData *pkvd)
@@ -306,15 +356,12 @@ void CApache::DyingThink( void )
 		MESSAGE_END();
 
 		// lots of smoke
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
-			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( pev->origin.x + RANDOM_FLOAT( -150.0f, 150.0f ) );
-			WRITE_COORD( pev->origin.y + RANDOM_FLOAT( -150.0f, 150.0f ) );
-			WRITE_COORD( pev->origin.z + RANDOM_FLOAT( -150.0f, -50.0f ) );
-			WRITE_SHORT( g_sModelIndexSmoke );
-			WRITE_BYTE( 100 ); // scale * 10
-			WRITE_BYTE( 10 ); // framerate
-		MESSAGE_END();
+		const Vector smokePosition(
+					pev->origin.x + RANDOM_FLOAT(-150.0f, 150.0f),
+					pev->origin.y + RANDOM_FLOAT(-150.0f, 150.0f),
+					pev->origin.z + RANDOM_FLOAT(-150.0f, -50.0f)
+		);
+		SendSmoke(smokePosition, GetVisual(fallingSmokeVisual));
 
 		Vector vecSpot = pev->origin + ( pev->mins + pev->maxs ) * 0.5f;
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
@@ -369,38 +416,16 @@ void CApache::DyingThink( void )
 		*/
 
 		// fireball
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
-			WRITE_BYTE( TE_SPRITE );
-			WRITE_VECTOR( vecSpot + Vector(0, 0, 256.0f) );
-			WRITE_SHORT( m_iExplode );
-			WRITE_BYTE( 120 ); // scale * 10
-			WRITE_BYTE( 255 ); // brightness
-		MESSAGE_END();
+		SendSprite(vecSpot + Vector(0, 0, 256.0f), GetVisual(fireBallVisual));
 
 		// big smoke
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
-			WRITE_BYTE( TE_SMOKE );
-			WRITE_VECTOR( vecSpot + Vector(0, 0, 512.0f) );
-			WRITE_SHORT( g_sModelIndexSmoke );
-			WRITE_BYTE( 250 ); // scale * 10
-			WRITE_BYTE( 5 ); // framerate
-		MESSAGE_END();
+		SendSmoke(vecSpot + Vector(0, 0, 512.0f), GetVisual(crashSmokeVisual));
 
 		// blast circle
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
 			WRITE_BYTE( TE_BEAMCYLINDER );
 			WRITE_CIRCLE( pev->origin, 2000 ); // reach damage radius over .2 seconds
-			WRITE_SHORT( m_iSpriteTexture );
-			WRITE_BYTE( 0 ); // startframe
-			WRITE_BYTE( 0 ); // framerate
-			WRITE_BYTE( 4 ); // life
-			WRITE_BYTE( 32 );  // width
-			WRITE_BYTE( 0 );   // noise
-			WRITE_BYTE( 255 );   // r, g, b
-			WRITE_BYTE( 255 );   // r, g, b
-			WRITE_BYTE( 192 );   // r, g, b
-			WRITE_BYTE( 128 ); // brightness
-			WRITE_BYTE( 0 );		// speed
+			WriteBeamVisual(GetVisual(blastCircleVisual));
 		MESSAGE_END();
 
 		EmitSoundScript(crashSoundScript);
@@ -409,7 +434,7 @@ void CApache::DyingThink( void )
 
 		if(/*!( pev->spawnflags & SF_NOWRECKAGE ) && */( pev->flags & FL_ONGROUND ) )
 		{
-			CBaseEntity *pWreckage = Create( "cycler_wreckage", pev->origin, pev->angles );
+			CBaseEntity *pWreckage = Create( "cycler_wreckage", pev->origin, pev->angles, nullptr, GetProjectileOverrides() );
 			// SET_MODEL( ENT( pWreckage->pev ), STRING( pev->model ) );
 			UTIL_SetSize( pWreckage->pev, Vector( -200.0f, -200.0f, -128.0f ), Vector( 200.0f, 200.0f, -32.0f ) );
 			pWreckage->pev->frame = pev->frame;
@@ -836,13 +861,7 @@ void CApache::FireRocket( void )
 	CBaseEntity *pRocket = CBaseEntity::Create( "hvr_rocket", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 	if( pRocket )
 	{
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSrc );
-			WRITE_BYTE( TE_SMOKE );
-			WRITE_VECTOR( vecSrc );
-			WRITE_SHORT( g_sModelIndexSmoke );
-			WRITE_BYTE( 20 ); // scale * 10
-			WRITE_BYTE( 12 ); // framerate
-		MESSAGE_END();
+		SendSmoke(vecSrc, GetVisual(rocketSmokeVisual));
 
 		pRocket->pev->velocity = pev->velocity + gpGlobals->v_forward * 100.0f;
 
@@ -937,13 +956,7 @@ void CApache::ShowDamage( void )
 {
 	if( m_iDoSmokePuff > 0 || RANDOM_LONG( 0, 99 ) > pev->health )
 	{
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
-			WRITE_BYTE( TE_SMOKE );
-			WRITE_VECTOR( pev->origin + Vector(0, 0, -32) );
-			WRITE_SHORT( g_sModelIndexSmoke );
-			WRITE_BYTE( RANDOM_LONG( 0, 9 ) + 20 ); // scale * 10
-			WRITE_BYTE( 12 ); // framerate
-		MESSAGE_END();
+		SendSmoke(pev->origin + Vector(0, 0, -32), GetVisual(damageSmokeVisual));
 	}
 	if( m_iDoSmokePuff > 0 )
 		m_iDoSmokePuff--;
@@ -1033,6 +1046,7 @@ class CApacheHVR : public CGrenade
 
 	static const NamedSoundScript rpgSoundScript;
 
+	static const NamedVisual modelVisual;
 	static const NamedVisual trailVisual;
 };
 
@@ -1054,6 +1068,9 @@ const NamedSoundScript CApacheHVR::rpgSoundScript = {
 	"Apache.RPG"
 };
 
+const NamedVisual CApacheHVR::modelVisual = BuildVisual("Apache.RocketModel")
+		.Model("models/HVR.mdl");
+
 const NamedVisual CApacheHVR::trailVisual = BuildVisual("Apache.RocketTrail")
 		.Model("sprites/smoke.spr")
 		.Life(1.5f)
@@ -1068,7 +1085,7 @@ void CApacheHVR::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/HVR.mdl" );
+	ApplyVisual(GetVisual(modelVisual));
 	UTIL_SetSize( pev, Vector( 0, 0, 0), Vector(0, 0, 0) );
 	UTIL_SetOrigin( pev, pev->origin );
 
@@ -1087,7 +1104,7 @@ void CApacheHVR::Spawn( void )
 void CApacheHVR::Precache( void )
 {
 	PrecacheBaseGrenadeSounds();
-	PRECACHE_MODEL( "models/HVR.mdl" );
+	RegisterVisual(modelVisual);
 	RegisterVisual(trailVisual);
 	RegisterAndPrecacheSoundScript(rpgSoundScript);
 }
@@ -1103,15 +1120,7 @@ void CApacheHVR::IgniteThink( void )
 	EmitSoundScript(rpgSoundScript);
 
 	// rocket trail
-	const Visual* visual = GetVisual(trailVisual);
-	if (visual->modelIndex)
-	{
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_BEAMFOLLOW );
-			WRITE_SHORT( entindex() ); // entity
-			WriteBeamFollowVisual(visual);
-		MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
-	}
+	SendBeamFollow(entindex(), GetVisual(trailVisual));
 
 	// set to accelerate
 	SetThink( &CApacheHVR::AccelerateThink );

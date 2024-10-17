@@ -10,6 +10,7 @@
 #include	"skill.h"
 #include	"spore.h"
 #include	"game.h"
+#include	"visuals_utils.h"
 
 #define FEATURE_SPORE_AMMO_CEILING_LIGHT 1
 
@@ -40,14 +41,47 @@ const NamedSoundScript CSpore::impactSoundScript = {
 	"Spore.Impact"
 };
 
+const NamedVisual CSpore::modelVisual = BuildVisual("Spore.Model")
+		.Model("models/spore.mdl");
+
+const NamedVisual CSpore::spriteVisual = BuildVisual("Spore.Sprite")
+		.Model("sprites/glow01.spr")
+		.RenderProps(kRenderTransAdd, Color(180, 180, 40), 100, kRenderFxDistort)
+		.Scale(0.8f);
+
+const NamedVisual CSpore::blowVisual = BuildVisual::Animated("Spore.Blow")
+		.Model("sprites/spore_exp_01.spr")
+		.RenderMode(kRenderTransAdd)
+		.Scale(2.0f)
+		.Alpha(128);
+
+const NamedVisual CSpore::blowAltVisual = BuildVisual::Animated("Spore.BlowAlt")
+		.Model("sprites/spore_exp_c_01.spr")
+		.RenderMode(kRenderTransAdd)
+		.Scale(2.0f)
+		.Alpha(128);
+
+const NamedVisual CSpore::sprayVisual = BuildVisual::Spray("Spore.Spray")
+		.Model("sprites/tinyspit.spr");
+
+const NamedVisual CSpore::trailVisual = BuildVisual::Spray("Spore.Trail")
+		.Model("sprites/tinyspit.spr");
+
+const NamedVisual CSpore::lightVisual = BuildVisual("Spore.Light")
+		.Radius(100)
+		.RenderColor(15, 220, 40)
+		.Life(0.5f);
+
 void CSpore::Precache(void)
 {
-	PRECACHE_MODEL("models/spore.mdl");
-	PRECACHE_MODEL("sprites/glow01.spr");
+	RegisterVisual(modelVisual);
+	RegisterVisual(spriteVisual);
 
-	m_iBlow = PRECACHE_MODEL("sprites/spore_exp_01.spr");
-	m_iBlowSmall = PRECACHE_MODEL("sprites/spore_exp_c_01.spr");
-	m_iSpitSprite = m_iTrail = PRECACHE_MODEL("sprites/tinyspit.spr");
+	RegisterVisual(blowVisual);
+	RegisterVisual(blowAltVisual);
+	RegisterVisual(sprayVisual);
+	RegisterVisual(trailVisual);
+	RegisterVisual(lightVisual);
 
 	RegisterAndPrecacheSoundScript(bounceSoundScript);
 	RegisterAndPrecacheSoundScript(impactSoundScript);
@@ -65,7 +99,7 @@ void CSpore::Spawn()
 	pev->solid = SOLID_BBOX;
 	pev->classname = MAKE_STRING("spore");
 
-	SET_MODEL(edict(), "models/spore.mdl");
+	ApplyVisual(GetVisual(modelVisual));
 
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 	UTIL_SetOrigin(pev, pev->origin);
@@ -102,10 +136,8 @@ void CSpore::Spawn()
 
 	pev->nextthink = gpGlobals->time + 0.01;
 
-	CSprite* sprite = CSprite::SpriteCreate("sprites/glow01.spr", pev->origin, false);
+	CSprite* sprite = CreateSpriteFromVisual(GetVisual(spriteVisual), pev->origin);
 	if (sprite) {
-		sprite->SetTransparency(kRenderTransAdd, 180, 180, 40, 100, kRenderFxDistort);
-		sprite->SetScale(0.8);
 		sprite->SetAttachment(edict(), 0);
 		m_hSprite = sprite;
 	}
@@ -141,46 +173,13 @@ void CSpore::IgniteThink()
 	else
 		UTIL_DecalTrace(&tr, DECAL_YBLOOD5 + RANDOM_LONG(0, 1));
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_SPRITE_SPRAY);
-	WRITE_VECTOR( pev->origin );
-	WRITE_VECTOR( tr.vecPlaneNormal );
-	WRITE_SHORT(m_iSpitSprite);
-	WRITE_BYTE(100);
-	WRITE_BYTE(40);
-	WRITE_BYTE(180);
-	MESSAGE_END();
+	SendSpray(pev->origin, tr.vecPlaneNormal, GetVisual(sprayVisual), 100, 40, 180);
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_DLIGHT);
-	WRITE_VECTOR( pev->origin );
-	WRITE_BYTE(10);
-	WRITE_BYTE(15);
-	WRITE_BYTE(220);
-	WRITE_BYTE(40);
-	WRITE_BYTE(5);
-	WRITE_BYTE(10);
-	MESSAGE_END();
+	SendDynLight(pev->origin, GetVisual(lightVisual), 10);
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_SPRITE);
-	WRITE_VECTOR( pev->origin );
-	WRITE_SHORT(RANDOM_LONG(0, 1) ? m_iBlow : m_iBlowSmall);
-	WRITE_BYTE(20);
-	WRITE_BYTE(128);
-	MESSAGE_END();
+	SendSprite(pev->origin, GetVisual(RANDOM_LONG(0, 1) ? blowVisual : blowAltVisual));
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_SPRITE_SPRAY);
-	WRITE_VECTOR( pev->origin );
-	WRITE_COORD(RANDOM_FLOAT(-1, 1));
-	WRITE_COORD(1);
-	WRITE_COORD(RANDOM_FLOAT(-1, 1));
-	WRITE_SHORT(m_iTrail);
-	WRITE_BYTE(2);
-	WRITE_BYTE(20);
-	WRITE_BYTE(80);
-	MESSAGE_END();
+	SendSpray(pev->origin, Vector(RANDOM_FLOAT(-1, 1), 1, RANDOM_FLOAT(-1, 1)), GetVisual(trailVisual), 2, 20, 80);
 
 	::RadiusDamage(pev->origin, pev, VARS(pev->owner), pev->dmg, 200, CLASS_NONE, DMG_ALWAYSGIB | DMG_BLAST);
 
@@ -196,16 +195,7 @@ void CSpore::FlyThink()
 	if (m_SporeType != GRENADE || (gpGlobals->time <= m_flIgniteTime + flDelay))
 	{
 		Vector velocity = pev->velocity.Normalize();
-
-		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_SPRITE_SPRAY);
-		WRITE_VECTOR( pev->origin );
-		WRITE_VECTOR( velocity );
-		WRITE_SHORT(m_iTrail);
-		WRITE_BYTE(2);
-		WRITE_BYTE(20);
-		WRITE_BYTE(80);
-		MESSAGE_END();
+		SendSpray(pev->origin, velocity, GetVisual(trailVisual), 2, 20, 80);
 	}
 	else
 	{
@@ -213,11 +203,6 @@ void CSpore::FlyThink()
 	}
 
 	pev->nextthink = gpGlobals->time + 0.03;
-}
-
-void CSpore::GibThink()
-{
-	//Nothing
 }
 
 void CSpore::RocketTouch(CBaseEntity* pOther)

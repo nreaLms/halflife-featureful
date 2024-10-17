@@ -30,9 +30,6 @@
 #include	"bullsquid.h"
 #include	"common_soundscripts.h"
 #include	"visuals_utils.h"
-#include	"fx_flags.h"
-
-extern int gmsgSpray;
 
 const NamedVisual sharedTinySpitVisual = BuildVisual("Bullsquid.TinySpitBase")
 		.Model("sprites/tinyspit.spr");
@@ -147,26 +144,7 @@ void CSquidSpit::Touch( CBaseEntity *pOther )
 		UTIL_TraceLine( pev->origin, pev->origin + pev->velocity * 10, dont_ignore_monsters, ENT( pev ), &tr );
 		UTIL_DecalTrace( &tr, DECAL_SPIT1 + RANDOM_LONG( 0, 1 ) );
 
-		const Visual* visual = GetVisual(fleckVisual);
-		if (visual->modelIndex)
-		{
-			// make some flecks
-			MESSAGE_BEGIN( MSG_PVS, gmsgSpray, tr.vecEndPos );
-				WRITE_VECTOR( tr.vecEndPos );	// pos
-				WRITE_VECTOR( tr.vecPlaneNormal );	// dir
-				WRITE_SHORT( visual->modelIndex );	// model
-				WRITE_BYTE( 5 );			// count
-				WRITE_BYTE( 30 );			// speed
-				WRITE_BYTE( 80 );// noise ( client will divide by 100 )
-				WRITE_BYTE( visual->rendermode );
-				WRITE_COLOR( visual->rendercolor );
-				WRITE_BYTE( visual->renderamt );
-				WRITE_BYTE( visual->renderfx );
-				WRITE_BYTE( (int)(visual->scale * 10) );
-				WRITE_SHORT( (int)(visual->framerate * 10) );
-				WRITE_BYTE( SPRAY_FLAG_FADEOUT );
-			MESSAGE_END();
-		}
+		SendSpray(tr.vecEndPos, tr.vecPlaneNormal, GetVisual(fleckVisual), 5, 30, 80);
 	}
 	else
 	{
@@ -271,7 +249,7 @@ void CSquidToxicSpit::Animate( void )
 				WRITE_SHORT( visual->modelIndex );	// model
 				WRITE_BYTE( 3 );			// count
 				WRITE_BYTE( RandomizeNumberFromRange(visual->life)*10 );			// life in 0.1s
-				WRITE_BYTE( (int)(visual->scale * 10) );			// scale in 0.1
+				WRITE_BYTE( (int)(RandomizeNumberFromRange(visual->scale) * 10) );			// scale in 0.1
 				WRITE_BYTE( 20 );			// velocity along vector in 10's
 				WRITE_BYTE( 20 );			// randomness of velocity in 10's
 				WRITE_BYTE( visual->rendermode );
@@ -316,27 +294,7 @@ void CSquidToxicSpit::Touch( CBaseEntity *pOther )
 		UTIL_TraceLine( pev->origin, pev->origin + pev->velocity * 10, dont_ignore_monsters, ENT( pev ), &tr );
 		UTIL_DecalTrace( &tr, DECAL_SPIT1 + RANDOM_LONG( 0, 1 ) );
 
-		const Visual* visual = GetVisual(fleckVisual);
-
-		if (visual->modelIndex)
-		{
-			// make some flecks
-			MESSAGE_BEGIN( MSG_PVS, gmsgSpray, tr.vecEndPos );
-				WRITE_VECTOR( tr.vecEndPos );	// pos
-				WRITE_VECTOR( tr.vecPlaneNormal );	// dir
-				WRITE_SHORT( visual->modelIndex );	// model
-				WRITE_BYTE( 8 );			// count
-				WRITE_BYTE( 15 );			// speed
-				WRITE_BYTE( 100 );// noise ( client will divide by 100 )
-				WRITE_BYTE( visual->rendermode );
-				WRITE_COLOR( visual->rendercolor );
-				WRITE_BYTE( visual->renderamt );
-				WRITE_BYTE( visual->renderfx );
-				WRITE_BYTE( (int)(visual->scale * 10) );
-				WRITE_SHORT( (int)(visual->framerate * 10) );
-				WRITE_BYTE( SPRAY_FLAG_FADEOUT );
-			MESSAGE_END();
-		}
+		SendSpray(tr.vecEndPos, tr.vecPlaneNormal, GetVisual(fleckVisual), 8, 15, 100);
 	}
 	else if (pev->owner == pOther->edict())
 	{
@@ -792,25 +750,8 @@ void CBullsquid::HandleAnimEvent( MonsterEvent_t *pEvent )
 				AttackSound(toxicSpit);
 
 				const Visual* visual = toxicSpit ? GetVisual(toxicTinySpitVisual) : GetVisual(tinySpitVisual);
-				if (visual->modelIndex)
-				{
-					// spew the spittle temporary ents.
-					MESSAGE_BEGIN( MSG_PVS, gmsgSpray, vecSpitOrigin );
-						WRITE_VECTOR( vecSpitOrigin );	// pos
-						WRITE_VECTOR( vecSpitDir );	// dir
-						WRITE_SHORT( visual->modelIndex );	// model
-						WRITE_BYTE( 15 );			// count
-						WRITE_BYTE( 210 );			// speed
-						WRITE_BYTE( 25 );// noise ( client will divide by 100 )
-						WRITE_BYTE( visual->rendermode );
-						WRITE_COLOR( visual->rendercolor );
-						WRITE_BYTE( visual->renderamt );
-						WRITE_BYTE( visual->renderfx );
-						WRITE_BYTE( (int)(visual->scale * 10) );
-						WRITE_SHORT( (int)(visual->framerate * 10) );
-						WRITE_BYTE( SPRAY_FLAG_FADEOUT );
-					MESSAGE_END();
-				}
+				// spew the spittle temporary ents.
+				SendSpray(vecSpitOrigin, vecSpitDir, visual, 15, 210, 25);
 
 				if (toxicSpit) {
 					CSquidToxicSpit::Shoot(pev, vecSpitOrigin, vecSpitDir * CSquidToxicSpit::SpitSpeed(), GetProjectileOverrides());

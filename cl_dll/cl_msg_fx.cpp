@@ -579,7 +579,7 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	Vector pos, dir;
 	int modelIndex;
 	float scale, frameRate, speed, zOffset, scaleSpeed;
-	int rendermode, renderamt, r, g, b;
+	int rendermode, renderamt;
 
 	const int flags = READ_BYTE();
 	const bool directed = (flags & SMOKER_FLAG_DIRECTED) != 0;

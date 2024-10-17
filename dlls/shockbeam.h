@@ -36,6 +36,12 @@ public:
 	CSprite *m_pSprite;
 
 	static const NamedSoundScript impactSoundScript;
+
+	static const NamedVisual spriteVisual;
+	static const NamedVisual beam1Visual;
+	static const NamedVisual beam2Visual;
+	static const NamedVisual lightVisual;
+	static const NamedVisual shellVisual;
 };
 #endif
 #endif

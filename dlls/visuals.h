@@ -35,7 +35,8 @@ struct Visual
 		BEAMNOISE_DEFINED = (1 << 8),
 		BEAMSCROLLRATE_DEFINED = (1 << 9),
 		LIFE_DEFINED = (1 << 10),
-		RADIUS_DEFINED = (1 << 11)
+		RADIUS_DEFINED = (1 << 11),
+		BEAMFLAGS_DEFINED = (1 << 12),
 	};
 
 	const char* model = nullptr;
@@ -43,13 +44,14 @@ struct Visual
 	Color rendercolor;
 	int renderamt = 0;
 	int renderfx = kRenderFxNone;
-	float scale = 1.0f;
-	float framerate = 0.0f;
+	FloatRange scale = 1.0f;
+	FloatRange framerate = 0.0f;
 	int beamWidth = 0;
 	int beamNoise = 0;
 	int beamScrollRate = 0;
 	FloatRange life = 0.0f;
 	IntRange radius = 0;
+	int beamFlags = 0;
 
 	int modelIndex = 0;
 
@@ -78,12 +80,12 @@ struct Visual
 		this->renderfx = renderfx;
 		MarkAsDefined(RENDERFX_DEFINED);
 	}
-	inline void SetScale(float scale)
+	inline void SetScale(FloatRange scale)
 	{
 		this->scale = scale;
 		MarkAsDefined(SCALE_DEFINED);
 	}
-	inline void SetFramerate(float framerate)
+	inline void SetFramerate(FloatRange framerate)
 	{
 		this->framerate = framerate;
 		MarkAsDefined(FRAMERATE_DEFINED);
@@ -112,6 +114,11 @@ struct Visual
 	{
 		this->radius = radius;
 		MarkAsDefined(RADIUS_DEFINED);
+	}
+	inline void SetBeamFlags(int flags)
+	{
+		this->beamFlags = flags;
+		MarkAsDefined(BEAMFLAGS_DEFINED);
 	}
 
 	inline bool HasModel() const {
@@ -199,12 +206,12 @@ struct BuildVisual
 	{
 		return RenderMode(rendermode).RenderColor(rendercolor);
 	}
-	inline BuildVisual& Scale(float scale)
+	inline BuildVisual& Scale(FloatRange scale)
 	{
 		visual.SetScale(scale);
 		return *this;
 	}
-	inline BuildVisual& Framerate(float framerate)
+	inline BuildVisual& Framerate(FloatRange framerate)
 	{
 		visual.SetFramerate(framerate);
 		return *this;
@@ -235,6 +242,10 @@ struct BuildVisual
 	}
 	inline BuildVisual& Radius(IntRange radius) {
 		visual.SetRadius(radius);
+		return *this;
+	}
+	inline BuildVisual& BeamFlags(int flags) {
+		visual.SetBeamFlags(flags);
 		return *this;
 	}
 	inline BuildVisual& Mixin(const NamedVisual* mixin)
