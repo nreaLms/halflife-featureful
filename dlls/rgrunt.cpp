@@ -170,8 +170,9 @@ void CRGrunt::Spawn()
 
 void CRGrunt::Precache()
 {
-	PrecacheHelper("models/rgrunt.mdl");
-	PRECACHE_MODEL("models/computergibs.mdl");
+	PrecacheMyModel("models/rgrunt.mdl");
+	PrecacheMyGibModel(DefaultGibModel());
+	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
 
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 

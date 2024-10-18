@@ -1078,7 +1078,7 @@ void CGargantua::Spawn()
 void CGargantua::Precache()
 {
 	PrecacheMyModel( DefaultModel() );
-	m_GargGibModel = PrecacheMyGibModel();
+	m_GargGibModel = PrecacheMyGibModel(DefaultGibModel());
 
 	SoundScriptParamOverride paramOverride;
 	paramOverride.OverridePitchAbsolute(IntRange(50, 65));
