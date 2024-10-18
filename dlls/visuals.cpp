@@ -310,6 +310,13 @@ void VisualSystem::AddVisualFromJsonValue(const char *name, Value &value)
 	_visuals[name] = visual;
 }
 
+void VisualSystem::EnsureVisualExists(const std::string& name)
+{
+	auto it = _visuals.find(name);
+	if (it == _visuals.end())
+		_visuals[name] = Visual();
+}
+
 const Visual* VisualSystem::GetVisual(const char *name)
 {
 	if (!name || *name == '\0')
@@ -427,7 +434,7 @@ void VisualSystem::DumpVisuals()
 void VisualSystem::DumpVisual(const char *name)
 {
 	_temp = name;
-	if (_temp[_temp.size()-1] == '.')
+	if (_temp[_temp.size()-1] == '.' || _temp[_temp.size()-1] == '#')
 	{
 		bool foundSomething = false;
 		for (const auto& p : _visuals)
