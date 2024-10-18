@@ -127,11 +127,17 @@ class EntTemplateSystem
 public:
 	bool ReadFromFile(const char* fileName);
 	const EntTemplate* GetTemplate(const char* name);
+	void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName);
 
 private:
 	std::map<std::string, EntTemplate, CaseInsensitiveCompare> _entTemplates;
 	std::string _temp;
 };
+
+static std::string GenerateResourceName(const std::string& templateName, const char* resourceName)
+{
+	return templateName + '#' + resourceName;
+}
 
 bool EntTemplateSystem::ReadFromFile(const char *fileName)
 {
@@ -206,7 +212,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 					}
 					else if (scriptIt->value.IsObject())
 					{
-						std::string replacement = templateName + '#' + soundScriptName;
+						std::string replacement = GenerateResourceName(templateName, + soundScriptName);
 						entTemplate.SetSoundScriptReplacement(soundScriptName, replacement);
 						g_SoundScriptSystem.AddSoundScriptFromJsonValue(replacement.c_str(), scriptIt->value);
 					}
@@ -229,7 +235,7 @@ bool EntTemplateSystem::ReadFromFile(const char *fileName)
 					}
 					else if (visualIt->value.IsObject())
 					{
-						std::string replacement = templateName + '#' + visualName;
+						std::string replacement = GenerateResourceName(templateName, visualName);
 						entTemplate.SetVisualReplacement(visualName, replacement);
 						g_VisualSystem.AddVisualFromJsonValue(replacement.c_str(), visualIt->value);
 					}
@@ -419,6 +425,24 @@ const EntTemplate* EntTemplateSystem::GetTemplate(const char *name)
 	return nullptr;
 }
 
+void EntTemplateSystem::EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName)
+{
+	if (!templateName || *templateName == '\0')
+		return;
+	_temp = templateName;
+	auto it = _entTemplates.find(_temp);
+	if (it != _entTemplates.end())
+	{
+		EntTemplate* entTemplate = &it->second;
+		if (!entTemplate->GetVisualNameOverride(visualName))
+		{
+			std::string replacement = GenerateResourceName(it->first, visualName);
+			entTemplate->SetVisualReplacement(visualName, replacement);
+			g_VisualSystem.EnsureVisualExists(replacement);
+		}
+	}
+}
+
 EntTemplateSystem g_EntTemplateSystem;
 
 void ReadEntTemplates()
@@ -429,4 +453,9 @@ void ReadEntTemplates()
 const EntTemplate* GetEntTemplate(const char* name)
 {
 	return g_EntTemplateSystem.GetTemplate(name);
+}
+
+void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName)
+{
+	g_EntTemplateSystem.EnsureVisualReplacementForTemplate(templateName, visualName);
 }

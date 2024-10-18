@@ -4512,10 +4512,14 @@ void CBaseMonster::GlowShellOn(const Visual* visual)
 		m_prevRenderFx = pev->renderfx;
 		m_prevRenderMode = pev->rendermode;
 
-		pev->renderamt = visual->renderamt;
-		pev->rendercolor = VectorFromColor(visual->rendercolor);
-		pev->renderfx = visual->renderfx;
-		pev->rendermode = visual->rendermode;
+		if (visual->HasDefined(Visual::ALPHA_DEFINED))
+			pev->renderamt = visual->renderamt;
+		if (visual->HasDefined(Visual::COLOR_DEFINED))
+			pev->rendercolor = VectorFromColor(visual->rendercolor);
+		if (visual->HasDefined(Visual::RENDERFX_DEFINED))
+			pev->renderfx = visual->renderfx;
+		if (visual->HasDefined(Visual::RENDERMODE_DEFINED))
+			pev->rendermode = visual->rendermode;
 
 		m_glowShellUpdate = TRUE;
 	}

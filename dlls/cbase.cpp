@@ -901,17 +901,25 @@ const char* CBaseEntity::GetVisualNameForTemplate(const char *name, string_t tem
 	return nullptr;
 }
 
-const char* CBaseEntity::GetVisualNameForMyTemplate(const char *name)
+const char* CBaseEntity::GetVisualNameForMyTemplate(const char *name, string_t* usedTemplate)
 {
 	const char* nameOverride = nullptr;
 
 	nameOverride = GetVisualNameForTemplate(name, m_entTemplate);
 	if (nameOverride)
+	{
+		if (usedTemplate)
+			*usedTemplate = m_entTemplate;
 		return nameOverride;
+	}
 
 	nameOverride = GetVisualNameForTemplate(name, m_ownerEntTemplate);
 	if (nameOverride)
+	{
+		if (usedTemplate)
+			*usedTemplate = m_ownerEntTemplate;
 		return nameOverride;
+	}
 
 	return name;
 }
@@ -922,17 +930,20 @@ const Visual* CBaseEntity::GetVisual(const char *name)
 	return g_VisualSystem.GetVisual(name);
 }
 
-const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool precache)
+const Visual* CBaseEntity::RegisterVisual(const NamedVisual &defaultVisual, bool precache, string_t* usedTemplate)
 {
 	if (defaultVisual.mixin)
 	{
-		const Visual* visual = RegisterVisual(*defaultVisual.mixin, false);
+		string_t mixinTemplate = iStringNull;
+		const Visual* visual = RegisterVisual(*defaultVisual.mixin, false, &mixinTemplate);
 		Visual changedVisual = defaultVisual;
 		changedVisual.CompleteFrom(*visual);
-		return g_VisualSystem.ProvideDefaultVisual(GetVisualNameForMyTemplate(defaultVisual.name), changedVisual, precache);
+		if (mixinTemplate)
+			EnsureVisualReplacementForTemplate(STRING(mixinTemplate), defaultVisual.name);
+		return g_VisualSystem.ProvideDefaultVisual(GetVisualNameForMyTemplate(defaultVisual.name, usedTemplate), changedVisual, precache);
 	}
 	else
-		return g_VisualSystem.ProvideDefaultVisual(GetVisualNameForMyTemplate(defaultVisual.name), defaultVisual, precache);
+		return g_VisualSystem.ProvideDefaultVisual(GetVisualNameForMyTemplate(defaultVisual.name, usedTemplate), defaultVisual, precache);
 }
 
 void CBaseEntity::AssignEntityOverrides(EntityOverrides entityOverrides)

@@ -276,9 +276,9 @@ public:
 	void RegisterAndPrecacheSoundScript(const char* derivative, const NamedSoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
 
 	static const char* GetVisualNameForTemplate(const char* name, string_t templateName);
-	const char* GetVisualNameForMyTemplate(const char* name);
+	const char* GetVisualNameForMyTemplate(const char* name, string_t* usedTemplate = nullptr);
 	const Visual* GetVisual(const char* name);
-	const Visual* RegisterVisual(const NamedVisual& defaultVisual, bool precache = true);
+	const Visual* RegisterVisual(const NamedVisual& defaultVisual, bool precache = true, string_t* usedTemplate = nullptr);
 	void AssignEntityOverrides(EntityOverrides entityOverrides);
 	EntityOverrides GetProjectileOverrides() const;
 

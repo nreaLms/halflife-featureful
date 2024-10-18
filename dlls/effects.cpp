@@ -3150,7 +3150,6 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 {
 	Vector vecOrigin;
 	edict_t* playSoundEnt = edict();
-	bool playSoundOnMyself = false;
 	string_t warpTarget = WarpTarget();
 	int inflictedRadius = 48;
 
@@ -3168,7 +3167,6 @@ void CEnvWarpBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	{
 		//use myself as center
 		vecOrigin = pev->origin;
-		playSoundOnMyself = true;
 	}
 
 	WarpballTemplate w;

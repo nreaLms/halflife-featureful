@@ -262,6 +262,7 @@ class VisualSystem
 public:
 	bool ReadFromFile(const char* fileName);
 	void AddVisualFromJsonValue(const char* name, rapidjson::Value& value);
+	void EnsureVisualExists(const std::string& name);
 	const Visual* GetVisual(const char* name);
 	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool doPrecache);
 	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);

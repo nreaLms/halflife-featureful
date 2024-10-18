@@ -135,4 +135,6 @@ void ReadEntTemplates();
 
 const EntTemplate* GetEntTemplate(const char* name);
 
+void EnsureVisualReplacementForTemplate(const char* templateName, const char* visualName);
+
 #endif
