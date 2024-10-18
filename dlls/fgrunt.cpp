@@ -1977,6 +1977,7 @@ void CHFGrunt::SpawnHelper(const char *defaultModel, float defaultHealth)
 void CHFGrunt :: Precache()
 {
 	PrecacheMyModel("models/hgrunt_opfor.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
@@ -2837,7 +2838,8 @@ LINK_ENTITY_TO_CLASS( monster_torch_ally_repel, CTorchRepel )
 class CDeadFGrunt : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/hgrunt_opfor.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_ally"); }
 	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
@@ -2871,9 +2873,9 @@ LINK_ENTITY_TO_CLASS( monster_human_grunt_ally_dead, CDeadFGrunt )
 //=========================================================
 // ********** DeadFGrunt SPAWN **********
 //=========================================================
-void CDeadFGrunt :: Spawn( )
+void CDeadFGrunt::Spawn()
 {
-	SpawnHelper("models/hgrunt_opfor.mdl");
+	SpawnHelper();
 
 	if ( pev->weapons <= 0 )
 	{
@@ -3011,6 +3013,7 @@ void CTorch::Spawn()
 void CTorch::Precache()
 {
 	PrecacheMyModel("models/hgrunt_torch.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CHFGrunt::dieSoundScript);
@@ -3325,7 +3328,8 @@ void CTorch::KillGas( void )
 class CDeadTorch : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/hgrunt_torch.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_torch"); }
 	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
@@ -3344,7 +3348,7 @@ LINK_ENTITY_TO_CLASS( monster_human_torch_ally_dead, CDeadTorch )
 
 void CDeadTorch::Spawn( )
 {
-	SpawnHelper("models/hgrunt_torch.mdl");
+	SpawnHelper();
 
 	if ( pev->weapons <= 0 )
 	{
@@ -3787,6 +3791,7 @@ void CMedic::Spawn()
 void CMedic::Precache()
 {
 	PrecacheMyModel("models/hgrunt_medic.mdl");
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(painSoundScript, CHFGrunt::painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript, CHFGrunt::dieSoundScript);
@@ -4086,6 +4091,7 @@ class CDeadMedic : public CDeadFGrunt
 public:
 	void Spawn();
 	void Precache();
+	const char* DefaultModel() { return "models/hgrunt_medic.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("human_grunt_medic"); }
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[3];
@@ -4108,7 +4114,7 @@ LINK_ENTITY_TO_CLASS( monster_human_medic_ally_dead, CDeadMedic )
 
 void CDeadMedic::Spawn( )
 {
-	SpawnHelper("models/hgrunt_medic.mdl");
+	SpawnHelper();
 	SetBodyGroupNumbers();
 
 	if ( pev->weapons <= 0 )

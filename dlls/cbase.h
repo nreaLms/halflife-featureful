@@ -20,6 +20,8 @@
 #include "util.h"
 #include "soundscripts.h"
 #include "visuals.h"
+#include "grapple_target.h"
+#include "classify.h"
 /*
 
 Class Hierachy
@@ -111,34 +113,6 @@ typedef void(CBaseEntity::*BASEPTR)( void );
 typedef void(CBaseEntity::*ENTITYFUNCPTR)( CBaseEntity *pOther );
 typedef void(CBaseEntity::*USEPTR)( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-// For CLASSIFY
-enum
-{
-	CLASS_NONE,
-	CLASS_MACHINE,
-	CLASS_PLAYER,
-	CLASS_HUMAN_PASSIVE,
-	CLASS_HUMAN_MILITARY,
-	CLASS_ALIEN_MILITARY,
-	CLASS_ALIEN_PASSIVE,
-	CLASS_ALIEN_MONSTER,
-	CLASS_ALIEN_PREY,
-	CLASS_ALIEN_PREDATOR,
-	CLASS_INSECT,
-	CLASS_PLAYER_ALLY,
-	CLASS_PLAYER_BIOWEAPON, // hornets launched by players
-	CLASS_ALIEN_BIOWEAPON, // hornets launched by the alien menace
-	CLASS_RACEX_PREDATOR,
-	CLASS_RACEX_SHOCK,
-	CLASS_PLAYER_ALLY_MILITARY,
-	CLASS_HUMAN_BLACKOPS,
-	CLASS_SNARK,
-	CLASS_GARGANTUA,
-	CLASS_NUMBER_OF_CLASSES,
-	CLASS_VEHICLE = 98,
-	CLASS_BARNACLE = 99 // special because no one pays attention to it, and it eats a wide cross-section of creatures.
-};
-
 class CBaseEntity;
 class CBaseToggle;
 class CBaseMonster;
@@ -178,15 +152,6 @@ public:
 
 	CBaseEntity *operator = ( CBaseEntity *pEntity );
 	CBaseEntity *operator ->();
-};
-
-enum GrappleTarget
-{
-	GRAPPLE_NOT_A_TARGET	= 0,
-	GRAPPLE_SMALL			= 1,
-	GRAPPLE_MEDIUM			= 2,
-	GRAPPLE_LARGE			= 3,
-	GRAPPLE_FIXED			= 4,
 };
 
 //
@@ -284,6 +249,9 @@ public:
 	}
 	virtual void Blocked( CBaseEntity *pOther ) { if( m_pfnBlocked ) ( this->*m_pfnBlocked )( pOther ); };
 
+	string_t m_entTemplate;
+	string_t m_ownerEntTemplate;
+
 	string_t m_soundList; // sound replacement list file name
 	int PRECACHE_SOUND(const char* soundName);
 
@@ -292,6 +260,8 @@ public:
 	void EmitAmbientSound( const Vector &vecOrigin, const char *sample, float vol, float attenuation, int iFlags, int pitch );
 	void StopSound( int channel, const char* sample );
 
+	static const char* GetSoundScriptNameForTemplate(const char* name, string_t templateName);
+	const char* GetSoundScriptNameForMyTemplate(const char* name);
 	const SoundScript* GetSoundScript(const char* name);
 	bool EmitSoundScript(const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	bool EmitSoundScript(const char* name, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
@@ -300,12 +270,21 @@ public:
 	void EmitSoundScriptAmbient(const Vector& vecOrigin, const SoundScript* soundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	void EmitSoundScriptAmbient(const Vector& vecOrigin, const char* name, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride(), int flags = 0);
 	void PrecacheSoundScript(const SoundScript& soundScript);
-	void PrecacheSoundScript(const char* name);
 	void RegisterAndPrecacheSoundScriptByName(const char* name, const SoundScript& defaultSoundScript);
 	void RegisterAndPrecacheSoundScript(const NamedSoundScript& defaultSoundScript);
 	void RegisterAndPrecacheSoundScript(const char* derivative, const char* base, const SoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
 	void RegisterAndPrecacheSoundScript(const char* derivative, const NamedSoundScript& defaultSoundScript, const SoundScriptParamOverride paramsOverride = SoundScriptParamOverride());
+
+	static const char* GetVisualNameForTemplate(const char* name, string_t templateName);
+	const char* GetVisualNameForMyTemplate(const char* name);
+	const Visual* GetVisual(const char* name);
 	const Visual* RegisterVisual(const NamedVisual& defaultVisual, bool precache = true);
+	void AssignEntityOverrides(EntityOverrides entityOverrides);
+	EntityOverrides GetProjectileOverrides() const;
+
+	int OverridenRenderProps();
+	virtual void ApplyDefaultRenderProps(int overridenRenderProps) {}
+	void ApplyVisual(const Visual* visual, const char* modelOverride = nullptr);
 
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )
@@ -409,8 +388,8 @@ public:
 	// used by monsters that are created by the MonsterMaker
 	virtual	void UpdateOwner( void ) { return; };
 
-	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, string_t soundList = iStringNull );
-	static CBaseEntity *CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, string_t soundList = iStringNull );
+	static CBaseEntity *Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
+	static CBaseEntity *CreateNoSpawn( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL, EntityOverrides entityOverrides = EntityOverrides() );
 
 	virtual BOOL FBecomeProne( void ) {return FALSE;};
 	edict_t *edict() { return ENT( pev ); };

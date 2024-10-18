@@ -525,6 +525,7 @@ void CIchthyosaur::Spawn()
 void CIchthyosaur::Precache()
 {
 	PrecacheMyModel( "models/icky.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);

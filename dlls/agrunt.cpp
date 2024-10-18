@@ -46,8 +46,6 @@ enum
 	TASK_AGRUNT_SETUP_HIDE_ATTACK = LAST_FOLLOWINGMONSTER_TASK + 1,
 };
 
-extern int gmsgSprite;
-
 //=========================================================
 // Monster's Anim Events Go Here
 //=========================================================
@@ -495,16 +493,9 @@ void CAGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			vecArmPos = vecArmPos + vecDirToEnemy * 32.0f;
 
-			const Visual* visual = GetVisual(muzzleFlashVisual);
-			if (visual->modelIndex)
-			{
-				MESSAGE_BEGIN( MSG_PVS, gmsgSprite, vecArmPos );
-					WRITE_VECTOR( vecArmPos );	// pos
-					WriteSpriteVisual(visual);
-				MESSAGE_END();
-			}
+			SendSprite(vecArmPos, GetVisual(muzzleFlashVisual));
 
-			CBaseEntity *pHornet = CBaseEntity::Create( "hornet", vecArmPos, UTIL_VecToAngles( vecDirToEnemy ), edict(), m_soundList );
+			CBaseEntity *pHornet = CBaseEntity::Create( "hornet", vecArmPos, UTIL_VecToAngles( vecDirToEnemy ), edict(), GetProjectileOverrides() );
 			UTIL_MakeVectors( pHornet->pev->angles );
 			pHornet->pev->velocity = gpGlobals->v_forward * 300.0f;
 
@@ -626,6 +617,7 @@ void CAGrunt::Spawn()
 void CAGrunt::Precache()
 {
 	PrecacheMyModel( "models/agrunt.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackHitSoundScript, NPC::attackHitSoundScript);
 	RegisterAndPrecacheSoundScript(attackMissSoundScript, NPC::attackMissSoundScript);
@@ -642,9 +634,7 @@ void CAGrunt::Precache()
 
 	RegisterVisual(muzzleFlashVisual);
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-	UTIL_PrecacheOther( "hornet", entityOverrides );
+	UTIL_PrecacheOther( "hornet", GetProjectileOverrides() );
 }
 
 //=========================================================
@@ -1205,7 +1195,8 @@ void CAGrunt::PlayUnUseSentence()
 class CDeadAgrunt : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/agrunt.mdl"; }
 	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
 	void TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 
@@ -1222,9 +1213,9 @@ const char* CDeadAgrunt::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_alien_grunt_dead, CDeadAgrunt )
 
-void CDeadAgrunt::Spawn( )
+void CDeadAgrunt::Spawn()
 {
-	SpawnHelper("models/agrunt.mdl", BLOOD_COLOR_YELLOW, gSkillData.agruntHealth/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW, gSkillData.agruntHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;
 }

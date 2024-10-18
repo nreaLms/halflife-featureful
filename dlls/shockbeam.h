@@ -18,7 +18,7 @@ public:
 	void Spawn(void);
 	void Precache();
 
-	static void Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity, string_t soundList = iStringNull);
+	static void Shoot(entvars_t *pevOwner, const Vector angles, const Vector vecStart, const Vector vecVelocity, EntityOverrides entityOverrides = EntityOverrides());
 	static float ShockSpeed() { return 2000.0f; }
 	void Touch(CBaseEntity *pOther);
 	void EXPORT FlyThink();
@@ -36,6 +36,12 @@ public:
 	CSprite *m_pSprite;
 
 	static const NamedSoundScript impactSoundScript;
+
+	static const NamedVisual spriteVisual;
+	static const NamedVisual beam1Visual;
+	static const NamedVisual beam2Visual;
+	static const NamedVisual lightVisual;
+	static const NamedVisual shellVisual;
 };
 #endif
 #endif

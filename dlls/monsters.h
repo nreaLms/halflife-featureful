@@ -177,7 +177,7 @@ enum
 class CGib : public CBaseEntity
 {
 public:
-	void Spawn( const char *szGibModel );
+	void Spawn( const char *szGibModel, const Visual* visual = nullptr );
 	void EXPORT BounceGibTouch( CBaseEntity *pOther );
 	void EXPORT StickyGibTouch( CBaseEntity *pOther );
 	void EXPORT WaitTillLand( void );
@@ -185,9 +185,10 @@ public:
 	void LimitVelocity( void );
 
 	virtual int ObjectCaps( void ) { return ( CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION ) | FCAP_DONT_SAVE; }
-	static void SpawnHeadGib( entvars_t *pevVictim );
-	static void SpawnHumanGibs(entvars_t *pevVictim, int cGibs = 4 );
-	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibIndex = 0 );
+	static void SpawnHeadGib( entvars_t *pevVictim, const Visual* visual = nullptr );
+	static void SpawnHumanGibs(entvars_t *pevVictim, int cGibs = 4, const Visual* visual = nullptr );
+	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibIndex = 0, const Visual* visual = nullptr );
+	static void SpawnRandomGibs( entvars_t *pevVictim, int cGibs, const char* gibModel, const Visual* visual );
 	static void SpawnStickyGibs( entvars_t *pevVictim, Vector vecOrigin, int cGibs );
 	static void SpawnRandomClientGibs(entvars_t *pevVictim, int cGibs, const char* gibModel, int gibBodiesNum = 0, int startGibIndex = 0 );
 

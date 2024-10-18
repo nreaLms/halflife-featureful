@@ -25,6 +25,7 @@
 #include "inventory.h"
 #include "soundscripts.h"
 #include "visuals.h"
+#include "ent_templates.h"
 #include "followers.h"
 #include "savetitles.h"
 #include "vcs_info.h"
@@ -1408,8 +1409,9 @@ void GameDLLInit( void )
 	RegisterAmmoTypes();
 	LoadWarpballTemplates();
 	ReadInventorySpec();
-	ReadSoundScripts();
-	ReadVisuals();
+	g_SoundScriptSystem.ReadFromFile("sound/soundscripts.json");
+	g_VisualSystem.ReadFromFile("templates/visuals.json");
+	ReadEntTemplates();
 	ReadFollowersDescription();
 	ReadSaveTitles();
 

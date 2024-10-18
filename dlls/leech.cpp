@@ -306,8 +306,8 @@ void CLeech::DeathSound()
 
 void CLeech::Precache( void )
 {
-	//PRECACHE_MODEL( "models/icky.mdl" );
 	PrecacheMyModel( "models/leech.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(attackSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);

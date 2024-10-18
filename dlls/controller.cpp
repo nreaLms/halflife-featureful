@@ -324,7 +324,7 @@ void CController::HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_COORD( 32 ); // decay
 			MESSAGE_END();
 
-			CBaseMonster *pBall = (CBaseMonster*)Create( "controller_head_ball", vecStart, pev->angles, edict(), m_soundList );
+			CBaseMonster *pBall = (CBaseMonster*)Create( "controller_head_ball", vecStart, pev->angles, edict(), GetProjectileOverrides() );
 
 			pBall->pev->velocity = Vector( 0.0f, 0.0f, 32.0f );
 			if (m_pCine)
@@ -397,6 +397,7 @@ void CController::Spawn()
 void CController::Precache()
 {
 	PrecacheMyModel( "models/controller.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(idleSoundScript);
 	RegisterAndPrecacheSoundScript(alertSoundScript);
@@ -409,8 +410,8 @@ void CController::Precache()
 	RegisterVisual(headShootLightVisual);
 	RegisterVisual(energyBallLightVisual);
 
-	UTIL_PrecacheOther( "controller_energy_ball" );
-	UTIL_PrecacheOther( "controller_head_ball" );
+	UTIL_PrecacheOther( "controller_energy_ball", GetProjectileOverrides() );
+	UTIL_PrecacheOther( "controller_head_ball", GetProjectileOverrides() );
 }	
 
 void CController::ClearBalls()
@@ -685,7 +686,7 @@ void CController::RunTask( Task_t *pTask )
 				vecDir = vecDir + Vector( RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ) ) * gSkillData.controllerSpeedBall;
 
 				vecSrc = vecSrc + vecDir * ( gpGlobals->time - m_flShootTime );
-				CBaseMonster *pBall = (CBaseMonster*)Create( "controller_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
+				CBaseMonster *pBall = (CBaseMonster*)Create( "controller_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 				pBall->pev->velocity = vecDir;
 			}
 			m_flShootTime += 0.2f;
@@ -871,7 +872,8 @@ void CController::RunAI( void )
 		{
 
 			m_pBall[i] = CreateSpriteFromVisual(GetVisual(energyBallVisual), pev->origin);
-			m_pBall[i]->SetAttachment( edict(), ( i + 3 ) );
+			if (m_pBall[i])
+				m_pBall[i]->SetAttachment( edict(), ( i + 3 ) );
 		}
 
 		float t = m_iBallTime[i] - gpGlobals->time;
@@ -882,10 +884,13 @@ void CController::RunAI( void )
 
 		m_iBallCurrent[i] += ( m_iBall[i] - m_iBallCurrent[i] ) * t;
 
-		m_pBall[i]->SetBrightness( m_iBallCurrent[i] );
+		if (m_pBall[i])
+			m_pBall[i]->SetBrightness( m_iBallCurrent[i] );
 
 		GetAttachment( i + 2, vecStart, angleGun );
-		UTIL_SetOrigin( m_pBall[i]->pev, vecStart );
+
+		if (m_pBall[i])
+			UTIL_SetOrigin( m_pBall[i]->pev, vecStart );
 
 		const Visual* visual = GetVisual(energyBallLightVisual);
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
@@ -1139,6 +1144,7 @@ class CControllerDead : public CDeadMonster
 {
 public:
 	void Spawn( void );
+	const char* DefaultModel() { return "models/controller.mdl"; }
 	int	DefaultClassify ( void ) { return	CLASS_ALIEN_MILITARY; }
 
 	const char* getPos(int pos) const;
@@ -1151,9 +1157,9 @@ const char* CControllerDead::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_alien_controller_dead, CControllerDead )
 
-void CControllerDead :: Spawn( )
+void CControllerDead::Spawn()
 {
-	SpawnHelper("models/controller.mdl", BLOOD_COLOR_YELLOW, gSkillData.controllerHealth/2);
+	SpawnHelper(BLOOD_COLOR_YELLOW, gSkillData.controllerHealth/2);
 	MonsterInitDead();
 	pev->frame = 255;
 }
@@ -1239,7 +1245,7 @@ void CControllerHeadBall::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	ApplyVisualToEntity(this, GetVisual(headBallVisual));
+	ApplyVisual(GetVisual(headBallVisual));
 
 	UTIL_SetSize(pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
@@ -1433,7 +1439,7 @@ void CControllerZapBall::Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	ApplyVisualToEntity(this, GetVisual(zapBallVisual));
+	ApplyVisual(GetVisual(zapBallVisual));
 
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
@@ -1628,16 +1634,17 @@ void CZapBallTrap::KeyValue( KeyValueData *pkvd )
 
 void CZapBallTrap::Precache()
 {
-	UTIL_PrecacheOther("controller_head_ball");
+	UTIL_PrecacheOther("controller_head_ball", GetProjectileOverrides());
+
 	RegisterAndPrecacheSoundScript(detectSoundScript);
 	RegisterAndPrecacheSoundScript(launchSoundScript);
 
 	const Visual* visual = RegisterVisual(zapBallVisual);
-	m_baseScale = visual->scale;
+	m_baseScale = RandomizeNumberFromRange(visual->scale);
 	m_baseBrightness = visual->renderamt;
 
 	const Visual* headVisual = GetVisual(CControllerHeadBall::headBallVisual);
-	m_maxScale = headVisual->scale;
+	m_maxScale = RandomizeNumberFromRange(headVisual->scale);
 	m_maxBrightness = headVisual->renderamt;
 
 	SetMaxFrame();
@@ -1652,12 +1659,12 @@ void CZapBallTrap::Spawn()
 
 	const Visual* visual = GetVisual(zapBallVisual);
 
-	ApplyVisualToEntity(this, visual);
+	ApplyVisual(visual);
 
 	UTIL_SetSize(pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	UTIL_SetOrigin( pev, pev->origin );
 
-	m_baseScale = visual->scale;
+	m_baseScale = RandomizeNumberFromRange(visual->scale);
 
 	if (FStringNull(pev->targetname))
 	{
@@ -1734,7 +1741,7 @@ void CZapBallTrap::LaunchBall(CBaseEntity *pTarget)
 
 	EmitSoundScript(launchSoundScript);
 
-	CBaseMonster *pBall = (CBaseMonster*)CBaseEntity::Create( "controller_head_ball", pev->origin, pev->angles, edict() );
+	CBaseMonster *pBall = (CBaseMonster*)CBaseEntity::Create( "controller_head_ball", pev->origin, pev->angles, edict(), GetProjectileOverrides() );
 
 	pBall->pev->velocity = Vector( 0.0f, 0.0f, 32.0f );
 	pBall->m_hEnemy = pTarget;

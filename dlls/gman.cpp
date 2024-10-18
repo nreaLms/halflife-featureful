@@ -141,6 +141,7 @@ void CGMan::Spawn()
 void CGMan::Precache()
 {
 	PrecacheMyModel( "models/gman.mdl" );
+	PrecacheMyGibModel();
 }
 
 //=========================================================

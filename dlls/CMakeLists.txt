@@ -62,6 +62,7 @@ set (SVDLL_SOURCES
 	bullsquid.cpp
 	buttons.cpp
 	cbase.cpp
+	classify.cpp
 	client.cpp
 	combat.cpp
 	common_soundscripts.cpp
@@ -76,6 +77,7 @@ set (SVDLL_SOURCES
 	eagle.cpp
 	effects.cpp
 	egon.cpp
+	ent_templates.cpp
 	explode.cpp
 	fgrunt.cpp
 	flybee.cpp
@@ -252,6 +254,8 @@ install( TARGETS ${SVDLL_LIBRARY}
 	    GROUP_READ GROUP_EXECUTE
 		WORLD_READ WORLD_EXECUTE)
 
-add_custom_command(TARGET ${SVDLL_LIBRARY}
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+	add_custom_command(TARGET ${SVDLL_LIBRARY}
 			POST_BUILD DEPENDS ${SVDLL_LIBRARY}
-			COMMAND $<$<CONFIG:release>:${CMAKE_STRIP}> -s $<TARGET_FILE:${SVDLL_LIBRARY}>)
+			COMMAND ${CMAKE_STRIP} -s $<TARGET_FILE:${SVDLL_LIBRARY}>)
+endif()

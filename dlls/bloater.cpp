@@ -145,6 +145,7 @@ void CBloater::Spawn()
 void CBloater::Precache()
 {
 	PrecacheMyModel( "models/floater.mdl" );
+	PrecacheMyGibModel();
 }	
 
 //=========================================================
@@ -414,6 +415,7 @@ void CFloater::Spawn()
 void CFloater::Precache()
 {
 	PrecacheMyModel( "models/floater.mdl" );
+	PrecacheMyGibModel();
 
 	m_tinySpit = PRECACHE_MODEL("sprites/tinyspit.spr");
 	m_explode1 = PRECACHE_MODEL("sprites/spore_exp_01.spr");

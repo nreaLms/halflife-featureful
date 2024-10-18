@@ -37,6 +37,8 @@
 #include "mod_features.h"
 #include "game.h"
 #include "common_soundscripts.h"
+#include "visuals_utils.h"
+#include "classify.h"
 
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
@@ -112,12 +114,12 @@ TYPEDESCRIPTION	CBaseMonster::m_SaveData[] =
 	DEFINE_FIELD( CBaseMonster, m_displayName, FIELD_STRING ),
 
 	DEFINE_FIELD( CBaseMonster, m_glowShellTime, FIELD_TIME ),
-	DEFINE_FIELD( CBaseMonster, m_glowShellColor, FIELD_VECTOR ),
 	DEFINE_FIELD( CBaseMonster, m_glowShellUpdate, FIELD_BOOLEAN ),
 
 	DEFINE_FIELD( CBaseMonster, m_prevRenderAmt, FIELD_INTEGER ),
 	DEFINE_FIELD( CBaseMonster, m_prevRenderColor, FIELD_VECTOR ),
-	DEFINE_FIELD( CBaseMonster, m_prevRenderFx, FIELD_INTEGER ),
+	DEFINE_FIELD( CBaseMonster, m_prevRenderFx, FIELD_SHORT ),
+	DEFINE_FIELD( CBaseMonster, m_prevRenderMode, FIELD_SHORT ),
 
 	DEFINE_FIELD( CBaseMonster, m_nextPatrolPathCheck, FIELD_TIME ),
 
@@ -3365,54 +3367,6 @@ int CBaseMonster::FindHintNode( void )
 	WorldGraph.m_iLastActiveIdleSearch = 0;// start at the top of the list for the next search.
 
 	return NO_NODE;
-}		
-
-static const char* ClassifyDisplayName(int classify)
-{
-	switch (classify) {
-	case CLASS_NONE:
-		return "None";
-	case CLASS_MACHINE:
-		return "Machine";
-	case CLASS_PLAYER:
-		return "Player";
-	case CLASS_HUMAN_PASSIVE:
-		return "Human Passive";
-	case CLASS_HUMAN_MILITARY:
-		return "Human Military";
-	case CLASS_ALIEN_MILITARY:
-		return "Alien Military";
-	case CLASS_ALIEN_PASSIVE:
-		return "Alien Passive";
-	case CLASS_ALIEN_MONSTER:
-		return "Alien Monster";
-	case CLASS_ALIEN_PREY:
-		return "Alien Prey";
-	case CLASS_ALIEN_PREDATOR:
-		return "Alien Predator";
-	case CLASS_INSECT:
-		return "Insect";
-	case CLASS_PLAYER_ALLY:
-		return "Player Ally";
-	case CLASS_PLAYER_BIOWEAPON:
-		return "Player Bioweapon";
-	case CLASS_ALIEN_BIOWEAPON:
-		return "Alien Bioweapon";
-	case CLASS_RACEX_PREDATOR:
-		return "Race X Predator";
-	case CLASS_RACEX_SHOCK:
-		return "Race X Shock";
-	case CLASS_PLAYER_ALLY_MILITARY:
-		return "Player Ally Military";
-	case CLASS_HUMAN_BLACKOPS:
-		return "Human Blackops";
-	case CLASS_SNARK:
-		return "Snark";
-	case CLASS_GARGANTUA:
-		return "Gargantua";
-	default:
-		return "Unknown";
-	}
 }
 
 const char* CBaseMonster::MonsterStateDisplayString(MONSTERSTATE monsterState)
@@ -3456,6 +3410,8 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 	} else {
 		ALERT( level, "%s (%s): ", STRING(pev->classname), STRING(pev->targetname) );
 	}
+	if (!FStringNull(m_entTemplate))
+		ALERT( level , "Template: %s. ", STRING(m_entTemplate) );
 	const int classify = Classify();
 	ALERT( level, "Classify: %s (%d), ", ClassifyDisplayName(classify), classify );
 
@@ -3534,6 +3490,21 @@ void CBaseMonster::ReportAIState( ALERT_TYPE level )
 		   pev->mins.x, pev->mins.y, pev->mins.z,
 		   pev->maxs.x, pev->maxs.y, pev->maxs.z,
 		   pev->size.x, pev->size.y, pev->size.z);
+
+	if (pev->model)
+		ALERT(level, "Model: %s. ", STRING(pev->model));
+	const char* gibModel = GibModel();
+	if (gibModel)
+		ALERT(level, "Gib Model: %s. ", gibModel);
+
+	ALERT(level, "Rendermode: %s. Color: (%g, %g, %g). Alpha: %g. Renderfx: %s. ",
+		  RenderModeToString(pev->rendermode),
+		  pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z,
+		  pev->renderamt,
+		  RenderFxToString(pev->renderfx));
+
+	if (pev->scale)
+		ALERT(level, "Scale: %g. ", pev->scale);
 
 	const char* targetForGrapple = nullptr;
 	switch (SizeForGrapple()) {
@@ -3717,7 +3688,15 @@ void CBaseMonster::Activate()
 
 void CBaseMonster::SetMySize(const Vector &vecMin, const Vector &vecMax)
 {
-	UTIL_SetSize(pev, m_minHullSize == g_vecZero ? vecMin : m_minHullSize, m_maxHullSize == g_vecZero ? vecMax : m_maxHullSize);
+	Vector vecMins = vecMin;
+	Vector vecMaxs = vecMax;
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate && entTemplate->IsSizeDefined())
+	{
+		vecMins = entTemplate->MinSize();
+		vecMaxs = entTemplate->MaxSize();
+	}
+	UTIL_SetSize(pev, m_minHullSize == g_vecZero ? vecMins : m_minHullSize, m_maxHullSize == g_vecZero ? vecMaxs : m_maxHullSize);
 }
 
 //=========================================================
@@ -4307,61 +4286,138 @@ BOOL CBaseMonster::ShouldFadeOnDeath( void )
 	return FALSE;
 }
 
-void CBaseMonster::SetMyHealth(const float health)
+const EntTemplate* CBaseMonster::GetMyEntTemplate()
+{
+	if (m_entTemplateChecked)
+	{
+		return m_cachedEntTemplate;
+	}
+	if (!FStringNull(m_entTemplate))
+	{
+		m_cachedEntTemplate = GetEntTemplate(STRING(m_entTemplate));
+		m_entTemplateChecked = true;
+		return m_cachedEntTemplate;
+	}
+	else
+	{
+		m_cachedEntTemplate = GetEntTemplate(STRING(pev->classname));
+		m_entTemplateChecked = true;
+		return m_cachedEntTemplate;
+	}
+}
+
+void CBaseMonster::SetMyHealth(const float defaultHealth)
 {
 	if (!pev->health) {
-		pev->health = health;
-	}
-}
-
-void CBaseMonster::SetMyModel(const char *model)
-{
-	if (FStringNull(pev->model)) {
-		const char* reverseModel = NULL;
-#if FEATURE_REVERSE_RELATIONSHIP_MODELS
-		if (m_reverseRelationship)
-			reverseModel = ReverseRelationshipModel();
-#endif
-		if (reverseModel)
-			SET_MODEL( ENT( pev ), reverseModel );
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsHealthDefined())
+			pev->health = entTemplate->Health();
 		else
-			SET_MODEL( ENT( pev ), model );
-	} else {
-		SET_MODEL( ENT( pev ), STRING(pev->model) );
+			pev->health = defaultHealth;
 	}
 }
 
-void CBaseMonster::PrecacheMyModel(const char *model)
+const Visual* CBaseMonster::MyOwnVisual()
 {
-	if (FStringNull(pev->model)) {
-		const char* reverseModel = NULL;
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+		return g_VisualSystem.GetVisual(entTemplate->OwnVisualName());
+	return nullptr;
+}
+
+const char* CBaseMonster::MyOwnModel(const char *defaultModel)
+{
+	if (!FStringNull(pev->model))
+		return STRING(pev->model);
+
+	const Visual* ownVisual = MyOwnVisual();
+	if (ownVisual && ownVisual->model)
+		return ownVisual->model;
+
 #if FEATURE_REVERSE_RELATIONSHIP_MODELS
-		if (m_reverseRelationship)
-			reverseModel = ReverseRelationshipModel();
-#endif
+	if (m_reverseRelationship)
+	{
+		const char* reverseModel = ReverseRelationshipModel();
 		if (reverseModel)
-			PRECACHE_MODEL(reverseModel);
-		else
-			PRECACHE_MODEL( model );
-	} else {
-		PRECACHE_MODEL( STRING( pev->model ) );
+			return reverseModel;
 	}
-	if (!FStringNull(m_gibModel)) {
-		PRECACHE_MODEL( STRING(m_gibModel) );
+#endif
+	return defaultModel;
+}
+
+void CBaseMonster::SetMyModel(const char *defaultModel)
+{
+	ApplyVisual(MyOwnVisual());
+
+	if (FStringNull(pev->model))
+	{
+		if (defaultModel)
+			SET_MODEL(ENT(pev), defaultModel);
 	}
 }
 
-void CBaseMonster::SetMyBloodColor(int bloodColor)
+void CBaseMonster::PrecacheMyModel(const char *defaultModel)
+{
+	const char* myModel = MyOwnModel(defaultModel);
+	if (myModel)
+		PRECACHE_MODEL(myModel);
+}
+
+const char* CBaseMonster::MyNonDefaultGibModel()
+{
+	if (!FStringNull(m_gibModel))
+		return STRING(m_gibModel);
+
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+	{
+		const Visual* gibVisual = g_VisualSystem.GetVisual(entTemplate->GibVisualName());
+		if (gibVisual && gibVisual->model)
+			return gibVisual->model;
+	}
+
+	return nullptr;
+}
+
+const Visual* CBaseMonster::MyGibVisual()
+{
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	if (entTemplate)
+		return g_VisualSystem.GetVisual(entTemplate->GibVisualName());
+	return nullptr;
+}
+
+int CBaseMonster::PrecacheMyGibModel(const char *model)
+{
+	const char* nonDefaultModel = MyNonDefaultGibModel();
+	if (nonDefaultModel)
+	{
+		return PRECACHE_MODEL(nonDefaultModel);
+	}
+	if (model)
+		return PRECACHE_MODEL(model);
+	return 0;
+}
+
+void CBaseMonster::SetMyBloodColor(int defaultBloodColor)
 {
 	if (!m_bloodColor) {
-		m_bloodColor = bloodColor;
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsBloodDefined())
+			m_bloodColor = entTemplate->BloodColor();
+		else
+			m_bloodColor = defaultBloodColor;
 	}
 }
 
 void CBaseMonster::SetMyFieldOfView(const float defaultFieldOfView)
 {
 	if (!m_flFieldOfView) {
-		m_flFieldOfView = defaultFieldOfView;
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsFielfOfViewDefined())
+			m_flFieldOfView = entTemplate->FieldOfView();
+		else
+			m_flFieldOfView = defaultFieldOfView;
 	}
 }
 
@@ -4371,7 +4427,10 @@ int CBaseMonster::Classify()
 		return CLASS_NONE;
 	if (m_iClass)
 		return m_iClass;
-	const int defaultClassify = DefaultClassify();
+
+	const EntTemplate* entTemplate = GetMyEntTemplate();
+	const int defaultClassify = (entTemplate && entTemplate->IsClassifyDefined()) ? entTemplate->Classify() : DefaultClassify();
+
 	if (m_reverseRelationship)
 	{
 		switch(defaultClassify)
@@ -4415,6 +4474,12 @@ int CBaseMonster::SizeForGrapple()
 		return GRAPPLE_NOT_A_TARGET;
 	else if (m_sizeForGrapple > 0 && m_sizeForGrapple <= GRAPPLE_FIXED)
 		return m_sizeForGrapple;
+	else
+	{
+		const EntTemplate* entTemplate = GetMyEntTemplate();
+		if (entTemplate && entTemplate->IsSizeForGrappleDefined())
+			return entTemplate->SizeForGrapple();
+	}
 	return DefaultSizeForGrapple();
 }
 
@@ -4438,23 +4503,23 @@ bool CBaseMonster::HandleDoorBlockage(CBaseEntity *pDoor)
 	return false;
 }
 
-void CBaseMonster::GlowShellOn( Vector color, float flDuration )
+void CBaseMonster::GlowShellOn(const Visual* visual)
 {
 	if (!m_glowShellUpdate)
 	{
 		m_prevRenderColor = pev->rendercolor;
 		m_prevRenderAmt = pev->renderamt;
 		m_prevRenderFx = pev->renderfx;
+		m_prevRenderMode = pev->rendermode;
 
-		pev->renderamt = 5;
-		pev->rendercolor = color;
-		pev->renderfx = kRenderFxGlowShell;
-
-		m_glowShellColor = color;
+		pev->renderamt = visual->renderamt;
+		pev->rendercolor = VectorFromColor(visual->rendercolor);
+		pev->renderfx = visual->renderfx;
+		pev->rendermode = visual->rendermode;
 
 		m_glowShellUpdate = TRUE;
 	}
-	m_glowShellTime = gpGlobals->time + flDuration;
+	m_glowShellTime = gpGlobals->time + RandomizeNumberFromRange(visual->life);
 }
 
 void CBaseMonster::GlowShellOff( void )
@@ -4464,6 +4529,7 @@ void CBaseMonster::GlowShellOff( void )
 		pev->renderamt = m_prevRenderAmt;
 		pev->rendercolor = m_prevRenderColor;
 		pev->renderfx = m_prevRenderFx;
+		pev->rendermode = m_prevRenderMode;
 
 		m_glowShellTime = 0.0f;
 
@@ -4492,14 +4558,15 @@ void CDeadMonster::KeyValue( KeyValueData *pkvd )
 
 void CDeadMonster::Precache()
 {
-	if (!FStringNull(m_gibModel))
-		PRECACHE_MODEL(STRING(m_gibModel));
+	PrecacheMyModel(DefaultModel());
+	PrecacheMyGibModel();
 }
 
-void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int health)
+void CDeadMonster::SpawnHelper(const char* defaultModel, int bloodColor, int health)
 {
-	PrecacheMyModel( modelName );
-	SetMyModel( modelName );
+	Precache();
+	PrecacheMyModel(defaultModel);
+	SetMyModel(defaultModel);
 
 	pev->effects &= EF_INVLIGHT;
 	pev->yaw_speed		= 8;
@@ -4510,17 +4577,23 @@ void CDeadMonster::SpawnHelper( const char* modelName, int bloodColor, int healt
 	pev->sequence = LookupSequence( seqName );
 	if (pev->sequence == -1)
 	{
-		ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), seqName, modelName );
+		ALERT ( at_console, "%s with bad pose (no %s animation in %s)\n", STRING(pev->classname), seqName, defaultModel );
 	}
 	SetMyHealth( health );
+}
+
+void CDeadMonster::SpawnHelper(int bloodColor, int health)
+{
+	SpawnHelper(DefaultModel(), bloodColor, health);
 }
 
 #if FEATURE_SKELETON
 class CSkeleton : public CDeadMonster
 {
 public:
-	void Spawn(void);
-	int	DefaultClassify(void) { return	CLASS_NONE; }
+	void Spawn();
+	const char* DefaultModel() { return "models/skeleton.mdl"; }
+	int	DefaultClassify() { return	CLASS_NONE; }
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 
 	const char* getPos(int pos) const;
@@ -4538,7 +4611,7 @@ LINK_ENTITY_TO_CLASS(monster_skeleton_dead, CSkeleton)
 
 void CSkeleton::Spawn(void)
 {
-	SpawnHelper("models/skeleton.mdl", DONT_BLEED);
+	SpawnHelper(DONT_BLEED);
 	MonsterInitDead();
 }
 

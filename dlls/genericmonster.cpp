@@ -126,13 +126,10 @@ void CGenericMonster::Spawn()
 {
 	Precache();
 
+	SetMyModel(nullptr);
 	if (FStringNull(pev->model))
 	{
 		ALERT(at_console, "Spawning monster_generic without model!\n");
-	}
-	else
-	{
-		SET_MODEL( ENT( pev ), STRING( pev->model ) );
 	}
 /*
 	if( FStrEq( STRING( pev->model ), "models/player.mdl" ) )
@@ -173,10 +170,8 @@ void CGenericMonster::Spawn()
 //=========================================================
 void CGenericMonster::Precache()
 {
-	if (!FStringNull(pev->model))
-		PRECACHE_MODEL( STRING( pev->model ) );
-	if (!FStringNull(m_gibModel))
-		PRECACHE_MODEL( STRING(m_gibModel) );
+	PrecacheMyModel(nullptr);
+	PrecacheMyGibModel();
 }
 
 void CGenericMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
@@ -256,22 +251,17 @@ LINK_ENTITY_TO_CLASS( monster_generic_dead, CDeadGenericMonster )
 
 void CDeadGenericMonster::Precache()
 {
-	if (!FStringNull(pev->model))
-		PRECACHE_MODEL( STRING( pev->model ) );
-	if (!FStringNull(m_gibModel))
-		PRECACHE_MODEL( STRING(m_gibModel) );
+	PrecacheMyModel(nullptr);
+	PrecacheMyGibModel();
 }
 
 void CDeadGenericMonster::Spawn()
 {
 	Precache();
+	SetMyModel(nullptr);
 	if (FStringNull(pev->model))
 	{
 		ALERT(at_console, "Spawning monster_generic_dead without model!\n");
-	}
-	else
-	{
-		SET_MODEL( ENT( pev ), STRING( pev->model ) );
 	}
 
 	pev->effects &= EF_INVLIGHT;
@@ -373,6 +363,7 @@ void CLoader::Spawn()
 void CLoader::Precache()
 {
 	PrecacheMyModel("models/loader.mdl");
+	PrecacheMyGibModel();
 }
 
 void CLoader::TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)

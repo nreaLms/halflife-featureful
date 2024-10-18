@@ -393,9 +393,7 @@ void CNihilanth::Precache( void )
 	PRECACHE_MODEL( "models/nihilanth.mdl" );
 	PRECACHE_MODEL( "sprites/lgtning.spr" );
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-	UTIL_PrecacheOther( "nihilanth_energy_ball", entityOverrides );
+	UTIL_PrecacheOther( "nihilanth_energy_ball", GetProjectileOverrides() );
 	UTIL_PrecacheOther( "monster_alien_controller" );
 	UTIL_PrecacheOther( "monster_alien_slave" );
 
@@ -612,7 +610,7 @@ void CNihilanth::DyingThink( void )
 	MESSAGE_END();
 
 	GetAttachment( 0, vecSrc, vecAngles ); 
-	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
+	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 	pEntity->pev->velocity = Vector( RANDOM_FLOAT( -0.7f, 0.7f ), RANDOM_FLOAT( -0.7f, 0.7f ), 1.0f ) * 600.0f;
 	pEntity->GreenBallInit();
 
@@ -680,7 +678,7 @@ void CNihilanth::ShootBalls( void )
 				// vecDir = ( m_posTarget - vecSrc ).Normalize();
 				vecDir = ( m_posTarget - pev->origin ).Normalize();
 				vecSrc = vecSrc + vecDir * ( gpGlobals->time - m_flShootTime );
-				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
+				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 				pEntity->pev->velocity = vecDir * 200.0f; 
 				pEntity->ZapInit( m_hEnemy );
 
@@ -689,7 +687,7 @@ void CNihilanth::ShootBalls( void )
 				// vecDir = ( m_posTarget - vecSrc ).Normalize();
 				vecDir = ( m_posTarget - pev->origin ).Normalize();
 				vecSrc = vecSrc + vecDir * ( gpGlobals->time - m_flShootTime );
-				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
+				pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 				pEntity->pev->velocity = vecDir * 200.0f; 
 				pEntity->ZapInit( m_hEnemy );
 			}
@@ -1073,7 +1071,7 @@ BOOL CNihilanth::EmitSphere( void )
 		return FALSE;
 
 	Vector vecSrc = m_hRecharger->pev->origin;
-	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
+	CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 	pEntity->pev->velocity = pev->origin - vecSrc;
 	pEntity->CircleInit( this );
 
@@ -1170,7 +1168,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 				Vector vecSrc, vecAngles;
 				GetAttachment( 2, vecSrc, vecAngles ); 
-				CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
+				CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 				pEntity->pev->velocity = pev->origin - vecSrc;
 				pEntity->TeleportInit( this, m_hEnemy, pTrigger, pTouch );
 			}
@@ -1234,7 +1232,7 @@ void CNihilanth::HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			Vector vecSrc, vecAngles;
 			GetAttachment( 2, vecSrc, vecAngles ); 
-			CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), m_soundList );
+			CNihilanthHVR *pEntity = (CNihilanthHVR *)Create( "nihilanth_energy_ball", vecSrc, pev->angles, edict(), GetProjectileOverrides() );
 			pEntity->pev->velocity = pev->origin - vecSrc;
 			pEntity->ZapInit( m_hEnemy );
 		}

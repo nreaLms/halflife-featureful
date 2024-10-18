@@ -99,7 +99,7 @@ public:
 	void Spawn( void );
 	void Precache();
 	void Think( void );
-	static CStomp *StompCreate(const StompParams& stompParams);
+	static CStomp *StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides = EntityOverrides());
 
 	static const NamedSoundScript stompSoundScript;
 protected:
@@ -143,7 +143,7 @@ class CBabyStomp : public CStomp
 {
 public:
 	void Precache();
-	static CBabyStomp *StompCreate(const StompParams& stompParams);
+	static CBabyStomp *StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides = EntityOverrides());
 
 	static constexpr const char* stompSoundScript = "BabyGarg.Stomp";
 protected:
@@ -251,10 +251,11 @@ void CStompShooter::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	}
 }
 
-CStomp *CStomp::StompCreate(const StompParams& stompParams)
+CStomp *CStomp::StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides)
 {
 	CStomp *pStomp = GetClassPtr( (CStomp *)NULL );
 	SetStompParams(pStomp, stompParams);
+	pStomp->AssignEntityOverrides(entityOverrides);
 	pStomp->Spawn();
 	return pStomp;
 }
@@ -331,7 +332,7 @@ void CStomp::Think( void )
 	float stompInterval = STOMP_INTERVAL;
 	int numOfSprites = 2;
 	int maxNumOfSprites = 8;
-	float spriteScale = m_stompVisual->scale;
+	float spriteScale = RandomizeNumberFromRange(m_stompVisual->scale);
 	if (g_pGameRules->IsMultiplayer())
 	{
 		stompInterval = STOMP_INTERVAL*2;
@@ -383,10 +384,11 @@ void CBabyStomp::Precache()
 	RegisterAndPrecacheSoundScript(stompSoundScript, CStomp::stompSoundScript, paramOverride);
 }
 
-CBabyStomp* CBabyStomp::StompCreate(const StompParams& stompParams)
+CBabyStomp* CBabyStomp::StompCreate(const StompParams& stompParams, EntityOverrides entityOverrides)
 {
 	CBabyStomp *pStomp = GetClassPtr( (CBabyStomp *)NULL );
 	SetStompParams(pStomp, stompParams);
+	pStomp->AssignEntityOverrides(entityOverrides);
 	pStomp->Spawn();
 	return pStomp;
 }
@@ -661,12 +663,14 @@ const NamedVisual CGargantua::bigFlameVisual = BuildVisual("Garg.FlameWide")
 		.Model(GARG_BEAM_SPRITE_NAME)
 		.RenderColor(255, 130, 90)
 		.BeamWidth(240)
+		.BeamFlags(BEAM_FSHADEIN)
 		.Mixin(&CGargantua::flameVisual);
 
 const NamedVisual CGargantua::smallFlameVisual = BuildVisual("Garg.FlameNarrow")
 		.Model(GARG_BEAM_SPRITE2)
 		.RenderColor(0, 120, 255)
 		.BeamWidth(140)
+		.BeamFlags(BEAM_FSHADEIN)
 		.Mixin(&CGargantua::flameVisual);
 
 const NamedVisual CGargantua::flameLightVisual = BuildVisual("Garg.FlameLight")
@@ -830,7 +834,6 @@ void CGargantua::FlameCreate( void )
 			UTIL_TraceLine( posGun, vecEnd, dont_ignore_monsters, edict(), &trace );
 
 			m_pFlame[i]->PointEntInit( trace.vecEndPos, entindex() );
-			m_pFlame[i]->SetFlags( BEAM_FSHADEIN );
 			// attachment is 1 based in SetEndAttachment
 			m_pFlame[i]->SetEndAttachment( attach + 2 );
 			CSoundEnt::InsertSound( bits_SOUND_COMBAT, posGun, 384, 0.3 );
@@ -1059,8 +1062,11 @@ void CGargantua::Spawn()
 	FollowingMonsterInit();
 
 	m_pEyeGlow = CreateSpriteFromVisual(m_eyeVisual, pev->origin);
-	m_pEyeGlow->SetAttachment( edict(), 1 );
-	m_pEyeGlow->SetBrightness(0); // start with eye off
+	if (m_pEyeGlow)
+	{
+		m_pEyeGlow->SetAttachment( edict(), 1 );
+		m_pEyeGlow->SetBrightness(0); // start with eye off
+	}
 	EyeOff();
 	m_seeTime = gpGlobals->time + 5;
 	m_flameTime = gpGlobals->time + 2;
@@ -1072,6 +1078,7 @@ void CGargantua::Spawn()
 void CGargantua::Precache()
 {
 	PrecacheMyModel( DefaultModel() );
+	m_GargGibModel = PrecacheMyGibModel(DefaultGibModel());
 
 	SoundScriptParamOverride paramOverride;
 	paramOverride.OverridePitchAbsolute(IntRange(50, 65));
@@ -1095,8 +1102,7 @@ void CGargantua::Precache()
 	RegisterVisual(smallFlameVisual);
 	m_flameVisual = RegisterVisual(flameLightVisual);
 
-	UTIL_PrecacheOther("garg_stomp");
-	m_GargGibModel = PRECACHE_MODEL( GibModel() );
+	UTIL_PrecacheOther("garg_stomp", GetProjectileOverrides());
 }
 
 void CGargantua::UpdateOnRemove()
@@ -1438,11 +1444,13 @@ void CGargantua::RunTask( Task_t *pTask )
 			SetThink( &CBaseEntity::SUB_Remove );
 			int i;
 			int parts = MODEL_FRAMES( m_GargGibModel );
+			const Visual* gibVisual = MyGibVisual();
+			const char* gibModel = GibModel();
 			for( i = 0; i < 10; i++ )
 			{
 				CGib *pGib = GetClassPtr( (CGib *)NULL );
 
-				pGib->Spawn( GibModel() );
+				pGib->Spawn( gibModel, gibVisual );
 
 				int bodyPart = 0;
 				if( parts > 1 )
@@ -1613,7 +1621,7 @@ void CGargantua::FootEffect()
 
 void CGargantua::MakeStomp(const StompParams& stompParams)
 {
-	CStomp::StompCreate(stompParams);
+	CStomp::StompCreate(stompParams, GetProjectileOverrides());
 }
 
 void CGargantua::StompEffect()
@@ -2153,6 +2161,7 @@ const NamedVisual CBabyGargantua::flameLightVisual = BuildVisual("BabyGarg.Flame
 void CBabyGargantua::Precache()
 {
 	PrecacheMyModel( DefaultModel() );
+	PrecacheMyGibModel();
 
 	SoundScriptParamOverride paramOverride;
 	paramOverride.OverridePitchAbsolute(IntRange(60, 75));
@@ -2177,7 +2186,7 @@ void CBabyGargantua::Precache()
 	RegisterVisual(smallFlameVisual);
 	m_flameVisual = RegisterVisual(flameLightVisual);
 
-	UTIL_PrecacheOther("babygarg_stomp");
+	UTIL_PrecacheOther("babygarg_stomp", GetProjectileOverrides());
 }
 
 void CBabyGargantua::StartTask(Task_t *pTask)
@@ -2288,7 +2297,7 @@ void CBabyGargantua::FootEffect()
 
 void CBabyGargantua::MakeStomp(const StompParams& stompParams)
 {
-	CBabyStomp::StompCreate(stompParams);
+	CBabyStomp::StompCreate(stompParams, GetProjectileOverrides());
 }
 
 void CBabyGargantua::StompEffect()

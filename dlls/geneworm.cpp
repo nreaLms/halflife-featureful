@@ -79,7 +79,7 @@ public:
 	void Precache();
 	void TurnOn();
 	void RunGeneWormCloud(float frames);
-	static CGeneWormCloud *LaunchCloud(const Vector origin, const Vector aim, float velocity, edict_t *pOwner, float fadeTime);
+	static CGeneWormCloud *LaunchCloud(const Vector origin, const Vector aim, float velocity, edict_t *pOwner, float fadeTime, EntityOverrides entityOverrides);
 	void CreateCloud(const Vector origin);
 
 	virtual int Save(CSave &save);
@@ -215,10 +215,11 @@ void CGeneWormCloud::GeneWormCloudThink()
 	m_lastTime = gpGlobals->time;
 }
 
-CGeneWormCloud *CGeneWormCloud::LaunchCloud(const Vector origin, const Vector aim, float velocity, edict_t *pOwner, float fadeTime)
+CGeneWormCloud *CGeneWormCloud::LaunchCloud(const Vector origin, const Vector aim, float velocity, edict_t *pOwner, float fadeTime, EntityOverrides entityOverrides)
 {
 	CGeneWormCloud *pCloud = GetClassPtr((CGeneWormCloud*)NULL);
 	UTIL_SetOrigin(pCloud->pev, origin);
+	pCloud->AssignEntityOverrides(entityOverrides);
 	pCloud->Spawn();
 
 	UTIL_MakeVectors(aim);
@@ -259,7 +260,7 @@ public:
 	void Precache();
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
-	static CGeneWormSpawn *LaunchSpawn(Vector origin, Vector aim, float speed, edict_t *pOwner);
+	static CGeneWormSpawn *LaunchSpawn(Vector origin, Vector aim, float speed, edict_t *pOwner, EntityOverrides entityOverrides);
 
 	void EXPORT SpawnTouch(CBaseEntity *pOther) { }
 	void EXPORT SpawnThink();
@@ -395,7 +396,7 @@ void CGeneWormSpawn::SpawnThink()
 }
 
 
-CGeneWormSpawn *CGeneWormSpawn::LaunchSpawn(Vector origin, Vector aim, float speed, edict_t *pOwner)
+CGeneWormSpawn *CGeneWormSpawn::LaunchSpawn(Vector origin, Vector aim, float speed, edict_t *pOwner, EntityOverrides entityOverrides)
 {
 	CGeneWormSpawn *WormSpawn = GetClassPtr((CGeneWormSpawn*)NULL);
 
@@ -725,8 +726,8 @@ void CGeneWorm::Precache()
 	PRECACHE_MODEL("sprites/tele1.spr");
 	PRECACHE_MODEL("sprites/boss_glow.spr");
 	UTIL_PrecacheOther("monster_shocktrooper");
-	UTIL_PrecacheOther("env_genewormcloud");
-	UTIL_PrecacheOther("env_genewormspawn");
+	UTIL_PrecacheOther("env_genewormcloud", GetProjectileOverrides());
+	UTIL_PrecacheOther("env_genewormspawn", GetProjectileOverrides());
 }
 
 //=========================================================
@@ -1274,7 +1275,7 @@ void CGeneWorm::HuntThink(void)
 
 			angle = (m_hEnemy->pev->origin - pos).Normalize();
 
-			m_pCloud = CGeneWormCloud::LaunchCloud(pos, angle, 700, ENT(pev), 0.15);
+			m_pCloud = CGeneWormCloud::LaunchCloud(pos, angle, 700, ENT(pev), 0.15, GetProjectileOverrides());
 			m_pCloud->pev->rendermode = 3;
 			m_pCloud->pev->rendercolor.x = 0;
 			m_pCloud->pev->rendercolor.y = 255;
@@ -1316,7 +1317,7 @@ void CGeneWorm::HandleAnimEvent(MonsterEvent_t *pEvent)
 			GetAttachment(GENEWORM_ATTACHMENT_SPAWN, vecPos, vecAng);
 			vecAng = pev->angles;
 
-			m_orificeGlow = CGeneWormSpawn::LaunchSpawn(vecPos, -vecAng, 1.25, ENT(pev));
+			m_orificeGlow = CGeneWormSpawn::LaunchSpawn(vecPos, -vecAng, 1.25, ENT(pev), GetProjectileOverrides());
 			pev->health = gSkillData.gwormHealth;
 
 			m_orificeGlow = NULL;

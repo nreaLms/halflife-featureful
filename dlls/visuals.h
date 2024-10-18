@@ -4,6 +4,12 @@
 
 #include "extdll.h"
 #include "template_property_types.h"
+#include "rapidjson/document.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include "icase_compare.h"
 
 struct BeamVisualParams
 {
@@ -29,24 +35,25 @@ struct Visual
 		BEAMNOISE_DEFINED = (1 << 8),
 		BEAMSCROLLRATE_DEFINED = (1 << 9),
 		LIFE_DEFINED = (1 << 10),
-		RADIUS_DEFINED = (1 << 11)
+		RADIUS_DEFINED = (1 << 11),
+		BEAMFLAGS_DEFINED = (1 << 12),
 	};
 
 	const char* model = nullptr;
 	int rendermode = kRenderNormal;
 	Color rendercolor;
-	int renderamt = 255;
+	int renderamt = 0;
 	int renderfx = kRenderFxNone;
-	float scale = 1.0f;
-	float framerate = 0.0f;
+	FloatRange scale = 1.0f;
+	FloatRange framerate = 0.0f;
 	int beamWidth = 0;
 	int beamNoise = 0;
 	int beamScrollRate = 0;
 	FloatRange life = 0.0f;
 	IntRange radius = 0;
+	int beamFlags = 0;
 
 	int modelIndex = 0;
-	int defined = 0;
 
 	inline void SetModel(const char* model)
 	{
@@ -73,12 +80,12 @@ struct Visual
 		this->renderfx = renderfx;
 		MarkAsDefined(RENDERFX_DEFINED);
 	}
-	inline void SetScale(float scale)
+	inline void SetScale(FloatRange scale)
 	{
 		this->scale = scale;
 		MarkAsDefined(SCALE_DEFINED);
 	}
-	inline void SetFramerate(float framerate)
+	inline void SetFramerate(FloatRange framerate)
 	{
 		this->framerate = framerate;
 		MarkAsDefined(FRAMERATE_DEFINED);
@@ -108,6 +115,11 @@ struct Visual
 		this->radius = radius;
 		MarkAsDefined(RADIUS_DEFINED);
 	}
+	inline void SetBeamFlags(int flags)
+	{
+		this->beamFlags = flags;
+		MarkAsDefined(BEAMFLAGS_DEFINED);
+	}
 
 	inline bool HasModel() const {
 		return model && *model;
@@ -122,6 +134,8 @@ struct Visual
 	void CompleteFrom(const Visual& visual);
 
 private:
+	int defined = 0;
+
 	inline bool ShouldCompleteFrom(const Visual& visual, int param) const {
 		return visual.HasDefined(param) && !HasDefined(param);
 	}
@@ -192,12 +206,12 @@ struct BuildVisual
 	{
 		return RenderMode(rendermode).RenderColor(rendercolor);
 	}
-	inline BuildVisual& Scale(float scale)
+	inline BuildVisual& Scale(FloatRange scale)
 	{
 		visual.SetScale(scale);
 		return *this;
 	}
-	inline BuildVisual& Framerate(float framerate)
+	inline BuildVisual& Framerate(FloatRange framerate)
 	{
 		visual.SetFramerate(framerate);
 		return *this;
@@ -230,6 +244,10 @@ struct BuildVisual
 		visual.SetRadius(radius);
 		return *this;
 	}
+	inline BuildVisual& BeamFlags(int flags) {
+		visual.SetBeamFlags(flags);
+		return *this;
+	}
 	inline BuildVisual& Mixin(const NamedVisual* mixin)
 	{
 		visual.mixin = mixin;
@@ -239,12 +257,25 @@ private:
 	NamedVisual visual;
 };
 
-void ReadVisuals();
+class VisualSystem
+{
+public:
+	bool ReadFromFile(const char* fileName);
+	void AddVisualFromJsonValue(const char* name, rapidjson::Value& value);
+	const Visual* GetVisual(const char* name);
+	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool doPrecache);
+	const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);
+	void DumpVisuals();
+	void DumpVisual(const char* name);
+private:
+	void DumpVisualImpl(const char* name, const Visual& visual);
 
-const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, bool precache);
-const Visual* ProvideDefaultVisual(const char* name, const Visual& visual, const char* mixinName, const Visual& mixinVisual);
+	std::map<std::string, Visual, CaseInsensitiveCompare> _visuals;
+	std::set<std::string> _modelStringSet;
+	std::string _temp;
+};
 
-const Visual* GetVisual(const char* name);
+extern VisualSystem g_VisualSystem;
 
 void DumpVisuals();
 

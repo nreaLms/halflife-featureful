@@ -610,6 +610,7 @@ void CRoboCop::Spawn()
 void CRoboCop::Precache()
 {
 	PrecacheMyModel( "models/robocop.mdl" );
+	PrecacheMyGibModel();
 
 	PRECACHE_MODEL( ROBOCOP_EYE_SPRITE_NAME );
 	PRECACHE_MODEL( ROBOCOP_EYE_BEAM_NAME );

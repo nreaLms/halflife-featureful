@@ -399,6 +399,7 @@ void CMonsterMaker::Precache( void )
 
 	EntityOverrides entityOverrides;
 	entityOverrides.model = m_customModel;
+	entityOverrides.entTemplate = m_entTemplate;
 	entityOverrides.soundList = m_soundList;
 
 	if (CheckMonsterClassname())
@@ -696,6 +697,7 @@ CBaseEntity* CMonsterMaker::SpawnMonster(const Vector &placePosition, const Vect
 	CBaseEntity* pEntity = CBaseEntity::Instance(pent);
 	if (pEntity)
 	{
+		pEntity->m_entTemplate = m_entTemplate;
 		pEntity->m_soundList = m_soundList;
 	}
 	CBaseMonster* createdMonster = pEntity ? pEntity->MyMonsterPointer() : NULL;

@@ -17,6 +17,7 @@
 #define BASEMONSTER_H
 
 #include "cbase.h"
+#include "ent_templates.h"
 
 class CFollowingMonster;
 class CTalkMonster;
@@ -385,11 +386,17 @@ public:
 			*outResult = 0;
 		return true;
 	}
-	
-	void SetMyHealth( const float health );
-	void SetMyModel( const char* model );
-	void PrecacheMyModel( const char* model );
-	void SetMyBloodColor( int bloodColor );
+
+	const EntTemplate* GetMyEntTemplate();
+	void SetMyHealth( const float defaultHealth );
+	const Visual* MyOwnVisual();
+	const char* MyOwnModel(const char* defaultModel);
+	void SetMyModel( const char* defaultModel );
+	void PrecacheMyModel( const char* defaultModel );
+	const char* MyNonDefaultGibModel();
+	const Visual* MyGibVisual();
+	int PrecacheMyGibModel( const char* model = nullptr );
+	void SetMyBloodColor( int defaultBloodColor );
 	void SetMyFieldOfView(const float defaultFieldOfView );
 
 	int Classify();
@@ -426,17 +433,17 @@ public:
 	//
 	// Glowshell effects
 	//
-	void GlowShellOn( Vector color, float flDuration );
+	void GlowShellOn( const Visual* visual );
 
 	void GlowShellOff( void );
 	void GlowShellUpdate( void );
 
 	float m_glowShellTime;
-	Vector m_glowShellColor;
 	BOOL m_glowShellUpdate;
 
 	Vector m_prevRenderColor;
-	int m_prevRenderFx;
+	short m_prevRenderFx;
+	short m_prevRenderMode;
 	int m_prevRenderAmt;
 
 	float m_nextPatrolPathCheck;
@@ -469,6 +476,9 @@ public:
 	float m_flLastYawTime;
 
 	const char* taskFailReason;
+
+	const EntTemplate* m_cachedEntTemplate;
+	bool m_entTemplateChecked;
 };
 
 #define FREEROAM_MAPDEFAULT 0
@@ -485,12 +495,18 @@ class CDeadMonster : public CBaseMonster
 {
 public:
 	void Precache();
-	void SpawnHelper(const char* modelName, int bloodColor = BLOOD_COLOR_RED, int health = 8);
+	void SpawnHelper(int bloodColor = BLOOD_COLOR_RED, int health = 8);
 	void KeyValue( KeyValueData *pkvd );
- 
+	virtual const char* DefaultModel() {
+		return nullptr;
+	}
+
 	CDeadMonster* MyDeadMonsterPointer() {return this;}
 	virtual const char* getPos(int pose) const = 0;
 	int	m_iPose;// which sequence to display	-- temporary, don't need to save
+
+protected:
+	void SpawnHelper(const char* defaultModel, int bloodColor = BLOOD_COLOR_RED, int health = 8);
 };
 
 #endif // BASEMONSTER_H

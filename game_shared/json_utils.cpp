@@ -13,57 +13,151 @@ using namespace rapidjson;
 
 constexpr const char definitions[] = R"(
 {
-    "alpha": {
+  "alpha": {
+    "type": "integer",
+    "minimum": 0,
+    "maximum": 255
+  },
+  "color": {
+    "type": ["string", "array", "null"],
+    "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$",
+    "items": {
       "type": "integer",
       "minimum": 0,
       "maximum": 255
     },
-    "color": {
-      "type": ["string", "array", "null"],
-      "pattern": "^([0-9]{1,3}[ ]+[0-9]{1,3}[ ]+[0-9]{1,3})|((#|0x)[0-9a-fA-F]{6})$",
-      "items": {
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 255
-      },
-      "minItems": 3,
-      "maxItems": 3
-    },
-    "range": {
-      "type": ["string", "object", "number", "array"],
-      "pattern": "[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?",
-      "properties": {
-        "min": {
-          "type": "number"
-        },
-        "max": {
-          "type": "number"
-        }
-      },
-      "items": {
+    "minItems": 3,
+    "maxItems": 3
+  },
+  "range": {
+    "type": ["string", "object", "number", "array"],
+    "pattern": "[0-9]+(\\.[0-9]+)?(,[0-9]+(\\.[0-9]+)?)?",
+    "properties": {
+      "min": {
         "type": "number"
       },
-      "minItems": 2,
-      "maxItems": 2
+      "max": {
+        "type": "number"
+      }
     },
-    "range_int": {
-      "type": ["string", "object", "integer", "array"],
-      "pattern": "[0-9]+(,[0-9]+)?",
-      "properties": {
-        "min": {
-          "type": "integer"
+    "items": {
+      "type": "number"
+    },
+    "minItems": 2,
+    "maxItems": 2
+  },
+  "range_int": {
+    "type": ["string", "object", "integer", "array"],
+    "pattern": "[0-9]+(,[0-9]+)?",
+    "properties": {
+      "min": {
+        "type": "integer"
+      },
+      "max": {
+        "type": "integer"
+      }
+    },
+    "items": {
+      "type": "integer"
+    },
+    "minItems": 2,
+    "maxItems": 2
+  },
+  "vector": {
+    "type": ["array"],
+    "items": {
+      "type": "number"
+    },
+    "minItems": 3,
+    "maxItems": 3
+  },
+  "soundscript": {
+    "type": ["object", "string"],
+    "properties": {
+      "waves": {
+        "type": "array",
+        "items": {
+          "type": "string"
         },
-        "max": {
-          "type": "integer"
-        }
+        "maxItems": 10
       },
-      "items": {
-        "type": "integer",
+      "channel": {
+        "type": "string",
+        "pattern": "^auto|weapon|voice|item|body|static$"
       },
-      "minItems": 2,
-      "maxItems": 2
+      "volume": {
+        "$ref": "#/range"
+      },
+      "attenuation": {
+        "type": ["number", "string"],
+        "minimum": 0,
+        "pattern": "^norm|idle|static|none$"
+      },
+      "pitch": {
+        "$ref": "#/range_int"
+      }
     }
-})";
+  },
+  "visual": {
+    "type": ["object", "string"],
+    "properties": {
+      "model": {
+        "type": "string"
+      },
+      "sprite": {
+        "type": "string"
+      },
+      "rendermode": {
+        "type": "string",
+        "pattern": ["Normal","normal","Color","color","Texture","texture","Glow","glow","Solid","solid","Additive","additive$"]
+      },
+      "color": {
+        "$ref": "definitions.json#/color"
+      },
+      "alpha": {
+        "$ref": "definitions.json#/alpha"
+      },
+      "renderfx": {
+        "type": ["integer", "string"],
+        "enum": ["Normal","normal","Constant Glow","constant glow","Constant glow","Distort","distort","Hologram","hologram","Glow Shell","glow shell","Glow shell"],
+        "minimum": 0,
+        "maximum": 20
+      },
+      "scale": {
+        "$ref": "definitions.json#/range",
+        "minimum": 0.0
+      },
+      "framerate": {
+        "type": "number",
+        "minimum": 0.0
+      },
+      "width": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "noise": {
+        "type": "integer"
+      },
+      "scrollrate": {
+        "type": "integer"
+      },
+      "life": {
+        "$ref": "#/range"
+      },
+      "radius": {
+        "$ref": "#/range_int"
+      },
+      "beamflags": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["Sine", "sine", "Solid", "solid", "Shadein", "shadein", "Shadeout", "shadeout"]
+        }
+      }
+    }
+  }
+}
+)";
 
 static void CalculateLineAndColumnFromOffset(const char* pMemFile, size_t offset, size_t& line, size_t& column)
 {
@@ -357,6 +451,21 @@ bool UpdatePropertyFromJson(IntRange& intRange, Value& jsonValue, const char* ke
 		if (intRange.min > intRange.max) {
 			intRange.min = intRange.max;
 		}
+		return true;
+	}
+	return false;
+}
+
+bool UpdatePropertyFromJson(Vector& vector, Value& jsonValue, const char* key)
+{
+	auto it = jsonValue.FindMember(key);
+	if (it != jsonValue.MemberEnd())
+	{
+		Value::Array arr = it->value.GetArray();
+		vector.x = arr[0].GetFloat();
+		vector.y = arr[1].GetFloat();
+		vector.z = arr[2].GetFloat();
+
 		return true;
 	}
 	return false;

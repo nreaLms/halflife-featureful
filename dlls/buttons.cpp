@@ -1248,38 +1248,18 @@ const char *ButtonSound( int sound )
 	return pszSound;
 }
 
-void PlaySparkSound( entvars_t *pev, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
+void DoSpark( CBaseEntity *pEntity, const Vector &location, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
 {
-	const SoundScript* soundScript = GetSoundScript(sparkSoundScript);
-	if (soundScript)
-	{
-		const char* sample = soundScript->Wave();
-		if (sample)
-		{
-			int channel = soundScript->channel;
-			FloatRange volume = soundScript->volume;
-			float attenuation = soundScript->attenuation;
-			IntRange pitch = soundScript->pitch;
-
-			soundParams.ApplyOverride(channel, volume, attenuation, pitch);
-
-			EMIT_SOUND_DYN(ENT(pev), soundScript->channel, sample, RandomizeNumberFromRange(volume), attenuation, 0, RandomizeNumberFromRange(pitch));
-		}
-	}
-}
-
-void DoSpark( entvars_t *pev, const Vector &location, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
-{
-	Vector tmp = location + pev->size * 0.5f;
+	Vector tmp = location + pEntity->pev->size * 0.5f;
 	UTIL_Sparks( tmp );
-	PlaySparkSound(pev, soundParams);
+	pEntity->EmitSoundScript(sparkSoundScript, soundParams);
 }
 
-void DoSparkShower( entvars_t *pev, const Vector &location, const SparkEffectParams& params, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
+void DoSparkShower( CBaseEntity *pEntity, const Vector &location, const SparkEffectParams& params, const SoundScriptParamOverride soundParams = SoundScriptParamOverride() )
 {
-	Vector tmp = location + pev->size * 0.5f;
+	Vector tmp = location + pEntity->pev->size * 0.5f;
 	UTIL_SparkShower( tmp, params );
-	PlaySparkSound(pev, soundParams);
+	pEntity->EmitSoundScript(sparkSoundScript, soundParams);
 }
 
 void CBaseButton::ButtonSpark( void )
@@ -1287,7 +1267,7 @@ void CBaseButton::ButtonSpark( void )
 	SetThink( &CBaseButton::ButtonSpark );
 	pev->nextthink = pev->ltime + 0.1f + RANDOM_FLOAT( 0.0f, 1.5f );// spark again at random interval
 
-	DoSpark( pev, pev->absmin );
+	DoSpark( this, pev->absmin );
 }
 
 //
@@ -2185,7 +2165,7 @@ void CEnvSpark::MakeSpark()
 	{
 		soundParams.OverrideAttenuationAbsolute(::SoundAttenuation(m_soundRadius));
 	}
-	DoSparkShower(pev, pev->origin, params, soundParams);
+	DoSparkShower(this, pev->origin, params, soundParams);
 }
 
 #define SF_BTARGET_USE		0x0001

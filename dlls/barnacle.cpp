@@ -72,7 +72,7 @@ public:
 	static const NamedSoundScript chewSoundScript;
 	static const NamedSoundScript alertSoundScript;
 	static const NamedSoundScript dieSoundScript;
-	static constexpr const char* painSoundScript = "Barnacle.Pain";
+	static const NamedSoundScript painSoundScript;
 };
 
 LINK_ENTITY_TO_CLASS( monster_barnacle, CBarnacle )
@@ -112,6 +112,12 @@ const NamedSoundScript CBarnacle::dieSoundScript = {
 	CHAN_WEAPON,
 	{"barnacle/bcl_die1.wav", "barnacle/bcl_die3.wav"},
 	"Barnacle.Die"
+};
+
+const NamedSoundScript CBarnacle::painSoundScript = {
+	CHAN_WEAPON,
+	{},
+	"Barnacle.Pain"
 };
 
 //=========================================================
@@ -415,12 +421,13 @@ void CBarnacle::WaitTillDead( void )
 void CBarnacle::Precache()
 {
 	PrecacheMyModel( "models/barnacle.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(alertSoundScript);//happy, lifting food up
 	RegisterAndPrecacheSoundScript(biteSoundScript);//just got food to mouth
 	RegisterAndPrecacheSoundScript(chewSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
-	PrecacheSoundScript(painSoundScript);
+	RegisterAndPrecacheSoundScript(painSoundScript);
 }
 
 //=========================================================

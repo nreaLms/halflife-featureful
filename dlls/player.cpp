@@ -3631,7 +3631,12 @@ CBaseEntity* SelectRandomSpawnPoint( CBaseEntity* pPlayer, const char* spawnPoin
 
 edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer )
 {
-	CBaseEntity *pSpot = NULL;
+	CBaseEntity *pSpot;
+	edict_t *player;
+
+	int nNumRandomSpawnsToTry = 10;
+
+	player = pPlayer->edict();
 
 	// choose a info_player_deathmatch point
 	if( g_pGameRules->IsCoOp() )
@@ -3642,9 +3647,57 @@ edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer )
 	}
 	if( g_pGameRules->IsDeathmatch() )
 	{
-		pSpot = SelectRandomSpawnPoint(pPlayer, "info_player_deathmatch");
-		if( pSpot )
+		if( !g_pLastSpawn )
+		{
+			nNumRandomSpawnsToTry = 0;
+			CBaseEntity* pEnt = 0;
+
+			while( ( pEnt = UTIL_FindEntityByClassname( pEnt, "info_player_deathmatch" )))
+				nNumRandomSpawnsToTry++;
+		}
+
+		pSpot = g_pLastSpawn;
+		// Randomize the start spot
+		for( int i = RANDOM_LONG( 1, nNumRandomSpawnsToTry - 1 ); i > 0; i-- )
+			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
+		if( FNullEnt( pSpot ) )  // skip over the null point
+			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
+
+		CBaseEntity *pFirstSpot = pSpot;
+
+		do 
+		{
+			if( pSpot )
+			{
+				// check if pSpot is valid
+				if( IsSpawnPointValid( pPlayer, pSpot ) )
+				{
+					if( pSpot->pev->origin == Vector( 0, 0, 0 ) )
+					{
+						pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
+						continue;
+					}
+
+					// if so, go to pSpot
+					goto ReturnSpot;
+				}
+			}
+			// increment pSpot
+			pSpot = UTIL_FindEntityByClassname( pSpot, "info_player_deathmatch" );
+		} while( pSpot != pFirstSpot ); // loop if we're not back to the start
+
+		// we haven't found a place to spawn yet,  so kill any guy at the first spawn point and spawn there
+		if( !FNullEnt( pSpot ) )
+		{
+			CBaseEntity *ent = NULL;
+			while( ( ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 ) ) != NULL )
+			{
+				// if ent is a client, kill em (unless they are ourselves)
+				if( ent->IsPlayer() && !(ent->edict() == player) )
+					ent->TakeDamage( VARS( INDEXENT( 0 ) ), VARS( INDEXENT( 0 ) ), 300, DMG_GENERIC );
+			}
 			goto ReturnSpot;
+		}
 	}
 
 	// If startspot is set, (re)spawn there.
@@ -6223,8 +6276,9 @@ void CBasePlayer::DisbandFollowers()
 class CDeadHEV : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void ) { return	CLASS_HUMAN_MILITARY; }
+	void Spawn();
+	const char* DefaultModel() { return g_modFeatures.DeadHazModel(); }
+	int	DefaultClassify() { return	CLASS_HUMAN_MILITARY; }
 
 	const char* getPos(int pos) const;
 	static const char *m_szPoses[4];
@@ -6242,9 +6296,9 @@ LINK_ENTITY_TO_CLASS( monster_hevsuit_dead, CDeadHEV )
 //=========================================================
 // ********** DeadHEV SPAWN **********
 //=========================================================
-void CDeadHEV :: Spawn( void )
+void CDeadHEV::Spawn()
 {
-	SpawnHelper(g_modFeatures.DeadHazModel());
+	SpawnHelper();
 	pev->body			= 1;
 	MonsterInitDead();
 }

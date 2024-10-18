@@ -27,15 +27,12 @@
 #include	"game.h"
 #include	"common_soundscripts.h"
 #include	"visuals_utils.h"
-#include	"fx_flags.h"
 
 #define SF_INFOBM_RUN		0x0001
 #define SF_INFOBM_WAIT		0x0002
 
 #define SF_BIGMOM_NOBABYCRABS SF_MONSTER_DONT_DROP_GUN
 #define SF_MONSTERCLIP_BABYCRABS SF_MONSTER_SPECIAL_FLAG
-
-extern int gmsgSpray;
 
 // AI Nodes for Big Momma
 class CInfoBM : public CPointEntity
@@ -112,7 +109,7 @@ public:
 	void Spawn( void );
 	void Precache();
 
-	static CBMortar *Shoot( edict_t *pOwner, Vector vecStart, Vector vecVelocity, string_t soundList = iStringNull );
+	static CBMortar *Shoot( edict_t *pOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides );
 	void Touch( CBaseEntity *pOther );
 	void EXPORT Animate( void );
 
@@ -712,7 +709,7 @@ void CBigMomma::LaunchMortar( void )
 	}
 
 	EmitSoundScript(launchMortarSoundScript);
-	CBMortar *pBomb = CBMortar::Shoot( edict(), startPos, vecLaunch, m_soundList );
+	CBMortar *pBomb = CBMortar::Shoot( edict(), startPos, vecLaunch, GetProjectileOverrides() );
 	pBomb->pev->gravity = 1.0f;
 	MortarSpray( startPos, Vector( 0.0f, 0.0f, 1.0f ), GetVisual(CBMortar::mortarSprayVisual), 24 );
 }
@@ -744,6 +741,7 @@ void CBigMomma::Spawn()
 void CBigMomma::Precache()
 {
 	PrecacheMyModel( "models/big_mom.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(alertSoundScript);
 	RegisterAndPrecacheSoundScript(painSoundScript);
@@ -758,11 +756,8 @@ void CBigMomma::Precache()
 	RegisterAndPrecacheSoundScript(childDieSoundScript);
 	RegisterAndPrecacheSoundScript(launchMortarSoundScript);
 
-	EntityOverrides entityOverrides;
-	entityOverrides.soundList = m_soundList;
-
-	UTIL_PrecacheOther(BIG_CHILDCLASS, entityOverrides);
-	UTIL_PrecacheOther("bmortar", entityOverrides);
+	UTIL_PrecacheOther(BIG_CHILDCLASS);
+	UTIL_PrecacheOther("bmortar", GetProjectileOverrides());
 
 	RegisterVisual(CBMortar::mortarSprayVisual);// client side spittle.
 }
@@ -1193,21 +1188,7 @@ Vector VecCheckSplatToss( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot
 // ---------------------------------
 void MortarSpray( const Vector &position, const Vector &direction, const Visual* visual, int count )
 {
-	MESSAGE_BEGIN( MSG_PVS, gmsgSpray, position );
-		WRITE_VECTOR( position );	// pos
-		WRITE_VECTOR( direction );	// dir
-		WRITE_SHORT( visual->modelIndex );	// model
-		WRITE_BYTE ( count );			// count
-		WRITE_BYTE ( 130 );			// speed
-		WRITE_BYTE ( 80 );			// noise ( client will divide by 100 )
-		WRITE_BYTE( visual->rendermode );
-		WRITE_COLOR( visual->rendercolor );
-		WRITE_BYTE( visual->renderamt );
-		WRITE_BYTE( visual->renderfx );
-		WRITE_BYTE( (int)(visual->scale * 10) );
-		WRITE_SHORT( (int)(visual->framerate * 10) );
-		WRITE_BYTE( SPRAY_FLAG_FADEOUT );
-	MESSAGE_END();
+	SendSpray(position, direction, visual, count, 130, 80);
 }
 
 // UNDONE: right now this is pretty much a copy of the squid spit with minor changes to the way it does damage
@@ -1221,7 +1202,7 @@ void CBMortar::Spawn( void )
 
 	const Visual* visual = GetVisual(mortarVisual);
 
-	ApplyVisualToEntity(this, visual);
+	ApplyVisual(visual);
 
 	pev->frame = 0;
 
@@ -1252,10 +1233,10 @@ void CBMortar::Animate( void )
 	pev->frame = AnimateWithFramerate(pev->frame, m_maxFrame, pev->framerate);
 }
 
-CBMortar *CBMortar::Shoot(edict_t *pOwner, Vector vecStart, Vector vecVelocity , string_t soundList)
+CBMortar *CBMortar::Shoot(edict_t *pOwner, Vector vecStart, Vector vecVelocity, EntityOverrides entityOverrides)
 {
 	CBMortar *pSpit = GetClassPtr( (CBMortar *)NULL );
-	pSpit->m_soundList = soundList;
+	pSpit->AssignEntityOverrides(entityOverrides);
 	pSpit->Spawn();
 	
 	UTIL_SetOrigin( pSpit->pev, vecStart );

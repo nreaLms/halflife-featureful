@@ -27,6 +27,7 @@
 #include "animation.h"
 #include "weapons.h"
 #include "player.h"
+#include "visuals_utils.h"
 
 #define TEMP_FOR_SCREEN_SHOTS	1
 #if TEMP_FOR_SCREEN_SHOTS //===================================================
@@ -389,6 +390,8 @@ class CWreckage : public CBaseMonster
 	void Think( void );
 
 	int m_flStartTime;
+
+	static const NamedVisual smokeVisual;
 };
 
 TYPEDESCRIPTION	CWreckage::m_SaveData[] =
@@ -400,8 +403,16 @@ IMPLEMENT_SAVERESTORE( CWreckage, CBaseMonster )
 
 LINK_ENTITY_TO_CLASS( cycler_wreckage, CWreckage )
 
+const NamedVisual CWreckage::smokeVisual = BuildVisual("Wreckage.Smoke")
+		.Model(g_pModelNameSmoke)
+		.Alpha(255)
+		.RenderMode(kRenderTransAlpha)
+		.Scale(FloatRange(4.9, 9.9))
+		.Framerate(FloatRange(8, 11));
+
 void CWreckage::Spawn( void )
 {
+	Precache();
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
 	pev->takedamage = 0;
@@ -424,6 +435,7 @@ void CWreckage::Precache()
 {
 	if( pev->model )
 		PRECACHE_MODEL( STRING( pev->model ) );
+	RegisterVisual(smokeVisual);
 }
 
 void CWreckage::Think( void )
@@ -450,11 +462,5 @@ void CWreckage::Think( void )
 	VecSrc.y = RANDOM_FLOAT( pev->absmin.y, pev->absmax.y );
 	VecSrc.z = RANDOM_FLOAT( pev->absmin.z, pev->absmax.z );
 
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, VecSrc );
-		WRITE_BYTE( TE_SMOKE );
-		WRITE_VECTOR( VecSrc );
-		WRITE_SHORT( g_sModelIndexSmoke );
-		WRITE_BYTE( RANDOM_LONG( 0,49 ) + 50 ); // scale * 10
-		WRITE_BYTE( RANDOM_LONG( 0, 3 ) + 8  ); // framerate
-	MESSAGE_END();
+	SendSmoke(VecSrc, GetVisual(smokeVisual));
 }

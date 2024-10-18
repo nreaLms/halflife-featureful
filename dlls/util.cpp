@@ -1642,9 +1642,7 @@ BOOL UTIL_IsValidEntity( edict_t *pent )
 
 static void UTIL_PrecacheOtherWithOverride(CBaseEntity* pEntity, EntityOverrides entityOverrides)
 {
-	if (entityOverrides.model)
-		pEntity->pev->model = entityOverrides.model;
-	pEntity->m_soundList = entityOverrides.soundList;
+	pEntity->AssignEntityOverrides(entityOverrides);
 	pEntity->Precache();
 }
 
@@ -2787,6 +2785,49 @@ void ReportAIStateByClassname(const char* name)
 	}
 }
 
+const char* RenderModeToString(int rendermode)
+{
+	switch (rendermode) {
+	case kRenderNormal:
+		return "Normal";
+	case kRenderTransColor:
+		return "Color";
+	case kRenderTransTexture:
+		return "Texture";
+	case kRenderGlow:
+		return "Glow";
+	case kRenderTransAlpha:
+		return "Solid";
+	case kRenderTransAdd:
+		return "Additive";
+	default:
+		return "Unknown";
+	}
+}
+
+const char* RenderFxToString(int renderfx)
+{
+	switch (renderfx) {
+	case kRenderFxNone:			return "Normal";
+	case kRenderFxPulseSlow:	return "Slow Pulse";
+	case kRenderFxPulseFast:	return "Fast Pulse";
+	case kRenderFxPulseSlowWide:return "Slow Wide Pulse";
+	case kRenderFxFadeSlow:		return "Slow Fade Away";
+	case kRenderFxFadeFast:		return "Fast Fade Away";
+	case kRenderFxSolidSlow:	return "Slow Become Solid";
+	case kRenderFxSolidFast:	return "Fast Become Solid";
+	case kRenderFxStrobeSlow:	return "Slow Strobe";
+	case kRenderFxStrobeFast:	return "Fast Strobe";
+	case kRenderFxStrobeFaster:	return "Faster Strobe";
+	case kRenderFxFlickerSlow:	return "Slow Flicker";
+	case kRenderFxFlickerFast:	return "Fast Flicker";
+	case kRenderFxNoDissipation:return "Constant Glow";
+	case kRenderFxDistort:		return "Distort";
+	case kRenderFxHologram:		return "Hologram";
+	case kRenderFxGlowShell:	return "Glow Shell";
+	default: return "Unknown";
+	}
+}
 
 // LRC- change the origin to the given position, and bring any movewiths along too.
 void UTIL_AssignOrigin( CBaseEntity *pEntity, const Vector vecOrigin )

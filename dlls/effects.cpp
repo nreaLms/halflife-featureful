@@ -296,7 +296,7 @@ void CBeam::PointEntInit(const Vector &start, int endIndex , int endAttachment)
 	RelinkBeam();
 }
 
-void CBeam::EntsInit(int startIndex, int endIndex , int startAttachment, int endAttachment)
+void CBeam::EntsInit(int startIndex, int endIndex, int startAttachment, int endAttachment)
 {
 	SetType( BEAM_ENTS );
 	SetStartEntity( startIndex );
@@ -880,8 +880,12 @@ void CLightning::BeamUpdateVars( void )
 
 	edict_t *pStart = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( m_iszStartEntity ) );
 	edict_t *pEnd = FIND_ENTITY_BY_TARGETNAME ( NULL, STRING( m_iszEndEntity ) );
-	pointStart = IsPointEntity( CBaseEntity::Instance( pStart ) );
-	pointEnd = IsPointEntity( CBaseEntity::Instance( pEnd ) );
+
+	CBaseEntity* pEntStart = CBaseEntity::Instance( pStart );
+	CBaseEntity* pEntEnd = CBaseEntity::Instance( pEnd );
+
+	pointStart = pEntStart == this ? 1 : IsPointEntity( pEntStart );
+	pointEnd = pEntEnd == this ? 1 : IsPointEntity( pEntEnd );
 
 	pev->skin = 0;
 	pev->sequence = 0;
@@ -914,6 +918,7 @@ void CLightning::BeamUpdateVars( void )
 	if( beamType == BEAM_POINTS || beamType == BEAM_ENTPOINT || beamType == BEAM_HOSE )
 	{
 		SetStartPos( pStart->v.origin );
+
 		if( beamType == BEAM_POINTS || beamType == BEAM_HOSE )
 			SetEndPos( pEnd->v.origin );
 		else

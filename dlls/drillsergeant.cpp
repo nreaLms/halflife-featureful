@@ -48,6 +48,7 @@ const NamedSoundScript CDrillSergeant::dieSoundScript = {
 void CDrillSergeant::Precache()
 {
 	PrecacheMyModel("models/drill.mdl");
+	PrecacheMyGibModel();
 	RegisterAndPrecacheSoundScript(painSoundScript);
 	RegisterAndPrecacheSoundScript(dieSoundScript);
 	TalkInit();
@@ -187,7 +188,8 @@ Schedule_t* CDrillSergeant::GetSchedule()
 class CDeadDrillSergeant : public CDeadMonster
 {
 public:
-	void Spawn( void );
+	void Spawn();
+	const char* DefaultModel() { return "models/drill.mdl"; }
 	bool IsEnabledInMod() { return g_modFeatures.IsMonsterEnabled("drillsergeant"); }
 	int	DefaultClassify ( void ) { return	CLASS_PLAYER_ALLY_MILITARY; }
 
@@ -204,9 +206,9 @@ const char* CDeadDrillSergeant::getPos(int pos) const
 
 LINK_ENTITY_TO_CLASS( monster_drillsergeant_dead, CDeadDrillSergeant )
 
-void CDeadDrillSergeant :: Spawn( )
+void CDeadDrillSergeant::Spawn()
 {
-	SpawnHelper("models/drill.mdl");
+	SpawnHelper();
 	MonsterInitDead();
 }
 

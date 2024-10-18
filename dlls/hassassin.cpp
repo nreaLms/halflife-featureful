@@ -419,6 +419,7 @@ void CHAssassin::Spawn()
 void CHAssassin::Precache()
 {
 	PrecacheMyModel( "models/hassassin.mdl" );
+	PrecacheMyGibModel();
 
 	RegisterAndPrecacheSoundScript(shotSoundScript);
 	RegisterAndPrecacheSoundScript(footstepSoundScript);
@@ -1100,8 +1101,9 @@ Schedule_t *CHAssassin::GetScheduleOfType( int Type )
 class CDeadHAssassin : public CDeadMonster
 {
 public:
-	void Spawn( void );
-	int	DefaultClassify ( void )
+	void Spawn();
+	const char* DefaultModel() { return "models/hassassin.mdl"; }
+	int	DefaultClassify()
 	{
 		if (g_modFeatures.blackops_classify)
 			return CLASS_HUMAN_BLACKOPS;
@@ -1122,7 +1124,7 @@ LINK_ENTITY_TO_CLASS( monster_human_assassin_dead, CDeadHAssassin )
 
 void CDeadHAssassin::Spawn()
 {
-	SpawnHelper("models/hassassin.mdl");
+	SpawnHelper();
 	MonsterInitDead();
 	pev->frame = 255;
 }
