@@ -83,7 +83,7 @@ constexpr const char definitions[] = R"(
       },
       "channel": {
         "type": "string",
-        "pattern": "^auto|weapon|voice|item|body|static$"
+        "enum": ["Auto","auto","Weapon","weapon","Voice","voice","Item","item","Body","body","Static","static"]
       },
       "volume": {
         "$ref": "#/range"
@@ -91,7 +91,7 @@ constexpr const char definitions[] = R"(
       "attenuation": {
         "type": ["number", "string"],
         "minimum": 0,
-        "pattern": "^norm|idle|static|none$"
+        "enum": ["Norm","norm","Idle","idle","Static","static","None","none"]
       },
       "pitch": {
         "$ref": "#/range_int"
@@ -109,7 +109,7 @@ constexpr const char definitions[] = R"(
       },
       "rendermode": {
         "type": "string",
-        "pattern": ["Normal","normal","Color","color","Texture","texture","Glow","glow","Solid","solid","Additive","additive$"]
+        "pattern": ["Normal","normal","Color","color","Texture","texture","Glow","glow","Solid","solid","Additive","additive"]
       },
       "color": {
         "$ref": "definitions.json#/color"

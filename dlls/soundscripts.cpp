@@ -191,7 +191,7 @@ static const char* ChannelToString(int channel)
 
 static bool ParseAttenuation(const char* str, float& attenuation)
 {
-	constexpr std::pair<const char*, int> attenuations[] = {
+	constexpr std::pair<const char*, float> attenuations[] = {
 		{"norm", ATTN_NORM},
 		{"idle", ATTN_IDLE},
 		{"static", ATTN_STATIC},
