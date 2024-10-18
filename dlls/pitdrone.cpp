@@ -62,8 +62,7 @@ public:
 LINK_ENTITY_TO_CLASS(pitdronespike, CPitdroneSpike)
 
 const NamedVisual CPitdroneSpike::spikeVisual = BuildVisual("Pitdrone.Spike")
-		.Model("models/pit_drone_spike.mdl")
-		.Scale(0.5f);
+		.Model("models/pit_drone_spike.mdl");
 
 const NamedVisual CPitdroneSpike::trailVisual = BuildVisual("Pitdrone.SpikeTrail")
 		.Model("sprites/spike_trail.spr")
