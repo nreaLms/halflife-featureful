@@ -38,7 +38,8 @@ int CHud::UpdateClientData( client_data_t *cdata, float time )
 
 	Think();
 
-	cdata->fov = m_iFOV;
+	// Always keep the two values equal to 1.0f when combined !!!
+    cdata->fov = cdata->fov * 0.8f + m_iFOV * 0.2f;
 
 	v_idlescale = m_iConcussionEffect;
 
