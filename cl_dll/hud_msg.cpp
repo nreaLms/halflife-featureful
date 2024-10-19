@@ -55,7 +55,7 @@ int CHud::MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 	m_flMouseSensitivity = 0;
 
 	// reset concussion effect
-	m_iConcussionEffect = 0;
+	m_iConcussionEffect = 1;	// Change value here to enable idle swaying
 
 	// Vit_amiN: reset the FOV
 	m_iFOV = 0;	// default_fov

@@ -322,9 +322,10 @@ Idle swaying
 */
 void V_AddIdle( struct ref_params_s *pparams )
 {
-	pparams->viewangles[ROLL] += v_idlescale * sin( pparams->time * v_iroll_cycle.value ) * v_iroll_level.value;
-	pparams->viewangles[PITCH] += v_idlescale * sin( pparams->time * v_ipitch_cycle.value ) * v_ipitch_level.value;
-	pparams->viewangles[YAW] += v_idlescale * sin( pparams->time * v_iyaw_cycle.value ) * v_iyaw_level.value;
+	// Tweak concussion values here
+	pparams->viewangles[ROLL] += ( v_idlescale * 1.25 ) * sin( pparams->time * ( v_iroll_cycle.value * 8 ) ) * v_iroll_level.value;
+	pparams->viewangles[PITCH] += ( v_idlescale * 1.25 ) * sin( ( pparams->time / 2 ) * v_ipitch_cycle.value ) * v_ipitch_level.value;
+	pparams->viewangles[YAW] += ( v_idlescale * 1.25 ) * sin( ( pparams->time / 2 ) * v_iyaw_cycle.value ) * v_iyaw_level.value;
 }
 
 extern cvar_t *cl_rollspeed;
@@ -625,9 +626,9 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	}
 	else if ( pparams->onground == 0 )
 	{
-		V_CalcBob( pparams, 0.00f, VB_COS, bobtimes[0], bobRight, lasttimes[0] );
-		V_CalcBob( pparams, 0.00f, VB_COS, bobtimes[1], bobUp, lasttimes[1] );
-		V_CalcBob( pparams, 0.00f, VB_COS, bobtimes[2], bobForward, lasttimes[2] );
+		V_CalcBob( pparams, 0.50f, VB_COS, bobtimes[0], bobRight, lasttimes[0] );
+		V_CalcBob( pparams, 1.00f, VB_COS, bobtimes[1], bobUp, lasttimes[1] );
+		V_CalcBob( pparams, 1.00f, VB_COS, bobtimes[2], bobForward, lasttimes[2] );
 	}
 	else if ( pparams->waterlevel >= 2 )
 	{
