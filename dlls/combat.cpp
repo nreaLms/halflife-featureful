@@ -773,6 +773,8 @@ void CBaseMonster::Killed( entvars_t *pevInflictor, entvars_t *pevAttacker, int 
 	//pev->enemy = ENT( pevAttacker );//why? (sjb)
 
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
+
+	pev->solid = SOLID_NOT;
 }
 
 void CBaseMonster::OnDying()
