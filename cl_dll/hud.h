@@ -899,6 +899,7 @@ public:
 	cvar_t	*m_pCvarDrawMoveMode;
 	cvar_t	*m_pCvarCrosshair;
 	cvar_t	*m_pCvarCrosshairColorable;
+	cvar_t	*cl_righthand;
 
 	cvar_t	*m_pCvarMinAlpha;
 	cvar_t	*m_pCvarHudRed;

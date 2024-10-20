@@ -567,6 +567,13 @@ void CStudioModelRenderer::StudioSetUpTransform( int trivial_accept )
 			}
 		}
 	}
+
+	if ( CVAR_GET_FLOAT( "cl_righthand" ) == 1 && m_pCurrentEntity == gEngfuncs.GetViewModel() )
+	{
+		( *m_protationmatrix )[0][1] *= -1;
+		( *m_protationmatrix )[1][1] *= -1;
+		( *m_protationmatrix )[2][1] *= -1;
+	}
 }
 
 /*
