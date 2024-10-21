@@ -167,29 +167,6 @@ int CHud::MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
-int CHud::MsgFunc_Damage( const char *pszName, int iSize, void *pbuf )
-{
-	int		armor, blood;
-	Vector	from;
-	int		i;
-	float	count;
-
-	BEGIN_READ( pbuf, iSize );
-	armor = READ_BYTE();
-	blood = READ_BYTE();
-
-	for( i = 0; i < 3; i++)
-		from[i] = READ_COORD();
-
-	count = ( blood * 0.5 ) + ( armor * 0.5 );
-
-	if( count < 10 )
-		count = 10;
-
-	// TODO: kick viewangles,  show damage visually
-	return 1;
-}
-
 int CHud::MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 {
 	int r, g, b;

@@ -135,10 +135,7 @@ int CHudHealth::MsgFunc_Damage( const char *pszName, int iSize, void *pbuf )
 	int damageTaken = READ_BYTE();	// health
 	long bitsDamage = READ_LONG(); // damage bits
 
-	Vector vecFrom;
-
-	for( int i = 0; i < 3; i++ )
-		vecFrom[i] = READ_COORD();
+	Vector vecFrom = READ_VECTOR();
 
 	UpdateTiles( gHUD.m_flTime, bitsDamage );
 

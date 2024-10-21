@@ -65,17 +65,9 @@ int __MsgFunc_RandomGibs( const char *pszName, int iSize, void *pbuf )
 	Vector size;
 	Vector direction;
 
-	absmin[0] = READ_COORD();
-	absmin[1] = READ_COORD();
-	absmin[2] = READ_COORD();
-
-	size[0] = READ_COORD();
-	size[1] = READ_COORD();
-	size[2] = READ_COORD();
-
-	direction[0] = READ_COORD();
-	direction[1] = READ_COORD();
-	direction[2] = READ_COORD();
+	absmin = READ_VECTOR();
+	size = READ_VECTOR();
+	direction = READ_VECTOR();
 
 	float randomization = READ_BYTE() / 100.0f;
 	int modelIndex = READ_SHORT();
@@ -156,12 +148,8 @@ int __MsgFunc_RandomGibs( const char *pszName, int iSize, void *pbuf )
 
 int __MsgFunc_MuzzleLight( const char *pszName, int iSize, void *pbuf )
 {
-	Vector vecSrc;
-
 	BEGIN_READ( pbuf, iSize );
-	vecSrc[0] = READ_COORD();
-	vecSrc[1] = READ_COORD();
-	vecSrc[2] = READ_COORD();
+	Vector vecSrc = READ_VECTOR();
 
 	if (cl_muzzlelight_monsters && cl_muzzlelight_monsters->value)
 	{
@@ -212,13 +200,9 @@ int __MsgFunc_CustomBeam( const char* pszName, int iSize, void *pbuf )
 			}
 			else
 			{
-				start[0] = READ_COORD();
-				start[1] = READ_COORD();
-				start[2] = READ_COORD();
+				start = READ_VECTOR();
 			}
-			end[0] = READ_COORD();
-			end[1] = READ_COORD();
-			end[2] = READ_COORD();
+			end = READ_VECTOR();
 		}
 		modelIndex = READ_SHORT();
 		startFrame = READ_BYTE();
@@ -306,11 +290,7 @@ int __MsgFunc_Sprite( const char* pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Vector pos;
-
-	pos[0] = READ_COORD();
-	pos[1] = READ_COORD();
-	pos[2] = READ_COORD();
+	Vector pos = READ_VECTOR();
 	int modelIndex = READ_SHORT();
 	float scale = READ_BYTE() * 0.1f;
 	int rendermode = READ_BYTE();
@@ -383,14 +363,8 @@ int __MsgFunc_SpriteTrail( const char* pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Vector pos, pos2;
-
-	pos[0] = READ_COORD();
-	pos[1] = READ_COORD();
-	pos[2] = READ_COORD();
-	pos2[0] = READ_COORD();
-	pos2[1] = READ_COORD();
-	pos2[2] = READ_COORD();
+	Vector pos = READ_VECTOR();
+	Vector pos2 = READ_VECTOR();
 	int modelIndex = READ_SHORT();
 	int count = READ_BYTE();
 	float life = (float)READ_BYTE() * 0.1f;
@@ -475,14 +449,8 @@ int __MsgFunc_Spray( const char* pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Vector pos, dir;
-
-	pos[0] = READ_COORD();
-	pos[1] = READ_COORD();
-	pos[2] = READ_COORD();
-	dir[0] = READ_COORD();
-	dir[1] = READ_COORD();
-	dir[2] = READ_COORD();
+	Vector pos = READ_VECTOR();
+	Vector dir = READ_VECTOR();
 	int modelIndex = READ_SHORT();
 	int count = READ_BYTE();
 	int speed = READ_BYTE();
@@ -508,15 +476,10 @@ int __MsgFunc_Streaks( const char* pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Vector pos, dir;
 	StreakParams streakParams;
 
-	pos[0] = READ_COORD();
-	pos[1] = READ_COORD();
-	pos[2] = READ_COORD();
-	dir[0] = READ_COORD();
-	dir[1] = READ_COORD();
-	dir[2] = READ_COORD();
+	Vector pos = READ_VECTOR();
+	Vector dir = READ_VECTOR();
 	streakParams.color = READ_BYTE();
 	streakParams.count = READ_SHORT();
 	streakParams.speed = READ_SHORT();
@@ -584,9 +547,7 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 	const int flags = READ_BYTE();
 	const bool directed = (flags & SMOKER_FLAG_DIRECTED) != 0;
 	const bool fade = (flags & SMOKER_FLAG_FADE_SPRITE) != 0;
-	pos[0] = READ_COORD();
-	pos[1] = READ_COORD();
-	pos[2] = READ_COORD();
+	pos = READ_VECTOR();
 	modelIndex = READ_SHORT();
 
 	const float scaleVal = READ_COORD();
@@ -602,9 +563,7 @@ int __MsgFunc_Smoke( const char* pszName, int iSize, void *pbuf )
 
 	if (directed)
 	{
-		dir[0] = READ_COORD();
-		dir[1] = READ_COORD();
-		dir[2] = READ_COORD();
+		dir = READ_VECTOR();
 	}
 
 	// Original hard-coded TE_SMOKE values
@@ -648,10 +607,7 @@ int __MsgFunc_SparkShower( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	Vector pos;
-	pos[0] = READ_COORD();
-	pos[1] = READ_COORD();
-	pos[2] = READ_COORD();
+	Vector pos = READ_VECTOR();
 
 	SparkEffectParams params;
 	params.sparkModelIndex = READ_SHORT();
@@ -671,13 +627,8 @@ int __MsgFunc_Particle( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 
-	const float x = READ_COORD();
-	const float y = READ_COORD();
-	const float z = READ_COORD();
-
-	const float velX = READ_COORD();
-	const float velY = READ_COORD();
-	const float velZ = READ_COORD();
+	const Vector position = READ_VECTOR();
+	const Vector velocity = READ_VECTOR();
 
 	const int renderMode = READ_BYTE();
 	const float particleLife = READ_BYTE() / 10.0f;
@@ -700,14 +651,14 @@ int __MsgFunc_Particle( const char *pszName, int iSize, void *pbuf )
 		model_t* sprite = gEngfuncs.pfnGetModelByIndex(modelIndex);
 		if (sprite)
 		{
-			CBaseParticle *particle = g_pParticleMan->CreateParticle(Vector(x,y,z), Vector(0.0f, 0.0f, 0.0f), sprite, particleSize > 0 ? particleSize : 16, brightness, "particle");
+			CBaseParticle *particle = g_pParticleMan->CreateParticle(position, Vector(0.0f, 0.0f, 0.0f), sprite, particleSize > 0 ? particleSize : 16, brightness, "particle");
 			if (particle)
 			{
 				particle->SetLightFlag(LIGHT_NONE);
 				particle->SetCullFlag(CULL_PVS);
 				particle->SetRenderFlag(RENDER_FACEPLAYER);
 
-				particle->m_vVelocity = Vector(velX, velY, velZ);
+				particle->m_vVelocity = velocity;
 				particle->m_iRendermode = renderMode;
 				particle->m_vColor = Vector(red, green, blue);
 				particle->m_flGravity = gravity;

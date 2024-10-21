@@ -1039,13 +1039,8 @@ static void ReadWeatherData(WeatherData& data)
 
 	if (data.IsVolume())
 	{
-		data.absmin.x = READ_COORD();
-		data.absmin.y = READ_COORD();
-		data.absmin.z = READ_COORD();
-
-		data.absmax.x = READ_COORD();
-		data.absmax.y = READ_COORD();
-		data.absmax.z = READ_COORD();
+		data.absmin = READ_VECTOR();
+		data.absmax = READ_VECTOR();
 	}
 	else
 	{
@@ -1063,9 +1058,7 @@ static void ReadWeatherData(WeatherData& data)
 
 		if (data.IsLocalizedPoint())
 		{
-			data.location.x = READ_COORD();
-			data.location.y = READ_COORD();
-			data.location.z = READ_COORD();
+			data.location = READ_VECTOR();
 		}
 	}
 }
