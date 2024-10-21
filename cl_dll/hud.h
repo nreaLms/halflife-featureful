@@ -1046,7 +1046,6 @@ public:
 	static HudSpriteRenderer& Renderer();
 
 	// user messages
-	int _cdecl MsgFunc_Damage( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_GameMode( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_Logo( const char *pszName,  int iSize, void *pbuf );
 	int _cdecl MsgFunc_ResetHUD( const char *pszName,  int iSize, void *pbuf );
