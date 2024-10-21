@@ -17,6 +17,7 @@
 //
 
 #include "parsemsg.h"
+#include "vector.h"
 
 static byte *gpBuf;
 static int giSize;
@@ -150,6 +151,15 @@ char* READ_STRING( void )
 float READ_COORD( void )
 {
 	return (float)( READ_SHORT() * ( 1.0 / 8 ) );
+}
+
+Vector READ_VECTOR()
+{
+	Vector vec;
+	vec.x = READ_COORD();
+	vec.y = READ_COORD();
+	vec.z = READ_COORD();
+	return vec;
 }
 
 float READ_ANGLE( void )

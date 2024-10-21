@@ -690,13 +690,8 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 			}
 			break;
 		case DRC_CMD_CAMERA:
-			v1[0] = READ_COORD();	// position
-			v1[1] = READ_COORD();
-			v1[2] = READ_COORD();	// vJumpOrigin
-
-			v1[0] = READ_COORD();	// view angle
-			v1[1] = READ_COORD();	// vJumpAngles
-			v1[2] = READ_COORD();
+			v1 = READ_VECTOR();	// position, vJumpOrigin
+			v2 = READ_VECTOR();	// view angle, vJumpAngles
 
 			f1    = READ_BYTE();	// fov
 			i1    = READ_WORD();	// target
@@ -769,13 +764,8 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 			gEngfuncs.pfnFilteredClientCmd( READ_STRING() );
 			break;
 		case DRC_CMD_CAMPATH:
-			v1[0] = READ_COORD();	// position
-			v1[1] = READ_COORD();
-			v1[2] = READ_COORD();	// vJumpOrigin
-
-			v2[0] = READ_COORD();	// view angle
-			v2[1] = READ_COORD();   // vJumpAngles
-			v2[2] = READ_COORD();
+			v1 = READ_VECTOR();	// position, vJumpOrigin
+			v2 = READ_VECTOR();	// view angle, vJumpAngles
 			f1    = READ_BYTE();	// FOV
 			i1    = READ_BYTE();	// flags
 
@@ -793,13 +783,9 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 			{
 				f1 = gHUD.m_flTime + (float)( READ_SHORT()) / 100.0f;
 
-				v1[0] = READ_COORD();	// position
-				v1[1] = READ_COORD();
-				v1[2] = READ_COORD();	// vJumpOrigin
+				v1 = READ_VECTOR();	// position, vJumpOrigin
 
-				v2[0] = READ_COORD();	// view angle
-				v2[1] = READ_COORD();   // vJumpAngles
-				v2[2] = READ_COORD();
+				v2 = READ_VECTOR();	// view angle, vJumpAngles
 				f2    = READ_BYTE();	// fov
 				i3    = READ_BYTE();	// flags
 

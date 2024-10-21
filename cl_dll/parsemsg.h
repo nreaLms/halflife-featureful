@@ -21,6 +21,7 @@
 
 #define ASSERT( x )
 
+#include "mathlib.h"
 #include "common_types.h"
 
 void BEGIN_READ( void *buf, int size );
@@ -32,6 +33,7 @@ int READ_LONG( void );
 float READ_FLOAT( void );
 char* READ_STRING( void );
 float READ_COORD( void );
+Vector READ_VECTOR();
 float READ_ANGLE( void );
 float READ_HIRESANGLE( void );
 
