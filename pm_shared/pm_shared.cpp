@@ -293,7 +293,7 @@ void PM_PlayStepSound( int step, float fvol )
 	irand = pmove->RandomLong( 0, 1 ) + ( pmove->iStepLeft * 2 );
 
 	// FIXME mp_footsteps needs to be a movevar
-	if( pmove->multiplayer && !pmove->movevars->footsteps )
+	if( !pmove->multiplayer && !pmove->movevars->footsteps )
 		return;
 	VectorCopy( pmove->velocity, hvel );
 	hvel[2] = 0.0f;
