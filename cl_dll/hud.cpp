@@ -235,6 +235,7 @@ extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
 cvar_t *r_decals = NULL;
 cvar_t *cl_viewbob = NULL;
+cvar_t* cl_headbob = NULL;
 cvar_t *cl_rollspeed = NULL;
 cvar_t *cl_rollangle = NULL;
 cvar_t *cl_satchelcontrol = NULL;
@@ -641,6 +642,7 @@ void CHud::Init( void )
 	m_pCvarCrosshair = gEngfuncs.pfnGetCvarPointer( "crosshair" );
 
 	CreateBooleanCvarConditionally(cl_viewbob, "cl_viewbob", clientFeatures.view_bob);
+	CreateBooleanCvarConditionally(cl_headbob, "cl_headbob", clientFeatures.head_bob);
 	CreateFloatCvarConditionally(cl_rollangle, "cl_rollangle", clientFeatures.rollangle);
 	cl_rollspeed = gEngfuncs.pfnRegisterVariable ( "cl_rollspeed", "200", FCVAR_CLIENTDLL|FCVAR_ARCHIVE );
 
@@ -1477,6 +1479,11 @@ bool CHud::ClientFeatureEnabled(cvar_t* cVariable, bool defaultValue)
 bool CHud::ViewBobEnabled()
 {
 	return ClientFeatureEnabled(cl_viewbob, clientFeatures.view_bob.enabled_by_default);
+}
+
+bool CHud::HeadBobEnabled()
+{
+	return ClientFeatureEnabled( cl_headbob, clientFeatures.head_bob.enabled_by_default );
 }
 
 int CHud::CalcMinHUDAlpha()

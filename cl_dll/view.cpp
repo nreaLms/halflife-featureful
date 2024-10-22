@@ -719,8 +719,12 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	// Head bob code (HL: Extended - Bacontsu)
 	Vector forward, right;
 	VectorMA( view->origin, bobRight * 0.8f, right, view->origin );
-	pparams->viewangles[PITCH] -= bobUp * 0.50;
-	pparams->viewangles[YAW] -= bobRight * 0.50;
+
+	if ( gHUD.HeadBobEnabled() )
+	{
+		pparams->viewangles[PITCH] -= bobUp * 0.50;
+		pparams->viewangles[YAW] -= bobRight * 0.50;
+	}
 
 	// fudge position around to keep amount of weapon visible
 	// roughly equal with different FOV
