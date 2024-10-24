@@ -104,9 +104,28 @@ int CM249::AddToPlayer(CBasePlayer *pPlayer)
 
 BOOL CM249::Deploy()
 {
-	m_fInSpecialReload = FALSE;
-	UpdateTape();
-	return DefaultDeploy("models/v_saw.mdl", "models/p_saw.mdl", M249_DEPLOY, "mp5", pev->body);
+	bool result;
+
+	if ( m_IsNotFirstDraw == true )
+	{
+		result = DefaultDeploy( "models/v_saw.mdl", "models/p_saw.mdl", M249_DEPLOY, "mp5" );
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 1.0;
+	}
+	else
+	{
+		result = DefaultDeploy( "models/v_saw.mdl", "models/p_saw.mdl", M249_RELOAD1, "mp5" );
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 2.5;
+	}
+
+	if (result)
+	{
+		m_IsNotFirstDraw = true;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5;
+		m_fInSpecialReload = FALSE;
+		UpdateTape();
+	}
+
+	return result;
 }
 
 void CM249::Holster()
@@ -290,11 +309,21 @@ int CM249::BodyFromClip()
 
 int CM249::BodyFromClip(int clip)
 {
-	if (clip == 0) {
+	if (clip > 49 && clip >= M249_MAX_CLIP)
+	{
+		m_iVisibleClip = m_iClip; // helps making sure the first draw always has all bullets drawn regardless
+		return 0;
+	}
+	else if (clip == 0) 
+	{
 		return 8;
-	} else if (clip > 0 && clip <= 8) {
+	} 
+	else if (clip > 0 && clip <= 8) 
+	{
 		return 9 - clip;
-	} else {
+	} 
+	else 
+	{
 		return 0;
 	}
 }

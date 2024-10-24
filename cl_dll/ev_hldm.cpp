@@ -2046,11 +2046,11 @@ void EV_FireM249( event_args_t *args )
 
 	if( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_556, 2, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_556, 1, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_556, 2, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_556, 1, &g_tracerCount[idx - 1], args->fparam1, args->fparam2 );
 	}
 }
 

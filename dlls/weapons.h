@@ -1211,6 +1211,8 @@ public:
 	int m_iVisibleClip;
 
 private:
+	bool m_IsNotFirstDraw;
+
 	unsigned short m_usM249;
 };
 #endif
