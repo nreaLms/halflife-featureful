@@ -168,24 +168,24 @@ void DLLEXPORT CAM_Think()
 #endif
 	Vector viewangles;
 
-	if( gEngfuncs.GetMaxClients() > 1 && CL_IsThirdPerson() )
-		CAM_ToFirstPerson();
+	//if( gEngfuncs.GetMaxClients() > 1 && CL_IsThirdPerson() )
+	//	CAM_ToFirstPerson();
 
-	switch( (int)cam_command->value )
-	{
-		case CAM_COMMAND_TOTHIRDPERSON:
-			CAM_ToThirdPerson();
-			break;
-		case CAM_COMMAND_TOFIRSTPERSON:
-			CAM_ToFirstPerson();
-			break;
-		case CAM_COMMAND_NONE:
-		default:
-			break;
-	}
+	//switch( (int)cam_command->value )
+	//{
+	//	case CAM_COMMAND_TOTHIRDPERSON:
+	//		CAM_ToThirdPerson();
+	//		break;
+	//	case CAM_COMMAND_TOFIRSTPERSON:
+	//		CAM_ToFirstPerson();
+	//		break;
+	//	case CAM_COMMAND_NONE:
+	//	default:
+	//		break;
+	//}
 
 	if( !cam_thirdperson )
-		return;
+		CAM_ToThirdPerson();
 #if LATER
 	if( cam_contain->value )
 	{
@@ -524,8 +524,8 @@ void CAM_Init()
 	gEngfuncs.pfnAddCommand( "-camin", CAM_InUp );
 	gEngfuncs.pfnAddCommand( "+camout", CAM_OutDown );
 	gEngfuncs.pfnAddCommand( "-camout", CAM_OutUp );
-	gEngfuncs.pfnAddCommand( "thirdperson", CAM_ToThirdPerson );
-	gEngfuncs.pfnAddCommand( "firstperson", CAM_ToFirstPerson );
+	//gEngfuncs.pfnAddCommand( "thirdperson", CAM_ToThirdPerson );
+	//gEngfuncs.pfnAddCommand( "firstperson", CAM_ToFirstPerson );
 	gEngfuncs.pfnAddCommand( "+cammousemove",CAM_StartMouseMove);
 	gEngfuncs.pfnAddCommand( "-cammousemove",CAM_EndMouseMove);
 	gEngfuncs.pfnAddCommand( "+camdistance", CAM_StartDistance );
