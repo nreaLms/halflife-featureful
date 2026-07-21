@@ -114,6 +114,9 @@ cvar_t	*cl_steady_uncrouch;
 cvar_t	*hlm_topdown;
 cvar_t	*hlm_topdown_height;
 
+cvar_t	*hlm_cam_lead;
+cvar_t	*hlm_cam_lead_max;
+
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
 cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2.0f};
@@ -839,10 +842,29 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 
 	if(hlm_topdown && hlm_topdown->value)
 	{
-		// Caméra fixe en plongée façon Hotline Miami :
-		// toujours au-dessus du joueur, regard toujours droit vers le bas.
-		pparams->vieworg[0] = pparams->simorg[0];
-		pparams->vieworg[1] = pparams->simorg[1];
+		float dx = g_flCrosshairX - ScreenWidth * 0.5f;
+		float dy = g_flCrosshairY - ScreenHeight * 0.5f;
+		float screenDist = sqrt(dx * dx + dy * dy);
+
+		float panX = 0.0f, panY = 0.0f;
+
+		if(screenDist > 0.01f)
+		{
+			// même formule que pour l'orientation du perso : direction monde du crosshair
+			float yaw = atan2(-dy, dx) * (180.0f / M_PI) - 90.0f;
+			Vector panAngles(0.0f, yaw, 0.0f);
+			Vector panForward, panRight, panUp;
+			AngleVectors(panAngles, panForward, panRight, panUp);
+
+			float halfScreen = Q_min(ScreenWidth, ScreenHeight) * 0.5f;
+			float lead = Q_min(screenDist / halfScreen, 1.0f) * hlm_cam_lead_max->value * hlm_cam_lead->value;
+
+			panX = panForward[0] * lead;
+			panY = panForward[1] * lead;
+		}
+
+		pparams->vieworg[0] = pparams->simorg[0] + panX;
+		pparams->vieworg[1] = pparams->simorg[1] + panY;
 		pparams->vieworg[2] = pparams->simorg[2] + hlm_topdown_height->value;
 
 		pparams->viewangles[PITCH] = 90.0f;
@@ -1772,6 +1794,9 @@ void V_Init()
 
 	hlm_topdown = gEngfuncs.pfnRegisterVariable( "hlm_topdown", "0", FCVAR_ARCHIVE );
 	hlm_topdown_height = gEngfuncs.pfnRegisterVariable( "hlm_topdown_height", "500", FCVAR_ARCHIVE );
+
+	hlm_cam_lead     = gEngfuncs.pfnRegisterVariable( "hlm_cam_lead", "0.5", FCVAR_ARCHIVE );
+	hlm_cam_lead_max = gEngfuncs.pfnRegisterVariable( "hlm_cam_lead_max", "150", FCVAR_ARCHIVE );
 }
 
 //#define TRACE_TEST	1
