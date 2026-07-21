@@ -111,6 +111,9 @@ cvar_t	*cl_chasedist;
 
 cvar_t	*cl_steady_uncrouch;
 
+cvar_t	*hlm_topdown;
+cvar_t	*hlm_topdown_height;
+
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
 cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2.0f};
@@ -833,9 +836,22 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	v_client_aimangles = pparams->cl_viewangles;
 	v_lastAngles = pparams->viewangles;
 	//v_cl_angles = pparams->cl_viewangles;	// keep old user mouse angles !
-	if( CL_IsThirdPerson() )
+
+	if(hlm_topdown && hlm_topdown->value)
 	{
-		VectorCopy( camAngles, pparams->viewangles );
+		// Caméra fixe en plongée façon Hotline Miami :
+		// toujours au-dessus du joueur, regard toujours droit vers le bas.
+		pparams->vieworg[0] = pparams->simorg[0];
+		pparams->vieworg[1] = pparams->simorg[1];
+		pparams->vieworg[2] = pparams->simorg[2] + hlm_topdown_height->value;
+
+		pparams->viewangles[PITCH] = 90.0f;
+		pparams->viewangles[YAW] = 0.0f;
+		pparams->viewangles[ROLL] = 0.0f;
+	}
+	else if(CL_IsThirdPerson())
+	{
+		VectorCopy(camAngles, pparams->viewangles);
 	}
 
 	// Apply this at all times
@@ -1748,6 +1764,9 @@ void V_Init()
 	cl_waterdist = gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist = gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 	cl_steady_uncrouch = gEngfuncs.pfnRegisterVariable( "cl_steady_uncrouch","1", FCVAR_ARCHIVE );
+
+	hlm_topdown = gEngfuncs.pfnRegisterVariable( "hlm_topdown", "0", FCVAR_ARCHIVE );
+	hlm_topdown_height = gEngfuncs.pfnRegisterVariable( "hlm_topdown_height", "500", FCVAR_ARCHIVE );
 }
 
 //#define TRACE_TEST	1
