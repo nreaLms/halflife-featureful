@@ -881,31 +881,16 @@ void GoldSourceInput::IN_MouseMove ( float frametime, usercmd_t *cmd)
 		// Apply custom mouse scaling/acceleration
 		IN_ScaleMouse( &mouse_x, &mouse_y );
 
-		// add mouse X/Y movement to cmd
-		if ( (in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1) ))
-			cmd->sidemove += m_side->value * mouse_x;
-		else
-			viewangles[YAW] -= m_yaw->value * mouse_x;
+		// La souris ne déplace plus le joueur (ce sera géré par WASD à l'étape suivante) :
+		// elle sert uniquement à orienter le personnage vers le crosshair.
+		float dx = g_flCrosshairX - ScreenWidth * 0.5f;
+		float dy = g_flCrosshairY - ScreenHeight * 0.5f;
 
-		if ( (in_mlook.state & 1) && !(in_strafe.state & 1))
+		if(fabs(dx) > 0.01f || fabs(dy) > 0.01f)
 		{
-			viewangles[PITCH] += m_pitch->value * mouse_y;
-			if (viewangles[PITCH] > cl_pitchdown->value)
-				viewangles[PITCH] = cl_pitchdown->value;
-			if (viewangles[PITCH] < -cl_pitchup->value)
-				viewangles[PITCH] = -cl_pitchup->value;
+			viewangles[YAW] = atan2(-dy, dx) * (180.0f / M_PI) - 90.0f;
 		}
-		else
-		{
-			if ((in_strafe.state & 1) && gEngfuncs.IsNoClipping() )
-			{
-				cmd->upmove -= m_forward->value * mouse_y;
-			}
-			else
-			{
-				cmd->forwardmove -= m_forward->value * mouse_y;
-			}
-		}
+		viewangles[PITCH] = 0.0f;
 	}
 
 	// HACKHACK: change viewangles directly in viewcode,

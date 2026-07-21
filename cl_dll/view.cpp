@@ -865,13 +865,18 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 			pitch += 360.0f;
 
 		// Player pitch is inverted
-		pitch /= -3.0f;
+		pitch = 0.0f;
 
 		// Slam local player's pitch value
 		ent->angles[0] = pitch;
 		ent->curstate.angles[0] = pitch;
 		ent->prevstate.angles[0] = pitch;
 		ent->latched.prevangles[0] = pitch;
+
+		ent->angles[2] = pitch;
+		ent->curstate.angles[2] = pitch;
+		ent->prevstate.angles[2] = pitch;
+		ent->latched.prevangles[2] = pitch;
 	}
 
 	// override all previous settings if the viewent isn't the client
