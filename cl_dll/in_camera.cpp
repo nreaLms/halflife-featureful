@@ -185,7 +185,7 @@ void DLLEXPORT CAM_Think()
 	}
 
 	if( !cam_thirdperson )
-		return;
+		CAM_ToThirdPerson();
 #if LATER
 	if( cam_contain->value )
 	{
@@ -524,8 +524,8 @@ void CAM_Init()
 	gEngfuncs.pfnAddCommand( "-camin", CAM_InUp );
 	gEngfuncs.pfnAddCommand( "+camout", CAM_OutDown );
 	gEngfuncs.pfnAddCommand( "-camout", CAM_OutUp );
-	gEngfuncs.pfnAddCommand( "thirdperson", CAM_ToThirdPerson );
-	gEngfuncs.pfnAddCommand( "firstperson", CAM_ToFirstPerson );
+	//gEngfuncs.pfnAddCommand( "thirdperson", CAM_ToThirdPerson );
+	//gEngfuncs.pfnAddCommand( "firstperson", CAM_ToFirstPerson );
 	gEngfuncs.pfnAddCommand( "+cammousemove",CAM_StartMouseMove);
 	gEngfuncs.pfnAddCommand( "-cammousemove",CAM_EndMouseMove);
 	gEngfuncs.pfnAddCommand( "+camdistance", CAM_StartDistance );
