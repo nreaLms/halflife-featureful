@@ -2771,7 +2771,17 @@ void PM_PlayerMove( qboolean server )
 	PM_ReduceTimers();
 
 	// Convert view angles to vectors
-	AngleVectors( pmove->angles, &pmove->forward, &pmove->right, &pmove->up );
+	AngleVectors(pmove->angles, &pmove->forward, &pmove->right, &pmove->up);
+
+	// Hotline Miami : le déplacement (WASD) est indépendant de la direction de visée.
+	// On recalcule forward/right à partir d'un yaw fixe, pas de l'angle vers le crosshair.
+	{
+		Vector moveAngles(0.0f, 0.0f, 0.0f);
+		Vector moveForward, moveRight, moveUp;
+		AngleVectors(moveAngles, &moveForward, &moveRight, &moveUp);
+		pmove->forward = moveForward;
+		pmove->right = moveRight;
+	}
 
 	// PM_ShowClipBox();
 
