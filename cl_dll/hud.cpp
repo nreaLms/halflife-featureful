@@ -906,6 +906,7 @@ void CHud::Init()
 
 	m_Ammo.Init();
 	m_Health.Init();
+	m_Crosshair.Init();
 	m_SayText.Init();
 	m_Spectator.Init();
 	m_Geiger.Init();

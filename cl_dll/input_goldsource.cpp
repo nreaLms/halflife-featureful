@@ -22,6 +22,7 @@
 #include "in_defs.h"
 #include "keydefs.h"
 #include "view.h"
+#include "hud_crosshair.h"
 
 #if !XASH_WIN32
 #include <dlfcn.h>
@@ -853,6 +854,15 @@ void GoldSourceInput::IN_MouseMove ( float frametime, usercmd_t *cmd)
 	if ( !iMouseInUse && !gHUD.m_iIntermission && !iVisibleMouse )
 	{
 		IN_GetMouseDelta( &mx, &my );
+
+		const float crosshairSensitivity = 1.0f; // à ajuster/exposer en cvar plus tard
+		g_flCrosshairX += mx * crosshairSensitivity;
+		g_flCrosshairY += my * crosshairSensitivity;
+
+		if(g_flCrosshairX < 0) g_flCrosshairX = 0;
+		if(g_flCrosshairY < 0) g_flCrosshairY = 0;
+		if(g_flCrosshairX > ScreenWidth)  g_flCrosshairX = (float)ScreenWidth;
+		if(g_flCrosshairY > ScreenHeight) g_flCrosshairY = (float)ScreenHeight;
 
 		if (m_filter && m_filter->value)
 		{

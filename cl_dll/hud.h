@@ -204,7 +204,7 @@ private:
 
 
 #include "health.h"
-
+#include "hud_crosshair.h"
 
 #define FADE_TIME 100
 
@@ -1275,6 +1275,7 @@ public:
 	CHudMonsterInfo		m_MonsterInfo;
 	CHudMeter	m_Meter;
 	CHudMessageBox	m_MessageBox;
+	CHudCrosshair   m_Crosshair;
 
 	void ParseModConfigs();
 	bool IsDeveloperModeOn();
