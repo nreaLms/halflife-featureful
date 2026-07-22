@@ -168,21 +168,9 @@ void DLLEXPORT CAM_Think()
 #endif
 	Vector viewangles;
 
-	if( gEngfuncs.GetMaxClients() > 1 && CL_IsThirdPerson() )
-		CAM_ToFirstPerson();
-
-	switch( (int)cam_command->value )
-	{
-		case CAM_COMMAND_TOTHIRDPERSON:
-			CAM_ToThirdPerson();
-			break;
-		case CAM_COMMAND_TOFIRSTPERSON:
-			CAM_ToFirstPerson();
-			break;
-		case CAM_COMMAND_NONE:
-		default:
-			break;
-	}
+	// TMOD: this mod is third person by design, including in multiplayer, so
+	// unlike stock HL we don't force first person back on for maxclients > 1,
+	// and cam_command is no longer used to toggle modes (see below).
 
 	if( !cam_thirdperson )
 		CAM_ToThirdPerson();

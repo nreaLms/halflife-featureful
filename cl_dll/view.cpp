@@ -96,6 +96,41 @@ Vector g_vViewForward;
 Vector g_vViewRight;
 Vector g_vViewUp;
 
+// --- Third person camera (TMOD) ---
+// Fixed-angle follow camera: unlike the stock cam_ofs system (mouse-orbited),
+// this camera keeps a constant pitch/yaw/roll offset behind the player and
+// only follows position, with smoothing and a horizontal deadzone.
+cvar_t	*tmod_cam_pitch;
+cvar_t	*tmod_cam_yaw;
+cvar_t	*tmod_cam_roll;
+cvar_t	*tmod_cam_dist;
+cvar_t	*tmod_cam_height;
+cvar_t	*tmod_cam_lock_y_axis;
+cvar_t	*tmod_cam_deadzone;
+
+// Set by info_camdist zones through the "CamZone" user message (see hud.cpp)
+extern float g_flCamDistTarget;
+extern float g_flCamDistCurrent;
+extern float g_flCamBlendSpeed;
+
+// Exposed for other client modules (e.g. health.cpp damage direction indicator)
+// that need to reason about screen-relative directions using the camera's
+// orientation instead of the player's view angles.
+bool	g_IsThirdPerson = false;
+Vector	g_ThirdPersonCamAngles;
+
+// Fixed/scripted camera state (env_camera_fixed, env_camera_path), driven by
+// the "CamFixed" user message (see hud.cpp) and reset in hud_msg.cpp.
+bool   g_bCamInitialized = false;
+bool   g_bFixedCamActive = false;
+bool   g_bFixedCamPendingDisable = false;
+Vector g_FixedCamTargetPos = Vector( 0, 0, 0 );
+Vector g_FixedCamTargetAng = Vector( 0, 0, 0 );
+Vector g_FixedCamCurrentPos = Vector( 0, 0, 0 );
+Vector g_FixedCamCurrentAng = Vector( 0, 0, 0 );
+float  g_flFixedCamBlendSpeed = 10.0f;
+int    g_iFixedCamDisableFrame = -1;
+
 cvar_t	*scr_ofsx;
 cvar_t	*scr_ofsy;
 cvar_t	*scr_ofsz;
@@ -650,24 +685,143 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 		}
 	}
 
-	// Treating cam_ofs[2] as the distance
+	// Third person camera (TMOD): fixed pitch/yaw/roll offset behind the
+	// player (not mouse-orbited like the stock cam_ofs system), with
+	// distance/height/deadzone smoothing and support for camera zones
+	// (info_camdist) and scripted/fixed cameras (env_camera_fixed,
+	// env_camera_path).
 	if( CL_IsThirdPerson() )
 	{
-		Vector ofs;
+		static Vector currentCameraPos = Vector( 0, 0, 0 );
+		static Vector stableTargetPos = Vector( 0, 0, 0 );
 
-		ofs[0] = ofs[1] = ofs[2] = 0.0f;
+		Vector playerPos;
+		Vector targetCameraPos;
 
-		CL_CameraOffset( (float *)&ofs );
+		g_IsThirdPerson = true;
 
-		VectorCopy( ofs, camAngles );
-		camAngles[ROLL]	= 0;
+		if( g_bFixedCamPendingDisable )
+		{
+			g_iFixedCamDisableFrame++;
+			if( g_iFixedCamDisableFrame >= 2 ) // wait 2 frames before releasing
+			{
+				g_bFixedCamPendingDisable = false;
+				g_iFixedCamDisableFrame = -1;
+				g_bFixedCamActive = false;
+			}
+		}
 
-		AngleVectors( camAngles, camForward, camRight, camUp );
+		// Camera orientation (constant, independent of player view angles)
+		Vector fixedCamAngles( tmod_cam_pitch->value, tmod_cam_yaw->value, tmod_cam_roll->value );
+
+		VectorCopy( pparams->vieworg, playerPos );
+
+		AngleVectors( fixedCamAngles, camForward, camRight, camUp );
+
+		float flBaseDist = ( g_flCamDistTarget >= 0.0f ) ? g_flCamDistTarget : tmod_cam_dist->value;
+
+		if( g_flCamDistCurrent < 0.0f )
+			g_flCamDistCurrent = flBaseDist;
+
+		float flDiff = flBaseDist - g_flCamDistCurrent;
+		if( fabs( flDiff ) > 0.1f )
+			g_flCamDistCurrent += flDiff * g_flCamBlendSpeed * pparams->frametime;
+		else
+			g_flCamDistCurrent = flBaseDist;
+
+		float distanceBack = g_flCamDistCurrent;
+		float height = tmod_cam_height->value;
 
 		for( i = 0; i < 3; i++ )
 		{
-			pparams->vieworg[i] += -ofs[2] * camForward[i];
+			targetCameraPos[i] = playerPos[i] - camForward[i] * distanceBack + camUp[i] * height;
 		}
+
+		// Initialize once to prevent snapping from the origin on the first frame
+		if( !g_bCamInitialized )
+		{
+			VectorCopy( targetCameraPos, currentCameraPos );
+			VectorCopy( targetCameraPos, stableTargetPos );
+			if( !g_bFixedCamActive )
+			{
+				VectorCopy( targetCameraPos, g_FixedCamCurrentPos );
+				VectorCopy( fixedCamAngles, g_FixedCamCurrentAng );
+			}
+			g_bCamInitialized = true;
+		}
+
+		float deadzone = tmod_cam_deadzone->value;
+
+		Vector delta;
+		for( i = 0; i < 3; i++ )
+		{
+			delta[i] = targetCameraPos[i] - stableTargetPos[i];
+		}
+
+		// Deadzone on the horizontal axes only (X and Y)
+		Vector deltaHorizontal( delta[0], delta[1], 0.0f );
+		float distHorizontal = deltaHorizontal.Length();
+
+		if( distHorizontal > deadzone )
+		{
+			float excess = distHorizontal - deadzone;
+			float moveFactor = excess / distHorizontal;
+
+			stableTargetPos[0] += delta[0] * moveFactor;
+			stableTargetPos[1] += delta[1] * moveFactor;
+		}
+
+		// The vertical axis (Z) follows immediately, no deadzone
+		stableTargetPos[2] = targetCameraPos[2];
+
+		// Unified lag - same speed for everything
+		float lerpFactor = g_flFixedCamBlendSpeed * pparams->frametime;
+		if( lerpFactor > 1.0f )
+			lerpFactor = 1.0f;
+
+		for( i = 0; i < 3; i++ )
+			currentCameraPos[i] += ( stableTargetPos[i] - currentCameraPos[i] ) * lerpFactor;
+
+		// Optional Y-axis lock (e.g. side-scrolling style levels)
+		if( tmod_cam_lock_y_axis && tmod_cam_lock_y_axis->value != 0.0f )
+		{
+			currentCameraPos[1] = 0.0f;
+		}
+
+		// Target depends on whether a fixed/scripted camera is active
+		Vector targetPos, targetAng;
+		if( g_bFixedCamActive )
+		{
+			VectorCopy( g_FixedCamTargetPos, targetPos );
+			VectorCopy( g_FixedCamTargetAng, targetAng );
+			// Keep the follow-cam state in sync so the return transition is smooth
+			VectorCopy( targetCameraPos, stableTargetPos );
+			VectorCopy( targetCameraPos, currentCameraPos );
+		}
+		else
+		{
+			VectorCopy( currentCameraPos, targetPos );
+			VectorCopy( fixedCamAngles, targetAng );
+		}
+
+		// Single lerp for both the follow-cam and fixed-cam cases
+		for( i = 0; i < 3; i++ )
+		{
+			g_FixedCamCurrentPos[i] += ( targetPos[i] - g_FixedCamCurrentPos[i] ) * lerpFactor;
+
+			float diff = targetAng[i] - g_FixedCamCurrentAng[i];
+			while( diff > 180.0f ) diff -= 360.0f;
+			while( diff < -180.0f ) diff += 360.0f;
+			g_FixedCamCurrentAng[i] += diff * lerpFactor;
+		}
+
+		VectorCopy( g_FixedCamCurrentPos, pparams->vieworg );
+		VectorCopy( g_FixedCamCurrentAng, camAngles );
+		VectorCopy( fixedCamAngles, g_ThirdPersonCamAngles );
+	}
+	else
+	{
+		g_IsThirdPerson = false;
 	}
 
 	// Give gun our viewangles
@@ -838,25 +992,11 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 		VectorCopy( camAngles, pparams->viewangles );
 	}
 
-	// Apply this at all times
-	{
-		float pitch = pparams->viewangles[0];
-
-		// Normalize angles
-		if( pitch > 180.0f )
-			pitch -= 360.0f;
-		else if( pitch < -180.0f )
-			pitch += 360.0f;
-
-		// Player pitch is inverted
-		pitch /= -3.0f;
-
-		// Slam local player's pitch value
-		ent->angles[0] = pitch;
-		ent->curstate.angles[0] = pitch;
-		ent->prevstate.angles[0] = pitch;
-		ent->latched.prevangles[0] = pitch;
-	}
+	// NOTE (TMOD): the stock code used to slam the local player model's
+	// pitch here (viewangles[0] / -3) so the visible body would tilt with
+	// mouse look under the old orbiting cam_ofs camera. The TMOD camera
+	// uses a fixed pitch/yaw/roll offset instead of orbiting on the view
+	// angles, so that hack no longer applies and has been dropped.
 
 	// override all previous settings if the viewent isn't the client
 	if( pparams->viewentity > pparams->maxclients )
@@ -1673,6 +1813,34 @@ void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 	{
 		V_CalcNormalRefdef( pparams );
 	}
+	else
+	{
+		// TMOD: while paused, freeze the local player model's angles instead
+		// of leaving them driven by whatever the last live frame set, so the
+		// third person camera doesn't twitch on unpause.
+		g_ev_punchangle = Vector( 0, 0, 0 );
+
+		cl_entity_t *pausedEnt = gEngfuncs.GetLocalPlayer();
+		if( pausedEnt )
+		{
+			pausedEnt->angles[0] = 0.0f;
+			pausedEnt->curstate.angles[0] = 0.0f;
+			pausedEnt->prevstate.angles[0] = 0.0f;
+			pausedEnt->latched.prevangles[0] = 0.0f;
+
+			pausedEnt->angles[2] = 0.0f;
+			pausedEnt->curstate.angles[2] = 0.0f;
+			pausedEnt->prevstate.angles[2] = 0.0f;
+			pausedEnt->latched.prevangles[2] = 0.0f;
+
+			// YAW: hold the last stable value (v_lastAngles is stored right
+			// before the pause, on the last normal frame)
+			pausedEnt->angles[1] = v_lastAngles[YAW];
+			pausedEnt->curstate.angles[1] = v_lastAngles[YAW];
+			pausedEnt->prevstate.angles[1] = v_lastAngles[YAW];
+			pausedEnt->latched.prevangles[1] = v_lastAngles[YAW];
+		}
+	}
 
 	// Save view data for viewmodel renderer
 	g_vViewOrigin = pparams->vieworg;
@@ -1748,6 +1916,14 @@ void V_Init()
 	cl_waterdist = gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist = gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 	cl_steady_uncrouch = gEngfuncs.pfnRegisterVariable( "cl_steady_uncrouch","1", FCVAR_ARCHIVE );
+
+	tmod_cam_pitch			=	gEngfuncs.pfnRegisterVariable( "tmod_cam_pitch",		"30",	FCVAR_ARCHIVE );
+	tmod_cam_yaw			=	gEngfuncs.pfnRegisterVariable( "tmod_cam_yaw",			"90",	FCVAR_ARCHIVE );
+	tmod_cam_roll			=	gEngfuncs.pfnRegisterVariable( "tmod_cam_roll",		"0",	FCVAR_ARCHIVE );
+	tmod_cam_dist			=	gEngfuncs.pfnRegisterVariable( "tmod_cam_dist",		"500",	FCVAR_ARCHIVE );
+	tmod_cam_height			=	gEngfuncs.pfnRegisterVariable( "tmod_cam_height",		"0",	FCVAR_ARCHIVE );
+	tmod_cam_lock_y_axis	=	gEngfuncs.pfnRegisterVariable( "tmod_cam_lock_y_axis",	"1",	FCVAR_ARCHIVE );
+	tmod_cam_deadzone		=	gEngfuncs.pfnRegisterVariable( "tmod_cam_deadzone",	"1",	FCVAR_ARCHIVE );
 }
 
 //#define TRACE_TEST	1

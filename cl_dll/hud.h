@@ -70,6 +70,11 @@
 
 #define		HUDELEM_ACTIVE	1
 
+// TMOD: third person camera state, defined in view.cpp, consumed by other
+// client modules (e.g. health.cpp damage direction indicator).
+extern bool g_IsThirdPerson;
+extern Vector g_ThirdPersonCamAngles;
+
 enum 
 { 
 	MAX_PLAYERS = 64,

@@ -359,7 +359,17 @@ void CHudHealth::CalcDamageDirection( Vector vecFrom )
 
 	float flDistToTarget = vecFrom.NormalizeInPlace();
 
-	AngleVectors( vecAngles, forward, right, up );
+	// TMOD: with the fixed-angle third person camera, screen-relative
+	// directions must be computed from the camera's orientation, not the
+	// player's (mouse) view angles, since the two are decoupled.
+	if( g_IsThirdPerson )
+	{
+		AngleVectors( g_ThirdPersonCamAngles, forward, right, up );
+	}
+	else
+	{
+		AngleVectors( vecAngles, forward, right, up );
+	}
 
 	front = DotProduct( vecFrom, right );
 	side = DotProduct( vecFrom, forward );

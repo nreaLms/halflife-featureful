@@ -279,6 +279,75 @@ cvar_t *default_fov = NULL;
 
 void ShutdownInput();
 
+// TMOD: third person camera zones (info_camdist) and fixed/scripted cameras
+// (env_camera_fixed, env_camera_path). Actual camera math lives in view.cpp;
+// these two handlers only decode the server messages into shared state.
+
+float g_flCamDistTarget = -1.0f;
+float g_flCamDistCurrent = -1.0f;
+float g_flCamBlendSpeed = 10.0f;
+
+int __MsgFunc_CamZone( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	int rawHeight = READ_LONG();
+	int rawSpeed = READ_LONG();
+
+	g_flCamDistTarget = *reinterpret_cast<float *>( &rawHeight );
+	g_flCamBlendSpeed = *reinterpret_cast<float *>( &rawSpeed );
+
+	return 1;
+}
+
+extern bool   g_bFixedCamActive;
+extern bool   g_bFixedCamPendingDisable;
+extern Vector g_FixedCamTargetPos;
+extern Vector g_FixedCamTargetAng;
+extern Vector g_FixedCamCurrentPos;
+extern Vector g_FixedCamCurrentAng;
+extern float  g_flFixedCamBlendSpeed;
+extern int    g_iFixedCamDisableFrame;
+
+int __MsgFunc_CamFixed( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+	bool  bEnable = ( READ_BYTE() != 0 );
+	int   rawX = READ_LONG();
+	int   rawY = READ_LONG();
+	int   rawZ = READ_LONG();
+	int   rawPitch = READ_LONG();
+	int   rawYaw = READ_LONG();
+	int   rawRoll = READ_LONG();
+	int   rawSpeed = READ_LONG();
+
+	g_flFixedCamBlendSpeed = *reinterpret_cast<float *>( &rawSpeed );
+
+	if( bEnable )
+	{
+		g_bFixedCamPendingDisable = false;
+		g_iFixedCamDisableFrame = -1;
+		g_bFixedCamActive = true;
+		g_FixedCamTargetPos = Vector(
+			*reinterpret_cast<float *>( &rawX ),
+			*reinterpret_cast<float *>( &rawY ),
+			*reinterpret_cast<float *>( &rawZ )
+		);
+		g_FixedCamTargetAng = Vector(
+			*reinterpret_cast<float *>( &rawPitch ),
+			*reinterpret_cast<float *>( &rawYaw ),
+			*reinterpret_cast<float *>( &rawRoll )
+		);
+	}
+	else
+	{
+		g_bFixedCamPendingDisable = true;
+		g_iFixedCamDisableFrame = 0; // incremented every frame in view.cpp
+	}
+
+	return 1;
+}
+
 int GetBloodSplatterStyle()
 {
 	return cl_bloodsplatter_style ? (int)cl_bloodsplatter_style->value : gHUD.clientFeatures.bloodsplatter_style.defaultValue;
@@ -789,6 +858,8 @@ void CHud::Init()
 	HOOK_MESSAGE( Capability );
 	HOOK_MESSAGE( OnRope );
 	HOOK_MESSAGE( Mirror );
+	HOOK_MESSAGE( CamZone );
+	HOOK_MESSAGE( CamFixed );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round

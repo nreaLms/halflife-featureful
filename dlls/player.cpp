@@ -302,6 +302,10 @@ int gmsgSaveDisable = 0;
 int gmsgCapability = 0;
 int gmsgOnRope = 0;
 
+// TMOD: third person camera (info_camdist zones + fixed/scripted cameras)
+int gmsgCamZone = 0;
+int gmsgCamFixed = 0;
+
 int gmsgWeaponTool = 0;
 int gmsgToolState = 0;
 
@@ -429,6 +433,10 @@ void LinkUserMessages()
 	gmsgSaveDisable = REG_USER_MSG("SaveDisable", 1);
 	gmsgCapability = REG_USER_MSG("Capability", 4);
 	gmsgOnRope = REG_USER_MSG("OnRope", 1);
+
+	// TMOD: third person camera
+	gmsgCamZone = REG_USER_MSG("CamZone", sizeof(int) * 2);
+	gmsgCamFixed = REG_USER_MSG("CamFixed", 1 + sizeof(int) * 7);
 
 	gmsgWeaponTool = REG_USER_MSG("WeaponTool", 2);
 	gmsgToolState = REG_USER_MSG("ToolState", 8);

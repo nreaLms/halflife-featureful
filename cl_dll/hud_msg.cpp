@@ -66,6 +66,17 @@ int CHud::MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 	g_lastFOV = 0.0f;
 	m_inScope = false;
 
+	// TMOD: reset fixed/scripted camera state
+	extern bool   g_bFixedCamActive;
+	extern bool   g_bCamInitialized;
+	extern Vector g_FixedCamCurrentPos;
+	extern Vector g_FixedCamCurrentAng;
+
+	g_bFixedCamActive = false;
+	g_bCamInitialized = false;  // forces re-init of the follow-cam next frame
+	g_FixedCamCurrentPos = Vector( 0, 0, 0 );
+	g_FixedCamCurrentAng = Vector( 0, 0, 0 );
+
 	return 1;
 }
 
