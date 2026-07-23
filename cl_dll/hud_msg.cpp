@@ -77,6 +77,10 @@ int CHud::MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 	g_FixedCamCurrentPos = Vector( 0, 0, 0 );
 	g_FixedCamCurrentAng = Vector( 0, 0, 0 );
 
+	// TMOD: reset aim lock-on state
+	extern bool g_bAutoAimLocked;
+	g_bAutoAimLocked = false;
+
 	return 1;
 }
 

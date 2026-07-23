@@ -740,6 +740,10 @@ cvar_t npckill = { "mp_npckill", "1", FCVAR_SERVER };
 
 cvar_t sv_bunnyhop		= { "sv_bunnyhop", "0", FCVAR_SERVER };
 
+// TMOD: aim/auto-aim system - FOV half-angle (degrees) used to pick the
+// nearest visible enemy to lock onto while holding IN_AIM.
+cvar_t tmod_player_aim_radius = { "tmod_player_aim_radius", "80", FCVAR_ARCHIVE };
+
 cvar_t allow_spectators = { "allow_spectators", "0", FCVAR_SERVER };	// 0 prevents players from being spectators
 
 #if FEATURE_USE_THROUGH_WALLS_CVAR
@@ -1671,6 +1675,7 @@ void GameDLLInit()
 	CVAR_REGISTER( &npckill );
 
 	CVAR_REGISTER( &sv_bunnyhop );
+	CVAR_REGISTER( &tmod_player_aim_radius );
 
 	CVAR_REGISTER( &mp_chattime );
 

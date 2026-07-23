@@ -348,6 +348,19 @@ int __MsgFunc_CamFixed( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+// TMOD: mirrors the server's aim lock-on state (see PreThink() in
+// player.cpp) so the third person tank controls freeze movement input
+// while the player is hard-locked onto an enemy (see g_bAutoAimLocked in
+// input_goldsource.cpp).
+extern bool g_bAutoAimLocked;
+
+int __MsgFunc_AutoAimLock( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+	g_bAutoAimLocked = ( READ_BYTE() != 0 );
+	return 1;
+}
+
 int GetBloodSplatterStyle()
 {
 	return cl_bloodsplatter_style ? (int)cl_bloodsplatter_style->value : gHUD.clientFeatures.bloodsplatter_style.defaultValue;
@@ -860,6 +873,7 @@ void CHud::Init()
 	HOOK_MESSAGE( Mirror );
 	HOOK_MESSAGE( CamZone );
 	HOOK_MESSAGE( CamFixed );
+	HOOK_MESSAGE( AutoAimLock );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round

@@ -60,6 +60,9 @@ extern DLL_GLOBAL bool g_fGameOver;
 bool gEvilImpulse101;
 extern DLL_GLOBAL bool gDisplayTitle;
 
+// TMOD: aim/auto-aim system, cvar defined and registered in game.cpp
+extern cvar_t tmod_player_aim_radius;
+
 bool gInitHUD = true;
 
 extern void CopyToBodyQue( entvars_t *pev);
@@ -305,6 +308,7 @@ int gmsgOnRope = 0;
 // TMOD: third person camera (info_camdist zones + fixed/scripted cameras)
 int gmsgCamZone = 0;
 int gmsgCamFixed = 0;
+int gmsgAutoAimLock = 0;
 
 int gmsgWeaponTool = 0;
 int gmsgToolState = 0;
@@ -437,6 +441,7 @@ void LinkUserMessages()
 	// TMOD: third person camera
 	gmsgCamZone = REG_USER_MSG("CamZone", sizeof(int) * 2);
 	gmsgCamFixed = REG_USER_MSG("CamFixed", 1 + sizeof(int) * 7);
+	gmsgAutoAimLock = REG_USER_MSG("AutoAimLock", 1);
 
 	gmsgWeaponTool = REG_USER_MSG("WeaponTool", 2);
 	gmsgToolState = REG_USER_MSG("ToolState", 8);
@@ -2789,6 +2794,162 @@ bool CBasePlayer::HasCustomBaseMaxSpeed()
 	return m_playerTemplate && m_playerTemplate->maxSpeed;
 }
 
+// TMOD: aim/auto-aim system.
+// Picks the closest living, visible, hostile monster within a forward FOV
+// cone (tmod_player_aim_radius degrees half-angle) and flMaxDist units.
+CBaseEntity *CBasePlayer::FindNearestEnemy(float flMaxDist)
+{
+	CBaseEntity *pNearest = NULL;
+	float flNearestDist = flMaxDist;
+
+	CBaseEntity *pEntity = NULL;
+
+	UTIL_MakeVectors(pev->v_angle);
+
+	float flHalfAngle = clamp(tmod_player_aim_radius.value, 1.0f, 179.0f) * (M_PI / 180.0f);
+	float flFovThreshold = cos(flHalfAngle);
+
+	while((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, flMaxDist)) != NULL)
+	{
+		if(pEntity->pev->deadflag != DEAD_NO)
+			continue;
+
+		if(pEntity->pev->health <= 0)
+			continue;
+
+		if(pEntity->pev->takedamage == DAMAGE_NO)
+			continue;
+
+		if(pEntity == this)
+			continue;
+
+		if(!(pEntity->pev->flags & FL_MONSTER))
+			continue;
+
+		// Don't auto-aim at bioweapons or insects
+		{
+			const int cls = pEntity->Classify();
+			if(cls == CLASS_ALIEN_BIOWEAPON || cls == CLASS_PLAYER_BIOWEAPON || cls == CLASS_INSECT)
+				continue;
+		}
+
+		if(IRelationship(pEntity) < R_DL)
+			continue;
+
+		if(!CanSeeEntity(pEntity))
+			continue;
+
+		Vector vecToEnemy = (pEntity->pev->origin - pev->origin).Normalize();
+		if(DotProduct(gpGlobals->v_forward, vecToEnemy) < flFovThreshold)
+			continue;
+
+		float flDist = (pEntity->pev->origin - pev->origin).Length();
+		if(flDist < flNearestDist)
+		{
+			flNearestDist = flDist;
+			pNearest = pEntity;
+		}
+	}
+
+	return pNearest;
+}
+
+// Line of sight check that tolerates transparent func_breakable/func_wall
+// glass panes instead of blocking on them.
+bool CBasePlayer::CanSeeEntity(CBaseEntity *pEntity)
+{
+	if(!pEntity)
+		return false;
+
+	Vector vecStart = EyePosition();
+	Vector vecEnd = pEntity->BodyTarget(vecStart);
+
+	TraceResult tr;
+	edict_t *pentIgnore = ENT(pev);
+
+	while(true)
+	{
+		UTIL_TraceLine(vecStart, vecEnd, dont_ignore_monsters, pentIgnore, &tr);
+
+		if(tr.flFraction == 1.0f)
+			return true;
+
+		CBaseEntity *pHit = CBaseEntity::Instance(tr.pHit);
+
+		if(!pHit)
+			return false;
+
+		if(pHit == pEntity)
+			return true;
+
+		if(FClassnameIs(pHit->pev, "func_breakable") ||
+		   FClassnameIs(pHit->pev, "func_wall"))
+		{
+			if(pHit->pev->rendermode != kRenderNormal ||
+			   pHit->pev->solid == SOLID_BSP)
+			{
+				pentIgnore = tr.pHit;
+				vecStart = tr.vecEndPos;
+				continue;
+			}
+		}
+
+		return false;
+	}
+}
+
+// Turns the player toward m_hAutoAimEnemy at a fixed angular speed.
+// Returns true once the player is facing the target closely enough to fire.
+bool CBasePlayer::AutoAimToNearestEnemy()
+{
+	const float flSearchRadius = 1024.0f;
+
+	if(!m_hAutoAimEnemy || m_hAutoAimEnemy->pev->deadflag != DEAD_NO ||
+	   m_hAutoAimEnemy->pev->health <= 0 || !CanSeeEntity(m_hAutoAimEnemy))
+	{
+		m_hAutoAimEnemy = FindNearestEnemy(flSearchRadius);
+
+		if(!m_hAutoAimEnemy)
+		{
+			m_bAutoAimActive = false;
+			return true;
+		}
+	}
+
+	Vector vecDir = m_hAutoAimEnemy->pev->origin - pev->origin;
+	vecDir.z = 0;
+	vecDir.Normalize();
+
+	float flTargetYaw = UTIL_VecToYaw(vecDir);
+
+	float flCurrentYaw = pev->v_angle.y;
+	float flDelta = flTargetYaw - flCurrentYaw;
+
+	while(flDelta > 180) flDelta -= 360;
+	while(flDelta < -180) flDelta += 360;
+
+	float flTurnSpeed = 900.0f * gpGlobals->frametime;
+
+	if(fabs(flDelta) <= flTurnSpeed)
+	{
+		pev->v_angle.y = flTargetYaw;
+		pev->angles.y = flTargetYaw;
+		pev->fixangle = TRUE;
+
+		m_bAutoAimReadyToFire = true;
+
+		return true;
+	}
+	else
+	{
+		flCurrentYaw += (flDelta > 0 ? flTurnSpeed : -flTurnSpeed);
+		pev->v_angle.y = flCurrentYaw;
+		pev->angles.y = flCurrentYaw;
+		pev->fixangle = TRUE;
+		return false;
+	}
+}
+
 void CBasePlayer::PreThink()
 {
 	SetMovementMode();
@@ -2806,6 +2967,102 @@ void CBasePlayer::PreThink()
 	// UNDONE: Do we need auto-repeat?
 	m_afButtonPressed =  buttonsChanged & pev->button;		// The changed ones still down are "pressed"
 	m_afButtonReleased = buttonsChanged & ( ~pev->button );	// The ones not down are "released"
+
+	// TMOD: hold IN_AIM to fire. While not aiming, IN_ATTACK doubles as
+	// IN_USE so the attack key still lets the player interact.
+	if(!FBitSet(pev->button, IN_AIM))
+	{
+		if((m_afButtonPressed & IN_ATTACK) && !m_bAttackAsUse)
+		{
+			m_bAttackAsUse = true;
+			m_afButtonPressed |= IN_USE;
+			pev->button &= ~IN_ATTACK;
+			m_afButtonPressed &= ~IN_ATTACK;
+		}
+		else if(!(pev->button & IN_ATTACK))
+		{
+			m_bAttackAsUse = false;
+		}
+	}
+	else
+	{
+		m_bAttackAsUse = false;
+	}
+
+	if(m_afButtonPressed & IN_AIM)
+	{
+		m_flAimStartTime = gpGlobals->time;
+	}
+
+	// Releasing IN_AIM drops the current lock-on
+	if(m_afButtonReleased & IN_AIM)
+	{
+		m_bAutoAimActive = false;
+		m_bAutoAimReadyToFire = false;
+		m_hAutoAimEnemy = NULL;
+	}
+
+	// Pressing IN_AIM (re)acquires the nearest visible enemy; holding it
+	// keeps whatever lock is currently active.
+	if(m_afButtonPressed & IN_AIM)
+	{
+		if(!m_bAutoAimActive)
+		{
+			m_hAutoAimEnemy = FindNearestEnemy(1024.0f);
+			m_bAutoAimActive = (m_hAutoAimEnemy != NULL);
+			m_bAutoAimReadyToFire = false;
+		}
+	}
+	else if(pev->button & IN_AIM)
+	{
+		m_bAutoAimActive = true;
+	}
+
+	bool bYawDone = true;
+	if(m_bAutoAimActive)
+	{
+		bYawDone = AutoAimToNearestEnemy();
+	}
+
+	// Firing requires: aim held, a short windup delay elapsed, and - if
+	// locked onto an enemy - the turn toward them finished.
+	bool bIsAimingDown = FBitSet(pev->button, IN_AIM);
+	bool bDelayOk = (gpGlobals->time - m_flAimStartTime) >= 0.2f;
+	bool bHasTarget = (m_bAutoAimActive && m_hAutoAimEnemy);
+
+	bool bCanFire = bIsAimingDown && bDelayOk && bYawDone
+		&& (!bHasTarget || m_bAutoAimReadyToFire);
+
+	if(!bCanFire)
+	{
+		pev->button &= ~(IN_ATTACK | IN_ATTACK2);
+		m_afButtonPressed &= ~(IN_ATTACK | IN_ATTACK2);
+	}
+
+	// This mod's controls don't support strafing and aiming/shooting at
+	// the same time - hold still while IN_AIM is down.
+	if(bIsAimingDown)
+	{
+		pev->velocity.x = 0.0f;
+		pev->velocity.y = 0.0f;
+		pev->button &= ~(IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT);
+		m_afButtonPressed &= ~(IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT);
+		m_afButtonReleased &= ~(IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT);
+	}
+
+	// Let the client know when a hard lock-on engages/disengages, so it
+	// can freeze the third person tank controls accordingly (see
+	// g_bAutoAimLocked in input_goldsource.cpp).
+	bool bLocking = (bIsAimingDown && m_bAutoAimActive && m_hAutoAimEnemy);
+	pev->fixangle = bLocking ? TRUE : FALSE;
+
+	if(bLocking != m_bWasLocking)
+	{
+		m_bWasLocking = bLocking;
+		MESSAGE_BEGIN(MSG_ONE, gmsgAutoAimLock, NULL, pev);
+		WRITE_BYTE(bLocking ? 1 : 0);
+		MESSAGE_END();
+	}
 
 	g_pGameRules->PlayerThink( this );
 
@@ -4253,6 +4510,15 @@ void CBasePlayer::Spawn()
 	m_flStartCharge = gpGlobals->time;
 	pev->classname = MAKE_STRING( "player" );
 	pev->armorvalue = 0;
+
+	// TMOD: reset aim/auto-aim state
+	m_hAutoAimEnemy = NULL;
+	m_bAutoAimActive = false;
+	m_bAutoAimReadyToFire = false;
+	m_bWasLocking = false;
+	m_bAttackAsUse = false;
+	m_flAimStartTime = 0.0f;
+
 	SetMaxArmor(g_modFeatures.MaxPlayerArmor());
 	pev->takedamage = DAMAGE_AIM;
 	pev->solid = SOLID_SLIDEBOX;

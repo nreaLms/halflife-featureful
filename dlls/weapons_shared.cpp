@@ -305,6 +305,19 @@ bool CanAttack( float attack_time, float curtime, bool isPredicted )
 
 void CBasePlayerWeapon::ItemPostFrame()
 {
+	// TMOD: this mod requires holding IN_AIM to fire. This must be enforced
+	// here, in the shared weapon code, not only in the player's server-side
+	// PreThink (dlls/player.cpp): PreThink only runs on the server, while
+	// firing effects (muzzle flash, tracers, impact decals) are predicted
+	// client-side by this same ItemPostFrame using the client's own local
+	// button state. Gating only server-side let the client mispredict a
+	// shot - visible impact, no actual damage - whenever attack was
+	// pressed without holding aim.
+	if( !FBitSet( m_pPlayer->pev->button, IN_AIM ) )
+	{
+		m_pPlayer->pev->button &= ~(IN_ATTACK | IN_ATTACK2);
+	}
+
 	const WeaponParameters& params = MyParameters();
 	const bool altMode = InAltMode();
 	const bool empty = Emptied();

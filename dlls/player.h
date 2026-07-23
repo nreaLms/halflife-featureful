@@ -151,6 +151,19 @@ public:
 	int					m_afButtonPressed;
 	int					m_afButtonReleased;
 
+	// TMOD: hold IN_AIM to fire, with auto-aim lock-on to the nearest
+	// visible enemy. See PreThink() for the gating logic.
+	CBaseEntity			*FindNearestEnemy(float flMaxDist);
+	bool				CanSeeEntity(CBaseEntity *pEntity);
+	bool				AutoAimToNearestEnemy();
+
+	EHANDLE				m_hAutoAimEnemy;
+	bool				m_bAutoAimActive;
+	bool				m_bAutoAimReadyToFire;
+	bool				m_bWasLocking;
+	bool				m_bAttackAsUse;	// IN_ATTACK doubles as IN_USE while not aiming
+	float				m_flAimStartTime;	// time IN_AIM was last pressed
+
 	edict_t				*m_pentSndLast;			// last sound entity to modify player room type
 	int					m_SndRoomtype;		// last roomtype set by sound entity
 	float				m_flSndRange;			// dist from player to sound entity
