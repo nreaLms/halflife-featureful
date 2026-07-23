@@ -13,7 +13,7 @@
 *
 ****/
 // Robin, 4-22-98: Moved set_suicide_frame() here from player.cpp to allow us to
-//				   have one without a hardcoded player.mdl in tf_client.cpp
+//				   have one without a hardcoded hgrunt_player.mdl in tf_client.cpp
 
 /*
 
@@ -66,7 +66,7 @@ void LinkUserMessages();
  */
 void set_suicide_frame( entvars_t *pev )
 {
-	if( !FStrEq( STRING( pev->model ), "models/player.mdl" ) )
+	if( !FStrEq( STRING( pev->model ), "models/hgrunt_player.mdl" ) )
 		return; // allready gibbed
 
 	//pev->frame = $deatha11;
@@ -1158,6 +1158,8 @@ void ClientPrecache()
 	// PRECACHE_SOUND( "player/pl_jumpland2.wav" );		// UNDONE: play 2x step sound
 	// PRECACHE_SOUND( "player/pl_fallpain2.wav" ); // not used
 
+	PRECACHE_SOUND( "player/pl_shot1.wav" );
+
 	PRECACHE_SOUND( "common/npc_step1.wav" );		// NPC walk on concrete
 	PRECACHE_SOUND( "common/npc_step2.wav" );
 	PRECACHE_SOUND( "common/npc_step3.wav" );
@@ -1262,7 +1264,7 @@ void ClientPrecache()
 		}
 	}
 
-	PRECACHE_MODEL( "models/player.mdl" );
+	PRECACHE_MODEL( "models/hgrunt_player.mdl" );
 
 	// hud sounds
 #if !FEATURE_CLIENTSIDE_HUDSOUND

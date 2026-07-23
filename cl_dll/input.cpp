@@ -1206,6 +1206,10 @@ void InitInput()
 	gEngfuncs.pfnAddCommand( "-alt1", IN_Alt1Up );
 	gEngfuncs.pfnAddCommand( "+aim", IN_AimDown );
 	gEngfuncs.pfnAddCommand( "-aim", IN_AimUp );
+	// TMOD: front kick. Impulse 108 (not 44 like the source mod) since
+	// sdk_new reserves impulses 1-50 for mapper-placed trigger_impulse
+	// entities - see the early-return guard in CBasePlayer::ImpulseCommands.
+	gEngfuncs.pfnAddCommand( "frontkick", []{ in_impulse = 108; } );
 	gEngfuncs.pfnAddCommand( "+score", IN_ScoreDown );
 	gEngfuncs.pfnAddCommand( "-score", IN_ScoreUp );
 	gEngfuncs.pfnAddCommand( "+showscores", IN_ScoreDown );

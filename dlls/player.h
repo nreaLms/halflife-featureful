@@ -89,13 +89,28 @@ enum
 typedef enum
 {
 	PLAYER_IDLE,
+	PLAYER_IDLE_AIM,	// TMOD: aim stance, held while IN_AIM is down
 	PLAYER_WALK,
 	PLAYER_JUMP,
 	PLAYER_SUPERJUMP,
 	PLAYER_DIE,
 	PLAYER_ATTACK1,
+	PLAYER_FRONTKICK,	// TMOD: melee kick (impulse 108)
+	PLAYER_RELOAD,		// TMOD
+	PLAYER_FLINCH,		// TMOD: reaction to taking damage
 	PLAYER_GRAPPLE,
 } PLAYER_ANIM;
+
+// TMOD: which weapon-hands pose/bodygroup the player model should use,
+// based on the currently held weapon. See CBasePlayer::GetWeaponAnimSet().
+enum EWeaponAnimSet
+{
+	ANIMSET_UNARMED,
+	ANIMSET_ONEHANDED,	// Eagle
+	ANIMSET_M4A1,		// M4A1 - bodygroup 0
+	ANIMSET_MP5,		// MP5 - bodygroup 3
+	ANIMSET_SHOTGUN,	// Shotgun - bodygroup 1
+};
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
@@ -157,12 +172,40 @@ public:
 	bool				CanSeeEntity(CBaseEntity *pEntity);
 	bool				AutoAimToNearestEnemy();
 
+	// TMOD: player animation - selects sequences/bodygroup by held weapon
+	EWeaponAnimSet		GetWeaponAnimSet();
+	int					m_iLastWeaponBody;	// tracks the last weapon bodygroup applied, -1 = none set yet
+
 	EHANDLE				m_hAutoAimEnemy;
 	bool				m_bAutoAimActive;
 	bool				m_bAutoAimReadyToFire;
 	bool				m_bWasLocking;
 	bool				m_bAttackAsUse;	// IN_ATTACK doubles as IN_USE while not aiming
 	float				m_flAimStartTime;	// time IN_AIM was last pressed
+	bool				m_bAimHeldLastFrame;	// TMOD: tracked in ItemPostFrame (shared), see weapons_shared.cpp
+
+	// TMOD: flinch reaction on taking damage
+	bool				m_bFlinching;
+	float				m_flFlinchTime;
+	bool				m_bWasFlinchLocking;	// TMOD: tracks state for the "PlayerFlinch" message (see PreThink)
+
+	// TMOD: brief blink/flash feedback after taking damage (purely visual -
+	// does not actually block damage, see IsInvulnerable() which is a
+	// separate, camera-cutscene-only mechanic)
+	float				m_flInvincibleTime;
+	float				m_flBlinkTime;
+	int					m_iBlinkCount;
+	bool				m_bVisible;
+
+	// TMOD: frontkick melee attack (impulse 108, see input.cpp's "frontkick" command)
+	bool				m_bKicking;
+	float				m_flNextKickTime;
+	bool				m_bKickWallPushback;
+	float				m_flKickWallPushbackTime;
+	bool				m_bKickDamagePending;
+	float				m_flKickDamageTime;
+	bool				m_bKickSoundPending;
+	float				m_flKickSoundTime;
 
 	edict_t				*m_pentSndLast;			// last sound entity to modify player room type
 	int					m_SndRoomtype;		// last roomtype set by sound entity

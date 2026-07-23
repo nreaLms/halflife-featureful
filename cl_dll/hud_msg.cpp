@@ -81,6 +81,10 @@ int CHud::MsgFunc_ResetHUD( const char *pszName, int iSize, void *pbuf )
 	extern bool g_bAutoAimLocked;
 	g_bAutoAimLocked = false;
 
+	// TMOD: reset flinch-lock state
+	extern bool g_bFlinchLocked;
+	g_bFlinchLocked = false;
+
 	return 1;
 }
 

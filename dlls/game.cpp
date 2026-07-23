@@ -378,7 +378,7 @@ const char* ModFeatures::DeadHazModel() const
 	if (opfor_deadhaz)
 		return "models/deadhaz.mdl";
 	else
-		return "models/player.mdl";
+		return "models/hgrunt_player.mdl";
 }
 
 void ModFeatures::EnableMonster(const char *name)

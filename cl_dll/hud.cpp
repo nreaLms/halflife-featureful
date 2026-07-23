@@ -361,6 +361,18 @@ int __MsgFunc_AutoAimLock( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+// TMOD: mirrors the server's flinch-lock state (see PreThink() in
+// player.cpp) so third person movement input actually freezes while the
+// flinch animation is playing - see g_bFlinchLocked in input_goldsource.cpp.
+extern bool g_bFlinchLocked;
+
+int __MsgFunc_Flinch( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+	g_bFlinchLocked = ( READ_BYTE() != 0 );
+	return 1;
+}
+
 int GetBloodSplatterStyle()
 {
 	return cl_bloodsplatter_style ? (int)cl_bloodsplatter_style->value : gHUD.clientFeatures.bloodsplatter_style.defaultValue;
@@ -874,6 +886,7 @@ void CHud::Init()
 	HOOK_MESSAGE( CamZone );
 	HOOK_MESSAGE( CamFixed );
 	HOOK_MESSAGE( AutoAimLock );
+	HOOK_MESSAGE( Flinch );
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round

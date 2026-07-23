@@ -309,6 +309,7 @@ int gmsgOnRope = 0;
 int gmsgCamZone = 0;
 int gmsgCamFixed = 0;
 int gmsgAutoAimLock = 0;
+int gmsgFlinch = 0;
 
 int gmsgWeaponTool = 0;
 int gmsgToolState = 0;
@@ -442,6 +443,7 @@ void LinkUserMessages()
 	gmsgCamZone = REG_USER_MSG("CamZone", sizeof(int) * 2);
 	gmsgCamFixed = REG_USER_MSG("CamFixed", 1 + sizeof(int) * 7);
 	gmsgAutoAimLock = REG_USER_MSG("AutoAimLock", 1);
+	gmsgFlinch = REG_USER_MSG("Flinch", 1);
 
 	gmsgWeaponTool = REG_USER_MSG("WeaponTool", 2);
 	gmsgToolState = REG_USER_MSG("ToolState", 8);
@@ -816,6 +818,11 @@ TakeDamageResult CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 	flArmorStrength = ArmorStrength();
 	flRatio = ARMOR_RATIO;
 
+	// TMOD: brief invincibility window after a flinch - ignore all
+	// incoming damage entirely while it's active.
+	if(gpGlobals->time < m_flInvincibleTime)
+		return TakeDamageResult();
+
 	if( ( damageInfo.type & DMG_BLAST ) && g_pGameRules->IsMultiplayer() )
 	{
 		// blasts damage armor more.
@@ -872,6 +879,37 @@ TakeDamageResult CBasePlayer::TakeDamage( entvars_t *pevInflictor, entvars_t *pe
 	TakeDamageResult takeDamageResult = CBaseMonster::TakeDamage( pevInflictor, pevAttacker, dmgInfo );
 
 	const bool fTookDamage = takeDamageResult.TookDamageToHealth() && !takeDamageResult.Killed();
+
+	// TMOD: trigger the flinch animation + hit feedback on taking damage
+	// (see SetAnimation). The blink/flash below is purely visual - it does
+	// not grant any actual damage immunity (see IsInvulnerable(), which is
+	// an unrelated camera-cutscene mechanic).
+	if(fTookDamage)
+	{
+		m_bFlinching = true;
+		m_flFlinchTime = gpGlobals->time;
+		pev->frame = 0;
+
+		EMIT_SOUND(ENT(pev), CHAN_AUTO, "player/pl_shot1.wav", 1.0f, ATTN_NORM);
+
+		// Brief blink/flash feedback
+		m_flInvincibleTime = gpGlobals->time + 2.5f;
+		m_flBlinkTime = gpGlobals->time;
+		m_iBlinkCount = 16;
+		m_bVisible = true;
+
+		pev->rendermode = kRenderTransColor;
+		pev->renderfx = kRenderFxNone;
+		pev->rendercolor = Vector(255, 255, 255);
+		pev->renderamt = 255;
+
+		int flinchSeq = LookupSequence("smflinch");
+		if(flinchSeq >= 0)
+		{
+			pev->sequence = flinchSeq;
+			ResetSequenceInfo();
+		}
+	}
 
 	// reset damage time countdown for each type of time based damage player just sustained
 	{
@@ -1409,7 +1447,6 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 {
 	int animDesired;
 	float speed;
-	char szAnim[64];
 
 	speed = pev->velocity.Length2D();
 
@@ -1419,178 +1456,164 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		playerAnim = PLAYER_IDLE;
 	}
 
-	switch( playerAnim )
+	// =========================================================
+	// Sequence lookups
+	// =========================================================
+
+	// Idle
+	int idleUnarmedSeq = LookupSequence("idle_unarmed");
+	int idleOnehandedSeq = LookupSequence("idle_onehanded");
+	int idleOnehandedAimSeq = LookupSequence("idle_onehanded_aim");
+	int idleTwohandedSeq = LookupSequence("idle_twohanded");
+	int idleTwohandedAimSeq = LookupSequence("idle_twohanded_aim");
+	// Movement
+	int walkUnarmedSeq = LookupSequence("walk_unarmed");
+	int walkOnehandedSeq = LookupSequence("walk_onehanded");
+	int walkTwohandedSeq = LookupSequence("walk_twohanded");
+	int runUnarmedSeq = LookupSequence("run_unarmed");
+	int runOnehandedSeq = LookupSequence("run_onehanded");
+	int runTwohandedSeq = LookupSequence("run_twohanded");
+	// Attack
+	int shootEagleSeq = LookupSequence("shoot_eagle");
+	int shootRifleSeq = LookupSequence("shoot_rifle");
+	int shootMp5Seq = LookupSequence("shoot_mp5");
+	int shootShotgunSeq = LookupSequence("shoot_shotgun");
+	int frontKickSeq = LookupSequence("frontkick");
+	// Reload
+	int reloadRifleSeq = LookupSequence("reload_mp5");
+	// Flinch
+	int flinchSeq = LookupSequence("smflinch");
+	// Death
+	int dieSeq = LookupSequence("diebackwards");
+
+	// =========================================================
+	// Priority locks (non-interruptible animations)
+	// =========================================================
+
+	// Death - never interrupted
+	if(pev->sequence == dieSeq)
+		return;
+
+	// Flinch - only interrupted by death or attack
+	if(m_bFlinching && !m_fSequenceFinished)
 	{
-	case PLAYER_JUMP:
-		m_IdealActivity = ACT_HOP;
+		if(playerAnim != PLAYER_DIE && playerAnim != PLAYER_ATTACK1)
+			return;
+		else
+			m_bFlinching = false;
+	}
+
+	// Currently-playing-animation detection
+	bool isEagleAnim = (shootEagleSeq >= 0) && (pev->sequence == shootEagleSeq);
+	bool isShotgunAnim = (shootShotgunSeq >= 0) && (pev->sequence == shootShotgunSeq);
+	bool isRifleAnim = (shootRifleSeq >= 0) && (pev->sequence == shootRifleSeq);
+	bool isMp5Anim = (shootMp5Seq >= 0) && (pev->sequence == shootMp5Seq);
+	bool isKickAnim = (frontKickSeq >= 0) && (pev->sequence == frontKickSeq);
+	bool isReloadAnim = (reloadRifleSeq >= 0) && (pev->sequence == reloadRifleSeq);
+
+	if(isEagleAnim && !m_fSequenceFinished)
+		return;
+	if(isShotgunAnim && !m_fSequenceFinished)
+		return;
+	if(isRifleAnim && !m_fSequenceFinished && playerAnim != PLAYER_ATTACK1 && playerAnim != PLAYER_RELOAD)
+		return;
+	if(isMp5Anim && !m_fSequenceFinished && playerAnim != PLAYER_ATTACK1 && playerAnim != PLAYER_RELOAD)
+		return;
+	if(isKickAnim && !m_fSequenceFinished)
+		return;
+	if(isReloadAnim && !m_fSequenceFinished)
+		return;
+
+	// =========================================================
+	// Animation selection
+	// =========================================================
+
+	EWeaponAnimSet animSet = GetWeaponAnimSet();
+	bool unarmed = (animSet == ANIMSET_UNARMED);
+	bool onehanded = (animSet == ANIMSET_ONEHANDED);
+	bool twohanded = (animSet == ANIMSET_MP5 || animSet == ANIMSET_M4A1 || animSet == ANIMSET_SHOTGUN);
+
+	switch(playerAnim)
+	{
+		case PLAYER_IDLE_AIM:
+		animDesired = onehanded ? idleOnehandedAimSeq : idleTwohandedAimSeq;
 		break;
-	case PLAYER_SUPERJUMP:
-		m_IdealActivity = ACT_LEAP;
+
+		case PLAYER_ATTACK1:
+		if(animSet == ANIMSET_ONEHANDED)
+			animDesired = shootEagleSeq;
+		else if(animSet == ANIMSET_M4A1)
+			animDesired = shootRifleSeq;
+		else if(animSet == ANIMSET_MP5)
+			animDesired = shootMp5Seq;
+		else
+			animDesired = shootShotgunSeq;
 		break;
-	case PLAYER_DIE:
-		m_IdealActivity = ACT_DIESIMPLE;
-		m_IdealActivity = GetDeathActivity();
+
+		case PLAYER_FRONTKICK:
+		animDesired = frontKickSeq;
 		break;
-	case PLAYER_ATTACK1:
-		switch( m_Activity )
-		{
-		case ACT_HOVER:
-		case ACT_SWIM:
-		case ACT_HOP:
-		case ACT_LEAP:
-		case ACT_DIESIMPLE:
-			m_IdealActivity = m_Activity;
-			break;
+
+		case PLAYER_RELOAD:
+		if(animSet == ANIMSET_MP5 || animSet == ANIMSET_M4A1)
+			animDesired = reloadRifleSeq;
+		else
+			animDesired = idleTwohandedSeq;
+		break;
+
+		case PLAYER_FLINCH:
+		animDesired = flinchSeq;
+		break;
+
+		case PLAYER_DIE:
+		animDesired = dieSeq;
+		break;
+
+		// PLAYER_JUMP / PLAYER_SUPERJUMP / PLAYER_GRAPPLE: no dedicated
+		// sequences on this model yet, fall through to the default pose
+		// selection below instead of forcing an undefined animation.
 		default:
-			m_IdealActivity = ACT_RANGE_ATTACK1;
-			break;
-		}
-		break;
-	case PLAYER_IDLE:
-	case PLAYER_WALK:
-		if( !FBitSet( pev->flags, FL_ONGROUND ) && ( m_Activity == ACT_HOP || m_Activity == ACT_LEAP ) )	// Still jumping
+		if(FBitSet(pev->button, IN_AIM))
 		{
-			m_IdealActivity = m_Activity;
+			animDesired = onehanded ? idleOnehandedAimSeq : idleTwohandedAimSeq;
 		}
-		else if( pev->waterlevel > WL_Feet )
+		else if(speed > 200)
 		{
-			if( speed == 0 )
-				m_IdealActivity = ACT_HOVER;
-			else
-				m_IdealActivity = ACT_SWIM;
+			if(unarmed)        animDesired = runUnarmedSeq;
+			else if(onehanded) animDesired = runOnehandedSeq;
+			else               animDesired = runTwohandedSeq;
+		}
+		else if(speed > 0)
+		{
+			if(unarmed)        animDesired = walkUnarmedSeq;
+			else if(onehanded) animDesired = walkOnehandedSeq;
+			else               animDesired = walkTwohandedSeq;
 		}
 		else
 		{
-			m_IdealActivity = ACT_WALK;
-		}
-		break;
-	case PLAYER_GRAPPLE:
-		{
-			if (FBitSet(pev->flags, FL_ONGROUND))
-			{
-				if (pev->waterlevel > WL_Feet)
-				{
-					if (speed == 0)
-						m_IdealActivity = ACT_HOVER;
-					else
-						m_IdealActivity = ACT_SWIM;
-				}
-				else
-				{
-					m_IdealActivity = ACT_WALK;
-				}
-			}
-			else if (speed == 0)
-			{
-				m_IdealActivity = ACT_HOVER;
-			}
-			else
-			{
-				m_IdealActivity = ACT_SWIM;
-			}
+			if(unarmed)        animDesired = idleUnarmedSeq;
+			else if(onehanded) animDesired = idleOnehandedSeq;
+			else               animDesired = idleTwohandedSeq;
 		}
 		break;
 	}
 
-	switch( m_IdealActivity )
-	{
-	case ACT_HOVER:
-	case ACT_LEAP:
-	case ACT_SWIM:
-	case ACT_HOP:
-	case ACT_DIESIMPLE:
-	default:
-		if( m_Activity == m_IdealActivity )
-			return;
-		m_Activity = m_IdealActivity;
+	// =========================================================
+	// Apply the animation
+	// =========================================================
 
-		animDesired = LookupActivity( m_Activity );
-
-		// Already using the desired animation?
-		if( pev->sequence == animDesired )
-			return;
-
-		pev->gaitsequence = 0;
-		pev->sequence = animDesired;
-		pev->frame = 0;
-		ResetSequenceInfo();
-		return;
-	case ACT_RANGE_ATTACK1:
-		if( FBitSet( pev->flags, FL_DUCKING ) )	// crouching
-			strcpy( szAnim, "crouch_shoot_" );
-		else
-			strcpy( szAnim, "ref_shoot_" );
-		strcat( szAnim, m_szAnimExtention );
-		animDesired = LookupSequence( szAnim );
-		if( animDesired == -1 )
-			animDesired = 0;
-
-		if( pev->sequence != animDesired || !m_fSequenceLoops )
-		{
-			pev->frame = 0;
-		}
-
-		if( !m_fSequenceLoops )
-		{
-			pev->effects |= EF_NOINTERP;
-		}
-
-		m_Activity = m_IdealActivity;
-
-		pev->sequence = animDesired;
-		ResetSequenceInfo();
-		break;
-	case ACT_WALK:
-		if( m_Activity != ACT_RANGE_ATTACK1 || m_fSequenceFinished )
-		{
-			if( FBitSet( pev->flags, FL_DUCKING ) )	// crouching
-				strcpy( szAnim, "crouch_aim_" );
-			else
-				strcpy( szAnim, "ref_aim_" );
-			strcat( szAnim, m_szAnimExtention );
-			animDesired = LookupSequence( szAnim );
-			if( animDesired == -1 )
-				animDesired = 0;
-			m_Activity = ACT_WALK;
-		}
-		else
-		{
-			animDesired = pev->sequence;
-		}
-	}
-
-	if( FBitSet( pev->flags, FL_DUCKING ) )
-	{
-		if( speed == 0 )
-		{
-			pev->gaitsequence = LookupActivity( ACT_CROUCHIDLE );
-			// pev->gaitsequence = LookupActivity( ACT_CROUCH );
-		}
-		else
-		{
-			pev->gaitsequence = LookupActivity( ACT_CROUCH );
-		}
-	}
-	else if( speed > 220 )
-	{
-		pev->gaitsequence = LookupActivity( ACT_RUN );
-	}
-	else if( speed > 0 )
-	{
-		pev->gaitsequence = LookupActivity( ACT_WALK );
-	}
-	else
-	{
-		// pev->gaitsequence = LookupActivity( ACT_WALK );
-		pev->gaitsequence = LookupSequence( "deep_idle" );
-	}
-
-	// Already using the desired animation?
-	if( pev->sequence == animDesired )
+	// If the model doesn't have this sequence yet, hold the current
+	// animation instead of snapping to sequence 0 (which could be
+	// anything on this model) - keeps a half-finished .qc from looking
+	// broken instead of just missing a pose.
+	if(animDesired < 0)
 		return;
 
-	//ALERT( at_console, "Set animation to %d\n", animDesired );
-	// Reset to first frame of desired animation
+	// Force restart for burst fire
+	bool forceRestart = (playerAnim == PLAYER_ATTACK1) && (pev->sequence == animDesired);
+	if(!forceRestart && pev->sequence == animDesired)
+		return;
+
 	pev->sequence = animDesired;
 	pev->frame = 0;
 	ResetSequenceInfo();
@@ -2950,6 +2973,27 @@ bool CBasePlayer::AutoAimToNearestEnemy()
 	}
 }
 
+// TMOD: which weapon-hands pose/bodygroup to use for the currently held weapon
+EWeaponAnimSet CBasePlayer::GetWeaponAnimSet()
+{
+	if(!m_pActiveItem)
+		return ANIMSET_UNARMED;
+
+	switch(m_pActiveItem->WeaponId())
+	{
+		case WEAPON_EAGLE:
+		return ANIMSET_ONEHANDED;
+		case WEAPON_MP5:
+		return ANIMSET_MP5;
+		case WEAPON_M4A1:
+		return ANIMSET_M4A1;
+		case WEAPON_SHOTGUN:
+		return ANIMSET_SHOTGUN;
+		default:
+		return ANIMSET_SHOTGUN;
+	}
+}
+
 void CBasePlayer::PreThink()
 {
 	SetMovementMode();
@@ -3064,6 +3108,69 @@ void CBasePlayer::PreThink()
 		MESSAGE_END();
 	}
 
+	// TMOD: aim pose while IN_AIM is held (overridden by SetAnimation's
+	// own priority locking - flinch/reload/attack/death take precedence)
+	if(FBitSet(pev->button, IN_AIM))
+	{
+		SetAnimation(PLAYER_IDLE_AIM);
+	}
+
+	// TMOD: front kick resolution (wall pushback, delayed damage, delayed
+	// sound - see case 108 in ImpulseCommands for the trigger)
+	if(m_bKicking)
+	{
+		if(gpGlobals->time >= m_flNextKickTime)
+			m_bKicking = false;
+	}
+
+	if(m_bKickWallPushback && gpGlobals->time >= m_flKickWallPushbackTime)
+	{
+		UTIL_MakeVectors(pev->v_angle);
+		Vector vecSrc = EyePosition();
+		Vector vecEnd = vecSrc + gpGlobals->v_forward * 64.0f;
+
+		TraceResult trPush;
+		UTIL_TraceLine(vecSrc, vecEnd, ignore_monsters, ENT(pev), &trPush);
+
+		if(trPush.flFraction < 0.99f)
+		{
+			float excess = (1.0f - trPush.flFraction) * 64.0f;
+			Vector newOrigin = pev->origin - gpGlobals->v_forward * excess * 0.1f;
+			UTIL_SetOrigin(pev, newOrigin);
+		}
+		else
+		{
+			m_bKickWallPushback = false;
+		}
+	}
+
+	if(m_bKickDamagePending && gpGlobals->time >= m_flKickDamageTime)
+	{
+		m_bKickDamagePending = false;
+
+		UTIL_MakeVectors(pev->v_angle);
+		Vector vecSrc = EyePosition();
+		Vector vecEnd = vecSrc + gpGlobals->v_forward * 64.0f;
+
+		TraceResult trHit;
+		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev), &trHit);
+
+		CBaseEntity *pHit = CBaseEntity::Instance(trHit.pHit);
+		if(pHit && pHit->pev->takedamage != DAMAGE_NO)
+		{
+			DamageInfo kickDamage(GetSkillValue("player_kick_damage"), DMG_CLUB);
+			pHit->TakeDamage(pev, pev, kickDamage);
+			UTIL_MakeVectors(pev->v_angle);
+			pHit->pev->velocity = pHit->pev->velocity + gpGlobals->v_forward * 200.0f;
+		}
+	}
+
+	if(m_bKickSoundPending && gpGlobals->time >= m_flKickSoundTime)
+	{
+		EmitSoundScript(NPC::swishSoundScript);
+		m_bKickSoundPending = false;
+	}
+
 	g_pGameRules->PlayerThink( this );
 
 	if (m_movementPrevented)
@@ -3125,6 +3232,61 @@ void CBasePlayer::PreThink()
 		return;         // intermission or finale
 
 	UTIL_MakeVectors( pev->v_angle );             // is this still used?
+
+	// TMOD: end the flinch once its animation has finished playing on its
+	// own (SetAnimation's priority lock only clears m_bFlinching when an
+	// interrupting animation - death/attack - takes over; without this,
+	// standing still after being hit would leave m_bFlinching stuck true
+	// forever, permanently blocking the frontkick).
+	if(m_bFlinching && m_fSequenceFinished)
+	{
+		m_bFlinching = false;
+		SetAnimation(PLAYER_IDLE);
+	}
+
+	// TMOD: hold still while the flinch animation is playing. The
+	// pev->velocity/button zeroing here only affects the server's own
+	// authoritative state; it does NOT stop PM_WalkMove from moving the
+	// player, since that reads pmove->cmd.forwardmove/sidemove - values
+	// generated client-side by IN_ThirdPersonControls, which has no idea
+	// the player is flinching unless told. Hence the "Flinch"
+	// message below, mirrored into g_bFlinchLocked client-side.
+	bool bFlinchLocking = (m_bFlinching && !m_fSequenceFinished);
+
+	if(bFlinchLocking)
+	{
+		pev->velocity.x = 0.0f;
+		pev->velocity.y = 0.0f;
+		pev->button &= ~(IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT);
+		m_afButtonPressed &= ~(IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT);
+		m_afButtonReleased &= ~(IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT);
+	}
+
+	if(bFlinchLocking != m_bWasFlinchLocking)
+	{
+		m_bWasFlinchLocking = bFlinchLocking;
+		MESSAGE_BEGIN(MSG_ONE, gmsgFlinch, NULL, pev);
+		WRITE_BYTE(bFlinchLocking ? 1 : 0);
+		MESSAGE_END();
+	}
+
+	// TMOD: resolve the post-flinch blink/flash - only starts once the
+	// flinch animation itself has finished playing.
+	if(m_iBlinkCount > 0 && !m_bFlinching && gpGlobals->time >= m_flBlinkTime)
+	{
+		m_bVisible = !m_bVisible;
+		m_iBlinkCount--;
+		m_flBlinkTime = gpGlobals->time + (1.0f / 16.0f);
+
+		pev->renderamt = m_bVisible ? 255 : 64;
+	}
+
+	if(m_iBlinkCount == 0 && gpGlobals->time >= m_flInvincibleTime)
+	{
+		pev->rendermode = kRenderNormal;
+		pev->renderamt = 255;
+		pev->rendercolor = Vector(0, 0, 0);
+	}
 
 	ItemPreFrame();
 	WaterMove();
@@ -4252,6 +4414,40 @@ void CBasePlayer::PostThink()
 			SetAnimation( PLAYER_WALK );
 	}
 
+	// TMOD: swap the weapon-hands bodygroup to match the currently held
+	// weapon (bare hands / one-handed / two-handed), only when it changes.
+	if(m_pActiveItem)
+	{
+		int id = m_pActiveItem->WeaponId();
+		if(id != m_iLastWeaponBody)
+		{
+			m_iLastWeaponBody = id;
+			switch(GetWeaponAnimSet())
+			{
+				case ANIMSET_M4A1:
+				SetBodygroup(2, 0);
+				break;
+				case ANIMSET_SHOTGUN:
+				SetBodygroup(2, 1);
+				break;
+				case ANIMSET_ONEHANDED:
+				SetBodygroup(2, 2);
+				break;
+				case ANIMSET_MP5:
+				SetBodygroup(2, 3);
+				break;
+				default:
+				SetBodygroup(2, 4); // bare hands
+				break;
+			}
+		}
+	}
+	else if(m_iLastWeaponBody != -1)
+	{
+		m_iLastWeaponBody = -1;
+		SetBodygroup(2, 4); // bare hands
+	}
+
 	StudioFrameAdvance();
 	CheckPowerups( pev );
 
@@ -4518,6 +4714,25 @@ void CBasePlayer::Spawn()
 	m_bWasLocking = false;
 	m_bAttackAsUse = false;
 	m_flAimStartTime = 0.0f;
+	m_bAimHeldLastFrame = false;
+
+	// TMOD: reset flinch/kick/animation state
+	m_bFlinching = false;
+	m_flFlinchTime = 0.0f;
+	m_bWasFlinchLocking = false;
+	m_flInvincibleTime = 0.0f;
+	m_flBlinkTime = 0.0f;
+	m_iBlinkCount = 0;
+	m_bVisible = true;
+	m_bKicking = false;
+	m_flNextKickTime = 0.0f;
+	m_bKickWallPushback = false;
+	m_flKickWallPushbackTime = 0.0f;
+	m_bKickDamagePending = false;
+	m_flKickDamageTime = 0.0f;
+	m_bKickSoundPending = false;
+	m_flKickSoundTime = 0.0f;
+	m_iLastWeaponBody = -1;
 
 	SetMaxArmor(g_modFeatures.MaxPlayerArmor());
 	pev->takedamage = DAMAGE_AIM;
@@ -4570,7 +4785,7 @@ void CBasePlayer::Spawn()
 	g_pGameRules->SetDefaultPlayerTeam( this );
 	g_pGameRules->GetPlayerSpawnSpot( this );
 
-	SET_MODEL( ENT( pev ), "models/player.mdl" );
+	SET_MODEL( ENT( pev ), "models/hgrunt_player.mdl" );
 	m_playerTemplateName = iStringNull;
 	m_playerTemplate = nullptr;
 	if (g_pGameRules->mapConfig.valid && !FStringNull(g_pGameRules->mapConfig.playerTemplate))
@@ -4639,6 +4854,12 @@ void CBasePlayer::Precache()
 	m_igeigerRangePrev = 1000;
 
 	m_bitsHUDDamage = -1;
+
+	// TMOD: front kick sound
+	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
+
+	// TMOD: flinch hit-feedback sound
+	PRECACHE_SOUND("player/pl_shot1.wav");
 
 	MarkClientValuesForUpdate();
 
@@ -5398,6 +5619,62 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 			const char *pTextureName = TRACE_TEXTURE( pWorld, start, end );
 			if( pTextureName )
 				ALERT( at_console, "Texture: %s\n", pTextureName );
+		}
+		break;
+	case 108:
+		// TMOD: front kick - see the "frontkick" client command in
+		// cl_dll/input.cpp. Resolution (wall pushback, delayed damage,
+		// delayed sound) happens in PreThink().
+		if(gpGlobals->time >= m_flNextKickTime && !m_bFlinching)
+		{
+			int kickShootShotgunSeq = LookupSequence("shoot_shotgun");
+			int kickShootRifleSeq = LookupSequence("shoot_rifle");
+			int kickShootMp5Seq = LookupSequence("shoot_mp5");
+			int kickReloadRifleSeq = LookupSequence("reload_mp5");
+
+			bool isFiring = (kickShootShotgunSeq >= 0 && pev->sequence == kickShootShotgunSeq && !m_fSequenceFinished)
+				|| (kickShootRifleSeq >= 0 && pev->sequence == kickShootRifleSeq && !m_fSequenceFinished)
+				|| (kickShootMp5Seq >= 0 && pev->sequence == kickShootMp5Seq && !m_fSequenceFinished);
+			bool isReloading = (kickReloadRifleSeq >= 0 && pev->sequence == kickReloadRifleSeq && !m_fSequenceFinished);
+
+			if(!isFiring && !isReloading)
+			{
+				m_bKicking = true;
+
+				UTIL_MakeVectors(pev->v_angle);
+				Vector vecSrc = EyePosition();
+				Vector vecEnd = vecSrc + gpGlobals->v_forward * 64.0f;
+				TraceResult trWall;
+				UTIL_TraceLine(vecSrc, vecEnd, ignore_monsters, ENT(pev), &trWall);
+				if(trWall.flFraction < 1.0f)
+				{
+					m_bKickWallPushback = true;
+					m_flKickWallPushbackTime = gpGlobals->time;
+				}
+				else
+				{
+					m_bKickWallPushback = false;
+				}
+
+				CBaseEntity *pKickTarget = FindNearestEnemy(128.0f);
+				if(pKickTarget)
+				{
+					Vector vecDir = pKickTarget->pev->origin - pev->origin;
+					vecDir.z = 0;
+					vecDir.Normalize();
+					float flTargetYaw = UTIL_VecToYaw(vecDir);
+					pev->v_angle.y = flTargetYaw;
+					pev->angles.y = flTargetYaw;
+					pev->fixangle = TRUE;
+				}
+
+				SetAnimation(PLAYER_FRONTKICK);
+				m_flKickDamageTime = gpGlobals->time + 0.3f;
+				m_bKickDamagePending = true;
+				m_flNextKickTime = gpGlobals->time + 0.9f;
+				m_flKickSoundTime = gpGlobals->time + 0.15f;
+				m_bKickSoundPending = true;
+			}
 		}
 		break;
 	case 195:
@@ -7565,7 +7842,7 @@ bool CBasePlayer::AssignPlayerTemplate(string_t templateName)
 	m_bloodColor = 0;
 	SetMyBloodColor(BLOOD_COLOR_RED);
 	pev->model = iStringNull;
-	SetMyModel("models/player.mdl");
+	SetMyModel("models/hgrunt_player.mdl");
 
 	return true;
 }
@@ -9333,7 +9610,7 @@ LINK_ENTITY_TO_CLASS(player_marker, CPlayerMarker)
 void CPlayerMarker::Spawn()
 {
 	Precache();
-	SET_MODEL(ENT(pev), "models/player.mdl");
+	SET_MODEL(ENT(pev), "models/hgrunt_player.mdl");
 	// use unique render fx to identify the entity on client
 	pev->renderfx = kRenderFxClampMinScale;
 	//ALERT(at_aiconsole, "DEBUG: Player_marker coordinates is %g %g %g \n", pev->origin.x, pev->origin.y, pev->origin.z);
@@ -9341,7 +9618,7 @@ void CPlayerMarker::Spawn()
 
 void CPlayerMarker::Precache()
 {
-	PRECACHE_MODEL("models/player.mdl");
+	PRECACHE_MODEL("models/hgrunt_player.mdl");
 }
 
 #define SF_TRIGGERCHANGEMAXAMMO_ALLPLAYERS (1<<0)

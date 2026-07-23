@@ -232,6 +232,9 @@ bool CBasePlayerWeapon::DefaultReload( int iClipSize, int iAnim, float fDelay, i
 
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + fDelay;
 
+	// TMOD: play the player's reload pose alongside the weapon's own anim
+	m_pPlayer->SetAnimation(PLAYER_RELOAD);
+
 	//!!UNDONE -- reload sound goes here !!!
 	if (iAnim >= 0)
 		SendWeaponAnim( iAnim, body );
@@ -313,9 +316,39 @@ void CBasePlayerWeapon::ItemPostFrame()
 	// button state. Gating only server-side let the client mispredict a
 	// shot - visible impact, no actual damage - whenever attack was
 	// pressed without holding aim.
-	if( !FBitSet( m_pPlayer->pev->button, IN_AIM ) )
+	//
+	// This also mirrors the 0.2s aim windup delay (see PreThink's bCanFire
+	// gate). Without it, if IN_ATTACK was already held before IN_AIM was
+	// pressed, the client saw "aiming" become true immediately and fired
+	// right away, while the server was still waiting out its windup -
+	// same symptom, fast visible fire with no damage. m_flAimStartTime and
+	// m_bAimHeldLastFrame are tracked here (not just in PreThink) so both
+	// sides compute the same windup independently.
+	bool bIsAimingNow = FBitSet( m_pPlayer->pev->button, IN_AIM );
+	if( bIsAimingNow && !m_pPlayer->m_bAimHeldLastFrame )
+	{
+		m_pPlayer->m_flAimStartTime = gpGlobals->time;
+	}
+	m_pPlayer->m_bAimHeldLastFrame = bIsAimingNow;
+
+	bool bAimDelayOk = ( gpGlobals->time - m_pPlayer->m_flAimStartTime ) >= 0.2f;
+
+	if( !bIsAimingNow || !bAimDelayOk )
 	{
 		m_pPlayer->pev->button &= ~(IN_ATTACK | IN_ATTACK2);
+
+		// Keep the weapon's own fire-rate timers pinned to "now" while
+		// gated. Without this, m_flNextPrimaryAttack/m_flNextSecondaryAttack
+		// stay stuck in the past throughout the whole windup, so the
+		// instant bAimDelayOk flips true there's a backlog of "attack
+		// allowed" time to burn through instantly - most visible during
+		// client-side prediction replay, which can resimulate several
+		// buffered commands (each crossing the threshold) within a
+		// single render frame, firing repeatedly with no throttle.
+		if( m_flNextPrimaryAttack < UTIL_WeaponTimeBase() )
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase();
+		if( m_flNextSecondaryAttack < UTIL_WeaponTimeBase() )
+			m_flNextSecondaryAttack = UTIL_WeaponTimeBase();
 	}
 
 	const WeaponParameters& params = MyParameters();

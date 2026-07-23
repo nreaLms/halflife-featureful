@@ -150,6 +150,14 @@ extern cvar_t *cl_movespeedkey;
 // so IN_ThirdPersonControls below simply never sees it engaged yet.
 bool g_bAutoAimLocked = false;
 
+// TMOD: mirrors CBasePlayer::m_bFlinching (see the "PlayerFlinch" message
+// in hud.cpp). PreThink() zeroing pev->velocity/pev->button server-side
+// isn't enough to actually stop movement: PM_WalkMove (pm_shared.cpp)
+// computes velocity straight from pmove->cmd.forwardmove/sidemove, which
+// is generated client-side by IN_ThirdPersonControls below and has no
+// idea the player is flinching unless we tell it here.
+bool g_bFlinchLocked = false;
+
 #if XASH_WIN32
 static cvar_t* m_rawinput = NULL;
 static double s_flRawInputUpdateTime = 0.0f;
@@ -907,7 +915,7 @@ void GoldSourceInput::IN_ThirdPersonControls(float frametime, usercmd_t *cmd)
 	// direction is resolved every frame straight from the keys currently
 	// held, and any brief flicker (e.g. one key registering a frame or
 	// two before a second one) is absorbed smoothly instead of snapping.
-	if(g_bAutoAimLocked)
+	if(g_bAutoAimLocked || g_bFlinchLocked)
 	{
 		hasTarget = false;
 		targetYaw = playerYaw;

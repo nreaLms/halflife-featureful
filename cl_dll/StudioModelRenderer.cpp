@@ -1154,7 +1154,7 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 		m_nCachedFrameCount = m_nFrameCount;
 	}
 
-	if (m_pCurrentEntity->curstate.renderfx == kRenderFxClampMinScale && strcmp(m_pCurrentEntity->model->name, "models/player.mdl") == 0)
+	if (m_pCurrentEntity->curstate.renderfx == kRenderFxClampMinScale && strcmp(m_pCurrentEntity->model->name, "models/hgrunt_player.mdl") == 0)
 	{
 		if (CanRenderReflections() && !b_PlayerMarkerParsed)
 		{
