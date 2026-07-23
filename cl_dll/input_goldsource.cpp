@@ -146,6 +146,10 @@ extern cvar_t *cl_forwardspeed;
 extern cvar_t *cl_pitchspeed;
 extern cvar_t *cl_movespeedkey;
 
+// TMOD: set by the future aim-lock/weapons feature; always false for now,
+// so IN_ThirdPersonControls below simply never sees it engaged yet.
+bool g_bAutoAimLocked = false;
+
 #if XASH_WIN32
 static cvar_t* m_rawinput = NULL;
 static double s_flRawInputUpdateTime = 0.0f;
@@ -819,6 +823,187 @@ void GoldSourceInput::IN_GetMouseDelta( int *pOutX, int *pOutY)
 	}
 	if(pOutX) *pOutX = mx;
 	if(pOutY) *pOutY = my;
+}
+
+/*
+===========
+IN_ThirdPersonControls
+
+TMOD: tank-style movement for the fixed-angle third person camera. The
+mouse no longer drives the view (see IN_Move below); instead the player's
+yaw rotates toward the input direction, computed relative to the camera's
+fixed yaw (cam_idealyaw) rather than the player's current view angles.
+The target direction is resolved immediately every frame from whichever
+movement keys are currently held (see the fix note below for why there's
+no artificial input delay), and both the turn and the forward speed are
+smoothed so direction changes blend instead of snapping.
+===========
+*/
+bool IsThirdPerson()
+{
+	return (cam_thirdperson != 0);
+}
+
+// Target yaw state for third person rotation
+static float playerYaw = 0.0f;
+static float targetYaw = 0.0f;
+static bool  hasTarget = false;
+
+extern cvar_t *cam_idealyaw;
+extern cvar_t *cam_idealpitch;
+
+extern kbutton_t in_forward;
+extern kbutton_t in_back;
+extern kbutton_t in_moveleft;
+extern kbutton_t in_moveright;
+extern kbutton_t in_aim;
+
+void GoldSourceInput::IN_ThirdPersonControls(float frametime, usercmd_t *cmd)
+{
+	Vector viewangles;
+
+	cvar_t *cl_rotatespeed = gEngfuncs.pfnGetCvarPointer("cl_rotatespeed");
+
+	// Nothing to do while paused, in intermission, or dead
+	if(g_Paused || gHUD.m_iIntermission)
+		return;
+
+	if(CL_IsDead())
+	{
+		hasTarget = false;
+		targetYaw = 0.0f;
+		cmd->forwardmove = 0.0f;
+		cmd->sidemove = 0.0f;
+		dead_viewangles = viewangles;
+		return;
+	}
+
+	gEngfuncs.GetViewAngles(viewangles);
+	playerYaw = viewangles[YAW];
+
+	if(!IsThirdPerson())
+		return;
+
+	// --- 1. Read directional keys ---
+	float currentForward = 0.0f;
+	float currentSide = 0.0f;
+
+	if(in_forward.state & 1)   currentForward += 1.0f;
+	if(in_back.state & 1)      currentForward -= 1.0f;
+	if(in_moveleft.state & 1)  currentSide += 1.0f;
+	if(in_moveright.state & 1) currentSide -= 1.0f;
+
+	bool isMovingNow = (currentForward != 0.0f || currentSide != 0.0f);
+
+	// --- 2. Resolve the target direction immediately from current input ---
+	// NOTE (TMOD fix): this used to wait on a "diagonal input window"
+	// (cl_diaginputwindow, ~80ms) before computing the target direction,
+	// meant to let a second key join in to form a diagonal before
+	// committing. In practice that delayed the start of ALL movement,
+	// including plain single-key presses, which is the input lag you'd
+	// feel between pressing a direction and the character actually
+	// moving. Now that turning and forward speed are smoothed (see the
+	// cosine-based blend below), there's no need to wait: the target
+	// direction is resolved every frame straight from the keys currently
+	// held, and any brief flicker (e.g. one key registering a frame or
+	// two before a second one) is absorbed smoothly instead of snapping.
+	if(g_bAutoAimLocked)
+	{
+		hasTarget = false;
+		targetYaw = playerYaw;
+	}
+	else if(isMovingNow)
+	{
+		// 90 degree CCW rotation to align with the Hammer axis convention
+		float adjustedForward = -currentSide;
+		float adjustedSide = currentForward;
+
+		float cameraYawRad = cam_idealyaw->value * (3.14159265f / 180.0f);
+		Vector forward(cosf(cameraYawRad), sinf(cameraYawRad), 0.0f);
+		Vector right(-sinf(cameraYawRad), cosf(cameraYawRad), 0.0f);
+
+		Vector wishDir = forward * adjustedForward + right * adjustedSide;
+		wishDir.z = 0.0f;
+
+		if(wishDir.Length() > 0.01f)
+		{
+			wishDir = wishDir.Normalize();
+			float newTargetYaw = atan2f(wishDir.y, wishDir.x) * (180.0f / 3.14159265f);
+
+			// Only lock a new target if it actually differs from the current one
+			if(!hasTarget || fabsf(newTargetYaw - targetYaw) > 1.0f)
+			{
+				targetYaw = newTargetYaw;
+				hasTarget = true;
+			}
+		}
+	}
+
+	// --- 4. Rotate toward the target yaw ---
+	if(hasTarget)
+	{
+		float rotationSpeed = (cl_rotatespeed ? cl_rotatespeed->value : 360.0f) * frametime;
+
+		float yawDifference = targetYaw - playerYaw;
+
+		while(yawDifference > 180.0f) yawDifference -= 360.0f;
+		while(yawDifference < -180.0f) yawDifference += 360.0f;
+
+		if(fabsf(yawDifference) <= rotationSpeed)
+		{
+			playerYaw = targetYaw;
+			if(!isMovingNow)
+				hasTarget = false;
+		}
+		else
+		{
+			playerYaw += (yawDifference > 0.0f ? rotationSpeed : -rotationSpeed);
+		}
+
+		while(playerYaw > 180.0f) playerYaw -= 360.0f;
+		while(playerYaw < -180.0f) playerYaw += 360.0f;
+
+		// --- 5. Scale forward speed smoothly with facing alignment ---
+		// A hard on/off cutoff here used to cause a visible stutter when
+		// quickly switching between diagonals (e.g. left-forward ->
+		// right-forward): speed would snap to 0, then snap back to full
+		// once realigned. Scaling continuously with the cosine of the
+		// facing error removes that snap: full speed when aligned,
+		// smoothly tapering off as the player turns to face the new
+		// direction, instead of a sudden stop/restart.
+		if(isMovingNow)
+		{
+			float facingRad = yawDifference * (3.14159265f / 180.0f);
+			float facingFactor = cosf(facingRad);
+			if(facingFactor < 0.0f)
+				facingFactor = 0.0f; // never move backward while turning to face
+
+			cmd->forwardmove = cl_forwardspeed->value * facingFactor;
+		}
+		else
+		{
+			cmd->forwardmove = 0.0f;
+		}
+	}
+	else
+	{
+		cmd->forwardmove = 0.0f;
+	}
+
+	cmd->sidemove = 0.0f;
+
+	// Holding aim cancels movement (character stands still to aim)
+	if(in_aim.state & 1)
+	{
+		cmd->forwardmove = 0.0f;
+		cmd->sidemove = 0.0f;
+	}
+
+	// --- 6. Apply the resulting yaw ---
+	viewangles[YAW] = playerYaw;
+	gEngfuncs.SetViewAngles(viewangles);
+
+	dead_viewangles = viewangles;
 }
 
 /*
@@ -1573,7 +1758,10 @@ void GoldSourceInput::IN_Move ( float frametime, usercmd_t *cmd)
 {
 	if ( !iMouseInUse && mouseactive )
 	{
-		IN_MouseMove ( frametime, cmd);
+		// TMOD: the fixed-angle third person camera isn't mouse-orbited, so
+		// mouse-look no longer drives the view here. IN_MouseMove is kept
+		// around (unused for now) in case first-person is ever reinstated.
+		IN_ThirdPersonControls ( frametime, cmd);
 	}
 
 	IN_JoyMove ( frametime, cmd);
@@ -1589,6 +1777,9 @@ void GoldSourceInput::IN_Init ()
 	ignoreNextDelta = false;
 	m_filter				= gEngfuncs.pfnRegisterVariable ( "m_filter","0", FCVAR_ARCHIVE );
 	sensitivity			 = gEngfuncs.pfnRegisterVariable ( "sensitivity","3", FCVAR_ARCHIVE | FCVAR_FILTERSTUFFTEXT ); // user mouse sensitivity setting.
+
+	// TMOD: tank-style third person movement controls (see IN_ThirdPersonControls)
+	gEngfuncs.pfnRegisterVariable( "cl_rotatespeed", "360", FCVAR_ARCHIVE );		// degrees/sec the player turns toward the input direction
 
 	in_joystick			 = gEngfuncs.pfnRegisterVariable ( "joystick","0", FCVAR_ARCHIVE );
 	joy_name				= gEngfuncs.pfnRegisterVariable ( "joyname", "joystick", 0 );

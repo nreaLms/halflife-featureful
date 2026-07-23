@@ -628,7 +628,11 @@
 #define IN_BACK			(1<<4)
 #define IN_USE			(1<<5)
 #define IN_CANCEL			(1<<6)
-#define IN_LEFT			(1<<7)
+// TMOD: IN_AIM takes over bit 7 (was IN_LEFT); IN_LEFT moved to a free
+// high bit to avoid a network protocol collision. IN_LEFT itself is legacy
+// (turn-left key) and unused by this mod's controls.
+#define IN_AIM				(1<<7)
+#define IN_LEFT				(1<<17)
 #define IN_RIGHT			(1<<8)
 #define IN_MOVELEFT			(1<<9)
 #define IN_MOVERIGHT		(1<<10)

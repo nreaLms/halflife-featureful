@@ -90,6 +90,7 @@ public:
 protected:
 	void IN_GetMouseDelta( int *pOutX, int *pOutY);
 	void IN_MouseMove ( float frametime, usercmd_t *cmd);
+	void IN_ThirdPersonControls(float frametime, usercmd_t *cmd);
 	void IN_StartupMouse ();
 	void IN_StartupJoystick ();
 	int IN_ReadJoystick ();

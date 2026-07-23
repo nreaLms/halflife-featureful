@@ -848,6 +848,10 @@ PM_WalkMove
 Only used by players.  Moves along the ground when player is a MOVETYPE_WALK.
 ======================
 */
+// TMOD: walk/run toggle state
+static bool g_isWalking = false;
+static bool g_walkKeyPrev = false; // previous frame's IN_ALT1 state
+
 void PM_WalkMove()
 {
 	//int clip;
@@ -871,12 +875,33 @@ void PM_WalkMove()
 	fmove = pmove->cmd.forwardmove;
 	smove = pmove->cmd.sidemove;
 
+	// TMOD: toggle walk/run when IN_ALT1 is pressed (not held)
+	bool walkKeyNow = (pmove->cmd.buttons & IN_ALT1) != 0;
+	if(walkKeyNow && !g_walkKeyPrev) // just pressed
+	{
+		g_isWalking = !g_isWalking;
+	}
+	g_walkKeyPrev = walkKeyNow;
+
 	// Zero out z components of movement vectors
 	pmove->forward[2] = 0;
 	pmove->right[2] = 0;
 
 	VectorNormalize( pmove->forward );  // Normalize remainder of vectors.
 	VectorNormalize( pmove->right );    // 
+
+	// TMOD: scale the requested move by the walk/run state.
+	// NOTE: as ported from the source mod, holding IN_ALT1 down forces
+	// speedfactor to 0.85 on every frame regardless of the toggle above,
+	// which makes the walk/run toggle only matter once the key is
+	// released. This looks like an unfinished tuning pass upstream -
+	// worth revisiting the intended walk/run/hold-to-sprint values.
+	float speedfactor = g_isWalking ? 0.25f : 0.75f; // walk vs run
+	if(pmove->cmd.buttons & IN_ALT1)
+		speedfactor = 0.85f;
+
+	fmove *= speedfactor;
+	smove *= speedfactor;
 
 	for( i = 0; i < 2; i++ )       // Determine x and y parts of velocity
 		wishvel[i] = pmove->forward[i] * fmove + pmove->right[i] * smove;
@@ -889,16 +914,19 @@ void PM_WalkMove()
 	//
 	// Clamp to server defined max speed
 	//
-	if( wishspeed > pmove->maxspeed )
+	float maxspeed = pmove->maxspeed * speedfactor;
+	if( wishspeed > maxspeed )
 	{
-		VectorScale( wishvel, pmove->maxspeed / wishspeed, wishvel );
-		wishspeed = pmove->maxspeed;
+		VectorScale( wishvel, maxspeed / wishspeed, wishvel );
+		wishspeed = maxspeed;
 	}
 
-	// Set pmove velocity
-	pmove->velocity[2] = 0;
-	PM_Accelerate( wishdir, wishspeed, pmove->movevars->accelerate );
-	pmove->velocity[2] = 0;
+	// TMOD: instant velocity change instead of PM_Accelerate's momentum-based
+	// ramp - matches the tank-style controls (immediate start/stop rather
+	// than FPS-style ice-skating). Vertical velocity (falling/jumping) is
+	// left untouched.
+	pmove->velocity[0] = wishvel[0];
+	pmove->velocity[1] = wishvel[1];
 
 	// Add in any base velocity to the current velocity.
 	VectorAdd( pmove->velocity, pmove->basevelocity, pmove->velocity );
@@ -2663,10 +2691,13 @@ void PM_CheckParamters()
 	//
 	// JoshA: Moved this to CheckParamters rather than working on the velocity,
 	// as otherwise it affects every integration step incorrectly.
-	if( ( pmove->onground != -1 ) && ( pmove->cmd.buttons & IN_USE ))
-	{
-		pmove->maxspeed *= 1.0f / 3.0f;
-	}
+	//
+	// TMOD: disabled - IN_USE is our generic interact key and shouldn't slow
+	// the player down while pressed.
+	//if( ( pmove->onground != -1 ) && ( pmove->cmd.buttons & IN_USE ))
+	//{
+	//	pmove->maxspeed *= 1.0f / 3.0f;
+	//}
 
 	if( ( spd != 0.0f ) && ( spd > pmove->maxspeed ) )
 	{

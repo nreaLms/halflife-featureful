@@ -127,6 +127,7 @@ kbutton_t	in_alt1;
 kbutton_t	in_score;
 kbutton_t	in_break;
 kbutton_t	in_graph;  // Display the netgraph
+kbutton_t	in_aim;	   // TMOD: hold to aim (blocks tank-style movement, see IN_ThirdPersonControls)
 
 typedef struct kblist_s
 {
@@ -683,6 +684,16 @@ void IN_Alt1Up()
 	KeyUp( &in_alt1 );
 }
 
+void IN_AimDown()
+{
+	KeyDown( &in_aim );
+}
+
+void IN_AimUp()
+{
+	KeyUp( &in_aim );
+}
+
 void IN_GraphDown()
 {
 	KeyDown( &in_graph );
@@ -1077,6 +1088,11 @@ int CL_ButtonBits( int bResetState )
 		bits |= IN_ALT1;
 	}
 
+	if( in_aim.state & 3 )
+	{
+		bits |= IN_AIM;
+	}
+
 	if( in_score.state & 3 )
 	{
 		bits |= IN_SCORE;
@@ -1103,6 +1119,7 @@ int CL_ButtonBits( int bResetState )
 		in_attack2.state &= ~2;
 		in_reload.state &= ~2;
 		in_alt1.state &= ~2;
+		in_aim.state &= ~2;
 		in_score.state &= ~2;
 	}
 
@@ -1187,6 +1204,8 @@ void InitInput()
 	gEngfuncs.pfnAddCommand( "-reload", IN_ReloadUp );
 	gEngfuncs.pfnAddCommand( "+alt1", IN_Alt1Down );
 	gEngfuncs.pfnAddCommand( "-alt1", IN_Alt1Up );
+	gEngfuncs.pfnAddCommand( "+aim", IN_AimDown );
+	gEngfuncs.pfnAddCommand( "-aim", IN_AimUp );
 	gEngfuncs.pfnAddCommand( "+score", IN_ScoreDown );
 	gEngfuncs.pfnAddCommand( "-score", IN_ScoreUp );
 	gEngfuncs.pfnAddCommand( "+showscores", IN_ScoreDown );
