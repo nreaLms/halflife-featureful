@@ -1570,7 +1570,27 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 		{
 			if (!(pEntity->m_EFlags & EFLAG_ALWAYS_SEND) && !pEntity->MustAddToFullPack(pSet))
 			{
-				return 0;
+				// TMOD: alternate PVS test. The standard visibility check is
+				// computed around the player's own origin, but in third
+				// person the camera can see things (over the shoulder,
+				// around a corner) that don't touch a PVS leaf from the
+				// player's position. As a fallback, still send anything
+				// within 1024 units even if the PVS check failed.
+				Vector entOrigin;
+				// Brush entities (MOVETYPE_PUSH/MOVETYPE_NONE) often have
+				// v.origin at (0,0,0) - use the bounding box center instead.
+				if( ent->v.movetype == MOVETYPE_PUSH || ent->v.movetype == MOVETYPE_NONE )
+					entOrigin = (ent->v.absmin + ent->v.absmax) * 0.5f;
+				else
+					entOrigin = ent->v.origin;
+
+				Vector delta = entOrigin - host->v.origin;
+				float distSq = DotProduct(delta, delta);
+
+				if( distSq > (1024.0f * 1024.0f) )
+				{
+					return 0;
+				}
 			}
 		}
 	}
