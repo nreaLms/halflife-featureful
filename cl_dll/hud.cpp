@@ -373,6 +373,235 @@ int __MsgFunc_Flinch( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+// TMOD: radar display. Server-side scan/broadcast lives in
+// PlayerPreThink() (dlls/client.cpp); this only decodes and draws it.
+// Drawn entirely with FillRGBA rectangles - no sprite assets required.
+
+#define RADAR_CLASS_NONE                0
+#define RADAR_CLASS_MACHINE             1
+#define RADAR_CLASS_PLAYER              2
+#define RADAR_CLASS_HUMAN_PASSIVE       3
+#define RADAR_CLASS_HUMAN_MILITARY      4
+#define RADAR_CLASS_ALIEN_MILITARY      5
+#define RADAR_CLASS_ALIEN_PASSIVE       6
+#define RADAR_CLASS_ALIEN_MONSTER       7
+#define RADAR_CLASS_ALIEN_PREY          8
+#define RADAR_CLASS_ALIEN_PREDATOR      9
+#define RADAR_CLASS_INSECT              10
+#define RADAR_CLASS_PLAYER_ALLY         11
+#define RADAR_CLASS_PLAYER_BIOWEAPON    12
+#define RADAR_CLASS_ALIEN_BIOWEAPON     13
+#define RADAR_CLASS_RACEX_PREDATOR      14
+#define RADAR_CLASS_RACEX_SHOCK         15
+#define RADAR_CLASS_PLAYER_ALLY_MILITARY 16
+#define RADAR_CLASS_HUMAN_BLACKOPS      17
+#define RADAR_CLASS_SNARK               18
+#define RADAR_CLASS_GARGANTUA           19
+
+// NOTE: these must numerically match the server-side CLASS_* values
+// (monsters.h) - the client has no access to that header, so the
+// server's Classify() result is sent as a raw byte and decoded here
+// using this parallel definition.
+
+// TMOD: HOOK_MESSAGE expands to gEngfuncs.pfnHookUserMsg(name, __MsgFunc_<name>),
+// requiring a free function with this exact name - unlike what the
+// CHudAmmo/CHudHealth pattern suggested, member methods aren't hooked
+// directly. This trampoline forwards to the actual handler.
+int __MsgFunc_Radar(const char *pszName, int iSize, void *pbuf)
+{
+	return gHUD.m_Radar.MsgFunc_Radar(pszName, iSize, pbuf);
+}
+
+int CHudRadar::Init(void)
+{
+	HOOK_MESSAGE(Radar);
+	gHUD.AddHudElem(this);
+
+	return 1;
+}
+
+int CHudRadar::VidInit(void)
+{
+	// delaying get sprite handle until we know the sprites are loaded
+	m_hSpriteRadar = 0;
+	m_hSpriteSpot = 0;
+	num_players = 0;
+
+	return 1;
+}
+
+int CHudRadar::MsgFunc_Radar(const char *pszName, int iSize, void *pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int flag = READ_BYTE();
+	if(flag == 0)
+	{
+		m_iFlags &= ~HUD_ACTIVE; // turn off radar
+		return 1;
+	}
+
+	m_iFlags |= HUD_ACTIVE; // turn on radar
+	num_players = READ_BYTE();
+
+	for(int i = 0; i < num_players; i++)
+	{
+		distance[i] = (float)READ_SHORT();
+		angle[i] = (float)READ_SHORT() / 10.0f;
+		classify[i] = READ_BYTE();
+	}
+
+	return 1;
+}
+
+#define RADAR_RED 0
+#define RADAR_GREEN 160
+#define RADAR_BLUE 0
+#define RADAR_OUTLINE_ALPHA 192
+#define RADAR_BACKGROUND_ALPHA 32
+
+static void GetRadarColor(int classify, int &r, int &g, int &b)
+{
+	switch(classify)
+	{
+		// Allies and neutrals
+		case RADAR_CLASS_PLAYER_ALLY:
+		case RADAR_CLASS_HUMAN_PASSIVE:
+		case RADAR_CLASS_PLAYER_ALLY_MILITARY:
+		case RADAR_CLASS_PLAYER_BIOWEAPON:
+		r = 50;   g = 50; b = 255;
+		break;
+
+		// Enemies
+		case RADAR_CLASS_HUMAN_MILITARY:
+		case RADAR_CLASS_HUMAN_BLACKOPS:
+		case RADAR_CLASS_ALIEN_BIOWEAPON:
+		case RADAR_CLASS_ALIEN_MILITARY:
+		case RADAR_CLASS_ALIEN_PREDATOR:
+		case RADAR_CLASS_ALIEN_PASSIVE:
+		case RADAR_CLASS_ALIEN_MONSTER:
+		case RADAR_CLASS_ALIEN_PREY:
+		case RADAR_CLASS_MACHINE:
+		case RADAR_CLASS_SNARK:
+		case RADAR_CLASS_RACEX_PREDATOR:
+		case RADAR_CLASS_RACEX_SHOCK:
+		case RADAR_CLASS_GARGANTUA:
+		case RADAR_CLASS_INSECT:
+		r = 255; g = 0;  b = 0;
+		break;
+
+		// Player
+		case RADAR_CLASS_PLAYER:
+		r = 255; g = 0;   b = 0;
+		break;
+
+		default:
+		r = 0; g = 0; b = 0;
+		break;
+	}
+}
+
+int CHudRadar::Draw(float flTime)
+{
+	int radar_width = 240;
+	int radar_height = 240;
+	int radar_margin = 64;
+
+	const float RADAR_RANGE = 600.0f;
+
+	int x = ScreenWidth - radar_width - radar_margin;
+	int y = radar_margin;
+
+	// Green background
+	FillRGBA(x, y, radar_width, radar_height, RADAR_RED, RADAR_GREEN, RADAR_BLUE, RADAR_BACKGROUND_ALPHA);
+
+	// Green border
+	FillRGBA(x, y, radar_width, 1, RADAR_RED, RADAR_GREEN, RADAR_BLUE, RADAR_OUTLINE_ALPHA); // top
+	FillRGBA(x, y + radar_height - 1, radar_width, 1, RADAR_RED, RADAR_GREEN, RADAR_BLUE, RADAR_OUTLINE_ALPHA); // bottom
+	FillRGBA(x, y, 1, radar_height, RADAR_RED, RADAR_GREEN, RADAR_BLUE, RADAR_OUTLINE_ALPHA); // left
+	FillRGBA(x + radar_width - 1, y, 1, radar_height, RADAR_RED, RADAR_GREEN, RADAR_BLUE, RADAR_OUTLINE_ALPHA); // right
+
+	// Center of radar (local player)
+	int radar_center_x = x + radar_width / 2;
+	int radar_center_y = y + radar_height / 2;
+
+	int grid_alpha = RADAR_OUTLINE_ALPHA / 2;
+
+	FillRGBA(radar_center_x, y, 1, radar_height, RADAR_RED, RADAR_GREEN, RADAR_BLUE, grid_alpha);
+	FillRGBA(x, radar_center_y, radar_width, 1, RADAR_RED, RADAR_GREEN, RADAR_BLUE, grid_alpha);
+
+	// Subdivision lines (quarter positions)
+	int sub_alpha = RADAR_OUTLINE_ALPHA / 6;
+
+	int quarter_w = radar_width / 4;
+	int quarter_h = radar_height / 4;
+
+	// Vertical subdivisions
+	FillRGBA(x + quarter_w, y, 1, radar_height, RADAR_RED, RADAR_GREEN, RADAR_BLUE, sub_alpha);
+	FillRGBA(x + radar_width - quarter_w, y, 1, radar_height, RADAR_RED, RADAR_GREEN, RADAR_BLUE, sub_alpha);
+
+	// Horizontal subdivisions
+	FillRGBA(x, y + quarter_h, radar_width, 1, RADAR_RED, RADAR_GREEN, RADAR_BLUE, sub_alpha);
+	FillRGBA(x, y + radar_height - quarter_h, radar_width, 1, RADAR_RED, RADAR_GREEN, RADAR_BLUE, sub_alpha);
+
+	// Blinking cycle: NPCs visible 0.35s, hidden 0.05s
+	const double PI_180 = 3.14159265358979 / 180.0;
+	float blink_cycle = fmod(flTime, 0.40f);
+	bool visible = blink_cycle < 0.35f;
+
+	// Draw hollow player marker
+	if(visible)
+	{
+		int size = 6;
+		int px = radar_center_x - size / 2;
+		int py = radar_center_y - size / 2;
+
+		FillRGBA(px, py, size, 1, 255, 255, 255, 255);
+		FillRGBA(px, py + size - 1, size, 1, 255, 255, 255, 255);
+		FillRGBA(px, py, 1, size, 255, 255, 255, 255);
+		FillRGBA(px + size - 1, py, 1, size, 255, 255, 255, 255);
+	}
+
+	for(int i = 0; i < num_players; i++)
+	{
+		if(distance[i] > RADAR_RANGE)
+			continue; // ignore targets outside radar range
+
+		float radians = (float)(angle[i] * PI_180);
+		float dist = (distance[i] / RADAR_RANGE) * (radar_width * 0.5f);
+
+		// Map X/Y positions in rectangular radar
+		int dot_x = radar_center_x - (int)(sin(radians) * dist);
+		int dot_y = radar_center_y - (int)(cos(radians) * dist);
+
+		// Clamp dots inside radar rectangle
+		if(dot_x < x + 2) dot_x = x + 2;
+		if(dot_x > x + radar_width - 2) dot_x = x + radar_width - 2;
+		if(dot_y < y + 2) dot_y = y + 2;
+		if(dot_y > y + radar_height - 2) dot_y = y + radar_height - 2;
+
+		int r, g, b;
+		GetRadarColor(classify[i], r, g, b);
+
+		// NPCs blink, players (CLASS_PLAYER) always visible
+		bool is_player = (classify[i] == RADAR_CLASS_PLAYER);
+		bool draw = is_player || visible;
+
+		if(draw)
+		{
+			int size = 6;
+			int px = dot_x - size / 2;
+			int py = dot_y - size / 2;
+
+			FillRGBA(px, py, size, 1, r, g, b, 255);
+			FillRGBA(px, py + size - 1, size, 1, r, g, b, 255);
+			FillRGBA(px, py, 1, size, r, g, b, 255);
+			FillRGBA(px + size - 1, py, 1, size, r, g, b, 255);
+		}
+	}
+	return 1;
+}
+
 int GetBloodSplatterStyle()
 {
 	return cl_bloodsplatter_style ? (int)cl_bloodsplatter_style->value : gHUD.clientFeatures.bloodsplatter_style.defaultValue;
@@ -1004,6 +1233,7 @@ void CHud::Init()
 
 	m_Ammo.Init();
 	m_Health.Init();
+	m_Radar.Init();
 	m_SayText.Init();
 	m_Spectator.Init();
 	m_Geiger.Init();
@@ -1568,6 +1798,7 @@ void CHud::VidInit()
 
 	m_Ammo.VidInit();
 	m_Health.VidInit();
+	m_Radar.VidInit();
 	m_Spectator.VidInit();
 	m_Geiger.VidInit();
 	m_Train.VidInit();

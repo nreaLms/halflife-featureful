@@ -1094,6 +1094,30 @@ struct RectangleRenderProperties
 
 //
 //-----------------------------------------------------
+// TMOD: radar - see PlayerPreThink() in dlls/client.cpp for the server-side
+// scan/broadcast this displays.
+//-----------------------------------------------------
+//
+class CHudRadar: public CHudBase
+{
+public:
+	int Init(void);
+	int VidInit(void);
+	int Draw(float flTime);
+	int MsgFunc_Radar(const char *pszName, int iSize, void *pbuf);
+private:
+	HSPRITE m_hSpriteRadar;
+	HSPRITE m_hSpriteSpot;
+	int radar_height, radar_width;
+	int num_players;
+	int type[32]; // unused, kept for layout parity with classify[]
+	int classify[32];
+	float angle[32];
+	float distance[32];
+};
+
+//
+//-----------------------------------------------------
 //
 class CHud
 {
@@ -1285,6 +1309,7 @@ public:
 
 	CHudAmmo		m_Ammo;
 	CHudHealth		m_Health;
+	CHudRadar		m_Radar;
 	CHudSpectator		m_Spectator;
 	CHudGeiger		m_Geiger;
 	CHudTrain		m_Train;

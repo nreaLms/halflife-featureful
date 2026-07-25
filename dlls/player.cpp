@@ -310,6 +310,7 @@ int gmsgCamZone = 0;
 int gmsgCamFixed = 0;
 int gmsgAutoAimLock = 0;
 int gmsgFlinch = 0;
+int gmsgRadar = 0;
 
 int gmsgWeaponTool = 0;
 int gmsgToolState = 0;
@@ -444,6 +445,7 @@ void LinkUserMessages()
 	gmsgCamFixed = REG_USER_MSG("CamFixed", 1 + sizeof(int) * 7);
 	gmsgAutoAimLock = REG_USER_MSG("AutoAimLock", 1);
 	gmsgFlinch = REG_USER_MSG("Flinch", 1);
+	gmsgRadar = REG_USER_MSG("Radar", -1);
 
 	gmsgWeaponTool = REG_USER_MSG("WeaponTool", 2);
 	gmsgToolState = REG_USER_MSG("ToolState", 8);
@@ -1394,6 +1396,12 @@ KilledResult CBasePlayer::Killed( entvars_t *pevInflictor, entvars_t *pevAttacke
 
 	// Tell Ammo Hud that the player is dead
 	SendCurWeaponDead();
+
+	// TMOD: turn off the radar
+	radar_on = 0;
+	MESSAGE_BEGIN(MSG_ONE, gmsgRadar, NULL, pev);
+	WRITE_BYTE(0);
+	MESSAGE_END();
 
 	// reset FOV
 	pev->fov = m_iFOV = m_iClientFOV = 0;
@@ -4840,6 +4848,10 @@ void CBasePlayer::Spawn()
 	}
 
 	g_pGameRules->PlayerSpawn( this );
+
+	// TMOD: radar starts on by default
+	fRadarTime = gpGlobals->time;
+	radar_on = 1;
 }
 
 void CBasePlayer::Precache()
@@ -4854,6 +4866,9 @@ void CBasePlayer::Precache()
 	m_igeigerRangePrev = 1000;
 
 	m_bitsHUDDamage = -1;
+
+	// TMOD: radar throttle reset
+	fRadarTime = 0;
 
 	// TMOD: front kick sound
 	RegisterAndPrecacheSoundScript(NPC::swishSoundScript);
@@ -5676,6 +5691,22 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 				m_bKickSoundPending = true;
 			}
 		}
+		break;
+	case 109:
+		// TMOD: radar off
+		CLIENT_PRINTF(ENT(pev), print_console, "Radar is now OFF\n");
+		radar_on = 0;
+		MESSAGE_BEGIN(MSG_ONE, gmsgRadar, NULL, pev);
+		WRITE_BYTE(0);
+		MESSAGE_END();
+		break;
+	case 110:
+		// TMOD: radar on
+		CLIENT_PRINTF(ENT(pev), print_console, "Radar is now ON\n");
+		radar_on = 1;
+		MESSAGE_BEGIN(MSG_ONE, gmsgRadar, NULL, pev);
+		WRITE_BYTE(1);
+		MESSAGE_END();
 		break;
 	case 195:
 		// show shortest paths for entire level to nearest node

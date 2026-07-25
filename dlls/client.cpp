@@ -1076,6 +1076,93 @@ void PlayerPreThink( edict_t *pEntity )
 
 	if( pPlayer )
 		pPlayer->PreThink();
+
+	// TMOD: radar - scan nearby players/NPCs and broadcast distance, angle
+	// (relative to the player's view yaw) and classification. See
+	// CHudRadar in cl_dll/hud.cpp for the client-side display.
+	if( !pPlayer )
+		return;
+
+	extern int gmsgRadar;
+
+	// Only update the radar every ~0.1s (fRadarTime holds the next allowed time)
+	if( gpGlobals->time < pPlayer->fRadarTime || !pPlayer->radar_on || !pPlayer->IsNetClient() )
+		return;
+
+	float target_distance[32];
+	float angle_to_target[32];
+	int   target_classify[32];
+	int   num_targets = 0;
+
+	// --- Players ---
+	for( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBaseEntity *pOther = UTIL_PlayerByIndex( i );
+		if( !pOther || pOther == pPlayer ) continue;
+		if( pOther->pev->deadflag != DEAD_NO ) continue;
+
+		Vector v = pOther->pev->origin - pPlayer->pev->origin;
+		float dist = v.Length();
+		if( dist >= 1000 || num_targets >= 32 ) continue;
+
+		target_distance[num_targets] = dist;
+
+		float yaw = UTIL_VecToAngles( v ).y - 90.0f;
+		if( yaw < 0 ) yaw += 360;
+		if( yaw >= 360 ) yaw -= 360;
+		angle_to_target[num_targets] = yaw;
+
+		target_classify[num_targets] = pOther->Classify();
+		num_targets++;
+	}
+
+	// --- NPCs (CBaseMonster) ---
+	for( int i = 1; i <= gpGlobals->maxEntities; i++ )
+	{
+		edict_t *pEdict = INDEXENT( i );
+		if( !pEdict || pEdict->free ) continue;
+
+		CBaseEntity *pEnt = CBaseEntity::Instance( pEdict );
+		if( !pEnt || pEnt == pPlayer ) continue;
+
+		CBaseMonster *pMonster = pEnt->MyMonsterPointer();
+		if( !pMonster || pMonster->pev->deadflag != DEAD_NO ) continue;
+
+		int c = pMonster->Classify();
+		if( c == CLASS_ALIEN_BIOWEAPON || c == CLASS_PLAYER_BIOWEAPON || c == CLASS_INSECT ) continue;
+
+		Vector v = pMonster->pev->origin - pPlayer->pev->origin;
+		float dist = v.Length();
+		if( dist >= 1000 || num_targets >= 32 ) continue;
+
+		target_distance[num_targets] = dist;
+
+		float yaw = UTIL_VecToAngles( v ).y - 90.0f;
+		if( yaw < 0 ) yaw += 360;
+		if( yaw >= 360 ) yaw -= 360;
+		angle_to_target[num_targets] = yaw;
+
+		// A player ally that's currently hostile toward us (e.g. under
+		// enemy control) shows up as hostile on the radar too.
+		if( ( c == CLASS_PLAYER_ALLY || c == CLASS_PLAYER_ALLY_MILITARY ) && pMonster->m_hEnemy == pPlayer )
+			c = CLASS_HUMAN_MILITARY;
+
+		target_classify[num_targets] = c;
+		num_targets++;
+	}
+
+	MESSAGE_BEGIN( MSG_ONE, gmsgRadar, NULL, pPlayer->pev );
+		WRITE_BYTE( 1 );
+		WRITE_BYTE( num_targets );
+		for( int i = 0; i < num_targets; i++ )
+		{
+			WRITE_SHORT( (int)target_distance[i] );
+			WRITE_SHORT( (int)(angle_to_target[i] * 10) ); // scaled, unpacked client-side
+			WRITE_BYTE( target_classify[i] );
+		}
+	MESSAGE_END();
+
+	pPlayer->fRadarTime = gpGlobals->time;
 }
 
 /*

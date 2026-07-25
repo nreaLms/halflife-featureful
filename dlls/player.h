@@ -189,6 +189,11 @@ public:
 	float				m_flFlinchTime;
 	bool				m_bWasFlinchLocking;	// TMOD: tracks state for the "PlayerFlinch" message (see PreThink)
 
+	// TMOD: radar - see PlayerPreThink() in dlls/client.cpp for the actual
+	// scan/broadcast, and CHudRadar in cl_dll/hud.cpp for the display.
+	float				fRadarTime;	// throttle: next time the radar is allowed to broadcast
+	int					radar_on;
+
 	// TMOD: brief blink/flash feedback after taking damage (purely visual -
 	// does not actually block damage, see IsInvulnerable() which is a
 	// separate, camera-cutscene-only mechanic)
