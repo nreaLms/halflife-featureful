@@ -22,6 +22,7 @@
 #include "in_defs.h"
 #include "keydefs.h"
 #include "view.h"
+#include "hud_crosshair.h"
 
 #if !XASH_WIN32
 #include <dlfcn.h>
@@ -854,6 +855,15 @@ void GoldSourceInput::IN_MouseMove ( float frametime, usercmd_t *cmd)
 	{
 		IN_GetMouseDelta( &mx, &my );
 
+		const float crosshairSensitivity = 1.0f;
+		g_flCrosshairX += mx * crosshairSensitivity;
+		g_flCrosshairY += my * crosshairSensitivity;
+
+		if(g_flCrosshairX < 0) g_flCrosshairX = 0;
+		if(g_flCrosshairY < 0) g_flCrosshairY = 0;
+		if(g_flCrosshairX > ScreenWidth)  g_flCrosshairX = (float)ScreenWidth;
+		if(g_flCrosshairY > ScreenHeight) g_flCrosshairY = (float)ScreenHeight;
+
 		if (m_filter && m_filter->value)
 		{
 			mouse_x = (mx + old_mouse_x) * 0.5;
@@ -871,31 +881,15 @@ void GoldSourceInput::IN_MouseMove ( float frametime, usercmd_t *cmd)
 		// Apply custom mouse scaling/acceleration
 		IN_ScaleMouse( &mouse_x, &mouse_y );
 
-		// add mouse X/Y movement to cmd
-		if ( (in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1) ))
-			cmd->sidemove += m_side->value * mouse_x;
-		else
-			viewangles[YAW] -= m_yaw->value * mouse_x;
+		// Mouse movement is now only used to orient the player towards the crosshair.
+		float dx = g_flCrosshairX - ScreenWidth * 0.5f;
+		float dy = g_flCrosshairY - ScreenHeight * 0.5f;
 
-		if ( (in_mlook.state & 1) && !(in_strafe.state & 1))
+		if( fabs( dx ) > 0.01f || fabs( dy ) > 0.01f )
 		{
-			viewangles[PITCH] += m_pitch->value * mouse_y;
-			if (viewangles[PITCH] > cl_pitchdown->value)
-				viewangles[PITCH] = cl_pitchdown->value;
-			if (viewangles[PITCH] < -cl_pitchup->value)
-				viewangles[PITCH] = -cl_pitchup->value;
+			viewangles[YAW] = atan2( -dy, dx ) * ( 180.0f / M_PI ) - 90.0f;
 		}
-		else
-		{
-			if ((in_strafe.state & 1) && gEngfuncs.IsNoClipping() )
-			{
-				cmd->upmove -= m_forward->value * mouse_y;
-			}
-			else
-			{
-				cmd->forwardmove -= m_forward->value * mouse_y;
-			}
-		}
+		viewangles[PITCH] = 0.0f;
 	}
 
 	// HACKHACK: change viewangles directly in viewcode,

@@ -2773,6 +2773,16 @@ void PM_PlayerMove( qboolean server )
 	// Convert view angles to vectors
 	AngleVectors( pmove->angles, &pmove->forward, &pmove->right, &pmove->up );
 
+	// Movement is independent of the view direction. 
+	// We recalculate forward/right from a fixed yaw, not from the angle to the crosshair.
+	{
+		Vector moveAngles( 0.0f, 0.0f, 0.0f );
+		Vector moveForward, moveRight, moveUp;
+		AngleVectors( moveAngles, &moveForward, &moveRight, &moveUp );
+		pmove->forward = moveForward;
+		pmove->right = moveRight;
+	}
+
 	// PM_ShowClipBox();
 
 	// Special handling for spectator and observers. (iuser1 is set if the player's in observer mode)

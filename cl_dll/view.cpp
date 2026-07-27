@@ -111,6 +111,11 @@ cvar_t	*cl_chasedist;
 
 cvar_t	*cl_steady_uncrouch;
 
+cvar_t	*cam_topdown;
+cvar_t	*cam_topdown_height;
+cvar_t	*cam_topdown_lead;
+cvar_t	*cam_topdown_lead_max;
+
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
 cvar_t	v_iyaw_cycle		= {"v_iyaw_cycle", "2", 0, 2.0f};
@@ -833,7 +838,41 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 	v_client_aimangles = pparams->cl_viewangles;
 	v_lastAngles = pparams->viewangles;
 	//v_cl_angles = pparams->cl_viewangles;	// keep old user mouse angles !
-	if( CL_IsThirdPerson() )
+
+	// Fixed top-down camera like in Hotline Miami:
+	// Always above the player, looking straight down.
+	if( cam_topdown && cam_topdown->value )
+	{
+		float dx = g_flCrosshairX - ScreenWidth * 0.5f;
+		float dy = g_flCrosshairY - ScreenHeight * 0.5f;
+		float screenDist = sqrt(dx * dx + dy * dy);
+
+		float panX = 0.0f, panY = 0.0f;
+
+		if( screenDist > 0.01f )
+		{
+			// Same method as for the player orientation: world direction of the crosshair
+			float yaw = atan2( -dy, dx ) * ( 180.0f / M_PI ) - 90.0f;
+			Vector panAngles( 0.0f, yaw, 0.0f );
+			Vector panForward, panRight, panUp;
+			AngleVectors( panAngles, panForward, panRight, panUp );
+
+			float halfScreen = Q_min( ScreenWidth, ScreenHeight ) * 0.5f;
+			float lead = Q_min( screenDist / halfScreen, 1.0f ) * cam_topdown_lead_max->value * cam_topdown_lead->value;
+
+			panX = panForward[0] * lead;
+			panY = panForward[1] * lead;
+		}
+
+		pparams->vieworg[0] = pparams->simorg[0] + panX;
+		pparams->vieworg[1] = pparams->simorg[1] + panY;
+		pparams->vieworg[2] = pparams->simorg[2] + cam_topdown_height->value;
+
+		pparams->viewangles[PITCH] = 90.0f;
+		pparams->viewangles[YAW] = 0.0f;
+		pparams->viewangles[ROLL] = 0.0f;
+	}
+	else if( CL_IsThirdPerson() )
 	{
 		VectorCopy( camAngles, pparams->viewangles );
 	}
@@ -849,13 +888,18 @@ void V_CalcNormalRefdef( struct ref_params_s *pparams )
 			pitch += 360.0f;
 
 		// Player pitch is inverted
-		pitch /= -3.0f;
+		pitch = 0.0f;
 
 		// Slam local player's pitch value
 		ent->angles[0] = pitch;
 		ent->curstate.angles[0] = pitch;
 		ent->prevstate.angles[0] = pitch;
 		ent->latched.prevangles[0] = pitch;
+
+		ent->angles[2] = pitch;
+		ent->curstate.angles[2] = pitch;
+		ent->prevstate.angles[2] = pitch;
+		ent->latched.prevangles[2] = pitch;
 	}
 
 	// override all previous settings if the viewent isn't the client
@@ -1748,6 +1792,11 @@ void V_Init()
 	cl_waterdist = gEngfuncs.pfnRegisterVariable( "cl_waterdist","4", 0 );
 	cl_chasedist = gEngfuncs.pfnRegisterVariable( "cl_chasedist","112", 0 );
 	cl_steady_uncrouch = gEngfuncs.pfnRegisterVariable( "cl_steady_uncrouch","1", FCVAR_ARCHIVE );
+
+	cam_topdown = gEngfuncs.pfnRegisterVariable( "cam_topdown", "1", FCVAR_ARCHIVE );
+	cam_topdown_height = gEngfuncs.pfnRegisterVariable( "cam_topdown_height", "500", FCVAR_ARCHIVE );
+	cam_topdown_lead     = gEngfuncs.pfnRegisterVariable( "cam_topdown_lead", "0.5", FCVAR_ARCHIVE );
+	cam_topdown_lead_max = gEngfuncs.pfnRegisterVariable( "cam_topdown_lead_max", "150", FCVAR_ARCHIVE );
 }
 
 //#define TRACE_TEST	1

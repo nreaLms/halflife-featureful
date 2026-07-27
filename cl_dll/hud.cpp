@@ -919,6 +919,7 @@ void CHud::Init()
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
 	m_Nightvision.Init();
+	m_Crosshair.Init();
 #if USE_VGUI
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
 #endif
